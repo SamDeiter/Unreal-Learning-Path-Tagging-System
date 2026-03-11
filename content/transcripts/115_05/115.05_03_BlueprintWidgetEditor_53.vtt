@@ -1,0 +1,205 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:07.169
+Now that we've got an understanding of what the User Widget is, let's take a look at Unreal's inbuilt tool for visually authoring them.
+
+2
+00:00:07.169 --> 00:00:10.169
+But firstly, how do we create a new widget?
+
+3
+00:00:10.169 --> 00:00:16.300
+Simply right-click in the content browser of your project and click Widget Blueprint under the User Interface category.
+
+4
+00:00:16.300 --> 00:00:22.460
+This will create a new widget, extending off of User Widget by default, as an asset in your content browser.
+
+5
+00:00:22.460 --> 00:00:29.620
+Opening this asset will summon the Widget Blueprint editor, and this is our authoring tool for developing UI with UMG.
+
+6
+00:00:29.620 --> 00:00:33.619
+We can see straight away that we've got a whole suite of menus and toolboxes to explore.
+
+7
+00:00:33.619 --> 00:00:37.869
+Right at the top in section 1, we've got the Common Toolbar.
+
+8
+00:00:37.869 --> 00:00:41.869
+This is pretty much the standard toolbar that we'd find in any of the existing tools within Unreal,
+
+9
+00:00:41.869 --> 00:00:45.939
+and we have access to File, Editor, Help, it's the usual suspects.
+
+10
+00:00:45.939 --> 00:00:48.939
+Underneath that in section 2, we've got the Toolbar.
+
+11
+00:00:48.939 --> 00:00:54.969
+This contains a number of common functions that we also find in the regular Blueprint editor, that being Compile, Save and Play.
+
+12
+00:00:54.969 --> 00:00:58.509
+Section 3 is the Editor Mode Selection.
+
+13
+00:00:58.509 --> 00:01:03.509
+This lets us swap between the Designer View, which is what we're currently looking at, and a more typical Blueprint graph view.
+
+14
+00:01:03.509 --> 00:01:09.769
+Each widget has got a Designer Front End, a Blueprint Back End, and a C++ Base under the hood,
+
+15
+00:01:09.769 --> 00:01:13.769
+much in the same way that an Actor Blueprint has got a viewport view instead of a Designer.
+
+16
+00:01:13.769 --> 00:01:16.769
+The same sort of architecture is at play here.
+
+17
+00:01:16.769 --> 00:01:20.439
+On the left in section 4, we've got the Palette.
+
+18
+00:01:20.439 --> 00:01:23.439
+This is a list of widgets that can be dragged and dropped into the Visual Designer,
+
+19
+00:01:23.439 --> 00:01:26.439
+and will display anything that inherits from UWidget.
+
+20
+00:01:26.439 --> 00:01:33.569
+This will also include any containers such as vertical and horizontal boxes, scroll boxes, overlays, borders, spaces.
+
+21
+00:01:33.569 --> 00:01:36.569
+It's the usual toolset for any visual UI design.
+
+22
+00:01:36.569 --> 00:01:39.980
+It'll also contain any user generated widgets.
+
+23
+00:01:39.980 --> 00:01:43.980
+So say we've got a health bar already made up, and now we're working on a Master HUD widget.
+
+24
+00:01:43.980 --> 00:01:49.980
+We can drag a health bar into the Master HUD widget by simply navigating to the user created category,
+
+25
+00:01:49.980 --> 00:01:51.980
+and selecting the widget that we'd like.
+
+26
+00:01:51.980 --> 00:01:56.560
+Below the Palette, we've got the Hierarchy view of section 5.
+
+27
+00:01:56.560 --> 00:02:00.560
+This view is a tree view of the parenting structure of the current widget,
+
+28
+00:02:00.560 --> 00:02:04.560
+and for ease, we can also drag directly from the Palette into the Hierarchy view,
+
+29
+00:02:04.560 --> 00:02:07.819
+to position new widgets exactly where we'd like them.
+
+30
+00:02:07.819 --> 00:02:11.979
+From there, we've got section 6, which is the Visual Designer proper.
+
+31
+00:02:11.979 --> 00:02:16.979
+This is a visual representation of the layout, with each visual element viable for manipulation once placed.
+
+32
+00:02:16.979 --> 00:02:22.979
+That can be moving it around, changing properties, deleting, resizing, or even reparenting to other widgets.
+
+33
+00:02:22.979 --> 00:02:28.259
+Section 7 is the Details panel, and here we can see information about the currently selected widget,
+
+34
+00:02:28.259 --> 00:02:31.259
+and change any of its exposed properties.
+
+35
+00:02:31.259 --> 00:02:34.259
+For instance, we could freely change the U texture source of an image widget.
+
+36
+00:02:34.259 --> 00:02:39.969
+Finally, in section 8, it's where we can author keyframed animations for widgets.
+
+37
+00:02:39.969 --> 00:02:42.969
+So say we want some UI to bounce onto the screen when we click a button.
+
+38
+00:02:42.969 --> 00:02:45.969
+This is where we'd actually author that bounce.
+
+39
+00:02:45.969 --> 00:02:50.639
+We'll touch on animation actually quite heavily, in more detail later on in this talk.
+
+40
+00:02:50.639 --> 00:02:55.639
+Just as a quick example, we can see here that we've got an image widget being dragged into the Visual Designer.
+
+41
+00:02:55.639 --> 00:02:59.639
+We're navigating over to the Details panel, and selecting a U texture source.
+
+42
+00:02:59.639 --> 00:03:04.639
+We can also see in the Hierarchy view, that it's updated to show that we've now got an image widget
+
+43
+00:03:04.639 --> 00:03:09.639
+as a child of the Canvas panel, which is the base container for all widgets by default.
+
+44
+00:03:09.639 --> 00:03:12.699
+Authoring widgets in UMG is exceptionally easy.
+
+45
+00:03:12.699 --> 00:03:14.699
+If we were to spawn this class and add it to the viewport,
+
+46
+00:03:14.699 --> 00:03:18.740
+we'd see that exact same star with the exact same offset from the top left.
+
+47
+00:03:18.740 --> 00:03:21.740
+As you can see, if we switch over to the Graph view instead of the Designer view,
+
+48
+00:03:21.740 --> 00:03:25.740
+we're dealing with the same framework that we've got right across the engine.
+
+49
+00:03:25.740 --> 00:03:28.740
+That being a blueprint backend to some kind of visual frontend.
+
+50
+00:03:28.740 --> 00:03:33.740
+This holds true for the animation graphs, the actor graphs, and now the UMG graphs.
+
+51
+00:03:33.740 --> 00:03:38.740
+We've got access to a series of contextual nodes to drive any logic that we may want our UI to run.

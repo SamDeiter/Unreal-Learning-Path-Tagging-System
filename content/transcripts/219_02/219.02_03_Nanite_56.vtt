@@ -1,0 +1,577 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:05.160
+Hi everyone, in this lesson, we're going to go and take a look at Nanite and how it works
+
+2
+00:00:05.160 --> 00:00:08.900
+with our world building when it comes to using Unreal.
+
+3
+00:00:08.900 --> 00:00:11.039
+So let's get started.
+
+4
+00:00:11.039 --> 00:00:13.599
+So Nanite is pretty easy to enable.
+
+5
+00:00:13.599 --> 00:00:16.800
+But one thing you want to do is make sure what items in your scene because you
+
+6
+00:00:16.800 --> 00:00:22.839
+may have pulled them in and forgotten to activate Nanite as they come in, as they're
+
+7
+00:00:22.839 --> 00:00:23.839
+imported.
+
+8
+00:00:23.839 --> 00:00:28.100
+But you can check that after the fact once you have items in your scene to be able
+
+9
+00:00:28.100 --> 00:00:29.460
+to convert what's there.
+
+10
+00:00:29.460 --> 00:00:34.780
+It's easily done by right clicking and going to Nanite and clicking on Nanite and you'll
+
+11
+00:00:34.780 --> 00:00:41.479
+see automatically and it is now enabled in the objects details for rendering.
+
+12
+00:00:41.479 --> 00:00:43.679
+So say we want to check it really quick.
+
+13
+00:00:43.679 --> 00:00:44.679
+Let me show you.
+
+14
+00:00:44.679 --> 00:00:47.390
+Let's go into Unreal.
+
+15
+00:00:47.390 --> 00:00:53.210
+So here in Unreal, I can go in here and I can type in with my content folder selected,
+
+16
+00:00:53.210 --> 00:00:56.340
+I can type in Nanite.
+
+17
+00:00:56.340 --> 00:01:03.119
+You'll see there's enabled and I want to put equal sign equal sign false.
+
+18
+00:01:03.119 --> 00:01:06.959
+Now this is going to show me everything in my scene that is not Nanite.
+
+19
+00:01:06.959 --> 00:01:11.439
+I have a couple a few copies in here and a few other things, but I can simply just
+
+20
+00:01:11.439 --> 00:01:16.620
+select all of these and convert them to a Nanite object.
+
+21
+00:01:16.620 --> 00:01:18.260
+That's actually pretty convenient.
+
+22
+00:01:18.260 --> 00:01:22.900
+Now before we used to have it where you would have to go through the tools and you
+
+23
+00:01:22.900 --> 00:01:27.299
+could like go through debugging used to be a Nanite debugger, but we decided let's
+
+24
+00:01:27.400 --> 00:01:30.459
+just keep it simple without another window to deal with.
+
+25
+00:01:30.459 --> 00:01:35.640
+Simply type it into your search content and you'll be able to find all the Nanite objects.
+
+26
+00:01:35.640 --> 00:01:41.480
+Now the benefit of using Nanite is the fact that again, using it, it is like virtual
+
+27
+00:01:41.480 --> 00:01:44.980
+textures, but for polygons.
+
+28
+00:01:44.980 --> 00:01:49.879
+It only draws what is needed based on my position in the world on a polygon level
+
+29
+00:01:49.879 --> 00:01:53.239
+versus an old school LOD level.
+
+30
+00:01:53.239 --> 00:01:56.040
+Basically LOD polygons, you can think of it that way.
+
+31
+00:01:56.040 --> 00:02:01.019
+That way there's a less of a change in the silhouette, more accuracy and more detail
+
+32
+00:02:01.019 --> 00:02:04.099
+shows up on the model as you navigate through the world.
+
+33
+00:02:04.099 --> 00:02:07.569
+So it's pretty awesome and works great.
+
+34
+00:02:07.569 --> 00:02:12.169
+What you can see here is we have a Nanite object here and he's actually pretty dense.
+
+35
+00:02:12.169 --> 00:02:16.930
+I ran a few times to make him a little bit denser and using the modeling tools,
+
+36
+00:02:16.930 --> 00:02:23.490
+I remeshed him, but this dense object is something that Nanite likes and is able
+
+37
+00:02:23.490 --> 00:02:24.909
+to calculate it.
+
+38
+00:02:24.909 --> 00:02:29.289
+Now obviously everything has a particular cap or limit if you keep throwing at it.
+
+39
+00:02:29.289 --> 00:02:35.210
+So you want to be strategic and you can have all your objects high poly.
+
+40
+00:02:35.210 --> 00:02:40.569
+That's fine, but for some things that may not be seen very often, if you decide to
+
+41
+00:02:40.569 --> 00:02:44.729
+make them a little lower poly, Nanite's not going to worry about that so much.
+
+42
+00:02:44.729 --> 00:02:47.250
+You don't have to worry about it like an old school game, so it kind of breaks that
+
+43
+00:02:47.250 --> 00:02:52.409
+game thinking, but you do have to be careful about really low poly objects.
+
+44
+00:02:52.409 --> 00:02:57.289
+And what I mean by that, you'll notice I have a piece of geometry here, which is a
+
+45
+00:02:57.289 --> 00:03:00.909
+simple continuation of that trim sheet.
+
+46
+00:03:00.909 --> 00:03:04.669
+I just isolated a region and this is a simple polygon in here.
+
+47
+00:03:04.669 --> 00:03:09.189
+Now if you have a few of these in your scene, that's fine that you will get less
+
+48
+00:03:09.189 --> 00:03:10.789
+chances of performance hitting you.
+
+49
+00:03:10.789 --> 00:03:15.710
+You heard me talk about this earlier, but if you have a lot of simple geometry and
+
+50
+00:03:15.710 --> 00:03:20.430
+you've converted them to a Nanite object, you could run into some problems.
+
+51
+00:03:20.430 --> 00:03:22.150
+So just keep that in mind.
+
+52
+00:03:22.409 --> 00:03:27.650
+If you needed to, you could run the modeling tool and remesh this and make it a higher
+
+53
+00:03:27.650 --> 00:03:34.409
+poly object if you really do need those flat cards or just in your DCC, go and handle
+
+54
+00:03:34.409 --> 00:03:39.930
+it there and in your DCC, just go ahead and make it so it's a higher poly flat
+
+55
+00:03:39.930 --> 00:03:40.930
+plane.
+
+56
+00:03:40.930 --> 00:03:43.050
+And that actually works just fine too.
+
+57
+00:03:43.050 --> 00:03:44.629
+So I just wanted to point that out.
+
+58
+00:03:44.629 --> 00:03:46.409
+Just be careful of those things.
+
+59
+00:03:46.409 --> 00:03:49.129
+Now there are a few things you do need to keep in mind when it comes to working
+
+60
+00:03:49.129 --> 00:03:50.689
+with Nanite objects.
+
+61
+00:03:50.710 --> 00:03:52.389
+Let's pick on the trees for a second here.
+
+62
+00:03:52.389 --> 00:03:56.870
+We'll get back to them later, but if I'm in a scene and I start to zoom out, you
+
+63
+00:03:56.870 --> 00:04:01.750
+will notice at times at a particular distance, bushes or plants, the tops of the trees
+
+64
+00:04:01.750 --> 00:04:03.110
+will disappear.
+
+65
+00:04:03.110 --> 00:04:07.789
+To prevent this from happening, what you want to do is go into that Nanite object
+
+66
+00:04:07.789 --> 00:04:12.469
+and you want to go ahead and edit it in such a way so that you are turning on preserved
+
+67
+00:04:12.469 --> 00:04:13.469
+area.
+
+68
+00:04:13.469 --> 00:04:16.389
+I'm just going to use this guy still since we still have him open.
+
+69
+00:04:16.389 --> 00:04:19.829
+His options are still the same, even though he's not a tree.
+
+70
+00:04:19.850 --> 00:04:23.620
+Let's go ahead and double click on this piece of geometry.
+
+71
+00:04:23.620 --> 00:04:25.939
+Let me go ahead and pull this piece of geometry into our scene.
+
+72
+00:04:25.939 --> 00:04:31.420
+I'm going to go full screen.
+
+73
+00:04:31.420 --> 00:04:41.019
+You'll notice if we type in Nanite and make sure we type it, you'll see we have
+
+74
+00:04:41.019 --> 00:04:42.300
+a preserved area.
+
+75
+00:04:42.300 --> 00:04:46.459
+Now again, if your trees are disappearing from a distance, you want to turn this on
+
+76
+00:04:46.459 --> 00:04:50.660
+and Unreal is nice with the pro tips to tell you, Hey man, this is used for foliage
+
+77
+00:04:50.660 --> 00:04:55.420
+just to help make sure that these surfaces and everything is working cleanly from a
+
+78
+00:04:55.420 --> 00:04:56.740
+distance.
+
+79
+00:04:56.740 --> 00:05:00.800
+Now if you go down below, there's another one which is fairly new called max edge length
+
+80
+00:05:00.800 --> 00:05:01.939
+factor.
+
+81
+00:05:01.939 --> 00:05:07.480
+This one comes in really handy if you're working with say a construction script and
+
+82
+00:05:07.480 --> 00:05:10.920
+you're using, say you're making pipes in this particular case.
+
+83
+00:05:10.920 --> 00:05:16.579
+Let me close this window out for a moment and we're going to go ahead and pick on
+
+84
+00:05:16.579 --> 00:05:23.000
+this particular piece of geometry and I'm going to double click on the pipes here
+
+85
+00:05:23.000 --> 00:05:32.910
+in my scene and in here we have, if we type in Nanite again, you'll see that
+
+86
+00:05:32.910 --> 00:05:36.170
+match that max edge length factor.
+
+87
+00:05:36.170 --> 00:05:37.750
+It is set to 10.
+
+88
+00:05:37.750 --> 00:05:43.759
+Now for some reason I leave it at default to be say zero and I hit apply.
+
+89
+00:05:43.759 --> 00:05:50.639
+You're going to notice a degradation or I should say a lower poly version happened
+
+90
+00:05:50.639 --> 00:05:54.480
+on your pipes unless you're really up close, then they don't look quite as
+
+91
+00:05:54.480 --> 00:06:01.740
+bad but as soon as you get a far away, those curves become very lower poly and they don't
+
+92
+00:06:01.740 --> 00:06:03.529
+look so great.
+
+93
+00:06:03.529 --> 00:06:09.089
+So we made this edge max edge length factor to be able to edit that.
+
+94
+00:06:09.089 --> 00:06:13.220
+So I'm going to go in here and type in 10 and I'm going to go ahead and hit apply
+
+95
+00:06:13.220 --> 00:06:14.660
+changes.
+
+96
+00:06:14.660 --> 00:06:19.560
+This will make it so it's consistent and if I decide to build out from this particular
+
+97
+00:06:19.560 --> 00:06:25.300
+construction script that I've created, I can actually have less of an issue with that.
+
+98
+00:06:25.300 --> 00:06:26.860
+And again, you can play with these numbers.
+
+99
+00:06:26.860 --> 00:06:30.259
+I have mine at 10 because it's working for these pipes.
+
+100
+00:06:30.259 --> 00:06:32.740
+You could probably get away with maybe five.
+
+101
+00:06:32.740 --> 00:06:38.699
+That kind of depends on the complexity of your construction of your items and so forth.
+
+102
+00:06:38.699 --> 00:06:43.379
+Just keep those things in mind when you're building out how you want them to be represented.
+
+103
+00:06:43.379 --> 00:06:47.220
+Ten seems to work pretty good for this particular pipe construction.
+
+104
+00:06:47.240 --> 00:06:50.240
+So just keep those things in mind.
+
+105
+00:06:50.240 --> 00:06:55.040
+Another thing I want to mention too, when it comes to using Nanite, you do want to
+
+106
+00:06:55.040 --> 00:06:57.339
+be careful when it comes to combining.
+
+107
+00:06:57.339 --> 00:07:02.839
+You don't want to combine an object in your scene using some of our merge tools.
+
+108
+00:07:02.839 --> 00:07:08.600
+Now if you decide, you're like, hey, I want to go in here and merge these actors.
+
+109
+00:07:08.600 --> 00:07:12.680
+You and say they're already Nanite and you go back in there again and you convert
+
+110
+00:07:12.680 --> 00:07:14.300
+them to Nanite one more time.
+
+111
+00:07:14.300 --> 00:07:16.439
+You do got to be careful with that.
+
+112
+00:07:16.439 --> 00:07:22.290
+If I have, because there can be a double calculation and you may get a performance hit.
+
+113
+00:07:22.290 --> 00:07:25.250
+You also notice that I have actual rivets here.
+
+114
+00:07:25.250 --> 00:07:32.750
+Now these little welding rivets, I'm not a plumber, I'm not going to pretend I am,
+
+115
+00:07:32.750 --> 00:07:35.589
+but these bolts, there you go.
+
+116
+00:07:35.589 --> 00:07:39.689
+So these bolts in here are pretty low poly.
+
+117
+00:07:39.689 --> 00:07:42.509
+They're not too low poly, but they're low enough.
+
+118
+00:07:42.509 --> 00:07:45.389
+And I just brought it in with a model and that's okay.
+
+119
+00:07:45.389 --> 00:07:47.910
+Nanite's forgiving for very small detail like that.
+
+120
+00:07:47.910 --> 00:07:53.790
+But if I have a lot of these and I decide like in my scene, I want to merge them and
+
+121
+00:07:53.790 --> 00:07:57.629
+merge them using the merge tool and convert it to Nanite, you got to be careful because
+
+122
+00:07:57.629 --> 00:08:02.949
+it's becoming something that wasn't brought in natively, or I should say from the DCC.
+
+123
+00:08:02.949 --> 00:08:07.649
+You're doing it with Unreal, you're converting Nanite objects, you're merging Nanite objects
+
+124
+00:08:07.649 --> 00:08:09.170
+and you got to be careful with that.
+
+125
+00:08:09.170 --> 00:08:13.670
+We go over this more in our optimization for linear content.
+
+126
+00:08:13.670 --> 00:08:19.269
+But there is an option when it comes to the merge actors, there's an approximate which
+
+127
+00:08:19.269 --> 00:08:25.970
+allows you to merge Nanite objects, doesn't necessarily mean you should.
+
+128
+00:08:25.970 --> 00:08:30.470
+So there is a calculation factor that's involved that you got to be careful.
+
+129
+00:08:30.470 --> 00:08:32.629
+It's better to just have them polyed in.
+
+130
+00:08:32.629 --> 00:08:38.009
+And as you can see, I can go in here and just kit bash the crap out of things, build
+
+131
+00:08:38.009 --> 00:08:41.549
+things in pieces, slap them together.
+
+132
+00:08:41.549 --> 00:08:46.850
+And no one would be the wiser using that whole trim sheet texture that I created for
+
+133
+00:08:46.850 --> 00:08:49.169
+different aspects and details.
+
+134
+00:08:49.169 --> 00:08:53.129
+And even simple items like this, these little knobs should be fine.
+
+135
+00:08:53.129 --> 00:08:54.610
+You just got to be careful.
+
+136
+00:08:54.610 --> 00:08:59.210
+If you have a lot and you're noticing some performance hit hits happening.
+
+137
+00:08:59.210 --> 00:09:03.850
+You also have to consider where you're going with your game, whether it's PC, whether
+
+138
+00:09:03.850 --> 00:09:06.710
+it's console, whether it's a mobile device.
+
+139
+00:09:06.710 --> 00:09:10.529
+You always want to think smarter as you can when it comes to mobile devices.
+
+140
+00:09:10.529 --> 00:09:17.850
+You might want to lean more into baking and less of lumen, but all this requires experimentation.
+
+141
+00:09:17.850 --> 00:09:21.610
+Well that's it with this lecture and the next video we're going to be talking about
+
+142
+00:09:21.610 --> 00:09:26.169
+blueprints and construction scripts and how to manage your assets as you get them ready
+
+143
+00:09:26.169 --> 00:09:29.610
+to be calculated for lumen and for Nanite.
+
+144
+00:09:29.610 --> 00:09:30.110
+Thanks again.

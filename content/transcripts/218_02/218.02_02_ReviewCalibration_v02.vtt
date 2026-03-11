@@ -1,0 +1,137 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.200
+Okay, in this section, we're going to do a quick review of calibration.
+
+2
+00:00:05.200 --> 00:00:09.550
+So, we've already covered what calibration is and why calibration is required.
+
+3
+00:00:09.550 --> 00:00:12.550
+But again, to reiterate, as we continue our calibration process,
+
+4
+00:00:12.550 --> 00:00:18.550
+calibration is required in order to create accurate compositions from CG renders and live video in Unreal Engine,
+
+5
+00:00:18.550 --> 00:00:25.550
+as a virtual camera needs to accurately simulate the physical camera used to capture the real-world video footage.
+
+6
+00:00:25.550 --> 00:00:31.550
+Now, the virtual camera position and orientation must closely match the position and orientation of the physical camera,
+
+7
+00:00:31.550 --> 00:00:37.549
+and the physical tracking information for that physical camera must match the exact timing of the video feed
+
+8
+00:00:37.549 --> 00:00:43.549
+to ensure that each video frame is accurately synced to the position and orientation of the camera at any given time.
+
+9
+00:00:43.549 --> 00:00:49.549
+When you complete this correctly, it is possible to evaluate your calibrated lens file for any focus and zoom position
+
+10
+00:00:49.549 --> 00:00:52.549
+by interpolating between the stored focus and zoom points.
+
+11
+00:00:52.549 --> 00:00:56.549
+And as we move through our tracking and calibration sections, we're going to be using this setup.
+
+12
+00:00:56.549 --> 00:01:02.549
+Each major component is required, but your solutions may differ than what we have on the Latte stage.
+
+13
+00:01:02.549 --> 00:01:06.549
+Now, one thing I want to note is that if you don't do lens distortion mapping before this,
+
+14
+00:01:06.549 --> 00:01:11.549
+you will run into the issue where the information you pass along for lens distortion and nodal point calibration
+
+15
+00:01:11.549 --> 00:01:15.549
+will not be accurate for your post team.
+
+16
+00:01:15.549 --> 00:01:23.840
+So, set extensions and anything that you need to add to your shots is going to be requiring you to do this calibration step.
+
+17
+00:01:23.840 --> 00:01:28.480
+Now, as you get started, there are some plugins that need to be enabled.
+
+18
+00:01:28.480 --> 00:01:33.480
+Again, camera calibration, lens distortion, which is depreciated, and then the OpenCV lens distortion.
+
+19
+00:01:33.480 --> 00:01:37.480
+Now, we move to OpenCV lens distortion instead of using our lens distortion plugin,
+
+20
+00:01:37.480 --> 00:01:41.480
+so that the OpenCV system is actually going to take on the bulk of that.
+
+21
+00:01:41.480 --> 00:01:46.480
+This was a change that was made in 5.0 as OpenCV takes over that function.
+
+22
+00:01:46.480 --> 00:01:51.480
+And again, as we move into more camera calibration, you'll see how that is important.
+
+23
+00:01:51.480 --> 00:01:57.090
+Now, there is one element that we built in our last class that you need to make sure is still active,
+
+24
+00:01:57.090 --> 00:01:58.090
+and that is our media profile.
+
+25
+00:01:58.090 --> 00:02:02.090
+If you have not already built your media profile, please refer to the other section.
+
+26
+00:02:02.090 --> 00:02:08.090
+The media profile is required as an asset that your lens file is going to utilize in order to locate your video source,
+
+27
+00:02:08.090 --> 00:02:15.090
+and that is used by Composer to overlay your CG elements in Unreal Engine inside the lens file asset editor for calibration.
+
+28
+00:02:15.090 --> 00:02:21.090
+Now, the media profile proxy configuration will automatically detect the number of sources available in your configuration,
+
+29
+00:02:21.090 --> 00:02:25.090
+but you may need to manually set that depending on what your setup is like.
+
+30
+00:02:25.090 --> 00:02:30.090
+Also, you are going to need additional lens files, as we've already built those,
+
+31
+00:02:30.090 --> 00:02:33.090
+if you have multiple cameras and lens configurations.
+
+32
+00:02:33.090 --> 00:02:38.090
+If you have a single camera body and multiple lenses, you will need a lens file for each.
+
+33
+00:02:38.090 --> 00:02:41.180
+Okay, so that finishes up this section.
+
+34
+00:02:41.180 --> 00:02:45.180
+And as we get ready, we're going to move on and talk about some other dependencies for calibration.

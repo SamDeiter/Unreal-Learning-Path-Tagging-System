@@ -1,0 +1,453 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.929
+Now let's dive into the project and continue developing the logic for our in-game cutscenes if you haven't already
+
+2
+00:00:07.410 --> 00:00:14.369
+Open the 205 start level from the content 205 maps folder in your content browser
+
+3
+00:00:15.730 --> 00:00:16.969
+So now that we're in the project
+
+4
+00:00:16.969 --> 00:00:23.769
+Let's go ahead and start adding the various components that we need to trigger our sequence and ultimately play it when the player
+
+5
+00:00:24.170 --> 00:00:26.809
+Hits something in this case. It's gonna be a trigger
+
+6
+00:00:27.289 --> 00:00:31.989
+So in the place actors panel, if you don't see that just go to window place actors
+
+7
+00:00:32.210 --> 00:00:34.409
+We're going to use this trigger box now
+
+8
+00:00:34.409 --> 00:00:38.009
+If you don't see trigger box just go to search classes and type in trigger
+
+9
+00:00:38.490 --> 00:00:44.700
+So why the trigger box somewhere on this platform here go ahead and move it up and we can scale it
+
+10
+00:00:45.140 --> 00:00:49.229
+Now if you want to be very precise in your details panel
+
+11
+00:00:49.939 --> 00:00:57.340
+Under the box extent. Let's just type in 150 150 150 and if I just deselect this so
+
+12
+00:00:57.659 --> 00:01:01.179
+We can select this actor by selecting a little icon here
+
+13
+00:01:01.179 --> 00:01:06.700
+But if you wanted to select it via the little kind of outline here, you notice that it's actually pretty small
+
+14
+00:01:06.780 --> 00:01:13.400
+So if we just select this take our line thickness to say something like 10 and maybe change the color to something like a hot pink
+
+15
+00:01:13.620 --> 00:01:18.900
+Now if I do select it, you'll see that it's a little bit easier to see and a little bit easier to select
+
+16
+00:01:19.540 --> 00:01:25.000
+Alright, perfect. All right. Now before we go on to this next step. I want to make a small disclaimer
+
+17
+00:01:25.480 --> 00:01:29.000
+So this next process as we're building out our functionality
+
+18
+00:01:29.000 --> 00:01:33.340
+We are going to put this functionality within our level blueprint
+
+19
+00:01:33.500 --> 00:01:40.040
+Now the thing that you want to keep in mind is that it's okay to put logic within your level blueprint. However for
+
+20
+00:01:40.640 --> 00:01:44.359
+Systems or things that are going to be used in multiple levels
+
+21
+00:01:44.359 --> 00:01:51.079
+So for example, we're building out this cutscene manager to where the player can step into a trigger box and trigger a cutscene
+
+22
+00:01:51.799 --> 00:01:54.200
+Assuming that our game is probably gonna have a lot of cutscenes
+
+23
+00:01:54.200 --> 00:01:58.359
+We don't want to put the logic within our level blueprint
+
+24
+00:01:58.359 --> 00:02:05.140
+And the reason being for that is again that logic within our level blueprint is only contained within the level itself
+
+25
+00:02:05.319 --> 00:02:10.039
+So if we have let's say hundreds of levels, well, we have to copy that code a hundred times over
+
+26
+00:02:10.560 --> 00:02:15.360
+All right. So the question that is probably begging to be asked is well, why don't we just do that now?
+
+27
+00:02:15.360 --> 00:02:22.060
+Well, the truth is that you will often place logic within your level blueprint for various reasons
+
+28
+00:02:22.240 --> 00:02:28.319
+So for this course, we're actually gonna be building that logic into our level blueprint and in the next course
+
+29
+00:02:28.400 --> 00:02:31.360
+we're gonna take that logic and we're actually going to put it into a
+
+30
+00:02:31.759 --> 00:02:37.000
+Self-contained actor a blueprint that can be used within any level. So for now, it's absolutely fine
+
+31
+00:02:37.000 --> 00:02:38.419
+This is okay to do
+
+32
+00:02:38.419 --> 00:02:40.800
+I just want you to keep in the back of your mind that
+
+33
+00:02:40.919 --> 00:02:45.199
+Putting a lot of logic or code for things that are going to be used in multiple levels
+
+34
+00:02:45.719 --> 00:02:50.599
+Within the level blueprint itself is not always the most advisable way to go about that
+
+35
+00:02:51.240 --> 00:02:55.150
+All right, let's go ahead and continue here. So with our trigger box
+
+36
+00:02:55.830 --> 00:02:59.509
+Selected I'm gonna go up to our kind of little three squares
+
+37
+00:02:59.509 --> 00:03:06.310
+I'm gonna do open level blueprint and this is going to open up the blueprint for our level again
+
+38
+00:03:06.310 --> 00:03:10.430
+Keep in mind. This is for the persistent world. This is this level only
+
+39
+00:03:10.430 --> 00:03:16.250
+So any code we put here we will have to copy over to a new level if that's how you want to build it
+
+40
+00:03:16.590 --> 00:03:22.849
+So within our level blueprint, I'm going to right-click and you'll see this add event for trigger box expand it out
+
+41
+00:03:23.310 --> 00:03:29.650
+Collision and add on actor begin overlap, and we'll do that compile and save
+
+42
+00:03:30.090 --> 00:03:37.270
+Now if you I'm actually gonna just deselect here in our level if you right-click and you don't see this on actor begin overlap
+
+43
+00:03:37.469 --> 00:03:44.069
+Reason for that is unreal has a nice little kind of handy quality of life feature that if you have the actor
+
+44
+00:03:44.229 --> 00:03:46.229
+Selected in your world and you right-click
+
+45
+00:03:46.349 --> 00:03:52.629
+You'll see that it will add some of the various different controls or different components. We can target within that blueprint
+
+46
+00:03:52.629 --> 00:03:57.069
+So again, if it's not selected right-click, you don't see it selected right-click you do
+
+47
+00:03:57.389 --> 00:04:04.240
+Alright, so now that we have our trigger box added to our level now, we wanted to actually do something
+
+48
+00:04:04.439 --> 00:04:06.699
+So in our slides here, you can see that
+
+49
+00:04:07.219 --> 00:04:10.620
+With our on actor begin overlap for our trigger box
+
+50
+00:04:10.699 --> 00:04:15.939
+we are going to play a movie a sequence player now in this case, we're going to target a
+
+51
+00:04:16.579 --> 00:04:22.660
+Sequence from the persistent level now quick note here. This says sequence 101. That's not the actual sequence
+
+52
+00:04:22.660 --> 00:04:27.620
+We'll using we'll jump over to the project here and actually put in the correct one that we're going to use
+
+53
+00:04:27.779 --> 00:04:31.980
+But the thing to take note here is because we're using our level blueprint
+
+54
+00:04:32.019 --> 00:04:36.019
+You'll notice that we have to target actors from the persistent level
+
+55
+00:04:36.060 --> 00:04:39.860
+So the actors that are in that level where that level blueprint exists
+
+56
+00:04:40.579 --> 00:04:42.899
+Alright, so now that we're back into our project
+
+57
+00:04:43.259 --> 00:04:48.459
+The first thing that we need to do is actually add our sequence to our level
+
+58
+00:04:48.459 --> 00:04:54.620
+So I'm gonna go down to our content browser here and in the sequence 2 0 5 0 0 the sequence folder
+
+59
+00:04:54.620 --> 00:04:57.420
+I'm gonna drag this sequence 2 0 5 start
+
+60
+00:04:57.500 --> 00:05:02.740
+I'm going to just kind of move this up and just basically kind of put it within our trigger box here
+
+61
+00:05:02.740 --> 00:05:05.300
+So I know that that's the sequence that I want to use
+
+62
+00:05:05.339 --> 00:05:08.660
+You don't have to have this sequence in the trigger box for it to play
+
+63
+00:05:08.660 --> 00:05:12.220
+In fact, this sequence could be off in some distant corner of the level
+
+64
+00:05:12.980 --> 00:05:18.699
+Position doesn't matter. Alright, so with that sequence 2 0 5 start selected
+
+65
+00:05:18.699 --> 00:05:21.180
+I'm gonna go ahead and just drag it into our world
+
+66
+00:05:21.180 --> 00:05:27.839
+So we have that actor gonna drag off of this and I'm gonna start typing play and we're looking for the play
+
+67
+00:05:28.100 --> 00:05:33.019
+Sequence player and you'll see that unreal automatically adds our little helper node there
+
+68
+00:05:33.060 --> 00:05:38.579
+So the translator to take the actor translated into a sequence player and that's going to be our target
+
+69
+00:05:38.740 --> 00:05:42.579
+let's go ahead and just drag off of this connect it hit compile and
+
+70
+00:05:43.540 --> 00:05:47.439
+Start and now what we should have is if I play
+
+71
+00:05:48.100 --> 00:05:50.500
+do this you notice there's my
+
+72
+00:05:51.339 --> 00:05:57.660
+Guy running and moving as soon as I hit that trigger box the sequence starts playing which is perfect
+
+73
+00:05:57.660 --> 00:05:59.660
+All right. I'm gonna go ahead and just stop that
+
+74
+00:06:00.100 --> 00:06:06.980
+It's off let's select our trigger box again F to frame and zoom in and we'll continue here
+
+75
+00:06:07.259 --> 00:06:07.740
+alright
+
+76
+00:06:07.740 --> 00:06:13.540
+so one of the issues that we have right now is if the sequence starts playing it will
+
+77
+00:06:13.699 --> 00:06:19.740
+play through and continue all the way to the end and then that trigger box still exists in our world and
+
+78
+00:06:20.500 --> 00:06:26.620
+We could theoretically run back into the trigger box and trigger the sequence again, which is not what we want, right?
+
+79
+00:06:26.620 --> 00:06:28.180
+We want this to be an in-game cutscene
+
+80
+00:06:28.180 --> 00:06:32.420
+We want it to play once the player to do something and that's it and be done
+
+81
+00:06:32.939 --> 00:06:35.629
+So if I go back to our slides here
+
+82
+00:06:35.629 --> 00:06:42.149
+You'll see that we need to add the second part of our logic to our level blueprint and that is disabling the trigger box
+
+83
+00:06:42.509 --> 00:06:45.949
+Collision now there's two options here that we have
+
+84
+00:06:46.389 --> 00:06:51.009
+You can use one you can use both doesn't matter. The first one is going to be
+
+85
+00:06:51.810 --> 00:06:54.290
+Setting the actor collision to false
+
+86
+00:06:54.290 --> 00:06:55.810
+So it means that it neat, you know
+
+87
+00:06:55.810 --> 00:07:00.009
+the player cannot trigger the collision again on this one or
+
+88
+00:07:00.129 --> 00:07:05.009
+We have this other option of just destroying the actor altogether. And essentially what happens behind the scenes is
+
+89
+00:07:05.689 --> 00:07:07.689
+once the sequence plays
+
+90
+00:07:07.730 --> 00:07:10.730
+It'll move on to the next event in our stack here
+
+91
+00:07:10.730 --> 00:07:15.550
+Which is destroy the actor and it will just delete it from the world making sure that it doesn't exist anymore
+
+92
+00:07:15.689 --> 00:07:19.889
+Now you could have both on here is absolutely fine just to be safe and we'll do that
+
+93
+00:07:19.970 --> 00:07:25.490
+The other thing to take note of here is that we need to make sure that we have our trigger box again from our persistent
+
+94
+00:07:25.490 --> 00:07:30.170
+Level set as the target for our collision. Let's jump back to our project
+
+95
+00:07:30.850 --> 00:07:38.149
+So within the level blueprint, I'm just gonna take this trigger box and drag off of it drag off of this pin here
+
+96
+00:07:38.149 --> 00:07:40.149
+And I'm going to just start typing
+
+97
+00:07:40.769 --> 00:07:43.930
+Collision and I believe this should be towards the top
+
+98
+00:07:44.550 --> 00:07:47.829
+We'll do this here. Keep looking or we can do
+
+99
+00:07:48.430 --> 00:07:52.269
+Set collision there to set actor enable collision
+
+100
+00:07:52.790 --> 00:07:58.009
+Excuse the target is the trigger box and new actor enable collision is set to false
+
+101
+00:07:58.589 --> 00:08:03.850
+Perfect drag off of this now if you want to keep your graph clean
+
+102
+00:08:03.850 --> 00:08:06.649
+Feel free to just double click add some reroute nodes
+
+103
+00:08:07.290 --> 00:08:09.290
+Do this just to make it look pretty
+
+104
+00:08:10.639 --> 00:08:16.579
+Perfect. Alright, so technically now if I just hit compile and save this should work
+
+105
+00:08:16.699 --> 00:08:19.240
+This may be all that you need maybe all that you want or
+
+106
+00:08:19.860 --> 00:08:25.259
+We can also just drag off of this guy right here and we can just do
+
+107
+00:08:25.980 --> 00:08:28.360
+Back to our slides here and we'll double check here
+
+108
+00:08:28.600 --> 00:08:34.019
+Destroy actor. Okay, so go here off of this one and just type in destroy
+
+109
+00:08:34.559 --> 00:08:39.600
+Destroy actor and then of course got to make sure that we hook it up it compile
+
+110
+00:08:40.639 --> 00:08:47.179
+Pro tip if you don't like your lines being all squirrely select the two nodes press Q and that will straighten
+
+111
+00:08:47.639 --> 00:08:54.159
+Perfect it start now if we were to go back in and test the event we could run through the trigger
+
+112
+00:08:54.159 --> 00:08:58.799
+It would trigger the sequence to a play and then as soon as the sequence is done
+
+113
+00:08:59.039 --> 00:09:05.799
+It will destroy that actor disable collision just to be safe and then we'll no longer be able to trigger it

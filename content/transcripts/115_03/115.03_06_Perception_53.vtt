@@ -1,0 +1,289 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:07.830
+Now on to AI Perception. Whilst we can leverage the power of the environment query system to gather data about the environment,
+
+2
+00:00:07.830 --> 00:00:13.050
+the AI Perception provides framework for the AI to receive sensory data.
+
+3
+00:00:13.050 --> 00:00:19.079
+The AI Perception framework gives us developers a tool to gather sensory data for each AI.
+
+4
+00:00:19.079 --> 00:00:27.339
+As we can see from the slide, Unreal gives us access to certain sensory stimuli such as sight, hearing, touch, damage and even team.
+
+5
+00:00:27.339 --> 00:00:31.339
+However, this is another system that does not come as default when creating our AI.
+
+6
+00:00:31.339 --> 00:00:37.840
+In order to leverage this, we need to do some extra steps, the first of which is to add the AI Perception component to our AI Controller.
+
+7
+00:00:37.840 --> 00:00:44.840
+And once again this can be done via Blueprint, as the AI Perception component is Blueprint spawnable, or we could add it directly through the native C++.
+
+8
+00:00:44.840 --> 00:00:50.979
+As the name suggests, it's the job of the AI Perception component to receive the sensory data,
+
+9
+00:00:50.979 --> 00:00:57.329
+and it uses that information to inform us as to what has been perceived and by what sense it has been perceived by.
+
+10
+00:00:57.329 --> 00:01:01.329
+Of course what we do with this functionality beyond this point is completely up to us as engineers.
+
+11
+00:01:01.329 --> 00:01:05.329
+What we do with this data will depend on the tech spec and design in mind.
+
+12
+00:01:05.329 --> 00:01:13.769
+A really handy aspect of the AI Perception framework is that it's totally customizable per AI, and it can be altered at runtime.
+
+13
+00:01:13.769 --> 00:01:20.269
+As we mentioned, the AI Perception component can be added to the AI Controller either through Blueprint or through native C++.
+
+14
+00:01:20.269 --> 00:01:26.400
+It allows us to define what senses we want our AI to listen out for, as well as configure the parameters of those senses.
+
+15
+00:01:26.400 --> 00:01:32.040
+We can also define a dominant sense that will take precedence over all of the other ones.
+
+16
+00:01:32.040 --> 00:01:40.049
+It's important to note that this sense must be one of the senses configured in the list of senses config file, otherwise it will be left as None.
+
+17
+00:01:40.049 --> 00:01:45.620
+The Perception component also exposes out events to Blueprint that we can utilize to drive functionality.
+
+18
+00:01:45.620 --> 00:01:51.120
+The list of events can be seen on the image to the right, so as an example we have the OnPerceptionUpdated function,
+
+19
+00:01:51.120 --> 00:01:57.620
+which will be fired when the Perception component processes all of its stimuli, and it will return a list of the recently perceived actors.
+
+20
+00:01:57.620 --> 00:02:04.939
+The AISite stimulus does exactly as you'd expect. It allows the AI to see things in the environment.
+
+21
+00:02:04.939 --> 00:02:11.129
+The AISiteConfig exposes key variables to developers that allow us to control what an AI agent sees.
+
+22
+00:02:11.129 --> 00:02:18.129
+When an actor enters a site radius of an AI agent, the Perception system signals an update and passes through the actor that it has seen.
+
+23
+00:02:18.129 --> 00:02:22.580
+So let's go over some of the properties that we can see in the above image.
+
+24
+00:02:22.580 --> 00:02:28.580
+Firstly we've got the implementation, and this is the AISense class to use, and it will default to AISenseSite.
+
+25
+00:02:28.580 --> 00:02:31.580
+You can overwrite this with your own implementation as you see fit.
+
+26
+00:02:31.580 --> 00:02:36.900
+Next we've got the SiteRadius, and this is the max distance over which this sense can start perceiving.
+
+27
+00:02:36.900 --> 00:02:45.379
+Next we've got the LoseSiteRadius, and this is the maximum distance over which a seen target is no longer perceived by this sense.
+
+28
+00:02:45.379 --> 00:02:52.569
+Next we've got the PeripheralVisionHalfAngleDegrees, and this is how far to either side the AI can see in degrees.
+
+29
+00:02:52.569 --> 00:02:57.759
+This is the angle measured in relation to the current forward vector of the AI agent.
+
+30
+00:02:57.759 --> 00:03:03.759
+Next we've got DetectionByAffiliation, and this determines if enemies, neutrals or friendlies can trigger this sense,
+
+31
+00:03:03.759 --> 00:03:08.759
+and it's worth noting that this property can only be defined and configured in the native C++.
+
+32
+00:03:08.759 --> 00:03:13.500
+Next we've got the AutoSuccessRangeFromLastSeenLocation.
+
+33
+00:03:13.500 --> 00:03:19.719
+When put to a value greater than zero, the AI will always be able to see the target that has already been seen,
+
+34
+00:03:19.719 --> 00:03:22.719
+as long as they are within the specified range.
+
+35
+00:03:22.719 --> 00:03:29.039
+And lastly we've got the MaxAge, and this will determine the duration in which the stimuli generated by this sense becomes forgotten,
+
+36
+00:03:29.039 --> 00:03:32.039
+and if left at zero, it will never be forgotten.
+
+37
+00:03:32.039 --> 00:03:35.900
+Next we have Hearing.
+
+38
+00:03:35.900 --> 00:03:40.900
+The AI Hearing sense can be used to detect sounds generated by a report noise event.
+
+39
+00:03:40.900 --> 00:03:46.319
+An example of this can be, say, the footfalls of the player or a gun being fired.
+
+40
+00:03:46.319 --> 00:03:50.319
+Again, let's take a look at some of the values that we have available to us in this sense.
+
+41
+00:03:50.319 --> 00:03:57.319
+Firstly we've got the implementation, and much like the sight implementation, this is simply where we set the class of the sense we want to use.
+
+42
+00:03:57.319 --> 00:04:04.860
+Next we've got the HearingRange, and this simply limits how far a reported noise event has to be for it to be perceived by this sense.
+
+43
+00:04:04.860 --> 00:04:11.659
+If the event is fired further away than this value allows, it will not be reported by the perception system.
+
+44
+00:04:11.659 --> 00:04:19.269
+Next we have the LOS HearingRange, and this is used to display a different radius in the debugger for the HearingRange property.
+
+45
+00:04:19.269 --> 00:04:24.269
+Following on from that we have Detection by Affiliation, and this is the same as the AI's sight sense.
+
+46
+00:04:24.269 --> 00:04:31.269
+It will determine if enemies, neutrals or friendlies can trigger this sense, and again, this can only be configured in the native C++.
+
+47
+00:04:31.269 --> 00:04:35.660
+Finally we also mirror the MaxAge parameter from the sight too.
+
+48
+00:04:35.660 --> 00:04:44.230
+This determines how long actors detected by this stimuli will be forgotten, and again, if this is set to zero, it will never be forgotten.
+
+49
+00:04:44.230 --> 00:04:46.870
+Next we've got the Damage sense.
+
+50
+00:04:46.870 --> 00:04:53.870
+If we want our AI agents to react to damage being taken, whether that be point or radial, this is the sense that we'll want to use.
+
+51
+00:04:53.870 --> 00:04:57.220
+Let's take a look at some of the properties within this sense.
+
+52
+00:04:57.220 --> 00:05:01.769
+Firstly we have implementation, and this controls how damage events are handled.
+
+53
+00:05:01.769 --> 00:05:08.769
+However if you are making your own damage system, then it is highly recommended that you simply make your own implementation for triggering this sense.
+
+54
+00:05:08.769 --> 00:05:14.920
+Lastly we have MaxAge, and this mirrors every other instance of MaxAge we've seen thus far.
+
+55
+00:05:14.920 --> 00:05:19.920
+This essentially determines how long an actor detected by this stimuli will remain in memory.
+
+56
+00:05:19.920 --> 00:05:22.920
+If this is set to zero, they will never be forgotten.
+
+57
+00:05:22.920 --> 00:05:29.660
+You'll also notice that we don't mirror the Detection by Affiliation properties that we have with sight and with hearing.
+
+58
+00:05:29.660 --> 00:05:38.459
+With a damage input, we should endeavor to make sure we don't damage the actor in the first place if they are an ally, neutral or enemy.
+
+59
+00:05:38.459 --> 00:05:44.459
+We should have some kind of implementation before we even get to this point to prevent the damage being from administered in the first place.
+
+60
+00:05:44.459 --> 00:05:48.769
+Following on from damage, we have the TouchSense.
+
+61
+00:05:48.769 --> 00:05:54.769
+This sense gives us the ability to detect when an ally bumps into something else, or when something bumps into it.
+
+62
+00:05:54.769 --> 00:06:00.769
+A great example of this sense would be to allow an ally agent to have knowledge of a player if they bump into them while sneaking around.
+
+63
+00:06:00.769 --> 00:06:09.500
+We don't have a great deal of parameters that we can adjust for this particular sense, however we can still adjust the MaxAge which we've covered in the last few slides.
+
+64
+00:06:09.500 --> 00:06:13.139
+Lastly we have the TeamSense.
+
+65
+00:06:13.139 --> 00:06:19.139
+This sense will notify the perception system when someone on the same team as our AI agent is nearby.
+
+66
+00:06:19.139 --> 00:06:26.240
+This can be useful in situations in which we want our AI agent to react to its allies gathering around them, maybe to perform some kind of group attack.
+
+67
+00:06:26.240 --> 00:06:33.240
+Once again we can see we've got much of the same set of properties that we've already discussed in the previous slides, most notably again the MaxAge.
+
+68
+00:06:33.240 --> 00:06:41.430
+So at this point we can configure our AI agent to have a perception component and even give it the senses it will use to gather information about the world.
+
+69
+00:06:41.430 --> 00:06:47.430
+But there's still the last crucial part of the system that we need to talk about, and that is the AI Stimulus Source component.
+
+70
+00:06:47.430 --> 00:06:54.069
+This component gives the owning actor a way to automatically register itself as a stimulus source.
+
+71
+00:06:54.069 --> 00:06:58.649
+This component can be added in both Blueprint and in C++.
+
+72
+00:06:58.649 --> 00:07:09.649
+With this component we can dictate what senses we register ourselves to, or by simply entering each sense into the Register as Source for Senses array, which is exposed out to the Editor Details panel.

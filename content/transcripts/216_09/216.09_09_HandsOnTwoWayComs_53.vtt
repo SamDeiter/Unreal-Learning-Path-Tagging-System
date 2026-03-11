@@ -1,0 +1,441 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:05.160
+In this video, we're going to talk about how to set up
+
+2
+00:00:05.160 --> 00:00:08.080
+two-way communication so the receiver can
+
+3
+00:00:08.080 --> 00:00:11.400
+also send message back to the sender.
+
+4
+00:00:11.400 --> 00:00:13.039
+Now, to do that,
+
+5
+00:00:13.039 --> 00:00:17.000
+let's take a look at what it is being set up right now.
+
+6
+00:00:17.000 --> 00:00:19.519
+The sender, you will see
+
+7
+00:00:19.519 --> 00:00:23.379
+the two-way communication related part
+
+8
+00:00:23.379 --> 00:00:28.379
+are all being commented in the yellow comment box.
+
+9
+00:00:28.379 --> 00:00:31.420
+So first, at begin play,
+
+10
+00:00:31.420 --> 00:00:33.780
+we will check if this instance
+
+11
+00:00:33.780 --> 00:00:36.340
+should be in two-way communication.
+
+12
+00:00:36.340 --> 00:00:38.759
+If it is two-way for the sender,
+
+13
+00:00:38.759 --> 00:00:41.380
+remember that before that the sender only
+
+14
+00:00:41.380 --> 00:00:44.780
+has a OSC client targeting the receiver,
+
+15
+00:00:44.780 --> 00:00:49.100
+so the sender doesn't have any way to receive messages.
+
+16
+00:00:49.100 --> 00:00:53.159
+So to allow the sender to also able to receive messages,
+
+17
+00:00:53.159 --> 00:00:56.679
+we want the sender to create an OSC server.
+
+18
+00:00:56.679 --> 00:01:02.429
+Now, because I know that my Internet
+
+19
+00:01:02.429 --> 00:01:06.510
+is fairly simple, I'm going to just leave this part blank,
+
+20
+00:01:06.510 --> 00:01:13.540
+so it will try to grab the first IP it has on this device.
+
+21
+00:01:13.540 --> 00:01:16.219
+Remember to use the same port
+
+22
+00:01:16.219 --> 00:01:19.620
+that is going to send the message back in.
+
+23
+00:01:19.620 --> 00:01:24.000
+Right now, we just used OSC port variable,
+
+24
+00:01:24.000 --> 00:01:27.620
+which we can set in the launch parameter later.
+
+25
+00:01:27.620 --> 00:01:32.140
+Now, I set the name of the OSC server to also be server.
+
+26
+00:01:32.140 --> 00:01:34.560
+If you remember, on the receiver side,
+
+27
+00:01:34.560 --> 00:01:38.219
+we also have the same server name here.
+
+28
+00:01:38.219 --> 00:01:39.700
+It's a bad practice,
+
+29
+00:01:39.700 --> 00:01:43.480
+so we actually should try to name them something else.
+
+30
+00:01:43.480 --> 00:01:45.959
+But if you remember,
+
+31
+00:01:45.959 --> 00:01:48.340
+a sender is never a receiver,
+
+32
+00:01:48.340 --> 00:01:53.579
+so usually there will not be
+
+33
+00:01:53.579 --> 00:02:00.819
+the same named OSC server component at the same instance.
+
+34
+00:02:00.859 --> 00:02:03.769
+That is actually fine.
+
+35
+00:02:03.769 --> 00:02:05.650
+But still, if we want to make sure
+
+36
+00:02:05.650 --> 00:02:08.409
+the server name is never the same,
+
+37
+00:02:08.409 --> 00:02:14.360
+we can also use sender IP address,
+
+38
+00:02:14.360 --> 00:02:17.080
+for example, to be the name.
+
+39
+00:02:17.080 --> 00:02:21.960
+So unless there's same instance from the same IP,
+
+40
+00:02:21.960 --> 00:02:25.240
+the name will never be duplicated.
+
+41
+00:02:25.240 --> 00:02:30.319
+So now we need the sender's own server as a different variable,
+
+42
+00:02:30.319 --> 00:02:33.789
+and we want the server to react to
+
+43
+00:02:33.789 --> 00:02:37.750
+all the event in the same way the receiver receives it.
+
+44
+00:02:37.750 --> 00:02:41.870
+So now we want to bind it to the OSC boundary received,
+
+45
+00:02:41.870 --> 00:02:45.909
+and also bind it to OSC message received.
+
+46
+00:02:45.909 --> 00:02:49.990
+So when that happened,
+
+47
+00:02:49.990 --> 00:02:51.710
+we actually wanted to just do
+
+48
+00:02:51.710 --> 00:02:54.389
+the same thing as what the receiver is doing.
+
+49
+00:02:54.389 --> 00:02:56.430
+So remember at begin play,
+
+50
+00:02:56.430 --> 00:03:02.270
+we are getting the receiver on the same level as a reference.
+
+51
+00:03:02.270 --> 00:03:05.960
+We're now going to get that reference and
+
+52
+00:03:05.960 --> 00:03:09.520
+just fire the same event in OSC receiver.
+
+53
+00:03:09.520 --> 00:03:14.710
+That's it. Now we make sure the sender also has
+
+54
+00:03:14.710 --> 00:03:18.349
+a server is able to listening to combing OSC messages,
+
+55
+00:03:18.349 --> 00:03:21.530
+and whenever there is a message or a bundle combing,
+
+56
+00:03:21.530 --> 00:03:24.150
+it is doing the same reaction
+
+57
+00:03:24.150 --> 00:03:27.150
+we wanted to do on the receiver side.
+
+58
+00:03:27.150 --> 00:03:30.479
+Now let's go to our receiver side
+
+59
+00:03:30.479 --> 00:03:33.840
+and move on to the two-way part.
+
+60
+00:03:33.879 --> 00:03:38.479
+At begin play, it is checking if it is a two-way communication.
+
+61
+00:03:38.479 --> 00:03:41.960
+If it is, it want to also be able to point
+
+62
+00:03:41.960 --> 00:03:46.919
+to the sender and send message back to the sender.
+
+63
+00:03:46.919 --> 00:03:51.900
+So for that, we want to create an OSC client.
+
+64
+00:03:51.900 --> 00:03:54.580
+The OSC client will have to target to
+
+65
+00:03:54.580 --> 00:04:00.139
+the sender IP address where we can set inside launch parameter.
+
+66
+00:04:00.139 --> 00:04:03.620
+The same, we're going to use the OSC port here.
+
+67
+00:04:04.560 --> 00:04:11.000
+We're going to save the client as a OSC client.
+
+68
+00:04:11.000 --> 00:04:14.520
+On the sender side,
+
+69
+00:04:14.520 --> 00:04:18.860
+we want to save the client and we also
+
+70
+00:04:18.860 --> 00:04:24.579
+want to save it as a variable on the OSC sender blueprint.
+
+71
+00:04:24.579 --> 00:04:30.589
+Now, in order to send the messages,
+
+72
+00:04:30.589 --> 00:04:36.009
+just so that we don't need to duplicate all the events,
+
+73
+00:04:36.009 --> 00:04:44.759
+again, we will go back to our sender part.
+
+74
+00:04:44.759 --> 00:04:50.639
+Now, if we go to the send messages event here,
+
+75
+00:04:50.639 --> 00:04:54.740
+we will see that when we're sending the message,
+
+76
+00:04:54.740 --> 00:04:59.240
+we are selecting our target based
+
+77
+00:04:59.240 --> 00:05:04.480
+on if the instance being played is a sender.
+
+78
+00:05:04.480 --> 00:05:06.399
+Now, if I am a sender,
+
+79
+00:05:06.399 --> 00:05:11.160
+I know the OSC client I want to target is the first one.
+
+80
+00:05:11.160 --> 00:05:13.680
+Because this is the first one I saved
+
+81
+00:05:13.680 --> 00:05:17.160
+before I do the two-way communication thing,
+
+82
+00:05:17.160 --> 00:05:20.680
+this is the receiver's target.
+
+83
+00:05:20.680 --> 00:05:25.980
+But if the instance being played is not a sender,
+
+84
+00:05:25.980 --> 00:05:27.259
+it is a receiver,
+
+85
+00:05:27.259 --> 00:05:30.740
+then we know receiver want to use this target.
+
+86
+00:05:30.740 --> 00:05:33.100
+It's targeting the sender.
+
+87
+00:05:33.100 --> 00:05:35.540
+Now, this might feels a little bit complicated,
+
+88
+00:05:35.540 --> 00:05:41.579
+but just know that we are just reusing the same set of logic.
+
+89
+00:05:41.579 --> 00:05:44.139
+Based on who is sending,
+
+90
+00:05:44.139 --> 00:05:50.500
+we will target destinations here.
+
+91
+00:05:50.899 --> 00:05:54.220
+We know that this part is already taken care
+
+92
+00:05:54.220 --> 00:05:57.459
+of for the example events here.
+
+93
+00:05:57.459 --> 00:06:00.379
+We just want to grab this logic,
+
+94
+00:06:00.379 --> 00:06:07.490
+we will copy and put into the new two events we just created.
+
+95
+00:06:07.490 --> 00:06:12.930
+We know that OSC client here,
+
+96
+00:06:12.930 --> 00:06:15.769
+so we know that the send event here is working for
+
+97
+00:06:15.769 --> 00:06:18.129
+one-way communication to make
+
+98
+00:06:18.129 --> 00:06:20.449
+it working on two-way communication.
+
+99
+00:06:20.449 --> 00:06:30.300
+I will replace the target to be this one.
+
+100
+00:06:30.300 --> 00:06:32.860
+Same thing for the bundle,
+
+101
+00:06:32.860 --> 00:06:35.740
+I'm just going to drag down here,
+
+102
+00:06:35.740 --> 00:06:43.180
+delete this node, like so.
+
+103
+00:06:43.180 --> 00:06:46.500
+Now we're ready to run the two-way testing.
+
+104
+00:06:46.500 --> 00:06:49.019
+Now just before we make a package,
+
+105
+00:06:49.019 --> 00:06:54.620
+I'll just connect back to where it should be,
+
+106
+00:06:54.620 --> 00:06:57.779
+so make sure we are using the launch parameter,
+
+107
+00:06:57.779 --> 00:07:03.670
+like so, save it.
+
+108
+00:07:03.670 --> 00:07:06.790
+Now we already finished
+
+109
+00:07:06.829 --> 00:07:09.350
+working on the two-way communication.
+
+110
+00:07:09.350 --> 00:07:13.829
+Now let's move on to package this project.

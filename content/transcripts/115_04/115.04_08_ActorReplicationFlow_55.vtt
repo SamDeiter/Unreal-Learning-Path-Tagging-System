@@ -1,0 +1,721 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:08.199
+Then it's worth talking, we've talked about all the kind of like core concepts of what goes on in the engine.
+
+2
+00:00:08.199 --> 00:00:15.199
+We've talked about like, you know, what replication is, we've talked about the various factors that we can kind of consider for optimizing these things.
+
+3
+00:00:15.199 --> 00:00:18.199
+We've talked about the kind of various kind of core fundamentals.
+
+4
+00:00:18.199 --> 00:00:26.260
+But it's actually worth talking a little bit about an example of how data actually gets from our server to our client.
+
+5
+00:00:26.260 --> 00:00:31.260
+So first off, it's worth talking about some kind of key functions.
+
+6
+00:00:31.260 --> 00:00:35.259
+Whenever we're talking about replication, like I said, actor is really our kind of key entry point.
+
+7
+00:00:35.259 --> 00:00:39.259
+So as you can see here, the kind of key functions that we're picking out all kind of relate to the actor.
+
+8
+00:00:39.259 --> 00:00:45.259
+There are various components involved, but actor is certainly our entry point.
+
+9
+00:00:45.259 --> 00:00:49.259
+So a couple of these, we talked about our net update frequency.
+
+10
+00:00:49.259 --> 00:00:52.259
+This is kind of like we said, our lowest hanging fruit.
+
+11
+00:00:52.259 --> 00:00:58.770
+This is how frequently our actor actually even tries to have information replicated to it.
+
+12
+00:00:58.770 --> 00:01:03.770
+Prereplication is a function that gets called before any replication takes place.
+
+13
+00:01:03.770 --> 00:01:07.769
+Whether or not an actor is relevant only to the owner.
+
+14
+00:01:07.769 --> 00:01:18.769
+So, you know, in this, we already talked about this in relevancy, but whether or not this is, if this is true, this is, this actor will only be relevant to the client that owns it.
+
+15
+00:01:18.769 --> 00:01:22.409
+Then the is relevancy owner for.
+
+16
+00:01:22.409 --> 00:01:29.409
+So this is the kind of other component of that coin of whether or not it's the relevant to our clients.
+
+17
+00:01:29.409 --> 00:01:40.409
+This is the function to check whether or not this thing should be treated as the owner for this particular logic when asking, is it only relevant to the owner?
+
+18
+00:01:40.409 --> 00:01:42.409
+Who is the owner for this thing?
+
+19
+00:01:42.409 --> 00:01:45.890
+And then finally we have, is net relevant for?
+
+20
+00:01:45.890 --> 00:01:50.890
+And then that is the, this kind of ability to ingest, inject custom logic.
+
+21
+00:01:50.890 --> 00:01:57.890
+If we're not relying on, you know, the kind of standard 1.5 kilometer distance equation or, you know, whatever net call distance we specify.
+
+22
+00:01:57.890 --> 00:02:05.890
+And if we're not relying on that hidden and collision off, what kind of additional or replacement functionality do we want to inject?
+
+23
+00:02:05.890 --> 00:02:07.890
+And that would be, is net relevant for?
+
+24
+00:02:07.890 --> 00:02:12.780
+Then in comes the kind of things that aren't part of the actor.
+
+25
+00:02:12.780 --> 00:02:19.780
+And this is actually really where all the replication is actually done is within our net driver.
+
+26
+00:02:19.780 --> 00:02:21.780
+So that's an important class to be aware of.
+
+27
+00:02:21.780 --> 00:02:25.780
+You might not necessarily interact with it a huge amount, but it's worth knowing that it's there.
+
+28
+00:02:25.780 --> 00:02:31.460
+And a lot of the actual replication occurs within this function called server replicate actors.
+
+29
+00:02:31.460 --> 00:02:34.460
+So this is kind of, there's a few steps to this.
+
+30
+00:02:34.460 --> 00:02:39.460
+Essentially it gathers up all the actors that are determined to be relevant for each client.
+
+31
+00:02:39.460 --> 00:02:44.460
+And then it replicates components and data within the actor that have changed since the last update.
+
+32
+00:02:44.460 --> 00:02:46.460
+We kind of talked about that kind of shadow set of data.
+
+33
+00:02:46.460 --> 00:02:52.460
+So again, this can be broken up into kind of three conceptual stages, the actual replication flow.
+
+34
+00:02:52.460 --> 00:02:58.460
+First off, we kind of create the list of the full, of all the actors that could possibly be considered.
+
+35
+00:02:58.460 --> 00:03:06.460
+Then we do a bunch of pruning on that list to kind of trim off things that might not currently be, we need to replicate to.
+
+36
+00:03:06.460 --> 00:03:14.460
+And then last of all, we kind of prioritize that pruned list and we account for the fact that our connection could get saturated.
+
+37
+00:03:14.460 --> 00:03:21.460
+So, you know, if we have 2000 things to replicate, that's not just a replication cost in terms of network traffic.
+
+38
+00:03:21.460 --> 00:03:24.460
+It's also a burden on our CPU, right?
+
+39
+00:03:24.460 --> 00:03:29.460
+So there's this idea of such of connections being saturated, which we'll talk about in a little bit,
+
+40
+00:03:29.460 --> 00:03:34.460
+which is essentially just when we are saying, you know, the CPU has had too much load.
+
+41
+00:03:34.460 --> 00:03:36.460
+We've had to try and pass over too much information.
+
+42
+00:03:36.460 --> 00:03:37.460
+We've had to do too many checks.
+
+43
+00:03:37.460 --> 00:03:47.460
+And in that situation, maybe we'll defer some replication checks until the next cycle just to kind of not overburden our CPU and slow our server down.
+
+44
+00:03:47.460 --> 00:03:52.969
+So our high level flow, like we said, the first thing is to populate our consider actors list.
+
+45
+00:03:52.969 --> 00:03:56.969
+So we loop over all the actively replicated actors.
+
+46
+00:03:56.969 --> 00:04:01.969
+By this we really refer to anything with B replicates, flag set to true.
+
+47
+00:04:01.969 --> 00:04:06.289
+Then we determine whether or not this actor is dormant initial.
+
+48
+00:04:06.289 --> 00:04:12.289
+So again, if essentially if this is dormant, as we said already, that would be anything that you say,
+
+49
+00:04:12.289 --> 00:04:16.290
+kind of like initial being the kind of key phrase here, anything that is initially dormant.
+
+50
+00:04:16.290 --> 00:04:23.290
+If something gets, if you flush its net dormancy, then it would temporarily become not dormant initial.
+
+51
+00:04:23.290 --> 00:04:27.290
+But then eventually later in the flow would get reverted to dormant initial.
+
+52
+00:04:27.290 --> 00:04:33.899
+Once it's kind of like we're certain that it's kind of been replicated to every client.
+
+53
+00:04:33.899 --> 00:04:38.899
+And then we determine if the actor needs an update by checking its net update frequency value.
+
+54
+00:04:38.899 --> 00:04:39.899
+So this is where that becomes relevant.
+
+55
+00:04:39.899 --> 00:04:42.899
+Again, easiest thing to do is not do things if you don't have to.
+
+56
+00:04:42.899 --> 00:04:46.899
+This is like reducing our net tick rate almost.
+
+57
+00:04:46.899 --> 00:04:50.899
+Then we check if the actor is only relevant to its owner.
+
+58
+00:04:50.899 --> 00:04:55.899
+And that's where it comes to the, you know, if it is only relevant to its owner,
+
+59
+00:04:55.899 --> 00:05:00.899
+then we just need to check if, you know, who is the owner for this net relevancy function.
+
+60
+00:05:00.899 --> 00:05:06.899
+If this actor is relevant, is the kind of relevancy owner for that particular actor,
+
+61
+00:05:06.899 --> 00:05:09.899
+then we're not going to trim it out.
+
+62
+00:05:09.899 --> 00:05:15.899
+Otherwise, if it's not the owner for that actor, and it is only relevant to its owner,
+
+63
+00:05:15.899 --> 00:05:17.899
+then we're going to trim this actor out because it's clearly,
+
+64
+00:05:17.899 --> 00:05:21.149
+this particular connection doesn't care about it.
+
+65
+00:05:21.149 --> 00:05:23.149
+Then we would call pre-replication.
+
+66
+00:05:23.149 --> 00:05:28.149
+So this is the function where developers essentially can additionally decide if properties,
+
+67
+00:05:28.149 --> 00:05:31.149
+you know, any kind of custom gameplay logic that we might use to say,
+
+68
+00:05:31.149 --> 00:05:34.149
+oh, in this particular situation, because of things I know about as a developer,
+
+69
+00:05:34.149 --> 00:05:36.149
+we actually don't need to pass this information over.
+
+70
+00:05:36.149 --> 00:05:38.149
+And that's where one of these other macros comes in.
+
+71
+00:05:38.149 --> 00:05:41.149
+So we talked about do rep lifetime as the standard.
+
+72
+00:05:41.149 --> 00:05:44.149
+Then we have do rep lifetime with condition.
+
+73
+00:05:44.149 --> 00:05:48.149
+One of the other macros to be aware of is this do rep lifetime active override macro.
+
+74
+00:05:48.149 --> 00:05:50.149
+And that's where you can essentially say, you know,
+
+75
+00:05:50.149 --> 00:05:57.149
+don't actually replicate this in certain scenarios that I as a gameplay developer for gameplay reasons know about.
+
+76
+00:05:57.149 --> 00:06:05.050
+And ultimately all of those things get added to this gigantic list for all of the actors that will get considered.
+
+77
+00:06:05.050 --> 00:06:09.050
+The next step is to kind of prune through that list to kind of check through,
+
+78
+00:06:09.050 --> 00:06:11.050
+okay, we've done all the kind of basic checks on these actors.
+
+79
+00:06:11.050 --> 00:06:17.689
+Now let's actually check which ones this connection would actually care about.
+
+80
+00:06:17.689 --> 00:06:21.689
+So we determine if the actor is currently dormant.
+
+81
+00:06:21.689 --> 00:06:24.689
+So again, we had initially dormant at the beginning, so, you know,
+
+82
+00:06:24.689 --> 00:06:26.689
+would never need to care about it.
+
+83
+00:06:26.689 --> 00:06:30.689
+Then we care if the actor is currently dormant.
+
+84
+00:06:30.689 --> 00:06:35.689
+If there is no actor channel currently open for this,
+
+85
+00:06:35.689 --> 00:06:39.689
+the channel being the connection between the server and this client,
+
+86
+00:06:39.689 --> 00:06:43.689
+this is a kind of relevant notion because obviously a channel doesn't need to exist
+
+87
+00:06:43.689 --> 00:06:46.689
+if something kind of becomes irrelevant and it stopped being replicated.
+
+88
+00:06:46.689 --> 00:06:51.689
+So a channel represents a current live connection between a server and a client.
+
+89
+00:06:51.689 --> 00:06:55.689
+So if there is no actor channel open yet,
+
+90
+00:06:55.689 --> 00:06:58.689
+then we need to check whether or not that might be
+
+91
+00:06:58.689 --> 00:07:01.689
+because the client hasn't actually loaded into the level yet,
+
+92
+00:07:01.689 --> 00:07:05.689
+hasn't actually loaded in the level that this particular actor resides in.
+
+93
+00:07:05.689 --> 00:07:08.689
+If the client hasn't loaded the level, then we're going to skip this actor
+
+94
+00:07:08.689 --> 00:07:10.689
+because clearly we don't need to replicate it
+
+95
+00:07:10.689 --> 00:07:15.329
+because the client doesn't really have a live notion of this actor yet.
+
+96
+00:07:15.329 --> 00:07:18.329
+Then we determine if the actor is relevant for this connection,
+
+97
+00:07:18.329 --> 00:07:21.329
+but that isn't that relevant for function.
+
+98
+00:07:21.329 --> 00:07:26.329
+Obviously, this is the function that by default is going to do that 1.5 kilometers
+
+99
+00:07:26.329 --> 00:07:30.329
+and also checking for whether or not it's hidden and has collision turned off.
+
+100
+00:07:30.329 --> 00:07:33.329
+If it's not relevant either by those default functions
+
+101
+00:07:33.329 --> 00:07:38.329
+or we've overridden that, then at this point we would then skip it.
+
+102
+00:07:38.329 --> 00:07:42.779
+And then we've established our pruned list
+
+103
+00:07:42.779 --> 00:07:49.779
+of all the things that would actually be relevant for final consideration.
+
+104
+00:07:49.779 --> 00:07:55.579
+So with this full list of relevant actors for the connection,
+
+105
+00:07:55.579 --> 00:07:58.579
+first off, we're going to sort those actors by priority.
+
+106
+00:07:58.579 --> 00:08:02.579
+And then for each sorted actor, we need to check whether or not
+
+107
+00:08:02.579 --> 00:08:07.579
+the connection hasn't loaded in the level that this actor is in yet.
+
+108
+00:08:07.579 --> 00:08:13.579
+If that actor channel is open, so if that level has become unloaded,
+
+109
+00:08:13.579 --> 00:08:17.579
+so previously this thing was relevant, but it's no longer relevant,
+
+110
+00:08:17.579 --> 00:08:19.579
+then we close that connection.
+
+111
+00:08:19.579 --> 00:08:24.579
+And then for every one second, we determine whether or not
+
+112
+00:08:24.579 --> 00:08:29.579
+that actor continues to be relevant by calling isn't it relevant for.
+
+113
+00:08:29.579 --> 00:08:33.580
+And if an actor is not relevant for more than five seconds,
+
+114
+00:08:33.580 --> 00:08:35.580
+then we would at that point close that channel.
+
+115
+00:08:35.580 --> 00:08:39.580
+So this is about cleaning up actors that have been relevant, are relevant,
+
+116
+00:08:39.580 --> 00:08:42.580
+but are kind of possibly becoming irrelevant to us.
+
+117
+00:08:42.580 --> 00:08:47.570
+And then finally, if we then establish that the actor is relevant
+
+118
+00:08:47.570 --> 00:08:52.570
+and we don't have an actor, then we kind of need to open up that actor channel.
+
+119
+00:08:52.570 --> 00:08:57.210
+And then last of all, we've talked kind of in a couple of slides ago
+
+120
+00:08:57.210 --> 00:09:01.210
+about this idea that a network connection might become saturated.
+
+121
+00:09:01.210 --> 00:09:03.210
+So we need to check for this idea of saturation.
+
+122
+00:09:03.210 --> 00:09:07.210
+That's the idea that we've already replicated kind of too many things
+
+123
+00:09:07.210 --> 00:09:11.210
+like our CPUs on our server is becoming a little bit overloaded.
+
+124
+00:09:11.210 --> 00:09:14.210
+So what we'll do at the point that we kind of detect that we're becoming,
+
+125
+00:09:14.210 --> 00:09:16.210
+our servers are becoming a little bit saturated
+
+126
+00:09:16.210 --> 00:09:19.210
+is we'll loop through the remaining actors in this list
+
+127
+00:09:19.210 --> 00:09:23.210
+and assess how long they've been relevant or irrelevant for.
+
+128
+00:09:23.210 --> 00:09:26.210
+If an actor has been relevant for less than a second,
+
+129
+00:09:26.210 --> 00:09:31.210
+then we can instantly say, oh, that actor, we know for a fact we don't need to replicate that
+
+130
+00:09:31.210 --> 00:09:33.210
+because it's less than a second.
+
+131
+00:09:33.210 --> 00:09:37.210
+It can't possibly have become, you know, too out of sync with the server.
+
+132
+00:09:37.210 --> 00:09:41.820
+And then if they've been relevant for more than one second,
+
+133
+00:09:41.820 --> 00:09:45.820
+then we call isn't it relevant for to determine if we kind of need to push it
+
+134
+00:09:45.820 --> 00:09:49.820
+to the next tick, whether we need to push it into the next tick at all
+
+135
+00:09:49.820 --> 00:09:51.820
+or whether we can kind of discard it.
+
+136
+00:09:51.820 --> 00:09:56.879
+And then lastly, if in a situation that our, it either does need to be,
+
+137
+00:09:56.879 --> 00:09:59.879
+it does need to be relevant regardless of the saturation
+
+138
+00:09:59.879 --> 00:10:02.879
+or it's just our connection isn't saturated.
+
+139
+00:10:02.879 --> 00:10:04.879
+At that point, we call you channel.
+
+140
+00:10:04.879 --> 00:10:07.879
+Like I said, the channel is this notion
+
+141
+00:10:07.879 --> 00:10:12.879
+where the server has a connection with a particular client's representation of the actor.
+
+142
+00:10:12.879 --> 00:10:14.879
+So the channel is the thing that represents that
+
+143
+00:10:14.879 --> 00:10:17.879
+and it's on the channel that we call this replicate actor.
+
+144
+00:10:17.879 --> 00:10:20.879
+And that is the function that actually does the replication.
+
+145
+00:10:20.879 --> 00:10:24.419
+So as I said, it's this you channel replicates actor.
+
+146
+00:10:24.419 --> 00:10:29.419
+This is actually what replicates the data within the actor.
+
+147
+00:10:29.419 --> 00:10:35.710
+And yes, so there's a kind of flow within that function that's kind of worth mentioning,
+
+148
+00:10:35.710 --> 00:10:40.710
+but obviously this is, thankfully, this is substantially simpler than the flow that we just went through.
+
+149
+00:10:40.710 --> 00:10:44.710
+First off, we determine whether or not this is the first update
+
+150
+00:10:44.710 --> 00:10:49.710
+since this channel was open, i.e. this is the first time this actor has become relevant
+
+151
+00:10:49.710 --> 00:10:53.710
+or it's previously been irrelevant and now it's become relevant
+
+152
+00:10:53.710 --> 00:10:56.710
+or it's just become undormant or something like that
+
+153
+00:10:56.710 --> 00:10:59.710
+or our level has just been loaded in or anything like that,
+
+154
+00:10:59.710 --> 00:11:03.840
+any number of scenarios that can lead to this being the first time.
+
+155
+00:11:03.840 --> 00:11:07.840
+And if that's the situation, serialize across all the relevant information that is needed.
+
+156
+00:11:07.840 --> 00:11:10.840
+So this is going to be kind of all our state.
+
+157
+00:11:10.840 --> 00:11:13.840
+This is where it's worth bearing in mind about the idea of client connections
+
+158
+00:11:13.840 --> 00:11:15.840
+that can come in halfway through a level.
+
+159
+00:11:15.840 --> 00:11:19.840
+With RPCs, obviously there's no concept of state with RPCs.
+
+160
+00:11:19.840 --> 00:11:21.840
+Those are not going to be preserved.
+
+161
+00:11:21.840 --> 00:11:26.840
+And this is where that relationship between RPCs versus replicated data versus, you know,
+
+162
+00:11:26.840 --> 00:11:29.840
+using on rep becomes quite an important conversation
+
+163
+00:11:29.840 --> 00:11:33.840
+because it's here that all our replicated state is going to get passed in.
+
+164
+00:11:33.840 --> 00:11:38.840
+But obviously that thing is not going to receive any RPCs that occurred before this point.
+
+165
+00:11:38.840 --> 00:11:45.509
+So that relationship between replicated data versus RPCs become quite important here.
+
+166
+00:11:45.509 --> 00:11:50.509
+And then next we determine if the connection owns the actor in question.
+
+167
+00:11:50.509 --> 00:11:55.509
+And if it's not owned and the actor's role is autonomous proxy,
+
+168
+00:11:55.509 --> 00:11:59.509
+then the role will be downgraded to simulated proxy.
+
+169
+00:11:59.509 --> 00:12:03.509
+So this might be for something that you previously owned that you no longer own,
+
+170
+00:12:03.509 --> 00:12:06.509
+i.e. you've stopped controlling this pawn
+
+171
+00:12:06.509 --> 00:12:09.509
+because you jumped into a car and then you've jumped out of the car
+
+172
+00:12:09.509 --> 00:12:14.509
+and therefore you are no longer the kind of owner for that car.
+
+173
+00:12:14.509 --> 00:12:18.509
+It's just become another entity in the world that is now being simulated by the server.
+
+174
+00:12:18.509 --> 00:12:25.059
+And then we replicate any changes, change properties within the actor.
+
+175
+00:12:25.059 --> 00:12:27.059
+After we've replicated those change properties in the actor,
+
+176
+00:12:27.059 --> 00:12:31.059
+then we go on to replicate into the actor's components.
+
+177
+00:12:31.059 --> 00:12:36.059
+And then we also account specially for any components that may have been deleted,
+
+178
+00:12:36.059 --> 00:12:40.059
+i.e. the server says, oh, from my server authoritative side of data,
+
+179
+00:12:40.059 --> 00:12:44.059
+I have deleted this component and we call this special delete command
+
+180
+00:12:44.059 --> 00:12:48.059
+to delete components locally on the client connection.

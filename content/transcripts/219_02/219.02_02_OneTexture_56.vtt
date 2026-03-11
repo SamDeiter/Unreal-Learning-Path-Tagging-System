@@ -1,0 +1,741 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:04.919
+Hi everyone, in this lesson, we're going to go and take a look at the outline for this
+
+2
+00:00:04.919 --> 00:00:06.480
+series of courses.
+
+3
+00:00:06.480 --> 00:00:09.980
+And then we're going to jump right in and take a look at the concept of a one texture
+
+4
+00:00:09.980 --> 00:00:13.339
+packing method when building worlds for games.
+
+5
+00:00:13.339 --> 00:00:15.490
+So let's get started.
+
+6
+00:00:15.490 --> 00:00:18.690
+You'll see here first, we'll talk about the one texture equation.
+
+7
+00:00:18.690 --> 00:00:23.570
+And that's basically masking of our materials using one texture to be able to do so.
+
+8
+00:00:23.570 --> 00:00:28.239
+We'll also look at Nanite and a review of how to use it.
+
+9
+00:00:28.239 --> 00:00:33.240
+We'll look at PCGs, blueprints and foliage tool, using PCGs, making blueprints and foliage
+
+10
+00:00:33.240 --> 00:00:34.240
+quicktake.
+
+11
+00:00:34.240 --> 00:00:39.399
+We'll look at level instancing impact level actors when it comes to building your world.
+
+12
+00:00:39.399 --> 00:00:43.140
+We'll then look at a quick landscape quicktake.
+
+13
+00:00:43.140 --> 00:00:46.159
+And then we'll look at world partition, an overview of it.
+
+14
+00:00:46.159 --> 00:00:50.560
+We'll look at editing tools, we'll look at basic planning concepts, and then we'll
+
+15
+00:00:50.560 --> 00:00:55.719
+look at material optimization, and finally some tips, tricks and plugins.
+
+16
+00:00:55.719 --> 00:01:00.219
+Now keep in mind, a lot of what we're talking about already exists in many of our other
+
+17
+00:01:00.219 --> 00:01:01.219
+classes.
+
+18
+00:01:01.219 --> 00:01:04.599
+And this is an overview when it comes to the concept of building your world with
+
+19
+00:01:04.599 --> 00:01:09.159
+games and using these tools holistically, as well as some of them getting a little
+
+20
+00:01:09.159 --> 00:01:13.159
+bit deeper than normal, such as when it comes to the texture equation.
+
+21
+00:01:13.159 --> 00:01:15.760
+We're going to look at that a bit deeper, and we're going to see what we can do
+
+22
+00:01:15.760 --> 00:01:17.500
+with that particular tool.
+
+23
+00:01:17.500 --> 00:01:20.379
+So let's get started.
+
+24
+00:01:20.379 --> 00:01:22.120
+So the one texture equation.
+
+25
+00:01:22.120 --> 00:01:24.560
+This is very important when it comes to your world.
+
+26
+00:01:24.560 --> 00:01:28.420
+If you want to be able to have a bit of overhead management, and make it so they don't
+
+27
+00:01:28.420 --> 00:01:31.680
+have too many textures loading in your scene.
+
+28
+00:01:31.680 --> 00:01:34.579
+You can do this with maybe one texture pack.
+
+29
+00:01:34.579 --> 00:01:38.319
+If it's a smaller game, if it's a larger game, you can have several of these textures
+
+30
+00:01:38.319 --> 00:01:40.819
+packed in your RGB channels.
+
+31
+00:01:40.819 --> 00:01:43.209
+Let me show you what I mean.
+
+32
+00:01:43.209 --> 00:01:47.590
+If you look at a regular texture, you'll see that it has its RGB channels in place.
+
+33
+00:01:47.590 --> 00:01:52.689
+But what you can do creatively is go into Photoshop, and you can paint on each one of those channels,
+
+34
+00:01:52.689 --> 00:01:56.329
+getting the color information that you need, as well as getting in here and painting on
+
+35
+00:01:56.329 --> 00:02:02.250
+such channels, such as the red channel for your roughness, as well as the alpha.
+
+36
+00:02:02.250 --> 00:02:06.900
+You can paint alpha information and isolate it within that alpha channel.
+
+37
+00:02:06.900 --> 00:02:10.979
+Let's go and jump into Unreal, and I'll show you this up close.
+
+38
+00:02:10.979 --> 00:02:15.099
+In Unreal, we're in our startup map here, and I'm going to show you a little bit of
+
+39
+00:02:15.099 --> 00:02:20.060
+how this is all broken down when it comes to using one texture in your packing of
+
+40
+00:02:20.060 --> 00:02:22.180
+your RGBs.
+
+41
+00:02:22.180 --> 00:02:27.620
+So if I go ahead and click on, say, this little object here that has a texture on it,
+
+42
+00:02:27.620 --> 00:02:31.180
+I'm going to click on the mGen material, and I'm going to double click on that.
+
+43
+00:02:31.180 --> 00:02:34.310
+Let me pull this over.
+
+44
+00:02:34.310 --> 00:02:38.870
+Now you'll see in our scene here, we have a simple texture setup.
+
+45
+00:02:38.870 --> 00:02:40.949
+I'm going to go ahead and go to that texture.
+
+46
+00:02:40.949 --> 00:02:46.500
+I'm going to double click on it, and I'm going to bring this over into our area,
+
+47
+00:02:46.500 --> 00:02:47.900
+our work area here.
+
+48
+00:02:47.900 --> 00:02:52.020
+And you can see we have red, green, and blue, as well as alpha, and all of them
+
+49
+00:02:52.020 --> 00:02:53.020
+are on at this time.
+
+50
+00:02:53.020 --> 00:02:57.860
+Now, if I wanted to, I can go in here and isolate and say, I just want to use the red
+
+51
+00:02:57.860 --> 00:02:58.860
+channel.
+
+52
+00:02:58.860 --> 00:03:03.580
+You'll see that I've painted and created a rough, tileable texture that I can use
+
+53
+00:03:03.580 --> 00:03:07.069
+and plug into my rough channels if I need to.
+
+54
+00:03:07.069 --> 00:03:11.069
+I can also turn on the green channel, and I can also turn on rough at the same time
+
+55
+00:03:11.069 --> 00:03:13.550
+if I wanted a little bit of a different color.
+
+56
+00:03:13.550 --> 00:03:16.990
+And then I can even go in there and mess with my chroma key if I wanted to.
+
+57
+00:03:16.990 --> 00:03:20.069
+I could even mess with my vibrance within that texture.
+
+58
+00:03:20.069 --> 00:03:24.090
+And when you do that, you want to make sure you make a copy of the texture if you do that,
+
+59
+00:03:24.090 --> 00:03:27.870
+or build it within the material where you can control those values, which actually works
+
+60
+00:03:27.870 --> 00:03:29.469
+out pretty well.
+
+61
+00:03:29.469 --> 00:03:34.030
+I can go to the B channel here, and if I wanted a bump map or displacement, I can
+
+62
+00:03:34.030 --> 00:03:35.030
+do so.
+
+63
+00:03:35.030 --> 00:03:40.990
+And the green channel isolated could also be a mild occlusion map if I wanted.
+
+64
+00:03:40.990 --> 00:03:41.990
+And then we also have alpha.
+
+65
+00:03:41.990 --> 00:03:45.789
+So I could turn that off, and you could see that I have alpha maps that I can use
+
+66
+00:03:45.789 --> 00:03:47.909
+and put them on simple pieces of geometry.
+
+67
+00:03:48.430 --> 00:03:52.629
+Now keep in mind when you're using simple pieces of geometry, and say you're not using
+
+68
+00:03:52.629 --> 00:03:57.990
+decals in this particular case, because using this with decals is really tricky and virtually
+
+69
+00:03:57.990 --> 00:04:01.469
+impossible unless you know exactly where things are placed.
+
+70
+00:04:01.469 --> 00:04:06.590
+But I've put these on certain small pieces of geometry that do not create a shadow.
+
+71
+00:04:06.590 --> 00:04:10.789
+You might want to make it so that that particular object or that simple piece of geometry,
+
+72
+00:04:10.789 --> 00:04:12.729
+there isn't a lot of them in your scene.
+
+73
+00:04:12.729 --> 00:04:18.129
+Because with simple pieces of geometry, and you're using Lumen, and you're using Nanite,
+
+74
+00:04:18.129 --> 00:04:22.610
+you want to make it so that you're not making Nanite kind of slow down when you
+
+75
+00:04:22.610 --> 00:04:26.250
+have simple pieces of geometry in your scene.
+
+76
+00:04:26.250 --> 00:04:30.329
+Now I'll re-emphasize that later, because what you can do is you can also make it
+
+77
+00:04:30.329 --> 00:04:35.189
+so that that piece of simple geometry is bumped up to have higher geometry, which will
+
+78
+00:04:35.189 --> 00:04:40.529
+make Nanite happier and make it so we have less hits on our calculations, because it's
+
+79
+00:04:40.529 --> 00:04:44.250
+constantly looking for the higher poly, but if you have lower poly and you have too many
+
+80
+00:04:44.250 --> 00:04:48.769
+lower poly in your scene, and you're trying to convert those to Nanite, you could run
+
+81
+00:04:48.769 --> 00:04:49.769
+into performance issues.
+
+82
+00:04:49.769 --> 00:04:51.329
+So we'll talk a little bit about that later on.
+
+83
+00:04:51.329 --> 00:04:54.790
+I'll repeat myself on that, but it's just something to keep in mind.
+
+84
+00:04:54.790 --> 00:05:00.910
+But in our case, I just have a few simple pieces of geometry with these little symbols
+
+85
+00:05:00.910 --> 00:05:06.420
+on here and warning signs, and it's pretty manageable at that point.
+
+86
+00:05:06.420 --> 00:05:09.220
+Let's go ahead and go back into Unreal real quick.
+
+87
+00:05:09.220 --> 00:05:13.740
+So what we can do is take a look at, let's say this one right here.
+
+88
+00:05:13.740 --> 00:05:17.819
+Now this particular piece of geometry, let's go and look at his material.
+
+89
+00:05:17.819 --> 00:05:21.449
+Let's go and pull that material back over here.
+
+90
+00:05:21.449 --> 00:05:27.610
+You'll notice that we have an albedo set up, a metal, normal.
+
+91
+00:05:27.610 --> 00:05:31.709
+We also have an ORMD, and you'll hear that phrase quite often.
+
+92
+00:05:31.709 --> 00:05:36.149
+That's your occlusion, your rough, your metal, and diffuse.
+
+93
+00:05:36.149 --> 00:05:40.189
+It could probably easily be O-R-M-A if you wanted to.
+
+94
+00:05:40.189 --> 00:05:44.870
+You could do whatever you want for that acronym, but I just kept it kind of standard.
+
+95
+00:05:44.870 --> 00:05:46.670
+And then we have specular.
+
+96
+00:05:46.670 --> 00:05:50.189
+So all of these are controllable within this material itself.
+
+97
+00:05:50.189 --> 00:05:53.810
+And if I wanted to, I can also change the color information.
+
+98
+00:05:53.810 --> 00:05:56.769
+So if I wanted that color to change, I could do so.
+
+99
+00:05:56.769 --> 00:05:59.810
+And that makes it pretty easy because I haven't built it into the material.
+
+100
+00:05:59.810 --> 00:06:05.589
+But let's look at the material close and look at those connections.
+
+101
+00:06:05.589 --> 00:06:06.589
+Now I kept it pretty simple.
+
+102
+00:06:06.589 --> 00:06:10.829
+It might look like a little bit of a noodle fest, but it's pretty simplistic, where you
+
+103
+00:06:10.829 --> 00:06:13.870
+can find where there's the rough connection.
+
+104
+00:06:13.870 --> 00:06:17.709
+There is the green channel going into the multiply for metallic.
+
+105
+00:06:17.709 --> 00:06:21.230
+And then we also have the bead channel, which is going up into our lerp, as well
+
+106
+00:06:21.230 --> 00:06:25.750
+as into our base blend overlay, so that we can have a bit of a color control when
+
+107
+00:06:25.750 --> 00:06:33.279
+it comes to our overall look for this guy for the albedo tint.
+
+108
+00:06:33.279 --> 00:06:35.399
+So and then down below, it's pretty straightforward.
+
+109
+00:06:35.399 --> 00:06:38.060
+We have our standard normal map in here.
+
+110
+00:06:38.060 --> 00:06:42.040
+Now this can be a simple going into a multiply.
+
+111
+00:06:42.040 --> 00:06:45.480
+I have it so that if I wanted to invert it, I have the option to do so.
+
+112
+00:06:45.480 --> 00:06:46.560
+So that's in there.
+
+113
+00:06:46.560 --> 00:06:51.000
+So you can see it's pretty standard stuff from actually accessing each one of those channels
+
+114
+00:06:51.000 --> 00:06:52.480
+that we talked about.
+
+115
+00:06:52.480 --> 00:06:57.879
+And each one of those channels, again, allows me to be able to build out and create and
+
+116
+00:06:57.879 --> 00:07:00.660
+isolate what I need to isolate.
+
+117
+00:07:00.660 --> 00:07:04.699
+You can actually see this here a bit closer when you look at the alpha two, you'll see
+
+118
+00:07:04.779 --> 00:07:08.509
+that there's an alpha present over here.
+
+119
+00:07:08.509 --> 00:07:13.629
+And I'm activating and using that alpha specifically.
+
+120
+00:07:13.629 --> 00:07:15.269
+And you can see here I have it active.
+
+121
+00:07:15.269 --> 00:07:19.470
+I'm even having the patterns in some of the materials for the alpha to make it look
+
+122
+00:07:19.470 --> 00:07:25.629
+like it's analyzing a terrain or some computer readouts are going on, and even scrolling
+
+123
+00:07:25.629 --> 00:07:26.910
+some of the text.
+
+124
+00:07:26.910 --> 00:07:29.310
+So it can actually come in pretty handy.
+
+125
+00:07:29.310 --> 00:07:32.730
+You'll notice also in my alpha, I have some textures.
+
+126
+00:07:32.730 --> 00:07:36.600
+Now this one has a normal map on it's going to turn that off for a second.
+
+127
+00:07:36.600 --> 00:07:40.560
+I just want to show you that you have the option to do so if you want to double click
+
+128
+00:07:40.560 --> 00:07:42.199
+on that again.
+
+129
+00:07:42.199 --> 00:07:43.199
+There we go.
+
+130
+00:07:43.199 --> 00:07:47.189
+Let me pull this over.
+
+131
+00:07:47.189 --> 00:07:51.149
+You'll notice having normal maps, so let's go and disconnect that normal map for a second.
+
+132
+00:07:51.149 --> 00:08:00.060
+Hit the Alt key and left click and I'll hit apply.
+
+133
+00:08:00.060 --> 00:08:03.399
+And I think I have that pretty much active for the keyboard, but in this particular
+
+134
+00:08:03.399 --> 00:08:05.300
+case, we don't need it.
+
+135
+00:08:05.300 --> 00:08:11.379
+So down below, you'll see as we play with these, you can go in here and let's pull
+
+136
+00:08:11.379 --> 00:08:16.540
+this over for a second here and I can choose to animate any one of these.
+
+137
+00:08:16.540 --> 00:08:22.379
+And I even have textured ones in here and banding that we can use when it comes
+
+138
+00:08:22.379 --> 00:08:25.860
+to like adding a holographic projection.
+
+139
+00:08:25.860 --> 00:08:30.139
+Now this one, I just literally use the original it came with, but I gave the option
+
+140
+00:08:30.139 --> 00:08:35.740
+if someone wanted to, they could go in here and grab some of these texture items and put
+
+141
+00:08:35.740 --> 00:08:41.340
+a nice degrading gradient in here and make it so that it has a holographic projection
+
+142
+00:08:41.340 --> 00:08:44.220
+to it, which is actually pretty cool.
+
+143
+00:08:44.220 --> 00:08:46.620
+So there's a lot of packing and adjusting.
+
+144
+00:08:46.620 --> 00:08:50.139
+You just have to figure out what you need and how you need it.
+
+145
+00:08:50.139 --> 00:08:55.960
+You can see I have all sorts of options and you'll see this panel work here is actually
+
+146
+00:08:55.960 --> 00:08:57.740
+down here.
+
+147
+00:08:57.740 --> 00:09:03.019
+You can just be as creative as you need to just making sure that you set things up ahead
+
+148
+00:09:03.019 --> 00:09:04.019
+of time.
+
+149
+00:09:04.019 --> 00:09:08.460
+And it really does when using this method, it really does take a lot of thought ahead
+
+150
+00:09:08.460 --> 00:09:09.460
+of time.
+
+151
+00:09:09.460 --> 00:09:14.259
+You have to think ahead of what you need, what you want, what resolution you need.
+
+152
+00:09:14.259 --> 00:09:17.940
+And you can see some of these are a little bit lower on the low side when it comes to
+
+153
+00:09:17.940 --> 00:09:25.639
+resolution and um, you can determine in your little a sheet that you make for it, what
+
+154
+00:09:25.639 --> 00:09:31.240
+is going to require larger, um, resolution based on what you are, how you're building
+
+155
+00:09:31.240 --> 00:09:32.500
+your world.
+
+156
+00:09:32.500 --> 00:09:36.379
+So it's really nice to be able to create it and let me actually look and show you
+
+157
+00:09:36.379 --> 00:09:41.059
+a demonstration of it in place in a whole little environment here.
+
+158
+00:09:41.059 --> 00:09:45.029
+So let's go ahead and control, let's move this out of the way for a second.
+
+159
+00:09:45.029 --> 00:09:50.529
+Let's go and control our exposure and you can see my trim sheet.
+
+160
+00:09:50.529 --> 00:09:55.149
+I have a lot of options in this particular case, let's go and bump up the exposure
+
+161
+00:09:55.149 --> 00:09:56.149
+just a little bit.
+
+162
+00:09:56.149 --> 00:09:57.149
+We're cheating.
+
+163
+00:09:57.149 --> 00:10:01.529
+I'm not putting the actual lights in here right now, but you can see we have a nice
+
+164
+00:10:01.529 --> 00:10:03.210
+little environment.
+
+165
+00:10:03.210 --> 00:10:05.950
+We have tubing that all has the same texture.
+
+166
+00:10:05.950 --> 00:10:07.529
+These all have the same texture.
+
+167
+00:10:07.529 --> 00:10:12.409
+All of these primarily have the same texture, just maybe a few added pieces such as this
+
+168
+00:10:12.409 --> 00:10:19.679
+screen here that I added and this little scope as well as a little bit of a, um,
+
+169
+00:10:19.679 --> 00:10:23.279
+occlusion parallax occlusion on some of these buttons.
+
+170
+00:10:23.279 --> 00:10:27.399
+But overall they're pretty much using the same texture through and through.
+
+171
+00:10:27.460 --> 00:10:33.899
+I'm a bit of a Mobius fan, I work with him at my twenties, so, um, and also a Jack Kirby
+
+172
+00:10:33.899 --> 00:10:39.580
+fan, huge fan of his work when he was around and even after my aging myself a little
+
+173
+00:10:39.580 --> 00:10:40.580
+bit maybe.
+
+174
+00:10:40.580 --> 00:10:45.460
+But you can see some really cool effects and looks and visuals that you can get from
+
+175
+00:10:45.460 --> 00:10:50.259
+this all from this one texture trim sheet that I created.
+
+176
+00:10:50.259 --> 00:10:55.720
+And we can go ahead and pair things together and no one really is the wiser.
+
+177
+00:10:55.720 --> 00:10:57.419
+It's actually pretty great.
+
+178
+00:10:57.419 --> 00:11:04.419
+And you'll see some of the pipes here too, just have a simple rough, um, uh, texture in
+
+179
+00:11:04.419 --> 00:11:10.549
+here using that rough channel that I already painted and putting it into the pipes.
+
+180
+00:11:10.549 --> 00:11:11.970
+Awesome.
+
+181
+00:11:11.970 --> 00:11:13.889
+So that's it for this course.
+
+182
+00:11:13.889 --> 00:11:18.490
+In the next course, we're going to go and break down a few things such as using Nanite
+
+183
+00:11:18.490 --> 00:11:22.769
+and a little brief peek into blueprints, which we'll cover later on.
+
+184
+00:11:22.769 --> 00:11:23.769
+Awesome.
+
+185
+00:11:23.769 --> 00:11:24.129
+Thanks again.

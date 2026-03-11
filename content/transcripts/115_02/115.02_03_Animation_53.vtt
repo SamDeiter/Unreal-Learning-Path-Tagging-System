@@ -1,0 +1,1125 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:02.839
+Now that we've got a workable character,
+
+2
+00:00:02.839 --> 00:00:04.759
+we should probably deal with animation.
+
+3
+00:00:04.759 --> 00:00:06.839
+We're all familiar with the concept of a skeleton
+
+4
+00:00:06.839 --> 00:00:07.879
+in a games engine.
+
+5
+00:00:07.879 --> 00:00:10.599
+It's a series of bones in a hierarchical framework
+
+6
+00:00:10.599 --> 00:00:13.529
+with joints and restraints applied.
+
+7
+00:00:13.529 --> 00:00:15.589
+However, in Unreal, the skeleton asset
+
+8
+00:00:15.589 --> 00:00:18.190
+is also responsible for associating animation data,
+
+9
+00:00:18.190 --> 00:00:20.510
+not just providing the skeletal hierarchy
+
+10
+00:00:20.510 --> 00:00:22.719
+within the skeletal mesh.
+
+11
+00:00:22.719 --> 00:00:24.199
+A skeleton asset can be shared
+
+12
+00:00:24.199 --> 00:00:26.000
+between other skeletal meshes
+
+13
+00:00:26.000 --> 00:00:27.039
+and these skeletal meshes
+
+14
+00:00:27.039 --> 00:00:30.030
+don't necessarily have to match exactly.
+
+15
+00:00:30.030 --> 00:00:31.510
+Sharing of a skeleton asset
+
+16
+00:00:31.510 --> 00:00:34.030
+provides a way to share animation between characters
+
+17
+00:00:34.030 --> 00:00:37.570
+or even entire animation blueprints.
+
+18
+00:00:37.570 --> 00:00:40.679
+The skeleton asset is responsible for the following.
+
+19
+00:00:40.679 --> 00:00:42.159
+Animation retargeting,
+
+20
+00:00:42.159 --> 00:00:44.079
+and this allows animations to be reused
+
+21
+00:00:44.079 --> 00:00:46.759
+between characters that use the same skeleton asset
+
+22
+00:00:46.759 --> 00:00:49.250
+but may have different proportions.
+
+23
+00:00:49.250 --> 00:00:52.070
+It's responsible for creating and storing sockets
+
+24
+00:00:52.070 --> 00:00:54.070
+and sockets allow developers to place a point
+
+25
+00:00:54.070 --> 00:00:56.390
+within the skeleton that is offset from a bone.
+
+26
+00:00:56.390 --> 00:00:57.670
+And this is specifically useful
+
+27
+00:00:57.670 --> 00:01:01.479
+for attachment of weapons to a character, for example.
+
+28
+00:01:01.479 --> 00:01:04.040
+Next, it can store animation notifies
+
+29
+00:01:04.040 --> 00:01:07.459
+and these are gonna be discussed in depth in just a second.
+
+30
+00:01:07.459 --> 00:01:09.459
+They can store animation curves
+
+31
+00:01:09.459 --> 00:01:10.540
+and these curves can be used
+
+32
+00:01:10.540 --> 00:01:13.829
+to drive material parameters, for instance.
+
+33
+00:01:13.829 --> 00:01:16.349
+Lastly, they can store animation slot names
+
+34
+00:01:16.349 --> 00:01:18.269
+and these are useful as these can be used
+
+35
+00:01:18.269 --> 00:01:22.180
+to play animation montages for characters.
+
+36
+00:01:22.180 --> 00:01:25.549
+A skeletal mesh is built up from two parts.
+
+37
+00:01:25.549 --> 00:01:27.349
+Firstly, we have the set of polygons
+
+38
+00:01:27.349 --> 00:01:29.590
+which make up the surface of the mesh.
+
+39
+00:01:29.590 --> 00:01:31.790
+And secondly, we have the hierarchical skeleton
+
+40
+00:01:31.790 --> 00:01:34.670
+that will be animated to deform those polygons.
+
+41
+00:01:34.670 --> 00:01:36.269
+A skeletal mesh stores a reference
+
+42
+00:01:36.269 --> 00:01:39.030
+to the skeleton asset that it was created from.
+
+43
+00:01:39.030 --> 00:01:41.629
+Skeletal meshes also hold levels of detailed data
+
+44
+00:01:41.629 --> 00:01:43.750
+that can be used when considering performance costs
+
+45
+00:01:43.750 --> 00:01:46.090
+of skeletal meshes in your game.
+
+46
+00:01:46.090 --> 00:01:47.349
+When it comes to gameplay,
+
+47
+00:01:47.349 --> 00:01:48.750
+this is the mesh type that we can use
+
+48
+00:01:48.750 --> 00:01:50.670
+for our player characters or indeed anything
+
+49
+00:01:50.670 --> 00:01:53.469
+that need to animate based off of a skeleton.
+
+50
+00:01:53.469 --> 00:01:55.430
+A character will hold a skeletal mesh component
+
+51
+00:01:55.430 --> 00:01:56.590
+which will in turn hold reference
+
+52
+00:01:56.590 --> 00:01:58.670
+to a skeletal mesh itself.
+
+53
+00:01:58.670 --> 00:02:01.549
+Skeletal meshes can only play animation sequences
+
+54
+00:02:01.549 --> 00:02:03.870
+which are tied to its skeleton asset.
+
+55
+00:02:03.870 --> 00:02:04.689
+This is important to know
+
+56
+00:02:04.689 --> 00:02:06.870
+when considering playing animation sequences
+
+57
+00:02:06.870 --> 00:02:08.620
+on the character.
+
+58
+00:02:08.620 --> 00:02:10.740
+Animation sequences are the building block
+
+59
+00:02:10.740 --> 00:02:13.340
+for creating an animation blueprint.
+
+60
+00:02:13.340 --> 00:02:16.199
+An animation sequence is a single animation asset
+
+61
+00:02:16.199 --> 00:02:19.129
+that can be played on a skeletal mesh.
+
+62
+00:02:19.129 --> 00:02:20.689
+They contain all the key frames
+
+63
+00:02:20.689 --> 00:02:22.810
+from our animation authoring package of choice
+
+64
+00:02:22.810 --> 00:02:25.050
+that specify transform information.
+
+65
+00:02:25.050 --> 00:02:27.270
+That being your location, rotation and scale
+
+66
+00:02:27.270 --> 00:02:29.009
+at a specific point in time
+
+67
+00:02:29.009 --> 00:02:31.430
+and are linked to a specific skeleton.
+
+68
+00:02:31.430 --> 00:02:33.030
+We can't just stick an animation sequence
+
+69
+00:02:33.030 --> 00:02:36.960
+on top of any old skeleton, they need to be compatible.
+
+70
+00:02:36.960 --> 00:02:38.439
+We can think of an animation sequence
+
+71
+00:02:38.439 --> 00:02:40.879
+as your looping walk animation asset
+
+72
+00:02:40.879 --> 00:02:43.689
+or your idly kicking the ground asset.
+
+73
+00:02:43.689 --> 00:02:46.430
+Whilst animation sequences can be played through code,
+
+74
+00:02:46.430 --> 00:02:48.229
+it's much more typical for them to be used
+
+75
+00:02:48.229 --> 00:02:50.689
+as building blocks when authoring animation instances
+
+76
+00:02:50.689 --> 00:02:53.919
+which we'll touch on in just a second.
+
+77
+00:02:53.919 --> 00:02:56.620
+They also allow developers to apply anim notifies
+
+78
+00:02:56.620 --> 00:03:00.509
+which again we will touch on in just a second.
+
+79
+00:03:00.509 --> 00:03:03.990
+Animation sequences also support animation curve data
+
+80
+00:03:03.990 --> 00:03:05.550
+which provide a way to change the value
+
+81
+00:03:05.550 --> 00:03:07.789
+of a material parameter or a morph target
+
+82
+00:03:07.789 --> 00:03:10.990
+while the animation in question is playing back.
+
+83
+00:03:10.990 --> 00:03:14.030
+Lastly, animation sequences can generate root motion.
+
+84
+00:03:14.030 --> 00:03:15.909
+However, in regards to root motion,
+
+85
+00:03:15.909 --> 00:03:17.610
+you need to consider whether you need this
+
+86
+00:03:17.610 --> 00:03:19.669
+to be replicated in a networked game.
+
+87
+00:03:19.669 --> 00:03:21.990
+If this is the case, then animation montages
+
+88
+00:03:21.990 --> 00:03:24.409
+is what you'll need to use instead.
+
+89
+00:03:24.409 --> 00:03:28.479
+And that leads us nicely onto montages.
+
+90
+00:03:28.479 --> 00:03:30.639
+What if we were to have multiple animation sequences
+
+91
+00:03:30.680 --> 00:03:32.400
+that we wanted to play together?
+
+92
+00:03:32.400 --> 00:03:35.240
+This is where the anim montage comes in.
+
+93
+00:03:35.240 --> 00:03:38.159
+Anim montages provide a way to control an animation asset
+
+94
+00:03:38.159 --> 00:03:40.759
+directly through blueprint or C++.
+
+95
+00:03:40.759 --> 00:03:42.919
+More importantly, an animation montage can be used
+
+96
+00:03:42.919 --> 00:03:45.240
+to combine several different animation sequences
+
+97
+00:03:45.240 --> 00:03:48.030
+into a single animation asset.
+
+98
+00:03:48.030 --> 00:03:50.349
+Furthermore, animation montages can be broken
+
+99
+00:03:50.349 --> 00:03:52.110
+into sections which can be played
+
+100
+00:03:52.110 --> 00:03:55.699
+either individually or in combination.
+
+101
+00:03:55.699 --> 00:03:58.099
+These sections can also be made to loop continuously
+
+102
+00:03:58.099 --> 00:04:00.759
+until told otherwise.
+
+103
+00:04:00.759 --> 00:04:02.719
+Events can be fired within a montage
+
+104
+00:04:02.719 --> 00:04:05.240
+that can perform tasks such as playing a sound key
+
+105
+00:04:05.240 --> 00:04:07.949
+or changing the ammunition count,
+
+106
+00:04:07.949 --> 00:04:12.080
+as well as replicating tasks in a networked game.
+
+107
+00:04:12.080 --> 00:04:14.740
+Complex animation sequences can be assigned to slots
+
+108
+00:04:14.740 --> 00:04:16.560
+within an animation montage,
+
+109
+00:04:16.560 --> 00:04:18.040
+the playback of which can be controlled
+
+110
+00:04:18.040 --> 00:04:20.720
+through blueprint or C++.
+
+111
+00:04:20.720 --> 00:04:23.319
+Each section created has a name and a location
+
+112
+00:04:23.319 --> 00:04:25.279
+in the slot, and we can use this name
+
+113
+00:04:25.279 --> 00:04:27.959
+to either jump directly to a section of the montage
+
+114
+00:04:27.959 --> 00:04:29.079
+or queue it up to be played
+
+115
+00:04:29.079 --> 00:04:32.040
+after the current section has been completed.
+
+116
+00:04:32.079 --> 00:04:33.879
+To put the above information into context,
+
+117
+00:04:33.879 --> 00:04:35.819
+if we were to take a reload animation,
+
+118
+00:04:35.819 --> 00:04:39.319
+we can break the reload montage into the following.
+
+119
+00:04:39.319 --> 00:04:42.399
+Firstly, a start animation sequence,
+
+120
+00:04:42.399 --> 00:04:45.480
+a reload loop animation sequence right in the middle,
+
+121
+00:04:45.480 --> 00:04:48.480
+and a finished reloading animation.
+
+122
+00:04:48.480 --> 00:04:50.319
+We can combine these animation sequences
+
+123
+00:04:50.319 --> 00:04:54.110
+and assign them to play within sections of the montage.
+
+124
+00:04:54.110 --> 00:04:57.689
+Our gameplay code can trigger the start reload section,
+
+125
+00:04:57.689 --> 00:04:59.629
+cause us to stay within the looping section
+
+126
+00:04:59.629 --> 00:05:01.629
+as we fill the magazine back up,
+
+127
+00:05:01.629 --> 00:05:02.829
+and then gracefully transition
+
+128
+00:05:02.829 --> 00:05:07.300
+into the finished animation section when the clip is full.
+
+129
+00:05:07.300 --> 00:05:09.439
+So we mentioned anim notifies earlier,
+
+130
+00:05:09.439 --> 00:05:12.089
+so let's take a look at those.
+
+131
+00:05:12.089 --> 00:05:14.850
+An anim notify is an event fired from the timeline
+
+132
+00:05:14.850 --> 00:05:16.389
+of an animation sequence,
+
+133
+00:05:16.389 --> 00:05:17.930
+letting us drive some kind of gameplay
+
+134
+00:05:17.930 --> 00:05:21.000
+based directly off of an animation.
+
+135
+00:05:21.000 --> 00:05:23.699
+Let's take a walk cycle as an example.
+
+136
+00:05:23.699 --> 00:05:24.899
+We can see in this example
+
+137
+00:05:24.899 --> 00:05:27.339
+that the notifies can be of a particular type.
+
+138
+00:05:27.339 --> 00:05:28.779
+A great example here would be the use
+
+139
+00:05:28.779 --> 00:05:31.980
+of the play sound notify to play the sound of a foot fall
+
+140
+00:05:31.980 --> 00:05:34.889
+as each foot makes contact with the ground.
+
+141
+00:05:34.889 --> 00:05:36.649
+We could then expand off of this quite easily
+
+142
+00:05:36.649 --> 00:05:38.689
+and add additional notifies to draw decals
+
+143
+00:05:38.689 --> 00:05:41.569
+under each foot to draw a footprint.
+
+144
+00:05:41.569 --> 00:05:43.370
+As can be seen in this example here,
+
+145
+00:05:43.370 --> 00:05:44.970
+the Unreal Engine offers out of the box
+
+146
+00:05:44.970 --> 00:05:46.430
+animation notifies that can be used
+
+147
+00:05:46.430 --> 00:05:48.089
+to achieve many things.
+
+148
+00:05:48.089 --> 00:05:50.129
+We can also create our own animation notifies
+
+149
+00:05:50.129 --> 00:05:53.079
+both within native and blueprint.
+
+150
+00:05:53.079 --> 00:05:54.399
+We can create anim notifies
+
+151
+00:05:54.399 --> 00:05:56.879
+by simply basing our new anim notify class
+
+152
+00:05:56.879 --> 00:05:59.769
+from the anim notify state class.
+
+153
+00:05:59.769 --> 00:06:01.870
+Anim notifies give developers some key functions
+
+154
+00:06:01.870 --> 00:06:03.389
+that we can override to achieve our goals,
+
+155
+00:06:03.910 --> 00:06:06.759
+and these are receive notify tick,
+
+156
+00:06:06.759 --> 00:06:08.759
+receive notify end,
+
+157
+00:06:08.759 --> 00:06:13.269
+receive notify begin and get notify name.
+
+158
+00:06:13.269 --> 00:06:15.629
+It isn't necessary to implement every function.
+
+159
+00:06:15.629 --> 00:06:17.230
+Your use case might just be that you need
+
+160
+00:06:17.230 --> 00:06:20.189
+to perform something when an anim notify begins,
+
+161
+00:06:20.189 --> 00:06:21.269
+or you might have a use case
+
+162
+00:06:21.269 --> 00:06:22.850
+for doing something over a period of time,
+
+163
+00:06:22.850 --> 00:06:24.230
+in which case you'd most likely use
+
+164
+00:06:24.230 --> 00:06:27.230
+the notify tick function.
+
+165
+00:06:27.230 --> 00:06:29.230
+Above are just examples of the functions
+
+166
+00:06:29.230 --> 00:06:30.310
+that we've just discussed.
+
+167
+00:06:30.310 --> 00:06:31.329
+And at a bare minimum,
+
+168
+00:06:31.329 --> 00:06:33.230
+you should implement the notify tick
+
+169
+00:06:33.269 --> 00:06:37.120
+and both begin notify and begin end functions.
+
+170
+00:06:37.120 --> 00:06:38.199
+It's also important to note
+
+171
+00:06:38.199 --> 00:06:40.000
+that the incoming prompts of these functions
+
+172
+00:06:40.000 --> 00:06:42.079
+offer up are the mesh component,
+
+173
+00:06:42.079 --> 00:06:43.720
+this being the skeletal mesh component
+
+174
+00:06:43.720 --> 00:06:46.740
+of the animation that we're triggering the notify on,
+
+175
+00:06:46.740 --> 00:06:47.720
+the animation,
+
+176
+00:06:47.720 --> 00:06:49.600
+this is the specific animation sequence
+
+177
+00:06:49.600 --> 00:06:52.220
+or montage that is triggering this notify,
+
+178
+00:06:52.220 --> 00:06:53.519
+and the frame delta time,
+
+179
+00:06:53.519 --> 00:06:54.540
+and this will give you the time
+
+180
+00:06:54.540 --> 00:06:57.610
+since the last animation update.
+
+181
+00:06:57.610 --> 00:07:00.870
+The animation instance is a C++ implementation
+
+182
+00:07:00.870 --> 00:07:03.370
+from which animation blueprints are based.
+
+183
+00:07:03.370 --> 00:07:04.629
+They're more commonly referred to
+
+184
+00:07:04.629 --> 00:07:07.660
+as just animation blueprints.
+
+185
+00:07:07.660 --> 00:07:09.620
+Animation instances are visual scripts
+
+186
+00:07:09.620 --> 00:07:12.100
+that are used to author complex animation systems.
+
+187
+00:07:12.100 --> 00:07:15.879
+So consider your players animations.
+
+188
+00:07:15.879 --> 00:07:19.500
+As an example, let's take an FPS character.
+
+189
+00:07:19.500 --> 00:07:21.259
+We'd want to control not only how they animate
+
+190
+00:07:21.259 --> 00:07:22.579
+when moving in 3D,
+
+191
+00:07:22.579 --> 00:07:24.060
+that being their forwards locomotion,
+
+192
+00:07:24.060 --> 00:07:25.980
+but also how they walk backwards, strafe,
+
+193
+00:07:25.980 --> 00:07:28.759
+crouch, sprint, jump, and aimed down sights.
+
+194
+00:07:28.759 --> 00:07:29.660
+We'd also want to control
+
+195
+00:07:29.660 --> 00:07:32.339
+how these animations blend into one another.
+
+196
+00:07:32.339 --> 00:07:35.889
+This is the job of the animation instance.
+
+197
+00:07:35.889 --> 00:07:38.649
+The animation instance consists of two separate systems,
+
+198
+00:07:38.649 --> 00:07:41.610
+that being the event graph and the anim graph.
+
+199
+00:07:41.610 --> 00:07:43.209
+These separate systems work together
+
+200
+00:07:43.209 --> 00:07:46.660
+to create the correct pose each frame.
+
+201
+00:07:46.660 --> 00:07:48.899
+The event graph inside the animation instance
+
+202
+00:07:48.899 --> 00:07:51.259
+is the same as any other graph inside Unreal.
+
+203
+00:07:51.259 --> 00:07:53.959
+It's a visually scripted environment to drive gameplay
+
+204
+00:07:53.959 --> 00:07:57.709
+through a context specific set of nodes.
+
+205
+00:07:57.709 --> 00:07:58.550
+In this case,
+
+206
+00:07:58.550 --> 00:08:00.550
+we have access to specialized animation nodes,
+
+207
+00:08:00.550 --> 00:08:02.910
+such as blueprint initialize animation
+
+208
+00:08:02.910 --> 00:08:05.939
+and blueprint update animation.
+
+209
+00:08:05.980 --> 00:08:08.060
+Initialize essentially being the begin play
+
+210
+00:08:08.060 --> 00:08:10.959
+of our animation with the update being its tick,
+
+211
+00:08:10.959 --> 00:08:14.509
+with the delta sign being passed in accordingly.
+
+212
+00:08:14.509 --> 00:08:16.470
+The event graph is where we receive data
+
+213
+00:08:16.470 --> 00:08:18.029
+that will inform the anim graph
+
+214
+00:08:18.029 --> 00:08:20.569
+as to what pose to produce.
+
+215
+00:08:20.569 --> 00:08:24.250
+For instance, we may have set an isCrouchingBool to true.
+
+216
+00:08:24.250 --> 00:08:26.490
+We'll want the event graph to receive that change
+
+217
+00:08:26.490 --> 00:08:28.509
+and the anim graph to reflect that change
+
+218
+00:08:28.509 --> 00:08:30.910
+in its subsequent animations.
+
+219
+00:08:30.910 --> 00:08:33.409
+It's also important to note that in the examples above,
+
+220
+00:08:33.409 --> 00:08:34.950
+both of these blueprint events are fired
+
+221
+00:08:34.990 --> 00:08:38.210
+prior to the animation graph having been updated.
+
+222
+00:08:38.210 --> 00:08:40.049
+If you find that you need more of an update
+
+223
+00:08:40.049 --> 00:08:41.789
+post the animation graph update,
+
+224
+00:08:41.789 --> 00:08:43.830
+then consider using the blueprint post
+
+225
+00:08:43.830 --> 00:08:47.279
+evaluate function instead.
+
+226
+00:08:47.279 --> 00:08:51.600
+The anim graph is where the actual pose is evaluated.
+
+227
+00:08:51.600 --> 00:08:53.779
+We can see here that we've got two potential poses
+
+228
+00:08:53.779 --> 00:08:55.360
+coming in on the left.
+
+229
+00:08:55.360 --> 00:08:59.529
+One being that of running and the other being crouching.
+
+230
+00:08:59.529 --> 00:09:01.769
+The anim graph is taking an alpha between the two
+
+231
+00:09:01.769 --> 00:09:05.279
+and producing a single result with the blend node.
+
+232
+00:09:05.279 --> 00:09:07.799
+After that blend node, we have an aim offset applied
+
+233
+00:09:07.799 --> 00:09:09.559
+because after all in an FPS game,
+
+234
+00:09:09.559 --> 00:09:11.440
+the player hasn't suddenly stopped aiming
+
+235
+00:09:11.440 --> 00:09:13.639
+now that they're crouching.
+
+236
+00:09:13.639 --> 00:09:15.360
+The anim graph takes a base pose
+
+237
+00:09:15.360 --> 00:09:16.960
+and modifies parts of it to reflect
+
+238
+00:09:16.960 --> 00:09:19.350
+any additional gameplay data.
+
+239
+00:09:19.350 --> 00:09:22.570
+The anim graph comes with threading out of the box.
+
+240
+00:09:22.570 --> 00:09:24.649
+There's obviously a lot of stuff going on here.
+
+241
+00:09:24.649 --> 00:09:27.529
+So think of all the transformations going on under the hood.
+
+242
+00:09:27.529 --> 00:09:28.870
+Threading makes a lot of sense
+
+243
+00:09:28.870 --> 00:09:32.149
+in regards to transform manipulation.
+
+244
+00:09:32.149 --> 00:09:34.330
+We can enable the multi-threading for anim graphs
+
+245
+00:09:34.330 --> 00:09:38.049
+by enabling the use multi-threaded animation update setting
+
+246
+00:09:38.049 --> 00:09:41.470
+in the animation instances class defaults.
+
+247
+00:09:41.470 --> 00:09:42.649
+Of course, with any threading,
+
+248
+00:09:42.649 --> 00:09:44.590
+we need to take into account its safety.
+
+249
+00:09:44.590 --> 00:09:47.470
+And there's a few things that are broadly safe to thread.
+
+250
+00:09:47.470 --> 00:09:50.190
+Those things would be the anim graph nodes themselves,
+
+251
+00:09:50.190 --> 00:09:52.940
+such as the ones we can see on this slide.
+
+252
+00:09:52.940 --> 00:09:55.580
+We've also got directly accessing any member variables
+
+253
+00:09:55.580 --> 00:09:57.899
+such as the is crouching member.
+
+254
+00:09:57.899 --> 00:10:00.019
+And then finally, any blueprint pure functions
+
+255
+00:10:00.019 --> 00:10:02.440
+as their cons, they're not going to modify the state
+
+256
+00:10:02.440 --> 00:10:05.100
+and are thus safe to access on other threads.
+
+257
+00:10:06.559 --> 00:10:10.080
+We also have the ability to enable fast path optimizations,
+
+258
+00:10:10.080 --> 00:10:12.509
+which are enabled in the project settings.
+
+259
+00:10:12.509 --> 00:10:14.110
+This essentially enables the anim graph
+
+260
+00:10:14.110 --> 00:10:16.110
+to access internal variables directly
+
+261
+00:10:16.110 --> 00:10:18.350
+without having to copy them from the native
+
+262
+00:10:18.350 --> 00:10:20.809
+into the blueprint virtual machine.
+
+263
+00:10:20.809 --> 00:10:22.570
+Of course, this does come with caveats.
+
+264
+00:10:22.570 --> 00:10:24.450
+If we're intending to modify that value,
+
+265
+00:10:24.450 --> 00:10:26.610
+we'll lose out on that optimization.
+
+266
+00:10:26.610 --> 00:10:27.850
+And as such, it's useful to have
+
+267
+00:10:27.850 --> 00:10:29.649
+the native animation instance class
+
+268
+00:10:29.649 --> 00:10:31.230
+make any changes that you would want
+
+269
+00:10:31.230 --> 00:10:35.370
+before having it bubble up into the animation graphs VM.
+
+270
+00:10:35.409 --> 00:10:37.370
+State machines and animation layers
+
+271
+00:10:37.370 --> 00:10:38.450
+can be used to organize
+
+272
+00:10:38.450 --> 00:10:41.250
+and break up animation functionality.
+
+273
+00:10:41.250 --> 00:10:43.570
+We can see here that we've got separate nodes for idle
+
+274
+00:10:43.570 --> 00:10:47.120
+and for running with a transition link between the two.
+
+275
+00:10:47.120 --> 00:10:49.039
+This lets us set up a spoke node layout
+
+276
+00:10:49.039 --> 00:10:52.360
+for each state in isolation from one another.
+
+277
+00:10:52.360 --> 00:10:54.700
+These links can have conditions applied to each other,
+
+278
+00:10:54.700 --> 00:10:57.500
+preventing certain states from blending into each other.
+
+279
+00:10:57.500 --> 00:10:58.679
+So in the above example,
+
+280
+00:10:58.679 --> 00:11:01.279
+the run state can blend into the jump start state,
+
+281
+00:11:01.279 --> 00:11:04.159
+but jump start can never blend back into run.

@@ -1,0 +1,229 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.070
+So it's time to look at how we make our AI agents traverse the world as they perform their behaviors.
+
+2
+00:00:06.650 --> 00:00:12.949
+Unreal comes with a system that supports land-based AI movement straight out of the box, that being the navigation mesh.
+
+3
+00:00:14.189 --> 00:00:19.510
+As we mentioned in our gameplay talk, Pawn is the base possessable class that the Unreal Engine offers,
+
+4
+00:00:19.510 --> 00:00:21.510
+but it's also not assumed to be humanoid.
+
+5
+00:00:22.100 --> 00:00:26.839
+Whereas character is the first derived version of Pawn that makes an assumption of the vertically aligned
+
+6
+00:00:27.219 --> 00:00:32.079
+humanoid entity, and it's primarily these entities that make use of the navigation system.
+
+7
+00:00:32.460 --> 00:00:36.020
+The navigation mesh is generated in the editor,
+
+8
+00:00:36.020 --> 00:00:42.700
+and it queries the environment on generation to understand where AI can traverse and which areas are non-navigable.
+
+9
+00:00:43.060 --> 00:00:48.649
+It can be both generated ahead of time, but also change at runtime to support dynamic levels.
+
+10
+00:00:50.829 --> 00:00:55.429
+Navigation modifier volumes can be used to apply navigation costs or blocks.
+
+11
+00:00:56.109 --> 00:01:00.950
+These make areas of the navigation mesh cheaper or more expensive to traverse.
+
+12
+00:01:02.630 --> 00:01:07.750
+Physical objects placed in the world can control whether or not they affect this navigation mesh or not.
+
+13
+00:01:09.049 --> 00:01:12.069
+Different navigation data can be built for different agents.
+
+14
+00:01:12.189 --> 00:01:15.409
+Say we have an agent that's particularly big or another one that is particularly small.
+
+15
+00:01:15.629 --> 00:01:22.310
+Their navigation requirements, of course, will be different from each other, and as such we can build different navigation data to represent their needs.
+
+16
+00:01:23.519 --> 00:01:30.719
+Navigation links can be formed between navigation mesh edges to allow AI to traverse spaces where navigation meshes may not exist,
+
+17
+00:01:30.799 --> 00:01:34.200
+for instance, jumping from one mesh onto another one.
+
+18
+00:01:35.340 --> 00:01:41.379
+As we mentioned, the navigation mesh is generated within the editor, though it does not come built in with any level.
+
+19
+00:01:41.859 --> 00:01:47.640
+In order to generate a navigation mesh, we must drop a navigation mesh bounds volume into the level,
+
+20
+00:01:48.250 --> 00:01:51.409
+which can be found in the place actors window under volumes.
+
+21
+00:01:51.810 --> 00:01:56.689
+We can then resize this volume to cover the area that we wish to have a navigation mesh generated for.
+
+22
+00:01:58.390 --> 00:02:03.230
+In order to know if your navigation mesh has been generated correctly, we can hit the P key in the editor.
+
+23
+00:02:04.180 --> 00:02:09.180
+If a navigation mesh has been successfully generated for this level, we'll be able to visualize it in the viewport.
+
+24
+00:02:10.300 --> 00:02:15.819
+In the picture to the right, we can see some of the controls that we have available to us on our navigation mesh once it has been generated.
+
+25
+00:02:16.740 --> 00:02:21.020
+For example, we can control the max slope angle that this navigation mesh will support.
+
+26
+00:02:21.780 --> 00:02:27.500
+Another key parameter to control with navigation meshes is whether the runtime generation is static or dynamic.
+
+27
+00:02:28.990 --> 00:02:32.310
+Static, of course, will be cheaper than its dynamic counterpart,
+
+28
+00:02:33.590 --> 00:02:37.430
+where it's important to understand what your project needs and that they may vary along the way.
+
+29
+00:02:38.069 --> 00:02:42.430
+If we've got a completely static scene, then a static generation nav mesh will be perfectly fine.
+
+30
+00:02:42.750 --> 00:02:48.310
+But if your game has got an ever-changing scene, such as trees falling over or objects being built at runtime,
+
+31
+00:02:48.590 --> 00:02:50.990
+then a dynamic navigation mesh will be required.
+
+32
+00:02:52.069 --> 00:02:58.270
+Lastly, it's really important to understand that physical objects in the world individually control whether they affect the nav mesh or not.
+
+33
+00:02:58.270 --> 00:03:01.500
+So ensuring that these are correctly set up is really important.
+
+34
+00:03:02.060 --> 00:03:04.900
+In the picture above, we can see a generated navigation mesh.
+
+35
+00:03:05.419 --> 00:03:09.620
+As well as that, we can also see that the tables and chairs have affected the generation of that mesh,
+
+36
+00:03:09.939 --> 00:03:15.530
+so that AI can reason that they cannot traverse through the table and chairs, they need to walk around them.
+
+37
+00:03:16.129 --> 00:03:21.169
+The navigation mesh system in Unreal supports different navigation meshes for different AI agents,
+
+38
+00:03:21.490 --> 00:03:29.060
+and it's important to understand that the navigation mesh system in Unreal supports different navigation meshes for different AI agents.
+
+39
+00:03:29.060 --> 00:03:38.699
+As we mentioned earlier, as can be seen in the image on the slide, we can define a humanoid profile that supports AI agents of a certain radius and height.
+
+40
+00:03:39.580 --> 00:03:42.780
+We can also determine other aspects of the navigation mesh generation.
+
+41
+00:03:43.460 --> 00:03:47.300
+This allows us to support different agents with appropriate navigation meshes for them to use.
+
+42
+00:03:48.099 --> 00:03:55.020
+A larger AI agent may not be able to navigate through narrow spaces in the terrain, so therefore our navigation mesh should not allow them to do so.
+
+43
+00:03:57.189 --> 00:04:04.789
+As we mentioned a few slides back, we can also make use of navigation link proxies and navigation modifiers to affect how our AI can traverse across the environment.
+
+44
+00:04:05.960 --> 00:04:10.879
+Navigation link proxies, as the name suggests, allow us to link between gaps in the mesh.
+
+45
+00:04:11.560 --> 00:04:15.520
+An AI agent can utilize these links to temporarily leave the navigation mesh.
+
+46
+00:04:16.240 --> 00:04:22.360
+In the example above, the AI agent can use a navigation link to jump off the ledge to get to another piece of the mesh.
+
+47
+00:04:24.350 --> 00:04:30.310
+As well as linking navigation mesh edges together, we can utilize navigation modifiers to affect navigation in several ways.
+
+48
+00:04:31.300 --> 00:04:33.540
+With navigation modifiers, we can do some of the following.
+
+49
+00:04:34.459 --> 00:04:37.339
+We can block navigation, and this is fairly self-explanatory.
+
+50
+00:04:37.939 --> 00:04:43.019
+This will create a void of navigation in the desired area, meaning that the AI will be forced to move around it.
+
+51
+00:04:44.399 --> 00:04:46.800
+We can also affect the cost of the navigation.
+
+52
+00:04:48.529 --> 00:04:52.730
+This essentially means that we can outline areas of our nav mesh that are high or low cost.
+
+53
+00:04:53.329 --> 00:05:00.649
+A high-cost area will be used as a fallback or last resort, whereas a low-cost area will be used as a preferred or priority path.
+
+54
+00:05:02.139 --> 00:05:08.339
+As an example, we can see in the image above that we can define an area by the wall that is not a desirable path for the AI agent to choose.
+
+55
+00:05:08.620 --> 00:05:13.459
+However, if we must, it will traverse through that area to its goal location if no other route can be found.
+
+56
+00:05:14.449 --> 00:05:22.129
+We can leverage this to create immersive experiences for the players, where the AI cleverly chooses other ways of getting to the player that avoid a choke point in the image.
+
+57
+00:05:22.129 --> 00:05:28.459
+This can be easily married up with the concept of pathing heuristics in the more classical A-Star implementations of pathfinding.

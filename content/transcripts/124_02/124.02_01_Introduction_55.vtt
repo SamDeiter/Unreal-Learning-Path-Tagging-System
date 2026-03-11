@@ -1,0 +1,301 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:03.459
+Hello and welcome to this course on
+
+2
+00:00:03.459 --> 00:00:07.099
+AI Systems Introduction to Navigation.
+
+3
+00:00:07.099 --> 00:00:11.980
+We'll be doing this course in Unreal Engine version 5.5.
+
+4
+00:00:11.980 --> 00:00:14.859
+However, most of this
+
+5
+00:00:14.859 --> 00:00:18.300
+hasn't changed for quite a few versions of the engine,
+
+6
+00:00:18.300 --> 00:00:20.780
+so you should be okay working in
+
+7
+00:00:20.780 --> 00:00:26.109
+previous engine versions I think all the way through five.
+
+8
+00:00:26.109 --> 00:00:27.670
+Now in this, we're going to go over
+
+9
+00:00:27.670 --> 00:00:29.710
+a number of different things.
+
+10
+00:00:29.710 --> 00:00:32.649
+We're going to go over how to
+
+11
+00:00:32.649 --> 00:00:36.310
+set up navigation and something called a NavMesh.
+
+12
+00:00:36.310 --> 00:00:40.750
+We're going to look at methods of customizing it so that we
+
+13
+00:00:40.750 --> 00:00:42.990
+can make the behavior
+
+14
+00:00:42.990 --> 00:00:46.890
+respond to the environment that we've created.
+
+15
+00:00:46.890 --> 00:00:51.070
+We're also going to have a go at making it dynamic
+
+16
+00:00:51.070 --> 00:00:52.710
+so that it changes at runtime
+
+17
+00:00:52.710 --> 00:00:54.890
+without having too much of a cost.
+
+18
+00:00:54.890 --> 00:00:56.890
+Finally, we're going to look at
+
+19
+00:00:56.890 --> 00:01:01.950
+different methods of getting the AI to avoid each other,
+
+20
+00:01:01.950 --> 00:01:04.900
+so they don't all get clumped up.
+
+21
+00:01:04.900 --> 00:01:08.340
+The first question, what is a NavMesh?
+
+22
+00:01:08.340 --> 00:01:12.750
+Well, a NavMesh or more common full name of
+
+23
+00:01:12.750 --> 00:01:14.790
+a navigation mesh is
+
+24
+00:01:14.790 --> 00:01:19.769
+a simplified map of the walkable areas used in game.
+
+25
+00:01:19.769 --> 00:01:24.390
+What it is, is it is a map which is generated and
+
+26
+00:01:24.390 --> 00:01:28.590
+created and modifiers are added to it,
+
+27
+00:01:28.590 --> 00:01:31.390
+and it is laid over the world.
+
+28
+00:01:31.390 --> 00:01:35.129
+Its primary function is just so that we can
+
+29
+00:01:35.129 --> 00:01:40.189
+figure out a path of how to get from one place to another.
+
+30
+00:01:40.189 --> 00:01:44.579
+It shows us what the walkable areas are.
+
+31
+00:01:44.579 --> 00:01:46.500
+This is a standard method,
+
+32
+00:01:46.500 --> 00:01:49.140
+it pre-calculates pathfinding,
+
+33
+00:01:49.140 --> 00:01:53.319
+allowing the AI to navigate complex environments efficiently.
+
+34
+00:01:53.319 --> 00:01:58.040
+All that means is it will break down all of the environment into
+
+35
+00:01:58.040 --> 00:02:01.680
+blocks and calculate the distance
+
+36
+00:02:01.680 --> 00:02:04.439
+that will be required to move across them.
+
+37
+00:02:04.439 --> 00:02:08.039
+Therefore, rather than actually having
+
+38
+00:02:08.039 --> 00:02:11.719
+to analyze the environment every single time that it goes in,
+
+39
+00:02:11.719 --> 00:02:15.919
+we just need to run an algorithm against
+
+40
+00:02:15.919 --> 00:02:20.599
+the table generated blocks and it'll tell us
+
+41
+00:02:20.599 --> 00:02:25.800
+the most efficient way to move through the environment.
+
+42
+00:02:25.800 --> 00:02:28.400
+Now, it's not entirely realistic.
+
+43
+00:02:28.400 --> 00:02:31.360
+Take for example, we had a maze.
+
+44
+00:02:31.360 --> 00:02:34.280
+Using this method, the AI is going to know
+
+45
+00:02:34.280 --> 00:02:39.240
+the exact best most efficient path to get through that maze,
+
+46
+00:02:39.240 --> 00:02:44.759
+to navigate it, where a natural AI would probably get lost
+
+47
+00:02:44.759 --> 00:02:50.759
+and would end up having to explore to find its way through it.
+
+48
+00:02:50.759 --> 00:02:53.000
+But a NavMesh is always going to give us
+
+49
+00:02:53.000 --> 00:02:55.599
+the most efficient best path.
+
+50
+00:02:55.599 --> 00:03:00.560
+Now, if you want to see some working examples
+
+51
+00:03:00.560 --> 00:03:04.740
+of a NavMesh in AI movement setup,
+
+52
+00:03:04.740 --> 00:03:07.639
+I can recommend two different projects to you.
+
+53
+00:03:07.639 --> 00:03:11.199
+The first one is the Lyra example game.
+
+54
+00:03:11.199 --> 00:03:17.520
+This is a fully implemented AAA game,
+
+55
+00:03:17.520 --> 00:03:21.879
+set up so that you can explore and see how everything is created.
+
+56
+00:03:21.879 --> 00:03:24.039
+In this, we do rely on the AI,
+
+57
+00:03:24.039 --> 00:03:27.599
+so you can see the AI set up there.
+
+58
+00:03:27.599 --> 00:03:32.240
+Secondly, we have something called the Matrix City demo.
+
+59
+00:03:32.240 --> 00:03:38.240
+Now, this is a massive open-world city,
+
+60
+00:03:38.240 --> 00:03:40.319
+which has hundreds and hundreds of
+
+61
+00:03:40.319 --> 00:03:44.840
+different AIs wandering around it with logic built-in.
+
+62
+00:03:44.919 --> 00:03:53.639
+Now, this also uses our mass crowd system to do avoidance.
+
+63
+00:03:53.639 --> 00:03:58.319
+So this is a good example of that setup.
+
+64
+00:03:58.319 --> 00:04:00.560
+For this project, when we get into it,
+
+65
+00:04:00.560 --> 00:04:04.000
+we do not require you to download a project for this.
+
+66
+00:04:04.000 --> 00:04:08.159
+We are going to be using the top-down template,
+
+67
+00:04:08.159 --> 00:04:11.919
+which can be found under the game section.
+
+68
+00:04:12.080 --> 00:04:17.040
+We'll be using that to do all of our examples.
+
+69
+00:04:17.040 --> 00:04:20.680
+So I recommend that you follow along with this.
+
+70
+00:04:20.680 --> 00:04:24.079
+I recommend that you open up that top-down template,
+
+71
+00:04:24.079 --> 00:04:26.079
+create a new project for that,
+
+72
+00:04:26.079 --> 00:04:28.199
+and we'll be able to follow
+
+73
+00:04:28.199 --> 00:04:30.480
+along with everything that we're doing.
+
+74
+00:04:30.480 --> 00:04:32.360
+Thank you very much.
+
+75
+00:04:32.360 --> 00:04:36.800
+In the next videos, we will jump into the browser.

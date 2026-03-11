@@ -1,0 +1,865 @@
+WEBVTT
+
+1
+00:00:01.330 --> 00:00:03.529
+Now let's look at how to send
+
+2
+00:00:03.529 --> 00:00:07.250
+a message from sender to receiver together.
+
+3
+00:00:07.250 --> 00:00:13.279
+Now let's go to our sender blueprint actor.
+
+4
+00:00:13.279 --> 00:00:16.039
+The first thing for the sender
+
+5
+00:00:16.039 --> 00:00:19.039
+is that we will read our launch parameter,
+
+6
+00:00:19.039 --> 00:00:24.640
+as we just saw previously in our packaged build,
+
+7
+00:00:24.640 --> 00:00:28.000
+we use different batch files to set things like if it's
+
+8
+00:00:28.000 --> 00:00:32.159
+a sender or if it's a receiver,
+
+9
+00:00:33.340 --> 00:00:39.039
+and we will set things to react to different ports,
+
+10
+00:00:39.039 --> 00:00:43.460
+the sender IP and receiver IP, etc.
+
+11
+00:00:43.460 --> 00:00:48.460
+Let's click into the read launch parameter blueprint function.
+
+12
+00:00:48.460 --> 00:00:52.780
+I put it into a blueprint function library so we can easily reuse
+
+13
+00:00:52.780 --> 00:00:58.579
+that across different blueprint class.
+
+14
+00:00:58.579 --> 00:01:00.100
+So we see that I'm using
+
+15
+00:01:00.100 --> 00:01:02.659
+the same blueprint function in the sender one,
+
+16
+00:01:02.659 --> 00:01:06.140
+and also again in the receiver one.
+
+17
+00:01:06.140 --> 00:01:09.569
+So let's click into the event here,
+
+18
+00:01:09.569 --> 00:01:12.090
+the read launch parameter event.
+
+19
+00:01:12.090 --> 00:01:16.010
+So first thing, I'm just getting the command line and I'm
+
+20
+00:01:16.010 --> 00:01:20.689
+parsing the command line and check out the launch parameters.
+
+21
+00:01:20.689 --> 00:01:23.209
+This one is a really useful map,
+
+22
+00:01:23.209 --> 00:01:30.810
+is already classified into different types of launch parameter.
+
+23
+00:01:30.810 --> 00:01:37.569
+First, I will find if there is an OSC receiver launch parameter.
+
+24
+00:01:37.569 --> 00:01:41.730
+If it is, I want to set this one to be a receiver.
+
+25
+00:01:41.730 --> 00:01:46.730
+If it's a sender, it will return a Boolean to set it is
+
+26
+00:01:46.730 --> 00:01:52.209
+a sender and then I can set my receiver IP,
+
+27
+00:01:52.209 --> 00:01:55.370
+and I will also set my sender IP and this
+
+28
+00:01:55.370 --> 00:01:58.689
+is only useful when we want to do two-way communication.
+
+29
+00:01:58.730 --> 00:02:04.689
+The receiver can also send message back to the sender.
+
+30
+00:02:04.689 --> 00:02:10.169
+Finally, we will set the port we want to use for this communication.
+
+31
+00:02:10.169 --> 00:02:13.689
+Finally, we will check if we want it to be
+
+32
+00:02:13.689 --> 00:02:20.240
+a two-way communication or just a one direction communication.
+
+33
+00:02:20.240 --> 00:02:25.719
+So let's just go down the path.
+
+34
+00:02:25.719 --> 00:02:27.680
+So for the sender,
+
+35
+00:02:27.680 --> 00:02:30.719
+we already have a client targeting
+
+36
+00:02:30.719 --> 00:02:35.199
+the correct IP import and I save it as an OSC client.
+
+37
+00:02:35.199 --> 00:02:37.879
+Let's move down to see
+
+38
+00:02:37.879 --> 00:02:42.280
+some example and then we will build our own together.
+
+39
+00:02:42.280 --> 00:02:46.229
+So let's take this event for example.
+
+40
+00:02:46.229 --> 00:02:51.469
+This is for a sender to send out an integer message.
+
+41
+00:02:51.469 --> 00:02:57.069
+So first thing, we're going to create an empty OSC message.
+
+42
+00:02:57.069 --> 00:02:59.909
+We want to convert a string to an address,
+
+43
+00:02:59.909 --> 00:03:02.789
+add to it, we want to add an integer,
+
+44
+00:03:02.789 --> 00:03:04.669
+we want to send it.
+
+45
+00:03:04.669 --> 00:03:07.389
+I just have a print string so I can
+
+46
+00:03:07.389 --> 00:03:11.189
+also see from my side what is being sent.
+
+47
+00:03:11.189 --> 00:03:15.870
+So I can compare with the result just for a debug purpose.
+
+48
+00:03:15.870 --> 00:03:22.580
+Finally, I will clear the OSC messages as a good practice.
+
+49
+00:03:22.580 --> 00:03:28.419
+Make sure we have nothing overriding the later coming message.
+
+50
+00:03:28.419 --> 00:03:32.979
+So now let's build this one together and instead of
+
+51
+00:03:32.979 --> 00:03:37.139
+an integer let's say we want to send out a string value.
+
+52
+00:03:37.139 --> 00:03:42.699
+So first, I'll right-click and do Make OSC message,
+
+53
+00:03:42.699 --> 00:03:52.009
+and I want to set my address,
+
+54
+00:03:52.009 --> 00:03:55.020
+set OSC message address,
+
+55
+00:03:55.020 --> 00:03:58.830
+and from the address here,
+
+56
+00:03:58.830 --> 00:04:03.669
+I want to use it from a string.
+
+57
+00:04:03.710 --> 00:04:14.789
+Not this one. So I want something that converts a string to OSC address.
+
+58
+00:04:14.789 --> 00:04:25.430
+So the string I will use slash test slash string.
+
+59
+00:04:25.430 --> 00:04:31.759
+Okay. So now I have an OSC address,
+
+60
+00:04:31.759 --> 00:04:33.920
+I'll drag it into the address.
+
+61
+00:04:33.920 --> 00:04:36.810
+Now from the output here,
+
+62
+00:04:36.810 --> 00:04:41.920
+I'm going to add a string value.
+
+63
+00:04:41.920 --> 00:04:47.439
+I'll add string to OSC message.
+
+64
+00:04:47.720 --> 00:04:53.259
+I will do make literal string,
+
+65
+00:04:53.259 --> 00:05:01.589
+and actually just for fun,
+
+66
+00:05:01.589 --> 00:05:04.069
+I will add two string to it and we
+
+67
+00:05:04.069 --> 00:05:08.910
+can specify it when we receive them.
+
+68
+00:05:08.910 --> 00:05:11.269
+We're actually now on the second one,
+
+69
+00:05:11.269 --> 00:05:15.110
+I will add a integer to it,
+
+70
+00:05:15.110 --> 00:05:20.889
+and I want to send it to my client.
+
+71
+00:05:20.889 --> 00:05:24.449
+So I will do OSC client,
+
+72
+00:05:24.449 --> 00:05:29.379
+I will do send OSC message,
+
+73
+00:05:29.379 --> 00:05:31.939
+and the message I want to send is from this one,
+
+74
+00:05:31.939 --> 00:05:35.459
+the output of the last node.
+
+75
+00:05:35.459 --> 00:05:43.740
+Finally, I want to clear OSC message.
+
+76
+00:05:44.420 --> 00:05:49.740
+So we can actually just send it as is,
+
+77
+00:05:49.740 --> 00:05:52.899
+but because I want to continue to say we have
+
+78
+00:05:52.899 --> 00:05:55.699
+like a 100 different event I want to send and is
+
+79
+00:05:55.699 --> 00:06:00.459
+all the same structure of a string and then a integer.
+
+80
+00:06:00.459 --> 00:06:03.620
+So I'm just going to make it into
+
+81
+00:06:03.620 --> 00:06:07.420
+a custom event by right-click and type in custom,
+
+82
+00:06:07.420 --> 00:06:15.329
+and I want to name it send string integer.
+
+83
+00:06:15.329 --> 00:06:22.360
+I will connect the execute node,
+
+84
+00:06:22.360 --> 00:06:24.639
+and the first line,
+
+85
+00:06:24.639 --> 00:06:26.439
+I'll just make sure the value,
+
+86
+00:06:26.439 --> 00:06:28.879
+I'll say it's a string value,
+
+87
+00:06:28.879 --> 00:06:42.740
+and drag the integer here also into the input value.
+
+88
+00:06:42.779 --> 00:06:47.529
+I'll say this is a integer value.
+
+89
+00:06:47.529 --> 00:06:52.060
+So that's it. So we can then fire
+
+90
+00:06:52.060 --> 00:06:54.259
+this event somewhere to send
+
+91
+00:06:54.259 --> 00:06:59.259
+a OSC message with an address test slash string,
+
+92
+00:06:59.259 --> 00:07:03.009
+that will contain some kind of string value
+
+93
+00:07:03.009 --> 00:07:08.069
+and some kind of integer value here.
+
+94
+00:07:09.610 --> 00:07:14.970
+Now, that's actually it.
+
+95
+00:07:14.970 --> 00:07:17.410
+Now on the receiver side,
+
+96
+00:07:17.410 --> 00:07:21.259
+let's go to receiver.
+
+97
+00:07:21.259 --> 00:07:24.060
+On the receiver side, we already have
+
+98
+00:07:24.060 --> 00:07:27.420
+some example of receiving messages,
+
+99
+00:07:27.420 --> 00:07:32.980
+and so we see that first thing,
+
+100
+00:07:32.980 --> 00:07:36.259
+it would check if it is a receiver from
+
+101
+00:07:36.259 --> 00:07:38.459
+the same read launch parameter
+
+102
+00:07:38.459 --> 00:07:41.060
+blueprint function library.
+
+103
+00:07:41.060 --> 00:07:43.939
+First, if it is a receiver,
+
+104
+00:07:43.939 --> 00:07:47.759
+it will create an OSC server to start listening,
+
+105
+00:07:47.759 --> 00:07:53.139
+and the port we're also going to specify here,
+
+106
+00:07:53.139 --> 00:07:56.540
+it will save it as an OSC server,
+
+107
+00:07:56.540 --> 00:07:58.629
+and we see that it is
+
+108
+00:07:58.629 --> 00:08:02.430
+bind event to when there is a bundle received,
+
+109
+00:08:02.430 --> 00:08:06.149
+and when there is an OSC message received.
+
+110
+00:08:06.149 --> 00:08:08.110
+So let's click into the when
+
+111
+00:08:08.110 --> 00:08:11.069
+OSC message receives bundle event,
+
+112
+00:08:11.069 --> 00:08:13.769
+which will be this one.
+
+113
+00:08:13.769 --> 00:08:17.769
+Now, I'm saving the message I received as
+
+114
+00:08:17.769 --> 00:08:22.810
+a variable here and then I will read its address,
+
+115
+00:08:22.810 --> 00:08:27.180
+and I will convert the address to a string just so that we
+
+116
+00:08:27.180 --> 00:08:29.699
+can then do a switch on string to
+
+117
+00:08:29.699 --> 00:08:35.019
+decide different reaction I want it to happen.
+
+118
+00:08:35.019 --> 00:08:37.019
+So we already have set scale,
+
+119
+00:08:37.019 --> 00:08:39.419
+set color, and set hidden.
+
+120
+00:08:39.419 --> 00:08:43.309
+I am just going to add one more,
+
+121
+00:08:43.309 --> 00:08:47.789
+and we know that the address we set on
+
+122
+00:08:47.789 --> 00:08:52.149
+the sender is called slash test slash string.
+
+123
+00:08:52.149 --> 00:08:55.710
+I'm just going to copy and go to the receiver one,
+
+124
+00:08:55.710 --> 00:09:01.659
+and do this test string compile.
+
+125
+00:09:01.659 --> 00:09:05.700
+Now, we have one more execute node here.
+
+126
+00:09:05.700 --> 00:09:10.620
+So now, I just want to make a very simple print string
+
+127
+00:09:10.620 --> 00:09:12.620
+for a star to just make sure we have
+
+128
+00:09:12.620 --> 00:09:15.220
+the communication set up correctly.
+
+129
+00:09:15.220 --> 00:09:19.399
+I will do like this.
+
+130
+00:09:19.399 --> 00:09:23.600
+I will do get OSC message.
+
+131
+00:09:23.799 --> 00:09:28.289
+So we know that the first one we have is a string.
+
+132
+00:09:28.289 --> 00:09:30.970
+I will do string at index,
+
+133
+00:09:30.970 --> 00:09:37.250
+and the message we want to get is this one.
+
+134
+00:09:37.250 --> 00:09:42.409
+So the first one must be a string,
+
+135
+00:09:42.409 --> 00:09:44.250
+and then that's true.
+
+136
+00:09:44.250 --> 00:09:47.850
+Another one, we also know the second one is an integer.
+
+137
+00:09:47.850 --> 00:09:52.370
+So we drag it out and I'll say get OSC.
+
+138
+00:09:52.370 --> 00:09:55.809
+Actually, let's just do a right-click.
+
+139
+00:09:55.809 --> 00:10:01.889
+Get OSC message, integer at index,
+
+140
+00:10:01.889 --> 00:10:05.490
+and let's drag the message in again.
+
+141
+00:10:06.700 --> 00:10:11.740
+We know that the integer is the second one in order.
+
+142
+00:10:11.740 --> 00:10:15.820
+So the index here must be one.
+
+143
+00:10:15.820 --> 00:10:19.100
+Now, I want to do a print string,
+
+144
+00:10:19.100 --> 00:10:26.980
+and I want to append,
+
+145
+00:10:26.980 --> 00:10:39.080
+I'll say I received a string equals to this string,
+
+146
+00:10:39.080 --> 00:10:52.220
+and also the integer equals to this integer.
+
+147
+00:10:52.220 --> 00:10:55.659
+Just so we can see it easily,
+
+148
+00:10:55.659 --> 00:11:00.379
+I will expand it and I'll say I want it to be a 10 second,
+
+149
+00:11:00.379 --> 00:11:03.580
+and it's a yellow text.
+
+150
+00:11:03.580 --> 00:11:06.700
+So it's a little bit special.
+
+151
+00:11:07.259 --> 00:11:10.809
+So that's it. That's an example of how
+
+152
+00:11:10.809 --> 00:11:19.210
+to send and receive a string plus an integer.
+
+153
+00:11:19.210 --> 00:11:23.129
+That's actually super flexible.
+
+154
+00:11:23.129 --> 00:11:25.090
+You can imagine that we can use
+
+155
+00:11:25.090 --> 00:11:28.649
+the same structure we can continue to add on things,
+
+156
+00:11:28.649 --> 00:11:31.570
+like we can add not only integer,
+
+157
+00:11:31.570 --> 00:11:34.970
+we can continue to add on floats, booleans,
+
+158
+00:11:34.970 --> 00:11:39.409
+everything can be in one single OSC message,
+
+159
+00:11:39.409 --> 00:11:41.970
+and we have so many ways to utilize them.
+
+160
+00:11:41.970 --> 00:11:45.289
+Even more so if we know we will continue to use
+
+161
+00:11:45.289 --> 00:11:50.809
+a string plus an integer format over and over,
+
+162
+00:11:50.809 --> 00:11:57.370
+we can also bring this address into the input.
+
+163
+00:11:57.370 --> 00:11:59.049
+So we can even send
+
+164
+00:11:59.049 --> 00:12:03.929
+different address using this same custom event.
+
+165
+00:12:03.929 --> 00:12:11.779
+So now to quickly test if we are able to send and receive,
+
+166
+00:12:11.779 --> 00:12:16.700
+I will go ahead and actually disconnect,
+
+167
+00:12:16.700 --> 00:12:21.289
+or go past this part and just make sure it will create
+
+168
+00:12:21.289 --> 00:12:26.820
+a server and in the center side to do the same thing.
+
+169
+00:12:26.820 --> 00:12:34.179
+I will bypass this part to make sure it have the client,
+
+170
+00:12:34.179 --> 00:12:35.860
+and for the port here,
+
+171
+00:12:35.860 --> 00:12:39.460
+both are using number 0, I'll just continue to.
+
+172
+00:12:39.460 --> 00:12:44.700
+So now if I hit play in the editor,
+
+173
+00:12:44.700 --> 00:12:51.629
+the sender is going to create a client
+
+174
+00:12:51.669 --> 00:12:54.710
+targeting itself because the receiver is blank,
+
+175
+00:12:54.710 --> 00:12:57.509
+and this receiver is also going to
+
+176
+00:12:57.509 --> 00:13:02.309
+create a server that is listening to port 0.
+
+177
+00:13:02.309 --> 00:13:05.980
+So now if we hit play,
+
+178
+00:13:05.980 --> 00:13:10.009
+oops, I forgot one thing.
+
+179
+00:13:10.009 --> 00:13:13.730
+So that's open level blueprint,
+
+180
+00:13:13.730 --> 00:13:17.169
+and we have to make sure we are firing
+
+181
+00:13:17.169 --> 00:13:21.379
+this send string and integer event here.
+
+182
+00:13:21.419 --> 00:13:25.860
+Let's go to level blueprint,
+
+183
+00:13:25.860 --> 00:13:31.539
+and I want to drag my BP or C sender.
+
+184
+00:13:31.539 --> 00:13:33.629
+Let's say whenever I hit
+
+185
+00:13:33.629 --> 00:13:51.580
+K or actually X,
+
+186
+00:13:51.580 --> 00:13:56.019
+which is also a good power C. Whenever I press C,
+
+187
+00:13:56.019 --> 00:14:01.019
+I want to set a send string and integer event,
+
+188
+00:14:01.019 --> 00:14:08.879
+and I want the string to be I pressed C,
+
+189
+00:14:08.879 --> 00:14:10.879
+and the integer will be,
+
+190
+00:14:10.879 --> 00:14:16.659
+I'll say 100, and I'll add one more time,
+
+191
+00:14:16.659 --> 00:14:20.700
+and this time I want this to be not C,
+
+192
+00:14:20.700 --> 00:14:29.980
+but V, I'll say I pressed V,
+
+193
+00:14:29.980 --> 00:14:31.779
+and the integer will be,
+
+194
+00:14:31.779 --> 00:14:33.259
+I think 999.
+
+195
+00:14:33.860 --> 00:14:38.289
+Now if I hit play,
+
+196
+00:14:38.289 --> 00:14:46.309
+and if I press C, nothing happens.
+
+197
+00:14:46.309 --> 00:14:53.490
+So just know that the OSC port must be something not zero.
+
+198
+00:14:53.490 --> 00:14:55.970
+I'm going to just test it again.
+
+199
+00:14:55.970 --> 00:15:02.500
+I'm running, and I'm pressing C.
+
+200
+00:15:02.500 --> 00:15:04.980
+So that is working.
+
+201
+00:15:04.980 --> 00:15:11.500
+I press V, and it receives a different integer.
+
+202
+00:15:11.500 --> 00:15:16.259
+We can use the same way to check other OSC communication.
+
+203
+00:15:16.259 --> 00:15:18.580
+So now if I want to see,
+
+204
+00:15:18.580 --> 00:15:20.379
+I'm changing color,
+
+205
+00:15:20.379 --> 00:15:22.820
+and it said I received address,
+
+206
+00:15:22.820 --> 00:15:25.059
+set color, that is correct.
+
+207
+00:15:25.059 --> 00:15:26.820
+You can receive address,
+
+208
+00:15:26.820 --> 00:15:29.940
+set hidden, that is also correct.
+
+209
+00:15:29.940 --> 00:15:33.139
+You can also change scale.
+
+210
+00:15:35.139 --> 00:15:42.120
+Okay, read property, let's see.
+
+211
+00:15:42.120 --> 00:15:48.320
+Oh, yeah, that's because we bypassed some of the events here.
+
+212
+00:15:48.320 --> 00:15:50.470
+Now we test it in-game,
+
+213
+00:15:50.470 --> 00:15:54.029
+and the one-way communication is working.
+
+214
+00:15:54.029 --> 00:15:58.029
+Let's move on to the next part.
+
+215
+00:15:58.029 --> 00:15:59.230
+In the next part,
+
+216
+00:15:59.230 --> 00:16:04.509
+we're going to do enhance our exercise of setting a bundle.

@@ -1,0 +1,497 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:10.470
+In this part of mesh optimizations, I want to talk about level of details, as these are very important for both your static and your skeletal meshes.
+
+2
+00:00:10.470 --> 00:00:15.330
+Now before I jump into what they are, I'd like to make one note about Nanite.
+
+3
+00:00:15.330 --> 00:00:21.829
+Nanite is going to do a lot of this work for you automatically, so if you're working on a project that utilizes Nanite meshes,
+
+4
+00:00:21.829 --> 00:00:30.089
+you can still adjust the level of details, but you do not need to do as much work as you do with just standard static or skeletal meshes.
+
+5
+00:00:30.089 --> 00:00:36.850
+Now, with that out of the way, what is a level of detail? Well, on the screen in front of us, we have this little cow taken from the content examples,
+
+6
+00:00:36.850 --> 00:00:46.049
+and we have it broken up into four different meshes. Now at the top of this image above each mesh is the number of triangles,
+
+7
+00:00:46.049 --> 00:00:51.890
+and at the bottom is the level of detail, or the LOD level that is associated with it.
+
+8
+00:00:51.890 --> 00:00:57.689
+And what level of details do is they give us the ability to show the exact same mesh,
+
+9
+00:00:57.950 --> 00:01:02.950
+but as that mesh gets further and further away from the camera, the number of triangles is reduced,
+
+10
+00:01:02.950 --> 00:01:11.950
+and just as long as we keep that silhouette intact and reduce those triangles, to the user, this is going to be an almost unnoticeable difference.
+
+11
+00:01:11.950 --> 00:01:20.030
+Now, level of detail meshes can be created for both static and skeletal meshes using a similar interface.
+
+12
+00:01:20.030 --> 00:01:25.950
+How this works is we define the level or number of level of details that we wish,
+
+13
+00:01:25.950 --> 00:01:30.950
+and then for each level, we can adjust the criteria for reduction.
+
+14
+00:01:30.950 --> 00:01:38.450
+We will have the ability to choose between triangles and vertices, and then a percentage that we want to keep for that particular level.
+
+15
+00:01:38.450 --> 00:01:42.450
+Let's take a look at this inside of the editor with this static mesh.
+
+16
+00:01:42.450 --> 00:01:49.299
+Now, right now, this static mesh has three levels of detail applied to it, so that's one, that's two,
+
+17
+00:01:49.299 --> 00:01:54.799
+and then if I go all the way back out here, we've got to go kind of far, but that is our third level of detail.
+
+18
+00:01:54.799 --> 00:02:02.299
+So you can see here, again, if we were this close right here with the default, let's take a look at this actually by grabbing it and hitting CTRL-E,
+
+19
+00:02:02.299 --> 00:02:04.799
+and then I'm going to bring this on the screen for us.
+
+20
+00:02:04.799 --> 00:02:13.800
+So we can see here, by default, this thing's 57,000 triangles, so when we are this far away, it just doesn't make sense to draw that many triangles.
+
+21
+00:02:13.800 --> 00:02:21.300
+We can barely see it, we just kind of see the outline of it, so that's why we want to reduce that when it's in the distance.
+
+22
+00:02:21.300 --> 00:02:28.800
+So to do this, what we're going to do is we're going to come up here to our LOD picker, and we can come down and select the individual LOD levels,
+
+23
+00:02:28.800 --> 00:02:38.800
+and I got this LOD picker by first coming here to our LOD settings, and number of LODs we can increase or decrease this number to give us more or less LODs.
+
+24
+00:02:38.800 --> 00:02:52.300
+And once we set that, let's go ahead and come over here to LOD, let's say LOD 3, and look at this, this is at 1146, and it does look a little decimally,
+
+25
+00:02:52.300 --> 00:02:55.800
+so let's set the triangle amount back to say 5 and hit apply changes.
+
+26
+00:02:55.800 --> 00:03:03.300
+We are going to need to give this a second to process because it's got to go and redo all of the level of detail levels that it has, recalculate everything.
+
+27
+00:03:05.439 --> 00:03:12.439
+Alright, so that is a little bit better, look at that, it's only 2800, so it's about 500 more than it was before, so that's looking pretty good.
+
+28
+00:03:12.439 --> 00:03:18.439
+Let's take a look at this in our project now, so we're going to close this, and then we just need to kind of zoom out a little bit more,
+
+29
+00:03:18.439 --> 00:03:23.439
+and there we go, that is looking a little bit better, and I think that's a pretty good result right there,
+
+30
+00:03:23.439 --> 00:03:28.439
+I mean 2000 for something that's going to be that far away is not too bad, so as we zoom in on that,
+
+31
+00:03:28.439 --> 00:03:35.439
+you can see here the level of detail is going to automatically change for us as the camera moves around the scene.
+
+32
+00:03:35.439 --> 00:03:42.030
+Now, skeletal meshes can also have this applied, but when working with skeletal meshes,
+
+33
+00:03:42.030 --> 00:03:52.060
+you're going to find a few additional controls and settings, as sometimes the reduction might happen in locations that are not ideal.
+
+34
+00:03:52.560 --> 00:03:58.560
+In the example in the screen on front of us, we see the mannequin hand, and with the default reduction,
+
+35
+00:03:58.560 --> 00:04:04.560
+notice that the finger geometry is kind of collapsing, and those don't really look too much like fingers anymore.
+
+36
+00:04:04.560 --> 00:04:09.560
+On the right hand side though, we've enabled an option called bone priority reduction,
+
+37
+00:04:09.560 --> 00:04:18.560
+and what this does is, this says, hey, when you're going to reduce, we're going to say remove geometry everywhere except for the hands,
+
+38
+00:04:18.560 --> 00:04:24.060
+and that's right, we can give the bones that the geometry and the hands are skinned to a priority,
+
+39
+00:04:24.060 --> 00:04:30.060
+and things with a higher priority will be very last to have their geometry removed.
+
+40
+00:04:30.060 --> 00:04:37.129
+Now, the next setting that I want to talk about happens to deal with open mesh edges.
+
+41
+00:04:37.129 --> 00:04:43.129
+On our skeletal meshes, we can also lock our mesh edges, and the reason I'm bringing this up is
+
+42
+00:04:43.129 --> 00:04:47.629
+because of the highlighted or circled area in the image on the screen in front of us.
+
+43
+00:04:47.629 --> 00:04:54.129
+Oftentimes when you're dealing with games, particularly games that have customization,
+
+44
+00:04:54.129 --> 00:05:01.129
+you generally separate the head from the torso, the torso from the legs, and possibly the arms depending on your setup.
+
+45
+00:05:01.129 --> 00:05:07.129
+Because of this, it will introduce what are known as open edges, and a lot of times there'll be geometry
+
+46
+00:05:07.129 --> 00:05:14.129
+that needs to fit inside of this open edge to complete the edge loop to make it look like it's one complete unit.
+
+47
+00:05:14.129 --> 00:05:22.660
+If you do not run the logarithm with lock mesh edges on, it will remove vertices, like in this example.
+
+48
+00:05:22.660 --> 00:05:29.660
+We see in the highlighted area there's a vert that needs to stay there in order for the head to meet with the torso.
+
+49
+00:05:29.660 --> 00:05:35.660
+And again, our tools are very powerful. They have the option to run the logarithm with this on,
+
+50
+00:05:35.660 --> 00:05:42.660
+which will exclude any open edges from the reduction, ensuring that your heads and your torsos and your legs and your feet
+
+51
+00:05:42.660 --> 00:05:49.160
+will all be put together and you won't see any gaps or holes inside of the model.
+
+52
+00:05:49.160 --> 00:05:57.319
+One last thing to note about level of detail adjustments, while Nanite does do this for you,
+
+53
+00:05:57.319 --> 00:06:03.819
+you will need to set your level of detail adjustments on any and all skeletal meshes that you have.
+
+54
+00:06:03.819 --> 00:06:07.319
+Let's take a look at how we do that inside of the editor now.
+
+55
+00:06:07.319 --> 00:06:13.819
+So I'm going to go ahead and hit control space here, and we're going to come here to our third person BP,
+
+56
+00:06:13.819 --> 00:06:22.269
+to our mannequin, character, mesh, and we're going to open up our skeletal mesh right here.
+
+57
+00:06:22.269 --> 00:06:30.769
+So here is our skeletal mesh, and to get to our LOD, we have our LOD settings right here.
+
+58
+00:06:30.769 --> 00:06:35.269
+And just like with our static mesh, we have the number of LODs that we can set.
+
+59
+00:06:35.269 --> 00:06:39.769
+However, we do have some different settings inside of our reduction.
+
+60
+00:06:39.769 --> 00:06:46.769
+We have triangles, vertices, first percent satisfied, max triangles, max vertices, and max first satisfied.
+
+61
+00:06:46.769 --> 00:06:55.769
+So, triangles is how many triangles do we want this to remove, vertices is the amount of vertices that we want this to move,
+
+62
+00:06:55.769 --> 00:06:59.769
+and first percent satisfied allows us to pick between the two.
+
+63
+00:06:59.769 --> 00:07:09.769
+So we can set, I want you to remove up to 12,000 vertices, or 12,000 triangles, and whichever one of those it can reduce first, it will stay there.
+
+64
+00:07:09.769 --> 00:07:15.769
+This next one, max triangles and max vertices, and first max satisfied, these are pretty cool.
+
+65
+00:07:15.769 --> 00:07:18.269
+This allows us to actually set a maximum number.
+
+66
+00:07:18.269 --> 00:07:21.769
+Let's say we want to reduce this down to 1,000.
+
+67
+00:07:21.769 --> 00:07:27.769
+We can put this in here, the logarithm will go, and it will reduce it right down to that number,
+
+68
+00:07:27.769 --> 00:07:30.769
+or a little bit above, or a tiny bit below.
+
+69
+00:07:30.769 --> 00:07:35.769
+And we can do that again with our max triangles, or our max vertices.
+
+70
+00:07:35.769 --> 00:07:43.959
+A few other options that I would like to point out here are things like our volumetric correction.
+
+71
+00:07:43.959 --> 00:07:50.459
+Here is our lock mesh edge option, as well as enforce bone boundaries.
+
+72
+00:07:50.459 --> 00:07:57.459
+And if we come up to our LOD info, our bones to prioritize is where we can add a list of bones,
+
+73
+00:07:57.459 --> 00:08:02.459
+and then we need to make sure that we set the weight of prioritization to a very high number,
+
+74
+00:08:02.459 --> 00:08:09.459
+so that when we run our reduction, it will only take things from that particular area.
+
+75
+00:08:09.459 --> 00:08:12.459
+Let's go ahead and take a look at our LOD right now.
+
+76
+00:08:12.459 --> 00:08:18.529
+So here's our LOD 3, and we can see here we've got some mangled fingers right there.
+
+77
+00:08:18.529 --> 00:08:26.529
+So what we're going to do is come to our character, we're going to go to our bones and show our bone names, and that's index 03L.
+
+78
+00:08:26.529 --> 00:08:31.689
+So what I'm going to do is bones to prioritize, I'm going to add a new item to the list here.
+
+79
+00:08:31.689 --> 00:08:39.629
+I'm going to scroll down, and we're going to look for, it was index 03L.
+
+80
+00:08:39.629 --> 00:08:43.629
+And now what I'm going to do with that, I'm going to say regenerate LOD.
+
+81
+00:08:43.629 --> 00:08:49.200
+And it looks like I might have not gotten that right, so one more time here.
+
+82
+00:08:49.200 --> 00:08:56.389
+Let's go ahead and show bones, bone names, index 03.
+
+83
+00:08:56.389 --> 00:09:10.909
+Let's go back up here real quick.
+
+84
+00:09:10.909 --> 00:09:23.539
+Maybe we actually need to do the one above it, so let's just add another one here.
+
+85
+00:09:23.539 --> 00:09:25.539
+And let's regenerate.
+
+86
+00:09:25.539 --> 00:09:29.100
+Hey, there we go, alright.
+
+87
+00:09:29.100 --> 00:09:34.100
+So it's actually index 02 that was the culprit, but you see how easy that was?
+
+88
+00:09:34.100 --> 00:09:41.100
+One of the other things that is really cool about this too, is let's just turn off our bone names here.
+
+89
+00:09:41.100 --> 00:09:48.490
+Let's come back up to our reduction settings here.
+
+90
+00:09:48.490 --> 00:09:52.490
+And we'll increase this to say 10.
+
+91
+00:09:52.490 --> 00:09:55.490
+Alright, and then we're going to say regenerate LOD.
+
+92
+00:09:55.490 --> 00:10:02.289
+Now, there we go, that put in a little bit more geometry in there for us.
+
+93
+00:10:02.289 --> 00:10:10.289
+Now, one of the things that you often have to do when you make your LODs is you need to make sure that they work with the animations as well.
+
+94
+00:10:10.289 --> 00:10:13.289
+So let's come over here to our animation tab.
+
+95
+00:10:13.289 --> 00:10:16.289
+And look at our third person.
+
+96
+00:10:16.289 --> 00:10:20.500
+Let's see if we got maybe the idle here or something like that.
+
+97
+00:10:20.500 --> 00:10:21.500
+There we go.
+
+98
+00:10:21.500 --> 00:10:22.500
+So here is our idle.
+
+99
+00:10:22.500 --> 00:10:25.500
+And let's just bring this down to our third LOD.
+
+100
+00:10:25.500 --> 00:10:27.500
+And what I'm going to do is I'm going to come back here.
+
+101
+00:10:27.500 --> 00:10:30.500
+And this I think is one of the coolest things about this tool.
+
+102
+00:10:30.500 --> 00:10:35.500
+So I'm going to take this volumetric correction and set it to a value of 1 and hit regenerate.
+
+103
+00:10:35.500 --> 00:10:40.399
+Now, normally if I wanted to fix this, now it gives them a super pointy head.
+
+104
+00:10:40.399 --> 00:10:44.399
+What I would have to do is make this correction inside my DCC.
+
+105
+00:10:44.399 --> 00:10:51.399
+Make sure that the skinned weights are transferred over and that basically nothing is out of place.
+
+106
+00:10:51.399 --> 00:10:56.399
+And that's just a lot of time, even if you have tools that are set up to automatically do that for you.
+
+107
+00:10:56.399 --> 00:10:57.399
+Now check this out.
+
+108
+00:10:57.399 --> 00:11:00.399
+Watch what happens when I come back over here to my animated.
+
+109
+00:11:00.399 --> 00:11:02.529
+Notice it looks exactly the same.
+
+110
+00:11:02.529 --> 00:11:06.529
+So let's just fix that so his head is not so pointy.
+
+111
+00:11:06.529 --> 00:11:09.830
+And we'll give this a second.
+
+112
+00:11:09.830 --> 00:11:10.830
+So there we go.
+
+113
+00:11:10.830 --> 00:11:12.830
+Now, no longer a super pointy head.
+
+114
+00:11:12.830 --> 00:11:13.830
+Let's come back to our animation.
+
+115
+00:11:13.830 --> 00:11:15.830
+Look at that, no longer super pointy head.
+
+116
+00:11:15.830 --> 00:11:22.220
+So this is really, really awesome because this means that we can adjust all of our LODs.
+
+117
+00:11:22.220 --> 00:11:24.220
+We can quickly make changes.
+
+118
+00:11:24.220 --> 00:11:25.220
+We can remove them.
+
+119
+00:11:25.220 --> 00:11:26.220
+We can add them.
+
+120
+00:11:26.220 --> 00:11:29.220
+And we can do it all in a non-destructive manner.
+
+121
+00:11:29.220 --> 00:11:35.220
+And that's what makes these tools so powerful is that it's the non-destructive nature of them.
+
+122
+00:11:35.220 --> 00:11:42.309
+Allows us to quickly iterate, run tests and optimizations that would otherwise take too long
+
+123
+00:11:42.309 --> 00:11:49.309
+or require too many different people in order to see if the actual optimization is a performance
+
+124
+00:11:49.309 --> 00:11:51.309
+gain or a performance decrement.

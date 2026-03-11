@@ -1,0 +1,405 @@
+WEBVTT
+
+1
+00:00:01.459 --> 00:00:07.780
+In this part of our tutorial we're going to be taking a look at ways we can optimize our static
+
+2
+00:00:07.780 --> 00:00:15.460
+and skeletal meshes so that they perform across multiple platforms in a way that is predictable
+
+3
+00:00:15.460 --> 00:00:20.179
+and how we expect. The first thing that we're going to be talking about is system units.
+
+4
+00:00:20.179 --> 00:00:24.339
+Now before you can start creating anything in your project it's really important to set your
+
+5
+00:00:24.339 --> 00:00:29.940
+system units correctly and this doesn't matter which digital content creation program you are
+
+6
+00:00:29.940 --> 00:00:36.460
+using. In this demo we'll be using 3ds max but the same principle applies to any digital content
+
+7
+00:00:36.460 --> 00:00:42.299
+creation program or DCC. Unreal Engine 5 uses centimeters as its default unit of measurement
+
+8
+00:00:42.299 --> 00:00:46.619
+so your DCC should match that to ensure everything imports the correct scale.
+
+9
+00:00:47.259 --> 00:00:53.740
+Getting the scale right is critical for a good user experience. If your assets are too large or
+
+10
+00:00:53.740 --> 00:00:59.740
+too small or inconsistent in size it can completely break the immersion which is especially
+
+11
+00:00:59.740 --> 00:01:06.319
+important in things like VR experiences. Proper scale is also critical for Nanite fallback meshes
+
+12
+00:01:06.319 --> 00:01:10.239
+which rely on accurate proportions for performance and visual fidelity.
+
+13
+00:01:10.879 --> 00:01:17.599
+So again remember that Unreal 5 uses centimeters. One unreal unit equals one centimeter and the
+
+14
+00:01:17.599 --> 00:01:23.840
+easiest way to make sure that you adhere to this is to set the system units of your digital
+
+15
+00:01:23.840 --> 00:01:28.400
+content creation program to use centimeters. The next thing we're going to talk about in
+
+16
+00:01:28.400 --> 00:01:35.200
+mesh optimizations is Nanite and when to use it. The short answer is use it anywhere and everywhere
+
+17
+00:01:35.200 --> 00:01:39.840
+you can. There's a small fixed overhead for having Nanite enabled so in most cases it
+
+18
+00:01:39.840 --> 00:01:44.879
+actually makes sense to take advantage of it rather than turn it off. Nanite typically uses
+
+19
+00:01:44.879 --> 00:01:49.599
+less memory and fewer resources than traditional static meshes while maintaining the same visual
+
+20
+00:01:49.599 --> 00:01:55.120
+qualities your high resolution source assets and it also helps reduce draw calls meaning you can
+
+21
+00:01:55.120 --> 00:02:00.879
+combine multiple materials on a single mesh without performance loss which simplifies your
+
+22
+00:02:00.879 --> 00:02:07.500
+scene setup. The only reason to really not use Nanite is if your target platform doesn't support
+
+23
+00:02:07.500 --> 00:02:14.939
+it and right here we can see two similar static meshes one with Nanite enabled and one
+
+24
+00:02:14.939 --> 00:02:20.539
+with Nanite disabled. So we have our static mesh up here and our Nanite mesh and at first glance
+
+25
+00:02:20.539 --> 00:02:24.939
+they look relatively the same but if we look at them in a little more detail we're going to
+
+26
+00:02:24.939 --> 00:02:30.780
+start to see some really significant differences. For example the area that we have highlighted here
+
+27
+00:02:30.780 --> 00:02:35.099
+on the static mesh we can definitely see the polygonal lines like this is definitely
+
+28
+00:02:35.099 --> 00:02:40.379
+a 3D mesh but if we look at the Nanite mesh notice that this is no longer a polygonal line
+
+29
+00:02:40.379 --> 00:02:46.139
+in fact the line actually goes up and down it has highs and lows or much like we would expect
+
+30
+00:02:46.139 --> 00:02:51.340
+if we were looking at the side of an object in the real world so we can see just from this
+
+31
+00:02:51.340 --> 00:02:57.979
+example the type of fidelity and resolution that we are getting with Nanite. Now one of the other
+
+32
+00:02:57.979 --> 00:03:07.139
+things that we need to know about Nanite is how it generates a fallback mesh so right here in this
+
+33
+00:03:07.139 --> 00:03:10.819
+example we have this a robot which we'll take a look at in the editor in a second this is the
+
+34
+00:03:10.819 --> 00:03:17.539
+Nanite mesh and this is the static mesh fallback. The fallback mesh is what gets used for things
+
+35
+00:03:17.539 --> 00:03:23.379
+like ray tracing, collision, other non-nanite systems, and platforms that don't necessarily
+
+36
+00:03:23.379 --> 00:03:29.780
+support Nanite. So inside the static mesh editor there are a few settings that you can use to
+
+37
+00:03:29.780 --> 00:03:36.580
+adjust the geometry or reduce the geometry of both the Nanite mesh and the static mesh
+
+38
+00:03:36.580 --> 00:03:42.819
+fallback. These settings are called keep triangle percentage this lets you reduce the triangle
+
+39
+00:03:42.819 --> 00:03:48.500
+count to optimize performance and then trim relative error this increases how aggressively
+
+40
+00:03:48.500 --> 00:03:55.699
+Nanite trims geometry which can significantly reduce disk space usage. Now you can quickly
+
+41
+00:03:55.699 --> 00:04:00.419
+go between the Nanite mesh and the static mesh fallback in the static mesh editor by
+
+42
+00:04:00.419 --> 00:04:06.259
+hitting ctrl n and we will take a look at that right now so inside of unreal I'm gonna just
+
+43
+00:04:06.259 --> 00:04:11.860
+close this window real quick we're gonna hit ctrl space we're gonna open up our smbot there we go
+
+44
+00:04:11.860 --> 00:04:16.180
+and we do have Nanite for this so if I hit ctrl n you can see here as soon as I do that
+
+45
+00:04:16.180 --> 00:04:21.620
+it says showing fallback and then we see the values right here and then if I want to do
+
+46
+00:04:21.620 --> 00:04:26.740
+anything over here under the details panel in the Nanite settings we have our keep triangle
+
+47
+00:04:26.740 --> 00:04:31.459
+percentage just put this down to 50 and hit apply we're going to see what this is going to
+
+48
+00:04:31.459 --> 00:04:35.220
+do is it's going to take our fallback triangles to write about half of the number that they
+
+49
+00:04:35.220 --> 00:04:42.879
+were before and I do believe that I need to do this to the percent triangles here there we go
+
+50
+00:04:42.879 --> 00:04:49.519
+wrong one that was the keep that's for disk size I wanted the fallback size right there so
+
+51
+00:04:49.519 --> 00:04:54.000
+right there about 40 we'll hit apply changes and there we go that's what we're looking for
+
+52
+00:04:54.000 --> 00:05:00.000
+is the fallback triangles right there so again it hit about half that size
+
+53
+00:05:01.569 --> 00:05:08.209
+for platforms that don't support Nanite there is the built-in level of detail tool that can be
+
+54
+00:05:08.209 --> 00:05:14.610
+found inside of the static mesh and the skeletal mesh editor with this tool you can have unreal
+
+55
+00:05:14.610 --> 00:05:20.370
+programmatically generate different versions of your static mesh that are reduced in triangle
+
+56
+00:05:20.370 --> 00:05:25.810
+count we can see an example of that here this little cow taken from the starter content
+
+57
+00:05:25.810 --> 00:05:32.610
+starts at 2500 triangles and using the tool we can actually reduce this down to 1200
+
+58
+00:05:32.610 --> 00:05:40.750
+600 and 300 triangles respectively now these numbers are not set in stone it's a good to start
+
+59
+00:05:40.750 --> 00:05:50.350
+reducing at around 75 percent for LOD 1, 25 percent for LOD 2, and then 12 percent for LOD 3
+
+60
+00:05:50.350 --> 00:05:57.949
+but these are just suggestions you should test and use numbers that work best for the project
+
+61
+00:05:57.949 --> 00:06:05.709
+that you happen to be working on now keep in mind that you can apply level of detail
+
+62
+00:06:05.709 --> 00:06:11.949
+adjustments to both your static and your skeletal meshes static meshes have a slightly simpler
+
+63
+00:06:12.670 --> 00:06:19.069
+interface with static meshes you have the ability to select their termination based off
+
+64
+00:06:19.069 --> 00:06:24.829
+of the triangle count the vertice count or a combination of both making options very very
+
+65
+00:06:24.829 --> 00:06:33.230
+simple for static mesh LOD creation skeletal meshes on the other hand have a slightly more
+
+66
+00:06:33.230 --> 00:06:41.620
+robust reduction tool and that's because skeletal meshes have to be reduced but also have that
+
+67
+00:06:41.620 --> 00:06:49.250
+reduction work with things like morph targets and animations let's just take a quick look at
+
+68
+00:06:49.250 --> 00:06:57.339
+the editor really quick and inside of our smbot here or inside of a static mesh we're going to
+
+69
+00:06:57.339 --> 00:07:03.180
+look at setting this up to have some level of detail so first we come down to our LOD settings
+
+70
+00:07:03.180 --> 00:07:08.779
+number of LODs we're going to set this to three and hit apply changes and this is actually
+
+71
+00:07:08.779 --> 00:07:15.470
+how simple it is to do this now that it has finished processing if we come over here to our
+
+72
+00:07:15.470 --> 00:07:22.990
+LODs we can go LOD0, LOD1, and LOD2 if we click on LOD auto the LODs will automatically change
+
+73
+00:07:22.990 --> 00:07:31.790
+as I move further and closer away to this object we can then come here I'm going to go to LOD0
+
+74
+00:07:31.790 --> 00:07:40.029
+we can come down to the LOD0 settings under its reduction and we can see here the percent
+
+75
+00:07:40.029 --> 00:07:46.990
+of triangles to keep if we come here to LOD1 you can see here if we come down to our reduction
+
+76
+00:07:46.990 --> 00:07:52.509
+settings we're at 50 and then we go to LOD2 and again we come down not our sections sorry
+
+77
+00:07:52.509 --> 00:07:58.029
+reduction and we're at 25 so we can simply just do something like this and hit apply changes
+
+78
+00:07:58.029 --> 00:08:03.069
+the other great thing about this tool is that it's non-destructive if we need to increase or
+
+79
+00:08:03.069 --> 00:08:08.269
+further decrease any of the settings in the generated level of details we simply come into
+
+80
+00:08:08.269 --> 00:08:12.910
+the tool make the reductions press the build button and that is all that we have to do
+
+81
+00:08:13.550 --> 00:08:20.350
+now as I mentioned before the skeletal mesh tool has a slightly few more options and
+
+82
+00:08:21.389 --> 00:08:27.389
+one of those options that I want to talk about is the bone priority reduction now what this does
+
+83
+00:08:27.389 --> 00:08:34.509
+is this will weight any geometry that are skinned to any bones very high so that when the
+
+84
+00:08:34.509 --> 00:08:41.629
+reduction logarithm is applied to them that geometry will be the last thing to be reduced
+
+85
+00:08:41.629 --> 00:08:47.389
+and we can actually see a really great example here on the left we have the default reduction
+
+86
+00:08:47.389 --> 00:08:52.750
+and while this does look like a hand it's actually missing a lot of geometry or it has
+
+87
+00:08:52.750 --> 00:08:57.950
+a lot of geometry that's been collapsed down to either a single triangle resulting in just
+
+88
+00:08:59.100 --> 00:09:03.820
+something again that looks kind of like a hand at first glance but it's actually got a lot of
+
+89
+00:09:03.820 --> 00:09:10.539
+issues by taking all of the bones that are inside of the hand and making sure that their bone
+
+90
+00:09:10.539 --> 00:09:17.580
+priority reduction was set to a very very high value we can still use that great reduction tool
+
+91
+00:09:17.580 --> 00:09:23.179
+but now the hand itself still looks like a hand the fingers still look like fingers we don't have
+
+92
+00:09:23.179 --> 00:09:30.240
+any weird looking geometry or anything like that the next thing I'd like to call out is the
+
+93
+00:09:31.039 --> 00:09:36.700
+lock open edges this ensures that important vertices are not removed during the reduction
+
+94
+00:09:36.700 --> 00:09:42.220
+process this feature is especially useful when working with separate body parts in fact we use
+
+95
+00:09:42.220 --> 00:09:49.740
+this inside of fortnite this is a head you might see this head inside of fortnite and
+
+96
+00:09:49.740 --> 00:09:54.539
+what I want to call out here is that there is this little triangle right here that's got a
+
+97
+00:09:54.539 --> 00:10:01.179
+vertice right there that sticks out that needs to be there in order for the head and the neck
+
+98
+00:10:01.179 --> 00:10:09.440
+to properly align now if we run the the skeletal mesh reduction tools by default that little bit
+
+99
+00:10:09.440 --> 00:10:15.120
+of geometry will actually get removed and that's going to result in a gap so the uh lock open
+
+100
+00:10:15.120 --> 00:10:23.759
+edges again allows us to have that correct reduction without removing areas that actually
+
+101
+00:10:23.759 --> 00:10:27.919
+need to be there so that we don't have any gaps inside of our geometry

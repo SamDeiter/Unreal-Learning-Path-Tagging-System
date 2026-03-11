@@ -1,0 +1,949 @@
+WEBVTT
+
+1
+00:00:01.360 --> 00:00:06.860
+So for setting up the controls for our car, we're going to be using the enhanced input system.
+
+2
+00:00:06.860 --> 00:00:13.140
+Now, the enhanced input system uses two primary assets.
+
+3
+00:00:13.140 --> 00:00:17.640
+There is the input action and the input mapping context.
+
+4
+00:00:17.640 --> 00:00:21.140
+And we use these to drive our throttle, our steering and our brakes.
+
+5
+00:00:21.140 --> 00:00:26.140
+Now, as it says here, the input action is a representation of something that your player can do.
+
+6
+00:00:26.140 --> 00:00:31.269
+So for us, it's like our throttle, steering and brakes, so accelerating and steering and braking.
+
+7
+00:00:31.269 --> 00:00:36.770
+And the input mapping context is sort of the parent of these input actions.
+
+8
+00:00:36.770 --> 00:00:42.770
+And you use that to describe the rules for what can trigger any of the input actions.
+
+9
+00:00:42.770 --> 00:00:45.770
+So let's take a look and see how we get those things set up.
+
+10
+00:00:45.770 --> 00:00:54.179
+So back in our engine, I'm just going to come back one folder and create a new folder just to try and keep things organized.
+
+11
+00:00:54.179 --> 00:01:00.320
+And I'll just call this controls.
+
+12
+00:01:00.320 --> 00:01:05.319
+And inside here, we're going to create two input actions.
+
+13
+00:01:05.319 --> 00:01:11.299
+One will be for our throttle and our steering and the other will be for our handbrake.
+
+14
+00:01:11.299 --> 00:01:18.219
+So if I right click and I come to input, we have input action as an option here.
+
+15
+00:01:18.219 --> 00:01:26.780
+So we'll create one of those. I'll call that IA throttle steering.
+
+16
+00:01:26.780 --> 00:01:33.980
+And if I control D to duplicate that, I'll call that IA brake.
+
+17
+00:01:33.980 --> 00:01:40.980
+So this will represent the ability to accelerate and to steer.
+
+18
+00:01:40.980 --> 00:01:44.980
+And this will represent the ability to use our handbrake basically.
+
+19
+00:01:44.980 --> 00:01:52.250
+So if we open up the throttle and steering input action first,
+
+20
+00:01:52.250 --> 00:02:00.310
+this is where we're going to configure the settings to determine what sort of output information this asset is going to give us.
+
+21
+00:02:00.310 --> 00:02:09.810
+So for the throttle and steering, the type of output information that we want is directional information from our keyboard inputs.
+
+22
+00:02:09.810 --> 00:02:14.310
+So for example, when I'm holding W, I want to be able to accelerate.
+
+23
+00:02:14.310 --> 00:02:19.810
+And when I'm holding A, I want to be able to turn left, holding D, turn right.
+
+24
+00:02:19.810 --> 00:02:23.810
+So this will be two different axes of information basically.
+
+25
+00:02:23.810 --> 00:02:29.469
+X will be our forwards and backwards axis and Y will be our steering, our left and right axis.
+
+26
+00:02:29.469 --> 00:02:36.469
+So to set that up under the value type heading here, we're going to change that to axis 2D.
+
+27
+00:02:36.469 --> 00:02:42.479
+So that's a vector 2D which would give us those two axes, the X and the Y axis.
+
+28
+00:02:42.479 --> 00:02:47.479
+And we want those to trigger only when we're holding these keys.
+
+29
+00:02:47.479 --> 00:02:50.479
+So we don't want to just tap the key and have it infinitely accelerate.
+
+30
+00:02:50.479 --> 00:02:56.599
+We want to be holding the key all the time and it only be accelerating when we're holding, the same with steering.
+
+31
+00:02:56.599 --> 00:02:59.169
+So to do that, we need to add a trigger.
+
+32
+00:02:59.169 --> 00:03:05.800
+So under the triggers heading here, we'll add an element and we'll change that to hold.
+
+33
+00:03:05.800 --> 00:03:09.960
+And if I pop open the index, you see we get a hold time threshold here.
+
+34
+00:03:09.960 --> 00:03:16.960
+And this is saying that, okay, you can hold it for one second and nothing will happen until that second has elapsed.
+
+35
+00:03:16.960 --> 00:03:20.960
+So because we want it to be instant, I'm just going to change that to zero.
+
+36
+00:03:20.960 --> 00:03:26.960
+Otherwise there'll be like a one second delay before the car will start turning left or right or start accelerating.
+
+37
+00:03:26.960 --> 00:03:32.449
+So if I just save that now, we can move on to our braking.
+
+38
+00:03:32.449 --> 00:03:35.949
+Now this is going to work in a slightly different way.
+
+39
+00:03:35.949 --> 00:03:38.449
+This is going to be our handbrake.
+
+40
+00:03:38.449 --> 00:03:41.449
+So we don't need any directional information from this.
+
+41
+00:03:41.449 --> 00:03:44.449
+We just simply need to know, is this on or is this off?
+
+42
+00:03:44.449 --> 00:03:46.449
+So is it true or is it false?
+
+43
+00:03:46.449 --> 00:03:51.449
+And the default value type of a bool works perfectly for that because that's the information that it gives us.
+
+44
+00:03:51.449 --> 00:03:53.449
+So we'll leave that as it is.
+
+45
+00:03:53.449 --> 00:03:56.449
+And the only thing we want to do is add a trigger again.
+
+46
+00:03:56.449 --> 00:03:59.449
+And we need to add the same trigger, so we just want to hold this.
+
+47
+00:03:59.449 --> 00:04:07.120
+Meaning that every time we hold this, for example spacebar, the handbrake will activate.
+
+48
+00:04:07.439 --> 00:04:16.589
+And again, I'm going to set the hold time threshold to zero so that, you know, there's no delay in activating the handbrake.
+
+49
+00:04:16.589 --> 00:04:21.589
+So we have our two input actions set up and they're giving us the information that we need.
+
+50
+00:04:21.589 --> 00:04:25.589
+So we've got the directional information for the throttle and the steering.
+
+51
+00:04:25.589 --> 00:04:35.439
+And then we have the true or false information from the handbrake or the brake input action.
+
+52
+00:04:35.439 --> 00:04:37.939
+And this is where we'll set up our key mapping.
+
+53
+00:04:37.939 --> 00:04:45.139
+So determining which buttons on our keyboard will give us what information from the input actions.
+
+54
+00:04:45.139 --> 00:04:49.180
+So let's create our input mapping context.
+
+55
+00:04:49.180 --> 00:04:53.180
+So right clicking back up to input and selecting input mapping context.
+
+56
+00:04:53.180 --> 00:04:56.180
+I'm going to call this IMC.
+
+57
+00:04:56.180 --> 00:04:58.180
+I'll just put controls.
+
+58
+00:04:58.180 --> 00:05:05.449
+And if I open that up, you see there's not much in here until we start adding mappings.
+
+59
+00:05:05.449 --> 00:05:11.449
+So if we add one mapping, this will essentially look for the input actions that you have in your project.
+
+60
+00:05:11.449 --> 00:05:20.490
+So we've got the brake, if I close that down, and we've got the throttle and steering.
+
+61
+00:05:20.490 --> 00:05:22.490
+Now the brake is quite a simple setup.
+
+62
+00:05:22.490 --> 00:05:28.709
+So if I just pop that open, press the keyboard icon here and then press spacebar.
+
+63
+00:05:28.709 --> 00:05:30.709
+That'll input the key mapping that we want.
+
+64
+00:05:30.709 --> 00:05:37.420
+You could also search for it in here if it's not on the keyboard, it's on the gamepad or something, for example.
+
+65
+00:05:37.420 --> 00:05:40.420
+But we don't need to add any triggers because we've already set that up.
+
+66
+00:05:40.420 --> 00:05:47.420
+And we don't need to add any modifiers because the information that we want from this is just the true or false bool.
+
+67
+00:05:47.420 --> 00:05:55.420
+So when we're pressing this button, so spacebar, we want it to give us the true output, which it will by default.
+
+68
+00:05:55.420 --> 00:05:58.420
+And when we let go, it will give us the false output.
+
+69
+00:05:58.420 --> 00:06:00.420
+So there's nothing more we need to do for that.
+
+70
+00:06:00.420 --> 00:06:09.069
+In the throttle and steering, however, we're going to need more than just one input key.
+
+71
+00:06:09.069 --> 00:06:11.069
+We're going to need W, A, S and D.
+
+72
+00:06:11.069 --> 00:06:17.389
+We're going to need four of them so we can drive forward and backwards and then steer left and right.
+
+73
+00:06:17.389 --> 00:06:29.339
+So if I add two more of those, just minimize them a little bit, we have W, S, A and D.
+
+74
+00:06:29.339 --> 00:06:36.879
+So these are the keys that we want to use to extract different information from the input action.
+
+75
+00:06:36.879 --> 00:06:39.879
+And if you remember, it was the vector 2D.
+
+76
+00:06:39.879 --> 00:06:43.879
+So that's the X axis information and the Y axis information.
+
+77
+00:06:43.879 --> 00:06:49.389
+So our X axis is going to be our W and S, our forwards and backwards.
+
+78
+00:06:49.389 --> 00:06:54.389
+And our Y axis is going to be the A and the D, so our turning or steering left and right.
+
+79
+00:06:54.389 --> 00:07:00.899
+By default, the information that comes out of the input action is the positive X value.
+
+80
+00:07:00.899 --> 00:07:07.899
+And we know that our vehicle is facing along the positive X axis, so that's going to be the forward direction for our vehicle.
+
+81
+00:07:07.899 --> 00:07:16.060
+So that means if I pop this open here, we don't need to add any triggers or modifiers to the information that's being output when we press W.
+
+82
+00:07:16.060 --> 00:07:19.060
+And because we want to find that positive X value.
+
+83
+00:07:19.060 --> 00:07:21.060
+And that's what we're getting by default.
+
+84
+00:07:21.060 --> 00:07:32.149
+But with the S input, we do need to add a modifier because we need to find the negative X axis, which means we'll be able to reverse.
+
+85
+00:07:32.149 --> 00:07:40.439
+So if we add plus here on the modifiers tab, and then choose the drop down and choose negate.
+
+86
+00:07:40.439 --> 00:07:46.439
+What this is going to do is essentially invert the values that have been spat out by the input action.
+
+87
+00:07:47.439 --> 00:07:54.860
+So by default, we get the positive X, if we negate that, that will give us the negative X axis.
+
+88
+00:07:54.860 --> 00:07:57.860
+And that's what we're going to use to be able to reverse the vehicle.
+
+89
+00:07:57.860 --> 00:08:06.660
+Next, looking at our steering with A and D, we're going to need to use a modifier to help us find the Y axis.
+
+90
+00:08:06.660 --> 00:08:14.040
+So if we add a new modifier, and from the drop down box, we choose swizzle input axis values.
+
+91
+00:08:14.040 --> 00:08:22.040
+Now what this is going to do is essentially convert the X axis into the Y axis and give us that Y axis output.
+
+92
+00:08:22.040 --> 00:08:31.779
+But because our A key we want to turn left, we know that that information also needs to give us the negative values.
+
+93
+00:08:31.779 --> 00:08:34.779
+So we can add a second modifier here.
+
+94
+00:08:34.779 --> 00:08:36.779
+And from the drop down, choose negate.
+
+95
+00:08:36.779 --> 00:08:41.779
+So this is going to do is find the Y axis and then invert the values.
+
+96
+00:08:41.779 --> 00:08:43.779
+So give us the negative values.
+
+97
+00:08:43.779 --> 00:08:54.940
+And for D, because we need the positive values, the only modifier we need to add is the swizzle input axis values modifier.
+
+98
+00:08:54.940 --> 00:09:00.070
+So just to go over these again, if I pop them all open, our brake will be using spacebar,
+
+99
+00:09:00.070 --> 00:09:02.070
+and we don't have any modifiers or any triggers on there.
+
+100
+00:09:02.070 --> 00:09:05.070
+So it's just going to give us the true or false response.
+
+101
+00:09:05.070 --> 00:09:13.250
+Then for W, we'll be getting the positive X axis, which is the default value.
+
+102
+00:09:13.250 --> 00:09:17.250
+For S, we've added a modifier to flip that default value so that it's negative.
+
+103
+00:09:17.250 --> 00:09:20.250
+So it gives us the negative X value.
+
+104
+00:09:20.250 --> 00:09:25.980
+And then for A and D, we've added the swizzle input axis values to find the Y axis instead.
+
+105
+00:09:25.980 --> 00:09:31.980
+And just for A, we've also added in a gate modifier so that we can flip those Y axis.
+
+106
+00:09:31.980 --> 00:09:36.980
+So they have one that turns in the positive direction and one that turns in the negative direction.
+
+107
+00:09:36.980 --> 00:09:41.460
+Now that we have the logic set up for our input actions,
+
+108
+00:09:41.460 --> 00:09:46.460
+we can go back to our vehicle blueprint and create the logic to read this information
+
+109
+00:09:46.460 --> 00:09:50.460
+and use it to drive things like the throttle and the brakes and the steering
+
+110
+00:09:50.460 --> 00:09:52.460
+and actually get our vehicle moving.
+
+111
+00:09:52.460 --> 00:09:59.539
+Back inside our vehicle blueprint here, if we open up the event graph,
+
+112
+00:09:59.539 --> 00:10:03.919
+this is where we're going to be setting up all of the logic to trigger certain events
+
+113
+00:10:03.919 --> 00:10:06.919
+like our throttle and steering and braking
+
+114
+00:10:06.919 --> 00:10:10.919
+with the key presses that we just set up in the input mapping context.
+
+115
+00:10:10.919 --> 00:10:16.049
+Now the first thing we need to do is enable the input mapping context that we just created
+
+116
+00:10:16.049 --> 00:10:20.049
+so that the blueprint knows where to read the information from.
+
+117
+00:10:20.049 --> 00:10:23.340
+And we're going to do that on event begin play.
+
+118
+00:10:23.340 --> 00:10:26.340
+So we don't need these two events here, we're just going to delete those.
+
+119
+00:10:26.340 --> 00:10:31.340
+And I'll drag off event begin play and I'll cast to, or search for,
+
+120
+00:10:31.340 --> 00:10:34.340
+cast to player controller.
+
+121
+00:10:34.340 --> 00:10:43.419
+And this is going to access the player controller that we input here.
+
+122
+00:10:43.419 --> 00:10:47.679
+And the target for this is going to be itself, so this blueprint.
+
+123
+00:10:47.679 --> 00:10:50.679
+So if I just search for get controller,
+
+124
+00:10:50.679 --> 00:10:56.379
+I default the target itself unless we put something else into this input pin here.
+
+125
+00:10:56.379 --> 00:11:02.570
+And next we need to actually find the enhanced input local player subsystem,
+
+126
+00:11:02.570 --> 00:11:05.570
+which is the controller system we're going to reference.
+
+127
+00:11:05.570 --> 00:11:15.070
+So if I right click search for enhanced input local player subsystem,
+
+128
+00:11:15.070 --> 00:11:20.220
+it's actually the other one that we needed there.
+
+129
+00:11:20.220 --> 00:11:27.220
+So enhanced input local player subsystem, there we go.
+
+130
+00:11:27.220 --> 00:11:31.250
+And then we need to make sure that this is valid.
+
+131
+00:11:31.250 --> 00:11:34.250
+So if we drag up and search for is valid,
+
+132
+00:11:34.250 --> 00:11:39.409
+we need to use the is valid with the question mark just here, the query.
+
+133
+00:11:39.409 --> 00:11:41.950
+And then I'll just connect that logic up.
+
+134
+00:11:41.950 --> 00:11:49.320
+The last thing we need to do is add the mapping context off the end of this.
+
+135
+00:11:49.320 --> 00:11:55.320
+So if this is valid, we want it to reference the input mapping context that we just created.
+
+136
+00:11:55.320 --> 00:12:04.539
+So if I right click search for add mapping context,
+
+137
+00:12:04.539 --> 00:12:08.549
+under the dropdown heading here,
+
+138
+00:12:08.549 --> 00:12:12.549
+it's going to give us access to all of the input mapping context assets within the project.
+
+139
+00:12:12.549 --> 00:12:14.549
+And obviously it's just the one that we created.
+
+140
+00:12:14.549 --> 00:12:17.549
+So just at the top of the list here, we'll set that up.
+
+141
+00:12:17.549 --> 00:12:25.029
+And then we'll actually add the target and connect that to the enhanced input local player subsystem.
+
+142
+00:12:28.340 --> 00:12:30.340
+If I compile and save that.
+
+143
+00:12:30.340 --> 00:12:34.750
+With this logic, the blueprint is now reading from the mapping context that we've created.
+
+144
+00:12:34.750 --> 00:12:38.750
+So any logic we do from now on will be based on these inputs.
+
+145
+00:12:38.750 --> 00:12:44.259
+So let's set up the logic for our braking system first.
+
+146
+00:12:44.259 --> 00:12:49.740
+So I'm just going to right click and search for our action input.
+
+147
+00:12:49.740 --> 00:12:53.019
+Oops.
+
+148
+00:12:53.019 --> 00:13:02.570
+And we want to search for the AI brake, sorry, IA brake enhanced input action.
+
+149
+00:13:02.570 --> 00:13:08.590
+And when this is triggered, we want to set the handbrake input.
+
+150
+00:13:08.590 --> 00:13:13.490
+So if I search for set handbrake input,
+
+151
+00:13:16.139 --> 00:13:20.139
+the target is going to be the vehicle movement component.
+
+152
+00:13:20.139 --> 00:13:24.139
+So what we can do actually is just drag that into the world here,
+
+153
+00:13:24.139 --> 00:13:29.360
+into the graph rather and have that be our target.
+
+154
+00:13:29.360 --> 00:13:35.360
+And the input is going to be the action value that is given out when we press and release the space bar.
+
+155
+00:13:35.360 --> 00:13:39.360
+So the key that we inputted as our input action.
+
+156
+00:13:39.360 --> 00:13:44.220
+And if we just connect those up together there.
+
+157
+00:13:44.220 --> 00:13:47.220
+That's essentially all the logic we need to do for the braking system.
+
+158
+00:13:47.220 --> 00:13:49.220
+It's quite straightforward.
+
+159
+00:13:49.220 --> 00:13:52.220
+When it comes to the steering and the throttle, it gets a little bit more complex
+
+160
+00:13:52.220 --> 00:13:57.570
+because we want to essentially break out the individual axes, X and Y,
+
+161
+00:13:57.570 --> 00:14:01.570
+as well as the positive and negative variants of those.
+
+162
+00:14:01.570 --> 00:14:07.240
+So the first thing we'll do is find the throttle and steering input.
+
+163
+00:14:07.240 --> 00:14:13.409
+And you can see we have the same options here.
+
+164
+00:14:13.409 --> 00:14:18.409
+We have our action value and the triggered pin we're going to use these two.
+
+165
+00:14:18.409 --> 00:14:23.269
+So our action value is, as you can see, is a vector 2D,
+
+166
+00:14:23.269 --> 00:14:29.269
+which means it's giving off more information than our bool above for the braking system.
+
+167
+00:14:29.269 --> 00:14:33.269
+And that means we're going to need to sort of break that information into its two channels,
+
+168
+00:14:33.269 --> 00:14:35.269
+so into the X and the Y channels.
+
+169
+00:14:35.269 --> 00:14:40.269
+So I'm going to pull off there and search for brake vector 2D.
+
+170
+00:14:40.269 --> 00:14:43.850
+And that will give us the X and the Y channels.
+
+171
+00:14:43.850 --> 00:14:51.100
+So now we have access to what we set up for the W and the S keyboard inputs
+
+172
+00:14:51.100 --> 00:14:57.100
+and the A and the D keyboard inputs, which will affect the Y channel or the Y axis.
+
+173
+00:14:57.100 --> 00:15:02.490
+So now that we've split this information, what we can do is start setting up the throttle.
+
+174
+00:15:02.490 --> 00:15:08.129
+So I'm going to search for set throttle input.
+
+175
+00:15:09.129 --> 00:15:16.110
+And again, dragging the vehicle movement component as our target.
+
+176
+00:15:16.110 --> 00:15:22.470
+And we want to connect the X axis here,
+
+177
+00:15:22.470 --> 00:15:30.340
+because the default X axis is what we're going to use as our W, our forward, our throttle input.
+
+178
+00:15:30.340 --> 00:15:32.340
+So let's just connect up that logic.
+
+179
+00:15:32.340 --> 00:15:42.580
+Now we set up the reverse with the brake input event or function, should I say.
+
+180
+00:15:42.580 --> 00:15:51.549
+So if I search for set brake input rather than the set handbrake input,
+
+181
+00:15:51.549 --> 00:16:03.870
+as long as on your vehicle component we have reverse as brake checked,
+
+182
+00:16:03.870 --> 00:16:09.899
+using this set brake input will actually both slow the car down if it's going forwards
+
+183
+00:16:09.899 --> 00:16:14.899
+and then enter reverse if you continue to hold S in this case.
+
+184
+00:16:14.899 --> 00:16:17.899
+But that's only valid when we use the negative values.
+
+185
+00:16:17.899 --> 00:16:27.639
+So to access the negative values on the X axis, we will multiply the output by minus one
+
+186
+00:16:27.639 --> 00:16:29.639
+and then connect that logic up there.
+
+187
+00:16:29.639 --> 00:16:32.730
+And we'll make sure we connect the execute as well.
+
+188
+00:16:32.730 --> 00:16:37.649
+And the next thing we can set up is the steering.
+
+189
+00:16:37.649 --> 00:16:40.870
+And that reads directly from the Y output.
+
+190
+00:16:40.870 --> 00:16:45.100
+So what I'm going to do here, just shift those over a little bit
+
+191
+00:16:45.100 --> 00:16:49.100
+and search for set steering input.
+
+192
+00:16:49.100 --> 00:17:00.379
+I connect those guys up and drag the Y pin over to our steering input here.
+
+193
+00:17:00.379 --> 00:17:05.730
+Just going to double click that so we get a couple of reroute nodes
+
+194
+00:17:05.730 --> 00:17:11.380
+that we can use to just see the information a little more clearly.
+
+195
+00:17:11.380 --> 00:17:14.380
+And that's it as far as it goes for our input actions.
+
+196
+00:17:14.380 --> 00:17:21.420
+So we're setting our throttle input with the positive X value.
+
+197
+00:17:21.420 --> 00:17:24.420
+Then we're setting our brake, which we're also using as reverse
+
+198
+00:17:24.420 --> 00:17:30.220
+because we've got the use brake as reverse option ticked.
+
+199
+00:17:30.220 --> 00:17:32.220
+I just search for that just to make sure.
+
+200
+00:17:32.220 --> 00:17:34.980
+Reverse as brake.
+
+201
+00:17:34.980 --> 00:17:38.269
+And we're using the negative X axis for that.
+
+202
+00:17:38.269 --> 00:17:43.940
+And then we're setting our steering input based on the Y values.
+
+203
+00:17:43.940 --> 00:17:45.940
+So we've set up our input actions.
+
+204
+00:17:45.940 --> 00:17:47.940
+We've determined which buttons on our keyboard
+
+205
+00:17:47.940 --> 00:17:51.940
+we want to trigger these different actions with our mapping context.
+
+206
+00:17:51.940 --> 00:17:54.940
+And our blueprint is now reading from all of our information
+
+207
+00:17:54.940 --> 00:17:59.420
+to set our brakes and our throttle and our steering.
+
+208
+00:17:59.420 --> 00:18:03.420
+The final thing we need to do is to tell the project to use this information
+
+209
+00:18:03.420 --> 00:18:06.670
+when we press play in the level.
+
+210
+00:18:06.670 --> 00:18:09.960
+And we do that with a game mode blueprint.
+
+211
+00:18:09.960 --> 00:18:11.960
+So coming back into our content browser here,
+
+212
+00:18:11.960 --> 00:18:14.960
+if I right click and we create a new blueprint,
+
+213
+00:18:14.960 --> 00:18:19.539
+we'll choose game mode base as the parent class.
+
+214
+00:18:19.539 --> 00:18:25.819
+And I'm just going to call this gm underscore, let's just say driving.
+
+215
+00:18:25.819 --> 00:18:29.230
+And double click this to open.
+
+216
+00:18:29.230 --> 00:18:31.230
+Inside here in the details panel,
+
+217
+00:18:31.230 --> 00:18:35.230
+all we need to change is the default pawn class.
+
+218
+00:18:35.230 --> 00:18:39.460
+And we're going to tell that to use our BP chaos vehicle.
+
+219
+00:18:39.460 --> 00:18:43.460
+And that's the blueprint that we've been adding this
+
+220
+00:18:43.460 --> 00:18:45.460
+or setting up all of this logic within.
+
+221
+00:18:45.460 --> 00:18:50.579
+So inside our level here, inside the world settings tab,
+
+222
+00:18:50.579 --> 00:18:52.579
+which if you don't have open, you can come to window
+
+223
+00:18:52.579 --> 00:18:55.990
+and then open with world settings here.
+
+224
+00:18:55.990 --> 00:18:57.990
+Under the game mode override, we're going to choose
+
+225
+00:18:57.990 --> 00:19:02.220
+our gm driving game mode blueprint.
+
+226
+00:19:02.220 --> 00:19:05.220
+And if I move a little lower down here,
+
+227
+00:19:05.220 --> 00:19:09.220
+when we hit play, we should see our vehicle spawn.
+
+228
+00:19:09.220 --> 00:19:12.250
+And when I hold W, we're going forwards.
+
+229
+00:19:12.250 --> 00:19:16.250
+And A will go left, D will go right.
+
+230
+00:19:16.250 --> 00:19:23.259
+And when I hold S, that breaks and then reverses.
+
+231
+00:19:23.259 --> 00:19:27.319
+So now we have our vehicle set up and driving around the scene.
+
+232
+00:19:27.319 --> 00:19:31.819
+Next, we'll take a look at some of the settings
+
+233
+00:19:31.819 --> 00:19:34.819
+that we can use to tweak the feel of this vehicle,
+
+234
+00:19:34.819 --> 00:19:37.819
+like the suspension and the steering and the grip,
+
+235
+00:19:37.819 --> 00:19:38.819
+that sort of thing.
+
+236
+00:19:38.819 --> 00:19:41.259
+So you can start customizing the look
+
+237
+00:19:41.259 --> 00:19:45.259
+and the feel of your own vehicle for your own projects.

@@ -1,0 +1,165 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:06.410
+Now that we know how to send a variable over the network. Let's take a look at how we can send a function of the network
+
+2
+00:00:07.429 --> 00:00:12.470
+much like with propagating variables the reflection system does a lot of the heavy lifting here a
+
+3
+00:00:13.789 --> 00:00:20.210
+Remote procedure call or RPC is a method of calling a function on one or more remote clients or the server
+
+4
+00:00:20.789 --> 00:00:24.570
+We can go from the client to the server or from the server to a specific client
+
+5
+00:00:24.690 --> 00:00:29.250
+As long as we're calling the function from an object that's ultimately owned by the player controller
+
+6
+00:00:29.769 --> 00:00:36.299
+Each player controller represents the network's connection between the client and the controlling server with no player controller
+
+7
+00:00:36.299 --> 00:00:39.619
+We're unable to pick out a particular client to send a message to
+
+8
+00:00:41.429 --> 00:00:47.549
+Multicasts however are sent from the server to every connected client and as such require no player controller to be involved
+
+9
+00:00:48.780 --> 00:00:53.899
+Defining a function to be called over the network is as easy as flagging a function with the U function markup and
+
+10
+00:00:54.020 --> 00:00:57.560
+Supplying the appropriate specifiers in our case here
+
+11
+00:00:57.560 --> 00:01:03.280
+We've got a multicast function being sent out reliably and with some required validation when calling it
+
+12
+00:01:03.640 --> 00:01:05.980
+We'll cover the multicast in just a second
+
+13
+00:01:05.980 --> 00:01:11.260
+But a quick note on reliability and validation if we call an RPC reliably
+
+14
+00:01:11.260 --> 00:01:16.579
+We flag into the engine that this function must go through to receiving clients. It doesn't matter if it's late
+
+15
+00:01:16.579 --> 00:01:22.379
+It just needs to reach them as gameplay engineers. We can't just ignore a gameplay critical function call
+
+16
+00:01:22.379 --> 00:01:26.659
+So flagging a function as reliable ensures that the function will be called regardless of lag
+
+17
+00:01:26.900 --> 00:01:33.219
+We can also flag something as unreliable which essentially outlines functions that are cosmetic or non gameplay critical
+
+18
+00:01:33.219 --> 00:01:36.299
+If we hit a patch of lag just after calling this function
+
+19
+00:01:36.299 --> 00:01:40.260
+We don't need to worry about it being received as much as we would with a reliable function
+
+20
+00:01:42.319 --> 00:01:46.500
+Validation allows us to assess whether or not a networked function is what we expect it to be
+
+21
+00:01:46.840 --> 00:01:51.620
+If we return false from the validate function, the requesting client will be booted from the server
+
+22
+00:01:51.959 --> 00:01:57.079
+So consider the following the client presses reload sending a reload call to the server
+
+23
+00:01:57.120 --> 00:02:01.760
+If the amount that they want to reload by in a single call is greater than say a single bullet
+
+24
+00:02:01.959 --> 00:02:07.420
+We can assume they found some kind of exploits or work around and boot them from the server before they have any meaningful impact
+
+25
+00:02:07.420 --> 00:02:13.340
+As for the actual function definition, we actually have three separate functions that we need to implement
+
+26
+00:02:14.520 --> 00:02:19.919
+Firstly, we've got our base you function written here as multicast to do function. This is just a stub function
+
+27
+00:02:19.919 --> 00:02:21.919
+It doesn't require any implementation directly
+
+28
+00:02:22.780 --> 00:02:24.780
+Then we have an explicitly defined
+
+29
+00:02:24.979 --> 00:02:29.900
+Implementation function for the networking subsystem to call once it receives the call over the network
+
+30
+00:02:29.900 --> 00:02:34.939
+And this is the main function where we put our gameplay code. This is the body that contains our implementation
+
+31
+00:02:35.620 --> 00:02:43.030
+We then have a validate function that holds our RPC validation and certification code as we mentioned above if we omit the with
+
+32
+00:02:43.189 --> 00:02:47.069
+Validation specifier the compiler won't prompt us to add a validate function
+
+33
+00:02:48.460 --> 00:02:50.460
+RPCs come in three flavors
+
+34
+00:02:51.139 --> 00:02:56.659
+First we've got server functions and this function when called on the client will execute the body on the server
+
+35
+00:02:57.139 --> 00:03:02.020
+This will only work if the object that we're calling the RPC from is owned by the local player controller
+
+36
+00:03:03.169 --> 00:03:08.110
+Next we've got client when called on the server. The body of this function will be executed client-side
+
+37
+00:03:08.979 --> 00:03:14.180
+Much like a server call a client call also needs to be called from an object owned by a player controller
+
+38
+00:03:14.539 --> 00:03:18.460
+This player controller dictates what client the body is actually executed on
+
+39
+00:03:20.090 --> 00:03:22.889
+Lastly we've got multicast and this function is fired everywhere
+
+40
+00:03:22.969 --> 00:03:26.650
+That's locally on the server as well as on all relevant clients
+
+41
+00:03:26.650 --> 00:03:31.110
+If the client is out of relevancy, the RPC will still be sent but not received

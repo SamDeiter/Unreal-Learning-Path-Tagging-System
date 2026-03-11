@@ -1,0 +1,209 @@
+WEBVTT
+
+1
+00:00:01.360 --> 00:00:05.400
+In this section, we're going to walk through the process of creating the base Blueprint
+
+2
+00:00:05.400 --> 00:00:07.940
+and adding our basic components.
+
+3
+00:00:07.940 --> 00:00:12.759
+Our Blueprint will serve as a self-contained actor that can be used multiple times within
+
+4
+00:00:12.759 --> 00:00:18.199
+our levels, with each Blueprint instance able to trigger a separate sequence.
+
+5
+00:00:18.199 --> 00:00:23.359
+Any updates we make to the logic will occur on the single Blueprint actor and propagate
+
+6
+00:00:23.359 --> 00:00:26.039
+to every instance within our levels.
+
+7
+00:00:26.039 --> 00:00:29.000
+Let's hop over to the level and start this process.
+
+8
+00:00:29.000 --> 00:00:34.359
+So for this section, we're going to want to have our 305 Start Map open, which you can
+
+9
+00:00:34.359 --> 00:00:41.719
+find in the Content Courses Sequence 30500 Maps folder.
+
+10
+00:00:41.719 --> 00:00:47.079
+Now with this open, I'm going to go back down to my Content Browser and in my BP folder,
+
+11
+00:00:47.079 --> 00:00:51.920
+under our Sequence 305 folder, I'm going to create a new Blueprint actor.
+
+12
+00:00:51.920 --> 00:00:55.859
+Now before we do that, I want to make a quick note about the two Blueprints that
+
+13
+00:00:55.859 --> 00:00:58.219
+you see within this folder.
+
+14
+00:00:58.240 --> 00:01:05.060
+The BP Sequence TriggerBox EX, for example, is what we're going to be building for this class.
+
+15
+00:01:05.060 --> 00:01:09.840
+This is our basic logic required to activate our sequences.
+
+16
+00:01:09.840 --> 00:01:17.760
+The BP Sequence TriggerBox Final is the full-up, robust Blueprint class that is included
+
+17
+00:01:17.760 --> 00:01:24.799
+in the 905 maps, and that contains all of the additional logic for adding a UMG widget
+
+18
+00:01:24.799 --> 00:01:25.959
+on screen.
+
+19
+00:01:25.959 --> 00:01:31.000
+Inherently, both have the same core functionality, but the Sequence TriggerBox Final is what
+
+20
+00:01:31.000 --> 00:01:34.519
+we will showcase at the end of the class.
+
+21
+00:01:34.519 --> 00:01:40.629
+Alright, so within our BP folder, I'm going to right-click, go up to Blueprint, and
+
+22
+00:01:40.629 --> 00:01:42.530
+add a Blueprint class.
+
+23
+00:01:42.530 --> 00:01:47.709
+Now you can, this is the same one in the basic asset, or you can create one under
+
+24
+00:01:47.709 --> 00:01:48.709
+Blueprint, both are the same.
+
+25
+00:01:48.709 --> 00:01:53.549
+We'll create a Blueprint class, and we're going to create, I'll move this over here,
+
+26
+00:01:53.549 --> 00:01:55.010
+an actor.
+
+27
+00:01:55.010 --> 00:02:00.969
+So with this, we'll call this BP, for Blueprint, underscore, SEQ for Sequence, and we'll
+
+28
+00:02:00.969 --> 00:02:06.730
+call this TriggerBox, and then I'm just going to write Example.
+
+29
+00:02:06.730 --> 00:02:11.289
+But choose whatever you want to, the name isn't as particular, just make sure you
+
+30
+00:02:11.289 --> 00:02:12.810
+know which one you're building.
+
+31
+00:02:12.810 --> 00:02:15.430
+Alright, we'll double-click this.
+
+32
+00:02:15.430 --> 00:02:18.189
+This will open up our Blueprint Editor window.
+
+33
+00:02:18.189 --> 00:02:23.030
+I'm going to expand my Details out and pin it, because we will be referencing some
+
+34
+00:02:23.030 --> 00:02:24.310
+of these later.
+
+35
+00:02:24.310 --> 00:02:29.409
+And now let's start building the logic within this Blueprint.
+
+36
+00:02:29.409 --> 00:02:34.210
+So the first thing I'm going to do is go over to my Components tab, click Add, and
+
+37
+00:02:34.210 --> 00:02:41.169
+I'm just going to start typing Collision, C-O-L-L-I, and we're going to add a Box
+
+38
+00:02:41.169 --> 00:02:42.169
+Collision.
+
+39
+00:02:42.169 --> 00:02:47.169
+You'll see that it adds it within the middle here, we'll press F to frame, there
+
+40
+00:02:47.169 --> 00:02:49.099
+we go.
+
+41
+00:02:49.099 --> 00:02:52.759
+And two changes that I want to make, just so I can see this on screen, are the Box
+
+42
+00:02:52.759 --> 00:02:55.599
+Extent, and then we're actually going to change our color.
+
+43
+00:02:55.599 --> 00:03:01.240
+So under Box Extent, I'm going to change this to 200 by 200 by 200.
+
+44
+00:03:01.240 --> 00:03:05.360
+And this will just change the overall size of the volume, so that when the player's
+
+45
+00:03:05.360 --> 00:03:09.280
+collision intersects with it, that it will trigger whatever logic we're going
+
+46
+00:03:09.280 --> 00:03:10.280
+to build later.
+
+47
+00:03:10.280 --> 00:03:14.780
+Alright, and then I'm just going to expand out Advanced and shape color, again feel
+
+48
+00:03:14.780 --> 00:03:18.020
+free to change this to whatever you want, I'm going to do something like a hot
+
+49
+00:03:18.020 --> 00:03:23.699
+pink, and then change my line thickness to maybe say something like 10, 5, whatever
+
+50
+00:03:23.699 --> 00:03:24.699
+you want.
+
+51
+00:03:24.699 --> 00:03:30.919
+Press Escape here, we'll go ahead and compile, and save, and now we have the base
+
+52
+00:03:30.919 --> 00:03:34.360
+logic for our blueprint that we're going to build the code on.

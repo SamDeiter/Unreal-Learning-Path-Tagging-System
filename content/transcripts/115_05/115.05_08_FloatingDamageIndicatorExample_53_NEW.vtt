@@ -1,0 +1,609 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.389
+Now, let's break down a practical example of how we can take these concepts and build
+
+2
+00:00:05.389 --> 00:00:09.789
+a typical piece of UI functionality in the Unreal editor.
+
+3
+00:00:09.789 --> 00:00:14.230
+We can see that we've got dynamically spawned widgets over a world actor, with both procedural
+
+4
+00:00:14.230 --> 00:00:16.329
+and baked animations.
+
+5
+00:00:16.329 --> 00:00:20.760
+Their float direction is randomized but their float distance is not.
+
+6
+00:00:20.760 --> 00:00:24.519
+Let's break down how we've used a blend of code and editor work to achieve this
+
+7
+00:00:24.519 --> 00:00:26.570
+effect.
+
+8
+00:00:26.570 --> 00:00:31.769
+The first thing we need to do is navigate to the UI floating damage asset in the editor.
+
+9
+00:00:31.769 --> 00:00:34.890
+This is under the UI UMG folder.
+
+10
+00:00:34.890 --> 00:00:37.179
+Let's break down what we can see here.
+
+11
+00:00:37.179 --> 00:00:41.409
+Firstly, the widget is parented to the floating damage widget.
+
+12
+00:00:41.409 --> 00:00:45.409
+This is our native class and it's here that will trigger our functionality.
+
+13
+00:00:45.409 --> 00:00:48.890
+Breaking down the hierarchy view, we can see we've got a single text block inside
+
+14
+00:00:48.890 --> 00:00:50.960
+of a border container.
+
+15
+00:00:50.960 --> 00:00:55.740
+We're using 88 as our placeholder text as 88 is the widest two digit number that we
+
+16
+00:00:55.740 --> 00:00:57.409
+can get.
+
+17
+00:00:57.409 --> 00:01:01.590
+At the bottom, we can see we've already got a baked, authored animation called spawn
+
+18
+00:01:01.590 --> 00:01:03.929
+animation.
+
+19
+00:01:03.929 --> 00:01:08.109
+Clicking through the tracks, we can see we're only animating the alpha of the content
+
+20
+00:01:08.109 --> 00:01:10.269
+parameter of the border.
+
+21
+00:01:10.269 --> 00:01:15.719
+This is basically going to take our initially opaque text and blend it out entirely.
+
+22
+00:01:15.719 --> 00:01:18.920
+Although this looks like a linear blend, if we click through to the curves menu,
+
+23
+00:01:18.920 --> 00:01:28.420
+we can actually define a different curve between these two keyframes.
+
+24
+00:01:28.420 --> 00:01:32.340
+Damage text is actually a bind widget, one of the year property specifiers we covered
+
+25
+00:01:32.340 --> 00:01:34.099
+earlier in this talk.
+
+26
+00:01:34.099 --> 00:01:38.700
+If we rename it from damage text to a random string, we can see that the blueprint no longer
+
+27
+00:01:38.700 --> 00:01:39.700
+compiles.
+
+28
+00:01:39.700 --> 00:01:43.659
+Of course, renaming this widget to the expected value fixes up the binding and we're good
+
+29
+00:01:43.659 --> 00:01:48.299
+to go.
+
+30
+00:01:48.299 --> 00:01:51.459
+Moving quickly off to the event graph, we can see that we've got absolutely no logic
+
+31
+00:01:51.459 --> 00:01:54.760
+at play here, all of our functionality is driven through the code.
+
+32
+00:01:54.760 --> 00:01:58.819
+So let's jump into Visual Studio and break down the underlying float damage widget
+
+33
+00:01:58.819 --> 00:02:00.340
+class.
+
+34
+00:02:00.340 --> 00:02:03.939
+So straight away, there's a few things we can point out.
+
+35
+00:02:03.939 --> 00:02:08.840
+We've got the usual Uclass, generated.h and generated body macros, meaning we're dealing
+
+36
+00:02:08.840 --> 00:02:10.680
+with a reflected type.
+
+37
+00:02:10.680 --> 00:02:14.240
+We cover this heavily in the Introduction to C++ in Unreal talk.
+
+38
+00:02:14.240 --> 00:02:18.000
+As a brief overview though, we can be sure that the instances of this class are not
+
+39
+00:02:18.000 --> 00:02:21.400
+going to get garbage collected when they shouldn't be, Unreal's keeping a reference
+
+40
+00:02:21.400 --> 00:02:23.349
+to them.
+
+41
+00:02:23.349 --> 00:02:26.590
+We can also see that we're extending off of user widget, as we mentioned at the start
+
+42
+00:02:26.590 --> 00:02:28.439
+of this talk.
+
+43
+00:02:28.439 --> 00:02:32.039
+Moving on from there, we've got a couple of publicly accessible functions in our header,
+
+44
+00:02:32.039 --> 00:02:35.139
+and we'll be using those to drive some of our gameplay.
+
+45
+00:02:35.139 --> 00:02:39.800
+Next, we're overriding some critical functions as outlined earlier, that being the native
+
+46
+00:02:39.800 --> 00:02:43.599
+construct and the native tick.
+
+47
+00:02:43.599 --> 00:02:47.539
+Following that we've got our bindings, that being the damage text and the spawn animation
+
+48
+00:02:47.539 --> 00:02:52.520
+bindings as bind widget and bind widget animation respectively.
+
+49
+00:02:52.520 --> 00:02:56.120
+Then finally, right at the bottom, we've got a few runtime members to help us drive
+
+50
+00:02:56.120 --> 00:02:57.719
+our gameplay.
+
+51
+00:02:57.719 --> 00:03:01.979
+Take note of the U function markup on the on spawn anim over function.
+
+52
+00:03:01.979 --> 00:03:04.960
+This is going to be important in just a moment.
+
+53
+00:03:04.960 --> 00:03:08.919
+Moving over to our CPP, we've got a fairly standard constructor.
+
+54
+00:03:08.919 --> 00:03:12.460
+Our bindable properties are initialized as null because our design layer is going
+
+55
+00:03:12.460 --> 00:03:16.659
+to populate those for us, and our float direction is initialized here given a random
+
+56
+00:03:16.659 --> 00:03:18.360
+X and Y value.
+
+57
+00:03:18.360 --> 00:03:23.139
+This is how we introduce that random float direction on a per widget basis.
+
+58
+00:03:23.139 --> 00:03:26.860
+In the body of the constructor, we're creating a delegate binding by passing in both
+
+59
+00:03:26.860 --> 00:03:31.659
+the name of a function, in this case on spawn anim over, and the object on which
+
+60
+00:03:31.659 --> 00:03:34.009
+to call that function.
+
+61
+00:03:34.009 --> 00:03:37.050
+This is why the U function markup was so important.
+
+62
+00:03:37.050 --> 00:03:42.090
+One of the most useful things about reflection is its ability to find a function by name.
+
+63
+00:03:42.090 --> 00:03:46.009
+Once this delegate is invoked, it's going to parse over whatever object we pass in
+
+64
+00:03:46.009 --> 00:03:49.009
+for a function called on spawn anim over.
+
+65
+00:03:49.009 --> 00:03:51.979
+If it finds one, it's going to call it.
+
+66
+00:03:51.979 --> 00:03:56.379
+Moving on from there, we've got our native construct, our begin play of the widget
+
+67
+00:03:56.379 --> 00:03:57.960
+world.
+
+68
+00:03:57.960 --> 00:04:01.439
+We check to see if the animation has been successfully burned from the design layer,
+
+69
+00:04:01.439 --> 00:04:03.419
+as it's a pointer after all.
+
+70
+00:04:03.419 --> 00:04:06.699
+If it is, we proceed through the following steps to make sure our widget both looks
+
+71
+00:04:06.699 --> 00:04:09.289
+and behaves as expected.
+
+72
+00:04:09.289 --> 00:04:13.729
+Firstly, we set its alignment in the viewport, and this is essentially going to move the
+
+73
+00:04:13.729 --> 00:04:17.490
+widget's route from the standard top left to the center of the text, making for
+
+74
+00:04:17.490 --> 00:04:19.209
+a more aesthetic effect.
+
+75
+00:04:19.209 --> 00:04:22.379
+Next, we actually bind that delegate.
+
+76
+00:04:22.379 --> 00:04:26.660
+We call the native bindToAnimationFinished function, and pass in the animation we wish
+
+77
+00:04:26.660 --> 00:04:29.379
+to bind to and a copy of the delegate.
+
+78
+00:04:29.379 --> 00:04:34.339
+As you'd expect, when the animation is finished, we're going to get our onSpawnAnimationOver
+
+79
+00:04:34.339 --> 00:04:35.339
+function invoked.
+
+80
+00:04:35.339 --> 00:04:38.889
+Finally, we simply play the animation.
+
+81
+00:04:38.889 --> 00:04:42.490
+So now the widget's been constructed, let's deal with that floating effect.
+
+82
+00:04:42.490 --> 00:04:46.430
+Firstly, we grab a reference to the local player controller.
+
+83
+00:04:46.430 --> 00:04:51.269
+If we were on a server, the getFirstPlayerController function would simply return the first connected
+
+84
+00:04:51.269 --> 00:04:52.269
+client.
+
+85
+00:04:52.269 --> 00:04:55.949
+However, because we're definitely on the client, calling getFirstPlayerController is
+
+86
+00:04:55.949 --> 00:04:58.910
+guaranteed to return our local client.
+
+87
+00:04:58.910 --> 00:05:02.550
+Now that we've got that local controller, we can go ahead and project a world location
+
+88
+00:05:02.550 --> 00:05:05.879
+onto their screen, giving us a screen coordinate.
+
+89
+00:05:05.879 --> 00:05:11.139
+In this case, we're just passing in the location in screen space as a ref.
+
+90
+00:05:11.139 --> 00:05:14.519
+Setting the position in viewport does exactly as you'd expect.
+
+91
+00:05:14.519 --> 00:05:17.879
+It's going to place our widget over the actor that we're dealing damage to, however
+
+92
+00:05:17.879 --> 00:05:23.680
+we want to offset that value by some value over time, giving us that float effect.
+
+93
+00:05:23.680 --> 00:05:28.120
+We simply take that projected coordinate and offset it by an accumulated distance multiplied
+
+94
+00:05:28.120 --> 00:05:30.439
+by a random float direction.
+
+95
+00:05:30.439 --> 00:05:34.680
+We'll keep accumulating that value until we eventually get a callback from our animation
+
+96
+00:05:34.680 --> 00:05:41.180
+that it's finished.
+
+97
+00:05:41.180 --> 00:05:45.579
+We can see that in our onSpawnAnimOver function, we're simply reporting something in the log
+
+98
+00:05:45.579 --> 00:05:49.500
+so we can keep on top of things, and then removing it from the viewport.
+
+99
+00:05:49.500 --> 00:05:53.000
+As the viewport is this widget linked to the root set and the widget is a reflected
+
+100
+00:05:53.000 --> 00:05:56.680
+member, we can rest assured that it will eventually get hoovered up by the garbage collector
+
+101
+00:05:56.680 --> 00:05:57.680
+from this point onward.
+
+102
+00:05:57.680 --> 00:06:02.560
+Finally, we can take a look at those public functions and honestly, there's nothing fancy.
+
+103
+00:06:02.560 --> 00:06:07.959
+The setDamageValue function simply takes in a float and coerces it into an fText.
+
+104
+00:06:07.959 --> 00:06:11.800
+Text blocks take an fText type as to afford us a chance to localize whatever text we
+
+105
+00:06:11.800 --> 00:06:12.800
+want to display.
+
+106
+00:06:12.800 --> 00:06:16.319
+Of course, in this instance, we're just displaying a float, so we can simply get
+
+107
+00:06:16.319 --> 00:06:21.860
+away with calling the fTextStaticAsNumber function without having to worry about any localization.
+
+108
+00:06:21.860 --> 00:06:25.879
+The setDamageLocation function is simpler still, it's just a setter.
+
+109
+00:06:25.879 --> 00:06:29.139
+The cache damage location is what we'll use in the native tick to make sure the
+
+110
+00:06:29.139 --> 00:06:32.519
+widget remains over the hit actor in world space.
+
+111
+00:06:32.519 --> 00:06:34.560
+And that's it, nothing crazy.
+
+112
+00:06:34.560 --> 00:06:38.000
+We've triggered a bound animation, we've built a procedural animation driven by a
+
+113
+00:06:38.000 --> 00:06:41.560
+tick, and we've bound to a widget for dynamically setting text values.
+
+114
+00:06:41.560 --> 00:06:44.959
+Let's quickly take a look at where we trigger this widget's creation, and where
+
+115
+00:06:44.959 --> 00:06:48.529
+do we take advantage of those public functions.
+
+116
+00:06:48.529 --> 00:06:52.810
+Jumping into the explosion component, which was a component added as part of the Introduction
+
+117
+00:06:52.810 --> 00:06:57.029
+to Gameplay talk in this course, we can see our new block of code.
+
+118
+00:06:57.029 --> 00:07:01.250
+Firstly, we have our NotUeServerPreProcessor.
+
+119
+00:07:01.250 --> 00:07:04.889
+This means this entire block of code will be stripped out of server builds, ensuring
+
+120
+00:07:04.889 --> 00:07:08.579
+we don't end up with UI on the server.
+
+121
+00:07:08.579 --> 00:07:11.740
+This is followed by an authority check to make sure that we're definitely not on
+
+122
+00:07:11.740 --> 00:07:16.019
+the server, and you'll remember from the Introduction to C++ talk that editor targets
+
+123
+00:07:16.019 --> 00:07:19.339
+contain both client and server code.
+
+124
+00:07:19.339 --> 00:07:23.500
+It's important that we have both a preprocessor and an authority check to make sure that
+
+125
+00:07:23.500 --> 00:07:25.959
+all potential targets are accounted for.
+
+126
+00:07:25.959 --> 00:07:30.680
+Next, we cache the location of the actor, and check its bounds to calculate an aesthetically
+
+127
+00:07:30.680 --> 00:07:33.699
+pleasing spawn location in world space.
+
+128
+00:07:33.699 --> 00:07:37.620
+This value, along with the amount of damage this actor took, is passed through to the
+
+129
+00:07:37.620 --> 00:07:40.959
+new SpawnFloatingIndicator function.
+
+130
+00:07:40.959 --> 00:07:43.060
+It's here that we do our actual spawning.
+
+131
+00:07:43.060 --> 00:07:46.959
+We check to see if we've got a valid floating damage class, and that the amount of damage
+
+132
+00:07:46.959 --> 00:07:51.259
+passed in was not zero, as displaying zero damage is basically pointless.
+
+133
+00:07:51.259 --> 00:07:54.800
+From there, we call the templatedCreateWidget function that we mentioned in today's
+
+134
+00:07:54.800 --> 00:08:00.069
+talk, as well as a sensible outer, in this case it's just going to be the world.
+
+135
+00:08:00.069 --> 00:08:04.870
+Once we've made sure we've got a valid pointer, we call both the setDamageValue and the setDamageLocation
+
+136
+00:08:04.870 --> 00:08:08.269
+functions to make sure our widget has got the correct appearance.
+
+137
+00:08:08.269 --> 00:08:13.089
+Finally, we call addToViewport with a z-value of 1.
+
+138
+00:08:13.089 --> 00:08:17.529
+Anything with a z-value of 0 or below is going to appear behind this widget, and
+
+139
+00:08:17.529 --> 00:08:22.259
+of course anything with a z-value higher is going to appear in front of this widget.
+
+140
+00:08:22.259 --> 00:08:26.180
+We've now got an animated damage indicator, accurately displaying how much damage an
+
+141
+00:08:26.180 --> 00:08:28.610
+exploding actor takes.
+
+142
+00:08:28.610 --> 00:08:32.559
+That concludes Introduction to Unreal Motion Graphics for Programmers.
+
+143
+00:08:32.559 --> 00:08:36.059
+Today we learned about the UWidget and the UserWidget.
+
+144
+00:08:36.059 --> 00:08:39.779
+We covered authoring new widgets using the Widget Blueprint Editor and its inbuilt
+
+145
+00:08:39.779 --> 00:08:41.919
+Animation Editor.
+
+146
+00:08:41.919 --> 00:08:45.799
+We looked at widget-overrideable functions and the special UProperties we have at
+
+147
+00:08:45.799 --> 00:08:46.799
+our disposal.
+
+148
+00:08:46.799 --> 00:08:50.919
+And we also learned how we can use the 3D widgets to build UI that can be used in
+
+149
+00:08:50.919 --> 00:08:53.840
+unconventional projects such as VR.
+
+150
+00:08:53.840 --> 00:08:58.720
+We wrapped up today's session with a live example of a piece of UI built in UMG, walking
+
+151
+00:08:58.840 --> 00:09:03.490
+through how we can build UI code that's responsive to designer requirements.
+
+152
+00:09:03.490 --> 00:09:05.490
+Thank you so much for watching, and have a wonderful day.

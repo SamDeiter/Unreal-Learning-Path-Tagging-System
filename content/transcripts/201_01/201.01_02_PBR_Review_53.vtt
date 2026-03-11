@@ -1,0 +1,265 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.320
+Hi everyone, in this lesson, we're going to take a look at the outline for this course.
+
+2
+00:00:05.320 --> 00:00:10.619
+And then we're going to take a look at a review of PBRs and how they work with Unreal.
+
+3
+00:00:10.619 --> 00:00:12.539
+So let's get started.
+
+4
+00:00:12.539 --> 00:00:17.879
+So the first part we'll be looking at is an overview of real time PBR.
+
+5
+00:00:17.879 --> 00:00:19.219
+What is real time PBR?
+
+6
+00:00:19.219 --> 00:00:23.039
+So it's a bit of a review for what we talked about in our first class.
+
+7
+00:00:23.039 --> 00:00:28.920
+So just a refresher and some new concepts, or I should say tools and methodologies
+
+8
+00:00:28.920 --> 00:00:29.920
+that can help you.
+
+9
+00:00:30.339 --> 00:00:36.329
+Next, we'll look at creating parent materials, instant materials, and adding more features.
+
+10
+00:00:36.329 --> 00:00:40.049
+We'll look at, we'll have a review of parent materials and instance materials.
+
+11
+00:00:40.049 --> 00:00:44.460
+And then we're going to introduce you to a switch parameter and how that works.
+
+12
+00:00:44.460 --> 00:00:47.259
+Next, we'll take a look at creating mask materials.
+
+13
+00:00:47.259 --> 00:00:51.539
+That process, we'll be using the minus nodes and clamps, that'll be some new stuff
+
+14
+00:00:51.539 --> 00:00:52.539
+to look at.
+
+15
+00:00:52.539 --> 00:00:56.659
+And using the lerp node, we'll look at masking textures for materials using one
+
+16
+00:00:56.659 --> 00:00:59.579
+texture by using RGB channels.
+
+17
+00:00:59.579 --> 00:01:02.820
+And then finally, we'll wrap things up looking at material functions.
+
+18
+00:01:02.820 --> 00:01:04.540
+What are material functions?
+
+19
+00:01:04.540 --> 00:01:09.420
+Using function inputs, building animated materials in a function, and using material
+
+20
+00:01:09.420 --> 00:01:11.700
+function in parent materials.
+
+21
+00:01:11.700 --> 00:01:14.219
+All right, let's go ahead and get started.
+
+22
+00:01:14.219 --> 00:01:18.650
+Let's go ahead and take a look at an overview of material theory in real time PBR.
+
+23
+00:01:18.650 --> 00:01:20.090
+Now review.
+
+24
+00:01:20.090 --> 00:01:24.209
+We've talked a bit about this in the first class, but what is real time PBR?
+
+25
+00:01:24.209 --> 00:01:28.450
+Many people from an offline render will find this difficult or at least tricky to understand
+
+26
+00:01:28.530 --> 00:01:31.730
+in the fact that we're being able to update some high quality materials on the
+
+27
+00:01:31.730 --> 00:01:34.530
+fly without having to send them to a renderer.
+
+28
+00:01:34.530 --> 00:01:37.969
+So that's because we use a unified light and shading system.
+
+29
+00:01:37.969 --> 00:01:43.010
+It approximates lights, real life behavior, physically accurate,
+
+30
+00:01:43.010 --> 00:01:48.250
+and uses real physical measurements such as Lumen, Lux, inverse square law,
+
+31
+00:01:48.250 --> 00:01:50.569
+energy conservation, et cetera.
+
+32
+00:01:50.569 --> 00:01:56.819
+It's more intuitive and consistent and produces a more accurate and more natural look.
+
+33
+00:01:56.859 --> 00:02:01.299
+So basically what we're talking about is the difference between things that are not
+
+34
+00:02:01.299 --> 00:02:03.099
+metal and things that are.
+
+35
+00:02:03.099 --> 00:02:06.620
+You can think of it as things that are flat in nature,
+
+36
+00:02:06.620 --> 00:02:10.340
+going all the way to things that are highly reflective.
+
+37
+00:02:10.340 --> 00:02:15.219
+So here's a nice little chart that I've given to you that shows you color wise
+
+38
+00:02:15.219 --> 00:02:18.979
+what you can do to imitate some of the things that you would see in real life
+
+39
+00:02:18.979 --> 00:02:20.340
+and in real nature.
+
+40
+00:02:20.340 --> 00:02:22.900
+So color info always has a range.
+
+41
+00:02:22.900 --> 00:02:25.740
+There are no pure whites or blacks in nature.
+
+42
+00:02:25.780 --> 00:02:28.340
+Although science is trying to get closer to that.
+
+43
+00:02:28.340 --> 00:02:32.539
+Keep in mind, roughness is key in defining the look of the material
+
+44
+00:02:32.539 --> 00:02:35.180
+as in selling its real world equivalent.
+
+45
+00:02:35.180 --> 00:02:39.060
+So that roughness is going to be key between shiny metal, rusty metal,
+
+46
+00:02:39.060 --> 00:02:40.780
+old leather, new leather.
+
+47
+00:02:40.780 --> 00:02:44.139
+Those are really, it's a really huge determining factor,
+
+48
+00:02:44.139 --> 00:02:46.860
+but there's also spec, which we mentioned in the first class,
+
+49
+00:02:46.860 --> 00:02:48.740
+which can add to the look,
+
+50
+00:02:48.740 --> 00:02:51.780
+but you gotta be careful because you have to bounce between spec and rough
+
+51
+00:02:51.780 --> 00:02:54.180
+and make sure they're not canceling each other out
+
+52
+00:02:54.180 --> 00:02:56.419
+or competing in some way.
+
+53
+00:02:56.419 --> 00:02:59.340
+So you'll see here again, a review of metallic.
+
+54
+00:02:59.340 --> 00:03:02.430
+Here's the range is zero to one typically.
+
+55
+00:03:02.430 --> 00:03:04.270
+And then you'll see here is roughness.
+
+56
+00:03:04.270 --> 00:03:07.830
+Both are very complimentary when working with your materials.
+
+57
+00:03:07.830 --> 00:03:10.629
+And you, again, you can have a defined texture
+
+58
+00:03:10.629 --> 00:03:13.250
+in these areas to help push that look
+
+59
+00:03:13.250 --> 00:03:14.870
+for what you're working with.
+
+60
+00:03:14.870 --> 00:03:16.349
+Here's some additional notes
+
+61
+00:03:16.349 --> 00:03:18.870
+when it comes to physical materials.
+
+62
+00:03:18.870 --> 00:03:20.030
+That's it with this course.
+
+63
+00:03:20.030 --> 00:03:22.310
+In the next course, we're gonna look at parent materials
+
+64
+00:03:22.310 --> 00:03:23.770
+and instance materials.
+
+65
+00:03:23.770 --> 00:03:26.389
+And in the case of adding more features
+
+66
+00:03:26.389 --> 00:03:27.509
+to those materials.

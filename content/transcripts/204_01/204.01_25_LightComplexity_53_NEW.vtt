@@ -1,0 +1,621 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:04.320
+In this part of optimization view modes,
+
+2
+00:00:04.320 --> 00:00:06.280
+I'd like to talk about lighting complexity
+
+3
+00:00:06.280 --> 00:00:09.660
+as lighting complexity shows you how many non-static lights
+
+4
+00:00:09.660 --> 00:00:11.960
+you have affecting your geometry.
+
+5
+00:00:11.960 --> 00:00:13.519
+Remember, a non-static light is
+
+6
+00:00:13.519 --> 00:00:18.120
+a light that is dynamic or can move around and interact
+
+7
+00:00:18.120 --> 00:00:20.320
+with the scene in real time.
+
+8
+00:00:20.320 --> 00:00:22.079
+Now, the more non-static lights
+
+9
+00:00:22.079 --> 00:00:24.640
+you have affecting any piece of geometry,
+
+10
+00:00:24.640 --> 00:00:28.980
+the more expensive it will be to render.
+
+11
+00:00:29.000 --> 00:00:32.000
+Red means areas are going to have performance issues.
+
+12
+00:00:32.000 --> 00:00:35.560
+And as we start to hit red to light purple, dark purple,
+
+13
+00:00:35.560 --> 00:00:37.439
+and then on to white, this is going
+
+14
+00:00:37.439 --> 00:00:39.520
+to be very expensive to render.
+
+15
+00:00:39.520 --> 00:00:42.439
+So this is definitely something we need to look at.
+
+16
+00:00:42.439 --> 00:00:45.600
+Now, again, as with most of our optimization view modes,
+
+17
+00:00:45.600 --> 00:00:49.079
+the goal here is to identify possible areas
+
+18
+00:00:49.079 --> 00:00:53.520
+and see what we can do to help adjust them in order
+
+19
+00:00:53.520 --> 00:00:56.039
+to get some performance back.
+
+20
+00:00:56.100 --> 00:00:59.939
+However, we don't want to make black and white decisions.
+
+21
+00:00:59.939 --> 00:01:02.259
+For example, we don't need to have
+
+22
+00:01:02.259 --> 00:01:04.739
+the scene that's ideal to moderate,
+
+23
+00:01:04.739 --> 00:01:07.980
+as the car is the only object in the scene
+
+24
+00:01:07.980 --> 00:01:08.980
+at this time.
+
+25
+00:01:08.980 --> 00:01:11.500
+So because of that, we can get away
+
+26
+00:01:11.500 --> 00:01:14.939
+with going to the more expensive and very expensive.
+
+27
+00:01:14.939 --> 00:01:16.659
+And also, every scene is unique.
+
+28
+00:01:16.659 --> 00:01:18.700
+So again, these tools are used
+
+29
+00:01:18.700 --> 00:01:20.900
+to help us make better judgments.
+
+30
+00:01:20.900 --> 00:01:22.920
+And let's go ahead and jump into the engine
+
+31
+00:01:22.920 --> 00:01:24.900
+and see an example of that.
+
+32
+00:01:25.079 --> 00:01:26.939
+Here, we have that exact same scene.
+
+33
+00:01:26.939 --> 00:01:30.000
+And if I come over to my lit optimization view modes,
+
+34
+00:01:30.000 --> 00:01:31.359
+lighting complexity, and remember,
+
+35
+00:01:31.359 --> 00:01:33.959
+Alt 7 is the keyboard shortcut.
+
+36
+00:01:33.959 --> 00:01:34.439
+Look at that.
+
+37
+00:01:34.439 --> 00:01:35.939
+That is just insane.
+
+38
+00:01:35.939 --> 00:01:37.159
+Everything is white.
+
+39
+00:01:37.159 --> 00:01:39.439
+That's really not going to work for us.
+
+40
+00:01:39.439 --> 00:01:40.959
+So what we're going to do first
+
+41
+00:01:40.959 --> 00:01:43.000
+is I'm going to hit the G key on my keyboard.
+
+42
+00:01:43.000 --> 00:01:45.120
+And then I'm going to come here and start selecting lights.
+
+43
+00:01:45.120 --> 00:01:46.359
+And let's see what's going on.
+
+44
+00:01:46.359 --> 00:01:48.879
+So first off, these lights right here that I selected,
+
+45
+00:01:48.879 --> 00:01:52.519
+they have an attenuation radius of 1,000.
+
+46
+00:01:52.540 --> 00:01:55.700
+And let's go ahead and just click on this effects world.
+
+47
+00:01:55.700 --> 00:01:59.239
+It looks like they're here just to highlight
+
+48
+00:01:59.239 --> 00:02:00.519
+this wheel a little bit more.
+
+49
+00:02:00.519 --> 00:02:02.060
+So what I'm going to do is I'm going
+
+50
+00:02:02.060 --> 00:02:04.519
+to take these down to, say, 50.
+
+51
+00:02:04.519 --> 00:02:07.799
+So with that done, let's just see what that did.
+
+52
+00:02:07.799 --> 00:02:10.919
+Let's just come here to our lighting complexity and see.
+
+53
+00:02:10.919 --> 00:02:12.599
+That didn't really do too much.
+
+54
+00:02:12.599 --> 00:02:15.919
+But I do know that we are well
+
+55
+00:02:15.919 --> 00:02:19.360
+on our way to making some adjustments that will work.
+
+56
+00:02:19.360 --> 00:02:20.960
+So let's grab this light next.
+
+57
+00:02:20.979 --> 00:02:23.819
+So this is a box light.
+
+58
+00:02:23.819 --> 00:02:25.939
+And look how big its radius is.
+
+59
+00:02:25.939 --> 00:02:29.659
+Its radius actually goes all the way out into the world.
+
+60
+00:02:29.659 --> 00:02:31.219
+And what we're going to do with this one
+
+61
+00:02:31.219 --> 00:02:33.419
+is we're just going to bring this back down.
+
+62
+00:02:33.419 --> 00:02:35.340
+I'm actually going to bring it quite far in,
+
+63
+00:02:35.340 --> 00:02:38.659
+because it looks like if I was to disable this,
+
+64
+00:02:38.659 --> 00:02:41.740
+it's really just to highlight this side of the car.
+
+65
+00:02:41.740 --> 00:02:45.099
+So having it go all the way through like this
+
+66
+00:02:45.099 --> 00:02:47.819
+is probably not something that we necessarily want.
+
+67
+00:02:47.819 --> 00:02:50.020
+Also, it gives us really hard shadow in the background.
+
+68
+00:02:50.039 --> 00:02:52.199
+And that doesn't really happen anywhere else in the scene.
+
+69
+00:02:52.199 --> 00:02:53.599
+So I'm going to bring this back in.
+
+70
+00:02:53.599 --> 00:02:54.400
+And check this out.
+
+71
+00:02:54.400 --> 00:02:56.360
+When I bring this back in and kind of just
+
+72
+00:02:56.360 --> 00:02:59.080
+make sure that it's right around the car,
+
+73
+00:02:59.080 --> 00:03:01.479
+I go back to my optimization view modes.
+
+74
+00:03:01.479 --> 00:03:04.639
+And I'm still not getting so much,
+
+75
+00:03:04.639 --> 00:03:06.439
+but we are getting some in this area.
+
+76
+00:03:06.439 --> 00:03:08.740
+So let's kind of continue on, because I'm sure there's
+
+77
+00:03:08.740 --> 00:03:10.240
+some other lights that we can do.
+
+78
+00:03:10.240 --> 00:03:12.000
+So let's check out this one right here.
+
+79
+00:03:12.000 --> 00:03:14.280
+Attenuation radius, 2,500.
+
+80
+00:03:14.280 --> 00:03:15.439
+So that's pretty large too.
+
+81
+00:03:15.439 --> 00:03:17.319
+That's going all the way out there.
+
+82
+00:03:17.319 --> 00:03:19.120
+Let's go back.
+
+83
+00:03:19.259 --> 00:03:20.500
+So this looks like, again, it's trying
+
+84
+00:03:20.500 --> 00:03:21.699
+to get the front right there.
+
+85
+00:03:21.699 --> 00:03:24.740
+So we're just going to bring this down.
+
+86
+00:03:24.740 --> 00:03:26.180
+It's about right there.
+
+87
+00:03:26.180 --> 00:03:27.379
+There we go.
+
+88
+00:03:27.379 --> 00:03:27.860
+Let's see.
+
+89
+00:03:27.860 --> 00:03:28.580
+What else can we do?
+
+90
+00:03:28.580 --> 00:03:29.740
+Let's grab the spotlight.
+
+91
+00:03:29.740 --> 00:03:32.219
+So it looks like it's actually going through the floor.
+
+92
+00:03:32.219 --> 00:03:35.099
+So again, we'll just take this attenuation radius
+
+93
+00:03:35.099 --> 00:03:37.939
+and bring this up, because it looks like it's probably
+
+94
+00:03:37.939 --> 00:03:41.300
+going right there for that highlight,
+
+95
+00:03:41.300 --> 00:03:42.979
+the front kind of right there.
+
+96
+00:03:42.979 --> 00:03:46.740
+You can see it's giving it just a little bit
+
+97
+00:03:46.740 --> 00:03:50.889
+of extra light.
+
+98
+00:03:51.310 --> 00:03:53.110
+There we go, something like that.
+
+99
+00:03:53.110 --> 00:03:53.830
+Nice.
+
+100
+00:03:53.830 --> 00:03:55.909
+All right, let's just check this out one more time,
+
+101
+00:03:55.909 --> 00:03:59.349
+because this is a process that is iterative.
+
+102
+00:03:59.349 --> 00:04:03.669
+So still getting a lot of red in there, or a lot of white,
+
+103
+00:04:03.669 --> 00:04:04.310
+I should say.
+
+104
+00:04:04.310 --> 00:04:06.710
+So let's see what else we can do over here.
+
+105
+00:04:06.710 --> 00:04:08.069
+So we fixed these ones.
+
+106
+00:04:08.069 --> 00:04:09.430
+Let's check this one out.
+
+107
+00:04:09.430 --> 00:04:10.550
+So what is this?
+
+108
+00:04:10.550 --> 00:04:13.139
+Sorts, this is a big one.
+
+109
+00:04:13.139 --> 00:04:15.259
+So let's go ahead and see what
+
+110
+00:04:15.259 --> 00:04:19.139
+this is doing really quick by just disabling it and enabling
+
+111
+00:04:19.199 --> 00:04:21.279
+it so it's casting on the back here.
+
+112
+00:04:21.279 --> 00:04:23.879
+So let's just bring this down some more,
+
+113
+00:04:23.879 --> 00:04:26.759
+because it looks like, oh, yeah, that was definitely
+
+114
+00:04:26.759 --> 00:04:28.600
+affecting everything in the scene.
+
+115
+00:04:28.600 --> 00:04:31.439
+Let's go back here, see our optimization view modes.
+
+116
+00:04:31.439 --> 00:04:36.920
+I'm still not crazy expensive, so let's
+
+117
+00:04:36.920 --> 00:04:38.480
+keep on going with these.
+
+118
+00:04:38.480 --> 00:04:41.240
+This one's got a huge attenuation radius as well,
+
+119
+00:04:41.240 --> 00:04:43.879
+and it's only for the other side of the car.
+
+120
+00:04:43.879 --> 00:04:47.399
+So there we go, maybe like that.
+
+121
+00:04:47.420 --> 00:04:50.100
+Let's see what we're doing with our lighting complexity now.
+
+122
+00:04:50.100 --> 00:04:52.540
+Nope, still pretty complex, but look,
+
+123
+00:04:52.540 --> 00:04:54.899
+we're getting better on the sides here,
+
+124
+00:04:54.899 --> 00:04:57.220
+so let's keep going.
+
+125
+00:04:57.220 --> 00:04:59.899
+We have these inner lights here.
+
+126
+00:04:59.899 --> 00:05:02.579
+Looks like these inner lights, let me just
+
+127
+00:05:02.579 --> 00:05:05.579
+grab these really quick, and let's go ahead
+
+128
+00:05:05.579 --> 00:05:07.259
+and see what affects the world.
+
+129
+00:05:07.259 --> 00:05:11.100
+So these are to brighten up the inside of the car,
+
+130
+00:05:11.100 --> 00:05:13.220
+and their attenuation radius is set to 1,000.
+
+131
+00:05:13.220 --> 00:05:17.240
+So let's set these to 50, and let's just
+
+132
+00:05:17.240 --> 00:05:25.199
+see, probably 75.
+
+133
+00:05:25.199 --> 00:05:27.720
+That definitely looks like they're doing their job,
+
+134
+00:05:27.720 --> 00:05:30.160
+and let's go back and check our attenuation,
+
+135
+00:05:30.160 --> 00:05:33.040
+or not attenuation, I'm sorry, lighting complexity again.
+
+136
+00:05:33.040 --> 00:05:34.199
+Oh my gosh, look at that.
+
+137
+00:05:34.199 --> 00:05:35.079
+So there we go.
+
+138
+00:05:35.079 --> 00:05:36.360
+That was our culprit.
+
+139
+00:05:36.360 --> 00:05:39.040
+That definitely helped us out quite a bit.
+
+140
+00:05:39.040 --> 00:05:42.699
+So that was the one final thing
+
+141
+00:05:42.699 --> 00:05:45.959
+that we had to bring in to help really just make sure
+
+142
+00:05:45.959 --> 00:05:48.879
+that we can run this scene appropriately,
+
+143
+00:05:48.899 --> 00:05:51.779
+to go to frame rate while not destroying
+
+144
+00:05:51.779 --> 00:05:53.459
+the art quality of it.
+
+145
+00:05:53.459 --> 00:05:55.819
+Now, the last thing I want to note about this, too,
+
+146
+00:05:55.819 --> 00:05:57.899
+is I'm going to come back to one of these lights.
+
+147
+00:05:57.899 --> 00:06:01.139
+A very important thing is this casting shadows.
+
+148
+00:06:01.139 --> 00:06:03.100
+Enabling and disabling casting shadows
+
+149
+00:06:03.100 --> 00:06:04.740
+is going to have a huge performance
+
+150
+00:06:04.740 --> 00:06:07.620
+impact on any dynamic light that you use.
+
+151
+00:06:07.620 --> 00:06:10.699
+So just as a rule of thumb, if you
+
+152
+00:06:10.699 --> 00:06:14.319
+want a dynamic light or your lighting complexity
+
+153
+00:06:14.319 --> 00:06:18.620
+to improve drastically, you can also disable cast shadows,
+
+154
+00:06:18.639 --> 00:06:20.319
+and that will have a huge performance
+
+155
+00:06:20.319 --> 00:06:23.959
+impact on that particular light.

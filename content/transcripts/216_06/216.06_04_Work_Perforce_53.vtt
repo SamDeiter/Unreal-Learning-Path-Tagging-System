@@ -1,0 +1,761 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.129
+Okay, now let's talk about server and client setup, and in this first section, we will
+
+2
+00:00:06.129 --> 00:00:09.130
+discuss working with Perforce Client.
+
+3
+00:00:09.130 --> 00:00:13.009
+To get started, you will need to head over to the Perforce website and locate the Helix
+
+4
+00:00:13.009 --> 00:00:19.559
+P4V visual client and the Helix Core P4D server.
+
+5
+00:00:19.559 --> 00:00:23.559
+Your initial setup will only need a single server, and while your team members or users
+
+6
+00:00:23.559 --> 00:00:27.699
+will install the client, your IT department should pretty much handle the rest of the
+
+7
+00:00:27.699 --> 00:00:32.719
+hardware and server setup and configuration.
+
+8
+00:00:32.719 --> 00:00:38.320
+Helix Core does offer a free trial for up to 5 users and up to 20 workspaces.
+
+9
+00:00:38.320 --> 00:00:41.520
+So if you need to make your own Perforce server to try it out first, go ahead and
+
+10
+00:00:41.520 --> 00:00:43.009
+give that a shot.
+
+11
+00:00:43.009 --> 00:00:49.189
+Large, scalable hardware is not a requirement before you create your Perforce server.
+
+12
+00:00:49.189 --> 00:00:54.939
+Now if you do select the full version, here are some of the Perforce Helix selling points.
+
+13
+00:00:54.939 --> 00:00:59.500
+Full version Perforce Helix manages tens of thousands of developers and creatives, tens
+
+14
+00:00:59.500 --> 00:01:04.500
+of millions of daily transactions, hundreds of terabytes of data, and tens of thousands
+
+15
+00:01:04.500 --> 00:01:07.659
+of concurrent commits.
+
+16
+00:01:07.659 --> 00:01:13.709
+Once you're ready to go, download the installer and install the Perforce client and server.
+
+17
+00:01:13.709 --> 00:01:15.590
+Note here the server port.
+
+18
+00:01:15.590 --> 00:01:21.709
+It is highly recommended that you maintain your server port ID as the default, 1666.
+
+19
+00:01:21.709 --> 00:01:26.030
+Additionally, the command line is going to need to be installed on the server in
+
+20
+00:01:26.030 --> 00:01:32.409
+order to utilize Unreal Game Sync in place of the standard Perforce front-end user interface.
+
+21
+00:01:32.409 --> 00:01:36.890
+We'll discuss more about using Unreal Game Sync a little bit later in this course.
+
+22
+00:01:36.890 --> 00:01:40.629
+For now, I want to move on to discuss a little bit about hardware considerations
+
+23
+00:01:40.629 --> 00:01:47.709
+you should make when choosing where you store your user workspace or using your server.
+
+24
+00:01:47.709 --> 00:01:51.450
+So for server-side hardware, it's recommended that you consider using a Linux system
+
+25
+00:01:51.450 --> 00:01:52.930
+instead of Windows.
+
+26
+00:01:52.930 --> 00:01:58.530
+A Linux system is going to give you a significantly faster performance over a Windows-based system,
+
+27
+00:01:58.530 --> 00:02:00.329
+but it's not a requirement.
+
+28
+00:02:00.329 --> 00:02:02.849
+Most of what we'll talk about is going to be Windows-based.
+
+29
+00:02:02.849 --> 00:02:07.170
+Additionally, I would also make sure that on both server and client system hardware
+
+30
+00:02:07.170 --> 00:02:11.099
+configurations that storage systems be deeply considered.
+
+31
+00:02:11.099 --> 00:02:17.280
+The differences between mechanical hard drives and solid-state NVMe drives are significant.
+
+32
+00:02:17.280 --> 00:02:23.060
+Mechanical hard drives cannot read and write data concurrently, while solid-state NVMe drives
+
+33
+00:02:23.060 --> 00:02:26.120
+can read and write data concurrently.
+
+34
+00:02:26.120 --> 00:02:31.039
+For this reason, it is recommended that your server storage drive and client user workspace
+
+35
+00:02:31.039 --> 00:02:37.759
+drive are SSD NVMe hardware.
+
+36
+00:02:37.759 --> 00:02:43.939
+Okay, once Perforce Helix has been installed and the server depot is actively running,
+
+37
+00:02:43.939 --> 00:02:48.689
+the next step is to open up the connection and create the client-side user workspace.
+
+38
+00:02:48.689 --> 00:02:54.289
+The workspace is where your project files will live and where you will work on assets locally.
+
+39
+00:02:54.289 --> 00:02:59.449
+This is where everything is going to be pushed and pulled to the Perforce server depot.
+
+40
+00:02:59.449 --> 00:03:06.780
+I recommend naming the workspace something short, not the default Perforce-generated workspace name.
+
+41
+00:03:06.780 --> 00:03:10.479
+You should be aware of the OS limitations for characters and naming conventions that
+
+42
+00:03:10.479 --> 00:03:12.240
+you might run up against.
+
+43
+00:03:12.240 --> 00:03:19.030
+For example, Windows has a 255 character limit, so simplicity in naming is key.
+
+44
+00:03:19.030 --> 00:03:23.330
+Ultimately, your naming conventions and workspace should make sense for whatever project you're
+
+45
+00:03:23.330 --> 00:03:28.949
+working on, and it is expected that you're going to have multiple projects that you
+
+46
+00:03:28.949 --> 00:03:31.569
+and your team will be working on.
+
+47
+00:03:31.569 --> 00:03:36.430
+Most studios will have multiple project streams on their server and multiple user workspaces
+
+48
+00:03:36.430 --> 00:03:39.400
+for each of those streams.
+
+49
+00:03:39.400 --> 00:03:42.960
+So once you're done, you want to select the depot, select the stream that you're
+
+50
+00:03:42.960 --> 00:03:48.020
+actually going to work from, and then you should be good to go.
+
+51
+00:03:48.020 --> 00:03:52.580
+However, as you work, you may need to set up and use type maps.
+
+52
+00:03:52.580 --> 00:03:56.699
+Type maps are server-side information, and while the average user may not ever have to
+
+53
+00:03:56.699 --> 00:04:01.030
+set this up, the type map is going to be used for any number of automated functions
+
+54
+00:04:01.030 --> 00:04:06.289
+such as version trimming if your storage space is limited, or simply enumerating tasks
+
+55
+00:04:06.289 --> 00:04:07.650
+as another example.
+
+56
+00:04:07.650 --> 00:04:12.949
+To access the type map in Windows, just head over to the Windows PowerShell, type
+
+57
+00:04:12.949 --> 00:04:18.110
+in the p4-type-map command, and that should open a text doc that you'll be able to
+
+58
+00:04:18.110 --> 00:04:23.470
+customize, make edits, and save, implementing your automation without much fuss.
+
+59
+00:04:23.470 --> 00:04:31.399
+A good command-line type map example has been provided online in the Epic Games documentation.
+
+60
+00:04:31.399 --> 00:04:35.439
+There you will find a comprehensive type map, similar to what is pictured here in
+
+61
+00:04:35.439 --> 00:04:38.199
+this slide.
+
+62
+00:04:38.199 --> 00:04:41.620
+Alright, moving on to the Helix Client frontend.
+
+63
+00:04:41.620 --> 00:04:45.639
+This is your user interface, and I've broken this up into four distinct sections.
+
+64
+00:04:45.639 --> 00:04:47.600
+First, there is the toolbar.
+
+65
+00:04:47.600 --> 00:04:49.529
+It's number one.
+
+66
+00:04:49.529 --> 00:04:52.129
+This is where all your menu buttons are going to live.
+
+67
+00:04:52.129 --> 00:04:58.399
+Refresh, get latest, submit, checkout, delete, differentiate, redraft, and clone.
+
+68
+00:04:58.399 --> 00:04:59.779
+They're all there.
+
+69
+00:04:59.779 --> 00:05:04.240
+And if you're ever unsure of what each toolbar button does once you launch Perforce, just
+
+70
+00:05:04.240 --> 00:05:07.720
+hover over the button and Perforce will give you a short description of the button's
+
+71
+00:05:07.720 --> 00:05:09.389
+function.
+
+72
+00:05:09.389 --> 00:05:14.819
+The next window that I want to look at is number two, file versions.
+
+73
+00:05:14.819 --> 00:05:19.439
+This is where your depot and workspace version views are available, and you can switch between
+
+74
+00:05:19.439 --> 00:05:23.329
+them by clicking on the tabs for either section.
+
+75
+00:05:23.329 --> 00:05:28.089
+Inside those sections, you'll be able to determine what files exist where, and be able to quickly
+
+76
+00:05:28.089 --> 00:05:33.370
+check what is in your workspace and what is in your depot to compare versioning.
+
+77
+00:05:33.370 --> 00:05:38.800
+Typically, you're going to start out in the workspace when launching Perforce.
+
+78
+00:05:38.800 --> 00:05:43.250
+But in this particular image, I'm showing you the depot side.
+
+79
+00:05:43.250 --> 00:05:46.930
+Next up is number three, the work area.
+
+80
+00:05:46.930 --> 00:05:49.350
+The work area is where your files live.
+
+81
+00:05:49.350 --> 00:05:53.829
+You can see pending change lists, there's a tab for the workspace setup, which will
+
+82
+00:05:53.829 --> 00:05:57.689
+allow you to switch between multiple active workspaces.
+
+83
+00:05:57.689 --> 00:05:59.790
+Notice here that I have two showing.
+
+84
+00:05:59.790 --> 00:06:07.629
+One is for the unified content example version 5.2, and another one is for the version 5.3
+
+85
+00:06:07.629 --> 00:06:09.029
+of the same content.
+
+86
+00:06:09.029 --> 00:06:14.189
+Here, you can also switch over to view the history of anything that you have submitted
+
+87
+00:06:14.189 --> 00:06:16.660
+for work.
+
+88
+00:06:16.660 --> 00:06:19.959
+Below that is number four, the command line.
+
+89
+00:06:19.959 --> 00:06:24.779
+This is an activity log, but it also allows for anything chronicled in the command line
+
+90
+00:06:24.779 --> 00:06:31.220
+history to be copied and pasted for rapid scripting if needed.
+
+91
+00:06:31.220 --> 00:06:35.620
+Moving on to the meat of Perforce, adding project files to Perforce that you can actually
+
+92
+00:06:35.620 --> 00:06:41.670
+work on, we're going to talk about adding an Unreal Engine project file to Perforce.
+
+93
+00:06:41.670 --> 00:06:46.230
+Unreal Engine project files and folders will need to be added to the Perforce workspace
+
+94
+00:06:46.230 --> 00:06:51.430
+once you've created that workspace on the client-side local hard drive.
+
+95
+00:06:51.430 --> 00:06:57.050
+This will allow the files within that workspace to be accessible by Perforce.
+
+96
+00:06:57.050 --> 00:07:00.790
+Once the workspace has been created on the client's local drive, all you need to do
+
+97
+00:07:00.790 --> 00:07:06.810
+to add your project files is just copy the entire engine project folder from your
+
+98
+00:07:06.810 --> 00:07:13.850
+Unreal Engine projects folder to the workspace collaboration subfolder, as you can see here.
+
+99
+00:07:13.889 --> 00:07:19.129
+Just a quick note here, the hierarchy of the depot will be handled by your internal IT staff,
+
+100
+00:07:19.129 --> 00:07:25.430
+but a typical configuration and what we use at Epic Games starts with a specific Perforce stream.
+
+101
+00:07:25.430 --> 00:07:31.350
+Then under the Perforce stream, a collaboration folder is created, followed by a subfolder
+
+102
+00:07:31.350 --> 00:07:36.069
+or set of subfolders that allows users to organize and maintain different sections
+
+103
+00:07:36.069 --> 00:07:38.389
+of different projects.
+
+104
+00:07:38.389 --> 00:07:43.389
+For example, right now, the ILT Education Department has the Unified Content Example
+
+105
+00:07:43.389 --> 00:07:50.670
+folder where the ILT-UCE project lives, and that lives in both the workspace and
+
+106
+00:07:50.670 --> 00:07:52.110
+the depot.
+
+107
+00:07:52.110 --> 00:07:58.149
+If I want to add the ILT demo folder from my workspace to the project depot, I simply
+
+108
+00:07:58.149 --> 00:08:01.850
+need to drag it over to the same workspace location.
+
+109
+00:08:01.850 --> 00:08:05.629
+Now you might be wondering, what is that going to look like in Perforce once those
+
+110
+00:08:05.629 --> 00:08:10.230
+project folders and files have been added to the client local workspace?
+
+111
+00:08:10.230 --> 00:08:16.220
+Well, for Perforce to have access to the folder and files, all I need to do is refresh
+
+112
+00:08:16.220 --> 00:08:21.339
+that workspace inside the Perforce workspace window, and that's going to show the folders
+
+113
+00:08:21.339 --> 00:08:25.160
+and files that have been moved to that workspace.
+
+114
+00:08:25.160 --> 00:08:29.759
+Typically the refresh happens automatically, so you don't have to actively refresh unless
+
+115
+00:08:29.759 --> 00:08:31.560
+you don't see anything.
+
+116
+00:08:31.600 --> 00:08:35.720
+However, that doesn't mean that those folders and files have been pushed to the Perforce
+
+117
+00:08:35.720 --> 00:08:37.960
+depot just yet.
+
+118
+00:08:37.960 --> 00:08:42.899
+In order to get those folders and files up onto the depot so that they can be shared
+
+119
+00:08:42.899 --> 00:08:48.480
+and accessed by multiple users, I need to select only a few specific folders and files
+
+120
+00:08:48.480 --> 00:08:53.179
+from inside the Perforce workspace file version window.
+
+121
+00:08:53.179 --> 00:08:58.879
+Those specific folders are the Unreal Engine config folder, the content folder, and the
+
+122
+00:08:58.879 --> 00:09:03.799
+Unreal Engine uProject file for my project.
+
+123
+00:09:03.799 --> 00:09:08.419
+Once you have those folders and files selected, right-click on one of them and that will
+
+124
+00:09:08.419 --> 00:09:10.740
+bring up a pop-up menu.
+
+125
+00:09:10.740 --> 00:09:15.240
+This menu will have the option to mark your files for add.
+
+126
+00:09:15.240 --> 00:09:19.039
+When you mark the files for add, another menu is going to pop up, allowing you to
+
+127
+00:09:19.039 --> 00:09:22.360
+create a pending changelist.
+
+128
+00:09:22.360 --> 00:09:25.639
+When you first start out, that changelist that you're going to create is going to
+
+129
+00:09:25.639 --> 00:09:30.230
+be a new one, and you can select that from the drop-down menu.
+
+130
+00:09:30.230 --> 00:09:35.750
+You'll note here in the changelist description, I've added hashtag preflight to the start
+
+131
+00:09:35.750 --> 00:09:37.470
+of my description list.
+
+132
+00:09:37.470 --> 00:09:41.230
+That is because there may be a project or stream lockdown in effect for different
+
+133
+00:09:41.230 --> 00:09:45.970
+projects within Epic Games, and there may be changes to things going on behind the
+
+134
+00:09:45.970 --> 00:09:48.529
+scenes that prevent a standard upload.
+
+135
+00:09:48.529 --> 00:09:54.549
+You won't necessarily need to use this in your preflight or pending changelist.
+
+136
+00:09:54.549 --> 00:09:57.669
+When you first start out, that changelist that you're going to create is going to be
+
+137
+00:09:57.669 --> 00:10:02.590
+a new one, and you can select that from the drop-down menu as an option.
+
+138
+00:10:02.590 --> 00:10:07.590
+You'll note here in the changelist description that I've added a hashtag preflight to the
+
+139
+00:10:07.590 --> 00:10:10.200
+start of my description text.
+
+140
+00:10:10.200 --> 00:10:15.000
+That is because there may be a project or stream lockdown in effect for different projects
+
+141
+00:10:15.000 --> 00:10:20.019
+within Epic Games, and there may be changes to things going on behind the scenes that
+
+142
+00:10:20.019 --> 00:10:22.559
+may prevent a standard upload.
+
+143
+00:10:22.559 --> 00:10:26.879
+It's not always necessary to add this to your description.
+
+144
+00:10:26.879 --> 00:10:32.940
+Adding the specific hashtag preflight tag should allow me to bypass any lockdown blockades
+
+145
+00:10:32.940 --> 00:10:38.240
+so that my submission continues to go through without disturbing other streams.
+
+146
+00:10:38.240 --> 00:10:42.779
+After that tag, I give a normal description of what I'm actually submitting, what I'm
+
+147
+00:10:42.779 --> 00:10:48.039
+doing to make my change, and also notating that I am the user making this change.
+
+148
+00:10:48.039 --> 00:10:50.740
+Basically, I'm putting my name on it.
+
+149
+00:10:50.820 --> 00:10:55.980
+Once I'm ready, then I just go ahead and click OK to create my pending changelist.
+
+150
+00:10:55.980 --> 00:11:01.320
+From there, I might notice that hey, I forgot to add my source folder to that changelist.
+
+151
+00:11:01.320 --> 00:11:05.659
+Source files like Maya, ZBrush, or any FBX file that I want to keep outside of the
+
+152
+00:11:05.659 --> 00:11:10.539
+Unreal Engine project so that I might revise that again later can be added to the same
+
+153
+00:11:10.539 --> 00:11:15.220
+pending changelist, or if I've already submitted that changelist, I can just create
+
+154
+00:11:15.220 --> 00:11:18.090
+a new one for that submission.
+
+155
+00:11:18.090 --> 00:11:20.370
+Process works exactly the same way.
+
+156
+00:11:20.370 --> 00:11:26.009
+I just select and right-click those files or folder that I want to mark for add, and
+
+157
+00:11:26.009 --> 00:11:30.610
+then if I still have an existing changelist that I haven't submitted yet, I can choose
+
+158
+00:11:30.610 --> 00:11:34.590
+that changelist by selecting it from the pull-down menu that appears on the same
+
+159
+00:11:34.590 --> 00:11:35.590
+pop-up menu.
+
+160
+00:11:35.590 --> 00:11:39.659
+I don't have to change anything in the description because everything that I'm adding
+
+161
+00:11:39.659 --> 00:11:44.240
+is already there, and then just go ahead and hit OK.
+
+162
+00:11:44.240 --> 00:11:48.440
+What that's going to do is create a pending changelist file inside the work area window
+
+163
+00:11:48.440 --> 00:11:50.519
+in Perforce.
+
+164
+00:11:50.519 --> 00:11:55.419
+That is indicated by a red changelist triangle showing the active changelist waiting to be
+
+165
+00:11:55.419 --> 00:11:59.340
+submitted and uploaded to the depot.
+
+166
+00:11:59.340 --> 00:12:03.700
+To make that submission, just right-click on that red pending changelist and choose
+
+167
+00:12:03.700 --> 00:12:06.039
+Submit.
+
+168
+00:12:06.039 --> 00:12:11.279
+One thing to note, sometimes if you select only the folder and mark for add, the files
+
+169
+00:12:11.279 --> 00:12:14.940
+within that folder may not be marked.
+
+170
+00:12:14.940 --> 00:12:19.360
+If that happens, you will need to go in and select each file individually and then
+
+171
+00:12:19.360 --> 00:12:23.490
+mark for add your entire selection.
+
+172
+00:12:23.490 --> 00:12:28.169
+Once you choose to submit, you'll get another pop-up menu that will allow you to review
+
+173
+00:12:28.169 --> 00:12:32.159
+all the files that are being submitted through the pending changelist.
+
+174
+00:12:32.159 --> 00:12:37.080
+If everything looks good, just hit the Submit button, and then the Submit changelist progress
+
+175
+00:12:37.080 --> 00:12:39.090
+bar will appear.
+
+176
+00:12:39.090 --> 00:12:42.730
+From there, you want to verify that the files you've uploaded are now in the depot.
+
+177
+00:12:42.730 --> 00:12:47.549
+So you're going to switch from your workspace view to the depot view inside the
+
+178
+00:12:47.549 --> 00:12:50.139
+Perforce version window.
+
+179
+00:12:50.139 --> 00:12:54.019
+You'll also want to verify that the log shows the submission of all the files that you had
+
+180
+00:12:54.019 --> 00:12:55.620
+marked for add.
+
+181
+00:12:55.620 --> 00:13:00.899
+You'll note here in the image for the log that shows the 347 files that were first
+
+182
+00:13:00.899 --> 00:13:06.179
+added and then also lists the two additional files that were added later.
+
+183
+00:13:06.179 --> 00:13:11.720
+When I submitted for the new changelist, 349 total files were added to the depot,
+
+184
+00:13:11.720 --> 00:13:15.759
+verifying that all my files were added to the depot successfully.
+
+185
+00:13:15.759 --> 00:13:20.200
+I can verify this visually by seeing that the project folder and files are now located
+
+186
+00:13:20.200 --> 00:13:25.980
+under the ILT demo folder inside the ILT EDU depot folder.
+
+187
+00:13:25.980 --> 00:13:30.460
+All those project files are now marked with a green indicator dot showing that they
+
+188
+00:13:30.460 --> 00:13:35.399
+are active and ready to be checked out by other users that might need to work on them.
+
+189
+00:13:35.399 --> 00:13:37.700
+Alright, that's it for this section.
+
+190
+00:13:37.700 --> 00:13:42.399
+In our next section, we will continue discussing server-client setup and working with ShotGrid.

@@ -1,0 +1,3857 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.779
+So we've talked about, this is kind of like everything
+
+2
+00:00:03.779 --> 00:00:06.259
+that makes up the kind of core fundamentals,
+
+3
+00:00:06.259 --> 00:00:07.960
+all of the way that things communicated,
+
+4
+00:00:07.960 --> 00:00:09.679
+the various tools available to us,
+
+5
+00:00:09.679 --> 00:00:11.240
+ways to optimize things,
+
+6
+00:00:11.240 --> 00:00:12.560
+how these things are actually done,
+
+7
+00:00:12.560 --> 00:00:14.560
+the functions that we can call about traveling.
+
+8
+00:00:14.560 --> 00:00:17.160
+The last thing is kind of a callback
+
+9
+00:00:17.160 --> 00:00:19.160
+to our very first session
+
+10
+00:00:19.160 --> 00:00:21.339
+when we talked about the kind of power
+
+11
+00:00:21.339 --> 00:00:24.420
+of Unreal, of the editor itself,
+
+12
+00:00:24.420 --> 00:00:27.760
+that one of the great things
+
+13
+00:00:27.760 --> 00:00:30.960
+about testing editor functionality
+
+14
+00:00:31.559 --> 00:00:34.479
+of testing multiplayer functionality, sorry,
+
+15
+00:00:34.479 --> 00:00:37.119
+is the editor gives us some kind of capability.
+
+16
+00:00:37.119 --> 00:00:38.679
+So you might ask the question
+
+17
+00:00:38.679 --> 00:00:39.920
+when you're doing a multiplayer game,
+
+18
+00:00:39.920 --> 00:00:43.939
+to test multiplayer, do I have to make a build every time?
+
+19
+00:00:43.939 --> 00:00:47.439
+The answer is kind of, is yes and no.
+
+20
+00:00:48.899 --> 00:00:52.340
+So we're gonna go into that a little bit.
+
+21
+00:00:52.340 --> 00:00:55.740
+So we talked about the kind of editor configuration
+
+22
+00:00:55.740 --> 00:00:57.219
+right in our first session.
+
+23
+00:00:57.219 --> 00:01:00.299
+I think it was like one of our first slides.
+
+24
+00:01:00.299 --> 00:01:02.619
+A little bit like standalone,
+
+25
+00:01:02.619 --> 00:01:04.299
+the editor configuration is,
+
+26
+00:01:05.400 --> 00:01:06.819
+when we build for the editor,
+
+27
+00:01:06.819 --> 00:01:09.659
+it's a configuration that is both server and client.
+
+28
+00:01:09.659 --> 00:01:11.540
+The reason that this is the case
+
+29
+00:01:11.540 --> 00:01:13.659
+is because the editor can spin up
+
+30
+00:01:13.659 --> 00:01:15.659
+as a server and a client.
+
+31
+00:01:16.579 --> 00:01:20.739
+And that gives us basically a pretty accurate,
+
+32
+00:01:20.739 --> 00:01:24.459
+a very, very true to finished game representation
+
+33
+00:01:24.459 --> 00:01:27.819
+of actually how this game might be executed
+
+34
+00:01:27.819 --> 00:01:29.739
+in various environments,
+
+35
+00:01:30.019 --> 00:01:32.700
+be that standalone, be that listen server,
+
+36
+00:01:32.700 --> 00:01:37.950
+be that dedicated server with clients connected situation.
+
+37
+00:01:37.950 --> 00:01:40.750
+We can also simulate bad ping
+
+38
+00:01:40.750 --> 00:01:43.709
+to see how our gameplay and network systems
+
+39
+00:01:43.709 --> 00:01:45.469
+kind of perform under various conditions.
+
+40
+00:01:45.469 --> 00:01:47.549
+If you have this presentation downloaded,
+
+41
+00:01:47.549 --> 00:01:48.909
+you'll see in the presenter notes,
+
+42
+00:01:48.909 --> 00:01:50.629
+there's a link provided
+
+43
+00:01:50.629 --> 00:01:51.909
+that will take you to the documentation
+
+44
+00:01:51.909 --> 00:01:53.469
+about how you would utilize
+
+45
+00:01:53.469 --> 00:01:56.510
+that kind of network connection emulation.
+
+46
+00:01:57.510 --> 00:02:01.290
+And we can also provide a couple of launch parameters
+
+47
+00:02:01.290 --> 00:02:02.209
+to the editor
+
+48
+00:02:04.290 --> 00:02:06.329
+to kind of specify various things
+
+49
+00:02:06.329 --> 00:02:08.289
+about how we want this connection to be.
+
+50
+00:02:08.289 --> 00:02:09.330
+It's worth mentioning though,
+
+51
+00:02:09.330 --> 00:02:11.969
+the kind of yes, but no part of this
+
+52
+00:02:11.969 --> 00:02:15.090
+is that whilst the editor will provide us
+
+53
+00:02:15.090 --> 00:02:16.449
+with a very good representation
+
+54
+00:02:16.449 --> 00:02:18.169
+of what our game will look like in editor,
+
+55
+00:02:18.169 --> 00:02:20.370
+you should be making regular builds of your game
+
+56
+00:02:20.370 --> 00:02:22.169
+to make sure that you can't,
+
+57
+00:02:22.169 --> 00:02:25.889
+you cannot and should not purely trust the editor
+
+58
+00:02:25.889 --> 00:02:28.610
+to give you 100% accurate representation
+
+59
+00:02:28.610 --> 00:02:30.090
+of how your game will occur
+
+60
+00:02:30.090 --> 00:02:31.689
+in a server-client relationship.
+
+61
+00:02:31.689 --> 00:02:34.969
+You should be making networked builds of your game,
+
+62
+00:02:34.969 --> 00:02:38.169
+testing that in a server-client setup
+
+63
+00:02:38.169 --> 00:02:40.050
+to make sure that all of this stuff is definitely true.
+
+64
+00:02:40.050 --> 00:02:41.409
+That should be part of your workflow.
+
+65
+00:02:41.409 --> 00:02:44.969
+You shouldn't be purely relying on the editor.
+
+66
+00:02:44.969 --> 00:02:47.650
+So a couple of the options available to us
+
+67
+00:02:49.050 --> 00:02:50.409
+we can control within the editor.
+
+68
+00:02:50.409 --> 00:02:52.569
+We can talk about the number of clients.
+
+69
+00:02:52.569 --> 00:02:54.689
+So obviously this defines the number of clients
+
+70
+00:02:54.810 --> 00:02:59.409
+that we want to create when the game is launched.
+
+71
+00:02:59.409 --> 00:03:01.490
+Network simulation, this is the kind of option
+
+72
+00:03:01.490 --> 00:03:02.610
+that we talked about below.
+
+73
+00:03:02.610 --> 00:03:04.009
+This is about whether or not we,
+
+74
+00:03:04.009 --> 00:03:06.810
+there's a kind of default configuration
+
+75
+00:03:06.810 --> 00:03:08.849
+for kind of good versus bad connection.
+
+76
+00:03:08.849 --> 00:03:11.810
+We can also specify our own if we want a simple,
+
+77
+00:03:11.810 --> 00:03:14.289
+but I think the document that I just mentioned before
+
+78
+00:03:14.289 --> 00:03:16.689
+and the kind of Unreal documentation,
+
+79
+00:03:16.689 --> 00:03:19.650
+it talks about exactly what this bad connection actually is.
+
+80
+00:03:19.650 --> 00:03:21.610
+I think it's like 10% packet loss
+
+81
+00:03:21.849 --> 00:03:24.370
+and 500 millisecond ping, I think.
+
+82
+00:03:26.240 --> 00:03:29.360
+And then we've got the various net modes,
+
+83
+00:03:29.360 --> 00:03:31.400
+which is, like I said, we can play as a client
+
+84
+00:03:31.400 --> 00:03:35.080
+where the editor will launch a dedicated server
+
+85
+00:03:35.080 --> 00:03:37.639
+in the background and will create a client for us
+
+86
+00:03:37.639 --> 00:03:39.240
+and we will connect to that server.
+
+87
+00:03:39.240 --> 00:03:42.039
+We can play standalone, which is kind of our single player
+
+88
+00:03:42.039 --> 00:03:43.879
+or local multiplayer,
+
+89
+00:03:43.879 --> 00:03:47.120
+if we have multiple clients version of the game.
+
+90
+00:03:47.120 --> 00:03:48.639
+And then finally listen server,
+
+91
+00:03:48.639 --> 00:03:52.680
+where if we have multiple clients,
+
+92
+00:03:52.680 --> 00:03:56.000
+it's our editor will be the server and,
+
+93
+00:03:56.000 --> 00:03:56.840
+will be the listen server,
+
+94
+00:03:56.840 --> 00:03:57.919
+so it's server and client
+
+95
+00:03:57.919 --> 00:04:00.639
+and every other client will be a client
+
+96
+00:04:00.639 --> 00:04:02.740
+connected to that server.
+
+97
+00:04:02.740 --> 00:04:04.460
+So I'll actually just kind of very briefly
+
+98
+00:04:04.460 --> 00:04:05.500
+demonstrate this.
+
+99
+00:04:07.759 --> 00:04:10.120
+Some of those settings are actually available
+
+100
+00:04:10.120 --> 00:04:11.240
+through your project settings.
+
+101
+00:04:11.240 --> 00:04:15.400
+So the things like the network connection stuff
+
+102
+00:04:15.400 --> 00:04:17.600
+isn't available through this kind of quick access,
+
+103
+00:04:17.639 --> 00:04:21.399
+but if you go to the level editor play section,
+
+104
+00:04:21.399 --> 00:04:22.920
+project settings,
+
+105
+00:04:27.660 --> 00:04:31.660
+oh, sorry, editor preferences, my apologies,
+
+106
+00:04:31.660 --> 00:04:37.519
+editor preferences and level editor play,
+
+107
+00:04:37.519 --> 00:04:39.560
+you see these, all these options here.
+
+108
+00:04:41.519 --> 00:04:43.519
+So this gives you the kind of more fine grain,
+
+109
+00:04:43.519 --> 00:04:45.920
+full bodied set options,
+
+110
+00:04:45.920 --> 00:04:47.759
+but the kind of quicker way to do this
+
+111
+00:04:47.759 --> 00:04:49.040
+is just in this drop down here
+
+112
+00:04:49.040 --> 00:04:50.480
+next to your play and editor button,
+
+113
+00:04:50.480 --> 00:04:52.079
+you've got a couple of settings just here.
+
+114
+00:04:52.079 --> 00:04:53.800
+Number of players you want connected,
+
+115
+00:04:53.800 --> 00:04:55.639
+what net mode you wanna be in,
+
+116
+00:04:55.639 --> 00:04:57.720
+but then you can also quickly jump to your,
+
+117
+00:04:57.720 --> 00:04:59.920
+to that same editor preferences section
+
+118
+00:04:59.920 --> 00:05:03.269
+just by clicking on the advanced settings here.
+
+119
+00:05:03.269 --> 00:05:05.509
+So if I were to play,
+
+120
+00:05:05.509 --> 00:05:06.910
+the kind of standard thing you would be in
+
+121
+00:05:06.910 --> 00:05:10.589
+is standalone and what this means,
+
+122
+00:05:10.589 --> 00:05:12.709
+ignore the kind of print strings in there for a second,
+
+123
+00:05:12.709 --> 00:05:14.550
+what this means is you're kind of playing this game
+
+124
+00:05:14.550 --> 00:05:16.350
+as though you were playing either single player
+
+125
+00:05:16.350 --> 00:05:19.470
+or in a kind of like split screen multiplayer mode.
+
+126
+00:05:19.509 --> 00:05:23.310
+So if I go to a number of players two,
+
+127
+00:05:23.310 --> 00:05:24.910
+what that's gonna assume I'm trying to do
+
+128
+00:05:24.910 --> 00:05:27.389
+is local multiplayer.
+
+129
+00:05:30.720 --> 00:05:33.240
+So typically that would be creating
+
+130
+00:05:33.240 --> 00:05:35.360
+like a split screen set up on your game,
+
+131
+00:05:35.360 --> 00:05:36.879
+depends if you've got split screen set up
+
+132
+00:05:36.879 --> 00:05:37.800
+and stuff like that,
+
+133
+00:05:37.800 --> 00:05:39.560
+but this is essentially the single player version
+
+134
+00:05:39.560 --> 00:05:40.399
+of your game.
+
+135
+00:05:42.259 --> 00:05:44.139
+Next, we've got kind of listen server.
+
+136
+00:05:44.139 --> 00:05:46.339
+So as I said, what this will do
+
+137
+00:05:46.339 --> 00:05:49.660
+is it will create the editor itself
+
+138
+00:05:49.660 --> 00:05:52.339
+becomes the client and server
+
+139
+00:05:52.339 --> 00:05:54.740
+and every following connection becomes a client.
+
+140
+00:05:54.740 --> 00:05:59.379
+So this is our server and client
+
+141
+00:05:59.379 --> 00:06:01.779
+and everything else for every other client
+
+142
+00:06:01.779 --> 00:06:02.660
+that you've chosen,
+
+143
+00:06:02.660 --> 00:06:04.339
+you get a little window like this.
+
+144
+00:06:04.339 --> 00:06:07.779
+So if I change this to number of players three,
+
+145
+00:06:07.779 --> 00:06:10.459
+not 34, that's probably gonna be a bit extreme,
+
+146
+00:06:10.459 --> 00:06:12.300
+but you'll see, I get two little windows,
+
+147
+00:06:12.300 --> 00:06:13.980
+one to represent each client
+
+148
+00:06:13.980 --> 00:06:15.980
+and you can actually see I have,
+
+149
+00:06:16.980 --> 00:06:20.160
+well, I have a kind of porn
+
+150
+00:06:20.160 --> 00:06:21.480
+representing each of these things.
+
+151
+00:06:21.480 --> 00:06:22.480
+I don't know why I currently
+
+152
+00:06:22.480 --> 00:06:23.600
+can't actually see the porns.
+
+153
+00:06:23.600 --> 00:06:25.199
+Maybe the porns are actually invisible.
+
+154
+00:06:25.199 --> 00:06:26.639
+Am I mistake on my part?
+
+155
+00:06:28.730 --> 00:06:30.970
+But, and then last of all,
+
+156
+00:06:30.970 --> 00:06:33.689
+we have play as client.
+
+157
+00:06:33.689 --> 00:06:35.370
+We don't have an option for dedicated server
+
+158
+00:06:35.370 --> 00:06:38.250
+because a client inherently implies
+
+159
+00:06:38.250 --> 00:06:39.889
+that a dedicated server
+
+160
+00:06:39.889 --> 00:06:41.329
+is gonna be created in the background
+
+161
+00:06:41.329 --> 00:06:43.089
+and therefore both the editor
+
+162
+00:06:43.089 --> 00:06:45.290
+and every window will be a client
+
+163
+00:06:45.290 --> 00:06:46.930
+connected to that dedicated server.
+
+164
+00:06:47.329 --> 00:06:50.089
+So in this case, this window is a client
+
+165
+00:06:50.089 --> 00:06:53.329
+and all the other two windows are all clients.
+
+166
+00:06:53.329 --> 00:06:55.569
+So that's the kind of end of the example
+
+167
+00:06:55.569 --> 00:06:57.209
+of how the editor works,
+
+168
+00:06:57.209 --> 00:07:00.089
+but I just wanted to quickly talk through the example
+
+169
+00:07:00.089 --> 00:07:01.610
+that I've set up in the scene
+
+170
+00:07:01.610 --> 00:07:02.889
+and the kind of example actor
+
+171
+00:07:02.889 --> 00:07:03.930
+that I just briefly showed off
+
+172
+00:07:03.930 --> 00:07:06.170
+and the kind of various things that I'm demonstrating
+
+173
+00:07:06.170 --> 00:07:07.569
+because this is kind of primarily here
+
+174
+00:07:07.569 --> 00:07:08.889
+just to kind of back up
+
+175
+00:07:08.889 --> 00:07:10.889
+and show you the ways that you can test the bounds
+
+176
+00:07:10.889 --> 00:07:13.449
+of some of these bits of functionality.
+
+177
+00:07:13.449 --> 00:07:15.290
+So the first thing that I wanted to do
+
+178
+00:07:15.290 --> 00:07:17.290
+is demonstrate to you what I was saying before
+
+179
+00:07:17.290 --> 00:07:19.170
+about the fact that you can't rely
+
+180
+00:07:19.170 --> 00:07:22.209
+on our with client code and with server code pragmas.
+
+181
+00:07:22.209 --> 00:07:25.009
+So what I've done is if you look at this,
+
+182
+00:07:25.009 --> 00:07:28.009
+my networked pawn that I've made,
+
+183
+00:07:28.009 --> 00:07:32.410
+this is just a kind of default pawn that I've created.
+
+184
+00:07:32.410 --> 00:07:33.689
+We talked about the default pawn
+
+185
+00:07:33.689 --> 00:07:35.089
+in our second training session.
+
+186
+00:07:35.089 --> 00:07:36.250
+It's just a kind of pawn
+
+187
+00:07:36.250 --> 00:07:38.370
+that has some floating movement functionality,
+
+188
+00:07:38.370 --> 00:07:41.329
+some basic collisions, some basic visuals.
+
+189
+00:07:41.329 --> 00:07:43.529
+And I've made a game mode.
+
+190
+00:07:43.529 --> 00:07:45.810
+It's possible that this game mode wasn't set up correctly.
+
+191
+00:07:45.889 --> 00:07:48.089
+So just let me quickly check that.
+
+192
+00:07:48.089 --> 00:07:51.910
+My networked pawn, no, that is the pawn class, okay.
+
+193
+00:07:51.910 --> 00:07:55.230
+So my game mode will essentially
+
+194
+00:07:56.709 --> 00:08:03.149
+create a spawn,
+
+195
+00:08:03.149 --> 00:08:04.829
+one of these networked pawns
+
+196
+00:08:04.829 --> 00:08:07.110
+for each of my clients on the server.
+
+197
+00:08:07.110 --> 00:08:08.509
+And then the client will end up
+
+198
+00:08:08.509 --> 00:08:11.350
+with a copy of every other client's pawn
+
+199
+00:08:11.350 --> 00:08:14.389
+and will be in control of their own local pawn.
+
+200
+00:08:14.389 --> 00:08:18.060
+So if I play this, again, you'll see.
+
+201
+00:08:18.930 --> 00:08:21.009
+Both are, well, easiest to do it in the editor
+
+202
+00:08:21.009 --> 00:08:22.769
+because you can see that this,
+
+203
+00:08:22.769 --> 00:08:24.370
+we've got three player states.
+
+204
+00:08:24.370 --> 00:08:26.250
+Like we said, this is the information
+
+205
+00:08:26.250 --> 00:08:27.730
+that represents the kind of global information
+
+206
+00:08:27.730 --> 00:08:28.569
+about the player.
+
+207
+00:08:30.860 --> 00:08:32.259
+We've got our, oh, this is
+
+208
+00:08:32.259 --> 00:08:33.700
+because I'm in dedicated server mode.
+
+209
+00:08:33.700 --> 00:08:35.740
+We've got one controller.
+
+210
+00:08:35.740 --> 00:08:38.259
+That's because I'm in dedicated server mode,
+
+211
+00:08:38.259 --> 00:08:39.659
+this is actually a client.
+
+212
+00:08:40.580 --> 00:08:42.620
+And so I've only got my own player controller.
+
+213
+00:08:42.620 --> 00:08:44.179
+You can see, I don't see the other player's
+
+214
+00:08:44.179 --> 00:08:45.220
+player controllers.
+
+215
+00:08:46.059 --> 00:08:48.820
+And if I move around,
+
+216
+00:08:49.539 --> 00:08:51.460
+okay, I don't know why I can't see the other pawns.
+
+217
+00:08:51.460 --> 00:08:52.700
+Maybe they don't have visuals,
+
+218
+00:08:52.700 --> 00:09:05.059
+but sorry, the frame rate going really terrible here.
+
+219
+00:09:08.360 --> 00:09:11.279
+Okay, I'm not sure exactly what's happening there
+
+220
+00:09:11.279 --> 00:09:12.720
+with why they're all kind of just rendering
+
+221
+00:09:12.720 --> 00:09:13.559
+in the middle of the screen,
+
+222
+00:09:13.559 --> 00:09:16.639
+but that's not even really what I was trying to show.
+
+223
+00:09:16.639 --> 00:09:19.279
+So the kind of main thing I was trying to kind of
+
+224
+00:09:20.320 --> 00:09:22.279
+display here, I'm just going to trim that back down
+
+225
+00:09:22.279 --> 00:09:26.159
+to two connected clients or yes,
+
+226
+00:09:26.159 --> 00:09:27.639
+or even just one actually for the purposes of
+
+227
+00:09:27.639 --> 00:09:30.039
+demonstration, it doesn't particularly matter.
+
+228
+00:09:30.039 --> 00:09:33.990
+First off, we've got this begin play functionality.
+
+229
+00:09:33.990 --> 00:09:36.029
+So if I kind of jump inside here,
+
+230
+00:09:36.029 --> 00:09:37.590
+you'll see what happens on begin play.
+
+231
+00:09:37.590 --> 00:09:41.070
+You'll see that I've written some if with server code
+
+232
+00:09:41.070 --> 00:09:43.149
+and if with client code, right?
+
+233
+00:09:43.149 --> 00:09:44.909
+So you would expect that on the server,
+
+234
+00:09:44.909 --> 00:09:46.669
+we print this string and on the client,
+
+235
+00:09:46.669 --> 00:09:49.129
+we print this string, right?
+
+236
+00:09:49.129 --> 00:09:52.250
+One thing that's worth bearing in mind is that when,
+
+237
+00:09:52.250 --> 00:09:54.690
+for the purposes of testing, when you do print strings,
+
+238
+00:09:54.690 --> 00:09:57.649
+actually what happens is that a print string
+
+239
+00:09:57.889 --> 00:10:00.809
+gets shown on both the server and all clients.
+
+240
+00:10:00.809 --> 00:10:03.809
+So you can't just rely on printing string alone.
+
+241
+00:10:03.809 --> 00:10:05.889
+You will probably need to say who is doing
+
+242
+00:10:05.889 --> 00:10:06.929
+the printing of the strings,
+
+243
+00:10:06.929 --> 00:10:09.889
+kind of know exactly where it's coming from.
+
+244
+00:10:09.889 --> 00:10:14.610
+So, but you'll see on begin play,
+
+245
+00:10:14.610 --> 00:10:17.570
+you'll see that both the client begin play
+
+246
+00:10:17.570 --> 00:10:20.610
+are called on the dedicated server and on my clients,
+
+247
+00:10:20.610 --> 00:10:23.169
+the client and the server according both situations,
+
+248
+00:10:23.169 --> 00:10:25.490
+even though one of these is the client
+
+249
+00:10:25.490 --> 00:10:26.610
+and one of these is server,
+
+250
+00:10:26.610 --> 00:10:27.850
+that doesn't seem to make sense.
+
+251
+00:10:27.850 --> 00:10:29.970
+But when you consider that this is in editor
+
+252
+00:10:29.970 --> 00:10:32.769
+and with in editor, both with server code
+
+253
+00:10:32.769 --> 00:10:34.690
+and with client code are true,
+
+254
+00:10:34.690 --> 00:10:37.570
+then this is why this is not a reliable way to,
+
+255
+00:10:37.570 --> 00:10:38.970
+you can't just put your server code in here.
+
+256
+00:10:38.970 --> 00:10:40.450
+You can't just put your client code in here
+
+257
+00:10:40.450 --> 00:10:42.210
+because that will turn your standalone game
+
+258
+00:10:42.210 --> 00:10:45.129
+and your editor into a big old liar.
+
+259
+00:10:47.429 --> 00:10:50.250
+So that's the first thing I wanted to mention.
+
+260
+00:10:50.250 --> 00:10:53.529
+Then I've got, if you download the project
+
+261
+00:10:53.529 --> 00:10:55.409
+that comes with this, you can obviously open this map.
+
+262
+00:10:55.409 --> 00:11:00.409
+It's just inside our content, 11504,
+
+263
+00:11:01.049 --> 00:11:03.009
+and it's just our example networked map.
+
+264
+00:11:03.009 --> 00:11:04.610
+And if you just go inside the level blueprint,
+
+265
+00:11:04.610 --> 00:11:07.809
+you can just see I've basically connected
+
+266
+00:11:07.809 --> 00:11:09.210
+basically a bunch of debug keys
+
+267
+00:11:09.210 --> 00:11:11.649
+just to demonstrate different little bits of information.
+
+268
+00:11:11.649 --> 00:11:12.730
+So I'm just gonna kind of drag that
+
+269
+00:11:12.730 --> 00:11:15.000
+onto my other window here.
+
+270
+00:11:15.000 --> 00:11:17.039
+So first off, we've got a,
+
+271
+00:11:18.919 --> 00:11:22.240
+what I'm doing here is I'm saying on begin play,
+
+272
+00:11:22.240 --> 00:11:25.919
+if I'm the server call, after five seconds,
+
+273
+00:11:25.919 --> 00:11:29.120
+call server do thing, client do thing,
+
+274
+00:11:29.120 --> 00:11:31.120
+and all clients do thing.
+
+275
+00:11:31.120 --> 00:11:32.799
+Now, if you look at what these functions are called,
+
+276
+00:11:32.799 --> 00:11:35.879
+these are on the networked porn,
+
+277
+00:11:35.879 --> 00:11:37.559
+server do thing is a server function.
+
+278
+00:11:37.559 --> 00:11:38.840
+So this is called,
+
+279
+00:11:39.919 --> 00:11:41.519
+this is typically intended to be called
+
+280
+00:11:41.519 --> 00:11:43.460
+from the client to the server.
+
+281
+00:11:44.679 --> 00:11:46.559
+This is a client function,
+
+282
+00:11:46.559 --> 00:11:50.559
+and this is called from the server to the client.
+
+283
+00:11:50.559 --> 00:11:51.960
+And then this is our net multicast.
+
+284
+00:11:52.679 --> 00:11:54.559
+And then this is called on every client connection.
+
+285
+00:11:54.559 --> 00:11:56.840
+So we'll see what that actually does.
+
+286
+00:11:56.840 --> 00:12:00.740
+We can also call this on when pressing the one key,
+
+287
+00:12:00.740 --> 00:12:03.919
+but obviously it's when we're in a server client scenario,
+
+288
+00:12:03.919 --> 00:12:06.320
+I can't press one whilst on the server.
+
+289
+00:12:06.320 --> 00:12:08.919
+So in this situation, I've had to do this delay.
+
+290
+00:12:08.919 --> 00:12:11.200
+If I am the server, do a delay of five seconds
+
+291
+00:12:11.200 --> 00:12:13.460
+and then call it just to kind of demonstrate that.
+
+292
+00:12:13.460 --> 00:12:19.840
+So I won't do anything for five seconds.
+
+293
+00:12:19.840 --> 00:12:22.139
+And you can see the dedicated server
+
+294
+00:12:22.139 --> 00:12:24.539
+is calling server do thing.
+
+295
+00:12:25.580 --> 00:12:28.799
+It's getting, it's all clients do thing called.
+
+296
+00:12:28.799 --> 00:12:30.299
+So that's the kind of network multicast
+
+297
+00:12:30.299 --> 00:12:32.460
+also getting called on our dedicated server.
+
+298
+00:12:32.460 --> 00:12:33.580
+You can see on the client,
+
+299
+00:12:33.580 --> 00:12:35.879
+only client do thing is called,
+
+300
+00:12:35.879 --> 00:12:38.720
+but the client is also receiving our net multicast.
+
+301
+00:12:38.720 --> 00:12:40.539
+So even though on the server,
+
+302
+00:12:40.539 --> 00:12:42.539
+all three of these were being called,
+
+303
+00:12:42.539 --> 00:12:47.539
+and this is on the porn,
+
+304
+00:12:47.919 --> 00:12:50.320
+only the server is receiving server do thing,
+
+305
+00:12:50.320 --> 00:12:52.659
+only the client was receiving client do thing,
+
+306
+00:12:52.700 --> 00:12:56.240
+and everyone was receiving the net multicast.
+
+307
+00:12:56.240 --> 00:12:57.360
+Okay, so that demonstrates that.
+
+308
+00:12:57.360 --> 00:13:00.429
+And you can also see what happens the other way around.
+
+309
+00:13:00.429 --> 00:13:03.870
+So bear in mind that this editor window is the client,
+
+310
+00:13:03.870 --> 00:13:05.830
+and I'll just wait a couple of seconds
+
+311
+00:13:05.830 --> 00:13:07.110
+for all those messages to disappear
+
+312
+00:13:07.110 --> 00:13:24.179
+so it's not getting completely over full.
+
+313
+00:13:24.179 --> 00:13:26.059
+So now that all the messages have disappeared,
+
+314
+00:13:26.059 --> 00:13:27.460
+if I just press one,
+
+315
+00:13:27.460 --> 00:13:29.620
+you can see when the client calls it,
+
+316
+00:13:30.539 --> 00:13:34.120
+the client server do thing gets called on the server,
+
+317
+00:13:35.059 --> 00:13:37.299
+client do thing gets called on the client,
+
+318
+00:13:37.299 --> 00:13:42.100
+and the net multicast is called locally on the client.
+
+319
+00:13:42.100 --> 00:13:43.539
+If I had two clients connected,
+
+320
+00:13:43.539 --> 00:13:45.820
+you would actually see that this kind of doesn't count.
+
+321
+00:13:45.820 --> 00:13:48.600
+This doesn't net multicast in the same way.
+
+322
+00:13:48.600 --> 00:13:53.309
+So if I actually just quickly do that,
+
+323
+00:13:53.309 --> 00:14:07.820
+if I change the number of players to two,
+
+324
+00:14:07.820 --> 00:14:09.639
+so you see when the server called it,
+
+325
+00:14:09.639 --> 00:14:11.840
+all clients do thing is called twice,
+
+326
+00:14:11.840 --> 00:14:22.289
+and that's because it's getting called on both clients.
+
+327
+00:14:22.289 --> 00:14:25.629
+Okay, and now when I call it from one of the clients,
+
+328
+00:14:25.629 --> 00:14:28.750
+you'd see we only get one all clients do things,
+
+329
+00:14:28.750 --> 00:14:31.470
+and that's because calling a net multicast from a client
+
+330
+00:14:31.470 --> 00:14:34.500
+will call it locally, but nowhere else.
+
+331
+00:14:34.500 --> 00:14:35.980
+It will also, when you call a client function
+
+332
+00:14:35.980 --> 00:14:39.139
+on the client, it does, that will come through,
+
+333
+00:14:39.139 --> 00:14:41.639
+but that's the intended behaviors that you are,
+
+334
+00:14:41.639 --> 00:14:44.590
+it is coming from the server.
+
+335
+00:14:46.250 --> 00:14:47.590
+Okay, so that's demonstrating
+
+336
+00:14:47.590 --> 00:14:49.110
+the different RPCs available to us
+
+337
+00:14:49.110 --> 00:14:54.330
+and what they do in different contexts.
+
+338
+00:14:54.330 --> 00:14:57.570
+Next up, this kind of thing that I was trying to prove
+
+339
+00:14:57.570 --> 00:15:00.450
+about the fact that it's only the server
+
+340
+00:15:00.450 --> 00:15:02.009
+that has game modes.
+
+341
+00:15:02.169 --> 00:15:06.169
+If I go to listen server,
+
+342
+00:15:06.169 --> 00:15:09.399
+and then I play with two clients connected.
+
+343
+00:15:09.399 --> 00:15:11.279
+So on the listen server, when I press two,
+
+344
+00:15:11.279 --> 00:15:14.240
+you can see I get a printout of my game mode name.
+
+345
+00:15:14.240 --> 00:15:18.419
+When I do it on the client, empty, nothing.
+
+346
+00:15:18.419 --> 00:15:20.929
+That's because clients don't get a game mode.
+
+347
+00:15:20.929 --> 00:15:22.690
+Obviously in the context that you're the listen server,
+
+348
+00:15:22.690 --> 00:15:23.929
+you are both server and client,
+
+349
+00:15:23.929 --> 00:15:25.129
+so you do have a game mode,
+
+350
+00:15:25.129 --> 00:15:30.539
+but I think you understand that discrepancy.
+
+351
+00:15:30.539 --> 00:15:32.899
+Next up, who has authority over an actor?
+
+352
+00:15:32.919 --> 00:15:36.059
+So as we said, net role is not the same as authority,
+
+353
+00:15:36.059 --> 00:15:37.320
+so it depends.
+
+354
+00:15:37.320 --> 00:15:39.059
+One of the easiest things to basically say
+
+355
+00:15:39.059 --> 00:15:41.500
+is who spawned this thing.
+
+356
+00:15:41.500 --> 00:15:46.500
+So if I press three, you can see we spawn an actor
+
+357
+00:15:46.500 --> 00:15:47.759
+in the middle of our level,
+
+358
+00:15:47.759 --> 00:15:49.399
+and then we're going to,
+
+359
+00:15:50.320 --> 00:15:52.600
+we basically call this check authority function,
+
+360
+00:15:52.600 --> 00:15:56.139
+and this is just a multicast function,
+
+361
+00:15:56.139 --> 00:15:59.259
+and all that does is try and find that actor
+
+362
+00:15:59.259 --> 00:16:01.779
+and then just print some information about it,
+
+363
+00:16:02.500 --> 00:16:04.659
+is who's printing this a server or the client,
+
+364
+00:16:04.659 --> 00:16:08.440
+and do I have authority?
+
+365
+00:16:08.440 --> 00:16:14.879
+So if I am the listen server, which I am,
+
+366
+00:16:19.690 --> 00:16:23.779
+if I press, sorry,
+
+367
+00:16:23.779 --> 00:16:29.279
+I think my game feels, it seems like it's frozen up.
+
+368
+00:16:29.279 --> 00:16:30.580
+Don't know why that is.
+
+369
+00:16:31.659 --> 00:16:36.720
+But if I press, sorry,
+
+370
+00:16:54.139 --> 00:16:55.879
+okay, so I don't know why that froze up,
+
+371
+00:16:56.679 --> 00:16:57.879
+but you can see when I press three,
+
+372
+00:16:57.879 --> 00:16:59.840
+I'm getting these actors spawning in
+
+373
+00:16:59.840 --> 00:17:02.519
+and just to kind of see what it's actually saying,
+
+374
+00:17:02.519 --> 00:17:04.960
+server has authority and the client is saying
+
+375
+00:17:04.960 --> 00:17:06.619
+it doesn't have authority, right?
+
+376
+00:17:06.619 --> 00:17:08.319
+And also the other thing that you can bear in mind
+
+377
+00:17:08.319 --> 00:17:09.220
+is that on the client,
+
+378
+00:17:09.220 --> 00:17:11.279
+I can see that those actors have been spawned in
+
+379
+00:17:11.279 --> 00:17:13.279
+because I did it from the server.
+
+380
+00:17:13.279 --> 00:17:16.259
+When I do this the other way around,
+
+381
+00:17:16.259 --> 00:17:19.460
+so I'm in listen server and client,
+
+382
+00:17:19.460 --> 00:17:21.579
+and the client chooses to spawn the actor,
+
+383
+00:17:21.579 --> 00:17:25.299
+you can see the, okay, too many bits of information,
+
+384
+00:17:25.339 --> 00:17:27.019
+but yeah, the client has authority
+
+385
+00:17:27.019 --> 00:17:27.859
+and that's because the client
+
+386
+00:17:27.859 --> 00:17:29.380
+is spawning these things locally.
+
+387
+00:17:29.380 --> 00:17:31.500
+And when I'm on the server, those things don't exist
+
+388
+00:17:31.500 --> 00:17:32.880
+because when the client spawn things,
+
+389
+00:17:32.880 --> 00:17:34.980
+they don't get replicated back to the server.
+
+390
+00:17:34.980 --> 00:17:36.700
+When clients spawn things, they are local
+
+391
+00:17:36.700 --> 00:17:38.980
+and therefore the client has authority over them,
+
+392
+00:17:38.980 --> 00:17:42.559
+but no one else is gonna know that it exists.
+
+393
+00:17:42.559 --> 00:17:44.500
+Okay, so that's that.
+
+394
+00:17:46.220 --> 00:17:47.859
+Then variable replication.
+
+395
+00:17:47.859 --> 00:17:49.299
+So this is, as you can see,
+
+396
+00:17:49.299 --> 00:17:51.900
+all I'm doing here is updating
+
+397
+00:17:51.900 --> 00:17:55.079
+a replicated variable on our actor.
+
+398
+00:17:57.180 --> 00:17:59.259
+And what you'll notice here
+
+399
+00:17:59.259 --> 00:18:00.700
+is that we get these two little dots.
+
+400
+00:18:00.700 --> 00:18:02.019
+This just says that this is,
+
+401
+00:18:02.019 --> 00:18:03.420
+when we're making changes to this,
+
+402
+00:18:03.420 --> 00:18:05.220
+we had this a little bit before
+
+403
+00:18:05.220 --> 00:18:09.039
+with when we had the fast path and the anim graph,
+
+404
+00:18:09.039 --> 00:18:11.380
+you watched the second session,
+
+405
+00:18:11.380 --> 00:18:13.680
+we talked about that basically denoted
+
+406
+00:18:13.680 --> 00:18:15.400
+some extra bit of information about the node.
+
+407
+00:18:15.400 --> 00:18:16.859
+This is basically saying you're making changes
+
+408
+00:18:16.859 --> 00:18:18.759
+to a replicated data.
+
+409
+00:18:18.759 --> 00:18:20.700
+So if I were to hit play now,
+
+410
+00:18:20.700 --> 00:18:23.220
+they kind of, we would see that kind of flow
+
+411
+00:18:23.220 --> 00:18:25.380
+that we've already talked about.
+
+412
+00:18:25.380 --> 00:18:27.180
+This is our kind of standard standalone mode.
+
+413
+00:18:27.180 --> 00:18:28.539
+That's the default.
+
+414
+00:18:28.539 --> 00:18:30.819
+And then we've got these various net modes available to us.
+
+415
+00:18:30.819 --> 00:18:33.180
+So standalone is our kind of like single player version
+
+416
+00:18:33.180 --> 00:18:35.819
+of the game, the offline version of our game.
+
+417
+00:18:35.819 --> 00:18:38.660
+You can, we've got this option for multiple players here.
+
+418
+00:18:39.740 --> 00:18:43.180
+This isn't, you might assume that this is actually
+
+419
+00:18:43.180 --> 00:18:45.559
+gonna be your kind of typical split screen setup,
+
+420
+00:18:45.559 --> 00:18:47.220
+but actually if you wanted to do
+
+421
+00:18:47.220 --> 00:18:48.859
+a kind of a test split screen,
+
+422
+00:18:49.740 --> 00:18:51.539
+simplest way to achieve that would be
+
+423
+00:18:51.539 --> 00:18:54.039
+if we go to our level blueprint.
+
+424
+00:18:54.039 --> 00:18:55.720
+And if I just quickly hook this in,
+
+425
+00:18:55.720 --> 00:18:57.079
+if you went to your begin play
+
+426
+00:18:57.079 --> 00:18:59.720
+and you created an additional local player,
+
+427
+00:18:59.720 --> 00:19:03.400
+that is how you would quickly test
+
+428
+00:19:03.400 --> 00:19:06.480
+what a split screen, oh, that's, yeah, there we go.
+
+429
+00:19:06.480 --> 00:19:07.720
+Okay, so we have both there
+
+430
+00:19:07.720 --> 00:19:09.519
+because I've done two number of players,
+
+431
+00:19:09.519 --> 00:19:11.039
+two and the create local player,
+
+432
+00:19:11.039 --> 00:19:12.079
+but you would see,
+
+433
+00:19:12.079 --> 00:19:14.599
+that's how you would achieve split screen.
+
+434
+00:19:15.559 --> 00:19:17.220
+But yeah, just standalone is generally
+
+435
+00:19:17.220 --> 00:19:19.059
+the same game in offline mode.
+
+436
+00:19:20.039 --> 00:19:26.400
+I'm just gonna unhook that create local player.
+
+437
+00:19:26.799 --> 00:19:28.559
+So then when talking about multiplayer testing,
+
+438
+00:19:28.559 --> 00:19:31.279
+you can use this to start from
+
+439
+00:19:31.279 --> 00:19:33.039
+your single player offline mode
+
+440
+00:19:33.039 --> 00:19:34.720
+and then kind of go through a lobby joining process
+
+441
+00:19:34.720 --> 00:19:35.700
+or something like that.
+
+442
+00:19:35.700 --> 00:19:37.359
+But if you're just trying to purely test
+
+443
+00:19:37.359 --> 00:19:38.720
+the multiplayer functionality,
+
+444
+00:19:38.720 --> 00:19:39.920
+that's where our listen server
+
+445
+00:19:39.920 --> 00:19:41.839
+and players client would come in.
+
+446
+00:19:41.839 --> 00:19:43.000
+So obviously there isn't an option
+
+447
+00:19:43.000 --> 00:19:45.039
+for playing as dedicated server
+
+448
+00:19:45.039 --> 00:19:46.720
+because the implication is that
+
+449
+00:19:46.720 --> 00:19:48.960
+one does not play on dedicated server.
+
+450
+00:19:48.960 --> 00:19:51.039
+So if you play as a listen server,
+
+451
+00:19:51.039 --> 00:19:55.519
+the editor is both server and the first client
+
+452
+00:19:55.519 --> 00:19:58.400
+and every additional client receives an additional window.
+
+453
+00:19:58.400 --> 00:20:00.559
+And if choosing players client,
+
+454
+00:20:00.559 --> 00:20:02.839
+then the server is created as a separate process
+
+455
+00:20:02.839 --> 00:20:05.700
+and the editor is just the first client
+
+456
+00:20:05.700 --> 00:20:07.240
+and every, including the editor,
+
+457
+00:20:07.240 --> 00:20:10.599
+every client is distinct from the server.
+
+458
+00:20:10.599 --> 00:20:13.240
+So let me just quickly demonstrate this.
+
+459
+00:20:13.240 --> 00:20:14.619
+When players listen server,
+
+460
+00:20:14.619 --> 00:20:16.640
+again, this isn't gonna be very obvious
+
+461
+00:20:16.640 --> 00:20:17.480
+what exactly is going on
+
+462
+00:20:17.480 --> 00:20:20.000
+because it is kind of all internal on one machine.
+
+463
+00:20:20.000 --> 00:20:23.880
+But as soon as we change this number of players up to two,
+
+464
+00:20:23.880 --> 00:20:27.400
+you'll see we get this little window appearing
+
+465
+00:20:27.400 --> 00:20:30.400
+and this represents our other client.
+
+466
+00:20:30.400 --> 00:20:32.440
+And you can actually see where it can have
+
+467
+00:20:32.440 --> 00:20:34.259
+in a multiplayer scenario that's already working.
+
+468
+00:20:34.259 --> 00:20:37.480
+So I can move around in my level
+
+469
+00:20:37.480 --> 00:20:39.799
+and you can see both of the clients moving around.
+
+470
+00:20:39.799 --> 00:20:41.119
+You'll just have to kind of believe me
+
+471
+00:20:41.119 --> 00:20:42.799
+that when I'm swapping between the window,
+
+472
+00:20:42.799 --> 00:20:45.119
+that is what's happening there.
+
+473
+00:20:45.119 --> 00:20:47.039
+Some printing of strings going on there in the top left,
+
+474
+00:20:47.039 --> 00:20:49.440
+that's just to kind of demonstrate some things.
+
+475
+00:20:49.440 --> 00:20:51.880
+So these are the various options we've got available to us,
+
+476
+00:20:51.880 --> 00:20:53.880
+the different nodes, the different nodes.
+
+477
+00:20:53.880 --> 00:20:59.009
+We can show the same thing with the client connection.
+
+478
+00:21:00.250 --> 00:21:03.250
+Again, in this situation, both of these are clients
+
+479
+00:21:03.250 --> 00:21:05.730
+and the server is just a third distinct process
+
+480
+00:21:05.730 --> 00:21:08.210
+that is neither the editor nor this little window
+
+481
+00:21:08.210 --> 00:21:09.369
+that's appearing here.
+
+482
+00:21:09.369 --> 00:21:11.490
+And then last of all, we've got obviously these,
+
+483
+00:21:11.490 --> 00:21:14.410
+you know, the advanced options where you can go to the,
+
+484
+00:21:14.410 --> 00:21:16.930
+change any of the kind of additional configuration settings
+
+485
+00:21:16.930 --> 00:21:19.609
+that you need, whether that's simulating a poor connection
+
+486
+00:21:19.609 --> 00:21:23.849
+or any of the kind of myriad of settings available here.
+
+487
+00:21:23.849 --> 00:21:28.410
+So that about kind of wraps up the kind of explaining
+
+488
+00:21:28.410 --> 00:21:31.089
+the engine part of this.
+
+489
+00:21:31.089 --> 00:21:33.170
+But what I was just gonna quickly demonstrate
+
+490
+00:21:33.170 --> 00:21:36.369
+is use this opportunity to just kind of reinforce
+
+491
+00:21:36.369 --> 00:21:38.369
+some of the things we've already talked about.
+
+492
+00:21:38.369 --> 00:21:39.849
+And that's what these print strings
+
+493
+00:21:39.849 --> 00:21:41.009
+in the top left are about.
+
+494
+00:21:41.009 --> 00:21:43.569
+This is a demo scene that should come with the project
+
+495
+00:21:43.569 --> 00:21:45.210
+if you download that.
+
+496
+00:21:45.210 --> 00:21:49.250
+If you just go to the content 11504 folder,
+
+497
+00:21:49.849 --> 00:21:51.650
+that's the one that comes with this,
+
+498
+00:21:51.650 --> 00:21:53.009
+that's linked to this session.
+
+499
+00:21:53.009 --> 00:21:57.009
+And so we've just got a couple of classes, a test map,
+
+500
+00:21:57.009 --> 00:22:00.369
+and then the other element to this is the C++ class,
+
+501
+00:22:00.369 --> 00:22:02.250
+which we've already looked at a little bit.
+
+502
+00:22:02.250 --> 00:22:05.430
+Just gonna close some of these windows.
+
+503
+00:22:05.430 --> 00:22:07.309
+So it's this my networked Pawn.
+
+504
+00:22:08.470 --> 00:22:10.549
+We've already looked at this a little bit,
+
+505
+00:22:10.549 --> 00:22:12.710
+but I'm kind of gonna go through
+
+506
+00:22:12.710 --> 00:22:14.390
+a couple of example scenarios
+
+507
+00:22:14.390 --> 00:22:15.710
+just to kind of re-highlight
+
+508
+00:22:15.710 --> 00:22:17.470
+some of the things we've already talked about.
+
+509
+00:22:17.470 --> 00:22:18.430
+So the first one,
+
+510
+00:22:18.430 --> 00:22:21.349
+if you remember all the way back to our first session,
+
+511
+00:22:21.349 --> 00:22:26.349
+we had this idea of the different command line,
+
+512
+00:22:27.670 --> 00:22:30.549
+the command line pragmas that are available
+
+513
+00:22:30.549 --> 00:22:33.470
+within each of the different configurations.
+
+514
+00:22:33.470 --> 00:22:36.349
+So we have with client code and with server code,
+
+515
+00:22:36.349 --> 00:22:38.309
+if you recall those.
+
+516
+00:22:38.309 --> 00:22:40.910
+And as we mentioned earlier in the presentation,
+
+517
+00:22:40.910 --> 00:22:43.869
+we can't, net mode is really the thing
+
+518
+00:22:43.869 --> 00:22:46.109
+we should be using to ascertain
+
+519
+00:22:46.109 --> 00:22:47.190
+whether we're on the server,
+
+520
+00:22:47.269 --> 00:22:48.589
+whether we're a client,
+
+521
+00:22:48.589 --> 00:22:52.710
+because whilst the temptation is to rely,
+
+522
+00:22:52.710 --> 00:22:57.710
+could be to rely on those, those pragmas,
+
+523
+00:22:58.349 --> 00:23:01.390
+it's not, they aren't reliable, essentially,
+
+524
+00:23:01.390 --> 00:23:03.670
+for reasons that we've kind of already discussed,
+
+525
+00:23:03.670 --> 00:23:05.349
+but just to kind of demonstrate it,
+
+526
+00:23:05.349 --> 00:23:07.869
+we've got the begin play here and with server code,
+
+527
+00:23:07.869 --> 00:23:10.230
+we've got this print string saying a server begin play
+
+528
+00:23:10.230 --> 00:23:12.910
+and with client code, we've got client begin play.
+
+529
+00:23:12.910 --> 00:23:16.789
+So if we are in a,
+
+530
+00:23:16.789 --> 00:23:17.950
+if I play as a listen server
+
+531
+00:23:17.950 --> 00:23:19.710
+and I've got two clients connected,
+
+532
+00:23:19.710 --> 00:23:21.269
+one thing that's worth bearing in mind as well
+
+533
+00:23:21.269 --> 00:23:25.349
+is when dealing with a multiplayer scenario,
+
+534
+00:23:25.349 --> 00:23:27.390
+when you're doing multiplayer testing,
+
+535
+00:23:27.390 --> 00:23:31.470
+the print strings will appear to every client.
+
+536
+00:23:31.470 --> 00:23:32.990
+So print strings from the server,
+
+537
+00:23:32.990 --> 00:23:37.990
+print strings from the client appear in on every monitor.
+
+538
+00:23:38.190 --> 00:23:41.390
+So it can be using print strings alone
+
+539
+00:23:41.390 --> 00:23:43.549
+and it can not always make it completely clear
+
+540
+00:23:43.549 --> 00:23:44.710
+where that print string is coming from.
+
+541
+00:23:44.710 --> 00:23:45.710
+So it's worth kind of adding
+
+542
+00:23:45.710 --> 00:23:48.230
+a bit of additional information.
+
+543
+00:23:48.230 --> 00:23:52.190
+So if I were to play again, we see these begin plays
+
+544
+00:23:52.190 --> 00:23:57.220
+and we can see that we've got the,
+
+545
+00:24:00.210 --> 00:24:03.089
+yeah, essentially we've got a client server begin play,
+
+546
+00:24:03.089 --> 00:24:05.769
+client begin play and server begin play
+
+547
+00:24:05.769 --> 00:24:10.769
+and client begin to play, sorry, from four times.
+
+548
+00:24:11.089 --> 00:24:13.650
+And that's because we have both the server
+
+549
+00:24:13.650 --> 00:24:17.490
+and the client printing both of these messages.
+
+550
+00:24:19.170 --> 00:24:23.250
+And that's essentially because we have two actors connected
+
+551
+00:24:23.250 --> 00:24:26.009
+and all of them are printing both of these things.
+
+552
+00:24:26.009 --> 00:24:28.009
+So that's kind of like eight messages.
+
+553
+00:24:28.930 --> 00:24:31.730
+So that's, you know, we can see immediately
+
+554
+00:24:31.730 --> 00:24:33.650
+that this with server code and with client code
+
+555
+00:24:33.650 --> 00:24:35.210
+isn't necessarily doing what we expect
+
+556
+00:24:35.210 --> 00:24:36.970
+and that's because we're in editor.
+
+557
+00:24:36.970 --> 00:24:38.329
+And as we said in editor
+
+558
+00:24:38.329 --> 00:24:40.690
+and when building for standalone configurations,
+
+559
+00:24:41.569 --> 00:24:43.650
+both with server code and with client code are true
+
+560
+00:24:43.650 --> 00:24:46.569
+because the editor can be server or client.
+
+561
+00:24:46.569 --> 00:24:48.559
+So you can't rely on that.
+
+562
+00:24:48.559 --> 00:24:50.160
+That's the first thing we want to talk about.
+
+563
+00:24:50.160 --> 00:24:52.240
+And then if, again, you can download this project
+
+564
+00:24:52.240 --> 00:24:55.039
+and kind of look at these things, but each of these,
+
+565
+00:24:55.039 --> 00:24:57.599
+then we've just got a series of kind of like debugging
+
+566
+00:24:57.599 --> 00:24:59.920
+things that are just bound to different keys
+
+567
+00:24:59.920 --> 00:25:01.359
+that are kind of there to demonstrate
+
+568
+00:25:01.359 --> 00:25:03.519
+different bits of functionality to us.
+
+569
+00:25:03.519 --> 00:25:09.000
+So the, also one thing that's kind of just very quickly
+
+570
+00:25:09.000 --> 00:25:12.079
+worth mentioning is we've, I've just made a blueprint
+
+571
+00:25:12.079 --> 00:25:15.559
+that inherits from our networked Pawn class.
+
+572
+00:25:15.559 --> 00:25:18.240
+The reason I've done this is just because this class
+
+573
+00:25:18.240 --> 00:25:21.680
+is using, is inheriting from a default Pawn,
+
+574
+00:25:23.079 --> 00:25:25.119
+the server version of the default Pawn
+
+575
+00:25:25.119 --> 00:25:28.000
+will replicate its location to the clients,
+
+576
+00:25:28.000 --> 00:25:30.960
+but clients that there's no kind of innate setup
+
+577
+00:25:30.960 --> 00:25:32.640
+for clients to communicate their inputs
+
+578
+00:25:32.640 --> 00:25:33.480
+through to the server.
+
+579
+00:25:33.480 --> 00:25:36.359
+So the server appropriately replicates the client's position.
+
+580
+00:25:36.359 --> 00:25:37.720
+So what you get is this set up
+
+581
+00:25:37.720 --> 00:25:40.480
+in a slightly strange scenario where the server Pawn
+
+582
+00:25:40.480 --> 00:25:42.200
+is moving around on everyone's representation,
+
+583
+00:25:42.200 --> 00:25:43.319
+but the client ones aren't,
+
+584
+00:25:43.319 --> 00:25:45.359
+they're just kind of stuck in their spawn position.
+
+585
+00:25:45.359 --> 00:25:46.839
+So all I've done,
+
+586
+00:25:46.839 --> 00:25:48.799
+this isn't necessarily the way you should do this,
+
+587
+00:25:48.799 --> 00:25:51.279
+but just to be able to really quickly demonstrate it,
+
+588
+00:25:51.279 --> 00:25:56.039
+all I've done is in the blueprint of the networked Pawn,
+
+589
+00:25:56.039 --> 00:25:57.200
+all I've done is on tick,
+
+590
+00:25:57.200 --> 00:25:59.519
+I've just checked whether that Pawn is locally controlled,
+
+591
+00:25:59.519 --> 00:26:01.359
+i.e. controlled by this connection.
+
+592
+00:26:01.359 --> 00:26:02.599
+And if we're not the server,
+
+593
+00:26:02.599 --> 00:26:03.799
+cause we don't want to be doing this on the server,
+
+594
+00:26:03.799 --> 00:26:06.799
+we only need to do this for client connections.
+
+595
+00:26:07.799 --> 00:26:09.680
+We basically just call,
+
+596
+00:26:09.680 --> 00:26:12.279
+we take our current location, our local location,
+
+597
+00:26:12.279 --> 00:26:14.319
+which we are controlling with our input
+
+598
+00:26:14.319 --> 00:26:16.160
+and calling this server,
+
+599
+00:26:16.160 --> 00:26:19.519
+this on server function to kind of set that Pawn's location
+
+600
+00:26:19.519 --> 00:26:20.359
+on the server.
+
+601
+00:26:20.359 --> 00:26:21.839
+And then it will get replicated out
+
+602
+00:26:21.839 --> 00:26:23.119
+to all the other clients.
+
+603
+00:26:23.119 --> 00:26:25.759
+So that's just a little bit of a hack.
+
+604
+00:26:25.759 --> 00:26:27.559
+This is not the way you would typically do this,
+
+605
+00:26:27.559 --> 00:26:30.819
+but I was just quickly trying to get this working.
+
+606
+00:26:30.819 --> 00:26:32.940
+So just, if you look at that,
+
+607
+00:26:32.940 --> 00:26:35.099
+don't take that as a lesson as onto how to do this,
+
+608
+00:26:35.099 --> 00:26:36.859
+because that is not really how you should be doing that.
+
+609
+00:26:36.859 --> 00:26:39.099
+It's purely for the purposes of demonstration.
+
+610
+00:26:40.220 --> 00:26:41.059
+So as I said,
+
+611
+00:26:41.059 --> 00:26:42.299
+the kind of key points that we're talking about here
+
+612
+00:26:42.299 --> 00:26:44.700
+is in this level blueprint.
+
+613
+00:26:44.700 --> 00:26:47.099
+So first off, we've got these kind of three functions,
+
+614
+00:26:47.099 --> 00:26:47.940
+right?
+
+615
+00:26:47.940 --> 00:26:50.900
+On our C++ class, we have server do thing,
+
+616
+00:26:50.900 --> 00:26:52.460
+which is our server function,
+
+617
+00:26:52.460 --> 00:26:54.299
+client do thing, which is our client function
+
+618
+00:26:54.299 --> 00:26:55.579
+and net multicast.
+
+619
+00:26:55.579 --> 00:27:00.460
+So the, if we've forgotten the server functions
+
+620
+00:27:00.460 --> 00:27:02.619
+are the ones that we are expected to be called
+
+621
+00:27:02.619 --> 00:27:04.819
+from a client,
+
+622
+00:27:04.819 --> 00:27:09.299
+usually by the owning client of an actor.
+
+623
+00:27:10.180 --> 00:27:11.619
+So that's gonna be the player
+
+624
+00:27:11.619 --> 00:27:13.220
+that is responsible for a particular actor,
+
+625
+00:27:13.220 --> 00:27:15.660
+normally either their player controller or their pawn.
+
+626
+00:27:15.660 --> 00:27:19.059
+And that's communicating to the server from the client.
+
+627
+00:27:19.059 --> 00:27:22.420
+Client functions like this are intended from the server
+
+628
+00:27:22.420 --> 00:27:24.380
+to an individual client,
+
+629
+00:27:24.380 --> 00:27:27.059
+normally the client that is owning the actor.
+
+630
+00:27:27.059 --> 00:27:30.339
+And then we have net multicast,
+
+631
+00:27:30.339 --> 00:27:31.420
+which is the kind of shotgun,
+
+632
+00:27:31.420 --> 00:27:33.220
+let everyone know about this thing.
+
+633
+00:27:35.140 --> 00:27:36.819
+So just to kind of demonstrate that,
+
+634
+00:27:36.819 --> 00:27:39.859
+what I've got here is a little bit of a setup.
+
+635
+00:27:39.859 --> 00:27:43.180
+Essentially, if we press debug one,
+
+636
+00:27:43.180 --> 00:27:47.099
+we call all three of those functions on the first pawn.
+
+637
+00:27:47.099 --> 00:27:48.539
+It doesn't particularly matter which one of them
+
+638
+00:27:48.539 --> 00:27:51.019
+because it's for any demonstration purposes.
+
+639
+00:27:52.019 --> 00:27:56.619
+And what we also do is we check on begin play.
+
+640
+00:27:56.619 --> 00:27:58.819
+If it's the server, then we also call this.
+
+641
+00:27:58.819 --> 00:28:02.339
+This is because obviously in a dedicated service setup,
+
+642
+00:28:02.339 --> 00:28:04.140
+there's no ability to press a button
+
+643
+00:28:04.180 --> 00:28:07.900
+because no one is actually inputting stuff to the server.
+
+644
+00:28:07.900 --> 00:28:10.859
+So if I go to a player's client,
+
+645
+00:28:10.859 --> 00:28:12.859
+so there'll be a distinct server setup
+
+646
+00:28:13.940 --> 00:28:20.599
+and I have two clients connected.
+
+647
+00:28:20.599 --> 00:28:24.519
+And then what you'll see here is,
+
+648
+00:28:24.519 --> 00:28:25.880
+so there's quite a lot of print string.
+
+649
+00:28:25.880 --> 00:28:27.359
+What I'll actually do is I'll change this
+
+650
+00:28:27.359 --> 00:28:28.759
+to be down to a number of players
+
+651
+00:28:28.759 --> 00:28:30.000
+because for the purposes of this demonstration,
+
+652
+00:28:30.000 --> 00:28:34.380
+we don't need multiple clients connected.
+
+653
+00:28:34.380 --> 00:28:36.420
+So after five seconds,
+
+654
+00:28:36.420 --> 00:28:39.059
+you can see the server called those functions.
+
+655
+00:28:39.059 --> 00:28:41.940
+And so server do thing is called,
+
+656
+00:28:41.940 --> 00:28:43.500
+all clients do things called.
+
+657
+00:28:43.500 --> 00:28:45.380
+These are both called on the server itself.
+
+658
+00:28:45.380 --> 00:28:47.579
+And then the client, client do thing is called
+
+659
+00:28:47.579 --> 00:28:49.019
+and all clients do thing is called.
+
+660
+00:28:49.019 --> 00:28:51.740
+So clearly when server calls server functions,
+
+661
+00:28:51.740 --> 00:28:53.619
+it does call them on itself.
+
+662
+00:28:53.619 --> 00:28:55.059
+When it calls a multicast,
+
+663
+00:28:55.059 --> 00:28:57.619
+it calls it on itself and all clients.
+
+664
+00:28:59.740 --> 00:29:02.099
+But then on the server,
+
+665
+00:29:02.099 --> 00:29:04.299
+the client form isn't called on the server.
+
+666
+00:29:04.299 --> 00:29:06.920
+It's only called on the client.
+
+667
+00:29:07.839 --> 00:29:09.039
+And then if we were to kind of like reverse this
+
+668
+00:29:09.039 --> 00:29:11.640
+the other way around, so if I press one,
+
+669
+00:29:11.640 --> 00:29:13.759
+this is, I am currently on the client
+
+670
+00:29:13.759 --> 00:29:15.519
+and we'll see what effect that has.
+
+671
+00:29:15.519 --> 00:29:24.539
+I might just wait for some of these messages to disappear.
+
+672
+00:29:24.539 --> 00:29:27.099
+Okay, so now when I press the one key,
+
+673
+00:29:27.099 --> 00:29:30.339
+we can see that client do thing is called on the client.
+
+674
+00:29:30.339 --> 00:29:32.420
+All clients do thing is called locally on the client
+
+675
+00:29:32.420 --> 00:29:35.220
+and also server do thing is called on the server.
+
+676
+00:29:35.220 --> 00:29:37.259
+So when you call a client function on a client,
+
+677
+00:29:37.259 --> 00:29:38.500
+it is called locally.
+
+678
+00:29:38.500 --> 00:29:40.259
+When you call a net multicast on a client,
+
+679
+00:29:40.259 --> 00:29:41.579
+it is called locally.
+
+680
+00:29:41.900 --> 00:29:43.539
+And when you call the server from that client,
+
+681
+00:29:43.539 --> 00:29:45.259
+it is broadcasted to the server,
+
+682
+00:29:45.259 --> 00:29:46.940
+but the server doesn't receive the client call.
+
+683
+00:29:46.940 --> 00:29:49.259
+The server didn't receive the net multicast
+
+684
+00:29:49.259 --> 00:29:51.410
+when it was called from the client.
+
+685
+00:29:51.410 --> 00:29:56.410
+And if we extend this out to a two-player scenario,
+
+686
+00:29:56.450 --> 00:30:01.380
+the kind of other interesting thing here,
+
+687
+00:30:01.380 --> 00:30:04.940
+so we've got a kind of two, these are both clients.
+
+688
+00:30:04.940 --> 00:30:06.700
+And if we kind of, you know,
+
+689
+00:30:06.700 --> 00:30:08.980
+we'll have to unfortunately tolerate the fact
+
+690
+00:30:08.980 --> 00:30:10.819
+that we've got a huge amount of print strings
+
+691
+00:30:10.819 --> 00:30:11.660
+at the moment.
+
+692
+00:30:11.660 --> 00:30:13.380
+But when I press one on this server,
+
+693
+00:30:13.420 --> 00:30:17.490
+you see that on,
+
+694
+00:30:19.779 --> 00:30:21.460
+oh, that's a little bit confusing,
+
+695
+00:30:21.460 --> 00:30:25.859
+but essentially when we are calling the net multicast
+
+696
+00:30:25.859 --> 00:30:27.619
+from this client,
+
+697
+00:30:27.619 --> 00:30:29.779
+you can see that only it's only called once,
+
+698
+00:30:29.779 --> 00:30:30.940
+even though there are two clients.
+
+699
+00:30:30.940 --> 00:30:34.700
+And that's because net multicast called from a client
+
+700
+00:30:34.700 --> 00:30:36.380
+aren't broadcast to other clients.
+
+701
+00:30:36.380 --> 00:30:38.660
+This is there an RPC that is intended
+
+702
+00:30:38.660 --> 00:30:40.299
+to be called from the server.
+
+703
+00:30:40.299 --> 00:30:43.500
+So it's only when the server calls a net multicast
+
+704
+00:30:43.539 --> 00:30:44.779
+that everyone receives it.
+
+705
+00:30:44.779 --> 00:30:47.220
+Otherwise only the client that is doing the calling
+
+706
+00:30:47.220 --> 00:30:51.420
+will actually receive that function, receive that RPC.
+
+707
+00:30:54.279 --> 00:30:56.240
+So then if we just keep going,
+
+708
+00:30:57.519 --> 00:30:59.240
+next up, we've got this thing
+
+709
+00:30:59.240 --> 00:31:00.160
+that I kind of already mentioned,
+
+710
+00:31:00.160 --> 00:31:01.759
+which is about kind of proving to ourselves
+
+711
+00:31:01.759 --> 00:31:03.480
+that game mode only exists on the server,
+
+712
+00:31:03.480 --> 00:31:04.720
+very easy to test.
+
+713
+00:31:05.720 --> 00:31:08.160
+If we just go have number of players is two
+
+714
+00:31:08.160 --> 00:31:09.599
+and we should play as a listen server.
+
+715
+00:31:09.599 --> 00:31:11.680
+So the editor will be server and client
+
+716
+00:31:11.720 --> 00:31:15.680
+and the first window will be client only.
+
+717
+00:31:15.680 --> 00:31:17.440
+Then if I press two,
+
+718
+00:31:17.440 --> 00:31:19.799
+you see I get a print string of my game mode name,
+
+719
+00:31:19.799 --> 00:31:22.680
+that's the name of my game mode instance.
+
+720
+00:31:22.680 --> 00:31:25.359
+And if I go to the client and I do the same thing,
+
+721
+00:31:25.359 --> 00:31:26.200
+nothing.
+
+722
+00:31:26.200 --> 00:31:28.440
+And that's because the client has no game mode,
+
+723
+00:31:28.440 --> 00:31:31.319
+that class is null on clients.
+
+724
+00:31:31.319 --> 00:31:34.900
+So only the server has game mode.
+
+725
+00:31:34.900 --> 00:31:36.619
+Then we've got some code
+
+726
+00:31:36.619 --> 00:31:39.859
+that basically spawns an actor locally.
+
+727
+00:31:39.859 --> 00:31:43.299
+So after this actor is spawned,
+
+728
+00:31:43.299 --> 00:31:44.700
+we just spawn like a tutorial,
+
+729
+00:31:44.700 --> 00:31:47.019
+like that orange old tutorial character
+
+730
+00:31:47.019 --> 00:31:49.859
+from previous old Unreal tutorials.
+
+731
+00:31:49.859 --> 00:31:52.900
+And then we call this net multicast function
+
+732
+00:31:52.900 --> 00:31:56.059
+that basically on every element,
+
+733
+00:31:56.059 --> 00:31:58.779
+search it, they all search for all instances
+
+734
+00:31:58.779 --> 00:32:01.339
+of that class of actor
+
+735
+00:32:01.339 --> 00:32:03.019
+and basically print out whether or not
+
+736
+00:32:03.019 --> 00:32:04.380
+they are the server or the client
+
+737
+00:32:04.380 --> 00:32:07.099
+and whether or not they have authority over the object.
+
+738
+00:32:07.099 --> 00:32:13.349
+So again, if we're in a listen server setup,
+
+739
+00:32:13.509 --> 00:32:15.829
+so therefore when I do things from the editor window,
+
+740
+00:32:15.829 --> 00:32:17.710
+that is kind of a, it is a client,
+
+741
+00:32:17.710 --> 00:32:19.309
+but it's also the server.
+
+742
+00:32:19.309 --> 00:32:22.119
+So when I press three,
+
+743
+00:32:22.119 --> 00:32:24.880
+you can see the tutorial character gets spawned in
+
+744
+00:32:24.880 --> 00:32:26.880
+and you can also see that again,
+
+745
+00:32:26.880 --> 00:32:28.039
+probably too many print strings,
+
+746
+00:32:28.039 --> 00:32:30.240
+but you can see server has authority,
+
+747
+00:32:30.240 --> 00:32:34.230
+client doesn't have authority, right?
+
+748
+00:32:34.230 --> 00:32:36.630
+And also you can see that when I'm on the client,
+
+749
+00:32:36.670 --> 00:32:39.470
+you can see all of those enemies
+
+750
+00:32:39.470 --> 00:32:41.700
+that I've spawned in appearing.
+
+751
+00:32:41.700 --> 00:32:46.140
+But when I do this the other way around,
+
+752
+00:32:46.140 --> 00:32:49.200
+when I press three on the client,
+
+753
+00:32:49.200 --> 00:32:51.759
+you can see it says client has authority,
+
+754
+00:32:51.759 --> 00:32:53.920
+but the server doesn't even get notified.
+
+755
+00:32:53.920 --> 00:32:54.880
+And that's because again,
+
+756
+00:32:54.880 --> 00:32:56.920
+we're calling a net multicast from the client.
+
+757
+00:32:56.920 --> 00:32:58.839
+So that doesn't go through to the server.
+
+758
+00:32:58.839 --> 00:33:02.359
+And because these things are spawned on the client,
+
+759
+00:33:02.359 --> 00:33:03.720
+that doesn't get communicated over to the server.
+
+760
+00:33:03.720 --> 00:33:04.960
+So they won't exist.
+
+761
+00:33:04.960 --> 00:33:06.720
+And if we had multiple clients connected,
+
+762
+00:33:06.720 --> 00:33:10.240
+none of them would see these tutorial characters either.
+
+763
+00:33:10.240 --> 00:33:13.400
+So when you spawn actors on a client
+
+764
+00:33:13.400 --> 00:33:15.599
+that is purely local to that client,
+
+765
+00:33:15.599 --> 00:33:19.880
+not replicated and the client has authority over it.
+
+766
+00:33:19.880 --> 00:33:22.000
+Okay, so that's this kind of difference of authority,
+
+767
+00:33:22.000 --> 00:33:24.839
+depending on how that object get created.
+
+768
+00:33:29.049 --> 00:33:30.410
+Next up, we just have kind of
+
+769
+00:33:30.410 --> 00:33:32.410
+standard variable replication.
+
+770
+00:33:32.410 --> 00:33:35.130
+So all we're doing here is when we press four,
+
+771
+00:33:35.130 --> 00:33:40.130
+we update this variable, some replicated float here.
+
+772
+00:33:40.329 --> 00:33:42.650
+And we just change it from the kind of standard value,
+
+773
+00:33:42.650 --> 00:33:43.650
+which is zero.
+
+774
+00:33:43.650 --> 00:33:45.329
+You can see it's marked up as replicated
+
+775
+00:33:45.329 --> 00:33:48.569
+as we kind of, we explore this a little bit earlier.
+
+776
+00:33:48.569 --> 00:33:52.089
+It's marked up for and get lifetime replicated props.
+
+777
+00:33:52.089 --> 00:33:54.490
+So all of the kind of proper work is done.
+
+778
+00:33:54.490 --> 00:33:56.089
+You can see as well in blueprint,
+
+779
+00:33:56.089 --> 00:33:57.849
+when you edit replicated values,
+
+780
+00:33:57.849 --> 00:34:00.089
+you have these additional kind of like little icon
+
+781
+00:34:00.089 --> 00:34:02.970
+in the top right to show this is a replicated value.
+
+782
+00:34:02.970 --> 00:34:05.210
+So what, and the kind of other part of this
+
+783
+00:34:05.210 --> 00:34:07.809
+is just on tick in our level blueprint.
+
+784
+00:34:07.809 --> 00:34:09.610
+We're just finding all access of class,
+
+785
+00:34:09.610 --> 00:34:10.929
+all of the networked porn
+
+786
+00:34:10.929 --> 00:34:13.690
+and just printing whether where the server,
+
+787
+00:34:13.690 --> 00:34:16.010
+which entity it is,
+
+788
+00:34:16.010 --> 00:34:18.809
+and then what some replicated float value is.
+
+789
+00:34:18.809 --> 00:34:24.000
+So if I play, you can see those print strings coming in.
+
+790
+00:34:25.340 --> 00:34:30.369
+We have the serverPorn one and serverPorn zero
+
+791
+00:34:30.750 --> 00:34:32.070
+and clientPorn one and zero,
+
+792
+00:34:32.070 --> 00:34:34.030
+and they're all printing zero all the time.
+
+793
+00:34:34.030 --> 00:34:36.909
+And when I'm on the server, when I hit four,
+
+794
+00:34:36.909 --> 00:34:38.789
+you can see the client starts printing one
+
+795
+00:34:38.789 --> 00:34:40.030
+and the service starts printing one.
+
+796
+00:34:40.030 --> 00:34:42.150
+So that is, that value has been replicated
+
+797
+00:34:42.150 --> 00:34:44.170
+and it's present on the client.
+
+798
+00:34:44.170 --> 00:34:45.949
+You can also see obviously the ordering
+
+799
+00:34:45.949 --> 00:34:47.949
+is identical here, but it's, you know,
+
+800
+00:34:47.949 --> 00:34:49.090
+it doesn't particularly matter,
+
+801
+00:34:49.090 --> 00:34:50.829
+but it's just an interesting kind of thing
+
+802
+00:34:50.829 --> 00:34:52.269
+that they get access of class
+
+803
+00:34:52.269 --> 00:34:54.789
+and not finding them necessarily in the same order,
+
+804
+00:34:54.789 --> 00:34:58.070
+but the generally the replication is still working.
+
+805
+00:34:58.070 --> 00:35:00.989
+But again, if we were to do that the other way around,
+
+806
+00:35:00.989 --> 00:35:07.420
+if I were to play and I go to my client,
+
+807
+00:35:07.420 --> 00:35:08.940
+they're all printing zero.
+
+808
+00:35:08.940 --> 00:35:14.110
+And if I press four, you see the client changes to one,
+
+809
+00:35:14.110 --> 00:35:15.489
+nothing else does.
+
+810
+00:35:15.489 --> 00:35:18.150
+Because again, when we're replicating values,
+
+811
+00:35:18.150 --> 00:35:19.909
+clients don't replicate values to the server
+
+812
+00:35:19.909 --> 00:35:21.750
+and they don't replicate values to other clients.
+
+813
+00:35:21.750 --> 00:35:24.070
+It is the server's responsibility to change this data.
+
+814
+00:35:24.070 --> 00:35:25.469
+So if you try and change that,
+
+815
+00:35:25.469 --> 00:35:27.769
+even a replicated value locally on a client,
+
+816
+00:35:27.769 --> 00:35:28.989
+nothing is gonna happen.
+
+817
+00:35:28.989 --> 00:35:31.070
+They have to communicate that up to the server
+
+818
+00:35:31.110 --> 00:35:36.340
+and it's the server that then propagates that change.
+
+819
+00:35:36.340 --> 00:35:40.409
+So example five.
+
+820
+00:35:40.409 --> 00:35:41.809
+This is basically just a demonstration
+
+821
+00:35:41.809 --> 00:35:43.650
+of this onRep functionality.
+
+822
+00:35:43.650 --> 00:35:46.730
+So this is just another replicated variable.
+
+823
+00:35:46.730 --> 00:35:48.650
+It's just a vector and we're setting it
+
+824
+00:35:48.650 --> 00:35:51.889
+from its default value of 000 to 00100.
+
+825
+00:35:51.889 --> 00:35:54.889
+But the side difference here is we have,
+
+826
+00:35:54.889 --> 00:35:56.489
+if we actually look at that variable,
+
+827
+00:35:56.489 --> 00:35:59.329
+we can see some replicated vector is rather
+
+828
+00:35:59.329 --> 00:36:01.650
+than just replicated, it's replicated using,
+
+829
+00:36:01.650 --> 00:36:03.889
+and it calls this function allenVec.
+
+830
+00:36:04.610 --> 00:36:07.010
+Again, this is just a highlight that the name
+
+831
+00:36:07.010 --> 00:36:10.070
+of the function has absolutely no relation
+
+832
+00:36:10.070 --> 00:36:11.769
+to what it's actually doing.
+
+833
+00:36:11.769 --> 00:36:13.610
+onRep is important.
+
+834
+00:36:13.610 --> 00:36:15.989
+It does need to be called onRep underscore.
+
+835
+00:36:15.989 --> 00:36:18.489
+So if we go to onRep allenVec,
+
+836
+00:36:18.489 --> 00:36:19.449
+we just see what that's doing.
+
+837
+00:36:19.449 --> 00:36:21.469
+All it's saying is essentially when this value
+
+838
+00:36:21.469 --> 00:36:25.239
+has changed, print a string to say that value has changed.
+
+839
+00:36:25.239 --> 00:36:30.809
+So same again.
+
+840
+00:36:30.809 --> 00:36:34.630
+When I press, yep, just waiting for that
+
+841
+00:36:34.630 --> 00:36:35.889
+to print string to occur.
+
+842
+00:36:35.889 --> 00:36:39.400
+When I press four, oh, sorry, wrong one.
+
+843
+00:36:39.400 --> 00:36:44.019
+When I press five, you can see on the client,
+
+844
+00:36:44.019 --> 00:36:45.780
+it's received this replicated value
+
+845
+00:36:45.780 --> 00:36:49.760
+and it's printed it out as 100, which is what we expect.
+
+846
+00:36:49.760 --> 00:36:56.309
+And if I were to do that from the client,
+
+847
+00:36:56.309 --> 00:36:59.369
+I press five, nothing is happening.
+
+848
+00:36:59.369 --> 00:37:02.510
+And again, this is what we were talking about
+
+849
+00:37:02.510 --> 00:37:07.510
+when the rep notify is only getting called
+
+850
+00:37:08.349 --> 00:37:10.210
+when that value is replicated.
+
+851
+00:37:10.210 --> 00:37:12.829
+And if you are setting it locally, it is not replicated.
+
+852
+00:37:12.829 --> 00:37:15.349
+The same thing would apply for standalone.
+
+853
+00:37:15.349 --> 00:37:20.389
+We can actually just test that.
+
+854
+00:37:20.389 --> 00:37:23.389
+So wait for those other print strings to come in.
+
+855
+00:37:23.389 --> 00:37:24.789
+So we're not getting confused.
+
+856
+00:37:24.789 --> 00:37:27.590
+If I press five, I'm pressing five, nothing is happening.
+
+857
+00:37:27.590 --> 00:37:30.510
+And that's not because the value isn't changing, it is,
+
+858
+00:37:30.510 --> 00:37:34.190
+but our rep notify isn't firing
+
+859
+00:37:34.190 --> 00:37:35.949
+because it's not getting replicated.
+
+860
+00:37:35.949 --> 00:37:37.010
+When you set the value on a client,
+
+861
+00:37:37.010 --> 00:37:38.710
+it's not replicating to anywhere.
+
+862
+00:37:38.710 --> 00:37:40.710
+When you set the value in standalone mode,
+
+863
+00:37:40.710 --> 00:37:42.230
+it's not replicating to anywhere.
+
+864
+00:37:42.230 --> 00:37:44.750
+So you cannot trust on rep to get called
+
+865
+00:37:44.750 --> 00:37:49.050
+in when that value is not replicated.
+
+866
+00:37:49.050 --> 00:37:50.670
+And the only place it gets called
+
+867
+00:37:50.670 --> 00:37:52.349
+is the place that it's getting replicated to.
+
+868
+00:37:52.349 --> 00:37:55.400
+It will not get called on the server.
+
+869
+00:37:56.679 --> 00:38:04.369
+And then example six is we have this same,
+
+870
+00:38:04.530 --> 00:38:06.530
+kind of a little bit more demonstration
+
+871
+00:38:06.530 --> 00:38:08.110
+of some replicated logic,
+
+872
+00:38:08.110 --> 00:38:10.670
+but there's a kind of additional caveat here.
+
+873
+00:38:10.670 --> 00:38:14.590
+So we have the second value, which is a struct.
+
+874
+00:38:14.590 --> 00:38:17.309
+And as we said, the struct application is absolutely fine,
+
+875
+00:38:17.309 --> 00:38:20.550
+but what I've done is, so this is a U struct,
+
+876
+00:38:20.550 --> 00:38:23.630
+which it needs to be, all of these things are marked up.
+
+877
+00:38:23.630 --> 00:38:27.630
+You can see we have some U property float,
+
+878
+00:38:27.630 --> 00:38:29.010
+some U property int,
+
+879
+00:38:29.010 --> 00:38:32.250
+but we also have some non U property float.
+
+880
+00:38:33.750 --> 00:38:38.750
+And what we have here is a function called updateMyStruct,
+
+881
+00:38:39.230 --> 00:38:41.590
+and we're passing in a prop val of 20
+
+882
+00:38:41.590 --> 00:38:45.110
+and a non U prop val of 50.
+
+883
+00:38:45.110 --> 00:38:48.659
+And if we go and look at what that function actually does,
+
+884
+00:38:48.659 --> 00:38:51.579
+updateMyStruct, prop val gets passed
+
+885
+00:38:51.579 --> 00:38:54.300
+into some U property float,
+
+886
+00:38:54.300 --> 00:38:55.980
+and non U prop val gets passed
+
+887
+00:38:55.980 --> 00:38:57.340
+into non U property float,
+
+888
+00:38:57.340 --> 00:38:59.559
+and then we're flushing net dormancy.
+
+889
+00:38:59.559 --> 00:39:01.059
+We don't actually need to do that,
+
+890
+00:39:01.059 --> 00:39:02.300
+but that was just kind of demonstrating
+
+891
+00:39:02.300 --> 00:39:04.039
+that function being used.
+
+892
+00:39:04.039 --> 00:39:05.860
+Technically, if this were now dormant,
+
+893
+00:39:05.860 --> 00:39:08.519
+that wouldn't be useful there, but it's not.
+
+894
+00:39:10.210 --> 00:39:14.610
+So if I were to play and hit six,
+
+895
+00:39:14.610 --> 00:39:17.210
+again, I'll wait for those print strings to occur,
+
+896
+00:39:17.210 --> 00:39:19.849
+five seconds, and if I hit six,
+
+897
+00:39:19.849 --> 00:39:26.719
+oh, sorry, I think I'm in standalone mode.
+
+898
+00:39:26.719 --> 00:39:30.940
+So I'll play as a listen client, listen server,
+
+899
+00:39:30.940 --> 00:39:33.260
+and I'll have two clients.
+
+900
+00:39:33.260 --> 00:39:39.019
+And now if I hit six, you can see,
+
+901
+00:39:41.340 --> 00:39:44.139
+it's printing out that the values were zero, zero,
+
+902
+00:39:44.300 --> 00:39:45.579
+well, zero, zero, zero,
+
+903
+00:39:45.579 --> 00:39:47.980
+and now they're coming in as 20, zero, zero.
+
+904
+00:39:47.980 --> 00:39:51.019
+So that 50 that we fed in isn't coming over,
+
+905
+00:39:51.019 --> 00:39:53.579
+and that's because that's going into a U property value,
+
+906
+00:39:53.579 --> 00:39:55.260
+a non U property value,
+
+907
+00:39:55.260 --> 00:39:59.260
+and non U properties don't get replicated, essentially,
+
+908
+00:39:59.260 --> 00:40:02.420
+even though this is a replicated struct,
+
+909
+00:40:02.420 --> 00:40:04.539
+which we're doing here,
+
+910
+00:40:04.539 --> 00:40:08.300
+even though we're setting the non U property value,
+
+911
+00:40:08.300 --> 00:40:09.900
+because the replication is kind of tied
+
+912
+00:40:09.900 --> 00:40:11.400
+into the reflection system,
+
+913
+00:40:11.400 --> 00:40:13.460
+if it's not a U property, it won't get replicated,
+
+914
+00:40:13.500 --> 00:40:14.619
+even if you change it.
+
+915
+00:40:16.400 --> 00:40:18.079
+The other kind of thing to mention here
+
+916
+00:40:18.079 --> 00:40:19.440
+is one of the kind of additional things
+
+917
+00:40:19.440 --> 00:40:20.719
+that you can do when you're doing
+
+918
+00:40:20.719 --> 00:40:23.559
+a replicated using callback,
+
+919
+00:40:23.559 --> 00:40:27.179
+is you can basically pass in,
+
+920
+00:40:27.179 --> 00:40:29.000
+you can add an additional parameter
+
+921
+00:40:29.000 --> 00:40:31.960
+that is the same type that is being replicated,
+
+922
+00:40:31.960 --> 00:40:35.920
+and that additional parameter will represent
+
+923
+00:40:35.920 --> 00:40:39.679
+what value that replicated value had
+
+924
+00:40:39.679 --> 00:40:41.500
+before it got updated.
+
+925
+00:40:41.500 --> 00:40:43.360
+So that is how we're leveraging this,
+
+926
+00:40:43.360 --> 00:40:45.960
+like printing the old value and printing the new value,
+
+927
+00:40:45.960 --> 00:40:50.719
+is that when you do a rep using,
+
+928
+00:40:50.719 --> 00:40:51.960
+and you make an on rep function,
+
+929
+00:40:51.960 --> 00:40:53.800
+if you pass in, if you add a parameter,
+
+930
+00:40:53.800 --> 00:40:55.079
+you don't need to do anything else,
+
+931
+00:40:55.079 --> 00:40:56.079
+if you just add a parameter
+
+932
+00:40:56.079 --> 00:40:58.480
+that is the type that you are replicating,
+
+933
+00:40:59.639 --> 00:41:02.440
+this parameter will contain the previous value
+
+934
+00:41:02.440 --> 00:41:04.760
+that had before is updated by the replication.
+
+935
+00:41:04.760 --> 00:41:06.480
+So that can be very, very useful for you
+
+936
+00:41:06.480 --> 00:41:09.480
+when you want to see what kind of changes are listed.
+
+937
+00:41:10.119 --> 00:41:13.019
+Okay, so that's kind of demonstrating
+
+938
+00:41:13.019 --> 00:41:14.260
+a couple of different things.
+
+939
+00:41:14.260 --> 00:41:16.539
+And then the last thing I wanted to show was,
+
+940
+00:41:16.539 --> 00:41:18.260
+again, just what I was talking about
+
+941
+00:41:19.420 --> 00:41:20.980
+quite a bit earlier in the presentation,
+
+942
+00:41:20.980 --> 00:41:24.659
+which is the fact that modifying individual values
+
+943
+00:41:24.659 --> 00:41:26.659
+of structs, they'll still replicate
+
+944
+00:41:26.659 --> 00:41:29.739
+and using this same on rep notify.
+
+945
+00:41:29.739 --> 00:41:32.260
+So you can see we're getting the replicated struct,
+
+946
+00:41:32.260 --> 00:41:38.670
+and we're just adjusting the new property int to 30 from zero.
+
+947
+00:41:38.670 --> 00:41:41.030
+I'll just wait for those print strings to appear.
+
+948
+00:41:41.869 --> 00:41:44.909
+And when I do six, you can see that same rep notify
+
+949
+00:41:44.909 --> 00:41:47.349
+is getting called, even though I only modified
+
+950
+00:41:47.349 --> 00:41:49.869
+a single value, I didn't modify the whole struct.
+
+951
+00:41:50.949 --> 00:41:52.389
+So that's again, proving that, you know,
+
+952
+00:41:52.389 --> 00:41:53.869
+you're setting a single member in a struct,
+
+953
+00:41:53.869 --> 00:41:55.630
+as long as that struct itself is replicated,
+
+954
+00:41:55.630 --> 00:41:58.110
+it will still all get replicated.
+
+955
+00:41:59.750 --> 00:42:01.030
+And that's about everything,
+
+956
+00:42:01.030 --> 00:42:03.230
+like obviously you can dig into this more,
+
+957
+00:42:03.230 --> 00:42:05.269
+doing things in the editor is a really good way
+
+958
+00:42:05.269 --> 00:42:07.429
+to kind of just be able to test the boundaries
+
+959
+00:42:07.429 --> 00:42:09.510
+of how all of these things work.
+
+960
+00:42:09.510 --> 00:42:11.590
+And that kind of really links back to the original point,
+
+961
+00:42:11.590 --> 00:42:13.030
+which is the kind of, you know,
+
+962
+00:42:13.030 --> 00:42:15.789
+the power available to us through testing
+
+963
+00:42:15.789 --> 00:42:17.349
+all this functionality through the editor
+
+964
+00:42:17.349 --> 00:42:18.869
+and what that provides for us.

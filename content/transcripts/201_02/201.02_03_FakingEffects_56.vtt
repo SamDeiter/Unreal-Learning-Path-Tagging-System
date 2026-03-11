@@ -1,0 +1,653 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:07.459
+Hey everyone! In this video we'll take a look at some of the limitations of translucent materials
+
+2
+00:00:07.459 --> 00:00:12.580
+using Lumen and how we can avoid them to recreate a realistic look that we want.
+
+3
+00:00:13.220 --> 00:00:17.859
+We'll also be exploring some advanced techniques for edge control in the engine.
+
+4
+00:00:18.420 --> 00:00:19.219
+Let's get started!
+
+5
+00:00:19.859 --> 00:00:24.260
+Alright, as I just mentioned, we'll be reviewing how certain looks and feels can still be
+
+6
+00:00:24.260 --> 00:00:29.940
+replicated in engine without the use of the Fresnel node, using something like the dot product,
+
+7
+00:00:30.019 --> 00:00:32.500
+the power, and the transform vector node.
+
+8
+00:00:33.380 --> 00:00:37.859
+And knowing alternatives to the Fresnel index workflow that we just learned in the previous
+
+9
+00:00:37.859 --> 00:00:44.100
+class is really important because view-dependent effects like edge highlighting and transparency
+
+10
+00:00:44.100 --> 00:00:48.420
+calculations may not really receive proper dynamic lighting using Lumen.
+
+11
+00:00:48.979 --> 00:00:55.299
+We'll also get an overview on faking caustics and hot spots in Unreal without the use of
+
+12
+00:00:55.299 --> 00:00:56.979
+something called Path Tracer.
+
+13
+00:00:57.840 --> 00:01:02.960
+Because translucent reflections and materials aren't really properly captured in Lumen,
+
+14
+00:01:02.960 --> 00:01:07.519
+so for example they don't really contribute to light bounces onto other surfaces
+
+15
+00:01:07.519 --> 00:01:09.760
+and can really cast proper shadows.
+
+16
+00:01:09.760 --> 00:01:13.200
+So let's jump into the engine and see how we can still achieve what we want.
+
+17
+00:01:14.500 --> 00:01:19.060
+Okay, we're in the faking details and refraction area of our default map.
+
+18
+00:01:20.060 --> 00:01:23.180
+And if I navigate here and focus on the floor,
+
+19
+00:01:23.739 --> 00:01:26.859
+you can see this faking refraction kind of effect.
+
+20
+00:01:28.099 --> 00:01:31.459
+Now, it's important to acknowledge that without Path Tracer,
+
+21
+00:01:31.459 --> 00:01:35.540
+you cannot really get bounce lights like this on translucent materials.
+
+22
+00:01:36.260 --> 00:01:39.620
+But we can fake this using something called Decal Components,
+
+23
+00:01:39.620 --> 00:01:44.900
+with a specific texture assigned to them replicating this caustics or refracted look.
+
+24
+00:01:45.620 --> 00:01:50.180
+And if I press G and select my Decal Component, you can see what I mean.
+
+25
+00:01:52.319 --> 00:01:58.239
+Now, Decal Components are really just planes with translucent or additive blend modes
+
+26
+00:01:58.239 --> 00:02:01.040
+that wrap around surfaces like this
+
+27
+00:02:01.599 --> 00:02:06.000
+and are typically used to add details to our environments.
+
+28
+00:02:07.019 --> 00:02:09.740
+Now, let's select our Decal Component over here
+
+29
+00:02:09.740 --> 00:02:12.620
+and double click on its material to see how it was made.
+
+30
+00:02:13.180 --> 00:02:18.460
+Okay, so it might look a little bit messy, but this material is actually pretty simple.
+
+31
+00:02:18.460 --> 00:02:22.300
+First of all, let's acknowledge if we click in an empty area of the graph
+
+32
+00:02:22.300 --> 00:02:26.939
+that the material domain was changed from surface to deferred decal,
+
+33
+00:02:26.939 --> 00:02:29.419
+and the blend mode assigned is the translucent.
+
+34
+00:02:29.979 --> 00:02:32.780
+So in this material, we're really just taking a simple texture
+
+35
+00:02:32.780 --> 00:02:35.020
+that I'm gonna be opening up down here
+
+36
+00:02:35.919 --> 00:02:40.159
+that can be easily hand painted in any image editing software.
+
+37
+00:02:40.159 --> 00:02:44.080
+And then if I switch the preview mode to plane,
+
+38
+00:02:44.080 --> 00:02:48.319
+you can see how if applied to plane and then onto a surface,
+
+39
+00:02:48.319 --> 00:02:51.759
+it can easily recreate this refracted look.
+
+40
+00:02:51.759 --> 00:02:54.000
+Now, we have a linear gradient node here
+
+41
+00:02:54.000 --> 00:02:57.680
+that is attached to an add node that is not connected to anything.
+
+42
+00:02:57.680 --> 00:02:59.919
+We left it here just for you to play around
+
+43
+00:02:59.919 --> 00:03:02.800
+and you can connect it to any of the material properties.
+
+44
+00:03:03.919 --> 00:03:07.360
+We're done multiplying the base color with a really high value
+
+45
+00:03:07.360 --> 00:03:09.919
+to increase the emission of our decal.
+
+46
+00:03:09.919 --> 00:03:12.719
+And we have various values here that you can really play around with.
+
+47
+00:03:13.439 --> 00:03:15.599
+Now, keep in mind that decals materials
+
+48
+00:03:15.599 --> 00:03:18.879
+are much more limited than standard materials
+
+49
+00:03:18.879 --> 00:03:21.919
+because they're projected onto existing surfaces
+
+50
+00:03:21.919 --> 00:03:24.639
+rather than being full materials themselves.
+
+51
+00:03:24.639 --> 00:03:27.840
+So they don't really have any physical properties
+
+52
+00:03:27.840 --> 00:03:30.000
+and have very limited blend modes.
+
+53
+00:03:30.800 --> 00:03:33.759
+So you won't be able to push this in all the directions you want,
+
+54
+00:03:33.759 --> 00:03:37.199
+but everything in here is at your disposal to test things out.
+
+55
+00:03:37.919 --> 00:03:39.759
+All right, let's go back to our viewport.
+
+56
+00:03:40.740 --> 00:03:43.379
+And if we navigate more here on the right,
+
+57
+00:03:44.500 --> 00:03:49.139
+we can see some examples of using the power and dot node
+
+58
+00:03:49.139 --> 00:03:51.379
+to replicate the Fresnel effect.
+
+59
+00:03:51.379 --> 00:03:54.020
+Now, these two materials are not translucent
+
+60
+00:03:54.020 --> 00:03:56.979
+and they don't have any altered refraction index.
+
+61
+00:03:57.539 --> 00:04:00.419
+They're also not using any Fresnel nodes.
+
+62
+00:04:00.419 --> 00:04:03.539
+And yet they do replicate how the light would bounce
+
+63
+00:04:03.620 --> 00:04:07.780
+on surfaces such as silk in the first example, and cotton.
+
+64
+00:04:08.530 --> 00:04:10.930
+So let's select the first preview mesh
+
+65
+00:04:10.930 --> 00:04:13.969
+and then open up its material from the Details panel
+
+66
+00:04:13.969 --> 00:04:15.889
+to see how these materials were developed.
+
+67
+00:04:17.149 --> 00:04:19.949
+Okay, so this material is a bit more complex
+
+68
+00:04:19.949 --> 00:04:22.189
+than the simple decal we just examined.
+
+69
+00:04:22.750 --> 00:04:24.990
+And we'll just go over it together
+
+70
+00:04:24.990 --> 00:04:27.149
+because we're introducing some new nodes here.
+
+71
+00:04:28.100 --> 00:04:29.939
+So we're starting with a camera vector
+
+72
+00:04:29.939 --> 00:04:33.060
+that I'm just going to be plugging directly into the base color
+
+73
+00:04:33.060 --> 00:04:34.180
+to show you what it does.
+
+74
+00:04:34.980 --> 00:04:37.300
+I'll just be expanding this preview a little bit.
+
+75
+00:04:37.300 --> 00:04:40.339
+Okay, so the camera vector tells us the direction
+
+76
+00:04:40.339 --> 00:04:44.259
+of the camera from any point on our material surface.
+
+77
+00:04:44.259 --> 00:04:46.980
+And that's what you see here in this color information.
+
+78
+00:04:47.540 --> 00:04:50.259
+The camera vector is super useful for creating effects
+
+79
+00:04:50.259 --> 00:04:52.420
+that change based on the viewing angle
+
+80
+00:04:52.980 --> 00:04:55.379
+like the Fresnel effect that we're trying to recreate here.
+
+81
+00:04:56.019 --> 00:04:58.740
+Now, it's important to know that the camera vector
+
+82
+00:04:58.740 --> 00:05:01.939
+outputs a direction vector in world space.
+
+83
+00:05:02.660 --> 00:05:05.860
+And we're using this dot product to compare it
+
+84
+00:05:05.860 --> 00:05:07.699
+with another kind of information.
+
+85
+00:05:08.800 --> 00:05:10.480
+And if we follow the noodle down here,
+
+86
+00:05:10.480 --> 00:05:12.079
+you can see that this dot product
+
+87
+00:05:12.079 --> 00:05:14.720
+is connected to a transform vector,
+
+88
+00:05:14.720 --> 00:05:17.120
+which is connected to a texture sample
+
+89
+00:05:17.120 --> 00:05:19.439
+that has a black normal texture.
+
+90
+00:05:20.240 --> 00:05:22.879
+If I connect the RGB output of our normal
+
+91
+00:05:22.879 --> 00:05:23.759
+to the base color,
+
+92
+00:05:24.930 --> 00:05:27.490
+you can see that the color information displayed
+
+93
+00:05:27.490 --> 00:05:30.449
+is completely different from the camera vector.
+
+94
+00:05:30.449 --> 00:05:33.730
+And that's because normal maps are usually stored
+
+95
+00:05:33.730 --> 00:05:35.410
+in tangent space,
+
+96
+00:05:35.410 --> 00:05:37.970
+while camera vectors, as I just mentioned,
+
+97
+00:05:38.769 --> 00:05:40.769
+speak in world space.
+
+98
+00:05:41.569 --> 00:05:44.050
+So these two different color informations
+
+99
+00:05:44.050 --> 00:05:46.290
+are basically asking two different questions.
+
+100
+00:05:47.420 --> 00:05:50.379
+The tangent space normal map is asking,
+
+101
+00:05:50.379 --> 00:05:54.300
+what is the app vector for a specific point on the surface?
+
+102
+00:05:55.100 --> 00:05:57.500
+While the world space direction vector
+
+103
+00:05:57.500 --> 00:05:59.579
+of the camera vector is asking,
+
+104
+00:05:59.579 --> 00:06:02.379
+what is the app vector for the entire world?
+
+105
+00:06:03.019 --> 00:06:05.420
+So basically, the normal map is speaking
+
+106
+00:06:05.420 --> 00:06:07.259
+from an object point of view,
+
+107
+00:06:07.259 --> 00:06:08.620
+is object oriented,
+
+108
+00:06:09.180 --> 00:06:11.819
+while the camera vector is world oriented.
+
+109
+00:06:13.339 --> 00:06:15.660
+And that's where this transform vector node
+
+110
+00:06:15.660 --> 00:06:16.939
+comes into place.
+
+111
+00:06:16.939 --> 00:06:18.860
+Because if we click on this arrow here,
+
+112
+00:06:18.860 --> 00:06:20.220
+we can expand it,
+
+113
+00:06:20.220 --> 00:06:23.259
+and we can see that it's basically translating
+
+114
+00:06:23.259 --> 00:06:25.420
+the tangent space color information
+
+115
+00:06:25.980 --> 00:06:27.259
+into the world space,
+
+116
+00:06:27.259 --> 00:06:30.139
+so that these two nodes can speak the same language.
+
+117
+00:06:30.620 --> 00:06:33.420
+So if I connect the transform vector to the base color,
+
+118
+00:06:33.980 --> 00:06:35.980
+we can see here that the color information
+
+119
+00:06:35.980 --> 00:06:38.779
+is much more similar to the camera vector one.
+
+120
+00:06:39.870 --> 00:06:42.029
+Now, if we connect the dot product
+
+121
+00:06:42.029 --> 00:06:45.709
+to the output base color of our material,
+
+122
+00:06:46.579 --> 00:06:48.420
+we can see here what's going on.
+
+123
+00:06:48.420 --> 00:06:50.100
+So connected to the camera vector
+
+124
+00:06:50.100 --> 00:06:51.620
+and the transform vector,
+
+125
+00:06:51.620 --> 00:06:53.620
+the dot product is asking us,
+
+126
+00:06:53.620 --> 00:06:56.180
+how directly am I looking at this surface?
+
+127
+00:06:57.089 --> 00:06:58.930
+Because if I'm looking straight at it,
+
+128
+00:06:59.490 --> 00:07:01.889
+I will be resulting a value of one,
+
+129
+00:07:02.529 --> 00:07:04.850
+while if I'm looking at it from the side,
+
+130
+00:07:04.850 --> 00:07:06.689
+I will be resulting a value of zero.
+
+131
+00:07:07.250 --> 00:07:10.449
+This resulting into a black edge outline
+
+132
+00:07:11.329 --> 00:07:13.170
+and an inner white color.
+
+133
+00:07:14.370 --> 00:07:16.769
+Now, to recreate something like the cotton,
+
+134
+00:07:16.769 --> 00:07:19.170
+we want to invert this result
+
+135
+00:07:19.170 --> 00:07:20.850
+by using a one minus node,
+
+136
+00:07:21.569 --> 00:07:24.850
+and make the edge much more defined and fuzzy.
+
+137
+00:07:24.850 --> 00:07:28.290
+So if I connected this add node to the base color,
+
+138
+00:07:28.370 --> 00:07:29.490
+you can see what I mean.
+
+139
+00:07:30.860 --> 00:07:32.779
+Now, the cotton and the silk
+
+140
+00:07:32.779 --> 00:07:35.740
+are almost opposite in what they want to achieve.
+
+141
+00:07:36.540 --> 00:07:38.699
+What I mean by that is that, as you can see,
+
+142
+00:07:38.699 --> 00:07:40.860
+the one minus node is used for the cotton,
+
+143
+00:07:40.860 --> 00:07:42.779
+but it's not used with the silk.
+
+144
+00:07:42.779 --> 00:07:45.420
+And we can actually play around with these values
+
+145
+00:07:45.420 --> 00:07:48.220
+and invert them to have a really cool effect.
+
+146
+00:07:48.220 --> 00:07:50.860
+So if I switch these 20s to zeros,
+
+147
+00:07:53.420 --> 00:07:54.939
+and these zeros to 20s,
+
+148
+00:07:56.430 --> 00:07:58.829
+we have something like an inverted eye
+
+149
+00:07:58.829 --> 00:08:00.509
+that's constantly staring at us.
+
+150
+00:08:01.230 --> 00:08:02.589
+Let's make it a real eye.
+
+151
+00:08:03.870 --> 00:08:05.550
+So if after the add node,
+
+152
+00:08:05.550 --> 00:08:07.230
+I add a one minus node,
+
+153
+00:08:08.430 --> 00:08:10.829
+we'll basically invert the entire polar result.
+
+154
+00:08:11.470 --> 00:08:14.110
+And here we have a pupil constantly staring at us,
+
+155
+00:08:14.110 --> 00:08:15.149
+which I think is pretty cool,
+
+156
+00:08:15.149 --> 00:08:16.509
+and I wanted to show you that.
+
+157
+00:08:16.509 --> 00:08:17.870
+All right, that was it for this video.
+
+158
+00:08:17.870 --> 00:08:19.149
+I hope you had a good time.
+
+159
+00:08:19.149 --> 00:08:20.509
+In the next video,
+
+160
+00:08:20.509 --> 00:08:23.470
+we'll learn how to develop a bump offset effect
+
+161
+00:08:23.470 --> 00:08:25.310
+on a translucent material
+
+162
+00:08:25.310 --> 00:08:28.829
+and dive deeper into the bump offset workflows and techniques.
+
+163
+00:08:29.550 --> 00:08:30.269
+I'll see you there.

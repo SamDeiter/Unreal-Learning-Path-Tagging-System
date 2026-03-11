@@ -1,0 +1,309 @@
+WEBVTT
+
+1
+00:00:01.419 --> 00:00:07.400
+So, how do you build one? Well that starts with the construction event that I briefly mentioned earlier
+
+2
+00:00:08.039 --> 00:00:11.910
+So what is the construction event again just to just to cover it?
+
+3
+00:00:12.250 --> 00:00:18.750
+Well, it's an event that we use to spawn rig elements during the preparation phase of the control rig graph
+
+4
+00:00:19.109 --> 00:00:21.429
+And what does this mean? So
+
+5
+00:00:21.989 --> 00:00:27.089
+this means that we use this event before the forwards or backwards solve logic to
+
+6
+00:00:27.410 --> 00:00:31.570
+spawn any of our rig elements like controls or bones or nulls and
+
+7
+00:00:32.130 --> 00:00:36.390
+It's an event that only runs once at the start of the control rig logic
+
+8
+00:00:36.810 --> 00:00:39.520
+Now it doesn't just spawn the rig elements
+
+9
+00:00:39.560 --> 00:00:46.399
+but we can also use it to set the initial positions of any of the rig elements that we're spawning or creating and
+
+10
+00:00:47.200 --> 00:00:50.039
+initialize variables update the hierarchy and
+
+11
+00:00:51.000 --> 00:00:56.079
+Importantly import the skeleton of the mesh that we're assigning this control rig to
+
+12
+00:00:56.770 --> 00:01:01.950
+Because as I said before if you were to make any changes to your skeleton the fact that you're
+
+13
+00:01:02.229 --> 00:01:07.150
+importing the skeleton on the construction event will pick up any of those changes that have been made and
+
+14
+00:01:07.840 --> 00:01:12.719
+This is essentially the main tool that allows you to procedurally build a control rig
+
+15
+00:01:12.719 --> 00:01:16.099
+And without this without the construction event, none of it would be possible
+
+16
+00:01:17.620 --> 00:01:22.400
+Taking a look at some of the common nodes and functions that you'd use at the construction event here
+
+17
+00:01:22.599 --> 00:01:25.280
+We have the spawn transform control node
+
+18
+00:01:25.560 --> 00:01:27.120
+Now this allows you to
+
+19
+00:01:27.120 --> 00:01:29.920
+spawn a control and set its position and
+
+20
+00:01:30.319 --> 00:01:34.420
+Determine what the control actually looks like so the scale of it the shape of it that kind of thing
+
+21
+00:01:34.760 --> 00:01:41.099
+So you could use this to spawn several different controls all at once with all of the same settings
+
+22
+00:01:41.099 --> 00:01:46.060
+If you know what position that controls in and how the control looks so you're not having to
+
+23
+00:01:46.659 --> 00:01:48.659
+manually recreate each one and
+
+24
+00:01:49.260 --> 00:01:51.379
+multiple times
+
+25
+00:01:51.379 --> 00:01:57.939
+There's also the control stack at item function, which is a function that's pre-built into the engine that is
+
+26
+00:01:58.420 --> 00:02:02.540
+comprised of other procedural rigging nodes like the spawn node
+
+27
+00:02:03.299 --> 00:02:05.859
+metadata and other string operator nodes and
+
+28
+00:02:06.579 --> 00:02:12.900
+Its function is similar to that of the spawn transform control node, but with a bit more functionality
+
+29
+00:02:13.659 --> 00:02:18.879
+So it allows you to add nulls above and below the control that you're spawning
+
+30
+00:02:19.080 --> 00:02:22.580
+To add the extra level of control within the hierarchy if you need that
+
+31
+00:02:23.000 --> 00:02:27.500
+You can also add secondary controls as children of the control that you're spawning
+
+32
+00:02:28.539 --> 00:02:33.500
+And it's a little easier to do things like rename your controls with the the built-in naming options
+
+33
+00:02:34.180 --> 00:02:37.180
+Tags are also a new concept with procedural rigging
+
+34
+00:02:37.460 --> 00:02:44.379
+So they allow you to tag parts of the rig with custom names to access in the rig logic and make updates to many
+
+35
+00:02:44.379 --> 00:02:51.539
+Parts at once so you could tag all of the bones with the name bone or all of the controls with the name control
+
+36
+00:02:51.539 --> 00:02:53.219
+for example and
+
+37
+00:02:53.219 --> 00:02:57.919
+Effect all of those things at once by just finding the items with that tag
+
+38
+00:02:58.500 --> 00:03:03.490
+Now it's a little bit like setting a variable to access in other parts of the rig logic later
+
+39
+00:03:05.650 --> 00:03:10.129
+You also have the ability to set metadata on elements within the rig
+
+40
+00:03:10.409 --> 00:03:14.250
+So storing data on things like controls or bones or nulls
+
+41
+00:03:14.810 --> 00:03:21.180
+Now this is similar to tagging but think of it more like a big container that can hold multiple data types
+
+42
+00:03:21.500 --> 00:03:23.500
+Unlike just storing a name with the tag
+
+43
+00:03:23.939 --> 00:03:30.900
+So the value of the metadata that you're setting includes the name as well as the type of element for that particular part of the rig
+
+44
+00:03:31.360 --> 00:03:33.960
+so you can just do a bit more with the information and
+
+45
+00:03:34.599 --> 00:03:39.759
+it's intended to pass data from the construction event to the forwards or backwards solve logic and
+
+46
+00:03:40.259 --> 00:03:46.979
+There's also the concat or concatenate node and this is useful for adding a suffix to the name of things and
+
+47
+00:03:47.259 --> 00:03:49.259
+We'll be using this to name our controls
+
+48
+00:03:49.460 --> 00:03:55.560
+To help us differentiate the names of our controls and our bones as well as build the hierarchy of our rig
+
+49
+00:03:56.060 --> 00:04:00.129
+We're going to be building a simple FK rig for our character
+
+50
+00:04:00.289 --> 00:04:05.430
+That you'll be able to use and set up for any of your own skeletal meshes in your own projects
+
+51
+00:04:05.969 --> 00:04:09.819
+Now, let's take a look at some of the nodes that we're going to be using for this setup
+
+52
+00:04:10.379 --> 00:04:15.719
+Now some of them you may have used before when you're creating your control rigs
+
+53
+00:04:15.919 --> 00:04:20.100
+But some of them are specifically intended to be used with the construction event
+
+54
+00:04:20.160 --> 00:04:26.670
+So it's unlikely you've come into contact with them before but the more of the the more traditional modes and functions
+
+55
+00:04:26.930 --> 00:04:32.129
+We're going to be using the item name search node now that allows us to essentially
+
+56
+00:04:32.509 --> 00:04:38.189
+Search for all of the elements within the rig that contain a particular name or even partial name
+
+57
+00:04:38.189 --> 00:04:44.339
+And this will allow us to grab lots of information at once to use to generate some controls
+
+58
+00:04:44.980 --> 00:04:48.779
+Now we'll also use the get transform node
+
+59
+00:04:49.240 --> 00:04:53.800
+which just allows us to get the transform of a particular element of the rig and
+
+60
+00:04:54.360 --> 00:04:58.160
+We'll use this information to set the transforms of our controls
+
+61
+00:04:58.879 --> 00:05:05.490
+Then we'll use the get parent node and this just allows us to search up the chain and find the parent of a particular
+
+62
+00:05:05.569 --> 00:05:11.000
+Item which we'll use to set up our hierarchy and then the concat node
+
+63
+00:05:11.439 --> 00:05:19.490
+Which is just going to help us name our controls and a couple of functions that we'll be using are the FK chain function
+
+64
+00:05:19.689 --> 00:05:25.970
+which is going to connect our controls and our bones together so the controls can drive the movement of the bones and
+
+65
+00:05:27.279 --> 00:05:29.639
+the colorize controls function
+
+66
+00:05:30.160 --> 00:05:36.399
+Which allows us to essentially automatically color our controls based on their position
+
+67
+00:05:37.459 --> 00:05:43.699
+Now some nodes that you may not recognize or at least may not have used before if you haven't worked with procedural rigging yet
+
+68
+00:05:44.100 --> 00:05:46.860
+Are the import skeleton node now
+
+69
+00:05:46.860 --> 00:05:52.620
+This is exactly what what you think it would be so it imports the skeleton into the control rig hierarchy
+
+70
+00:05:52.620 --> 00:05:58.740
+And it's great for picking up any changes that might have happened to the skeleton like you've added or remove bones for example
+
+71
+00:05:59.600 --> 00:06:04.579
+Or it's great for importing a different skeleton when you're using this rig on a different character
+
+72
+00:06:05.060 --> 00:06:11.399
+We'll also use the spawn control node to spawn all of our controls and set their initial positions and
+
+73
+00:06:12.149 --> 00:06:18.790
+We'll use the add tag and find items with tag nodes for our bones and our controls
+
+74
+00:06:18.790 --> 00:06:26.810
+So we'll tag our bones or tag our controls and we use the information in the FK chain function later on and then lastly
+
+75
+00:06:27.050 --> 00:06:30.389
+We'll take a look at the control stack at item function
+
+76
+00:06:30.610 --> 00:06:35.569
+just so we can see a different way of spawning the controls and see some benefits of the
+
+77
+00:06:35.930 --> 00:06:39.149
+Well of this function versus the spawn control node

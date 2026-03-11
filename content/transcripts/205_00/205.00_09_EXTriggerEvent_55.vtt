@@ -1,0 +1,665 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:03.850
+In this final section, we'll build the final logic
+
+2
+00:00:03.850 --> 00:00:07.110
+for pausing our sequence, firing off the event,
+
+3
+00:00:07.110 --> 00:00:10.849
+look for player input, and then finally unpausing
+
+4
+00:00:10.849 --> 00:00:13.140
+the sequence.
+
+5
+00:00:13.140 --> 00:00:15.720
+So if we jump back over to our project, one of the things
+
+6
+00:00:15.720 --> 00:00:18.500
+that I just want to take a quick note to show that may be
+
+7
+00:00:18.500 --> 00:00:20.780
+different from what you have set up,
+
+8
+00:00:20.780 --> 00:00:23.120
+if you recall from the previous course,
+
+9
+00:00:23.120 --> 00:00:26.179
+we talked about binding overrides,
+
+10
+00:00:26.179 --> 00:00:29.660
+specifically being able to use the spawnable actors.
+
+11
+00:00:29.660 --> 00:00:31.320
+So if I open up the level sequence,
+
+12
+00:00:31.359 --> 00:00:34.740
+you'll see within our sequence, we have our character.
+
+13
+00:00:34.740 --> 00:00:36.359
+And we have this SKM bot that we
+
+14
+00:00:36.359 --> 00:00:39.640
+have converted to a spawnable.
+
+15
+00:00:39.640 --> 00:00:42.439
+So within the level, again, just kind of tucked off
+
+16
+00:00:42.439 --> 00:00:45.560
+into a small corner here, if I close our sequence,
+
+17
+00:00:45.560 --> 00:00:49.759
+you'll see that I've dropped in our SKM bot runtime.
+
+18
+00:00:49.759 --> 00:00:52.479
+And in the actual sequence actor,
+
+19
+00:00:52.479 --> 00:00:55.079
+underneath our binding overrides,
+
+20
+00:00:55.079 --> 00:00:58.479
+I've selected our SKM bot from the sequence.
+
+21
+00:00:58.479 --> 00:01:02.640
+And the bound actor is going to be this SKM bot runtime, which
+
+22
+00:01:02.640 --> 00:01:04.340
+exists in our world.
+
+23
+00:01:04.340 --> 00:01:06.719
+So if you don't have that set up and you play your sequence,
+
+24
+00:01:06.719 --> 00:01:08.719
+you'll notice that it doesn't look like the actor is there
+
+25
+00:01:08.719 --> 00:01:09.879
+or it's tracking.
+
+26
+00:01:09.879 --> 00:01:14.640
+Again, that's because within the actual sequence itself,
+
+27
+00:01:14.640 --> 00:01:18.120
+our SKM bot is set to a replaceable.
+
+28
+00:01:18.120 --> 00:01:18.920
+Perfect.
+
+29
+00:01:18.920 --> 00:01:23.799
+So we'll go ahead and go back down here into our section.
+
+30
+00:01:23.799 --> 00:01:25.959
+So let's go up to our level blueprint.
+
+31
+00:01:25.959 --> 00:01:27.519
+And we'll open up our level blueprint.
+
+32
+00:01:27.519 --> 00:01:30.280
+And we are going to go down below here and start
+
+33
+00:01:30.280 --> 00:01:34.640
+creating the additional logic we need to connect to our input
+
+34
+00:01:34.640 --> 00:01:38.079
+and activate our event.
+
+35
+00:01:38.079 --> 00:01:40.599
+So I'm going to drag my BP sequence manager
+
+36
+00:01:40.599 --> 00:01:43.280
+into our level blueprint here.
+
+37
+00:01:43.280 --> 00:01:46.120
+And first thing I want to do is drag off of this.
+
+38
+00:01:46.120 --> 00:01:53.569
+And I'm going to do a bind event to pause dispatcher.
+
+39
+00:01:53.569 --> 00:01:55.650
+There we go, perfect.
+
+40
+00:01:55.650 --> 00:01:57.829
+Now, in order to activate this,
+
+41
+00:01:57.870 --> 00:02:03.459
+we need to add a event, begin play.
+
+42
+00:02:03.459 --> 00:02:04.459
+Perfect.
+
+43
+00:02:04.459 --> 00:02:07.620
+And begin play, drag off and connect this.
+
+44
+00:02:07.620 --> 00:02:09.189
+Hit compile.
+
+45
+00:02:09.189 --> 00:02:10.530
+You notice here that we actually
+
+46
+00:02:10.530 --> 00:02:12.229
+need to create our event next.
+
+47
+00:02:12.229 --> 00:02:15.469
+So I'm going to drag off of our event here.
+
+48
+00:02:15.469 --> 00:02:18.430
+And we're going to add a custom event.
+
+49
+00:02:18.430 --> 00:02:20.349
+And we can give this any name that we'd like.
+
+50
+00:02:20.349 --> 00:02:26.780
+But I'm going to do sequence, pause, event.
+
+51
+00:02:26.780 --> 00:02:29.169
+There we go, perfect.
+
+52
+00:02:29.210 --> 00:02:31.650
+And then from this sequence, pause, event,
+
+53
+00:02:31.650 --> 00:02:36.090
+I'm just going to drag off and type in print text.
+
+54
+00:02:36.090 --> 00:02:38.650
+Now, this is purely just debug information.
+
+55
+00:02:38.650 --> 00:02:40.650
+So you see here it says development only.
+
+56
+00:02:40.650 --> 00:02:42.009
+I'll expand this out.
+
+57
+00:02:42.009 --> 00:02:45.090
+And this is just a way for us to get a little pop-up
+
+58
+00:02:45.090 --> 00:02:48.650
+on screen that, from this text, kind of lets us know,
+
+59
+00:02:48.650 --> 00:02:50.009
+hey, what's happening here?
+
+60
+00:02:50.009 --> 00:02:52.430
+So instead of hello, I'm just going
+
+61
+00:02:52.430 --> 00:02:58.409
+to say, pause event triggered.
+
+62
+00:02:58.449 --> 00:03:02.250
+And you can choose to have a duration, a text color,
+
+63
+00:03:02.250 --> 00:03:03.090
+whatever you'd like.
+
+64
+00:03:03.090 --> 00:03:04.810
+But this should be fine for right now.
+
+65
+00:03:04.810 --> 00:03:06.050
+Hit compile.
+
+66
+00:03:06.050 --> 00:03:06.969
+Our error goes away.
+
+67
+00:03:06.969 --> 00:03:08.250
+All right, perfect.
+
+68
+00:03:08.250 --> 00:03:11.889
+Now, if we were to play our event,
+
+69
+00:03:11.889 --> 00:03:13.650
+so if I actually play our sequence here,
+
+70
+00:03:13.650 --> 00:03:16.569
+we should get a pause event trigger pop-up on screen.
+
+71
+00:03:16.569 --> 00:03:19.449
+But of course, the sequence will continue.
+
+72
+00:03:19.449 --> 00:03:22.530
+So this next portion is going to be the logic
+
+73
+00:03:22.530 --> 00:03:27.050
+that we need to, again, talk in between the sequence manager
+
+74
+00:03:27.050 --> 00:03:29.530
+pause event, the sequence when it's saying,
+
+75
+00:03:29.530 --> 00:03:32.490
+hey, I'm firing off this event, and what we
+
+76
+00:03:32.490 --> 00:03:37.080
+want to do with that event.
+
+77
+00:03:37.080 --> 00:03:38.960
+All right, so now what I want to do
+
+78
+00:03:38.960 --> 00:03:41.919
+is actually put in our sequence 205 start.
+
+79
+00:03:41.919 --> 00:03:43.840
+So that's the sequence we're playing.
+
+80
+00:03:43.840 --> 00:03:46.099
+Move it down here.
+
+81
+00:03:46.099 --> 00:03:49.300
+And I'm going to drag off of this.
+
+82
+00:03:49.300 --> 00:03:52.900
+And I'm going to search for pause.
+
+83
+00:03:52.900 --> 00:03:53.780
+We'll do pause.
+
+84
+00:03:53.780 --> 00:03:58.770
+And what we're looking for is work here.
+
+85
+00:03:58.810 --> 00:04:01.699
+And pause again.
+
+86
+00:04:01.699 --> 00:04:04.659
+If you don't see pause here, so it should be here,
+
+87
+00:04:04.659 --> 00:04:06.300
+pause player sequence player, you
+
+88
+00:04:06.300 --> 00:04:08.300
+can uncheck content sensitive.
+
+89
+00:04:08.300 --> 00:04:11.419
+And this will basically search for anything
+
+90
+00:04:11.419 --> 00:04:12.900
+that is related to this node.
+
+91
+00:04:12.900 --> 00:04:15.180
+But we'll keep context sensitive on.
+
+92
+00:04:15.180 --> 00:04:18.660
+And we want this pause sequence player.
+
+93
+00:04:18.660 --> 00:04:22.000
+Drag this and get a little bit thinner here.
+
+94
+00:04:22.000 --> 00:04:23.759
+And off of our print text, I'll
+
+95
+00:04:23.759 --> 00:04:27.519
+go ahead and drag into our pause.
+
+96
+00:04:27.519 --> 00:04:29.560
+All right, so now what we have here
+
+97
+00:04:29.600 --> 00:04:32.439
+is that when we have our event fired,
+
+98
+00:04:32.439 --> 00:04:33.759
+I'm going to create this event.
+
+99
+00:04:33.759 --> 00:04:36.759
+It's going to pause our movie sequence player.
+
+100
+00:04:36.759 --> 00:04:39.040
+In fact, we could compile, save.
+
+101
+00:04:39.040 --> 00:04:40.800
+And let's go ahead and hit play
+
+102
+00:04:40.800 --> 00:04:43.079
+and just see if we do get this.
+
+103
+00:04:43.079 --> 00:04:45.170
+So I have our player run up.
+
+104
+00:04:45.170 --> 00:04:47.089
+Jump trigger our event.
+
+105
+00:04:47.089 --> 00:04:49.620
+Let the sequence play.
+
+106
+00:04:49.620 --> 00:04:52.660
+And if you recall, around frame 480
+
+107
+00:04:52.660 --> 00:04:55.420
+is where we should see this event fire.
+
+108
+00:04:55.420 --> 00:04:57.139
+So if we take a look in the upper left,
+
+109
+00:04:57.139 --> 00:05:01.949
+we should see our event fire print string display.
+
+110
+00:05:01.949 --> 00:05:02.870
+Perfect, there we go.
+
+111
+00:05:02.870 --> 00:05:05.750
+So our pause event has been triggered.
+
+112
+00:05:05.750 --> 00:05:08.189
+And you'll notice that the sequence sits here.
+
+113
+00:05:08.189 --> 00:05:11.389
+We are now officially paused in our sequence waiting
+
+114
+00:05:11.389 --> 00:05:12.589
+for player action.
+
+115
+00:05:12.589 --> 00:05:13.430
+Perfect.
+
+116
+00:05:13.430 --> 00:05:15.889
+Let's go ahead and escape out of there.
+
+117
+00:05:15.889 --> 00:05:20.560
+Let's bring our level blueprint back over.
+
+118
+00:05:20.560 --> 00:05:23.639
+So now what we need to do is after our pause event,
+
+119
+00:05:23.639 --> 00:05:26.040
+we need to add a gate.
+
+120
+00:05:26.120 --> 00:05:28.480
+So if we just type in gate, and we'll do this.
+
+121
+00:05:28.480 --> 00:05:30.120
+And essentially what this is going to do
+
+122
+00:05:30.120 --> 00:05:32.920
+is this acts like a actual gate in real life
+
+123
+00:05:32.920 --> 00:05:36.240
+that is waiting for some type of logic
+
+124
+00:05:36.240 --> 00:05:40.639
+to trigger this gate to open, close, et cetera.
+
+125
+00:05:40.639 --> 00:05:42.600
+So I'm going to take this enter.
+
+126
+00:05:42.600 --> 00:05:45.220
+And if you hold down Control, you
+
+127
+00:05:45.220 --> 00:05:46.379
+can actually drag off this.
+
+128
+00:05:46.379 --> 00:05:47.300
+So Control left click.
+
+129
+00:05:47.300 --> 00:05:50.579
+And we're actually going to do this as a toggle.
+
+130
+00:05:50.579 --> 00:05:52.100
+And we're going to do start close,
+
+131
+00:05:52.100 --> 00:05:53.579
+make sure we have a start closed.
+
+132
+00:05:53.579 --> 00:05:55.819
+And on the enter, I'm just going to drag back.
+
+133
+00:05:56.500 --> 00:05:58.339
+You can choose whichever key that you want.
+
+134
+00:05:58.339 --> 00:06:01.180
+But for this one, I'm just going to use the letter P.
+
+135
+00:06:01.180 --> 00:06:03.420
+Just type in keyboard.
+
+136
+00:06:03.420 --> 00:06:07.879
+And that should give us our P key from our keyboard.
+
+137
+00:06:07.879 --> 00:06:09.160
+So this is going to pause.
+
+138
+00:06:09.160 --> 00:06:12.560
+When our P key is pressed, it means that our gate is entered.
+
+139
+00:06:12.560 --> 00:06:14.480
+It's going to toggle it.
+
+140
+00:06:14.480 --> 00:06:16.879
+And then what we want to do is just
+
+141
+00:06:16.879 --> 00:06:19.040
+continue playing the sequence.
+
+142
+00:06:19.040 --> 00:06:22.160
+So I'm going to drag off of our sequence here,
+
+143
+00:06:22.160 --> 00:06:23.829
+so the sequence player.
+
+144
+00:06:23.870 --> 00:06:26.269
+And we're just going to type in play.
+
+145
+00:06:26.269 --> 00:06:27.589
+This is what we're looking for.
+
+146
+00:06:27.589 --> 00:06:28.790
+Play sequence player.
+
+147
+00:06:28.790 --> 00:06:31.540
+We can delete this guy.
+
+148
+00:06:31.540 --> 00:06:34.699
+Move this over and continue to play.
+
+149
+00:06:34.699 --> 00:06:35.939
+Hit compile.
+
+150
+00:06:35.939 --> 00:06:36.939
+Hit save.
+
+151
+00:06:36.939 --> 00:06:38.100
+Move this off screen.
+
+152
+00:06:38.100 --> 00:06:39.480
+And then let's double check just
+
+153
+00:06:39.480 --> 00:06:41.500
+to make sure that this works.
+
+154
+00:06:41.500 --> 00:06:43.639
+Our player runs up.
+
+155
+00:06:43.639 --> 00:06:55.209
+Toggle.
+
+156
+00:06:55.209 --> 00:06:57.449
+And then again, when we hit frame 480,
+
+157
+00:06:57.449 --> 00:07:00.410
+we should see our little pop up text.
+
+158
+00:07:00.410 --> 00:07:02.050
+Pause event is triggered.
+
+159
+00:07:02.050 --> 00:07:03.889
+Give it a second just to make sure.
+
+160
+00:07:03.889 --> 00:07:06.209
+We'll hit the P key.
+
+161
+00:07:06.209 --> 00:07:08.290
+You'll see that it unpauses the sequence.
+
+162
+00:07:08.290 --> 00:07:10.129
+The character runs off.
+
+163
+00:07:10.129 --> 00:07:11.410
+We resume controls.
+
+164
+00:07:11.410 --> 00:07:14.410
+And if we leave and come back, you
+
+165
+00:07:14.410 --> 00:07:16.860
+see that we no longer trigger it.
+
+166
+00:07:16.860 --> 00:07:20.319
+Perfect, this is exactly what we want.

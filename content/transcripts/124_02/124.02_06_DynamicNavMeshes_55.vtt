@@ -1,0 +1,405 @@
+WEBVTT
+
+1
+00:00:01.470 --> 00:00:06.429
+Hello and welcome to this video on dynamic nav meshes.
+
+2
+00:00:07.519 --> 00:00:11.759
+Now, there may be times when you will need your nav mesh to update,
+
+3
+00:00:11.759 --> 00:00:14.880
+and this is not done by default.
+
+4
+00:00:14.880 --> 00:00:17.519
+And I'm going to demonstrate that by...
+
+5
+00:00:18.879 --> 00:00:23.070
+I'm going to grab this blue cube over here,
+
+6
+00:00:23.070 --> 00:00:27.890
+drag this over, and I'm going to make a couple of changes to it.
+
+7
+00:00:27.890 --> 00:00:31.570
+The first thing is I don't want to simulate physics for this one,
+
+8
+00:00:31.570 --> 00:00:35.409
+I'm going to reduce the rotation so that it's flat.
+
+9
+00:00:36.799 --> 00:00:43.039
+And I'm going to move this out so that it's a bit of a long one.
+
+10
+00:00:43.820 --> 00:00:47.899
+Now, at the moment, you can see that this does not affect the navigation.
+
+11
+00:00:49.409 --> 00:00:55.890
+And that is because for this, we have unticked the can ever affect navigation.
+
+12
+00:00:56.530 --> 00:00:59.820
+If I take that on, you can see that's going to change it
+
+13
+00:00:59.820 --> 00:01:02.460
+so the navigation is working around it.
+
+14
+00:01:04.609 --> 00:01:06.849
+Now, I want this to move. So there's a couple of things.
+
+15
+00:01:06.849 --> 00:01:08.930
+We're already movable, so that's fine.
+
+16
+00:01:09.810 --> 00:01:14.370
+But I am going to add in a component just here.
+
+17
+00:01:14.370 --> 00:01:17.650
+And this is going to be the rotating movement component.
+
+18
+00:01:18.849 --> 00:01:25.730
+And the rotating movement is going to rotate on the z-axis by 180.
+
+19
+00:01:26.609 --> 00:01:29.569
+And let's just try that one second.
+
+20
+00:01:32.700 --> 00:01:34.939
+Yes, we can see that that's pretty fast.
+
+21
+00:01:34.939 --> 00:01:37.900
+So we've got the rotation is moving pretty fast for that.
+
+22
+00:01:37.900 --> 00:01:40.060
+I'm going to slow it down just a little bit.
+
+23
+00:01:40.060 --> 00:01:44.140
+So I grab the rotating movement, I'm going to change that to 90.
+
+24
+00:01:44.140 --> 00:01:45.579
+So that's about half the speed.
+
+25
+00:01:46.299 --> 00:01:50.859
+Again, if I simulate, we can see that this is updating as we go.
+
+26
+00:01:51.739 --> 00:01:55.260
+Now, what you'll notice here is as we're running,
+
+27
+00:01:55.260 --> 00:01:57.980
+this isn't updating the nav mesh at all.
+
+28
+00:01:57.980 --> 00:02:01.420
+So if I was to actually play when I was in the game,
+
+29
+00:02:02.060 --> 00:02:04.540
+if I wanted to move to here, I could,
+
+30
+00:02:05.620 --> 00:02:10.259
+but I can never cross this middle section because navigation is an update.
+
+31
+00:02:15.099 --> 00:02:17.099
+Oh, this is quite easy to fix.
+
+32
+00:02:18.189 --> 00:02:22.270
+Again, we have to jump into the project settings.
+
+33
+00:02:22.270 --> 00:02:28.189
+So if we come up to the top, select project settings and navigation mesh here.
+
+34
+00:02:28.189 --> 00:02:32.349
+So under navigation mesh, you'll see as we work our way through it,
+
+35
+00:02:32.349 --> 00:02:34.990
+there is a runtime generation.
+
+36
+00:02:34.990 --> 00:02:40.800
+So under generation, we have, I'm just going to search for it.
+
+37
+00:02:41.680 --> 00:02:46.050
+Runtime goes to the top, here you go.
+
+38
+00:02:46.050 --> 00:02:49.729
+Under the navigation mesh, we have the option for runtime generation.
+
+39
+00:02:50.849 --> 00:02:55.169
+And if I drop this down, we have a couple of options.
+
+40
+00:02:55.169 --> 00:02:59.729
+We have dynamic modifier only, and we have the dynamic.
+
+41
+00:02:59.729 --> 00:03:02.449
+So we're going to use dynamic straight up.
+
+42
+00:03:03.009 --> 00:03:08.849
+And now that that's ticked, if we simulate, you can see what's going on here.
+
+43
+00:03:08.849 --> 00:03:11.729
+The nav mesh is updating as we go.
+
+44
+00:03:12.449 --> 00:03:19.490
+Now you'll also be able to notice that the color of the sections
+
+45
+00:03:20.129 --> 00:03:24.849
+that are now in red, these are the ones that have to update.
+
+46
+00:03:24.849 --> 00:03:29.169
+To reduce the load runtime, you don't want to rebuild the entire nav mesh,
+
+47
+00:03:29.169 --> 00:03:30.689
+especially if you've got quite a big level,
+
+48
+00:03:30.770 --> 00:03:33.490
+that'd be very, very expensive for every moving object.
+
+49
+00:03:34.620 --> 00:03:42.060
+So what it does is it will just rebuild the ones where something dynamic has moved in it.
+
+50
+00:03:42.060 --> 00:03:46.300
+And if I reduced it and I could manage to fit it into a singular one,
+
+51
+00:03:47.020 --> 00:03:49.259
+I'll just take that down to about four,
+
+52
+00:03:50.060 --> 00:03:52.699
+you'll see that it's only going to affect this one.
+
+53
+00:03:52.699 --> 00:03:58.379
+But it's in red because it needs to take time on tick to update this.
+
+54
+00:04:00.030 --> 00:04:04.909
+OK, and as you probably noticed in the project settings,
+
+55
+00:04:04.909 --> 00:04:07.870
+there was another option under runtime generation,
+
+56
+00:04:07.870 --> 00:04:11.310
+and that is dynamic modifiers only.
+
+57
+00:04:11.310 --> 00:04:12.509
+Let's select that.
+
+58
+00:04:13.789 --> 00:04:18.670
+So you're in a situation where you do want the nav mesh to update,
+
+59
+00:04:18.670 --> 00:04:20.029
+but not for every little thing.
+
+60
+00:04:20.589 --> 00:04:25.069
+For example, these you could run through and knock them out the way.
+
+61
+00:04:25.069 --> 00:04:28.829
+So if I was to show you at the moment when my character comes over,
+
+62
+00:04:29.470 --> 00:04:32.029
+you might want to keep it so that they knock them out the way.
+
+63
+00:04:32.029 --> 00:04:36.110
+And therefore, we wouldn't want these to affect the nav mesh,
+
+64
+00:04:36.750 --> 00:04:39.310
+but we would want something like this to affect the nav mesh.
+
+65
+00:04:40.110 --> 00:04:43.550
+So in this case, we can use modifiers only.
+
+66
+00:04:43.550 --> 00:04:47.470
+So if I jump in to my project settings,
+
+67
+00:04:47.470 --> 00:04:50.110
+change it to dynamic modifiers only,
+
+68
+00:04:50.110 --> 00:04:54.910
+the first thing is when I play, you'll notice that nothing updates at all.
+
+69
+00:04:56.139 --> 00:05:01.899
+Now what I'm going to do is I'm going to add another component
+
+70
+00:05:01.899 --> 00:05:03.819
+to this rotating movement here,
+
+71
+00:05:04.379 --> 00:05:09.899
+and I'm going to search for a nav modifier.
+
+72
+00:05:10.829 --> 00:05:13.629
+OK, now you'd usually do this as part of a blueprint.
+
+73
+00:05:13.629 --> 00:05:16.189
+So if you created a blueprint for something that revolves,
+
+74
+00:05:16.189 --> 00:05:19.149
+you would add the modifier into the blueprint
+
+75
+00:05:19.149 --> 00:05:20.829
+and it would be easier to manage.
+
+76
+00:05:20.829 --> 00:05:24.509
+But I just want to get across in this demonstration how this works.
+
+77
+00:05:25.069 --> 00:05:30.029
+Now I am going to change the extents to about 550
+
+78
+00:05:30.029 --> 00:05:32.189
+so that it kind of matches what we've got there.
+
+79
+00:05:32.750 --> 00:05:35.069
+And now if we look at that,
+
+80
+00:05:35.069 --> 00:05:41.149
+you can see that this is updating as we would expect beforehand.
+
+81
+00:05:42.110 --> 00:05:45.230
+Now there is one problem.
+
+82
+00:05:45.230 --> 00:05:48.350
+The old nav mesh is below here.
+
+83
+00:05:48.350 --> 00:05:52.350
+So we've already cut out this area.
+
+84
+00:05:52.350 --> 00:05:54.509
+And because we're not taking it into consideration,
+
+85
+00:05:54.990 --> 00:05:58.430
+that's going to stay there sort of indefinitely.
+
+86
+00:05:58.430 --> 00:05:59.550
+So let's correct that.
+
+87
+00:06:00.189 --> 00:06:05.230
+What I'm going to do is with the object selected under nav,
+
+88
+00:06:05.230 --> 00:06:08.029
+I'm going to tick off Can Effect Navigation.
+
+89
+00:06:08.819 --> 00:06:11.060
+So that means our nav modifier,
+
+90
+00:06:11.620 --> 00:06:13.540
+which we won't see until we run the game,
+
+91
+00:06:13.540 --> 00:06:16.819
+is the only thing which is going to affect this navigation.
+
+92
+00:06:16.819 --> 00:06:20.100
+So if I run, you'll see that that opens.
+
+93
+00:06:20.660 --> 00:06:24.500
+So that's a sort of opt-in effect.
+
+94
+00:06:25.060 --> 00:06:28.579
+Navigation is only going to be affected by these nav modifiers.
+
+95
+00:06:28.579 --> 00:06:30.660
+And these are something that you'd need to add
+
+96
+00:06:30.660 --> 00:06:33.220
+to the things that you want to change the navigation.
+
+97
+00:06:33.220 --> 00:06:34.660
+And you would need to...
+
+98
+00:06:35.860 --> 00:06:38.180
+And it would update it accordingly.
+
+99
+00:06:38.180 --> 00:06:41.620
+So that is the nav modifier.
+
+100
+00:06:43.699 --> 00:06:47.939
+And that's the basics of the dynamic nav mesh.
+
+101
+00:06:48.579 --> 00:06:52.740
+The next thing we'll be looking at is the nav mesh in the vocal.

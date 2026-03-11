@@ -1,0 +1,1205 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:07.200
+In this section of your ICFX training, we are going to move into a hands-on end display configuration and setup.
+
+2
+00:00:07.200 --> 00:00:14.199
+Now, this is going to be slightly different than the at-home setup, and as a result, we're going to take a look at our terminology again.
+
+3
+00:00:14.199 --> 00:00:20.199
+The end display component terminology that you should already be familiar with is going to be the same as we go ahead and build this out.
+
+4
+00:00:20.199 --> 00:00:25.199
+So we use NDC to abbreviate end display configuration when we talk about it.
+
+5
+00:00:25.199 --> 00:00:30.199
+We will talk about cluster, host, node, and viewport as we build out the end display configuration.
+
+6
+00:00:30.199 --> 00:00:36.200
+And then when we move into our camera discussion a little later, we'll talk about our frustum, inner and outer,
+
+7
+00:00:36.200 --> 00:00:45.200
+and then we'll also refer to the use of a pixel processor, which is our hardware system channeling from the end display configuration to the wall itself.
+
+8
+00:00:45.200 --> 00:00:52.200
+Now, the first time that we get our end display configuration set up, we will need to import some meshes.
+
+9
+00:00:52.200 --> 00:00:58.200
+The big difference between the end display configuration at home and the end display configuration for your stage
+
+10
+00:00:58.200 --> 00:01:05.200
+is that the stage requires a custom mesh. To import that, we're going to just import the FBX that we've created
+
+11
+00:01:05.200 --> 00:01:12.200
+and make sure that we import our game path and disable the generate lightmap UVs.
+
+12
+00:01:12.200 --> 00:01:18.200
+We're not using this for a light, so we aren't going to necessarily need those lightmap UVs.
+
+13
+00:01:18.200 --> 00:01:23.200
+Now, your stage is going to be a little bit different, your hardware configuration, your meshes are going to be different,
+
+14
+00:01:23.200 --> 00:01:25.200
+but the principles are going to be the same.
+
+15
+00:01:25.200 --> 00:01:32.200
+The first thing that we do is we need to create an end display configuration, then double click to open that new NDC configuration
+
+16
+00:01:32.200 --> 00:01:37.200
+that we've named NDC asset S01, because it's stage 01.
+
+17
+00:01:37.200 --> 00:01:44.200
+Once that's open, delete your end display screen. We'll be adding in new components with new meshes,
+
+18
+00:01:44.200 --> 00:01:48.200
+and we will also have created our offset when we created this.
+
+19
+00:01:48.200 --> 00:01:56.200
+Now, our stage, our offset is 170.2 units, and it's already built in using the DCC Maya to generate our meshes.
+
+20
+00:01:56.200 --> 00:02:02.390
+Your origin position, which is what our offset is, is going to be a little bit different.
+
+21
+00:02:02.390 --> 00:02:04.390
+We'll talk about that once we set that up.
+
+22
+00:02:04.390 --> 00:02:08.389
+Now, once we get our meshes in, we will set up our cluster.
+
+23
+00:02:08.389 --> 00:02:12.389
+Our cluster is going to run through the settings of our render sync policy.
+
+24
+00:02:12.389 --> 00:02:15.389
+The default sync policy is set to Ethernet.
+
+25
+00:02:15.389 --> 00:02:21.389
+That's required for larger stages, because this configuration typically has multiple hosts.
+
+26
+00:02:21.389 --> 00:02:26.389
+Now, as we go through and create our hosts, we're going to need to add in a new cluster node,
+
+27
+00:02:26.389 --> 00:02:33.389
+and we're going to have to set that with our render node and choose the IP address for the actual render node itself.
+
+28
+00:02:33.389 --> 00:02:40.389
+Once you click and create those, a multi-monitor configuration will require that we add together the pixel width
+
+29
+00:02:40.389 --> 00:02:43.389
+of all our monitors in that configuration.
+
+30
+00:02:43.389 --> 00:02:49.389
+The total pixel width is then input under the node 0 window in the menu of your details panel.
+
+31
+00:02:49.389 --> 00:02:52.780
+Next, we want to make sure that as we set up our cluster,
+
+32
+00:02:52.780 --> 00:02:56.780
+we will set up our viewports to match the layout of our physical wall.
+
+33
+00:02:56.780 --> 00:03:00.000
+The latte stage uses two hosts.
+
+34
+00:03:00.000 --> 00:03:06.000
+We have two hosts connecting our main LED wall, which is a side and main wall,
+
+35
+00:03:06.000 --> 00:03:12.000
+as well as a 4K TV wild wall that is running in a separate computer.
+
+36
+00:03:12.000 --> 00:03:16.000
+The way these layout is that we create our in-display viewports
+
+37
+00:03:16.000 --> 00:03:20.000
+and then position the pixels inside the pixel viewport
+
+38
+00:03:20.000 --> 00:03:25.000
+so that they match the same layout that we have on the Brompton for our mapping.
+
+39
+00:03:25.000 --> 00:03:28.379
+Now, there is a best practice that we want to talk about here.
+
+40
+00:03:28.379 --> 00:03:30.379
+As you build out your in-display configuration,
+
+41
+00:03:30.379 --> 00:03:35.379
+it is important that you generate an in-display sublevel
+
+42
+00:03:35.379 --> 00:03:40.379
+where all of your in-display configurations will be brought into the world.
+
+43
+00:03:40.379 --> 00:03:42.379
+They live in that world space,
+
+44
+00:03:42.379 --> 00:03:48.379
+and they should be brought into and parented underneath your persistent level.
+
+45
+00:03:48.379 --> 00:03:54.379
+Now, the MVC level itself should also be changed from blueprint to always loaded
+
+46
+00:03:54.379 --> 00:03:57.379
+so that it is always active in your persistent level.
+
+47
+00:03:57.379 --> 00:04:00.740
+Now, let's jump into the engine here.
+
+48
+00:04:00.740 --> 00:04:03.740
+Now, right as we get started, I'm going to start with our best practices.
+
+49
+00:04:03.740 --> 00:04:05.740
+You can see that we're in my beach level.
+
+50
+00:04:05.740 --> 00:04:07.740
+I've got a beach that's all set up.
+
+51
+00:04:07.740 --> 00:04:09.740
+This is the world that we're going to be living in.
+
+52
+00:04:09.740 --> 00:04:12.770
+To start off, I'm just going to create that level from the start.
+
+53
+00:04:12.770 --> 00:04:16.769
+Go into levels and create my MVC level.
+
+54
+00:04:16.769 --> 00:04:20.769
+Now, once this is ready to go, because I'm connected to Perforce,
+
+55
+00:04:20.769 --> 00:04:23.769
+I do want to make sure that I check out my stage level
+
+56
+00:04:23.769 --> 00:04:28.769
+and make sure that my MVC level is either set to add or ready to be added here.
+
+57
+00:04:28.769 --> 00:04:33.769
+Now, I move up from my outliner and switch tabs to my levels
+
+58
+00:04:33.769 --> 00:04:38.769
+to make sure that my MVC level gets added into my persistent level.
+
+59
+00:04:38.769 --> 00:04:42.769
+Now, with my persistent level active and my MVC level parented underneath,
+
+60
+00:04:42.769 --> 00:04:46.769
+I want to change my streaming method by right-clicking here
+
+61
+00:04:46.769 --> 00:04:49.769
+to change streaming method to always loaded.
+
+62
+00:04:49.769 --> 00:04:52.769
+Now, with the two levels here, I also have the option in my viewport
+
+63
+00:04:52.769 --> 00:04:55.769
+of switching between the two, since my MVC configuration
+
+64
+00:04:55.769 --> 00:04:58.769
+that I'm going to build must live in my MVC level,
+
+65
+00:04:58.769 --> 00:05:02.769
+I'm going to make sure that this is the active level in my viewport.
+
+66
+00:05:02.769 --> 00:05:06.899
+Next, I'm going to need a folder in my content browser
+
+67
+00:05:06.899 --> 00:05:09.899
+for my end display configuration to live.
+
+68
+00:05:09.899 --> 00:05:12.899
+So I'm going to right-click here and go ahead and add a new folder
+
+69
+00:05:12.899 --> 00:05:14.899
+and I'm going to call this one MDC.
+
+70
+00:05:14.899 --> 00:05:18.899
+And from there, I'm going to go ahead and add in a new folder
+
+71
+00:05:18.899 --> 00:05:23.899
+for organization called MDC Meshes.
+
+72
+00:05:25.339 --> 00:05:30.339
+Because as we start out here, we are going to need to bring in meshes to work from.
+
+73
+00:05:30.339 --> 00:05:32.339
+So let's start with our importing.
+
+74
+00:05:32.339 --> 00:05:35.339
+I'm going to open up this folder because that's where I want my meshes to live
+
+75
+00:05:35.339 --> 00:05:42.540
+and I'm going to right-click here and go ahead and import to game MDC meshes.
+
+76
+00:05:42.540 --> 00:05:45.540
+You'll see I've got wall meshes and wild wall in here.
+
+77
+00:05:45.540 --> 00:05:48.629
+So I'm going to first select my wall meshes and hit open.
+
+78
+00:05:48.629 --> 00:05:52.629
+And you'll see that there is a section here for generate lightmap UVs.
+
+79
+00:05:52.629 --> 00:05:54.629
+I want to make sure that this is checked off.
+
+80
+00:05:54.629 --> 00:05:58.629
+Go ahead and import all and that's going to bring in my meshes.
+
+81
+00:05:58.629 --> 00:06:03.629
+I can ignore this warning and get ready to bring in one more mesh.
+
+82
+00:06:03.629 --> 00:06:05.629
+So I'm going to do it again.
+
+83
+00:06:05.629 --> 00:06:12.629
+Import game MDC meshes and choose my wild wall 4K TV vertical mesh.
+
+84
+00:06:12.629 --> 00:06:14.860
+So that FBX is coming in.
+
+85
+00:06:14.860 --> 00:06:17.860
+Again, generate lightmap UVs is checked off.
+
+86
+00:06:17.860 --> 00:06:19.860
+I'm going to go ahead and import all.
+
+87
+00:06:19.860 --> 00:06:21.860
+And I'm going to get the same message for my error.
+
+88
+00:06:21.860 --> 00:06:24.860
+This message is really just saying no smoothing group is found.
+
+89
+00:06:24.860 --> 00:06:26.860
+That's fine. We're not going to be using that.
+
+90
+00:06:26.860 --> 00:06:34.370
+Now as I get ready to use this, I am going to need to make some changes to my meshes.
+
+91
+00:06:34.370 --> 00:06:36.370
+So let's go ahead and open up each one of these.
+
+92
+00:06:36.370 --> 00:06:40.230
+This shows me all of my meshes.
+
+93
+00:06:40.230 --> 00:06:43.230
+I'm going to move through each one of these from start to finish.
+
+94
+00:06:43.230 --> 00:06:45.230
+So here is my main wall.
+
+95
+00:06:45.230 --> 00:06:53.490
+In my main wall it has a UV channel 0 which is a full non-uniform UV unwrap of this wall.
+
+96
+00:06:53.490 --> 00:06:58.490
+And another UV channel which is a uniform layout of my UV channel.
+
+97
+00:06:58.490 --> 00:07:02.490
+Now this channel is used for color keying and green screen.
+
+98
+00:07:02.490 --> 00:07:06.649
+With this saved, I do want to make one change here.
+
+99
+00:07:06.649 --> 00:07:12.649
+My new meshes means that I need to go into my build settings underneath my LOD section under build settings
+
+100
+00:07:12.649 --> 00:07:15.649
+and turn on use full precision UVs.
+
+101
+00:07:15.649 --> 00:07:19.649
+Hit apply changes and then save this mesh.
+
+102
+00:07:19.649 --> 00:07:23.810
+Then I can close this window and move on to the next mesh.
+
+103
+00:07:23.810 --> 00:07:28.639
+Same thing with this one. This is my side walls position.
+
+104
+00:07:28.639 --> 00:07:34.899
+I'm going to go ahead and turn on use full precision UVs and apply those changes.
+
+105
+00:07:34.899 --> 00:07:39.220
+Save this mesh and move on to the last one.
+
+106
+00:07:39.220 --> 00:07:43.410
+Now I'm not checking my channels but I know that my channels are correct.
+
+107
+00:07:43.410 --> 00:07:47.410
+UV channel 0 and UV channel 1, they are laid out this way.
+
+108
+00:07:47.410 --> 00:07:50.410
+Now I don't want them overlapping as well.
+
+109
+00:07:50.410 --> 00:07:56.410
+You'll notice that this UV channel 1 is in the upper corner and the previous mesh was in the lower corner.
+
+110
+00:07:56.410 --> 00:07:59.410
+That's because if I'm using these I don't want them to overlap.
+
+111
+00:07:59.410 --> 00:08:03.410
+So again I'm going to save and move on to my final mesh.
+
+112
+00:08:03.410 --> 00:08:06.410
+My final mesh is my wild wall.
+
+113
+00:08:06.410 --> 00:08:12.410
+Same thing, turn on use full precision UVs, apply my changes and look at my UV sets.
+
+114
+00:08:12.410 --> 00:08:19.410
+Now my wild wall has a full non-uniform scale layout for my UV set.
+
+115
+00:08:19.410 --> 00:08:26.410
+This is fine. I want to keep this but since my wild wall is not going to be using a UV channel 1
+
+116
+00:08:26.410 --> 00:08:33.409
+and its UV sets aren't perfect, I'm going to go ahead and remove this selected UV channel.
+
+117
+00:08:33.409 --> 00:08:38.409
+The wild wall doesn't use chroma key that much unless your wild wall is using chroma key.
+
+118
+00:08:38.409 --> 00:08:40.409
+You don't need this.
+
+119
+00:08:40.409 --> 00:08:45.440
+So I'm going to go ahead and delete it and hit save and then I can close this window.
+
+120
+00:08:45.440 --> 00:08:47.440
+Now you can see I've got these all added.
+
+121
+00:08:47.440 --> 00:08:54.240
+I'm going to go ahead and make sure that my Lambert also gets added to my source control by hitting mark for add.
+
+122
+00:08:54.240 --> 00:08:59.240
+Now back to my NBC folder, I need to start work on my end display configuration.
+
+123
+00:08:59.240 --> 00:09:07.240
+To do that I'm going to right click, move up to the end display section in my content browser and create end display config.
+
+124
+00:09:07.240 --> 00:09:12.980
+Now I'm going to want to create a new configuration and go ahead and hit finish here.
+
+125
+00:09:12.980 --> 00:09:17.980
+Now with this new configuration, I'm going to call this MDC asset because that's what this is.
+
+126
+00:09:17.980 --> 00:09:22.299
+And I'll call this S for stage and 01.
+
+127
+00:09:22.299 --> 00:09:28.299
+Now once that's ready to go, I am going to need to edit this and make sure that my meshes show up.
+
+128
+00:09:28.299 --> 00:09:33.460
+So first thing, I want to open this up and I'm going to pull it off so it's minimized a little
+
+129
+00:09:33.460 --> 00:09:39.460
+so it's just not taking up the whole space of the screen because I want to move back into my NDC meshes folder
+
+130
+00:09:39.460 --> 00:09:44.710
+and grab each of these to add into my end display configuration.
+
+131
+00:09:44.710 --> 00:09:51.710
+Now as I get started, you are going to find out that right away you'll see that there is this mesh.
+
+132
+00:09:51.710 --> 00:09:53.710
+This is our end display screen.
+
+133
+00:09:53.710 --> 00:10:02.710
+Because this is a generic screen and we use this for at home, I'm actually going to delete this because we need a custom mesh for our stage setup.
+
+134
+00:10:02.710 --> 00:10:10.159
+So my custom mesh is going to take the place of those and I'm going to do that by clicking on them and dragging them in.
+
+135
+00:10:10.159 --> 00:10:14.159
+Now you would think I'd be able to add components, but I can't.
+
+136
+00:10:14.159 --> 00:10:21.159
+In order to actually add these, I'm going to go ahead and grab all of them and drag them up to the MDC asset.
+
+137
+00:10:21.159 --> 00:10:24.289
+Now I do need another component here for organization.
+
+138
+00:10:24.289 --> 00:10:33.289
+That component, if I select my NDC asset, is going to be an end display transform, which I'm just going to call NDC xform.
+
+139
+00:10:33.289 --> 00:10:38.220
+Or actually let's change this to xform walls.
+
+140
+00:10:38.220 --> 00:10:45.220
+And I'm going to call it that because I'm going to parent my two meshes from my main wall underneath them.
+
+141
+00:10:45.220 --> 00:10:50.220
+So that as I'm organized, my wild wall is separate from that position.
+
+142
+00:10:50.220 --> 00:10:59.440
+Now as I go through here, one of the things I want to do right away is I want to make sure that my wild wall 4K TV is going to be a tracked object.
+
+143
+00:10:59.440 --> 00:11:04.440
+So while I'm in here, before I get anything else set up, let's add in that component.
+
+144
+00:11:04.440 --> 00:11:09.440
+So let's go live link and I'm going to add in a live link component controller.
+
+145
+00:11:09.440 --> 00:11:17.440
+Now that's a lot of words, so I'm going to make this an abbreviation for LL for live link underscore CC for component controller.
+
+146
+00:11:18.440 --> 00:11:25.440
+And I'm going to call this one wild wall WW 4K TV track.
+
+147
+00:11:25.440 --> 00:11:27.440
+TRK is for tracking.
+
+148
+00:11:27.440 --> 00:11:34.440
+Now I'm ready to go in here and it's time to move on to building out our end display configuration.
+
+149
+00:11:34.440 --> 00:11:38.440
+So you see here that's step one, that gives us all of our components.
+
+150
+00:11:38.440 --> 00:11:41.860
+And I'm going to go through each of my wall mesh pieces.
+
+151
+00:11:41.860 --> 00:11:46.139
+And I'm going to make sure that everything is correct in here in my settings.
+
+152
+00:11:46.139 --> 00:11:49.139
+And then I'm going to move on down to my component controller.
+
+153
+00:11:49.139 --> 00:11:57.139
+And in order to get this to actually work, I'm going to make sure that my subject representation chooses my wild wall 4K TV first.
+
+154
+00:11:57.139 --> 00:12:00.139
+And that the subject is ready to go.
+
+155
+00:12:00.139 --> 00:12:02.399
+Where did I get the selection?
+
+156
+00:12:02.399 --> 00:12:06.399
+If I go under source and choose OptiTrack source, I have this create option.
+
+157
+00:12:06.399 --> 00:12:08.399
+That's going to allow me to create this.
+
+158
+00:12:08.399 --> 00:12:16.399
+And you'll see that I've got an already predefined wild wall 4K TV and a Blackmagic Active for our camera.
+
+159
+00:12:16.399 --> 00:12:21.399
+As well as a nodal plug for our tracked object that we'll use later in calibration.
+
+160
+00:12:21.399 --> 00:12:26.399
+Now back into my details panel and back into my end display configuration.
+
+161
+00:12:26.399 --> 00:12:31.399
+This you can see my wild wall representation exists again and I'm ready to compile this.
+
+162
+00:12:31.399 --> 00:12:37.399
+Now I haven't set up cluster nodes because you can see my compiler results are going to be wrong.
+
+163
+00:12:37.399 --> 00:12:39.500
+Now I need to do that.
+
+164
+00:12:39.500 --> 00:12:43.500
+I need to move over to step two and start building in my clusters.
+
+165
+00:12:43.500 --> 00:12:46.500
+Now let's go ahead and add in our first cluster.
+
+166
+00:12:46.500 --> 00:12:48.500
+So here's my new cluster node.
+
+167
+00:12:48.500 --> 00:12:55.500
+I'm going to add this cluster node and I'm going to call this one RNDR for render as it's my first node.
+
+168
+00:12:55.500 --> 00:12:58.500
+And add in a zero for a double zero.
+
+169
+00:12:58.500 --> 00:13:03.690
+Now my preset here is a full HD 1920 by 1080.
+
+170
+00:13:03.690 --> 00:13:13.940
+I'm going to change this to quad, I'm sorry to ultra HD because the monitor that I'm using is an ultra HD 3840 by 2160.
+
+171
+00:13:13.940 --> 00:13:19.940
+That is what spread across the entire pixel mapping for our pixel processor software.
+
+172
+00:13:19.940 --> 00:13:24.740
+So selecting this I need to also change my IP address.
+
+173
+00:13:24.740 --> 00:13:33.740
+Now at home using a generic IP address is fine but on a stage you're generally going to want to use the IP address for the machines that you're connecting to.
+
+174
+00:13:33.740 --> 00:13:40.940
+So that first IP address is going to be 10 dot 14 dot 101 dot 70.
+
+175
+00:13:40.940 --> 00:13:43.059
+That's for our render node.
+
+176
+00:13:43.059 --> 00:13:49.509
+I'm going to go ahead and make sure that this is all set and my position for my size is 3840 by 2160.
+
+177
+00:13:49.509 --> 00:13:51.509
+So I'm going to go ahead and hit add.
+
+178
+00:13:51.509 --> 00:13:56.539
+Now I'm going to zoom to fit so you can see what's going on in here.
+
+179
+00:13:56.539 --> 00:14:05.080
+And you can see I've got my host with my IP address, my render node with my primary position in here.
+
+180
+00:14:05.080 --> 00:14:09.080
+And down here is my viewport where we're going to make some changes.
+
+181
+00:14:09.080 --> 00:14:15.139
+So first thing I'm going to do is change my view origin in my details panel to the default viewpoint.
+
+182
+00:14:15.139 --> 00:14:20.240
+Next under my projection policy I want to change from simple to mesh.
+
+183
+00:14:20.240 --> 00:14:26.200
+Now changing from simple to mesh I need to choose a mesh to connect this to.
+
+184
+00:14:26.200 --> 00:14:29.200
+So that first mesh is going to be my wall main.
+
+185
+00:14:29.200 --> 00:14:35.710
+With my wall main selected you can see that my mesh position actually shows up in here.
+
+186
+00:14:35.710 --> 00:14:39.840
+Now this wall mesh is not actually the right size.
+
+187
+00:14:39.840 --> 00:14:42.840
+My viewport is actually going to need to be smaller.
+
+188
+00:14:42.840 --> 00:14:46.840
+So I'm going to change that number to 1760 by 880.
+
+189
+00:14:46.840 --> 00:14:49.840
+Now that doesn't change what's projected in here.
+
+190
+00:14:49.840 --> 00:14:53.840
+It just changes the position inside my cluster node.
+
+191
+00:14:53.840 --> 00:15:01.940
+Now the position in here needs to match the layout that we showed you earlier for my end display configuration.
+
+192
+00:15:01.940 --> 00:15:06.940
+Which means I need to move this over by changing my position to 2080.
+
+193
+00:15:06.940 --> 00:15:09.940
+So that this aligns in that position.
+
+194
+00:15:09.940 --> 00:15:13.940
+I'm going to keep zero because we want it to be flush against this edge.
+
+195
+00:15:13.940 --> 00:15:18.940
+Now I need to rename this so viewport zero's name changes.
+
+196
+00:15:18.940 --> 00:15:24.450
+We're going to call this main wall VP for viewport.
+
+197
+00:15:24.450 --> 00:15:27.450
+And then with that selected I'm just going to go ahead and hit control D.
+
+198
+00:15:27.450 --> 00:15:32.450
+Now if this doesn't work for you, you can go ahead and right click and duplicate as well.
+
+199
+00:15:32.450 --> 00:15:38.450
+But hitting control D should make a duplicate viewport that we can then make more adjustments to.
+
+200
+00:15:38.450 --> 00:15:42.450
+First adjustment, let's rename this so we don't get confused.
+
+201
+00:15:42.450 --> 00:15:44.700
+This is going to be our side wall.
+
+202
+00:15:44.700 --> 00:15:48.700
+I'm going to take off the VP1 and just leave this as side wall VP.
+
+203
+00:15:48.700 --> 00:15:54.379
+Now I'm going to change my mesh here from wall main to wall side.
+
+204
+00:15:54.379 --> 00:15:57.049
+That changes what it's being looked at.
+
+205
+00:15:57.049 --> 00:16:01.049
+And now I just need to change my position and my size.
+
+206
+00:16:01.049 --> 00:16:04.049
+My position back to zero.
+
+207
+00:16:04.049 --> 00:16:10.049
+And my size needs to be 880 because that side wall is smaller than our main wall.
+
+208
+00:16:10.049 --> 00:16:13.240
+Now note, it stretches this out.
+
+209
+00:16:13.240 --> 00:16:17.240
+If I hit 1760 again, it stretches this position out.
+
+210
+00:16:17.240 --> 00:16:20.240
+But it doesn't change what's being shown in here.
+
+211
+00:16:20.240 --> 00:16:24.240
+But the 880 is the correct orientation.
+
+212
+00:16:24.240 --> 00:16:29.980
+Next, I need to move into my wild wall and do the same thing.
+
+213
+00:16:29.980 --> 00:16:35.980
+Now I could add the wild wall here, but because it's running on a separate host and a separate node,
+
+214
+00:16:35.980 --> 00:16:37.980
+I need to add to that cluster.
+
+215
+00:16:37.980 --> 00:16:39.980
+So before I do that, I'm going to select my cluster.
+
+216
+00:16:39.980 --> 00:16:42.980
+Let's go add, new cluster node.
+
+217
+00:16:42.980 --> 00:16:47.100
+And for this one, I'm going to change the name here to that new machine.
+
+218
+00:16:47.100 --> 00:16:51.100
+That's going to be MLTP for multipurpose.
+
+219
+00:16:51.100 --> 00:16:56.100
+I'm going to add an 01 here because it's the second node in our set, and we started with zero.
+
+220
+00:16:56.100 --> 00:17:01.100
+And this one also is a Ultra HD 3840 by 2160.
+
+221
+00:17:01.100 --> 00:17:11.099
+One of the things I can do here is I need to first add in my host IP address, 10.14.101.65.
+
+222
+00:17:11.099 --> 00:17:15.099
+And then on this, you'll notice that I've got a size position in here.
+
+223
+00:17:15.099 --> 00:17:18.099
+Now this wild wall is vertical.
+
+224
+00:17:18.099 --> 00:17:21.130
+I could make these changes later, but I'm going to make them now.
+
+225
+00:17:21.130 --> 00:17:28.190
+I'm going to change this 2160 to 3840 in a vertical position.
+
+226
+00:17:28.190 --> 00:17:30.190
+So I'm just reversing these two.
+
+227
+00:17:30.190 --> 00:17:32.190
+Now with that done, I'm ready to go.
+
+228
+00:17:32.190 --> 00:17:34.700
+So I can go ahead and hit add.
+
+229
+00:17:34.700 --> 00:17:37.930
+This gives me my full vertical position.
+
+230
+00:17:37.930 --> 00:17:41.930
+And I really want to make sure that I just change my viewport here.
+
+231
+00:17:41.930 --> 00:17:43.990
+So let's change that name.
+
+232
+00:17:43.990 --> 00:17:47.990
+Wild wall 4K TV viewport.
+
+233
+00:17:47.990 --> 00:17:50.539
+Now select that again.
+
+234
+00:17:50.539 --> 00:17:53.539
+Make sure that my view origin is set to default.
+
+235
+00:17:53.539 --> 00:17:56.539
+My type here is mesh.
+
+236
+00:17:56.539 --> 00:18:00.569
+And that my mesh that's selected is my wild wall 4K TV.
+
+237
+00:18:00.569 --> 00:18:03.569
+Now I'm not going to make any changes here on my size.
+
+238
+00:18:03.569 --> 00:18:08.569
+The thing that you're seeing here is a positional change that's collapsing in here.
+
+239
+00:18:08.569 --> 00:18:14.569
+It's because of where it is on my default viewpoint and my origin.
+
+240
+00:18:14.569 --> 00:18:17.569
+To fix this, all I got to do is move it.
+
+241
+00:18:17.569 --> 00:18:20.569
+So I'm going to move this position.
+
+242
+00:18:20.569 --> 00:18:22.980
+I'm going to move this over.
+
+243
+00:18:22.980 --> 00:18:28.980
+And initially, I really want to make sure that this is just set kind of where I want it to be.
+
+244
+00:18:28.980 --> 00:18:34.849
+Now as I put these in position, there is something else that needs to get added.
+
+245
+00:18:34.849 --> 00:18:36.849
+And that's going to change our position.
+
+246
+00:18:36.849 --> 00:18:38.849
+So I'm not going to get married to this really quickly.
+
+247
+00:18:38.849 --> 00:18:45.849
+Now that asset that needs to be added here is selecting my NDC asset and going to add ICVFX camera.
+
+248
+00:18:46.849 --> 00:18:53.849
+You need the ICVFX camera to show where your camera is actually going to be looking inside your nDisplay configuration.
+
+249
+00:18:53.849 --> 00:18:59.849
+We'll make these adjustments a little bit later, but we're going to call this NDCICVFXCam.
+
+250
+00:18:59.849 --> 00:19:00.910
+And we're going to leave this in here.
+
+251
+00:19:00.910 --> 00:19:04.910
+Now we're using only one camera right now, so we don't need to iterate this.
+
+252
+00:19:04.910 --> 00:19:12.039
+Now with that ICVFX camera, you can see that my wall's position is not exactly where I want it to be.
+
+253
+00:19:12.039 --> 00:19:15.039
+This is where the X form comes into play.
+
+254
+00:19:15.039 --> 00:19:20.579
+Like if I wanted to rotate this wall, it's going to rotate its position based on just that wall.
+
+255
+00:19:20.579 --> 00:19:22.579
+And I don't want that.
+
+256
+00:19:22.579 --> 00:19:26.579
+I only want these two to move together.
+
+257
+00:19:26.579 --> 00:19:34.680
+So let's select my rotation and rotate it 90 degrees to make sure that that's lined up and that's facing the correct position.
+
+258
+00:19:34.680 --> 00:19:38.779
+Now my wild wall needs to adjust as well.
+
+259
+00:19:38.779 --> 00:19:43.319
+Where my wild wall lives currently is not quite where I want it to be.
+
+260
+00:19:43.319 --> 00:19:47.319
+So let's rotate this 90 degrees and maybe zero that back out.
+
+261
+00:19:47.319 --> 00:19:54.569
+Now if I look at that, it's not really where I want it to be, and it's not facing the right direction either.
+
+262
+00:19:54.569 --> 00:20:00.920
+So let's negative 90 this, or negative 180 this actually, if I could just type.
+
+263
+00:20:00.920 --> 00:20:02.920
+There we go, 180.
+
+264
+00:20:02.920 --> 00:20:04.980
+And then these positions are going to change.
+
+265
+00:20:04.980 --> 00:20:08.980
+For this, 50 is probably enough, it's close enough.
+
+266
+00:20:08.980 --> 00:20:13.980
+250 here gets me closer, and then another 50 to raise it up.
+
+267
+00:20:13.980 --> 00:20:17.980
+So that's a little closer to where we're actually located in the real world space.
+
+268
+00:20:17.980 --> 00:20:23.690
+Now with this all set, I'm ready to hit compile and save.
+
+269
+00:20:23.690 --> 00:20:29.779
+Now note, as you go through here, if something's not quite right, you can always go back and make adjustments.
+
+270
+00:20:29.779 --> 00:20:37.779
+So if I'm looking here in my configuration and under my cluster, I find that maybe my render sync policy isn't quite correct or it hasn't been set to Ethernet.
+
+271
+00:20:37.779 --> 00:20:39.779
+I can go ahead and adjust that.
+
+272
+00:20:39.779 --> 00:20:42.779
+At home, you don't necessarily need to use Ethernet.
+
+273
+00:20:42.779 --> 00:20:46.779
+If you switch to none, that's fine because you're using your local position.
+
+274
+00:20:46.779 --> 00:20:58.779
+But if you're using a stage, larger stages have multiple nodes with multiple configurations, you're going to want to make sure that this uses the default Ethernet configuration under your cluster's render sync policy.
+
+275
+00:20:58.779 --> 00:21:10.259
+Now if I come through here and I'm like, you know what, some of this might not be right, maybe my IP address is wrong, I can always go in and change these later to make sure that I'm connecting to the correct position.
+
+276
+00:21:11.259 --> 00:21:17.809
+Now once this is done, I'm going to go ahead and hide this for now and move back into my level.
+
+277
+00:21:17.809 --> 00:21:25.349
+Now back in here, I've got my nDisplay asset, I've got my maps, and I'm in my nDisplay level.
+
+278
+00:21:25.349 --> 00:21:32.420
+From here, I want to make sure that I add in my nDisplay configuration and see that that's going to get added in.
+
+279
+00:21:32.420 --> 00:21:38.049
+And since I can't see anything, I've got to figure out where it went.
+
+280
+00:21:38.049 --> 00:21:46.880
+Now that just means that this mesh has inherited some of these positions, and I'm going to go ahead and zero this out and zero out my rotations.
+
+281
+00:21:46.880 --> 00:21:55.880
+And then I need to move my mesh, which is actually going to be located way over here at my origin position, back to where I need to be inside my level.
+
+282
+00:21:55.880 --> 00:22:06.349
+So let's go ahead and keep that pretty close, move that around, just kind of get right in front, and then zoom in a little bit closer.
+
+283
+00:22:06.349 --> 00:22:12.829
+So we're back in front of our cave, let's rotate this, and move these into position.
+
+284
+00:22:12.829 --> 00:22:24.369
+Now, my Live Link wild wall is actually going to be controlling this positional information, so this is going to be something that gets controlled inside Motive.
+
+285
+00:22:24.369 --> 00:22:34.809
+So I just want to move this back a little bit, and you can see whatever is being shown in here is actually going to be what's displayed on our screen.
+
+286
+00:22:34.809 --> 00:22:37.809
+So it's important that you have these positions already set.
+
+287
+00:22:37.809 --> 00:22:40.809
+Now, let's jump back into our slides really quick.
+
+288
+00:22:40.809 --> 00:22:47.809
+All right, so let's take a look again at the Latte stage and the viewport regions and its relationship to the Pixel processor.
+
+289
+00:22:47.809 --> 00:22:55.839
+So the setup that we have for quick visual reference on our Render CPU, which you'll see on the right side here,
+
+290
+00:22:55.839 --> 00:23:03.839
+is laid out with our side wall, which if you're standing in front of the physical wall, the side wall is on the left,
+
+291
+00:23:03.839 --> 00:23:08.839
+and the main wall is dead center, but it's positioned on the right, it's to the right of our wall.
+
+292
+00:23:08.839 --> 00:23:14.839
+Now, for our pixel resolution on our Render CPU, we lay them out the same way for quick visual reference.
+
+293
+00:23:14.839 --> 00:23:21.839
+This means that in our Pixel processor for the in-display configuration, that same mapping feed is laid out to match.
+
+294
+00:23:21.839 --> 00:23:28.839
+That way, the side wall lines up with the main wall on the pixel resolution feed,
+
+295
+00:23:28.839 --> 00:23:34.839
+and as you'll see in our next slide, these line up with our in-display configuration,
+
+296
+00:23:34.839 --> 00:23:40.839
+matches our physical world LED walls, and our in-display configuration matches our render output node,
+
+297
+00:23:40.839 --> 00:23:42.839
+so that they line up correctly.
+
+298
+00:23:42.839 --> 00:23:46.839
+This matches our Brompton, as we've shown before, and if we switch over to the Brompton,
+
+299
+00:23:46.839 --> 00:23:51.839
+you can see that this map lays out in the exact same configuration.
+
+300
+00:23:51.839 --> 00:23:54.839
+So that's it for your in-display configuration.
+
+301
+00:23:54.839 --> 00:23:58.839
+Next up, we'll be adding in some cameras and discussing our frustrum.

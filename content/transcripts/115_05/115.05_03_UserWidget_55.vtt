@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:11.859
+So, we've talked a little bit about the base entry point, the uWidget, but let's go on to one of the classes that we're probably going to be working with a little bit more, and that's the UserWidget.
+
+2
+00:00:11.859 --> 00:00:18.460
+So UserWidget is the first blueprint usable class for Unreal widgets.
+
+3
+00:00:18.460 --> 00:00:27.379
+If we're going to try and compare it to the general Unreal framework, I suppose this would be the actor of the UMG world.
+
+4
+00:00:27.980 --> 00:00:39.679
+And whilst it does extend off of UWidget, it's really with UserWidget that we'll start developing our own UI implementations,
+
+5
+00:00:39.679 --> 00:00:43.880
+and you can even extend off UserWidget for C++ to build your own custom elements.
+
+6
+00:00:43.880 --> 00:00:51.079
+It's not purely a blueprint thing, but within C++, you do have the option to extend directly from UWidget.
+
+7
+00:00:51.079 --> 00:00:54.079
+Within Blueprint, you literally cannot make UWidgets.
+
+8
+00:00:54.079 --> 00:00:57.920
+You have to start at UWidget and downwards.
+
+9
+00:00:57.920 --> 00:01:05.319
+So UWidgets can be created at runtime on demand with a templated createWidget call.
+
+10
+00:01:05.319 --> 00:01:09.319
+The syntax is relatively similar to newObject.
+
+11
+00:01:09.319 --> 00:01:20.319
+So you would pass in, you call createWidget, it's a generic templated type, so you would specify the type that you want to kind of cast this to.
+
+12
+00:01:20.319 --> 00:01:23.920
+Then you've specified the kind of owner for this widget.
+
+13
+00:01:23.920 --> 00:01:30.519
+So unlike newObject, where you kind of pass in an outer and that outer could be kind of anything,
+
+14
+00:01:30.519 --> 00:01:38.319
+there's a kind of specific subset of things that are feasible owners for a UMG widget.
+
+15
+00:01:38.319 --> 00:01:43.920
+So that is another widget, quite obviously, like sometimes you'll be spawning widgets within widgets.
+
+16
+00:01:43.920 --> 00:01:49.120
+If you think about something like a health bar, you might have segments that represent the individual bits of health.
+
+17
+00:01:49.319 --> 00:01:55.609
+So it makes quite a lot of sense that health bar, that widgets can create widgets themselves.
+
+18
+00:01:55.609 --> 00:02:00.209
+A widget tree, which is essentially a data structure keeping track of how widgets are nested within each other.
+
+19
+00:02:00.209 --> 00:02:05.010
+Think like an inventory window consisting of many inventory slots.
+
+20
+00:02:05.010 --> 00:02:09.810
+A player controller, which is probably the most common, to be perfectly honest.
+
+21
+00:02:09.810 --> 00:02:15.909
+When you're certainly when you're doing this in a kind of gameplay level, that is the most common thing that you're going to be passing in.
+
+22
+00:02:15.909 --> 00:02:21.310
+You can spawn them through, you can pass in the game instance as an owner of a widget as well.
+
+23
+00:02:21.310 --> 00:02:24.509
+To be honest, it's not something I've used myself a huge amount.
+
+24
+00:02:24.509 --> 00:02:30.110
+So I wouldn't be certain whether or not that means that the widget would persist between scenes.
+
+25
+00:02:30.110 --> 00:02:36.009
+That's something that is worth experimenting with, but it is certainly a valid owner.
+
+26
+00:02:36.009 --> 00:02:38.210
+And the last option would be the world.
+
+27
+00:02:38.210 --> 00:02:44.389
+So if you try and pass things up, it isn't one of those things, like just a normal actor, you'll probably get told off.
+
+28
+00:02:44.389 --> 00:02:50.990
+And then the last argument to pass in here is the actual class for the widget you want to be spawning.
+
+29
+00:02:50.990 --> 00:03:00.289
+So this class should at least be at the same level or a child of the kind of cast to type.
+
+30
+00:03:00.289 --> 00:03:05.590
+Because otherwise that's going to cause you problems, unsurprisingly.
+
+31
+00:03:06.289 --> 00:03:14.490
+And unlike UObject, the user widgets keep track of the game world and the local player control.
+
+32
+00:03:14.490 --> 00:03:18.389
+I mean, we can kind of pull meaningful information from those things at runtime.
+
+33
+00:03:18.389 --> 00:03:25.590
+It's very useful that natively any widget will have access to the local player controller that they are displayed on.
+
+34
+00:03:25.590 --> 00:03:33.090
+Obviously, a widget without any access to a player controller doesn't really make sense because widgets only exist to be displayed on a player screen.
+
+35
+00:03:33.090 --> 00:03:38.789
+So yeah, that gives us access to kind of once we have access to the player controller,
+
+36
+00:03:38.789 --> 00:03:46.090
+we can access things they are possessing and then we can easily access things like health components or inventories, et cetera, et cetera, et cetera.
+
+37
+00:03:46.090 --> 00:03:49.770
+So you can understand the benefits there.
+
+38
+00:03:49.770 --> 00:03:53.669
+So user widget has some kind of critical functions that are worth mentioning.
+
+39
+00:03:53.669 --> 00:04:00.270
+These are the kind of standard things you would first be using when working with these to just get it working out the door.
+
+40
+00:04:00.270 --> 00:04:01.870
+So first off, we've got add to viewport.
+
+41
+00:04:01.870 --> 00:04:08.969
+This kind of does, well, really all of these functions probably do what they say on the tin because they're not terribly named functions.
+
+42
+00:04:08.969 --> 00:04:14.469
+So this adds the widget to the local player's viewport and it takes in a Z order as a parameter.
+
+43
+00:04:14.469 --> 00:04:19.870
+This is essentially confusingly because Unreal uses X as depth.
+
+44
+00:04:19.870 --> 00:04:27.269
+But here, when we're talking about Z, we're talking about the more typical use of Z within a lot of game engines where Z means depth.
+
+45
+00:04:27.269 --> 00:04:32.170
+So our Z order, as the number goes up, it's going to be rendered on top.
+
+46
+00:04:32.170 --> 00:04:40.259
+And if these two things are overlapping, the higher number is drawn over the widgets with the lower number.
+
+47
+00:04:40.259 --> 00:04:43.060
+Add to player screen achieves kind of the same result.
+
+48
+00:04:43.060 --> 00:04:49.459
+And when we're in a single player game, add to player screen and add to viewport will be almost entirely indistinguishable.
+
+49
+00:04:49.459 --> 00:04:53.459
+This becomes more relevant when we're in a split screen multiplayer scenario
+
+50
+00:04:53.459 --> 00:04:57.660
+because each player will get a kind of subdivided part of the screen.
+
+51
+00:04:57.660 --> 00:05:07.160
+So if we've got like a left right split, player one is probably going to have like the kind of left half of the screen and player two is going to have the right half of the screen.
+
+52
+00:05:07.160 --> 00:05:11.160
+When you add to player screen and that widget goes into the top left,
+
+53
+00:05:11.160 --> 00:05:16.660
+if you're adding that widget to the second player screen, it's not going to go into the top left of the overall window.
+
+54
+00:05:16.660 --> 00:05:22.819
+It's going to go into the kind of like top center of the screen because that's the top left of player two's screen.
+
+55
+00:05:22.819 --> 00:05:33.920
+RemoveFromViewport is a function that you may still occasionally see in tutorials, but it is actually deprecated since Unreal 5.1.
+
+56
+00:05:33.920 --> 00:05:36.319
+It really does the same thing as RemoveFromParent now.
+
+57
+00:05:36.319 --> 00:05:40.720
+It does still exist in C++, but all it does is then call RemoveFromParent.
+
+58
+00:05:40.720 --> 00:05:48.220
+So it's just worth highlighting that it will be mentioned by other resources, but it actually doesn't really do anything anymore and it's advised not to use.
+
+59
+00:05:48.220 --> 00:05:54.120
+And instead we have RemoveFromParent, which is basically just doing the opposite of add to viewport or add to player screen.
+
+60
+00:05:54.120 --> 00:05:56.420
+This just removes it from whatever it's inside of.
+
+61
+00:05:56.420 --> 00:06:03.019
+So that could be the viewport itself or it could be from inside of another widget if we're spawning that widget with inside other widgets.

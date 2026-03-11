@@ -1,0 +1,1121 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:08.300
+So now that we know what simulates the will of the AI agent, it's time to look at what drives the logic and the memory behind the AI agent.
+
+2
+00:00:08.300 --> 00:00:12.599
+The Behaviour Tree can be best described as the brain of the AI.
+
+3
+00:00:12.599 --> 00:00:16.899
+In fact, the Behaviour Tree component inherits directly from the brain component.
+
+4
+00:00:16.899 --> 00:00:23.879
+The Behaviour Tree component is held by the AI controller and indeed makes a clear assumption that it's owned by an AI controller,
+
+5
+00:00:23.879 --> 00:00:28.750
+with functions such as GetAIOwner being made available to programmers.
+
+6
+00:00:28.750 --> 00:00:36.750
+It's also strongly paired with a Blackboard component, exposing functions to developers that allow us to retrieve the Blackboard component from the Behaviour Tree directly.
+
+7
+00:00:36.750 --> 00:00:42.390
+It's important to note that although the ownership pairing has been established in the code architecture,
+
+8
+00:00:42.390 --> 00:00:45.390
+the AI controller does not come with a brain component already attached.
+
+9
+00:00:45.390 --> 00:00:50.159
+This can be done by a developer through Blueprint or C++, however.
+
+10
+00:00:50.159 --> 00:00:53.159
+Lastly, if you choose to add the Behaviour Tree component through Blueprint,
+
+11
+00:00:53.159 --> 00:01:01.159
+the native C++ code of the AI controller will automatically search for a brain component on itself and set its own member variables accordingly.
+
+12
+00:01:01.159 --> 00:01:08.700
+The Behaviour Tree component allows developers to plug in their desired Behaviour Tree in the editor and have it be run immediately upon possession.
+
+13
+00:01:08.700 --> 00:01:16.500
+Alternatively, we can explicitly call RunBehaviourTree ourselves and pass through a specific tree as and when we find it suitable.
+
+14
+00:01:16.500 --> 00:01:22.819
+If a Behaviour Tree component is not present when calling RunBehaviourTree, then one will be created for you.
+
+15
+00:01:22.819 --> 00:01:28.650
+The Behaviour Tree component is in charge of running our AI logic, that being the Behaviour Tree asset.
+
+16
+00:01:28.650 --> 00:01:33.719
+As already mentioned, it will start the AI logic on possession and stop AI logic on unpossess.
+
+17
+00:01:33.719 --> 00:01:36.719
+It will also tick the Behaviour Tree directly for us.
+
+18
+00:01:36.719 --> 00:01:39.719
+We can also use it to pause the Behaviour Tree's logic.
+
+19
+00:01:39.719 --> 00:01:46.930
+The brain component on the AI also features a special messaging system that the AI logic can utilise.
+
+20
+00:01:46.930 --> 00:01:50.349
+You'll find examples of these already in the engine.
+
+21
+00:01:50.349 --> 00:01:55.349
+These messages allow us to know what may have gone on during the processing of a piece of AI logic.
+
+22
+00:01:55.349 --> 00:02:01.920
+For example, in our MoveTo task, we can determine whether or not we succeeded or failed in our move.
+
+23
+00:02:01.920 --> 00:02:08.500
+This will determine whether or not we proceed onto the next node in the tree or fail the whole node in its entirety.
+
+24
+00:02:08.500 --> 00:02:13.500
+A Behaviour Tree allows an AI agent to do their thinking and make decisions that drive their functionality.
+
+25
+00:02:13.500 --> 00:02:19.659
+A Behaviour Tree can be paired with a Blackboard to efficiently make decisions, although it isn't strictly necessary to use one.
+
+26
+00:02:19.659 --> 00:02:22.659
+However, it is still highly recommended that you do use a Blackboard.
+
+27
+00:02:22.659 --> 00:02:29.979
+As we mentioned previously, the Blackboard component and the Behaviour Tree component have been strongly paired in the code architecture.
+
+28
+00:02:29.979 --> 00:02:32.979
+Behaviour Trees are created within the editor, as can be seen in the image here.
+
+29
+00:02:32.979 --> 00:02:41.199
+And we simply right-click in the Content Browser, go to the Artificial Intelligence category, and select the Behaviour Tree option.
+
+30
+00:02:41.199 --> 00:02:47.770
+Behaviour Trees are built in a hierarchical set of nodes that control the flow of decision making, which we're going to cover shortly.
+
+31
+00:02:47.770 --> 00:02:52.770
+In Unreal, Behaviour Trees are event-driven, which avoids doing unnecessary polling every frame.
+
+32
+00:02:52.770 --> 00:02:58.509
+The Behaviour Tree passively listens for events that can then be used to trigger changes in the tree.
+
+33
+00:02:58.509 --> 00:03:03.509
+This type of code architecture means that we do not need to iterate over the entire tree every tick,
+
+34
+00:03:03.509 --> 00:03:06.509
+so instead we rely on the messages to inform us of these changes.
+
+35
+00:03:06.509 --> 00:03:14.370
+They also help with debugging Behaviour Trees, as we can simply only show the relevant information at the time that it was being executed.
+
+36
+00:03:14.370 --> 00:03:19.370
+Here we've got an example of a simple Behaviour Tree, in which the AI agent can either move towards the player and attack them,
+
+37
+00:03:19.370 --> 00:03:23.370
+or if they've not yet perceived a player, they will patrol randomly until they do perceive one.
+
+38
+00:03:23.370 --> 00:03:27.430
+Behaviour Tree branches are executed in order.
+
+39
+00:03:27.430 --> 00:03:35.159
+When authoring your own Behaviour Trees, you'll notice that all of the nodes have been assigned a number when they're placed in the graph.
+
+40
+00:03:35.159 --> 00:03:39.159
+This numerical value tells us the order in which these nodes will be executed.
+
+41
+00:03:39.159 --> 00:03:44.159
+So at the higher level, the Behaviour Tree executes top to bottom, whilst on a branch level we execute left to right.
+
+42
+00:03:44.159 --> 00:03:48.189
+This is critical to understand when authoring your own Behaviour Trees.
+
+43
+00:03:48.189 --> 00:03:53.189
+You wouldn't want an AI agent to prefer patrolling to chasing and engaging with the player.
+
+44
+00:03:53.189 --> 00:03:58.669
+It's also important to understand that nodes in the Behaviour Tree can be moved around and will update their execution order
+
+45
+00:03:58.669 --> 00:04:04.669
+based on their position at runtime, so clean and well spaced out Behaviour Trees are a must.
+
+46
+00:04:04.669 --> 00:04:10.669
+So on the previous slide, Behaviour Trees come with their own editor graph, and as such have their own graph nodes.
+
+47
+00:04:10.669 --> 00:04:19.730
+Behaviour Trees are made up of five types of nodes, that being the root node, composite nodes, task nodes, decorator nodes and service nodes.
+
+48
+00:04:19.730 --> 00:04:21.730
+So let's take a look at what each one of these do.
+
+49
+00:04:21.730 --> 00:04:25.959
+The root node is the default node found in all Behaviour Trees,
+
+50
+00:04:25.959 --> 00:04:29.959
+and it serves as the starting point for a Behaviour Tree, and thus cannot be deleted.
+
+51
+00:04:29.959 --> 00:04:34.079
+This unique node within the tree has got a few special rules.
+
+52
+00:04:34.079 --> 00:04:37.079
+Firstly, the root node can only have one connection,
+
+53
+00:04:37.079 --> 00:04:42.079
+and if that connection to the root node is removed, then the entire tree is disabled.
+
+54
+00:04:42.079 --> 00:04:46.560
+Next, it does not support attaching of decorators or service nodes.
+
+55
+00:04:46.560 --> 00:04:50.560
+And lastly, the root node does not have any inherent properties.
+
+56
+00:04:50.560 --> 00:04:54.560
+However, when you select it, you'll be shown the properties of the Behaviour Tree on the whole.
+
+57
+00:04:54.560 --> 00:05:00.660
+As we can see with this example, selecting the root node allows us to set the Behaviour Tree's blackboard.
+
+58
+00:05:00.660 --> 00:05:05.170
+So now we've got our root node, but in its own right it doesn't really do a lot.
+
+59
+00:05:05.170 --> 00:05:07.170
+This is where the composite nodes come in.
+
+60
+00:05:07.170 --> 00:05:10.170
+Composite nodes define the root of a branch.
+
+61
+00:05:10.170 --> 00:05:14.620
+As well as this, they also determine the rules for how a branch is executed,
+
+62
+00:05:14.620 --> 00:05:19.620
+and we'll see how each one of the composite nodes goes on to define these in the following slides.
+
+63
+00:05:19.620 --> 00:05:21.839
+Another important thing to note about composite nodes
+
+64
+00:05:21.839 --> 00:05:25.839
+is that they are the only type of node that can be attached to that root node.
+
+65
+00:05:25.839 --> 00:05:30.199
+Composite nodes support both decorator and service nodes,
+
+66
+00:05:30.199 --> 00:05:33.199
+and decorators allow us to control how we either enter the branch,
+
+67
+00:05:33.199 --> 00:05:35.199
+or even cancel out mid execution.
+
+68
+00:05:35.199 --> 00:05:40.449
+Services will only ever be active if the children of the composite node are being executed.
+
+69
+00:05:40.449 --> 00:05:44.449
+This is important to understand when we come to actually placing our service nodes.
+
+70
+00:05:44.449 --> 00:05:47.959
+There are three types of composite nodes that we can use,
+
+71
+00:05:47.959 --> 00:05:51.959
+that being the selector, the sequence, and the simple parallel.
+
+72
+00:05:51.959 --> 00:05:54.509
+Let's find out how each of these differ,
+
+73
+00:05:54.509 --> 00:05:57.509
+and what they offer to the engineer when developing our AI.
+
+74
+00:05:57.509 --> 00:06:00.279
+Let's start with the selector node.
+
+75
+00:06:00.279 --> 00:06:03.980
+The selector node will execute its children from left to right,
+
+76
+00:06:03.980 --> 00:06:07.980
+and it will stop executing when one of its children succeeds in its task.
+
+77
+00:06:07.980 --> 00:06:12.139
+If a child succeeds, then the selector node itself succeeds.
+
+78
+00:06:12.139 --> 00:06:16.139
+If all of its children fail, then the selector node itself will fail.
+
+79
+00:06:16.139 --> 00:06:18.680
+We can see as an example on the right
+
+80
+00:06:18.680 --> 00:06:22.680
+that the selector composite node will attempt to execute the first wait task,
+
+81
+00:06:22.680 --> 00:06:27.680
+however its decorator will cause it to fail after one second, thus failing the task.
+
+82
+00:06:27.680 --> 00:06:28.680
+Instead of failing straight away,
+
+83
+00:06:28.680 --> 00:06:32.680
+the selector node will execute the secondary wait task and thus succeed.
+
+84
+00:06:32.680 --> 00:06:36.290
+If we were to place a secondary task ahead of the first,
+
+85
+00:06:36.290 --> 00:06:40.290
+we would see that the task would succeed and the second would not run.
+
+86
+00:06:40.290 --> 00:06:43.509
+On the left, we can see that this composite node
+
+87
+00:06:43.509 --> 00:06:46.509
+also exposes two variables to developers,
+
+88
+00:06:46.509 --> 00:06:50.149
+the first being applied decorator scope.
+
+89
+00:06:50.149 --> 00:06:52.149
+If set, all decorators in the branch below
+
+90
+00:06:52.149 --> 00:06:55.149
+will be removed when execution flow leaves this branch,
+
+91
+00:06:55.149 --> 00:06:59.600
+but decorators on this node in particular will not be affected.
+
+92
+00:06:59.600 --> 00:07:00.600
+Lastly, we have the node name,
+
+93
+00:07:00.600 --> 00:07:03.600
+and this is just the readable name that this node should be assigned
+
+94
+00:07:03.600 --> 00:07:08.000
+when being displayed in the behavior graph editor.
+
+95
+00:07:08.000 --> 00:07:10.000
+It's usually a good idea to name your composite nodes
+
+96
+00:07:10.000 --> 00:07:14.000
+as it acts as a way to identify what this branch of your behavior tree is trying to do,
+
+97
+00:07:14.000 --> 00:07:18.000
+especially useful when your behavior trees start to grow in size.
+
+98
+00:07:18.000 --> 00:07:23.089
+Selectors are ideal for branches in which any sub-branch may perform a task,
+
+99
+00:07:23.089 --> 00:07:26.089
+but it does not matter which one of them is actually executed.
+
+100
+00:07:26.089 --> 00:07:30.600
+Next, we have sequence nodes.
+
+101
+00:07:30.600 --> 00:07:34.600
+Sequences also execute their children from left to right, much like the selector,
+
+102
+00:07:34.600 --> 00:07:38.600
+but a sequence node will stop executing once one of its children fails.
+
+103
+00:07:38.600 --> 00:07:41.600
+If a child fails, the whole sequence node will fail.
+
+104
+00:07:41.600 --> 00:07:45.110
+Conversely, if all the sequences' children succeed,
+
+105
+00:07:45.110 --> 00:07:47.110
+then the sequence will succeed.
+
+106
+00:07:47.110 --> 00:07:50.490
+In the example on the right, we can see there are three wait tasks,
+
+107
+00:07:50.490 --> 00:07:53.490
+with each executing one after the other.
+
+108
+00:07:53.490 --> 00:07:56.589
+If we were to place a similar condition to any of the other task nodes
+
+109
+00:07:56.589 --> 00:07:58.589
+like we did in the selector example,
+
+110
+00:07:58.589 --> 00:08:00.589
+we would see that the sequence would fail immediately
+
+111
+00:08:00.589 --> 00:08:03.589
+and not execute any of the children following the task that failed.
+
+112
+00:08:03.589 --> 00:08:07.000
+Sequences are ideal for things such as moving towards a target,
+
+113
+00:08:07.000 --> 00:08:11.000
+as we would likely run an environment query to find out a location to move to,
+
+114
+00:08:11.000 --> 00:08:13.000
+then proceed to that location.
+
+115
+00:08:13.000 --> 00:08:15.480
+On the left, we can see a similar set of properties
+
+116
+00:08:15.480 --> 00:08:17.480
+that we would see in the selector node,
+
+117
+00:08:17.480 --> 00:08:19.480
+and they do exactly the same thing.
+
+118
+00:08:19.480 --> 00:08:23.189
+Lastly, we have the simple parallel node.
+
+119
+00:08:23.189 --> 00:08:26.189
+The simple parallel node allows a single main task node
+
+120
+00:08:26.189 --> 00:08:29.189
+to be executed alongside a full tree.
+
+121
+00:08:29.189 --> 00:08:30.189
+When the main task finishes,
+
+122
+00:08:30.189 --> 00:08:33.190
+depending on what finish mode that we've got selected,
+
+123
+00:08:33.190 --> 00:08:36.190
+the other tree will either be aborted immediately,
+
+124
+00:08:36.190 --> 00:08:38.190
+or will simply wait until it finishes.
+
+125
+00:08:38.190 --> 00:08:41.639
+Simple parallel nodes are great for things such as
+
+126
+00:08:41.639 --> 00:08:44.960
+moving continuously whilst also shooting.
+
+127
+00:08:44.960 --> 00:08:47.960
+Decorator nodes are the next type of node that we need to look at.
+
+128
+00:08:47.960 --> 00:08:50.960
+They can be attached to either composite or task nodes,
+
+129
+00:08:50.960 --> 00:08:52.960
+but they cannot be placed on their own.
+
+130
+00:08:52.960 --> 00:08:57.179
+They define whether a node or branch can be executed at all,
+
+131
+00:08:57.179 --> 00:09:01.600
+and they're also known as conditionals in other behavior tree systems.
+
+132
+00:09:01.600 --> 00:09:05.600
+Lastly, decorator nodes can also be used to abort parts of a behavior tree,
+
+133
+00:09:05.600 --> 00:09:07.600
+allowing us to bail out of the execution of a branch
+
+134
+00:09:07.600 --> 00:09:09.600
+midway through that execution.
+
+135
+00:09:09.600 --> 00:09:12.399
+So, on to task nodes.
+
+136
+00:09:12.399 --> 00:09:15.809
+The task nodes are nodes that do things,
+
+137
+00:09:15.809 --> 00:09:19.809
+so for example, move on an AI or editing a blackboard key.
+
+138
+00:09:19.809 --> 00:09:23.100
+Tasks support both decorator and service nodes,
+
+139
+00:09:23.100 --> 00:09:25.100
+and other than composite nodes,
+
+140
+00:09:25.100 --> 00:09:27.100
+task nodes are the only other node type
+
+141
+00:09:27.100 --> 00:09:30.100
+that can be placed down onto the behavior graph itself.
+
+142
+00:09:30.100 --> 00:09:33.710
+There's a wide choice of tasks already implemented in Unreal,
+
+143
+00:09:33.710 --> 00:09:35.710
+one of which we can already see in the example below,
+
+144
+00:09:35.710 --> 00:09:37.710
+that being the move to task.
+
+145
+00:09:37.710 --> 00:09:40.190
+Much like decorator nodes,
+
+146
+00:09:40.190 --> 00:09:44.190
+we can create our own task nodes in both Blueprint and in C++.
+
+147
+00:09:44.190 --> 00:09:46.190
+And lastly, we're going to come to services.
+
+148
+00:09:46.190 --> 00:09:50.279
+Services are nodes that will execute at a defined frequency
+
+149
+00:09:50.279 --> 00:09:52.279
+when their branch is being executed.
+
+150
+00:09:52.279 --> 00:09:54.509
+Services can be used to perform checks
+
+151
+00:09:54.509 --> 00:09:56.509
+or update data about the world
+
+152
+00:09:56.509 --> 00:09:58.509
+that can then be used in place of parallel nodes
+
+153
+00:09:58.509 --> 00:10:01.509
+that you might have otherwise used in other behavior tree systems.
+
+154
+00:10:01.509 --> 00:10:05.639
+Unreal comes with two services supported out of the box,
+
+155
+00:10:05.639 --> 00:10:07.639
+the first being Default Focus.
+
+156
+00:10:07.639 --> 00:10:11.799
+This service will set the focus actor directly on the AI controller.
+
+157
+00:10:11.799 --> 00:10:13.960
+This can be especially useful
+
+158
+00:10:13.960 --> 00:10:16.960
+for getting hold of a set actor in Blueprint or C++,
+
+159
+00:10:16.960 --> 00:10:19.960
+instead of having to access the data directly on the blackboard.
+
+160
+00:10:19.960 --> 00:10:23.470
+The second is RunEQS.
+
+161
+00:10:23.470 --> 00:10:25.470
+This service can be used to regularly run
+
+162
+00:10:25.470 --> 00:10:28.470
+an environment query system template as an assigned interval
+
+163
+00:10:28.470 --> 00:10:31.879
+and will update the given blackboard value with the result.
+
+164
+00:10:31.879 --> 00:10:34.879
+Lastly, it's important to note that although services do tick,
+
+165
+00:10:34.879 --> 00:10:36.879
+you don't have to use them in that way.
+
+166
+00:10:36.879 --> 00:10:38.950
+Services come with functions that allow developers
+
+167
+00:10:38.950 --> 00:10:41.950
+to know when a service has come into relevancy of the tree
+
+168
+00:10:41.950 --> 00:10:43.950
+and when it has ceased to be relevant,
+
+169
+00:10:43.950 --> 00:10:45.950
+so they don't have to be ticking all of the time.
+
+170
+00:10:45.950 --> 00:10:49.490
+So now that we know all the different types of nodes that we have access to,
+
+171
+00:10:49.490 --> 00:10:52.490
+we should discuss how you utilize memory in the behavior tree.
+
+172
+00:10:52.490 --> 00:10:55.750
+Behavior tree nodes exist as shared objects,
+
+173
+00:10:55.750 --> 00:10:58.750
+meaning that all AI agents using the same behavior tree
+
+174
+00:10:58.750 --> 00:11:01.750
+will share the same single set of node instances.
+
+175
+00:11:01.750 --> 00:11:04.750
+This approach has a two-fold effect.
+
+176
+00:11:04.750 --> 00:11:07.750
+The first is that it improves CPU performance,
+
+177
+00:11:07.750 --> 00:11:09.750
+and secondly, it reduces memory usage.
+
+178
+00:11:09.750 --> 00:11:11.750
+It does, however, come with a caveat,
+
+179
+00:11:11.750 --> 00:11:15.750
+that being that the shared nodes cannot store agent-specific data in their headers.
+
+180
+00:11:15.750 --> 00:11:20.769
+However, if we do find ourselves needing to store agent-specific data,
+
+181
+00:11:20.769 --> 00:11:23.769
+Unreal offers support to do so in three different ways.
+
+182
+00:11:23.769 --> 00:11:26.769
+So let's cover the first way in which you can do so.
+
+183
+00:11:26.769 --> 00:11:28.769
+That would be instancing your nodes.
+
+184
+00:11:28.769 --> 00:11:31.090
+Behavior tree nodes expose out a bool
+
+185
+00:11:31.090 --> 00:11:34.090
+that allows us as developers to instance the node,
+
+186
+00:11:34.090 --> 00:11:37.090
+and this is the bCreateNodeInstance parameter.
+
+187
+00:11:37.090 --> 00:11:40.220
+If this is set to true, then this will grant each AI agent
+
+188
+00:11:40.220 --> 00:11:43.220
+using this behavior tree a unique instance of that node.
+
+189
+00:11:43.220 --> 00:11:47.049
+This will, of course, allow us to store some agent-specific data
+
+190
+00:11:47.049 --> 00:11:51.049
+with the downside of actually having a higher memory and CPU cost
+
+191
+00:11:51.049 --> 00:11:53.049
+to a non-instance version of the node.
+
+192
+00:11:53.049 --> 00:11:57.080
+There are examples of usage of these node types
+
+193
+00:11:57.080 --> 00:11:59.080
+within Unreal's own implementation,
+
+194
+00:11:59.080 --> 00:12:03.080
+such as the play animation task and the run behavior dynamic task.
+
+195
+00:12:03.080 --> 00:12:05.840
+The second way in which we can get around this
+
+196
+00:12:05.840 --> 00:12:07.840
+is by using the Blackboard storage.
+
+197
+00:12:07.840 --> 00:12:11.200
+The Blackboard storage can be accessed within nodes
+
+198
+00:12:11.200 --> 00:12:12.200
+to get agent-specific data,
+
+199
+00:12:12.200 --> 00:12:14.200
+and key functions in our nodes send through
+
+200
+00:12:14.200 --> 00:12:18.289
+the AI agent's behavior tree component as one of its parameters.
+
+201
+00:12:18.289 --> 00:12:21.289
+As developers, we can simply expose an fName property
+
+202
+00:12:21.289 --> 00:12:23.289
+to make use of a Blackboard key selector
+
+203
+00:12:23.289 --> 00:12:27.419
+to allow us to get and set data from and to the Blackboard.
+
+204
+00:12:27.419 --> 00:12:29.419
+It's important to note that this approach
+
+205
+00:12:29.419 --> 00:12:31.419
+can only support Blackboard data types,
+
+206
+00:12:31.419 --> 00:12:34.059
+which we're going to discuss in just a second.
+
+207
+00:12:34.059 --> 00:12:37.320
+And lastly, we've got the node memory.
+
+208
+00:12:37.320 --> 00:12:40.320
+Unreal allows developers to create a custom struct or class
+
+209
+00:12:40.320 --> 00:12:43.570
+to store variables inside the node's memory.
+
+210
+00:12:43.570 --> 00:12:45.570
+Many of the functions in behavior tree nodes
+
+211
+00:12:45.570 --> 00:12:48.570
+pass through a Uint8 pointer parameter,
+
+212
+00:12:48.570 --> 00:12:50.570
+and this parameter indicates the block of memory
+
+213
+00:12:50.570 --> 00:12:53.570
+that has been allocated to our AI agent.
+
+214
+00:12:53.570 --> 00:12:55.570
+The get instance memory size function,
+
+215
+00:12:55.570 --> 00:12:58.570
+which must be implemented if we're going to use the memory approach,
+
+216
+00:12:58.570 --> 00:13:02.049
+will dictate the size of this block of memory.
+
+217
+00:13:02.049 --> 00:13:06.049
+Nodes will allocate this amount of memory for each AI agent,
+
+218
+00:13:06.049 --> 00:13:08.049
+and the node memory is stored in a single continuous block
+
+219
+00:13:08.049 --> 00:13:11.179
+to optimize performance.
+
+220
+00:13:11.179 --> 00:13:13.179
+However, it's very important to keep in mind
+
+221
+00:13:13.179 --> 00:13:16.179
+that node memory is not part of the U object ecosystem,
+
+222
+00:13:16.179 --> 00:13:19.529
+so our memory is not visible to the garbage collector.
+
+223
+00:13:19.529 --> 00:13:22.529
+It's highly recommended that when dealing with reflection types
+
+224
+00:13:22.529 --> 00:13:24.529
+that we make use of the Tweek object pointer
+
+225
+00:13:24.529 --> 00:13:26.600
+to hold your variable.
+
+226
+00:13:26.600 --> 00:13:28.600
+We can see an example of how this is done
+
+227
+00:13:28.600 --> 00:13:29.600
+in the next slide,
+
+228
+00:13:29.600 --> 00:13:31.600
+and this example is lifted from the move to task
+
+229
+00:13:31.600 --> 00:13:34.840
+already implemented in Unreal.
+
+230
+00:13:34.840 --> 00:13:37.840
+So now we've covered the simulated will of the AI
+
+231
+00:13:37.840 --> 00:13:39.840
+and the brains of the AI.
+
+232
+00:13:39.840 --> 00:13:43.129
+Now we need to discuss the memory of the AI.
+
+233
+00:13:43.129 --> 00:13:45.129
+The blackboard is a special asset type
+
+234
+00:13:45.129 --> 00:13:47.129
+that is created specifically to work in conjunction
+
+235
+00:13:47.129 --> 00:13:49.159
+within the behavior tree.
+
+236
+00:13:49.159 --> 00:13:53.159
+It's used to store information in the shape of a blackboard key.
+
+237
+00:13:53.159 --> 00:13:55.159
+This information can then be queried by the behavior tree
+
+238
+00:13:55.159 --> 00:13:58.360
+at runtime to make informed decisions.
+
+239
+00:13:58.360 --> 00:14:01.360
+A blackboard can store up to 255 entries
+
+240
+00:14:01.360 --> 00:14:04.360
+and they can also support parent blackboards.
+
+241
+00:14:04.360 --> 00:14:07.360
+This means we can inherit keys from other blackboards.
+
+242
+00:14:07.360 --> 00:14:11.190
+The blackboard component offers programmers the entry way
+
+243
+00:14:11.190 --> 00:14:15.190
+for querying and saving data to and from the blackboard respectively.
+
+244
+00:14:15.190 --> 00:14:17.860
+The blackboard component is strongly paired
+
+245
+00:14:17.860 --> 00:14:19.919
+to the behavior tree component.
+
+246
+00:14:19.919 --> 00:14:21.919
+It will cache the component and programmers can retrieve
+
+247
+00:14:21.919 --> 00:14:25.919
+the brain component of the AI directly from the blackboard component.
+
+248
+00:14:25.919 --> 00:14:29.240
+The blackboard component also follows a similar pattern
+
+249
+00:14:29.240 --> 00:14:32.690
+to the behavior tree component in terms of creation.
+
+250
+00:14:32.690 --> 00:14:35.690
+It's not present by default on the AI controller
+
+251
+00:14:35.690 --> 00:14:37.690
+and much like the behavior tree component,
+
+252
+00:14:37.690 --> 00:14:40.690
+it can either be added via blueprints or C++.
+
+253
+00:14:40.690 --> 00:14:42.690
+However, this isn't necessary as one will be created
+
+254
+00:14:42.690 --> 00:14:44.690
+when the AI logic is triggered to start.
+
+255
+00:14:44.690 --> 00:14:46.690
+But it's also important to note that the blackboard
+
+256
+00:14:46.690 --> 00:14:48.690
+is not essential to running the AI logic
+
+257
+00:14:48.690 --> 00:14:51.679
+as we mentioned earlier.
+
+258
+00:14:51.679 --> 00:14:53.679
+Again, much like the behavior tree component,
+
+259
+00:14:53.679 --> 00:14:56.679
+the blackboard component does expose a blackboard asset
+
+260
+00:14:56.679 --> 00:14:59.159
+to the editor which can be plugged in directly.
+
+261
+00:14:59.159 --> 00:15:02.159
+The blackboard component also offers a unique callback functionality
+
+262
+00:15:02.159 --> 00:15:05.159
+that allows objects to register as observers
+
+263
+00:15:05.159 --> 00:15:07.159
+of a particular blackboard key
+
+264
+00:15:07.159 --> 00:15:10.159
+so that they can be notified when that blackboard value has changed.
+
+265
+00:15:10.159 --> 00:15:13.679
+A blackboard can store the following data types.
+
+266
+00:15:13.679 --> 00:15:16.679
+We can store a lot of our expected basic types
+
+267
+00:15:16.679 --> 00:15:20.679
+such as vector, rotator, bool, int32, float, and string
+
+268
+00:15:20.679 --> 00:15:22.679
+as well as enum.
+
+269
+00:15:22.679 --> 00:15:24.679
+But we can also store some much more unreal specific types
+
+270
+00:15:24.679 --> 00:15:28.679
+such as the fname, uobject, and uclass.
+
+271
+00:15:28.679 --> 00:15:30.679
+If you wish to look at how data for each of these keys
+
+272
+00:15:30.679 --> 00:15:32.679
+is actually manipulated, then we'd highly recommend you
+
+273
+00:15:32.679 --> 00:15:35.679
+take a look at the BlackboardKeyAllTypes header
+
+274
+00:15:35.679 --> 00:15:37.679
+which will give us a handy include
+
+275
+00:15:37.679 --> 00:15:39.899
+for all of the types that we listed above.
+
+276
+00:15:39.899 --> 00:15:41.899
+Lastly, it's important to note that a blackboard
+
+277
+00:15:41.899 --> 00:15:43.899
+cannot store arrays of data.
+
+278
+00:15:43.899 --> 00:15:46.899
+The blackboard works off of a single block of memory
+
+279
+00:15:46.899 --> 00:15:48.899
+and data types are stored with offsets
+
+280
+00:15:48.899 --> 00:15:50.899
+based off of their data size.

@@ -1,0 +1,189 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:09.140
+As we mentioned in the previous slide, optimization starts at the beginning of your project and is something that goes through the lifetime of your project.
+
+2
+00:00:09.140 --> 00:00:15.140
+So making sure that your project is set up from the initial creation with optimization in mind
+
+3
+00:00:15.140 --> 00:00:22.140
+is key to making sure that you will have a successful optimization throughout the life of your project.
+
+4
+00:00:22.140 --> 00:00:29.140
+One of the first areas to look at is under Project Settings and it is the Rendering section.
+
+5
+00:00:29.140 --> 00:00:36.140
+Under this section, you're going to find a wide range of options that directly affect both performance and visual quality.
+
+6
+00:00:36.140 --> 00:00:46.140
+This is where we're going to be able to control features such as rendering paths, ray tracing, virtual textures, and shadow maps, and many other features here.
+
+7
+00:00:46.140 --> 00:00:54.140
+For example, we could enable or disable forward renderers should we want to have our project use less memory and a lower overhead.
+
+8
+00:00:54.140 --> 00:00:59.140
+We can also use this section to disable hardware or software ray tracing.
+
+9
+00:00:59.140 --> 00:01:05.140
+We can also use it to tune how virtual textures and shadow maps behave.
+
+10
+00:01:05.140 --> 00:01:17.140
+And we can even disable things like shader permutations for skylights or sky atmosphere or other types of lights or assets we don't happen to be using
+
+11
+00:01:18.140 --> 00:01:24.140
+which can reduce shader compile time and free up memory without affecting our visuals.
+
+12
+00:01:24.140 --> 00:01:34.140
+But again, we want to make sure that we do this from the beginning of our project so that we don't have any unexpected visual changes after enabling or disabling a feature.
+
+13
+00:01:34.140 --> 00:01:42.680
+To go into a few of these features in a little more detail, the first one I want to talk about is virtual shadows and textures.
+
+14
+00:01:42.680 --> 00:01:49.680
+Now, virtual texture support is enabled by default in Unreal Engine 5.5.
+
+15
+00:01:49.680 --> 00:01:57.680
+If you're working with Unreal Engine 5.4 all the way to 5.0, you will need to enable virtual texture support and restart the engine.
+
+16
+00:01:57.680 --> 00:02:08.680
+If you're not aware, what virtual texturing support allows you to do is use very large textures while still maintaining a lower and more consistent memory footprint at runtime.
+
+17
+00:02:09.780 --> 00:02:19.780
+This system also helps improve texture streaming efficiency, reducing memory spikes while still maintaining high quality visuals across large environments.
+
+18
+00:02:19.780 --> 00:02:27.780
+There are two key types of virtual texturing to understand. There's runtime virtual texturing and streaming virtual texturing.
+
+19
+00:02:27.780 --> 00:02:35.780
+Runtime virtual texturing is used whenever you have a very large layered material such as one that would go on a landscape.
+
+20
+00:02:35.780 --> 00:02:43.780
+What you're going to do is we're going to take all those layers and we're going to bake them down to a single texture and then display that as the virtual texture on our landscape.
+
+21
+00:02:43.780 --> 00:02:50.780
+This is going to help us just have a more efficient memory footprint as well as maintaining that really great visual look.
+
+22
+00:02:50.780 --> 00:02:53.780
+The other type is streaming virtual textures.
+
+23
+00:02:53.780 --> 00:02:59.780
+Streaming virtual textures replace the built-in MIPT based streaming system.
+
+24
+00:02:59.780 --> 00:03:12.780
+All you have to do to support streaming based is make sure that your textures are converted to virtual textures and that you are using the appropriate virtual texture sampler inside of your materials.
+
+25
+00:03:12.780 --> 00:03:17.379
+The next thing that I want to talk about here is virtual shadow maps.
+
+26
+00:03:17.379 --> 00:03:23.379
+The best part about virtual shadow maps, there's not a lot that you need to do with them as they're already enabled by default.
+
+27
+00:03:23.379 --> 00:03:31.379
+And what they are going to do is they're going to give us this increased shadow resolution so that shadows match the high level of detail provided by Nanette geometry.
+
+28
+00:03:31.379 --> 00:03:38.379
+They also help produce plausible soft shadows with predictable and controllable performance costs.
+
+29
+00:03:38.379 --> 00:03:45.610
+They also work extremely well out of the box requiring minimal adjustments to achieve good results.
+
+30
+00:03:45.610 --> 00:03:54.180
+Now, one thing that I would like to call out when using virtual shadows is that if your project uses a fully dynamic time of day system,
+
+31
+00:03:54.180 --> 00:04:02.180
+you should disable the variable r.shadows.virtual.cache.static separate.
+
+32
+00:04:02.180 --> 00:04:08.180
+This setting is on by default, but disabling it saves memory because dynamic shadows will not need a static copy.
+
+33
+00:04:08.180 --> 00:04:17.180
+Turning this off can reduce shadow memory uses by roughly half, which is especially helpful for large open worlds or streaming environments.
+
+34
+00:04:17.180 --> 00:04:25.790
+Now, the next section we're going to talk about is Lumen and Lumen is Unreal Engine 5's real time global illumination and reflection system.
+
+35
+00:04:25.790 --> 00:04:30.790
+It provides a high quality lighting without the need for baking.
+
+36
+00:04:30.790 --> 00:04:39.790
+It is enabled by default for all new projects in Unreal Engine 5 and works best when used together with World Partition, Nanite, and virtual shadow maps.
+
+37
+00:04:39.790 --> 00:04:47.879
+Lumen supports two ray tracing modes, hardware ray tracing and software ray tracing.
+
+38
+00:04:47.879 --> 00:04:59.879
+Hardware ray tracing is on by default. It uses a GPU's dedicated ray tracing cores and it's meant for high-end PCs and Gen 9 consoles such as the PlayStation 5 and the Xbox Siri X.
+
+39
+00:04:59.879 --> 00:05:16.379
+If you do enable it in your projects, you can expect around a 4 millisecond time and it can now maintain a steady 60 frames per second on high-end PCs and Gen 9 consoles.
+
+40
+00:05:16.379 --> 00:05:25.379
+Software ray tracing, on the other hand, uses compute shaders instead of hardware acceleration and it serves as a fallback for mid-range GPUs.
+
+41
+00:05:25.379 --> 00:05:44.980
+It also runs at around 4 milliseconds on average and, again, we're using this as a fallback or for systems that don't necessarily have hardware ray tracing so expect it to not be as powerful or as accurate.
+
+42
+00:05:44.980 --> 00:05:56.980
+Starting with Unreal Engine 5.3, we have a few 60 FPS frame per second default device profiles which enable Lumen with all of the settings it needs to hit that 60 FPS.
+
+43
+00:05:56.980 --> 00:06:05.620
+These are going to be the PC60 for high-end PCs, PlayStation 5 and Xbox Series X.
+
+44
+00:06:05.620 --> 00:06:12.620
+These profiles are designed to help developers hit that constant 60 FPS targets with both Lumen and Nanite available.
+
+45
+00:06:12.620 --> 00:06:25.620
+And it's recommended to move all Gen 9 console projects and high-end PC projects to hardware ray tracing and you should keep software ray tracing on for less capable or older hardware.
+
+46
+00:06:26.709 --> 00:06:31.709
+Again, for the best results, always use Lumen alongside Nanite, World Partition and Virtual Shadow Maps.
+
+47
+00:06:31.709 --> 00:06:38.709
+And make sure to profile performance regularly using Unreal Insights, Unreal's built-in performance profiling tool.

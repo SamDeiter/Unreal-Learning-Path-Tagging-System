@@ -1,0 +1,917 @@
+WEBVTT
+
+1
+00:00:01.100 --> 00:00:03.520
+We're now going to take a look at some of the optimization
+
+2
+00:00:03.520 --> 00:00:05.839
+view modes Unreal Engine 5 provides
+
+3
+00:00:05.839 --> 00:00:09.560
+to help us visually debug performance issues
+
+4
+00:00:09.560 --> 00:00:13.560
+or better understand areas that could be performance
+
+5
+00:00:13.560 --> 00:00:16.579
+issues inside of our levels.
+
+6
+00:00:16.579 --> 00:00:18.160
+The first one we're going to talk about
+
+7
+00:00:18.160 --> 00:00:19.120
+is lighting complexity.
+
+8
+00:00:19.120 --> 00:00:20.359
+But before we do that, I want
+
+9
+00:00:20.359 --> 00:00:22.039
+to pop over to the editor really quick
+
+10
+00:00:22.039 --> 00:00:25.120
+and show you where a lot of these view modes live.
+
+11
+00:00:25.120 --> 00:00:27.879
+And that is underneath the view mode settings here,
+
+12
+00:00:27.879 --> 00:00:29.320
+optimization view modes.
+
+13
+00:00:29.339 --> 00:00:31.660
+And we have our lighting complexity, light map density,
+
+14
+00:00:31.660 --> 00:00:34.899
+stationary light overlap, shader complexity, shader complexity
+
+15
+00:00:34.899 --> 00:00:40.219
+in quads, quad overdraw, material, LWC, function usage,
+
+16
+00:00:40.219 --> 00:00:42.299
+and some others for texture streaming.
+
+17
+00:00:42.299 --> 00:00:46.380
+So what does this lighting complexity do?
+
+18
+00:00:46.380 --> 00:00:48.920
+Well, lighting complexity is a visualization mode
+
+19
+00:00:48.920 --> 00:00:51.740
+that helps you show how many non-static lights, which
+
+20
+00:00:51.740 --> 00:00:55.380
+are dynamic or movable lights, are affecting your geometry.
+
+21
+00:00:55.380 --> 00:00:57.619
+It's a really quick way to understand where you're seeing
+
+22
+00:00:57.619 --> 00:01:00.880
+lighting might be heavy and, therefore, more performant
+
+23
+00:01:00.880 --> 00:01:02.179
+expensive.
+
+24
+00:01:02.179 --> 00:01:06.870
+To interpret this, Unreal uses a scale that starts at black
+
+25
+00:01:06.870 --> 00:01:08.709
+and goes to white.
+
+26
+00:01:08.709 --> 00:01:12.840
+And as the scale starts to approach white,
+
+27
+00:01:12.840 --> 00:01:15.469
+the values that it's showing us
+
+28
+00:01:15.469 --> 00:01:20.069
+indicate the light is growing more and more expensive.
+
+29
+00:01:20.069 --> 00:01:23.709
+We can use this mode to help visualize areas of our levels
+
+30
+00:01:23.709 --> 00:01:25.629
+that are being hit by multiple lights
+
+31
+00:01:25.629 --> 00:01:29.590
+so we can make better decisions about how to adjust lighting
+
+32
+00:01:29.590 --> 00:01:31.209
+in that area.
+
+33
+00:01:31.209 --> 00:01:33.890
+Oftentimes, it can be difficult to understand
+
+34
+00:01:33.890 --> 00:01:37.730
+how your lights are interacting with one another.
+
+35
+00:01:37.730 --> 00:01:41.609
+And this tool helps you make those decisions.
+
+36
+00:01:41.609 --> 00:01:44.489
+Let's take a look at how that works in the editor.
+
+37
+00:01:44.489 --> 00:01:46.870
+So again, we're going to come up here to our lit.
+
+38
+00:01:46.870 --> 00:01:49.730
+We're going to go up to our optimization view modes.
+
+39
+00:01:49.730 --> 00:01:52.209
+And we're going to go to our stationary light overlap.
+
+40
+00:01:52.209 --> 00:01:54.530
+I'm just going to hold down L and click.
+
+41
+00:01:55.030 --> 00:01:56.469
+Not stationary, light overlap.
+
+42
+00:01:56.469 --> 00:01:56.969
+I'm sorry.
+
+43
+00:01:56.969 --> 00:02:00.810
+We're going to come over here and we want our light complexity.
+
+44
+00:02:00.810 --> 00:02:02.069
+There we go.
+
+45
+00:02:02.069 --> 00:02:05.930
+And then I'm going to just hold down Alt and move and move.
+
+46
+00:02:05.930 --> 00:02:08.270
+Keep holding down Alt. That's going to make some copies.
+
+47
+00:02:08.270 --> 00:02:12.590
+So what I meant earlier when I said more informed choices
+
+48
+00:02:12.590 --> 00:02:14.789
+is if we come here to our light attenuation radius
+
+49
+00:02:14.789 --> 00:02:17.590
+and say we set this to something like 100,
+
+50
+00:02:17.590 --> 00:02:19.770
+you can see here now we have our light.
+
+51
+00:02:19.770 --> 00:02:21.069
+It's still kind of expensive.
+
+52
+00:02:21.069 --> 00:02:23.210
+But as we move other lights around,
+
+53
+00:02:23.270 --> 00:02:25.710
+or maybe we set this to like 500, you can see here
+
+54
+00:02:25.710 --> 00:02:28.150
+now we can make a little bit more informed choice
+
+55
+00:02:28.150 --> 00:02:30.870
+about how these lights are going to interact
+
+56
+00:02:30.870 --> 00:02:32.110
+with one another.
+
+57
+00:02:32.110 --> 00:02:33.830
+Maybe we have something like this.
+
+58
+00:02:33.830 --> 00:02:34.669
+Oops, not like that.
+
+59
+00:02:34.669 --> 00:02:37.430
+I wanted to grab that axis and just move it over like this.
+
+60
+00:02:37.430 --> 00:02:41.210
+So we have something like that that's giving us
+
+61
+00:02:41.210 --> 00:02:42.590
+the lights where we need them.
+
+62
+00:02:42.590 --> 00:02:46.009
+But we have a better idea of how everything
+
+63
+00:02:46.009 --> 00:02:48.449
+is interacting with one another.
+
+64
+00:02:48.449 --> 00:02:50.349
+So remember some things to take away from this.
+
+65
+00:02:50.349 --> 00:02:52.590
+Keeping your lighting complexity and the dark blue
+
+66
+00:02:52.849 --> 00:02:55.949
+to bright green range for optimal performance.
+
+67
+00:02:55.949 --> 00:02:59.389
+And red areas are warnings that it's time to simplify
+
+68
+00:02:59.389 --> 00:03:03.379
+or optimizing your lighting setup in that particular area.
+
+69
+00:03:03.379 --> 00:03:06.199
+The next optimization of view mode I want to talk about
+
+70
+00:03:06.199 --> 00:03:07.800
+is quad overdraw.
+
+71
+00:03:07.800 --> 00:03:09.840
+So quad overdraw is a visualization mode
+
+72
+00:03:09.840 --> 00:03:12.419
+that helps you understand how efficiently your geometry
+
+73
+00:03:12.419 --> 00:03:14.879
+is being rendered on the GPU.
+
+74
+00:03:14.879 --> 00:03:18.280
+GPU processes pixels in a two by two quad,
+
+75
+00:03:18.280 --> 00:03:19.939
+not individual pixels.
+
+76
+00:03:19.939 --> 00:03:21.800
+This means that when you have very small
+
+77
+00:03:21.800 --> 00:03:25.199
+or thin triangles, smaller than a two by two pixel area,
+
+78
+00:03:25.199 --> 00:03:29.199
+the GPU has to process the full quad for each one,
+
+79
+00:03:29.199 --> 00:03:31.240
+which results in a lot of extra work,
+
+80
+00:03:31.240 --> 00:03:32.759
+even though most of those pixels
+
+81
+00:03:32.759 --> 00:03:36.650
+might not actually contribute to the final image.
+
+82
+00:03:36.650 --> 00:03:40.210
+This matters because high quad overdraw means your GPU
+
+83
+00:03:40.210 --> 00:03:44.210
+is wasting cycles, shading tiny triangles,
+
+84
+00:03:44.210 --> 00:03:46.889
+which can seriously impact performance,
+
+85
+00:03:46.889 --> 00:03:50.990
+especially when we have very dense, detailed scenes.
+
+86
+00:03:50.990 --> 00:03:54.030
+This is also super common in high poly models,
+
+87
+00:03:54.030 --> 00:03:57.030
+foliage and nanite fallback messes
+
+88
+00:03:57.030 --> 00:03:59.590
+that are not properly optimized.
+
+89
+00:03:59.590 --> 00:04:03.129
+The quad overdraw view mode shows which messes
+
+90
+00:04:03.129 --> 00:04:05.930
+are suffering from excessive overdraw.
+
+91
+00:04:05.930 --> 00:04:08.469
+Blue indicates low overdraw,
+
+92
+00:04:08.469 --> 00:04:10.669
+which is good and what you want to see.
+
+93
+00:04:10.669 --> 00:04:13.629
+Green to red indicates high overdraw,
+
+94
+00:04:13.629 --> 00:04:16.930
+meaning the GPU is doing a lot of unnecessary work
+
+95
+00:04:16.930 --> 00:04:18.959
+in those areas.
+
+96
+00:04:18.959 --> 00:04:22.720
+You can reduce quad overdraw by using LODs
+
+97
+00:04:22.720 --> 00:04:26.019
+to remove or simplify small thin triangles
+
+98
+00:04:26.019 --> 00:04:27.759
+that can't be seen at distance
+
+99
+00:04:27.759 --> 00:04:31.600
+or optimizing meshes to avoid excessive detail
+
+100
+00:04:31.600 --> 00:04:34.870
+in areas that don't contribute visually.
+
+101
+00:04:34.870 --> 00:04:37.730
+Ensuring that meshes also have proper distance
+
+102
+00:04:37.730 --> 00:04:43.389
+for the view that they are from the camera can also help.
+
+103
+00:04:43.389 --> 00:04:45.189
+The key thing that you should take away from this
+
+104
+00:04:45.189 --> 00:04:49.750
+is if you want quad overdraw to be as blue as possible,
+
+105
+00:04:49.750 --> 00:04:52.730
+this means that your geometry is efficient
+
+106
+00:04:52.730 --> 00:04:56.079
+and your GPU will render your scene
+
+107
+00:04:56.079 --> 00:04:58.920
+much faster and smoother.
+
+108
+00:04:58.920 --> 00:05:02.339
+The nanite visualization mode that is available
+
+109
+00:05:02.339 --> 00:05:07.339
+shows you how nanite is being constructed for your scene.
+
+110
+00:05:07.899 --> 00:05:09.819
+Let's take a look at these individually,
+
+111
+00:05:09.819 --> 00:05:12.540
+starting right up here with the triangles.
+
+112
+00:05:12.540 --> 00:05:15.319
+So these triangles displays all of the triangles
+
+113
+00:05:15.319 --> 00:05:18.920
+that the nanite meshes in your current scene.
+
+114
+00:05:18.920 --> 00:05:20.899
+This is useful for seeing mesh density
+
+115
+00:05:20.899 --> 00:05:24.540
+and verifying how nanite is handling high poly geometry.
+
+116
+00:05:24.540 --> 00:05:26.060
+If you zoom in, you can actually see
+
+117
+00:05:26.060 --> 00:05:28.660
+how many triangles nanite is processing
+
+118
+00:05:28.660 --> 00:05:30.000
+often in the millions.
+
+119
+00:05:30.000 --> 00:05:30.920
+And this is really cool
+
+120
+00:05:30.920 --> 00:05:32.319
+because it's still doing all of that
+
+121
+00:05:32.319 --> 00:05:35.120
+while maintaining real-time performance.
+
+122
+00:05:35.120 --> 00:05:38.339
+Now the clusters view shows colored groupings of triangle
+
+123
+00:05:38.339 --> 00:05:40.100
+that nanite uses internally.
+
+124
+00:05:40.100 --> 00:05:42.300
+Each color represents a cluster
+
+125
+00:05:42.939 --> 00:05:44.139
+or a logical group of triangles
+
+126
+00:05:44.139 --> 00:05:46.699
+that nanite renders as a single unit.
+
+127
+00:05:46.699 --> 00:05:48.220
+This view helps you understand
+
+128
+00:05:48.220 --> 00:05:50.480
+how nanite's cluster-based rendering system
+
+129
+00:05:50.480 --> 00:05:52.579
+is organizing and batching geometry
+
+130
+00:05:52.579 --> 00:05:56.259
+for performance efficiency.
+
+131
+00:05:56.259 --> 00:06:00.189
+Instances visualize a unique color
+
+132
+00:06:00.189 --> 00:06:01.709
+to each instance in the scene.
+
+133
+00:06:01.709 --> 00:06:03.389
+This is useful for identifying
+
+134
+00:06:03.389 --> 00:06:05.629
+and verifying instanced static meshes,
+
+135
+00:06:05.629 --> 00:06:07.389
+especially when working with
+
+136
+00:06:07.389 --> 00:06:09.269
+instanced static mesh components
+
+137
+00:06:09.269 --> 00:06:12.910
+or hierarchical instanced static mesh components.
+
+138
+00:06:13.470 --> 00:06:15.829
+The primitive view colors all components
+
+139
+00:06:15.829 --> 00:06:18.029
+of an instant mesh with the same color.
+
+140
+00:06:18.029 --> 00:06:19.629
+Unlike instances view,
+
+141
+00:06:19.629 --> 00:06:22.470
+this differentiates individual instances.
+
+142
+00:06:22.470 --> 00:06:24.350
+This mode will help you see all components
+
+143
+00:06:24.350 --> 00:06:26.350
+that share the same base mesh
+
+144
+00:06:26.350 --> 00:06:29.500
+as one unified color group.
+
+145
+00:06:29.500 --> 00:06:31.439
+Overdraw, which is very important,
+
+146
+00:06:31.439 --> 00:06:33.980
+visualizes how much overdraw is happening
+
+147
+00:06:33.980 --> 00:06:35.500
+in your scene geometry.
+
+148
+00:06:35.500 --> 00:06:36.779
+You'll notice that a smaller,
+
+149
+00:06:36.779 --> 00:06:39.100
+closely stacked objects like foliage
+
+150
+00:06:39.100 --> 00:06:42.100
+or detailed props will create more overdraw
+
+151
+00:06:42.100 --> 00:06:44.660
+than larger single surface meshes.
+
+152
+00:06:44.660 --> 00:06:46.420
+This mode helps identify areas
+
+153
+00:06:46.420 --> 00:06:50.269
+where rendering efficiency can be improved.
+
+154
+00:06:50.269 --> 00:06:53.829
+Material ID view shows distinct colors
+
+155
+00:06:53.829 --> 00:06:56.589
+for each material ID applied to nanite meshes.
+
+156
+00:06:56.589 --> 00:06:58.910
+This is great for checking material assignments,
+
+157
+00:06:58.910 --> 00:07:00.290
+multi-material setups,
+
+158
+00:07:00.290 --> 00:07:03.389
+or ensuring that materials are applied consistently
+
+159
+00:07:03.389 --> 00:07:06.300
+across complex assets.
+
+160
+00:07:06.300 --> 00:07:09.379
+Raster bins shows you programmable GPU features
+
+161
+00:07:09.379 --> 00:07:12.819
+such as tessellation and other rasterization tasks.
+
+162
+00:07:12.819 --> 00:07:15.180
+This is primarily used for debugging
+
+163
+00:07:15.180 --> 00:07:16.420
+advanced rendering paths
+
+164
+00:07:16.420 --> 00:07:19.180
+and verifying how nanite is dividing geometry
+
+165
+00:07:19.180 --> 00:07:22.199
+into programmable raster events.
+
+166
+00:07:22.199 --> 00:07:24.779
+The evaluate world position offset view
+
+167
+00:07:24.779 --> 00:07:27.220
+shows which meshes or materials
+
+168
+00:07:27.220 --> 00:07:28.860
+are using world position offset.
+
+169
+00:07:28.860 --> 00:07:32.339
+This is important because WPO can affect
+
+170
+00:07:32.339 --> 00:07:34.620
+nanite performance and stability.
+
+171
+00:07:34.620 --> 00:07:37.939
+Nanite doesn't support all types of vertex deformation
+
+172
+00:07:38.100 --> 00:07:40.939
+and using this view can help you quickly identify assets
+
+173
+00:07:40.939 --> 00:07:43.899
+relying on WPO or world position offset
+
+174
+00:07:43.899 --> 00:07:47.250
+so you can quickly adjust them if needed.
+
+175
+00:07:47.250 --> 00:07:49.810
+Remember that this view mode here
+
+176
+00:07:49.810 --> 00:07:52.870
+can only be activated if you are utilizing
+
+177
+00:07:52.870 --> 00:07:54.689
+a nanite mesh inside of your scene.
+
+178
+00:07:54.689 --> 00:07:56.329
+So if I come back over here,
+
+179
+00:07:56.329 --> 00:07:58.129
+I'm gonna come to my lighting complexity,
+
+180
+00:07:58.129 --> 00:07:59.250
+just go back to lit,
+
+181
+00:07:59.250 --> 00:08:02.250
+and if we come here to our nanite and we go to overview,
+
+182
+00:08:02.250 --> 00:08:04.889
+I don't have any type of nanite mesh in here,
+
+183
+00:08:04.889 --> 00:08:07.930
+but if I came into and added a,
+
+184
+00:08:08.889 --> 00:08:10.170
+let's see here, we'll just right click
+
+185
+00:08:10.170 --> 00:08:11.790
+and we'll do nanite.
+
+186
+00:08:11.790 --> 00:08:14.089
+Nanite is enabled on this and I pull this in,
+
+187
+00:08:14.089 --> 00:08:16.730
+then we're gonna get this view populated
+
+188
+00:08:16.730 --> 00:08:20.649
+with a nanite mesh right there.
+
+189
+00:08:20.649 --> 00:08:23.589
+So remember that if you're not seeing anything,
+
+190
+00:08:23.589 --> 00:08:25.490
+it's probably because you do not have
+
+191
+00:08:25.490 --> 00:08:28.399
+a nanite mesh placed inside of your scene.
+
+192
+00:08:28.399 --> 00:08:32.740
+Now, one of the things that I want to call out
+
+193
+00:08:32.740 --> 00:08:36.559
+specifically with nanite is nanites overdraw.
+
+194
+00:08:36.559 --> 00:08:38.340
+Now, once you've determined that nanite
+
+195
+00:08:38.919 --> 00:08:40.100
+may be causing performance issues,
+
+196
+00:08:40.100 --> 00:08:43.100
+the overdraw visualization tool can help you pinpoint
+
+197
+00:08:43.100 --> 00:08:45.059
+where those problems are.
+
+198
+00:08:45.059 --> 00:08:48.820
+We use this tool after profiling confirms
+
+199
+00:08:48.820 --> 00:08:50.019
+that nanite is the source
+
+200
+00:08:50.019 --> 00:08:51.580
+of your performance bottlenecks,
+
+201
+00:08:51.580 --> 00:08:55.259
+and it's designed to help show where overdraw is occurring
+
+202
+00:08:55.259 --> 00:08:58.580
+and how it's impacting nanite's efficiency.
+
+203
+00:08:58.580 --> 00:09:00.779
+What it does is it highlights areas
+
+204
+00:09:00.779 --> 00:09:03.940
+where nanite is doing extra rasterization work.
+
+205
+00:09:03.940 --> 00:09:06.179
+Basically that means areas where multiple layers
+
+206
+00:09:06.220 --> 00:09:09.460
+of geometry overlap or where there are small triangles
+
+207
+00:09:09.460 --> 00:09:10.899
+that are densely packed.
+
+208
+00:09:10.899 --> 00:09:15.059
+Now, some amount of overdraw is normal and expected,
+
+209
+00:09:15.059 --> 00:09:17.179
+especially in complex scenes.
+
+210
+00:09:17.179 --> 00:09:19.899
+However, excessive overdraw leads
+
+211
+00:09:19.899 --> 00:09:23.059
+to higher nanite culling and rasterization costs,
+
+212
+00:09:23.059 --> 00:09:25.279
+as well as reduced effectiveness
+
+213
+00:09:25.279 --> 00:09:27.659
+of nanite's independent scene scaling.
+
+214
+00:09:27.659 --> 00:09:29.460
+Essentially, the more overdraw you have,
+
+215
+00:09:29.460 --> 00:09:34.399
+the less efficient nanite can batch renders and clusters.
+
+216
+00:09:34.399 --> 00:09:38.179
+To interpret this view, we use it to identify areas
+
+217
+00:09:38.179 --> 00:09:41.600
+with dense or overlapping meshes,
+
+218
+00:09:41.600 --> 00:09:44.379
+small geometry that might be unnecessarily detailed,
+
+219
+00:09:44.379 --> 00:09:46.919
+and regions where simplifying assets
+
+220
+00:09:46.919 --> 00:09:49.360
+or adjusting placement could reduce overdraw.
+
+221
+00:09:49.360 --> 00:09:52.840
+Remember, blue indicates low overdraw, which is good,
+
+222
+00:09:52.840 --> 00:09:57.840
+while red and orange show heavy or expensive areas.
+
+223
+00:09:59.190 --> 00:10:02.169
+Remember that we wanna use this mode
+
+224
+00:10:02.210 --> 00:10:06.649
+only after we have profiled to target performance issues,
+
+225
+00:10:06.649 --> 00:10:08.889
+specifically tied to nanite,
+
+226
+00:10:08.889 --> 00:10:12.169
+and that some overdraw is unavoidable,
+
+227
+00:10:12.169 --> 00:10:15.730
+and minimizing it will help maintain efficient scaling
+
+228
+00:10:15.730 --> 00:10:18.370
+and ensure your scene continues to render smoothly
+
+229
+00:10:18.370 --> 00:10:20.230
+and cost efficiently.

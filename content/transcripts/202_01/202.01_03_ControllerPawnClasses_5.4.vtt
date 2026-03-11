@@ -1,0 +1,341 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:02.700
+Now that we've talked a little bit
+
+2
+00:00:02.700 --> 00:00:06.379
+about inheritance and other object-oriented concepts,
+
+3
+00:00:06.379 --> 00:00:10.900
+I want to now move on about controllers and pawn classes,
+
+4
+00:00:10.900 --> 00:00:14.099
+as these do slightly different things
+
+5
+00:00:14.099 --> 00:00:17.739
+but can be somewhat confusing at first.
+
+6
+00:00:17.739 --> 00:00:19.100
+So the first thing that we're gonna talk about
+
+7
+00:00:19.100 --> 00:00:20.780
+is a controller class.
+
+8
+00:00:20.780 --> 00:00:24.820
+Now, the controller class is a digital representation
+
+9
+00:00:24.820 --> 00:00:26.899
+of whatever physical input device
+
+10
+00:00:26.899 --> 00:00:28.179
+is currently being used.
+
+11
+00:00:28.179 --> 00:00:30.579
+So whether the player is using a mouse and a keyboard,
+
+12
+00:00:30.579 --> 00:00:35.060
+a controller, a plastic guitar, an Arduino board,
+
+13
+00:00:35.060 --> 00:00:39.399
+whatever they are using to send out input,
+
+14
+00:00:39.399 --> 00:00:42.619
+that is gonna be taken by our controller classes.
+
+15
+00:00:42.619 --> 00:00:45.759
+Now, there are two controller classes that you will see.
+
+16
+00:00:45.759 --> 00:00:48.840
+There is the player controller and the AI controller.
+
+17
+00:00:48.840 --> 00:00:50.359
+Now, the AI controller is simply
+
+18
+00:00:50.359 --> 00:00:52.439
+when you are trying to mimic input
+
+19
+00:00:52.439 --> 00:00:55.700
+that a player would use,
+
+20
+00:00:55.700 --> 00:00:59.140
+and it is kind of outside the scope of our talk.
+
+21
+00:00:59.140 --> 00:01:01.140
+So that's about all we're gonna talk about,
+
+22
+00:01:01.140 --> 00:01:02.420
+the AI controller.
+
+23
+00:01:02.420 --> 00:01:04.840
+The player controller, on the other hand,
+
+24
+00:01:04.840 --> 00:01:06.819
+is something that we are going to use,
+
+25
+00:01:06.819 --> 00:01:10.659
+and controllers do something called possession.
+
+26
+00:01:10.659 --> 00:01:14.680
+And what they possess is something called the pawn.
+
+27
+00:01:14.680 --> 00:01:16.439
+And when something is possessed,
+
+28
+00:01:16.439 --> 00:01:20.359
+its inputs pass through the player controller
+
+29
+00:01:20.359 --> 00:01:22.439
+down into the pawn,
+
+30
+00:01:22.439 --> 00:01:24.760
+controlling it and displaying movement.
+
+31
+00:01:24.760 --> 00:01:26.319
+So we can think of the player
+
+32
+00:01:26.319 --> 00:01:30.159
+kind of like a spirit that controls an avatar.
+
+33
+00:01:30.159 --> 00:01:33.000
+The reason that we wanna do this is,
+
+34
+00:01:33.000 --> 00:01:34.620
+let's say that we have a game
+
+35
+00:01:34.620 --> 00:01:37.519
+that supports multiple inputs.
+
+36
+00:01:37.519 --> 00:01:40.540
+We have mouse and keyboard, we have a controller,
+
+37
+00:01:40.540 --> 00:01:45.019
+and this game also has multiple vehicle types.
+
+38
+00:01:45.019 --> 00:01:48.280
+There is a human, there's a horse, there's a car,
+
+39
+00:01:48.280 --> 00:01:50.480
+there's a helicopter.
+
+40
+00:01:50.480 --> 00:01:53.099
+However, what we want to have happen
+
+41
+00:01:53.099 --> 00:01:54.640
+is that whenever a player is playing
+
+42
+00:01:54.640 --> 00:01:56.319
+on the mouse and keyboard,
+
+43
+00:01:57.159 --> 00:01:58.319
+whenever they go to press forward,
+
+44
+00:01:58.319 --> 00:02:00.599
+no matter if they're a horse or a car
+
+45
+00:02:00.599 --> 00:02:02.760
+or a tractor or a rocket ship,
+
+46
+00:02:02.760 --> 00:02:05.599
+we always want W to make them go forward,
+
+47
+00:02:05.599 --> 00:02:08.000
+A to make them go left, D to make them go right,
+
+48
+00:02:08.000 --> 00:02:10.139
+and S to go backwards.
+
+49
+00:02:10.139 --> 00:02:14.080
+And by establishing our movements
+
+50
+00:02:14.080 --> 00:02:15.919
+and things inside of our player controller,
+
+51
+00:02:15.919 --> 00:02:21.460
+what we do is we allow our players
+
+52
+00:02:21.659 --> 00:02:23.620
+to use the same movement components
+
+53
+00:02:23.620 --> 00:02:25.060
+and the same movement inputs,
+
+54
+00:02:25.060 --> 00:02:27.979
+no matter what type of pawn
+
+55
+00:02:27.979 --> 00:02:31.180
+they're having to be possessing.
+
+56
+00:02:31.180 --> 00:02:32.740
+Now, you might be wondering,
+
+57
+00:02:32.740 --> 00:02:34.840
+well, you keep talking about this thing called pawn.
+
+58
+00:02:34.840 --> 00:02:36.000
+What is a pawn?
+
+59
+00:02:36.000 --> 00:02:40.969
+Well, a pawn is just simply a class
+
+60
+00:02:40.969 --> 00:02:45.270
+that takes the input passed from the user or the AI
+
+61
+00:02:45.270 --> 00:02:47.569
+and takes that movement and processes it
+
+62
+00:02:47.569 --> 00:02:49.770
+into the actual movement and interaction
+
+63
+00:02:49.770 --> 00:02:52.090
+that you're seeing on the screen.
+
+64
+00:02:52.090 --> 00:02:53.889
+Now, when you're dealing with pawn,
+
+65
+00:02:53.889 --> 00:02:56.250
+you're gonna see two kind of subclasses.
+
+66
+00:02:56.250 --> 00:02:59.349
+There's a pawn and there is a character class.
+
+67
+00:02:59.349 --> 00:03:02.610
+The difference between the two is that pawn is a simple,
+
+68
+00:03:02.610 --> 00:03:04.090
+basically kind of like a ghost
+
+69
+00:03:04.090 --> 00:03:06.530
+that will float in the world and collide with objects.
+
+70
+00:03:06.530 --> 00:03:07.669
+The character class though,
+
+71
+00:03:07.669 --> 00:03:09.849
+that gives us a more advanced movement.
+
+72
+00:03:09.849 --> 00:03:11.389
+It gives us a capsule component
+
+73
+00:03:11.389 --> 00:03:13.370
+and a skeletal mesh component
+
+74
+00:03:13.370 --> 00:03:18.120
+that represents the visual representation of that.
+
+75
+00:03:18.120 --> 00:03:20.759
+Generally speaking, all character monsters
+
+76
+00:03:20.759 --> 00:03:24.000
+and vehicles will derive from either pawn
+
+77
+00:03:24.000 --> 00:03:29.289
+or the character class, depending on what it's used for.
+
+78
+00:03:29.289 --> 00:03:32.490
+And again, it's best to keep things split up
+
+79
+00:03:32.490 --> 00:03:34.930
+in this manner where we have our controller
+
+80
+00:03:34.930 --> 00:03:37.270
+controlling our various pawns,
+
+81
+00:03:37.270 --> 00:03:40.289
+as this will ensure that we don't have to have code
+
+82
+00:03:40.289 --> 00:03:41.889
+in multiple locations
+
+83
+00:03:41.889 --> 00:03:46.479
+and that the end user isn't surprised
+
+84
+00:03:46.479 --> 00:03:49.280
+whenever a new mechanic is introduced
+
+85
+00:03:49.280 --> 00:03:52.500
+or they utilize a new type of vehicle.

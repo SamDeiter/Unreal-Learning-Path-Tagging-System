@@ -1,0 +1,249 @@
+WEBVTT
+
+1
+00:00:04.980 --> 00:00:08.099
+Moving on to material optimizations. There are some really great
+
+2
+00:00:08.939 --> 00:00:14.240
+optimizations you can put into your materials, some nodes which you may not be familiar with, so hopefully we can
+
+3
+00:00:15.080 --> 00:00:20.920
+demonstrate something new today, but some material optimizations can give you a really good win in your project.
+
+4
+00:00:20.920 --> 00:00:26.640
+So the first thing you want to be doing is building parent materials that then you create
+
+5
+00:00:26.960 --> 00:00:32.159
+material instances from. So we won't be going over how to create material instances in this course.
+
+6
+00:00:32.640 --> 00:00:35.159
+There are other courses on material instances, however
+
+7
+00:00:35.799 --> 00:00:40.719
+just the concept of building a parent material that houses all the material instructions
+
+8
+00:00:41.039 --> 00:00:47.219
+that will be your main base material and then from that material you can right-click in your content browser
+
+9
+00:00:47.759 --> 00:00:54.840
+and convert and create a material instance from that parent material and therefore you can edit the individual
+
+10
+00:00:55.079 --> 00:01:01.500
+parameters of that parent material without recompiling the entire material. So for example if you made a
+
+11
+00:01:02.140 --> 00:01:05.019
+transparent glass material shader and then
+
+12
+00:01:05.700 --> 00:01:07.700
+you had a
+
+13
+00:01:07.719 --> 00:01:11.620
+parameter on that parent material called glass color for example.
+
+14
+00:01:12.060 --> 00:01:15.099
+You can then create multiple instances of that glass without
+
+15
+00:01:16.140 --> 00:01:21.780
+recompiling the parent material and you can change the glass color from green to a goldish
+
+16
+00:01:22.500 --> 00:01:23.900
+mustardy color
+
+17
+00:01:23.900 --> 00:01:25.620
+etc without
+
+18
+00:01:25.620 --> 00:01:28.019
+recompiling. So for your material pipelines
+
+19
+00:01:28.019 --> 00:01:32.219
+it's really good to get into the practice of having a parent material that houses
+
+20
+00:01:32.659 --> 00:01:35.459
+all the instructions that you need and then just
+
+21
+00:01:35.819 --> 00:01:40.939
+instancing off that parent material so that the majority of the materials in your map are actually
+
+22
+00:01:41.340 --> 00:01:44.099
+instanced materials rather than the parent material.
+
+23
+00:01:45.810 --> 00:01:47.930
+Moving on to some material switches
+
+24
+00:01:48.370 --> 00:01:52.969
+you can get a static bool in your material if you'd like so you can actually
+
+25
+00:01:53.409 --> 00:01:59.849
+decide to switch based on a given parameter here and then render the output so
+
+26
+00:02:00.290 --> 00:02:05.790
+you can edit these switches at runtime so you can actually call in this instance
+
+27
+00:02:06.090 --> 00:02:13.889
+be enable base color texture and if you enable that then it will turn green so maybe you might use this for an
+
+28
+00:02:14.250 --> 00:02:19.770
+optimization pass so you want to set everything to just render this luminous green
+
+29
+00:02:20.370 --> 00:02:27.729
+just to check what textures are being used where that might be a good use case for that. You can also get a static switch
+
+30
+00:02:27.969 --> 00:02:29.530
+which
+
+31
+00:02:29.530 --> 00:02:36.050
+has a similar similar effect so you know whether we're picking A or B we can still
+
+32
+00:02:36.689 --> 00:02:41.849
+enable this at runtime if we would like another good useful switch there
+
+33
+00:02:41.849 --> 00:02:46.650
+and then we can also get a mask switch so if you would just want to mask a certain channel
+
+34
+00:02:47.289 --> 00:02:52.129
+from a mask that you might have packed with RG and B
+
+35
+00:02:52.849 --> 00:02:56.610
+you can just mask based on a specific channel as well.
+
+36
+00:02:57.129 --> 00:03:05.020
+We have some quality expression nodes, so we've got a shading path, so do you want to change the
+
+37
+00:03:06.099 --> 00:03:10.259
+texture or whatever you might be inputting into this node
+
+38
+00:03:11.060 --> 00:03:17.300
+dependent on the the rendering model that you're using so especially if you're trying to work across multiple
+
+39
+00:03:17.819 --> 00:03:22.659
+platforms with maybe you've got deferred on by default and then you want to change it to a forward rendering
+
+40
+00:03:22.900 --> 00:03:26.819
+maybe for a VR application or you want a mobile application
+
+41
+00:03:27.300 --> 00:03:32.300
+you can change the shading path and therefore the instruction count of that material
+
+42
+00:03:32.900 --> 00:03:34.900
+based on the renderer that you're using
+
+43
+00:03:35.780 --> 00:03:41.340
+Again we can have a feature level switch so we could use these within the materials say you want these
+
+44
+00:03:42.020 --> 00:03:48.900
+different switches inside your game to say okay, I want to go at this level of detail for example for
+
+45
+00:03:49.580 --> 00:03:53.419
+SM5 and SM6. Okay, we'll set this and it's almost like
+
+46
+00:03:53.979 --> 00:04:00.580
+when we're using those texture groups and we were saying okay batch all these into this setting you can actually
+
+47
+00:04:01.259 --> 00:04:02.979
+decide on a
+
+48
+00:04:02.979 --> 00:04:05.340
+larger scale in your materials which
+
+49
+00:04:05.979 --> 00:04:07.979
+feature level you want to select
+
+50
+00:04:08.500 --> 00:04:12.659
+dependent on your texture quality you can say okay if we're running a
+
+51
+00:04:13.379 --> 00:04:14.860
+super low
+
+52
+00:04:14.860 --> 00:04:22.819
+texture quality or or even a high texture quality use this type of color if we're running on
+
+53
+00:04:23.379 --> 00:04:27.779
+medium or epic for example use this type of texture sample so
+
+54
+00:04:28.180 --> 00:04:30.480
+You know maybe the texture has been
+
+55
+00:04:31.500 --> 00:04:33.500
+imported a different
+
+56
+00:04:34.259 --> 00:04:37.180
+resolution maybe you want to make some affordances for the
+
+57
+00:04:37.699 --> 00:04:42.019
+Amount of information going in from a low quality switch to a higher quality switch
+
+58
+00:04:42.139 --> 00:04:45.620
+Yeah that that quality node is available for you there
+
+59
+00:04:45.620 --> 00:04:52.259
+And then also you you have a ray tracing quality switch, so if if you want to support
+
+60
+00:04:53.259 --> 00:04:58.060
+Real ray traced materials and non ray traced materials in the same project
+
+61
+00:04:58.139 --> 00:05:04.220
+But you want to make some affordances for someone that might not have ray tracing enabled then you can
+
+62
+00:05:04.459 --> 00:05:08.500
+Have different outputs based on whether ray tracing is enabled there

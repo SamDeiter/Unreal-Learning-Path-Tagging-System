@@ -1,0 +1,489 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:07.139
+In this section, we're going to discuss media profiles and implementing them for use in your ICVFX stage.
+
+2
+00:00:07.139 --> 00:00:13.140
+On the LANTE stage, one of the things that we actually connect through is the Aja Kona 5 interface.
+
+3
+00:00:13.140 --> 00:00:26.140
+So we use the KeyPro Ultra 12G, and this piece of hardware connects all of our devices, our camera, and our master clock into the computer so that everything is synchronized through our Kona 5 card.
+
+4
+00:00:26.140 --> 00:00:38.140
+Our input, output, genlock, and pass-through SDI information needs to be noted that when in use, the media profile that we're about to build will separate the signals onto separate internal SDI channels.
+
+5
+00:00:38.140 --> 00:00:46.140
+So when we set this up, we're going to set our input to SDI 1, output to SDI 2, and our genlock to SDI 4.
+
+6
+00:00:46.140 --> 00:00:49.140
+Now let's move into the engine to set up our media profile.
+
+7
+00:00:49.140 --> 00:00:57.140
+So to start with a media profile, I want to take a look at the project that we're working with, and this is our stage 11801-503b.
+
+8
+00:00:57.140 --> 00:01:08.140
+It's a clean project that we've been working from, and we will actually begin building from having assembled our end display configuration and adding in a media profile to connect our camera to prepare for camera calibration.
+
+9
+00:01:08.140 --> 00:01:16.140
+So to start with that, we want to move up here to this area in our toolbar so that we can move to our media profile section.
+
+10
+00:01:16.140 --> 00:01:23.519
+So first, I'm going to click this button, and this button is going to allow me to create a new empty media profile.
+
+11
+00:01:23.519 --> 00:01:28.519
+Now, when this pops up to pick a media profile class, we're going to choose media profile.
+
+12
+00:01:28.519 --> 00:01:34.709
+Once that's selected, it's going to provide us another window that is going to ask where we're going to put this.
+
+13
+00:01:34.709 --> 00:01:45.709
+Now, since we're going to be using our media profile to actually feed the camera's view into the engine for camera calibration, we want to create a new folder and call that calibration.
+
+14
+00:01:45.709 --> 00:01:52.000
+Then we can go ahead and double-click to select that folder, and then we need to name our media profile.
+
+15
+00:01:52.000 --> 00:02:01.000
+For our media profile, we want to name it something that we're actually going to be able to recognize and switch to whenever we use this calibration for a specific camera.
+
+16
+00:02:01.000 --> 00:02:03.000
+So we're going to start with MP for media profile.
+
+17
+00:02:03.000 --> 00:02:10.000
+We're going to name it Latte because we are on the Latte stage, BM for Blackmagic, and Aja for our Aja Key Pro.
+
+18
+00:02:10.000 --> 00:02:12.000
+I'm going to go ahead and hit save.
+
+19
+00:02:12.000 --> 00:02:16.000
+Once that happens, you're going to see a menu pop up that looks something like this.
+
+20
+00:02:16.000 --> 00:02:29.030
+Now, in order to make sure that you've actually got a good profile and you're not hanging on to anything that exists from a previous media profile, you're going to see this nice red bar that says this project doesn't have the media proxies configured.
+
+21
+00:02:29.030 --> 00:02:35.030
+To get started, we are going to click configure now inside our red warning menu.
+
+22
+00:02:35.030 --> 00:02:41.030
+Once that happens, a new window is going to pop up and give us the option for our media profile configuration.
+
+23
+00:02:41.030 --> 00:02:46.030
+From there, we're going to choose our proxies location and we're going to choose our calibration folder.
+
+24
+00:02:46.030 --> 00:02:48.030
+That'll generate our proxy folder.
+
+25
+00:02:48.030 --> 00:02:50.030
+Same thing for our bundles location.
+
+26
+00:02:50.030 --> 00:02:52.030
+We're going to choose our calibration folder.
+
+27
+00:02:52.030 --> 00:02:58.030
+Now, under our number of source proxies, we're going to go ahead and change this from two to one.
+
+28
+00:02:58.030 --> 00:03:03.030
+And then for our output proxies, we have the option here of leaving this as one or selecting zero.
+
+29
+00:03:03.030 --> 00:03:07.030
+Since we want to actually set our output proxy, we're going to leave this as one.
+
+30
+00:03:07.030 --> 00:03:13.030
+Now, you want to make sure that the should create bundle is checked on and then go ahead and hit configure.
+
+31
+00:03:13.030 --> 00:03:18.030
+This will change our media profile window and configure the actual media profile for us to use.
+
+32
+00:03:18.030 --> 00:03:24.030
+Now, once that's done, let's move back into our calibration folder and choose our media profile.
+
+33
+00:03:24.030 --> 00:03:27.030
+This is our MP Latte Blackmagic Aja profile.
+
+34
+00:03:27.030 --> 00:03:33.030
+You can see this question mark that is here and the other media profile sources automatically added themselves to this configuration.
+
+35
+00:03:34.030 --> 00:03:39.099
+Now, in order to get this ready to go, before I do this, I want to be able to save this.
+
+36
+00:03:39.099 --> 00:03:42.099
+So, I want to go to source control and make sure I mark this for add.
+
+37
+00:03:42.099 --> 00:03:49.099
+That way I can make changes and save this as needed and it will actually make changes and save them to the project on Perforce.
+
+38
+00:03:49.099 --> 00:03:52.099
+Now, let's double click and reopen our media profile.
+
+39
+00:03:52.099 --> 00:03:57.379
+Now, you'll see that the nice red bar that warned us that we didn't have a configuration is gone.
+
+40
+00:03:57.379 --> 00:04:02.379
+Now, we need to actually go through and start creating our media profile source selections.
+
+41
+00:04:02.379 --> 00:04:05.379
+So, the first thing we want to do is go under our input section here.
+
+42
+00:04:05.379 --> 00:04:10.770
+I'm going to make this a little bit smaller so you can see it's not quite as wide so I don't have to move left and right.
+
+43
+00:04:10.770 --> 00:04:13.770
+And that way it's a little bit more compact and easier to see.
+
+44
+00:04:13.770 --> 00:04:16.769
+Now, I'm going to start here under inputs and I'm going to move to media source.
+
+45
+00:04:16.769 --> 00:04:20.769
+And you can see that there is one array element because we have one source.
+
+46
+00:04:20.769 --> 00:04:25.769
+Now, I'm going to click on the media source 01 and choose my Aja media source.
+
+47
+00:04:25.769 --> 00:04:31.769
+Next, I'm going to expand that because I have new options available after selecting my source.
+
+48
+00:04:31.769 --> 00:04:36.769
+From my Aja's media source option, I want to go ahead and expand some of these.
+
+49
+00:04:36.769 --> 00:04:42.769
+So, first, I'm going to select my Aja and I'm going to go ahead and select my configuration.
+
+50
+00:04:42.769 --> 00:04:48.769
+And under my configuration, I want to make sure that I am at single length 1, that my resolution is HD 1080p,
+
+51
+00:04:48.769 --> 00:04:54.769
+and that my standard is set to progressive and that my frame rate is actually set to 24 frames per second
+
+52
+00:04:54.769 --> 00:04:57.769
+since we're shooting with a 24 frames per second camera.
+
+53
+00:04:57.769 --> 00:05:01.769
+Then go ahead and hit apply and this will actually configure that option.
+
+54
+00:05:01.769 --> 00:05:04.769
+Next, I want to choose my timecode format.
+
+55
+00:05:04.769 --> 00:05:10.769
+Now, I want to choose the LTC format, but you want to be able to choose whatever format you're actually using.
+
+56
+00:05:10.769 --> 00:05:15.769
+Once that's done, I want to move a little bit further down into my video section
+
+57
+00:05:15.769 --> 00:05:18.769
+and where I've got my color format, I want to make some changes.
+
+58
+00:05:18.769 --> 00:05:23.769
+So, first, I want to change from 8-bit YUV and change that to a 10-bit format.
+
+59
+00:05:23.769 --> 00:05:27.769
+Then I want to change my is sRGB input to on.
+
+60
+00:05:27.769 --> 00:05:34.769
+Once that's done, then my sRGB format is selected and my media source is finished.
+
+61
+00:05:34.769 --> 00:05:37.769
+Now, if I have more than one media source or more than one camera,
+
+62
+00:05:37.769 --> 00:05:41.769
+I can go ahead and repeat these steps for a second media source.
+
+63
+00:05:41.769 --> 00:05:43.769
+Next, I want to move into my outputs.
+
+64
+00:05:43.769 --> 00:05:47.769
+In my outputs, it's going to work pretty similar to what we did for our inputs.
+
+65
+00:05:47.769 --> 00:05:52.769
+I'm going to go in and first select my media source and choose my Aja media output.
+
+66
+00:05:52.769 --> 00:05:56.769
+Next, I'm going to expand those options and choose my Aja again.
+
+67
+00:05:56.769 --> 00:06:00.769
+Now, my Aja configuration, I can go ahead and hit this
+
+68
+00:06:00.769 --> 00:06:03.769
+and you're going to see the same options here with a few more options available.
+
+69
+00:06:03.769 --> 00:06:06.769
+I have output type as fill and fill and key,
+
+70
+00:06:06.769 --> 00:06:09.769
+and with that, I'm going to go ahead and make sure that this is set as fill.
+
+71
+00:06:09.769 --> 00:06:12.769
+Since we're not actually doing any color keying, we're going to use Kona.
+
+72
+00:06:12.769 --> 00:06:15.769
+I want to change this from single link one to single link two.
+
+73
+00:06:15.769 --> 00:06:17.769
+Next, we're going to make sure that this is HD 1080,
+
+74
+00:06:17.769 --> 00:06:20.769
+and then we're going to make sure that this is also progressive
+
+75
+00:06:20.769 --> 00:06:23.769
+and change our frame rate to 24 frames per second.
+
+76
+00:06:23.769 --> 00:06:25.769
+We're going to leave our reference as free run.
+
+77
+00:06:25.769 --> 00:06:27.769
+Then I'm going to go ahead and hit apply,
+
+78
+00:06:27.769 --> 00:06:29.769
+and I'm going to move down to my output options.
+
+79
+00:06:29.769 --> 00:06:33.769
+Now, my output options, I'm going to go ahead and make the same changes
+
+80
+00:06:33.769 --> 00:06:35.769
+to my timecode format.
+
+81
+00:06:35.769 --> 00:06:37.769
+I'm going to first verify that this is LTC
+
+82
+00:06:37.769 --> 00:06:41.769
+and then change my pixel format from 8-bit YUV to 10-bit YUV.
+
+83
+00:06:41.769 --> 00:06:44.769
+Now, that finishes my output setup,
+
+84
+00:06:44.769 --> 00:06:46.769
+and now we need to move on to the next section,
+
+85
+00:06:46.769 --> 00:06:49.769
+which is our timecode provider and our genlock provider.
+
+86
+00:06:49.769 --> 00:06:52.769
+Now, for our timecode setup, we want to scroll down
+
+87
+00:06:52.769 --> 00:06:57.769
+and choose to check on override project settings.
+
+88
+00:06:57.769 --> 00:06:59.769
+Then we want to choose our timecode provider
+
+89
+00:06:59.769 --> 00:07:01.769
+and choose our Aja SDI input.
+
+90
+00:07:01.769 --> 00:07:03.769
+Then from there, let's expand our provider,
+
+91
+00:07:03.769 --> 00:07:05.769
+go down to timecode, and then we'll see
+
+92
+00:07:05.769 --> 00:07:07.769
+we have some other options that we can choose.
+
+93
+00:07:07.769 --> 00:07:09.769
+We want to use a dedicated pin.
+
+94
+00:07:09.769 --> 00:07:11.769
+We don't want to use reference in
+
+95
+00:07:11.769 --> 00:07:13.769
+because that will conflict with our genlock.
+
+96
+00:07:13.769 --> 00:07:16.769
+And then we want to change our LTC configuration
+
+97
+00:07:16.769 --> 00:07:19.769
+and make sure that we are using 24 frames per second.
+
+98
+00:07:19.769 --> 00:07:22.990
+Notice, we don't have to choose an SDI input.
+
+99
+00:07:22.990 --> 00:07:26.990
+So with these options, we are set with our Kona 5,
+
+100
+00:07:26.990 --> 00:07:29.990
+our LTC index is 1, and our 24 frame rate selected.
+
+101
+00:07:29.990 --> 00:07:32.990
+Hit apply, and now let's move into our genlock.
+
+102
+00:07:32.990 --> 00:07:34.990
+In our genlock, I'm going to go ahead
+
+103
+00:07:34.990 --> 00:07:36.990
+and override my project settings again,
+
+104
+00:07:36.990 --> 00:07:38.990
+which will activate my custom timestamp,
+
+105
+00:07:38.990 --> 00:07:41.990
+and from there, I'm going to choose my Aja SDI input.
+
+106
+00:07:41.990 --> 00:07:44.990
+Now, I can expand my custom timestamp and my genlock,
+
+107
+00:07:44.990 --> 00:07:47.990
+and I want to make sure that I click on use reference in.
+
+108
+00:07:47.990 --> 00:07:50.990
+And from there, I can choose my configuration.
+
+109
+00:07:50.990 --> 00:07:52.990
+So from here, I'm going to choose my Kona 5.
+
+110
+00:07:52.990 --> 00:07:55.990
+I'm going to change my single link to single link 4.
+
+111
+00:07:55.990 --> 00:07:57.990
+And then from here, I've got my 1080p resolution,
+
+112
+00:07:57.990 --> 00:07:59.990
+progressive standard, and again,
+
+113
+00:07:59.990 --> 00:08:01.990
+change my frame rate to 24 frames per second.
+
+114
+00:08:01.990 --> 00:08:04.990
+With that finished, I can go ahead and hit apply.
+
+115
+00:08:04.990 --> 00:08:06.990
+And now with all my options finished,
+
+116
+00:08:06.990 --> 00:08:08.990
+I can move up here to the upper left-hand corner
+
+117
+00:08:08.990 --> 00:08:12.990
+of my media profile and go ahead and hit apply
+
+118
+00:08:12.990 --> 00:08:16.990
+and then save my media profile to finish this setup.
+
+119
+00:08:16.990 --> 00:08:19.990
+Now that we've finished our media profile configuration,
+
+120
+00:08:19.990 --> 00:08:21.990
+we can go ahead and hand this back over to Brian
+
+121
+00:08:21.990 --> 00:08:25.990
+to continue with an ICDFX cinematography discussion
+
+122
+00:08:25.990 --> 00:08:27.990
+about considerations and techniques.

@@ -1,0 +1,2585 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:04.450
+Welcome to your Unreal training for stage operations, tool
+
+2
+00:00:04.450 --> 00:00:06.650
+execution, and optimization.
+
+3
+00:00:06.650 --> 00:00:09.509
+My name is Sean Spitzer, your senior instructor
+
+4
+00:00:09.509 --> 00:00:10.410
+at Epic Games.
+
+5
+00:00:10.410 --> 00:00:13.050
+And today, we're going to be talking about ICV effects
+
+6
+00:00:13.050 --> 00:00:15.169
+and tool operations and optimization
+
+7
+00:00:15.169 --> 00:00:18.129
+overall on your scene on the stage.
+
+8
+00:00:18.129 --> 00:00:20.649
+This is a bit of a review of our other courses,
+
+9
+00:00:20.649 --> 00:00:23.030
+but we're going to go and look at a few things to keep
+
+10
+00:00:23.030 --> 00:00:24.949
+in mind when you're on the stage.
+
+11
+00:00:24.949 --> 00:00:26.890
+We're not going to go through all of these,
+
+12
+00:00:26.890 --> 00:00:28.649
+since we've talked about plenty of them
+
+13
+00:00:28.649 --> 00:00:31.089
+within our courses, our live class,
+
+14
+00:00:31.089 --> 00:00:33.649
+what we're going to focus mainly on
+
+15
+00:00:33.649 --> 00:00:37.570
+is looking at our performance and how best
+
+16
+00:00:37.570 --> 00:00:39.969
+to get Unreal to do the things that we need.
+
+17
+00:00:39.969 --> 00:00:45.750
+And in 5.1, Lumen makes that much easier.
+
+18
+00:00:45.750 --> 00:00:49.189
+And the Lumen in 5.1 allows us to update our lighting
+
+19
+00:00:49.189 --> 00:00:49.969
+on the fly.
+
+20
+00:00:49.969 --> 00:00:51.310
+And we'll do a bit of a review
+
+21
+00:00:51.310 --> 00:00:52.869
+on some of those aspects and things
+
+22
+00:00:52.869 --> 00:00:56.500
+that you can use to your advantage.
+
+23
+00:00:56.500 --> 00:00:59.060
+I'll add a few more things in here that not necessarily
+
+24
+00:00:59.060 --> 00:01:01.000
+part of the class, but they will point out
+
+25
+00:01:01.039 --> 00:01:03.420
+the light updates that you can get going
+
+26
+00:01:03.420 --> 00:01:05.560
+and the different types of lighting scenarios
+
+27
+00:01:05.560 --> 00:01:07.060
+using LevelSnapshot.
+
+28
+00:01:07.060 --> 00:01:08.599
+I'll squeeze those in just a little bit
+
+29
+00:01:08.599 --> 00:01:11.439
+towards the middle of this course.
+
+30
+00:01:11.439 --> 00:01:15.459
+All right, so let's go ahead and go to Switchboard here
+
+31
+00:01:15.459 --> 00:01:17.040
+and we're going to take a look at a few things
+
+32
+00:01:17.040 --> 00:01:19.310
+also in Unreal.
+
+33
+00:01:19.310 --> 00:01:22.269
+So you'll see in Switchboard, if I go to my settings,
+
+34
+00:01:22.269 --> 00:01:26.290
+which I have up right now, I can actually run some traces
+
+35
+00:01:26.290 --> 00:01:28.609
+and tell what's going on with Unreal
+
+36
+00:01:28.609 --> 00:01:32.090
+by running CBAR commands as soon as Switchboard
+
+37
+00:01:32.090 --> 00:01:34.810
+and us launching to the wall starts to hit.
+
+38
+00:01:34.810 --> 00:01:37.530
+Now we can run a trace GPU if we need to.
+
+39
+00:01:37.530 --> 00:01:40.689
+You can also run, if I minimize things just for a second,
+
+40
+00:01:40.689 --> 00:01:42.329
+I'm going to close settings here
+
+41
+00:01:42.329 --> 00:01:44.370
+and I'm going to minimize Switchboard for a bit
+
+42
+00:01:44.370 --> 00:01:46.049
+and also Unreal.
+
+43
+00:01:46.049 --> 00:01:48.810
+You'll notice that we also can run Unreal Insights
+
+44
+00:01:48.810 --> 00:01:50.969
+as an EXE on your desktop.
+
+45
+00:01:50.969 --> 00:01:53.150
+Now, if you do run into problems with this
+
+46
+00:01:53.150 --> 00:01:54.870
+and if for some reason it's not quite hitting
+
+47
+00:01:54.870 --> 00:01:57.450
+or connecting, you may run into situations
+
+48
+00:01:57.450 --> 00:02:00.250
+where Unreal will require you to reinstall it
+
+49
+00:02:00.250 --> 00:02:02.370
+if Unreal Insights is fighting you a bit,
+
+50
+00:02:02.370 --> 00:02:06.129
+but you do can run Unreal Insights right within the engine.
+
+51
+00:02:06.129 --> 00:02:08.090
+It's not always the most ideal to do so
+
+52
+00:02:08.090 --> 00:02:10.330
+because you are running things in the background
+
+53
+00:02:10.330 --> 00:02:14.289
+as it's looking at your system and your setup,
+
+54
+00:02:14.289 --> 00:02:16.590
+but that option is there if you run into it.
+
+55
+00:02:16.590 --> 00:02:22.120
+So again, review, you can run Unreal Insights
+
+56
+00:02:22.120 --> 00:02:25.080
+through your Switchboard when you initially launch,
+
+57
+00:02:25.080 --> 00:02:26.800
+as you saw through our settings,
+
+58
+00:02:26.800 --> 00:02:29.620
+we can actually get those commands going
+
+59
+00:02:29.620 --> 00:02:30.879
+through our CVARS,
+
+60
+00:02:30.879 --> 00:02:33.539
+or you can run it through the EXE on the desktop,
+
+61
+00:02:33.539 --> 00:02:38.479
+or you can also run it live within your scene itself
+
+62
+00:02:38.479 --> 00:02:40.919
+by going to Tools and Unreal Insights.
+
+63
+00:02:40.919 --> 00:02:42.819
+And we talked about how to read that
+
+64
+00:02:42.819 --> 00:02:46.439
+in our previous courses from before.
+
+65
+00:02:46.439 --> 00:02:47.599
+So what we're going to do now
+
+66
+00:02:47.599 --> 00:02:51.060
+is take a look at our scene as a whole,
+
+67
+00:02:51.060 --> 00:02:53.740
+and we're going to jump ahead a few slides
+
+68
+00:02:53.740 --> 00:02:56.740
+and we're going to review some of the terminology
+
+69
+00:02:57.500 --> 00:02:59.620
+that we talked about when it came to draw calls.
+
+70
+00:02:59.620 --> 00:03:03.259
+Now, draw calls, when you're looking at them,
+
+71
+00:03:03.259 --> 00:03:05.680
+are two things specifically,
+
+72
+00:03:05.680 --> 00:03:08.500
+is your geometry is going to be a draw call,
+
+73
+00:03:08.500 --> 00:03:10.659
+and your materials are going to be a draw call.
+
+74
+00:03:10.659 --> 00:03:13.199
+These are very important to consider.
+
+75
+00:03:13.199 --> 00:03:14.639
+So you have to determine
+
+76
+00:03:14.639 --> 00:03:16.759
+where you're merging your geometry,
+
+77
+00:03:16.759 --> 00:03:19.479
+and also if you're going to be using Nanite
+
+78
+00:03:19.479 --> 00:03:20.840
+in Virtual Texturing.
+
+79
+00:03:20.840 --> 00:03:22.280
+This is very important to consider
+
+80
+00:03:22.280 --> 00:03:25.479
+because activating Nanite in Virtual Texturing
+
+81
+00:03:25.479 --> 00:03:26.919
+works really well and gives you
+
+82
+00:03:26.919 --> 00:03:29.280
+some really great scenes with Lumen.
+
+83
+00:03:29.280 --> 00:03:32.759
+Now, if we decided to use Nanite outside of Lumen,
+
+84
+00:03:32.759 --> 00:03:34.439
+those bakes will take a while.
+
+85
+00:03:34.439 --> 00:03:35.360
+And if I do that,
+
+86
+00:03:35.360 --> 00:03:38.259
+I'll have to make sure that I use GPU light mass
+
+87
+00:03:38.259 --> 00:03:40.780
+to be able to bake things quicker on stage.
+
+88
+00:03:40.780 --> 00:03:42.759
+This, again, is dependent upon your scene
+
+89
+00:03:42.759 --> 00:03:44.520
+and how complex it is overall,
+
+90
+00:03:44.520 --> 00:03:48.520
+and you have to consider those situations.
+
+91
+00:03:48.520 --> 00:03:50.159
+All right, in our previous class,
+
+92
+00:03:50.159 --> 00:03:53.180
+we talked about your draw calls
+
+93
+00:03:53.180 --> 00:03:57.819
+and your thread, your CPU, what's going on.
+
+94
+00:03:57.819 --> 00:04:00.900
+We also talked about what those determining factors are
+
+95
+00:04:00.900 --> 00:04:05.870
+when it comes to looking and examining your scenes,
+
+96
+00:04:05.870 --> 00:04:08.490
+and also what's being drawn by your camera.
+
+97
+00:04:08.490 --> 00:04:12.129
+And in our case, our camera is linked into our NDC,
+
+98
+00:04:12.129 --> 00:04:14.250
+so whatever's being drawn in our scene
+
+99
+00:04:14.250 --> 00:04:16.850
+is luckily not being drawn all at one time,
+
+100
+00:04:16.850 --> 00:04:18.529
+but according to what my camera's looking at,
+
+101
+00:04:18.529 --> 00:04:21.410
+which is fantastic that Unreal works that way,
+
+102
+00:04:21.410 --> 00:04:23.490
+and is to our advantage.
+
+103
+00:04:23.490 --> 00:04:27.269
+And we have the GPU visualizer that we can also use.
+
+104
+00:04:27.269 --> 00:04:29.509
+Now, I know a few people working in ICVFX
+
+105
+00:04:29.509 --> 00:04:31.769
+will sometimes use this quite quickly
+
+106
+00:04:31.769 --> 00:04:34.490
+because it gives you a quick snapshot of what's going on,
+
+107
+00:04:34.490 --> 00:04:36.089
+but they're not always dependent upon it.
+
+108
+00:04:36.089 --> 00:04:38.529
+They'll actually go to session front end,
+
+109
+00:04:38.529 --> 00:04:41.329
+or they all will also go to Unreal Insights.
+
+110
+00:04:41.329 --> 00:04:44.209
+Now, again, to get to the EXEs for some of those,
+
+111
+00:04:44.209 --> 00:04:48.230
+you'll see Unreal Insights is found within my Epic Games,
+
+112
+00:04:48.230 --> 00:04:51.430
+Unreal 5.1 engine binaries,
+
+113
+00:04:51.430 --> 00:04:54.509
+and Windows 64.
+
+114
+00:04:54.509 --> 00:04:55.870
+You'll find this right here,
+
+115
+00:04:55.870 --> 00:04:59.610
+but you'll also find session front end in here also,
+
+116
+00:04:59.610 --> 00:05:03.170
+if you wanted to be able to use that one as an EXE.
+
+117
+00:05:03.170 --> 00:05:06.850
+So now, let's go ahead in our scene
+
+118
+00:05:06.850 --> 00:05:12.000
+and take a look again at our GPU visualizer.
+
+119
+00:05:12.000 --> 00:05:13.680
+Now, your GPU visualizer, again,
+
+120
+00:05:13.680 --> 00:05:17.660
+is a very lightweight way to look at your scene overall,
+
+121
+00:05:17.660 --> 00:05:18.720
+and what's going on,
+
+122
+00:05:18.720 --> 00:05:20.160
+and you'll be able to activate that
+
+123
+00:05:20.199 --> 00:05:22.480
+through your output log here,
+
+124
+00:05:22.480 --> 00:05:23.720
+and in my output log,
+
+125
+00:05:23.720 --> 00:05:26.300
+which is just the same as if you hit tilde,
+
+126
+00:05:26.300 --> 00:05:28.199
+but I like this because it tells you what's going on.
+
+127
+00:05:28.199 --> 00:05:31.480
+You can also do a question mark at the end of your CVAR
+
+128
+00:05:31.480 --> 00:05:33.060
+if you're not sure what that CVAR does
+
+129
+00:05:33.060 --> 00:05:35.060
+and you want a quick breakdown of it.
+
+130
+00:05:35.060 --> 00:05:36.939
+Then we'll do profile GPU.
+
+131
+00:05:36.939 --> 00:05:39.139
+Now, the profile GPU, as a reminder,
+
+132
+00:05:39.139 --> 00:05:40.959
+takes a snapshot of that scene,
+
+133
+00:05:40.959 --> 00:05:43.160
+so you might want to bookmark areas,
+
+134
+00:05:43.160 --> 00:05:45.519
+and it allows you to be able to actually look at this
+
+135
+00:05:45.519 --> 00:05:47.399
+and see where in your milliseconds
+
+136
+00:05:47.399 --> 00:05:49.620
+you may be getting hit in your scene.
+
+137
+00:05:51.279 --> 00:05:52.879
+This one I've used for a while,
+
+138
+00:05:52.879 --> 00:05:54.600
+but I don't use it all the time.
+
+139
+00:05:54.600 --> 00:05:57.120
+A lot of times, I like to use session front end,
+
+140
+00:05:57.120 --> 00:05:58.680
+and I want to point out some of the changes
+
+141
+00:05:58.680 --> 00:06:00.839
+that do happen with session front end
+
+142
+00:06:00.839 --> 00:06:04.970
+because this has changed interface-wise just a bit.
+
+143
+00:06:04.970 --> 00:06:07.310
+As I open up session front end,
+
+144
+00:06:07.310 --> 00:06:08.730
+you'll notice, again, like I said,
+
+145
+00:06:08.730 --> 00:06:12.050
+you can run this through an EXE outside of Unreal.
+
+146
+00:06:12.050 --> 00:06:14.209
+I want to make sure that I have selected
+
+147
+00:06:14.209 --> 00:06:17.079
+the session that I want to analyze.
+
+148
+00:06:17.079 --> 00:06:18.939
+Now, to be able to profile that,
+
+149
+00:06:18.939 --> 00:06:22.420
+we want to make sure that we're selecting this one.
+
+150
+00:06:22.420 --> 00:06:23.660
+Let me open this up.
+
+151
+00:06:23.660 --> 00:06:26.939
+You can also load a profile that you already have.
+
+152
+00:06:26.939 --> 00:06:29.500
+Now, I don't have one in this particular session,
+
+153
+00:06:29.500 --> 00:06:32.779
+but we want to be able to activate a new one.
+
+154
+00:06:32.779 --> 00:06:35.720
+You'll see here that under console
+
+155
+00:06:35.720 --> 00:06:36.959
+is tracking some of the things
+
+156
+00:06:36.959 --> 00:06:39.399
+that are going on in our scene,
+
+157
+00:06:39.399 --> 00:06:42.339
+and you'll also see our Aja is at work
+
+158
+00:06:42.339 --> 00:06:43.879
+in balancing things out.
+
+159
+00:06:43.879 --> 00:06:45.139
+Now, I want to make that point
+
+160
+00:06:45.139 --> 00:06:47.660
+that our Aja is making sure that our frame rate
+
+161
+00:06:47.660 --> 00:06:50.220
+is set to a 30 frames per second,
+
+162
+00:06:50.220 --> 00:06:53.180
+but you can see the chug in what happens
+
+163
+00:06:53.180 --> 00:06:55.180
+with Unreal when you have a lot on your scene,
+
+164
+00:06:55.180 --> 00:06:56.060
+a lot of draw calls,
+
+165
+00:06:56.060 --> 00:06:58.699
+and then a lot of material's giving you trouble.
+
+166
+00:06:58.699 --> 00:07:00.920
+Maybe fog is giving you trouble, whatever it is.
+
+167
+00:07:00.920 --> 00:07:03.300
+You'll notice your camera lag is going to occur,
+
+168
+00:07:03.300 --> 00:07:05.639
+and we're going to be playing with that a little bit.
+
+169
+00:07:05.639 --> 00:07:08.959
+So here's our scene here that we have set up,
+
+170
+00:07:08.959 --> 00:07:10.720
+and you'll notice we also can actually
+
+171
+00:07:10.720 --> 00:07:12.360
+load things within groups.
+
+172
+00:07:12.360 --> 00:07:14.259
+So when loading your sessions,
+
+173
+00:07:14.259 --> 00:07:16.199
+you really want to make sure this is selected,
+
+174
+00:07:16.199 --> 00:07:18.480
+but I do want to point out in the automation part,
+
+175
+00:07:18.480 --> 00:07:19.899
+you can actually run tests.
+
+176
+00:07:19.899 --> 00:07:22.699
+If I started the test, it'll ask me to save,
+
+177
+00:07:22.699 --> 00:07:24.079
+and then I can run that session.
+
+178
+00:07:24.079 --> 00:07:26.319
+Now, we're not going to get into the test just yet,
+
+179
+00:07:26.319 --> 00:07:28.720
+but let's go to the profile here for a second.
+
+180
+00:07:28.720 --> 00:07:31.439
+We used to have icons in 5.0.
+
+181
+00:07:31.439 --> 00:07:34.399
+Now we just have text to be able to click on,
+
+182
+00:07:34.399 --> 00:07:36.800
+and I can actually grab my data capture,
+
+183
+00:07:36.800 --> 00:07:39.819
+and it's now capturing data for my scene,
+
+184
+00:07:39.819 --> 00:07:42.319
+and then I can click on data capture again.
+
+185
+00:07:42.319 --> 00:07:43.160
+It'll ask me,
+
+186
+00:07:43.160 --> 00:07:45.319
+would you like to transfer the captured stats?
+
+187
+00:07:45.319 --> 00:07:47.759
+Yes, please, it's going to keep it,
+
+188
+00:07:47.759 --> 00:07:49.000
+and it's going to give me a link,
+
+189
+00:07:49.000 --> 00:07:51.019
+and then now I can load that file.
+
+190
+00:07:51.019 --> 00:07:52.759
+Are you sure you want to load the session?
+
+191
+00:07:52.759 --> 00:07:55.699
+Automate results, data will be lost, we'll say yes,
+
+192
+00:07:55.699 --> 00:07:58.519
+because it was automating tests in the background,
+
+193
+00:07:58.519 --> 00:08:00.639
+or I can force it like I just did,
+
+194
+00:08:00.639 --> 00:08:02.680
+or I had it give me the data
+
+195
+00:08:02.680 --> 00:08:04.360
+from where I'm at right here.
+
+196
+00:08:04.360 --> 00:08:05.540
+Now, when you do run this,
+
+197
+00:08:05.540 --> 00:08:08.540
+I do recommend you move your camera around in your scene.
+
+198
+00:08:08.540 --> 00:08:11.519
+We didn't do this for this particular data capture,
+
+199
+00:08:11.519 --> 00:08:13.160
+but it allows me to go in here
+
+200
+00:08:13.160 --> 00:08:15.800
+and to be able to see where my issues might be.
+
+201
+00:08:15.800 --> 00:08:18.079
+Now, you can also search things accordingly,
+
+202
+00:08:18.079 --> 00:08:21.160
+so say, hey, maybe I think fog's giving me trouble,
+
+203
+00:08:21.160 --> 00:08:23.259
+so I can go and look at my fog up close,
+
+204
+00:08:23.259 --> 00:08:26.759
+double-click on it, and see if I'm getting hit anywhere,
+
+205
+00:08:26.759 --> 00:08:30.160
+and it looks like our fog is relatively not too bad
+
+206
+00:08:30.160 --> 00:08:33.460
+in this particular instance, so we're doing okay.
+
+207
+00:08:33.460 --> 00:08:36.039
+And again, our aja is keeping things locked down,
+
+208
+00:08:36.039 --> 00:08:37.399
+but you can analyze things,
+
+209
+00:08:37.399 --> 00:08:39.159
+and again, you really want to try to do this
+
+210
+00:08:39.159 --> 00:08:40.559
+before you get on the wall,
+
+211
+00:08:40.559 --> 00:08:43.200
+but there will be times where you're in that scenario
+
+212
+00:08:43.200 --> 00:08:45.600
+where you need to look at what's going on on the wall.
+
+213
+00:08:45.600 --> 00:08:47.279
+And I'm gonna show you, again,
+
+214
+00:08:47.279 --> 00:08:49.600
+a little bit of review with Level Snapshots,
+
+215
+00:08:49.600 --> 00:08:51.080
+how we can change our lighting,
+
+216
+00:08:51.080 --> 00:08:52.559
+but I'm gonna really focus on
+
+217
+00:08:52.559 --> 00:08:55.580
+what that lighting optimization means for your scene.
+
+218
+00:08:55.580 --> 00:08:58.580
+All right, so I'm gonna go and close this.
+
+219
+00:08:58.580 --> 00:09:01.980
+So we're in Lumen right now in our environment.
+
+220
+00:09:01.980 --> 00:09:04.940
+We've now checked out our NDC as well.
+
+221
+00:09:04.940 --> 00:09:06.519
+We want to make sure that our beach scene
+
+222
+00:09:06.519 --> 00:09:07.860
+is also checked out,
+
+223
+00:09:07.860 --> 00:09:10.740
+so I'm gonna go ahead and check this out for our scene.
+
+224
+00:09:10.740 --> 00:09:12.899
+Really important, because we're making changes here,
+
+225
+00:09:12.899 --> 00:09:16.309
+and we want those changes to be recorded.
+
+226
+00:09:16.309 --> 00:09:18.950
+Now you'll notice in our environment,
+
+227
+00:09:18.950 --> 00:09:23.950
+if Kevin will go over and switch to the camera on stage
+
+228
+00:09:24.570 --> 00:09:27.549
+and move the camera around,
+
+229
+00:09:27.549 --> 00:09:29.309
+we may get a little bit of lag,
+
+230
+00:09:29.309 --> 00:09:32.159
+but overall, it's actually not too bad.
+
+231
+00:09:32.159 --> 00:09:34.679
+And this is using water in our environment,
+
+232
+00:09:34.679 --> 00:09:36.759
+and water is probably one of the heaviest things
+
+233
+00:09:36.759 --> 00:09:38.419
+you can mess with.
+
+234
+00:09:38.419 --> 00:09:42.340
+Now, if we wanted to, we can push this water system back,
+
+235
+00:09:42.340 --> 00:09:46.299
+and we can also lower the complexity of our terrain.
+
+236
+00:09:46.299 --> 00:09:48.519
+Virtual texturing is gonna be very important
+
+237
+00:09:48.519 --> 00:09:51.879
+in this particular scenario, if it starts to lag too,
+
+238
+00:09:51.879 --> 00:09:52.879
+so we can switch that.
+
+239
+00:09:52.879 --> 00:09:56.279
+So let's go and talk about a review of virtual texturing
+
+240
+00:09:56.279 --> 00:10:00.320
+and using Nanite, as well as looking at Lumen up close.
+
+241
+00:10:00.320 --> 00:10:02.659
+So let's go back into the engine
+
+242
+00:10:02.659 --> 00:10:05.639
+and see where we can actually make things a bit smoother,
+
+243
+00:10:05.639 --> 00:10:08.200
+if we are getting a bit more of a chug.
+
+244
+00:10:08.759 --> 00:10:09.639
+One of them is, is we can go ahead
+
+245
+00:10:09.639 --> 00:10:11.679
+and look at some of our rocks up close.
+
+246
+00:10:11.679 --> 00:10:13.039
+And I'm gonna look at this material.
+
+247
+00:10:13.039 --> 00:10:14.159
+So I'm gonna click on the folder
+
+248
+00:10:14.159 --> 00:10:16.320
+where this material's located.
+
+249
+00:10:16.320 --> 00:10:18.080
+Oh, looks like that's my demo rock.
+
+250
+00:10:18.080 --> 00:10:20.259
+Let's go to a different one.
+
+251
+00:10:20.259 --> 00:10:21.100
+There we go.
+
+252
+00:10:21.100 --> 00:10:23.919
+Has the textures nested in here, because I'm making scans.
+
+253
+00:10:23.919 --> 00:10:25.860
+So I can go in here, and I can now,
+
+254
+00:10:25.860 --> 00:10:29.899
+if I wanted to, right-click and change these assets
+
+255
+00:10:29.899 --> 00:10:31.139
+to virtual texturing.
+
+256
+00:10:31.139 --> 00:10:34.980
+Now, you can also go in here and lower resolution,
+
+257
+00:10:34.980 --> 00:10:37.779
+if you needed to, by using a thing called
+
+258
+00:10:37.779 --> 00:10:40.980
+a bulk edit property matrix.
+
+259
+00:10:40.980 --> 00:10:42.500
+And this is a review again,
+
+260
+00:10:42.500 --> 00:10:44.419
+where you can actually open these up
+
+261
+00:10:44.419 --> 00:10:47.179
+and actually look at your resolution,
+
+262
+00:10:47.179 --> 00:10:48.980
+look at your compression settings,
+
+263
+00:10:48.980 --> 00:10:51.460
+and you can see we have a maximum texture size.
+
+264
+00:10:51.460 --> 00:10:54.820
+So I can cap that off if I needed to do so.
+
+265
+00:10:54.820 --> 00:10:56.519
+So that's actually really nice.
+
+266
+00:10:56.519 --> 00:10:58.580
+But what we wanna do is mainly switch this
+
+267
+00:10:58.580 --> 00:11:01.220
+to a virtual texture, and that's right here.
+
+268
+00:11:01.220 --> 00:11:03.679
+Now, if I converted this to a virtual texture,
+
+269
+00:11:03.679 --> 00:11:08.279
+it's gonna give me a, finding my conversion first,
+
+270
+00:11:08.279 --> 00:11:10.879
+it's gonna give me some options to be able to choose
+
+271
+00:11:10.879 --> 00:11:12.559
+this virtual texturing.
+
+272
+00:11:12.559 --> 00:11:15.519
+And what I mean by that, it's going to give me a list,
+
+273
+00:11:15.519 --> 00:11:17.039
+and you can see my list here.
+
+274
+00:11:17.039 --> 00:11:19.240
+It can say, hey, do you wanna do all of them,
+
+275
+00:11:19.240 --> 00:11:22.120
+or do you wanna just pick a certain ones to do?
+
+276
+00:11:22.120 --> 00:11:24.200
+And I can choose my resolution.
+
+277
+00:11:24.200 --> 00:11:26.059
+This is very important to consider,
+
+278
+00:11:26.059 --> 00:11:28.080
+especially when you're working with Nanite
+
+279
+00:11:28.080 --> 00:11:29.899
+and you're working with virtual shadows,
+
+280
+00:11:29.899 --> 00:11:32.220
+and say you have a big scene you need to manage,
+
+281
+00:11:32.220 --> 00:11:35.539
+you wanna make sure that you're activating this when needed.
+
+282
+00:11:35.539 --> 00:11:37.059
+I'm gonna hit cancel for now.
+
+283
+00:11:37.059 --> 00:11:39.340
+We're not gonna do that in this particular scenario,
+
+284
+00:11:39.340 --> 00:11:41.200
+just because it takes a bit of time,
+
+285
+00:11:41.200 --> 00:11:42.500
+and I don't want you guys
+
+286
+00:11:42.500 --> 00:11:44.779
+to get completely bored out of your head.
+
+287
+00:11:44.779 --> 00:11:47.259
+Now you'll notice in my scene, in my geometry,
+
+288
+00:11:47.259 --> 00:11:49.379
+if I click on some of these rock assets,
+
+289
+00:11:49.379 --> 00:11:50.720
+they are combined.
+
+290
+00:11:50.720 --> 00:11:53.179
+If I click on these two back in the distance,
+
+291
+00:11:53.179 --> 00:11:54.419
+they are now combined.
+
+292
+00:11:54.419 --> 00:11:57.019
+And the reason why that I merged those,
+
+293
+00:11:57.019 --> 00:11:59.620
+and you can see merge actors here that I can do that,
+
+294
+00:11:59.620 --> 00:12:01.860
+is because I wanted the draw calls to be light.
+
+295
+00:12:01.860 --> 00:12:03.980
+So I wanted my draw calls not to be heavy.
+
+296
+00:12:03.980 --> 00:12:06.159
+So if you have a lot of little pieces,
+
+297
+00:12:06.159 --> 00:12:08.799
+and they don't necessarily need to be moved around
+
+298
+00:12:08.799 --> 00:12:10.779
+all separately, and you know for sure
+
+299
+00:12:10.779 --> 00:12:12.299
+that they're gonna be a constant,
+
+300
+00:12:12.299 --> 00:12:15.100
+you can actually merge those as you need.
+
+301
+00:12:15.100 --> 00:12:18.139
+You can also go in here and convert these to Nanite.
+
+302
+00:12:18.139 --> 00:12:19.919
+So I have a rock up close.
+
+303
+00:12:19.919 --> 00:12:22.019
+You'll notice my resolution's not really high,
+
+304
+00:12:22.019 --> 00:12:24.620
+just so that you guys can download these scenes
+
+305
+00:12:24.620 --> 00:12:26.220
+without pulling your hair out.
+
+306
+00:12:26.220 --> 00:12:27.779
+But I can also go in here
+
+307
+00:12:27.779 --> 00:12:30.480
+and grab this piece of geometry at any time,
+
+308
+00:12:30.480 --> 00:12:35.340
+and it's a bit different compared to Unreal 5.0.
+
+309
+00:12:35.340 --> 00:12:38.259
+I can now go in here and go straight to Nanite.
+
+310
+00:12:38.259 --> 00:12:41.500
+So I can click on Nanite and make this a Nanite object.
+
+311
+00:12:41.500 --> 00:12:43.980
+Now again, the benefit, and I'm gonna make sure I do,
+
+312
+00:12:43.980 --> 00:12:45.799
+I'm gonna turn that off for a second here.
+
+313
+00:12:45.799 --> 00:12:48.759
+The benefit, first I wanna do is check this out.
+
+314
+00:12:48.759 --> 00:12:50.879
+Very important, make sure you do that.
+
+315
+00:12:50.879 --> 00:12:52.299
+The benefit of doing that
+
+316
+00:12:52.299 --> 00:12:55.320
+is gonna give me a higher shadow quality.
+
+317
+00:12:55.320 --> 00:12:59.679
+And I can bring in a higher resolution model.
+
+318
+00:12:59.679 --> 00:13:02.960
+So you can do that all through Bridge also
+
+319
+00:13:02.960 --> 00:13:04.000
+within Quixel Bridge.
+
+320
+00:13:04.000 --> 00:13:06.320
+When you export your geometry in your scene,
+
+321
+00:13:06.320 --> 00:13:09.399
+you can tell it to be a Nanite object.
+
+322
+00:13:09.399 --> 00:13:14.080
+So again, this is where I emphasize having a game plan,
+
+323
+00:13:14.080 --> 00:13:16.779
+knowing exactly what your visuals are gonna be.
+
+324
+00:13:16.779 --> 00:13:19.440
+So you wanna make sure before you get on the wall
+
+325
+00:13:19.440 --> 00:13:21.399
+that you consider these things ahead of time
+
+326
+00:13:21.399 --> 00:13:25.000
+so you don't necessarily bloat your scene unnecessarily.
+
+327
+00:13:25.000 --> 00:13:29.080
+So this has now become a Nanite object.
+
+328
+00:13:29.080 --> 00:13:32.820
+And I also wanna be able to click on this object
+
+329
+00:13:32.820 --> 00:13:36.179
+and I'm gonna type in Nanite.
+
+330
+00:13:36.179 --> 00:13:38.419
+And again, this is a review for some of you before,
+
+331
+00:13:38.419 --> 00:13:40.100
+but I'm gonna make sure I point these out.
+
+332
+00:13:40.100 --> 00:13:42.419
+And I'm gonna enable my Nanite support
+
+333
+00:13:42.419 --> 00:13:45.419
+and I wanna build my Nanite in my mesh.
+
+334
+00:13:45.419 --> 00:13:46.860
+Now, when you build that Nanite,
+
+335
+00:13:46.860 --> 00:13:48.899
+you'll see a little bit of like a shadow shift
+
+336
+00:13:48.899 --> 00:13:51.580
+in some cases on your object.
+
+337
+00:13:51.580 --> 00:13:53.259
+What's happening is you're letting Unreal know
+
+338
+00:13:53.259 --> 00:13:55.820
+that you're using Nanite information
+
+339
+00:13:55.820 --> 00:13:58.100
+on this particular object.
+
+340
+00:13:58.100 --> 00:13:59.940
+And you're not necessarily
+
+341
+00:13:59.940 --> 00:14:01.659
+going to be using your LODs now.
+
+342
+00:14:01.659 --> 00:14:04.740
+You're gonna be leaning more on your Nanite information.
+
+343
+00:14:04.740 --> 00:14:07.500
+And again, Nanite works as a review again,
+
+344
+00:14:07.500 --> 00:14:09.100
+repeating myself, I know,
+
+345
+00:14:09.100 --> 00:14:11.659
+the Nanite works like your virtual shadow maps
+
+346
+00:14:11.659 --> 00:14:13.419
+and like your virtual text train.
+
+347
+00:14:13.419 --> 00:14:16.659
+It only draws a high quality information that you need
+
+348
+00:14:16.659 --> 00:14:18.759
+according to where your camera's pointing direction.
+
+349
+00:14:18.759 --> 00:14:22.360
+That's what makes it so unique and so awesome.
+
+350
+00:14:22.360 --> 00:14:24.279
+All right, so let's talk a little bit
+
+351
+00:14:24.279 --> 00:14:29.220
+about our Lumen optimization for a moment.
+
+352
+00:14:29.220 --> 00:14:31.419
+So I'm gonna click on Lumen here.
+
+353
+00:14:31.419 --> 00:14:35.000
+And I should say my light in its Lumen mode.
+
+354
+00:14:35.000 --> 00:14:37.659
+And again, you wanna make sure your light is movable.
+
+355
+00:14:37.659 --> 00:14:40.139
+My light's completely movable in our scene.
+
+356
+00:14:40.139 --> 00:14:41.820
+We wanna make sure that in that,
+
+357
+00:14:41.820 --> 00:14:44.700
+we wanna double check on our settings for Lumen.
+
+358
+00:14:44.700 --> 00:14:47.220
+Now, we talked about this in previous classes,
+
+359
+00:14:47.220 --> 00:14:49.899
+when it comes to your project settings.
+
+360
+00:14:49.899 --> 00:14:52.179
+And you wanna go to rendering.
+
+361
+00:14:52.179 --> 00:14:54.080
+And in rendering, you wanna make sure
+
+362
+00:14:54.080 --> 00:14:56.100
+that you're set to Lumen
+
+363
+00:14:56.100 --> 00:15:01.019
+and that you are leaning on your ray tracing when available.
+
+364
+00:15:01.019 --> 00:15:04.370
+You'll see support hardware ray tracing
+
+365
+00:15:04.370 --> 00:15:08.279
+and also use hardware ray tracing when available.
+
+366
+00:15:08.279 --> 00:15:10.080
+I've kept things pretty simple.
+
+367
+00:15:10.080 --> 00:15:12.039
+And a lot of times you kinda want to,
+
+368
+00:15:12.039 --> 00:15:13.600
+when it comes to your volume,
+
+369
+00:15:13.600 --> 00:15:18.259
+you can change your surface catch to hit for reflections.
+
+370
+00:15:18.259 --> 00:15:19.940
+That could slow things down a bit.
+
+371
+00:15:19.940 --> 00:15:22.059
+So just be aware if you do that,
+
+372
+00:15:22.059 --> 00:15:23.899
+you gotta have kind of a beast of a machine
+
+373
+00:15:23.899 --> 00:15:26.279
+and a setup for your volume,
+
+374
+00:15:26.279 --> 00:15:28.679
+especially depending on your complexity.
+
+375
+00:15:28.679 --> 00:15:30.600
+And then you also see global tracing.
+
+376
+00:15:30.600 --> 00:15:33.179
+We could put detailed tracing, but also keep in mind,
+
+377
+00:15:33.179 --> 00:15:35.889
+this is also a GPU hog.
+
+378
+00:15:35.889 --> 00:15:38.590
+You can also do that through your post-process volume
+
+379
+00:15:38.590 --> 00:15:40.850
+after the fact as an override,
+
+380
+00:15:40.850 --> 00:15:42.529
+which is actually kind of handy.
+
+381
+00:15:42.529 --> 00:15:44.370
+So if I go to my outliner,
+
+382
+00:15:44.370 --> 00:15:46.809
+I'm gonna collapse my geometry folder.
+
+383
+00:15:46.809 --> 00:15:50.269
+And when we go to my post-process volume,
+
+384
+00:15:50.269 --> 00:15:52.970
+I can go in here and take a deeper look
+
+385
+00:15:52.970 --> 00:15:54.730
+at some of my settings.
+
+386
+00:15:54.730 --> 00:15:57.250
+We'll see that our reflections are set to Lumen.
+
+387
+00:15:57.250 --> 00:16:01.000
+This is gonna be handy in this particular water scenario.
+
+388
+00:16:01.000 --> 00:16:02.440
+And you'll see that we also have
+
+389
+00:16:02.440 --> 00:16:04.100
+our project defaults active.
+
+390
+00:16:04.100 --> 00:16:06.159
+So we can actually flip those at any time
+
+391
+00:16:06.159 --> 00:16:08.980
+if we needed to and go to the higher resolution ones,
+
+392
+00:16:08.980 --> 00:16:10.559
+which we talked about.
+
+393
+00:16:10.559 --> 00:16:12.399
+Now, if you were to use anything
+
+394
+00:16:12.399 --> 00:16:14.639
+like screen space information,
+
+395
+00:16:14.639 --> 00:16:17.840
+you also wanna make sure in your NDC that you overscan.
+
+396
+00:16:17.840 --> 00:16:21.080
+We're not using any screen space global illumination.
+
+397
+00:16:21.080 --> 00:16:23.860
+We're strictly using Lumen just because we can get
+
+398
+00:16:23.860 --> 00:16:26.620
+some nice updated information on the fly.
+
+399
+00:16:26.620 --> 00:16:28.500
+And what I mean by that,
+
+400
+00:16:28.500 --> 00:16:33.649
+is if I go in here and rotate my scene
+
+401
+00:16:33.649 --> 00:16:38.580
+and go ahead and switch to the volume, Kevin, thank you,
+
+402
+00:16:38.580 --> 00:16:41.179
+you'll see that it's now automatically updated
+
+403
+00:16:41.179 --> 00:16:42.059
+on our volume.
+
+404
+00:16:42.059 --> 00:16:44.539
+This is really awesome.
+
+405
+00:16:44.539 --> 00:16:46.399
+And I can't tell you how great this is
+
+406
+00:16:46.399 --> 00:16:50.899
+because before it was very chuggy to do this with Lumen.
+
+407
+00:16:50.899 --> 00:16:52.559
+And I can now change my time of day,
+
+408
+00:16:52.559 --> 00:16:56.600
+go ahead and leave that camera shot there,
+
+409
+00:16:56.600 --> 00:16:57.580
+change that angle.
+
+410
+00:16:58.059 --> 00:17:00.340
+So if the director wants the sunlight
+
+411
+00:17:00.340 --> 00:17:04.000
+coming from a different angle, he can.
+
+412
+00:17:04.000 --> 00:17:11.490
+That's like a really bright day in Tahiti there.
+
+413
+00:17:11.490 --> 00:17:12.329
+We can do that.
+
+414
+00:17:12.329 --> 00:17:15.700
+I'm changing this on the fly.
+
+415
+00:17:15.700 --> 00:17:21.049
+Oh, got a little stuck on my mouse there.
+
+416
+00:17:21.049 --> 00:17:23.069
+And there's the lighting change.
+
+417
+00:17:23.069 --> 00:17:25.509
+And we can also do that through a level snapshot.
+
+418
+00:17:25.509 --> 00:17:28.130
+I'll point you to it in level snapshot,
+
+419
+00:17:28.130 --> 00:17:29.430
+but I'm not gonna hold you there
+
+420
+00:17:29.430 --> 00:17:31.369
+because we do have a class on that
+
+421
+00:17:31.369 --> 00:17:32.990
+and talks about how to do it.
+
+422
+00:17:32.990 --> 00:17:35.069
+But that can give you a quick access to it
+
+423
+00:17:35.069 --> 00:17:37.940
+without having to rotate constantly.
+
+424
+00:17:37.940 --> 00:17:41.720
+Pretty awesome to be able to do that and get that working.
+
+425
+00:17:41.720 --> 00:17:45.650
+So let's go into Unreal Engine again,
+
+426
+00:17:45.650 --> 00:17:47.490
+and let's go and take a look here
+
+427
+00:17:47.490 --> 00:17:50.269
+at some of our options again with Lumen.
+
+428
+00:17:50.269 --> 00:17:52.940
+So let me go to my post-process volume.
+
+429
+00:17:52.940 --> 00:17:55.619
+Now you'll see Lumen global illumination.
+
+430
+00:17:55.619 --> 00:17:56.940
+There's a few more settings
+
+431
+00:17:56.940 --> 00:17:58.779
+that we didn't necessarily have before.
+
+432
+00:17:58.779 --> 00:18:00.740
+There's a max distance trace,
+
+433
+00:18:00.740 --> 00:18:02.700
+and I've kept that at 20,000.
+
+434
+00:18:02.700 --> 00:18:04.700
+Now that actually works pretty well.
+
+435
+00:18:04.700 --> 00:18:06.880
+But again, you can increase this as you need to,
+
+436
+00:18:06.880 --> 00:18:09.119
+but be very sparing with this.
+
+437
+00:18:09.119 --> 00:18:10.619
+Because overall what this does,
+
+438
+00:18:10.619 --> 00:18:13.579
+it controls the maximum distance that Lumen should trace.
+
+439
+00:18:13.579 --> 00:18:16.140
+So it's actually looking at how far
+
+440
+00:18:16.140 --> 00:18:18.099
+we need our accuracy to be.
+
+441
+00:18:18.099 --> 00:18:19.680
+And in the LED volume,
+
+442
+00:18:19.680 --> 00:18:22.799
+you don't necessarily have to go very far
+
+443
+00:18:22.799 --> 00:18:24.180
+in your environment.
+
+444
+00:18:24.180 --> 00:18:26.819
+You wanna keep things up close and working great.
+
+445
+00:18:26.819 --> 00:18:29.380
+So the default works pretty darn well.
+
+446
+00:18:29.380 --> 00:18:31.619
+There's also an advanced setting here.
+
+447
+00:18:31.660 --> 00:18:34.740
+You'll see that we have a final gather lighting speed.
+
+448
+00:18:34.740 --> 00:18:36.920
+In here, we have ours set to one.
+
+449
+00:18:36.920 --> 00:18:38.539
+This controls how much, again, Lumen,
+
+450
+00:18:38.539 --> 00:18:39.599
+don't you love Unreal?
+
+451
+00:18:39.599 --> 00:18:41.819
+Gives you a little cheat sheet here.
+
+452
+00:18:41.819 --> 00:18:43.339
+Again, final gather is allowed
+
+453
+00:18:43.339 --> 00:18:46.240
+to catch the lighting results to improve the performance.
+
+454
+00:18:46.240 --> 00:18:50.220
+But again, larger scales will chug things
+
+455
+00:18:50.220 --> 00:18:51.339
+if you're not careful.
+
+456
+00:18:51.339 --> 00:18:53.220
+There's a diffuse color boost you get,
+
+457
+00:18:53.220 --> 00:18:56.839
+a sky light leaking that you get here,
+
+458
+00:18:56.839 --> 00:18:59.619
+and a full skylight leaking distance here.
+
+459
+00:18:59.619 --> 00:19:02.900
+So overall, these are some of the improvements
+
+460
+00:19:02.900 --> 00:19:05.380
+that you have with Lumen.
+
+461
+00:19:05.380 --> 00:19:08.559
+And you'll see also reflections, like we talked about.
+
+462
+00:19:08.559 --> 00:19:11.420
+You can have high quality translucency reflections.
+
+463
+00:19:11.420 --> 00:19:14.059
+And we have water here, so we wanna keep that on.
+
+464
+00:19:14.059 --> 00:19:16.579
+And I could turn that off if I needed to,
+
+465
+00:19:16.579 --> 00:19:18.599
+if my water was pushed farther back,
+
+466
+00:19:18.599 --> 00:19:21.579
+and I didn't care if the light is passing through.
+
+467
+00:19:21.579 --> 00:19:23.819
+But these are all the things to consider
+
+468
+00:19:23.819 --> 00:19:25.559
+when you're working with Lumen,
+
+469
+00:19:25.559 --> 00:19:29.539
+and the accessibility that you get is pretty awesome.
+
+470
+00:19:29.539 --> 00:19:31.220
+You'll see here, take a snapshot.
+
+471
+00:19:31.220 --> 00:19:32.859
+We talked about this before.
+
+472
+00:19:32.859 --> 00:19:35.690
+So we can open level snapshot.
+
+473
+00:19:35.690 --> 00:19:38.970
+And you'll see that I have a couple already in my scene.
+
+474
+00:19:38.970 --> 00:19:43.150
+So if I select this one, I double click on it,
+
+475
+00:19:43.150 --> 00:19:45.990
+it'll say, hey, do you wanna restore that level snapshot?
+
+476
+00:19:45.990 --> 00:19:47.069
+And I can.
+
+477
+00:19:47.069 --> 00:19:50.069
+And your director is going to be a very happy person.
+
+478
+00:19:50.069 --> 00:19:52.490
+Because you can have multiple of these in here,
+
+479
+00:19:52.490 --> 00:19:55.450
+and is now very much optimized in Unreal,
+
+480
+00:19:55.450 --> 00:19:58.410
+allowing you to actually load quite a bit,
+
+481
+00:19:58.410 --> 00:20:01.670
+and be able to update those scenarios if needed
+
+482
+00:20:01.670 --> 00:20:05.230
+for particular shots or looks that need to be explored.
+
+483
+00:20:05.230 --> 00:20:06.809
+So I wanna backtrack just a bit,
+
+484
+00:20:06.809 --> 00:20:09.430
+and take a moment and take a look at Insights.
+
+485
+00:20:09.430 --> 00:20:11.769
+Now, the whole reason I brought that up earlier
+
+486
+00:20:11.769 --> 00:20:14.470
+is so that you could see that you could run Insights
+
+487
+00:20:14.470 --> 00:20:16.250
+via your switchboard.
+
+488
+00:20:16.250 --> 00:20:18.690
+You can run a command line and get it going.
+
+489
+00:20:18.690 --> 00:20:20.650
+But you can also, like mentioned before,
+
+490
+00:20:20.650 --> 00:20:22.490
+run it through an EXE on your desktop,
+
+491
+00:20:22.490 --> 00:20:24.130
+or even run it through here.
+
+492
+00:20:24.130 --> 00:20:26.470
+Now, believe it or not,
+
+493
+00:20:26.509 --> 00:20:29.470
+running Unreal Insights here is not too bad.
+
+494
+00:20:29.470 --> 00:20:32.190
+And the fact that it actually works like your EXE.
+
+495
+00:20:32.190 --> 00:20:34.309
+So it does it kind of independently.
+
+496
+00:20:34.309 --> 00:20:36.910
+The only thing in caveat you have to be concerned about
+
+497
+00:20:36.910 --> 00:20:38.589
+is sometimes when you're running,
+
+498
+00:20:38.589 --> 00:20:41.210
+you're analyzing your Unreal Insights,
+
+499
+00:20:41.210 --> 00:20:43.990
+it may be a little bit stubborn to stop the trace.
+
+500
+00:20:43.990 --> 00:20:46.670
+So you may find yourself trying to continually
+
+501
+00:20:46.670 --> 00:20:47.490
+get it to stop.
+
+502
+00:20:47.490 --> 00:20:50.549
+You'll see like there's a trace here that it's doing live
+
+503
+00:20:50.549 --> 00:20:53.150
+and I can open it because it's analyzing my scene.
+
+504
+00:20:54.150 --> 00:20:56.309
+But I can go in here too, and eventually it will.
+
+505
+00:20:57.150 --> 00:20:58.630
+So don't be afraid that it will fill up your hard drive.
+
+506
+00:20:58.630 --> 00:21:01.150
+It will actually start to go away.
+
+507
+00:21:01.150 --> 00:21:04.910
+And at any time you can go in here and find these traces
+
+508
+00:21:04.910 --> 00:21:08.269
+and you can delete them and stop them from production
+
+509
+00:21:08.269 --> 00:21:09.670
+or just clear out your hard drive.
+
+510
+00:21:09.670 --> 00:21:11.269
+You just need some space.
+
+511
+00:21:11.269 --> 00:21:13.430
+But we have an inventory of them in here.
+
+512
+00:21:13.430 --> 00:21:15.710
+We can connect to our,
+
+513
+00:21:15.710 --> 00:21:17.589
+again, you can see where you can connect
+
+514
+00:21:17.589 --> 00:21:20.150
+to your particular computer that you want.
+
+515
+00:21:20.150 --> 00:21:21.630
+In our case, it would just be us.
+
+516
+00:21:21.630 --> 00:21:23.549
+We can see we're connected.
+
+517
+00:21:23.549 --> 00:21:26.710
+So I can go ahead and run the trace on this
+
+518
+00:21:26.710 --> 00:21:28.029
+if we wanted to.
+
+519
+00:21:28.029 --> 00:21:30.349
+Now you'll notice this is open trace.
+
+520
+00:21:30.349 --> 00:21:32.670
+So again, all of your categories that you have,
+
+521
+00:21:32.670 --> 00:21:34.450
+like say I want to open this trace,
+
+522
+00:21:34.450 --> 00:21:37.549
+I can take a look at a previous trace that I did,
+
+523
+00:21:37.549 --> 00:21:40.470
+or I can just go back into my session here
+
+524
+00:21:40.470 --> 00:21:43.990
+and I can find, maybe I want to look at the live one.
+
+525
+00:21:43.990 --> 00:21:45.349
+It's in a live trace.
+
+526
+00:21:45.349 --> 00:21:46.549
+So we can start the trace.
+
+527
+00:21:46.549 --> 00:21:49.430
+And again, we've gone over this before in class,
+
+528
+00:21:49.430 --> 00:21:51.150
+how this actually works.
+
+529
+00:21:51.150 --> 00:21:53.869
+So you'll see it's still loading that trace there.
+
+530
+00:21:53.869 --> 00:21:56.309
+So let's go ahead and we can grab that live session
+
+531
+00:21:56.309 --> 00:21:58.759
+if we want to.
+
+532
+00:21:58.759 --> 00:22:01.640
+And we'll say open that trace and open it up.
+
+533
+00:22:01.640 --> 00:22:03.759
+And you'll notice we can actually do a comparable.
+
+534
+00:22:03.759 --> 00:22:06.680
+Here's like one trace compared to another trace.
+
+535
+00:22:06.680 --> 00:22:08.519
+You can do a live session trace
+
+536
+00:22:08.519 --> 00:22:10.819
+and see what a previous one looks like.
+
+537
+00:22:10.819 --> 00:22:13.079
+All of this is accessible to you.
+
+538
+00:22:13.079 --> 00:22:15.160
+And it's actually kind of nice to be able to do so.
+
+539
+00:22:15.160 --> 00:22:17.480
+So you can actually see, hey, where is this going?
+
+540
+00:22:17.480 --> 00:22:19.160
+So say we want to stop this trace.
+
+541
+00:22:19.160 --> 00:22:21.720
+Now this is where it can get a little bit weird
+
+542
+00:22:22.359 --> 00:22:24.599
+sometimes and again, it is in its early stages
+
+543
+00:22:24.599 --> 00:22:26.440
+and gets better and better.
+
+544
+00:22:26.440 --> 00:22:29.140
+So we'll go ahead and do a trace stop
+
+545
+00:22:29.140 --> 00:22:32.200
+and we'll see if it wanted to do that for us.
+
+546
+00:22:32.200 --> 00:22:36.559
+Looks like it's still going and we'll do a stop trace.
+
+547
+00:22:36.559 --> 00:22:39.740
+Do both commands here.
+
+548
+00:22:39.740 --> 00:22:43.859
+And this is kind of a little bit of my only big caveat
+
+549
+00:22:43.859 --> 00:22:46.720
+with this is getting it to do what you want
+
+550
+00:22:46.720 --> 00:22:48.140
+can be kind of a pain in the butt
+
+551
+00:22:48.140 --> 00:22:51.960
+when the fact that sometimes it will just keep going.
+
+552
+00:22:52.480 --> 00:22:53.599
+Most of the time if you just close the scene
+
+553
+00:22:53.599 --> 00:22:57.750
+you should be good to go, shutting out of all systems.
+
+554
+00:22:59.039 --> 00:23:01.019
+And we can also do a control alt delete
+
+555
+00:23:01.019 --> 00:23:03.019
+if it just gives you some trouble
+
+556
+00:23:03.019 --> 00:23:06.220
+and you really want to get that sucker to not run
+
+557
+00:23:06.220 --> 00:23:09.559
+and you'll see that it's running independently.
+
+558
+00:23:09.559 --> 00:23:11.900
+So if I really wanted to stop this trace
+
+559
+00:23:11.900 --> 00:23:13.619
+I can end that task.
+
+560
+00:23:13.619 --> 00:23:16.819
+I can end this task and I can end this task here.
+
+561
+00:23:16.819 --> 00:23:18.059
+And it does it independently.
+
+562
+00:23:18.059 --> 00:23:19.740
+You'll see right here is a good example
+
+563
+00:23:19.740 --> 00:23:21.579
+of how it does it independently.
+
+564
+00:23:21.579 --> 00:23:24.660
+So if it is stubborn, that's the one way you can do that.
+
+565
+00:23:26.220 --> 00:23:29.059
+That's my only thing, kind of a little bit of a hard ask
+
+566
+00:23:29.059 --> 00:23:31.980
+I'd like for that to change, but we're working on it.
+
+567
+00:23:31.980 --> 00:23:33.259
+So be patient with us.
+
+568
+00:23:34.220 --> 00:23:35.660
+It gets better and better.
+
+569
+00:23:35.660 --> 00:23:37.819
+And session front end is also an option
+
+570
+00:23:37.819 --> 00:23:38.980
+if you want to do that.
+
+571
+00:23:38.980 --> 00:23:41.420
+Less of a problem with the stopping
+
+572
+00:23:41.420 --> 00:23:42.819
+and doing what you want.
+
+573
+00:23:42.819 --> 00:23:45.500
+Now, if we do bring up in here,
+
+574
+00:23:45.500 --> 00:23:48.140
+Unreal Insights again, run that again,
+
+575
+00:23:48.140 --> 00:23:48.960
+pull this in here.
+
+576
+00:23:48.960 --> 00:23:51.059
+We don't need to run a new trace or anything.
+
+577
+00:23:51.500 --> 00:23:53.779
+You'll notice it'll start to continue where it left off
+
+578
+00:23:53.779 --> 00:23:57.180
+sometimes, which is a little bit, not so much.
+
+579
+00:23:57.180 --> 00:24:00.059
+You do have the option to delete these two,
+
+580
+00:24:00.059 --> 00:24:02.579
+but as a live one, you'll notice it's grayed out.
+
+581
+00:24:02.579 --> 00:24:04.720
+It won't necessarily go.
+
+582
+00:24:04.720 --> 00:24:08.700
+So that's again, some things to consider,
+
+583
+00:24:08.700 --> 00:24:11.660
+but you'll notice in here too, as we go in here
+
+584
+00:24:11.660 --> 00:24:13.740
+we analyze, let's actually open up
+
+585
+00:24:13.740 --> 00:24:15.019
+something a little smaller.
+
+586
+00:24:15.019 --> 00:24:17.420
+We'll do this one here.
+
+587
+00:24:17.420 --> 00:24:18.579
+That's not too big.
+
+588
+00:24:18.579 --> 00:24:20.420
+Open that trace.
+
+589
+00:24:20.420 --> 00:24:21.740
+You'll notice you can go in here
+
+590
+00:24:21.740 --> 00:24:23.539
+and click on any area of data.
+
+591
+00:24:23.539 --> 00:24:26.140
+And you can see my GPU thread, my game thread,
+
+592
+00:24:26.140 --> 00:24:29.220
+my RHI thread, and also my render threads.
+
+593
+00:24:29.220 --> 00:24:33.099
+You can analyze these and you can isolate GPU and CPU.
+
+594
+00:24:33.099 --> 00:24:35.299
+These are really helpful to work with
+
+595
+00:24:35.299 --> 00:24:36.420
+and things to consider.
+
+596
+00:24:36.420 --> 00:24:37.980
+You'll see we also have the counters
+
+597
+00:24:37.980 --> 00:24:39.200
+because really what we're looking for
+
+598
+00:24:39.200 --> 00:24:41.000
+is where our lag is at.
+
+599
+00:24:41.000 --> 00:24:43.940
+Where's our milliseconds being hit?
+
+600
+00:24:43.940 --> 00:24:45.619
+Where are things giving us trouble?
+
+601
+00:24:45.619 --> 00:24:47.980
+You can see our session here that we have set up,
+
+602
+00:24:47.980 --> 00:24:50.140
+give us a details where that session is,
+
+603
+00:24:50.140 --> 00:24:52.700
+where the U-trace is nested and living,
+
+604
+00:24:52.700 --> 00:24:55.710
+and you can have all this data ready to go.
+
+605
+00:24:55.710 --> 00:24:57.150
+Cool.
+
+606
+00:24:57.150 --> 00:24:57.990
+All right.
+
+607
+00:24:57.990 --> 00:25:00.630
+So again, let's actually kill that trace
+
+608
+00:25:00.630 --> 00:25:01.470
+so it doesn't continue.
+
+609
+00:25:01.470 --> 00:25:02.470
+It's using that data.
+
+610
+00:25:02.470 --> 00:25:04.490
+And since it's a separate function,
+
+611
+00:25:04.490 --> 00:25:07.309
+it's still maybe trying to get that information
+
+612
+00:25:07.309 --> 00:25:08.869
+to come out the door.
+
+613
+00:25:08.869 --> 00:25:11.910
+You can see that it's still loading up a little bit there
+
+614
+00:25:11.910 --> 00:25:13.670
+and it's running live.
+
+615
+00:25:13.670 --> 00:25:16.869
+So we can do just a real quick control, I'll delete.
+
+616
+00:25:16.869 --> 00:25:19.910
+Since my stop trace wasn't finding us just a little bit.
+
+617
+00:25:20.349 --> 00:25:21.670
+And again, you can try to run it.
+
+618
+00:25:21.670 --> 00:25:23.990
+Sometimes it's a little bit of a refresh issue.
+
+619
+00:25:25.829 --> 00:25:27.789
+Let's try to do a trace pause
+
+620
+00:25:27.789 --> 00:25:30.750
+and see if that'll take in this particular case.
+
+621
+00:25:30.750 --> 00:25:31.569
+And it did.
+
+622
+00:25:31.569 --> 00:25:32.910
+It looks like it paused for us.
+
+623
+00:25:32.910 --> 00:25:34.789
+Let me check the session.
+
+624
+00:25:34.789 --> 00:25:38.000
+Let me check the other log.
+
+625
+00:25:38.000 --> 00:25:41.420
+Nope, still going until it's like, ah, all right.
+
+626
+00:25:41.420 --> 00:25:45.170
+And then in that case, we'll just do control, I'll delete
+
+627
+00:25:45.170 --> 00:25:48.829
+and tell those two Unreal insights to end the task.
+
+628
+00:25:48.829 --> 00:25:50.609
+Don't continue where you left off.
+
+629
+00:25:51.170 --> 00:25:52.009
+There you go.
+
+630
+00:25:52.009 --> 00:25:53.890
+And when you close out of the engine
+
+631
+00:25:53.890 --> 00:25:58.210
+and when you reboot or close your computer,
+
+632
+00:25:58.210 --> 00:25:59.609
+it should kick that out.
+
+633
+00:25:59.609 --> 00:26:01.130
+And that information shouldn't be there
+
+634
+00:26:01.130 --> 00:26:02.690
+if it gives you a bit of trouble.
+
+635
+00:26:02.690 --> 00:26:03.829
+It doesn't always do this.
+
+636
+00:26:03.829 --> 00:26:08.029
+In another demo I did, it stopped, paused just fine.
+
+637
+00:26:08.029 --> 00:26:10.690
+Some of that might be a product of Zoom.
+
+638
+00:26:10.690 --> 00:26:12.849
+There is sometimes Zoom and refresh
+
+639
+00:26:12.849 --> 00:26:16.240
+that might give you a little bit of trouble.
+
+640
+00:26:16.240 --> 00:26:18.640
+So we see this here.
+
+641
+00:26:18.640 --> 00:26:21.180
+We see all of our stuff in place.
+
+642
+00:26:21.180 --> 00:26:23.920
+And what we wanna do here is now let's go
+
+643
+00:26:23.920 --> 00:26:27.279
+and take a look at fog and what we can do with fog.
+
+644
+00:26:27.279 --> 00:26:29.799
+We're gonna start off with this little small scene
+
+645
+00:26:29.799 --> 00:26:32.599
+and we're gonna move on to another scene
+
+646
+00:26:32.599 --> 00:26:35.779
+which has some really great also optimization samples.

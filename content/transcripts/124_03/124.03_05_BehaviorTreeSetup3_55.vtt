@@ -1,0 +1,297 @@
+WEBVTT
+
+1
+00:00:01.540 --> 00:00:07.379
+Hello and welcome to this next video. In this we're going to have a look at some of the more
+
+2
+00:00:07.379 --> 00:00:14.900
+advanced ways of creating tasks in order to do stuff within the Behaviour Tree.
+
+3
+00:00:15.650 --> 00:00:20.690
+Right, so we're back into the engine now and let's create another task.
+
+4
+00:00:21.649 --> 00:00:25.570
+This time what we're going to do is we're going to use our interface slightly.
+
+5
+00:00:26.339 --> 00:00:33.490
+So the first thing I'm going to do is I'll do one from up here again.
+
+6
+00:00:33.490 --> 00:00:40.130
+So under this I'm going to create a new task. I'm going to use the bt-task-blueprint-base
+
+7
+00:00:41.090 --> 00:00:47.579
+and I'm going to call this bt underscore change comma.
+
+8
+00:00:51.859 --> 00:00:59.600
+Okay and save. So again we're back here and for this what I'm going to do is go override
+
+9
+00:01:00.000 --> 00:01:08.879
+I'm just going to use receive execute. Now I want to be able to change the color.
+
+10
+00:01:08.879 --> 00:01:13.280
+I'm going to use this node in a number of different places and I'm going to change to
+
+11
+00:01:13.280 --> 00:01:20.000
+different colors. Therefore what I want to have is a variable which will allow me to determine
+
+12
+00:01:20.000 --> 00:01:26.799
+which color this task is going to use. So I just add to a variable and I'm going to call this
+
+13
+00:01:27.599 --> 00:01:37.200
+color. I'm going to make it instance editable and on the boolean I'm going to be looking for
+
+14
+00:01:37.200 --> 00:01:43.939
+linear color. Now there are a couple other colors in here but make sure you're using
+
+15
+00:01:43.939 --> 00:01:53.920
+linear color. Okay now if I drag off of the actor and I type in change color
+
+16
+00:01:55.939 --> 00:02:03.950
+and I'm going to use a message. I'm going to drag in our color and plug it in there.
+
+17
+00:02:06.349 --> 00:02:16.449
+Now I want to do one final thing and that is the finish execute and because I'm using a message
+
+18
+00:02:17.250 --> 00:02:24.830
+it's not so simple to figure out if this is a success or a failure. So I'm just gonna click
+
+19
+00:02:24.830 --> 00:02:34.030
+the default as a success. So again all this does is it will receive execute and it will send
+
+20
+00:02:34.030 --> 00:02:41.259
+a message via an interface to the actor telling it to change color and then it's going to finish
+
+21
+00:02:41.259 --> 00:02:47.180
+the execute. Now let's have a quick look at the interface because we should have gone over
+
+22
+00:02:47.180 --> 00:02:53.020
+interfaces by now but what they do is they maintain a means to communicate between different
+
+23
+00:02:53.020 --> 00:03:00.300
+actors. You see I have BI MPC if I open this up you can see down the right hand side I have
+
+24
+00:03:00.300 --> 00:03:07.819
+a number of different functions. What an interface does is it just defines a method
+
+25
+00:03:07.819 --> 00:03:14.060
+of communicating between the blueprints and then if what you're sending the message to has
+
+26
+00:03:14.060 --> 00:03:22.620
+that interface applied to it it will do something on that. Now this is quite nice for a task
+
+27
+00:03:23.259 --> 00:03:31.180
+because it means that any of the code that we write isn't class dependent. So this doesn't
+
+28
+00:03:32.139 --> 00:03:40.460
+actually know or care what class your MPC is. It's going to send the task, it's going to send
+
+29
+00:03:40.460 --> 00:03:44.860
+the message regardless. It may not even have this to implement then it would do nothing.
+
+30
+00:03:45.699 --> 00:03:53.379
+However if we have a quick look at our MPC character you can see that I've already written
+
+31
+00:03:53.379 --> 00:04:00.860
+some code here and it's event change color and we have the interface implemented there
+
+32
+00:04:02.099 --> 00:04:12.099
+and if we double click on that it's just changing the tint on a material that the
+
+33
+00:04:12.099 --> 00:04:18.019
+character has. So you can see this on construction script. Don't worry too much about that just bear
+
+34
+00:04:18.019 --> 00:04:24.050
+in mind that it's sending the instruction to change color and then it's finishing the execute.
+
+35
+00:04:24.050 --> 00:04:32.959
+I'm going to compile and save. Next up we're going to create one more task and this time
+
+36
+00:04:32.959 --> 00:04:38.639
+I'll do it in a different way. I'm going to right hand click come up to blueprint task
+
+37
+00:04:40.129 --> 00:04:47.439
+and under classes I am going to search for task and we should see here that we have a
+
+38
+00:04:49.089 --> 00:04:56.060
+bt task blueprint base and so this is just the other way that I can create
+
+39
+00:04:56.060 --> 00:05:08.769
+a blueprint. I'm going to call this bt underscore change speed. Double click on that
+
+40
+00:05:10.420 --> 00:05:19.470
+and on the override again I'm just going to look for receive execute and I will need a
+
+41
+00:05:19.470 --> 00:05:27.709
+variable determining the speed as the input so I will change or create a speed variable
+
+42
+00:05:28.509 --> 00:05:37.470
+make it a float and make it instance editable and I'm going to use the interface again to drag
+
+43
+00:05:37.470 --> 00:05:50.379
+off and go change speed message I'll drag in the speed that and again at the end I'm going
+
+44
+00:05:50.379 --> 00:05:59.170
+to do p finish execute I'll mark this as a success so again I'm using the interface
+
+45
+00:05:59.170 --> 00:06:04.449
+and the code is all on the pawn but because we're using an interface they aren't dependent
+
+46
+00:06:04.449 --> 00:06:11.730
+on each other so you could write a completely different method of changing the color of or by
+
+47
+00:06:11.730 --> 00:06:19.250
+changing the speed and still use exactly the same task in a different in a different behavior tree
+
+48
+00:06:20.459 --> 00:06:27.550
+let's save and compile and now I'm going to jump back into the baby tree and I'm going to
+
+49
+00:06:27.550 --> 00:06:32.350
+do a little bit more from this so for the wonder about the first thing that I want to do
+
+50
+00:06:33.389 --> 00:06:44.779
+is change the speed change the speed and I am going to set this to 200 because we're wondering
+
+51
+00:06:44.779 --> 00:06:50.189
+about we don't really want them running around the place and then I'm going to drag off and
+
+52
+00:06:50.189 --> 00:07:04.350
+I'm going to do change color and again we have a color up here I'm going to change this to yellow
+
+53
+00:07:05.230 --> 00:07:16.689
+so that is full one on red one on green and blue zero so again these are the ones that I
+
+54
+00:07:16.689 --> 00:07:22.209
+marked as instance editable and now we have two functions so if we were to look at this
+
+55
+00:07:23.709 --> 00:07:30.670
+what it does it starts off by changing the speed to 200 then changes the color to yellow finds a
+
+56
+00:07:30.670 --> 00:07:35.790
+random location moves to it and then waits for one second then it will go all the way back to
+
+57
+00:07:35.790 --> 00:07:45.740
+the top and it will repeat the process let's save and let's kick that off so now you can see this
+
+58
+00:07:45.740 --> 00:07:52.939
+is working our characters are yellow and they are wandering around accordingly so they're just
+
+59
+00:07:52.939 --> 00:08:02.910
+moving around slowly to a location now escape there so that's adding in our extra to our two
+
+60
+00:08:02.910 --> 00:08:10.430
+elements and what I'd like to do at this point is have a look at how we can visualize what the
+
+61
+00:08:11.069 --> 00:08:18.990
+um the baby tree is actually doing so if I was to hit play again but I'm not going to jump
+
+62
+00:08:18.990 --> 00:08:28.529
+into the character game here I'm actually going to jump to our baby tree now what we see with
+
+63
+00:08:28.529 --> 00:08:35.679
+the baby tree we can actually watch this in action you see at the moment it's going to move to
+
+64
+00:08:37.820 --> 00:08:44.830
+and then it will wait for one second you can see here we have a drop down and this is going to
+
+65
+00:08:44.830 --> 00:08:49.789
+give us access to all of the other different pi controllers so I can select any of them they're
+
+66
+00:08:49.789 --> 00:08:55.149
+all pretty much doing the same thing but it will allow me to watch them as as the game
+
+67
+00:08:55.149 --> 00:09:00.830
+is running and this is really useful because if you want to figure out why something's getting
+
+68
+00:09:00.830 --> 00:09:06.669
+stuck or what it's doing you're able to watch them as it's running you can also see that down
+
+69
+00:09:06.669 --> 00:09:14.350
+here we have the content of the blackboard so we've not set the player but we have set the location
+
+70
+00:09:14.350 --> 00:09:22.429
+and the self-actor so that's just a useful method of seeing what the behavior tree is doing
+
+71
+00:09:22.429 --> 00:09:30.779
+at any one time I'm going to come back into here and just stop it and I think we will stop
+
+72
+00:09:30.779 --> 00:09:36.460
+there for this video in the next video we're going to look at creating a completely different
+
+73
+00:09:37.259 --> 00:09:44.700
+set of actions and show how we would make the decision to
+
+74
+00:09:44.700 --> 00:09:48.139
+change over to a different side of the behavior tree

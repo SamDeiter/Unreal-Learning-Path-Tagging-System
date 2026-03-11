@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:08.230
+Hello, in this class we'll be learning about advanced nodes effects in translucent materials
+
+2
+00:00:08.230 --> 00:00:12.990
+and specifics to be aware of when applying them to our scenes.
+
+3
+00:00:12.990 --> 00:00:16.910
+There are no slides for this lesson, so let's jump straight into the engine.
+
+4
+00:00:16.910 --> 00:00:24.100
+Alright, we're in the blurred glass section of our default map, and here you can see
+
+5
+00:00:24.100 --> 00:00:28.500
+two different preview meshes with the same material assigned.
+
+6
+00:00:28.500 --> 00:00:34.920
+This material is supposed to be replicating a frosted glass look, and it's using a node
+
+7
+00:00:34.920 --> 00:00:39.479
+called Spiro Blur, which is actually a material function.
+
+8
+00:00:39.479 --> 00:00:45.780
+Now if I switch my mode from Lit to Shader Complexity, we can see that similarly to
+
+9
+00:00:45.780 --> 00:00:52.479
+the rest of our translucent material, this shader has a high computational cost, especially
+
+10
+00:00:52.479 --> 00:00:57.479
+if you start overlapping multiple translucent objects on top of each other.
+
+11
+00:00:57.479 --> 00:01:03.299
+That's really where it gets bright pink, which is the heaviest you can get.
+
+12
+00:01:03.299 --> 00:01:08.299
+The demand of this material doesn't just come from its translucency properties, but
+
+13
+00:01:08.299 --> 00:01:13.780
+also from the Spiro Blur node itself that it was created with, which has a quite
+
+14
+00:01:13.780 --> 00:01:16.420
+high performance overhead.
+
+15
+00:01:16.420 --> 00:01:20.659
+So make sure to use it with caution in your environments if you plan on using this
+
+16
+00:01:20.659 --> 00:01:21.659
+material.
+
+17
+00:01:21.659 --> 00:01:26.709
+Ok, we have our preview mesh selected, and now in the details panel we can just double
+
+18
+00:01:26.709 --> 00:01:29.849
+click on the material assigned to it to open it up.
+
+19
+00:01:29.849 --> 00:01:35.090
+Ok, I'm just gonna undock it over here, and then I'm gonna just zoom a little bit
+
+20
+00:01:35.090 --> 00:01:37.010
+into this plane.
+
+21
+00:01:37.010 --> 00:01:42.030
+Now we have two values that we can play around with in this material instance.
+
+22
+00:01:42.030 --> 00:01:47.329
+One is the amount, and the other one is connected to the temporal anti-aliasing radial
+
+23
+00:01:47.329 --> 00:01:48.329
+blur.
+
+24
+00:01:48.329 --> 00:01:53.730
+Now if we slide around the temporal AA, we can see that it's not really affecting
+
+25
+00:01:53.730 --> 00:01:56.090
+the visuals of this material.
+
+26
+00:01:56.090 --> 00:02:02.209
+And that's probably because it should be used in conjunction with other settings and parameters
+
+27
+00:02:02.209 --> 00:02:06.549
+of the spiral blur that weren't exposed to the material instance.
+
+28
+00:02:06.549 --> 00:02:09.889
+So I'm just gonna turn it off and focus on the amount.
+
+29
+00:02:09.889 --> 00:02:17.409
+So if we focus on these defined outlines of the cube, which is behind this plane,
+
+30
+00:02:17.409 --> 00:02:23.469
+and then I start increasing the amount value or the intensity of my blur, you can see
+
+31
+00:02:23.469 --> 00:02:29.610
+that the outlines of the cube become less and less perceivable.
+
+32
+00:02:29.610 --> 00:02:35.360
+And as I slide it down, they get real crisp and defined.
+
+33
+00:02:35.360 --> 00:02:39.620
+Let's stop this material instance back here, and open up its parent material to see how
+
+34
+00:02:39.620 --> 00:02:40.740
+it was developed.
+
+35
+00:02:40.740 --> 00:02:47.060
+Alright, so we kept this material quite simple, and really most of it revolves around
+
+36
+00:02:47.060 --> 00:02:50.599
+this spiral blur material function.
+
+37
+00:02:50.599 --> 00:02:56.199
+Now this node being a material function allows us to double click on it, and then open it
+
+38
+00:02:56.199 --> 00:02:58.939
+up and see how it was developed.
+
+39
+00:02:58.939 --> 00:03:03.500
+This is a really cool technique to peek under the hood of the engine and see how
+
+40
+00:03:03.500 --> 00:03:06.759
+its developers developed this expression.
+
+41
+00:03:06.759 --> 00:03:11.240
+Now it's really important that we keep these material functions intact and we don't
+
+42
+00:03:11.240 --> 00:03:17.460
+apply any changes to them because they're directly connected to the engine content.
+
+43
+00:03:17.460 --> 00:03:23.800
+So if you move some nodes around or if you unplug some pins, make sure to either reconnect
+
+44
+00:03:23.800 --> 00:03:30.219
+them or when you close down this material function to not save any changes.
+
+45
+00:03:30.219 --> 00:03:35.840
+Alright, talking about the spiral blur material functions, we actually have two different
+
+46
+00:03:35.840 --> 00:03:39.860
+nodes that we can use based on our needs.
+
+47
+00:03:39.860 --> 00:03:45.219
+If we right-click in an empty area of the graph and we type spiral blur, we can see
+
+48
+00:03:45.219 --> 00:03:50.780
+that we can either select the texture option or the scene texture.
+
+49
+00:03:50.780 --> 00:03:56.219
+And I'm just going to pop off of them here.
+
+50
+00:03:56.219 --> 00:04:03.120
+Now the textures parabola is really connected to textures and image samples, while the
+
+51
+00:04:03.120 --> 00:04:09.639
+scene texture is connected to the camera and the scene.
+
+52
+00:04:09.639 --> 00:04:14.159
+Now as I just mentioned, we kept this material quite simple.
+
+53
+00:04:14.159 --> 00:04:19.500
+And we also haven't exposed a lot of its settings to parameters.
+
+54
+00:04:19.500 --> 00:04:24.180
+So we don't have them at our disposal here in the material instance.
+
+55
+00:04:24.180 --> 00:04:28.680
+But this doesn't mean that you can't go in and expose them yourself, change the color
+
+56
+00:04:28.680 --> 00:04:32.279
+and just test out the settings of this spiral blur.
+
+57
+00:04:32.279 --> 00:04:37.500
+So the aim of this lesson was really to spark your curiosity and demonstrate yet
+
+58
+00:04:37.500 --> 00:04:44.689
+another kind of look and feel that you can achieve using translucent materials.
+
+59
+00:04:44.689 --> 00:04:48.889
+That was it for this lesson and in the next video, we'll be learning about two-sided
+
+60
+00:04:48.930 --> 00:04:51.769
+foliage materials and how they're set up.
+
+61
+00:04:51.769 --> 00:04:52.410
+I'll see you there.

@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:05.040 --> 00:00:07.740
+Let's jump into some mesh optimizations now
+
+2
+00:00:08.259 --> 00:00:10.699
+So the first thing you want to do in your DCC app
+
+3
+00:00:10.699 --> 00:00:15.419
+Whatever you might be using whether it's a mayor or max or another software you want to make sure
+
+4
+00:00:16.539 --> 00:00:17.960
+UE 5
+
+5
+00:00:17.960 --> 00:00:21.579
+correlates to your grid inside this DCC system, so
+
+6
+00:00:22.219 --> 00:00:27.420
+UE 5 uses centimeters for unit measurement. So one unreal unit is one centimeter
+
+7
+00:00:27.660 --> 00:00:34.520
+So just make sure your scene is set up and scaled to centimeters in your external package there
+
+8
+00:00:35.869 --> 00:00:39.990
+When looking at the use of Nanite, which is Unreal Engine 5's
+
+9
+00:00:40.710 --> 00:00:45.229
+new mesh based system, you can see that when we have a
+
+10
+00:00:45.950 --> 00:00:47.429
+proxy mesh
+
+11
+00:00:47.429 --> 00:00:51.750
+That that fidelity especially on that wood grain gets lost a little bit
+
+12
+00:00:51.750 --> 00:00:58.270
+But as soon as we have a Nanite mesh where we're getting this extra level of fidelity and we're throwing
+
+13
+00:00:58.829 --> 00:01:01.229
+Everything at the scene and an Unreal Engine 5
+
+14
+00:01:01.909 --> 00:01:03.909
+Can handle millions of polygons
+
+15
+00:01:04.750 --> 00:01:11.150
+Being thrown at the scene and it will make some affordances and some optimizations to how the meshes are rendered
+
+16
+00:01:11.790 --> 00:01:17.969
+But you can see a really strong use of why you might want to use Nanite on your meshes here
+
+17
+00:01:18.430 --> 00:01:24.319
+So to talk a little bit about Nanite you when you import on the FBX options
+
+18
+00:01:24.500 --> 00:01:31.180
+You can build Nanite for the per asset basis on your import FBX settings
+
+19
+00:01:31.799 --> 00:01:38.159
+Then in your static mesh editor, so when you double-click the static mesh from the concept browser
+
+20
+00:01:39.000 --> 00:01:46.980
+You can see the details panel and you'll see the the Nanite settings here and whether it's enabled and then
+
+21
+00:01:47.560 --> 00:01:52.640
+You've got a couple of different options that you can change that and then you can also create
+
+22
+00:01:53.920 --> 00:01:58.480
+Geometry collections which Nanite can batch certain assets together
+
+23
+00:01:58.480 --> 00:02:05.319
+So if we select a few different assets and we say okay Nanite enable enable Nanite here
+
+24
+00:02:05.319 --> 00:02:09.860
+We can then have collections of this geometry that are grouped together
+
+25
+00:02:10.080 --> 00:02:13.639
+Which Unreal can then make some affordances for as well
+
+26
+00:02:15.159 --> 00:02:20.039
+So Nanite isn't supported just out of the box on every single
+
+27
+00:02:20.919 --> 00:02:22.360
+mesh type
+
+28
+00:02:22.360 --> 00:02:23.840
+Nanite works
+
+29
+00:02:23.960 --> 00:02:31.360
+Fantastically on the static meshes and instance versions of static meshes and hierarchical instance of static meshes and also
+
+30
+00:02:31.800 --> 00:02:36.520
+Geometry collections. However, we can't support skeletal animations right now
+
+31
+00:02:37.199 --> 00:02:40.759
+morph targets or any world position offsets and materials
+
+32
+00:02:41.599 --> 00:02:47.919
+Spline meshes custom depth or stencils vertex painting on instances any decals
+
+33
+00:02:48.599 --> 00:02:50.199
+or custom
+
+34
+00:02:50.240 --> 00:02:53.280
+UVs these are not currently supported
+
+35
+00:02:53.280 --> 00:02:59.240
+So again, if you're trying to do any kind of transparency or skeletal meshes anything like this
+
+36
+00:02:59.439 --> 00:03:06.180
+Unreal doesn't currently support Nanite out of the box, but for any kind of fixed static mesh based geometry
+
+37
+00:03:06.840 --> 00:03:12.080
+Nanite works excellent for that. When looking at
+
+38
+00:03:13.319 --> 00:03:20.840
+Optimization as well. We want to think about limiting overdraw. So especially on this foliage actor, for example
+
+39
+00:03:21.460 --> 00:03:24.159
+You can see that unreal even though
+
+40
+00:03:25.139 --> 00:03:28.860
+We've technically got a bit of asset in every
+
+41
+00:03:29.500 --> 00:03:33.340
+Box here. Well, we'll end up getting a little bit of overdraw
+
+42
+00:03:33.419 --> 00:03:36.979
+especially when we've got these layered on top of each other and
+
+43
+00:03:37.580 --> 00:03:41.740
+Unreal needs to render something behind this static mesh for example
+
+44
+00:03:41.780 --> 00:03:43.780
+So on the right hand side here
+
+45
+00:03:43.780 --> 00:03:49.539
+You can see that we've tried to optimize the plane a little bit just to say okay only render
+
+46
+00:03:49.539 --> 00:03:55.819
+What's within this surface here and therefore if we're looking at this right hand image and on the left top left hand side of that
+
+47
+00:03:55.819 --> 00:04:02.259
+Image you can see that if there was something placed behind that and we all would render that first and it would render it
+
+48
+00:04:02.819 --> 00:04:09.560
+Without an extra alpha render pass so you can instantly see that especially as these layers stack up
+
+49
+00:04:10.340 --> 00:04:12.340
+You get a lot more
+
+50
+00:04:12.500 --> 00:04:17.699
+Well, you're limiting the effects of overdraw depending on the complexity of the scene
+
+51
+00:04:17.699 --> 00:04:21.579
+So really good to consider just how how you're laying these
+
+52
+00:04:22.379 --> 00:04:26.899
+Static mesh planes and you're seen and making sure you're trying to limit that overdraw
+
+53
+00:04:27.500 --> 00:04:30.970
+And then you can also make some level of detail adjustments. So
+
+54
+00:04:31.689 --> 00:04:33.689
+if you get a default reduction
+
+55
+00:04:34.449 --> 00:04:36.870
+On your mesh here, you'll see that
+
+56
+00:04:38.089 --> 00:04:40.269
+Deforms the mesh a little bit
+
+57
+00:04:40.970 --> 00:04:47.069
+Maybe this is okay for your default reduction again level of detail depends on what you need from your scene
+
+58
+00:04:47.069 --> 00:04:49.449
+but it's a good setting if you
+
+59
+00:04:50.110 --> 00:04:55.189
+Have some bone priority reduction so that it preserves that mesh a little bit
+
+60
+00:04:55.189 --> 00:05:00.029
+So a level of detail of meshes can be found on lots of different types of meshes
+
+61
+00:05:00.029 --> 00:05:03.790
+However, again, it's up to you which approach you take there

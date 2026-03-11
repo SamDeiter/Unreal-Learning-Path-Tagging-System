@@ -1,0 +1,1021 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:04.139
+Hello, and welcome back.
+
+2
+00:00:04.139 --> 00:00:09.859
+Our goal for this class is to develop a parallax effect using the Bump Offset node on a surface
+
+3
+00:00:09.859 --> 00:00:12.699
+that looks translucent, but it isn't.
+
+4
+00:00:12.699 --> 00:00:14.580
+Let's get right into it.
+
+5
+00:00:14.580 --> 00:00:20.160
+So since our exercise will be quite extensive today, we'll be jumping directly into the
+
+6
+00:00:20.160 --> 00:00:24.420
+engine and cut the slides a little short, but remember that each step that I will
+
+7
+00:00:24.420 --> 00:00:29.780
+be taking in Unreal will also be displayed through screenshots and instructions here
+
+8
+00:00:29.780 --> 00:00:33.500
+in the slides so you can easily follow along.
+
+9
+00:00:33.500 --> 00:00:36.539
+Together with the sample material we will check out in just a moment, you should be
+
+10
+00:00:36.539 --> 00:00:41.299
+able to walk in the right direction as we draft a new material out.
+
+11
+00:00:41.299 --> 00:00:46.539
+Our goal for today is to create a Bump Offset material, and we'll be introducing two new
+
+12
+00:00:46.539 --> 00:00:49.659
+nodes, the Noise node and the Bump Offset node.
+
+13
+00:00:49.659 --> 00:00:53.460
+Alright, let's jump straight into the engine and see them in action.
+
+14
+00:00:53.659 --> 00:00:59.659
+Okay, we're in the Bump Offset section of our default map, and down here we can see
+
+15
+00:00:59.659 --> 00:01:05.540
+displayed two examples of materials using the Bump Offset node.
+
+16
+00:01:05.540 --> 00:01:12.150
+Here on the left we see how the Bump Offset was used in conjunction with the normal map,
+
+17
+00:01:12.150 --> 00:01:16.150
+and if we get close to these pebbles we can see how they really look elevated from
+
+18
+00:01:16.150 --> 00:01:17.310
+the surface.
+
+19
+00:01:17.310 --> 00:01:22.269
+So the Bump Offset node together with the normal map are really creating a nice three-dimensional
+
+20
+00:01:22.269 --> 00:01:24.180
+effect.
+
+21
+00:01:24.180 --> 00:01:28.780
+Let's turn here to the right to analyze this gemstone material now, where the Bump Offset
+
+22
+00:01:28.780 --> 00:01:33.819
+node was used to create a nice parallax and depth effect.
+
+23
+00:01:33.819 --> 00:01:39.290
+It looks as if we could almost enter this material, and it's really cool.
+
+24
+00:01:39.290 --> 00:01:44.890
+Now, when creating materials with the Bump Offset node, we need to make sure that the UVs on
+
+25
+00:01:44.890 --> 00:01:50.730
+our object are well mapped, and that the texture is correctly tiling, because if I
+
+26
+00:01:50.730 --> 00:01:55.049
+start zooming into this rock down here, I don't know if you noticed this before, but
+
+27
+00:01:55.049 --> 00:01:59.450
+if I start panning a little bit to the right, we can see that as we get closer to this
+
+28
+00:01:59.450 --> 00:02:04.890
+border here, the illusion of parallax start really breaking down, because the UV mapping
+
+29
+00:02:04.890 --> 00:02:07.609
+on this object wasn't correctly set up.
+
+30
+00:02:07.609 --> 00:02:12.330
+Now if we were always looking at this rock from this point of view, it would be alright,
+
+31
+00:02:12.330 --> 00:02:15.050
+and nobody would be noticing anything weird with it.
+
+32
+00:02:15.050 --> 00:02:19.210
+So this is just something to be aware of if your player or your camera needs to get
+
+33
+00:02:19.210 --> 00:02:21.370
+close to these kinds of materials.
+
+34
+00:02:21.370 --> 00:02:26.810
+Alright, let's start with reviewing the pebbles material first, then we'll be taking a look
+
+35
+00:02:26.810 --> 00:02:31.050
+at the gemstone material, and after that we will be creating the gemstone material
+
+36
+00:02:31.050 --> 00:02:31.770
+from scratch.
+
+37
+00:02:32.759 --> 00:02:37.080
+Let's select the preview mesh for the pebble material, and down here in the details
+
+38
+00:02:37.080 --> 00:02:40.680
+panel, we can open up its material assigned to it.
+
+39
+00:02:41.240 --> 00:02:44.919
+Alright, the first thing I'm going to be doing here is switching the preview mesh
+
+40
+00:02:44.919 --> 00:02:49.159
+from the sphere to the cube, because I think that a flat surface is going to help
+
+41
+00:02:49.159 --> 00:02:53.400
+us understand better what's going on, and then I'm going to zoom into it.
+
+42
+00:02:54.120 --> 00:02:56.520
+Okay, so let's review what's going on here.
+
+43
+00:02:57.240 --> 00:03:03.159
+We have a bump offset node, where the height input is connected to the red channel
+
+44
+00:03:03.159 --> 00:03:04.599
+of this texture sample.
+
+45
+00:03:04.599 --> 00:03:08.599
+Let's connect the red channel of this texture sample directly into the base color
+
+46
+00:03:08.599 --> 00:03:09.719
+to see how it looks like.
+
+47
+00:03:10.969 --> 00:03:15.849
+Okay, so we can see that this texture sample is really providing us with the height information
+
+48
+00:03:15.849 --> 00:03:22.009
+that we need, but most of the heavy lifting in this material is actually given by the
+
+49
+00:03:22.009 --> 00:03:22.569
+normal map.
+
+50
+00:03:23.289 --> 00:03:27.930
+So let's just try by pressing Alt on our keyboard and then clicking on the input
+
+51
+00:03:27.930 --> 00:03:32.889
+pin of the normal to unplug the normal map, and here you can see how essential
+
+52
+00:03:32.889 --> 00:03:35.610
+it was in the development of our material.
+
+53
+00:03:36.169 --> 00:03:40.810
+This material is still a little bit interesting because its specularity and roughness are
+
+54
+00:03:40.810 --> 00:03:45.210
+still connected to it, so it does have some nice details.
+
+55
+00:03:45.849 --> 00:03:49.449
+But its elevation and three-dimensionality is completely gone.
+
+56
+00:03:50.439 --> 00:03:56.259
+So let's connect the normal map back again, and I'm also going to be connecting
+
+57
+00:03:56.259 --> 00:03:58.419
+the base color to what we had before.
+
+58
+00:03:59.800 --> 00:04:04.360
+All right, so you can see here that this bump offset node is also connected to the
+
+59
+00:04:04.360 --> 00:04:06.120
+texture sample of the base color.
+
+60
+00:04:06.680 --> 00:04:08.439
+I'm going to be showing you why.
+
+61
+00:04:08.439 --> 00:04:13.639
+So let's just zoom into the texture down here, and I want to find a position of the
+
+62
+00:04:13.639 --> 00:04:18.680
+camera where we can easily see some nice ambient occlusion, like here or here.
+
+63
+00:04:19.500 --> 00:04:24.949
+Now I'm going to be unplugging the bump offset from the base color, and you can see
+
+64
+00:04:24.949 --> 00:04:29.029
+that a little bit of the ambient occlusion detail is now gone.
+
+65
+00:04:29.910 --> 00:04:31.910
+So that's actually what this is doing.
+
+66
+00:04:31.910 --> 00:04:37.910
+It's just adding some nice ambient occlusion around the pebbles, which is actually improving
+
+67
+00:04:37.910 --> 00:04:40.149
+this feeling and illusion of depth.
+
+68
+00:04:41.660 --> 00:04:47.259
+Okay, so then we have some few nodes up here that you can play around with.
+
+69
+00:04:47.899 --> 00:04:51.660
+You can also just totally change all the textures you want, changing the colors.
+
+70
+00:04:51.660 --> 00:04:55.500
+Nothing is set to stone here, or maybe I should say set to pebble.
+
+71
+00:04:56.500 --> 00:05:02.100
+All right, so then up here we have a series of nodes that we use just to add some imperfections
+
+72
+00:05:02.100 --> 00:05:06.259
+or just some texture variation, and that is really it for this graph.
+
+73
+00:05:06.259 --> 00:05:09.459
+So we can just close it down and go back to our viewport.
+
+74
+00:05:10.939 --> 00:05:14.939
+All right, now let's open up the gemstone material and see how this was developed.
+
+75
+00:05:14.939 --> 00:05:18.620
+So I'm going to be clicking on the preview mesh, and then in the details panel, I will
+
+76
+00:05:18.620 --> 00:05:19.740
+open up the material.
+
+77
+00:05:21.100 --> 00:05:25.019
+All right, so the first thing I'm going to do is again switching back the preview mode
+
+78
+00:05:25.019 --> 00:05:26.620
+from sphere to cube.
+
+79
+00:05:27.769 --> 00:05:32.870
+Okay, and now we're going to be recreating this material from scratch, so I won't be
+
+80
+00:05:32.870 --> 00:05:38.629
+diving too much into how this was made, but one thing that I want to mention is that
+
+81
+00:05:38.629 --> 00:05:41.029
+this material is not translucent.
+
+82
+00:05:41.029 --> 00:05:46.579
+It's actually opaque, even though it does give a translucent illusion, and you can see
+
+83
+00:05:46.579 --> 00:05:51.060
+here that we have something connected to the refraction index, even though the refraction
+
+84
+00:05:51.060 --> 00:05:53.060
+index is completely disabled.
+
+85
+00:05:53.060 --> 00:05:55.860
+So these series of nodes are not actually being calculated.
+
+86
+00:05:55.860 --> 00:05:59.939
+They're not actually being applied to the refraction index.
+
+87
+00:05:59.939 --> 00:06:03.060
+They are being applied to the emissive color that they're connected to, but the
+
+88
+00:06:03.060 --> 00:06:05.139
+refraction index is completely grayed out.
+
+89
+00:06:05.779 --> 00:06:10.019
+In order for us to be able to use the refraction index, we would need to be switching the
+
+90
+00:06:10.019 --> 00:06:15.930
+blend mode from opaque to translucent, and here you would see that the refraction index
+
+91
+00:06:15.930 --> 00:06:20.970
+would be enabled again, even though now a material looks a bit more ghost-like and
+
+92
+00:06:20.970 --> 00:06:26.199
+weird and not like a gemstone material anymore, but you can still use this for something
+
+93
+00:06:26.199 --> 00:06:28.920
+else, something a bit more mysterious maybe.
+
+94
+00:06:29.899 --> 00:06:34.459
+And remember that if you want to have access to the specular, roughness, and metallic
+
+95
+00:06:34.459 --> 00:06:39.100
+values of any translucent material, you need to make sure that the lighting mode is switched
+
+96
+00:06:39.100 --> 00:06:43.100
+to surface forward shading or surface translucency volume.
+
+97
+00:06:43.660 --> 00:06:47.740
+Okay, I think we can start out with building our new material, so I'm gonna be keeping
+
+98
+00:06:47.740 --> 00:06:51.339
+this open because we will be borrowing some nodes from this material.
+
+99
+00:06:52.060 --> 00:06:57.420
+Okay, so in the content browser, I will be creating a new material, and then I'm
+
+100
+00:06:57.420 --> 00:07:03.740
+gonna be calling it m underscore bump offset, but you can really call it whatever you
+
+101
+00:07:03.740 --> 00:07:07.350
+want, and then I'm gonna double click on it to open it up.
+
+102
+00:07:08.220 --> 00:07:13.660
+Okay, so first of all, let's go back to our gemstone material, and let's copy a few
+
+103
+00:07:13.660 --> 00:07:17.660
+textures that we can borrow from it, just to speed up our process.
+
+104
+00:07:18.220 --> 00:07:22.779
+We're gonna be taking the base color, and we're gonna copy also this whole
+
+105
+00:07:23.339 --> 00:07:25.339
+layout of nodes for the normal.
+
+106
+00:07:26.199 --> 00:07:32.680
+Then we want to be taking this soft smoke kind of texture, and this yellow one down
+
+107
+00:07:32.680 --> 00:07:38.649
+here, so we need these four main textures together with the normal setup.
+
+108
+00:07:39.560 --> 00:07:45.819
+Then I'm gonna Ctrl C to copy, and then Ctrl V down here, and we'll just
+
+109
+00:07:45.819 --> 00:07:48.300
+quickly move them in the right position.
+
+110
+00:07:52.600 --> 00:07:57.800
+Okay, so what we have here is actually a group of nodes that is typically used
+
+111
+00:07:57.800 --> 00:08:02.759
+to give granular and runtime control over normals.
+
+112
+00:08:02.759 --> 00:08:09.000
+In fact, this flattened normal, we can input the normals, and then we can define its strengths.
+
+113
+00:08:09.000 --> 00:08:13.319
+We're gonna wait a little bit before plugging in the base color and the normal,
+
+114
+00:08:13.319 --> 00:08:16.519
+because we will be connecting the outputs of nodes we'll be developing
+
+115
+00:08:16.519 --> 00:08:21.079
+directly to the base color to see some nice previews of what they're doing,
+
+116
+00:08:21.079 --> 00:08:23.319
+and I think it's gonna help us understanding what's going on.
+
+117
+00:08:24.759 --> 00:08:30.040
+Okay, let's start by creating a bump offset node by pressing B on the keyboard and
+
+118
+00:08:30.040 --> 00:08:31.879
+clicking on an empty area of the graph.
+
+119
+00:08:33.100 --> 00:08:36.460
+Okay, then we want to add a texture coordinate node,
+
+120
+00:08:37.610 --> 00:08:40.809
+and we want to connect it to a Multiply node,
+
+121
+00:08:42.779 --> 00:08:46.460
+and then we want to add a scalar parameter that we're gonna be calling
+
+122
+00:08:46.460 --> 00:08:51.000
+Interior Tiling, and let's set the tiling to 1.
+
+123
+00:08:53.049 --> 00:08:58.409
+Okay, and then the output of this Multiply node, we can connect it to the coordinates.
+
+124
+00:08:58.409 --> 00:09:04.730
+Now the preview of our bump offset is still black because nothing is connected to our height,
+
+125
+00:09:04.730 --> 00:09:09.159
+so let's take care of it by right-clicking on the height,
+
+126
+00:09:09.159 --> 00:09:13.899
+and then promote that to parameter, and here you can see that we start having some previews.
+
+127
+00:09:14.700 --> 00:09:16.940
+Let's set the height to 0.7.
+
+128
+00:09:17.940 --> 00:09:22.169
+Okay, then let's promote to parameter the height ratio,
+
+129
+00:09:23.029 --> 00:09:29.539
+and we can actually call it Interior Offset, and let's set this to 1.
+
+130
+00:09:30.980 --> 00:09:35.700
+Now let's plug this bump offset output pin directly into the base color,
+
+131
+00:09:36.340 --> 00:09:38.259
+and we won't be seeing much.
+
+132
+00:09:38.259 --> 00:09:42.019
+Actually, we'll be switching the preview mesh from sphere to cube.
+
+133
+00:09:42.580 --> 00:09:46.019
+We won't be seeing much going on, but this is just for you to know
+
+134
+00:09:46.019 --> 00:09:50.500
+that what the bump offset node is doing right now with our texture coordinates
+
+135
+00:09:50.500 --> 00:09:56.340
+is distorting them based on our viewing angle to create a fake depth effect,
+
+136
+00:09:56.340 --> 00:09:58.179
+and it's not very visible right now,
+
+137
+00:09:58.179 --> 00:10:02.019
+but as we continue developing the node, it will be more and more prominent.
+
+138
+00:10:02.100 --> 00:10:06.659
+Okay, so now what we want to do is connecting this bump offset node
+
+139
+00:10:06.659 --> 00:10:10.740
+to the UVs input of this yellow texture sample,
+
+140
+00:10:10.740 --> 00:10:12.899
+and we chose this particular texture sample
+
+141
+00:10:12.899 --> 00:10:16.980
+because it has a really nice and funky color information and contrast.
+
+142
+00:10:16.980 --> 00:10:18.580
+So let's open it up to see what I mean.
+
+143
+00:10:19.659 --> 00:10:22.139
+Now the red channel is basically empty.
+
+144
+00:10:22.139 --> 00:10:26.700
+If I isolate the red channel, you can see that it almost has nothing stored in it,
+
+145
+00:10:26.700 --> 00:10:30.379
+but if we enable the green channel or the blue channel,
+
+146
+00:10:30.460 --> 00:10:34.139
+especially, you can see how much contrast there is in it.
+
+147
+00:10:34.139 --> 00:10:38.220
+Today we'll be actually using a combination of the green and the blue channels,
+
+148
+00:10:38.220 --> 00:10:41.580
+which creates this really nice and weird texture.
+
+149
+00:10:41.580 --> 00:10:43.580
+Okay, let's go back to our bump offset,
+
+150
+00:10:44.220 --> 00:10:47.179
+and by the way, the more contrast our texture will have,
+
+151
+00:10:47.740 --> 00:10:50.700
+the clearer will be the high definition of our material.
+
+152
+00:10:51.340 --> 00:10:55.980
+Okay, so I'm just gonna move this texture a little bit to the side,
+
+153
+00:10:55.980 --> 00:10:58.379
+and now we will be introducing a new node.
+
+154
+00:10:58.379 --> 00:11:01.259
+So if I right-click in an empty area of the graph,
+
+155
+00:11:01.259 --> 00:11:06.539
+I can add the first noise node, and we haven't seen this node before.
+
+156
+00:11:07.480 --> 00:11:10.279
+So I'm just gonna open up our preview here,
+
+157
+00:11:10.279 --> 00:11:13.240
+and then let's just go in and change these values a little bit.
+
+158
+00:11:14.250 --> 00:11:19.690
+So let's set the scale to 0.01, the levels to 5,
+
+159
+00:11:19.690 --> 00:11:24.409
+the output min to 0, output max to 0.25,
+
+160
+00:11:24.409 --> 00:11:26.809
+and the level scale is fine at 2.
+
+161
+00:11:27.480 --> 00:11:29.720
+And we can start seeing here in our preview
+
+162
+00:11:29.720 --> 00:11:31.639
+that the texture we had before
+
+163
+00:11:31.639 --> 00:11:33.720
+changed to something a little bit more dissolved.
+
+164
+00:11:34.710 --> 00:11:39.110
+So the noise node actually generates random-looking patterns
+
+165
+00:11:39.110 --> 00:11:41.830
+that we can control based on these values.
+
+166
+00:11:42.549 --> 00:11:45.590
+This is basically like a random texture generator
+
+167
+00:11:45.590 --> 00:11:46.870
+straight into the engine.
+
+168
+00:11:48.279 --> 00:11:51.000
+One cool thing to notice is that since the noise nodes
+
+169
+00:11:51.000 --> 00:11:54.679
+are mathematically generated rather than from image files,
+
+170
+00:11:54.759 --> 00:11:58.519
+if we pan around the graph, you can actually see them self-dialing,
+
+171
+00:11:58.519 --> 00:12:00.519
+and I love this effect, it's really cool.
+
+172
+00:12:02.009 --> 00:12:02.970
+Okay, let's move on.
+
+173
+00:12:02.970 --> 00:12:07.370
+I'm gonna Ctrl-C on the noise, and then Ctrl-V to duplicate it,
+
+174
+00:12:08.440 --> 00:12:10.360
+and then I'm just gonna change the values
+
+175
+00:12:10.360 --> 00:12:12.120
+on this second noise node.
+
+176
+00:12:12.870 --> 00:12:15.110
+All right, we want the scale to be 0.1,
+
+177
+00:12:16.070 --> 00:12:20.629
+the levels to be 6, output min 0, output max 0.25,
+
+178
+00:12:20.629 --> 00:12:22.070
+and level scale 2.
+
+179
+00:12:22.070 --> 00:12:25.190
+So basically this noise node is a little bit chunkier
+
+180
+00:12:25.269 --> 00:12:26.230
+than our first one.
+
+181
+00:12:27.210 --> 00:12:30.809
+Let's now add a lerp node by pressing L on the keyboard
+
+182
+00:12:30.809 --> 00:12:32.970
+and left-clicking on the graph,
+
+183
+00:12:32.970 --> 00:12:36.570
+and we want to connect the first noise to the A,
+
+184
+00:12:37.129 --> 00:12:38.330
+the second noise to the B,
+
+185
+00:12:39.049 --> 00:12:43.450
+and the G channel of this yellow texture sample to the alpha.
+
+186
+00:12:44.519 --> 00:12:47.480
+And then let's plug the output pin to the base color
+
+187
+00:12:47.480 --> 00:12:49.080
+to see what's happening here.
+
+188
+00:12:49.980 --> 00:12:52.059
+So it's not very visible,
+
+189
+00:12:52.059 --> 00:12:55.820
+but the bump offset node connected to our texture sample
+
+190
+00:12:55.820 --> 00:12:58.220
+and then to the alpha of the lerp
+
+191
+00:12:58.220 --> 00:12:59.980
+means that we're basically blending
+
+192
+00:12:59.980 --> 00:13:04.539
+between these two noise patterns based on our camera angle,
+
+193
+00:13:04.539 --> 00:13:07.100
+and we're basically creating the illusion of depth
+
+194
+00:13:07.100 --> 00:13:09.100
+as we move the camera around.
+
+195
+00:13:09.100 --> 00:13:12.139
+We're basically creating a view-dependent texture effect
+
+196
+00:13:12.139 --> 00:13:14.779
+that simulates a simple parallax.
+
+197
+00:13:15.879 --> 00:13:18.279
+Now let's increase this effect a little bit more
+
+198
+00:13:18.279 --> 00:13:21.320
+to make it more visible by adding a multiply node,
+
+199
+00:13:22.549 --> 00:13:25.190
+and then let's multiply the output of the lerp
+
+200
+00:13:26.360 --> 00:13:29.080
+with the B channel of the texture sample.
+
+201
+00:13:30.090 --> 00:13:32.490
+And now if you plug this to the base color
+
+202
+00:13:32.490 --> 00:13:33.929
+and then we move the camera around,
+
+203
+00:13:33.929 --> 00:13:36.809
+we can really start seeing some parallax,
+
+204
+00:13:37.799 --> 00:13:39.799
+and it looks incredibly cool.
+
+205
+00:13:40.919 --> 00:13:44.200
+Okay, now ultimately this series of nodes
+
+206
+00:13:44.200 --> 00:13:48.039
+will be plugged into the emissive property
+
+207
+00:13:48.039 --> 00:13:49.240
+of our MIMI tool,
+
+208
+00:13:49.240 --> 00:13:52.279
+so I'm just going to be unplugging the base color pin
+
+209
+00:13:52.279 --> 00:13:54.200
+by pressing Alt on the keyboard
+
+210
+00:13:54.200 --> 00:13:55.720
+and then clicking on base color.
+
+211
+00:13:56.279 --> 00:14:00.200
+Let's connect our original base color texture
+
+212
+00:14:00.200 --> 00:14:01.159
+into the base color,
+
+213
+00:14:01.879 --> 00:14:03.799
+and then the normal into the normal.
+
+214
+00:14:04.600 --> 00:14:08.659
+Okay, now we can start adding a bit more variation
+
+215
+00:14:08.659 --> 00:14:10.580
+to our emissive texture over here,
+
+216
+00:14:11.480 --> 00:14:15.879
+and let's start multiplying this texture sample down here
+
+217
+00:14:17.129 --> 00:14:19.769
+with just a simple constant tree vector
+
+218
+00:14:19.769 --> 00:14:23.129
+that is going to really give the base color of our emission.
+
+219
+00:14:23.769 --> 00:14:25.929
+So you can choose any color you like,
+
+220
+00:14:25.929 --> 00:14:28.970
+and it's going to show really permanently in your material.
+
+221
+00:14:29.690 --> 00:14:32.009
+So I'm just going to make it maybe pink.
+
+222
+00:14:32.889 --> 00:14:36.090
+Okay, and I'll multiply it with the texture sample.
+
+223
+00:14:36.889 --> 00:14:42.649
+Okay, let's now multiply the result of this base color
+
+224
+00:14:42.649 --> 00:14:45.929
+and texture sample that I'm going to plug to the A,
+
+225
+00:14:45.929 --> 00:14:46.570
+not to the B,
+
+226
+00:14:47.210 --> 00:14:50.889
+with the output multiply node connected to the B.
+
+227
+00:14:51.750 --> 00:14:53.909
+Okay, one last step is missing,
+
+228
+00:14:54.549 --> 00:14:57.029
+and let's just give us a bit more control
+
+229
+00:14:57.029 --> 00:15:02.070
+on the intensity of the emission of our material.
+
+230
+00:15:03.110 --> 00:15:05.269
+So I'm just going to add one more multiply node,
+
+231
+00:15:06.070 --> 00:15:08.549
+connect the output pin of this multiply to the A,
+
+232
+00:15:09.350 --> 00:15:11.350
+and then I'm going to hit S on the keyboard
+
+233
+00:15:11.350 --> 00:15:13.110
+to add a scalar parameter
+
+234
+00:15:13.110 --> 00:15:16.419
+that I'm going to call emissive strength.
+
+235
+00:15:17.610 --> 00:15:19.929
+And I'm going to put a real high value
+
+236
+00:15:19.929 --> 00:15:21.929
+because I want to make this real visible,
+
+237
+00:15:21.929 --> 00:15:23.289
+and then I'm going to connect it to the D.
+
+238
+00:15:24.330 --> 00:15:28.409
+Okay, so now if we plug the multiply node into the emissive,
+
+239
+00:15:29.720 --> 00:15:34.440
+boom, you can see our final magical and parallax material.
+
+240
+00:15:35.080 --> 00:15:37.799
+Now, if I zoom in a lot into this material,
+
+241
+00:15:37.799 --> 00:15:41.240
+you start seeing this spherical artifact happening,
+
+242
+00:15:42.230 --> 00:15:45.190
+and this is really dictated by two main values,
+
+243
+00:15:46.179 --> 00:15:48.500
+the interior tiling and the height.
+
+244
+00:15:48.500 --> 00:15:51.860
+So if I switch the height to something like 0.4,
+
+245
+00:15:51.940 --> 00:15:54.580
+you can see that that's not happening anymore,
+
+246
+00:15:56.470 --> 00:15:59.590
+but we start seeing these weird artifacts on the edges.
+
+247
+00:15:59.590 --> 00:16:01.509
+So you really need to tweak these values
+
+248
+00:16:01.509 --> 00:16:02.389
+a little bit around
+
+249
+00:16:02.389 --> 00:16:05.750
+until you find the right balance of what you want.
+
+250
+00:16:06.740 --> 00:16:09.539
+All right, I hope you enjoyed this class,
+
+251
+00:16:09.539 --> 00:16:10.500
+and in the next video,
+
+252
+00:16:10.500 --> 00:16:14.419
+we'll be looking into advanced glass node effects
+
+253
+00:16:14.419 --> 00:16:15.139
+and techniques.
+
+254
+00:16:15.779 --> 00:16:16.500
+I'll see you there.
+
+255
+00:16:17.059 --> 00:16:17.700
+Bye.

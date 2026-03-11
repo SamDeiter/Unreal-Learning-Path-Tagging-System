@@ -1,6 +1,6 @@
 /* global __BUILD_HASH__, __BUILD_TIME__ */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
-import { PathProvider } from "./context/PathContext";
+import { PathProvider, usePath } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
@@ -30,6 +30,7 @@ const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIn
 const PathDashboard = lazy(() => import("./components/PathBuilder/PathDashboard"));
 const PathCreationWizard = lazy(() => import("./components/PathBuilder/PathCreationWizard"));
 const PathLoader = lazy(() => import("./components/PathBuilder/PathLoader"));
+const WorkflowStepper = lazy(() => import("./components/PathBuilder/WorkflowStepper"));
 const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
@@ -119,6 +120,52 @@ const MOBILE_TAB_ORDER = [
   "analytics-costs",
   "augmentation",
 ];
+
+// ── Builder Editor with Workflow Stepper ──────────────────────────────
+function BuilderEditor({
+  courses,
+  isMobile,
+  preSelectedSkill,
+  setPreSelectedSkill,
+  onBackToDashboard,
+}) {
+  const { workflowStage } = usePath();
+
+  // Panel visibility per stage
+  const showLeftPanel = !isMobile && (workflowStage === "curate");
+  const showRightPanel = !isMobile && workflowStage !== "curate";
+
+  return (
+    <div className="builder-editor-container">
+      <WorkflowStepper />
+      <div className={`builder-layout ${isMobile ? "builder-mobile" : ""} workflow-stage-${workflowStage}`}>
+        {/* Left: Course Library — visible during Curate */}
+        {showLeftPanel && (
+          <aside className="library-panel">
+            <LeftPanel
+              courses={courses}
+              preSelectedSkill={preSelectedSkill}
+              onSkillUsed={() => setPreSelectedSkill(null)}
+              onBackToDashboard={onBackToDashboard}
+            />
+          </aside>
+        )}
+
+        {/* Center: Path Canvas — always visible */}
+        <section className="assembly-panel">
+          <AssemblyLine />
+        </section>
+
+        {/* Right: Intelligence Panel — visible during Arrange/Review/Export */}
+        {showRightPanel && (
+          <aside className="output-panel-area">
+            <PathIntelligencePanel />
+          </aside>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState("adaptive");
@@ -545,31 +592,13 @@ function App() {
                   </div>
                 )}
                 {activeTab === "builder" && builderView === "editor" && (
-                  <div className={`builder-layout ${isMobile ? "builder-mobile" : ""}`}>
-                    {/* Left: Input Panel — hidden on mobile */}
-                    {!isMobile && (
-                      <aside className="library-panel">
-                        <LeftPanel
-                          courses={courses}
-                          preSelectedSkill={preSelectedSkill}
-                          onSkillUsed={() => setPreSelectedSkill(null)}
-                          onBackToDashboard={() => setBuilderView("dashboard")}
-                        />
-                      </aside>
-                    )}
-
-                    {/* Center: Path Canvas */}
-                    <section className="assembly-panel">
-                      <AssemblyLine />
-                    </section>
-
-                    {/* Right: Outputs — hidden on mobile */}
-                    {!isMobile && (
-                      <aside className="output-panel-area">
-                        <PathIntelligencePanel />
-                      </aside>
-                    )}
-                  </div>
+                  <BuilderEditor
+                    courses={courses}
+                    isMobile={isMobile}
+                    preSelectedSkill={preSelectedSkill}
+                    setPreSelectedSkill={setPreSelectedSkill}
+                    onBackToDashboard={() => setBuilderView("dashboard")}
+                  />
                 )}
                 {/* PathLoader: bridges saved path data into PathContext */}
                 {pendingEditPath && (

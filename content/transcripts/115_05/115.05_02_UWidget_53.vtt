@@ -1,0 +1,289 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.660
+So let's begin with UWidget.
+
+2
+00:00:03.660 --> 00:00:07.259
+This is the perfect start to looking into your Unreal Motion Graphics as UWidget lies
+
+3
+00:00:07.259 --> 00:00:08.259
+at the base of it.
+
+4
+00:00:08.259 --> 00:00:12.039
+But before we start, it's important to understand what Unreal Motion Graphics actually
+
+5
+00:00:12.039 --> 00:00:13.099
+is.
+
+6
+00:00:13.099 --> 00:00:17.640
+UMG gives developers a framework that wraps around Slate, which is Unreal's custom
+
+7
+00:00:17.640 --> 00:00:19.579
+UI programming framework.
+
+8
+00:00:19.579 --> 00:00:23.739
+The editor UI is actually largely built on top of this exact framework.
+
+9
+00:00:23.739 --> 00:00:28.079
+It also provides a visual UI authoring tool that allows developers to create UI
+
+10
+00:00:28.079 --> 00:00:31.160
+elements in an easy way that is quick to pick up.
+
+11
+00:00:31.160 --> 00:00:35.399
+So with that in mind, let's take a look at what UWidget is.
+
+12
+00:00:35.399 --> 00:00:39.159
+Essentially UWidget is the base class that developers can access within native, and this
+
+13
+00:00:39.159 --> 00:00:44.189
+is important to note as UWidget is not a type that can be easily created within blueprint.
+
+14
+00:00:44.189 --> 00:00:48.770
+It serves as the base implementation of a widget in native, and the class itself introduces
+
+15
+00:00:48.770 --> 00:00:53.520
+some of the base functionality that developers can use when creating their own UI elements.
+
+16
+00:00:53.520 --> 00:00:56.960
+As you may have noticed from the prefix of this type, this class is part of the reflection
+
+17
+00:00:56.960 --> 00:00:58.219
+system.
+
+18
+00:00:58.219 --> 00:01:02.719
+It's based from the UVisual class which in turn inherits from the UObject class, so we
+
+19
+00:01:02.719 --> 00:01:07.879
+can think of the UWidget as a UObject wrapper for a Slate widget.
+
+20
+00:01:07.879 --> 00:01:11.540
+The reason why we say UWidget is at the base of UMG is because some of the more
+
+21
+00:01:11.540 --> 00:01:15.680
+common UI elements that you're likely to use when creating your own UI is based
+
+22
+00:01:15.680 --> 00:01:20.359
+from this class, such as the text box, the overlay, the horizontal box and the vertical
+
+23
+00:01:20.359 --> 00:01:21.620
+box.
+
+24
+00:01:21.620 --> 00:01:26.859
+UWidget, and all types deriving from it, essentially lie on top of Slate.
+
+25
+00:01:26.859 --> 00:01:31.400
+As we've discussed already, UWidgets act as a wrapper for those Slate widgets.
+
+26
+00:01:31.400 --> 00:01:35.680
+More importantly, UWidgets provide us engineers with an almost familiar coding environment.
+
+27
+00:01:35.680 --> 00:01:39.700
+Much of the same principles of working with UObjects also apply here when working
+
+28
+00:01:39.700 --> 00:01:41.090
+with UWidget.
+
+29
+00:01:41.090 --> 00:01:45.750
+When creating a UWidget, in the backend we create an SWidget that will be the UI element
+
+30
+00:01:45.750 --> 00:01:48.150
+that we actually end up rendering to the screen.
+
+31
+00:01:48.150 --> 00:01:54.459
+Lastly, it's also crucial to understand that UMG widgets exist solely on the client.
+
+32
+00:01:54.459 --> 00:01:57.959
+Now that we've got a brief understanding of the bedrock of the Unreal Motion Graphics
+
+33
+00:01:57.959 --> 00:02:01.280
+framework, let's take a look at the main class that we're likely to be working with
+
+34
+00:02:01.280 --> 00:02:05.459
+when authoring our own UI, that being the UserWidget.
+
+35
+00:02:05.459 --> 00:02:09.659
+The UserWidget is the first usable class for all Unreal widgets.
+
+36
+00:02:09.659 --> 00:02:13.819
+It's the default class that the UMG Blueprint editor initialises and is essentially the
+
+37
+00:02:13.819 --> 00:02:17.449
+UObject of the UMG world.
+
+38
+00:02:17.449 --> 00:02:22.009
+While it does extend off of UWidget, as engineers, it really is with the UserWidget that we'll
+
+39
+00:02:22.009 --> 00:02:24.650
+start developing our own UI implementations.
+
+40
+00:02:24.650 --> 00:02:28.430
+We'll be extending off of UserWidget in C++ to build our own custom elements for the
+
+41
+00:02:28.469 --> 00:02:29.789
+most part.
+
+42
+00:02:29.789 --> 00:02:34.270
+They can be created at runtime and on demand with a templated create widget call, and
+
+43
+00:02:34.270 --> 00:02:38.469
+the syntax here is almost identical to the new object syntax, with some const expressions
+
+44
+00:02:38.469 --> 00:02:41.430
+under the hood to enforce sensible outers.
+
+45
+00:02:41.430 --> 00:02:44.590
+For instance, we can't have any random actor own the widget.
+
+46
+00:02:44.590 --> 00:02:48.870
+The compiler will ensure that the outer is either another widget, a widget tree,
+
+47
+00:02:48.870 --> 00:02:51.990
+which is essentially a data structure keeping track of how widgets are nested within
+
+48
+00:02:51.990 --> 00:02:57.830
+each other, it needs to be a player controller, the game instance, or the game world.
+
+49
+00:02:57.870 --> 00:03:02.229
+Unlike UObject, UserWidgets keep track of the game world and the local player controller,
+
+50
+00:03:02.229 --> 00:03:06.030
+meaning we can pull meaningful information at runtime, very useful for stuff like health
+
+51
+00:03:06.030 --> 00:03:09.389
+bars that need access to information about the local player.
+
+52
+00:03:09.389 --> 00:03:12.590
+The UserWidget also has some critical functions publicly available.
+
+53
+00:03:12.590 --> 00:03:16.710
+Firstly, we've got the add to viewport, and this does exactly as you'd expect.
+
+54
+00:03:16.710 --> 00:03:21.090
+It adds this widget to the local player's viewport and takes in a Z order as a parameter.
+
+55
+00:03:21.090 --> 00:03:24.349
+If we've got two widgets occupying the same space, one of them has obviously got
+
+56
+00:03:24.349 --> 00:03:29.060
+to occlude the other one, and the Z order is what drives these fake depths on the screen.
+
+57
+00:03:29.060 --> 00:03:32.500
+The higher the Z order, the higher priority is given on the screen.
+
+58
+00:03:32.500 --> 00:03:36.939
+In other words, the lower the Z order, the further into the scene the widget will be rendered.
+
+59
+00:03:36.939 --> 00:03:39.939
+After that, we've got add to screen, and this is similar to add to viewport, but
+
+60
+00:03:39.939 --> 00:03:41.500
+with one key difference.
+
+61
+00:03:41.500 --> 00:03:44.780
+The concept of a viewport is married to the concept of a local player.
+
+62
+00:03:44.780 --> 00:03:49.990
+This may not be an issue for 99% of use cases, as you'll pretty much always have a local player.
+
+63
+00:03:49.990 --> 00:03:53.469
+However, in cases where the local player is yet to be initialised, we may want
+
+64
+00:03:53.509 --> 00:03:56.110
+to add it directly to the screen's canvas.
+
+65
+00:03:56.110 --> 00:04:01.960
+Add to screen will add the widget to the canvas without even attempting to poll for a local player's viewport.
+
+66
+00:04:01.960 --> 00:04:06.159
+From there, we've got remove from viewport, and again, this does exactly as you'd expect.
+
+67
+00:04:06.159 --> 00:04:10.090
+It will remove this widget from the viewport regardless of its container.
+
+68
+00:04:10.090 --> 00:04:13.530
+Finally, we've got remove from parent, and it's a bit more of a bespoke function
+
+69
+00:04:13.530 --> 00:04:15.169
+than remove from viewport.
+
+70
+00:04:15.169 --> 00:04:18.610
+Say we've got an inventory screen filled with many inventory slots.
+
+71
+00:04:18.610 --> 00:04:22.769
+Calling remove from parent on the inventory slot will remove it from the overall inventory
+
+72
+00:04:22.769 --> 00:04:26.170
+screen container, without necessarily removing it from the viewport.

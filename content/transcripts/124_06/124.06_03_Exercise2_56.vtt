@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:01.490 --> 00:00:08.289
+Hello and welcome to this next video in our series. In this we are going to be doing some
+
+2
+00:00:08.289 --> 00:00:15.490
+of the coding in order to get the perception component to pass information to the state tree.
+
+3
+00:00:16.829 --> 00:00:24.589
+So here I am back in the AI site character and what I'm going to do is I'm going to come
+
+4
+00:00:24.589 --> 00:00:30.109
+over to the components and where it says AR perception I'm going to right-hand click
+
+5
+00:00:30.109 --> 00:00:37.310
+and we have an option to add an event. Now we have a number of different events here
+
+6
+00:00:37.310 --> 00:00:44.189
+but what you'll find is a few of these are all firing at the same time they just provide us
+
+7
+00:00:44.189 --> 00:00:51.090
+different data. It'll either provide us details of all of the actors that they're attracting
+
+8
+00:00:51.649 --> 00:00:57.090
+or it will provide us just the ones that have changed. And that's the one we're going
+
+9
+00:00:57.090 --> 00:01:06.140
+to work with. So we are going to use the on target perception updated. And you'll see that
+
+10
+00:01:06.140 --> 00:01:17.069
+this returns us two pins. The actor which was updated and a stimulus structure. Okay
+
+11
+00:01:17.069 --> 00:01:22.909
+so to start with the first thing I'm going to do is save out the stimulus to a variable.
+
+12
+00:01:24.640 --> 00:01:31.680
+So I will right-hand click on stimulus and I will go promote to variable. That's just going
+
+13
+00:01:31.680 --> 00:01:41.379
+to allow us to easily access it through the rest of the checks. Next thing that I want to do
+
+14
+00:01:42.099 --> 00:01:50.829
+is I want to check to see if we've seen the player. So I'm going to drag off of the actor
+
+15
+00:01:52.700 --> 00:02:05.650
+and I'm going to type equals and I'm going to get player character. I'm going to plug that into
+
+16
+00:02:05.650 --> 00:02:15.490
+the equals while hold down b to get a branch up. Plug that in there and connect that up there.
+
+17
+00:02:17.569 --> 00:02:26.830
+And do a little bit of tidying up and I'm going to add in a comment.
+
+18
+00:02:38.669 --> 00:02:46.639
+Now next up we are going to want to check to see what type of sense was triggered.
+
+19
+00:02:47.199 --> 00:02:53.759
+Now in this case it doesn't particularly matter because we only have the sight sense set up.
+
+20
+00:02:54.319 --> 00:03:00.479
+However I'm going to add this in now just so you'd know how to do it if you wanted to set
+
+21
+00:03:00.479 --> 00:03:12.990
+up multiple different senses. So I'm going to drag in and get the stimulus and if I drag off
+
+22
+00:03:12.990 --> 00:03:24.099
+of this there is a node that allows me to get the sense class from stimulus. I plug that in
+
+23
+00:03:24.819 --> 00:03:34.400
+we are returned a AI sense class reference and again from this I'm going to do an equals
+
+24
+00:03:38.539 --> 00:03:45.650
+and I'm going to do a drop down. Now I'm going to search for AI sense
+
+25
+00:03:48.689 --> 00:03:54.479
+and you can see that there is a number of different options here. Now I want you to
+
+26
+00:03:54.479 --> 00:04:02.240
+ignore these first ones because they are a legacy system that is still in there.
+
+27
+00:04:02.879 --> 00:04:13.620
+What I would like you to select is AI sense site and again I'm going to do another branch
+
+28
+00:04:13.620 --> 00:04:33.680
+off of the site. I want to comment in. Okay so we're just doing a check to see what sense
+
+29
+00:04:33.680 --> 00:04:47.779
+we have and is it sight. Now next up because this fires regardless of if we've lost sight or
+
+30
+00:04:47.779 --> 00:04:54.990
+seen something we're going to have to clarify to see if it has lost or seen it. So again
+
+31
+00:04:54.990 --> 00:05:03.069
+I'm going to grab the stimulus, get it but this time I am going to right hand click and select
+
+32
+00:05:03.069 --> 00:05:13.810
+split struct pin. This is going to give me a lot more options and the one that I care about
+
+33
+00:05:13.810 --> 00:05:22.610
+is stimulus successfully sensed because this will return a true if we've seen it and a false if we
+
+34
+00:05:22.610 --> 00:05:37.139
+have lost sight of it. So I'll come in and add in a branch and connect this up and let's
+
+35
+00:05:37.139 --> 00:05:56.240
+add another comment. How we can do something different if we've lost sight and do something
+
+36
+00:05:56.240 --> 00:06:04.300
+different if we've seen it. So for this what I would like to do is we already have
+
+37
+00:06:05.180 --> 00:06:12.860
+a layer scene variable boolean. I'm going to plug that in and this is going to tell
+
+38
+00:06:13.500 --> 00:06:23.230
+the system that the player has been seen and I'm going to do the same thing on
+
+39
+00:06:24.540 --> 00:06:32.529
+false. However I'm going to say it's not been seen. There's one more thing that we need to do
+
+40
+00:06:32.529 --> 00:06:41.709
+and that is to log the last location. So you can see what we're doing here we're either
+
+41
+00:06:41.709 --> 00:06:46.670
+logging if we've seen the player or we haven't seen the player and we're logging across their
+
+42
+00:06:46.670 --> 00:07:08.560
+last location. Come in here and comment and mark the player as seen and the next one is
+
+43
+00:07:11.899 --> 00:07:24.000
+mark the player as no longer. Okay and with that done let's test this out.
+
+44
+00:07:24.720 --> 00:07:31.009
+So I'm going to jump back into the level. We have our character here and I'm going to press
+
+45
+00:07:31.009 --> 00:07:42.290
+play and again use the apostrophe so I can see his view and at the moment he's logged me and now
+
+46
+00:07:42.290 --> 00:07:50.100
+he's following after me. If I go behind one of the walls you can see that he now goes to
+
+47
+00:07:50.100 --> 00:08:03.259
+our last known location. So just do that again until he travels to my last known location
+
+48
+00:08:03.980 --> 00:08:13.629
+until he sees us again. So that is up and working. Now it's a little bit
+
+49
+00:08:13.629 --> 00:08:20.509
+finicky because I've set the site to such a small area but if you set it to a larger one
+
+50
+00:08:20.509 --> 00:08:27.069
+so let's do that now. I'm just going to come back in and in the AI perception I'm going to
+
+51
+00:08:27.069 --> 00:08:34.419
+increase about a thousand to each of these and I'm going to make the peripheral vision back to 90.
+
+52
+00:08:35.649 --> 00:09:00.779
+Play it again if I play apostrophe and see see the character is following us.
+
+53
+00:09:01.820 --> 00:09:10.799
+Because we have the last known location it's a bit more robust and that brings us to the
+
+54
+00:09:10.799 --> 00:09:16.639
+end of our first exercise. We've set up the perception component and got it to log the
+
+55
+00:09:16.639 --> 00:09:22.610
+character. In the next one we're going to be looking at the noise stimulus.

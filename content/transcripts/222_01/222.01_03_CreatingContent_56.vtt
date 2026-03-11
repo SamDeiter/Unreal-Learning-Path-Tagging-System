@@ -1,0 +1,149 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:07.549
+When creating any type of 3D mesh that's to be used with Chaos clothing, there are a few
+
+2
+00:00:07.549 --> 00:00:15.429
+things you need to know in order for the clothing to react better with the simulation
+
+3
+00:00:15.429 --> 00:00:17.890
+inside of Unreal Engine 5.
+
+4
+00:00:17.890 --> 00:00:23.469
+The first thing is the difference between a render mesh and a proxy mesh.
+
+5
+00:00:23.469 --> 00:00:28.089
+The render mesh acts as, well, what is going to be seen by the end user.
+
+6
+00:00:28.089 --> 00:00:35.329
+This is often going to be very highly detailed, could be double-sided, have non-uniform triangles,
+
+7
+00:00:35.329 --> 00:00:39.289
+there can be some pinching or something like that in the fabric, and we can see kind of
+
+8
+00:00:39.289 --> 00:00:42.090
+that for this cape right here taken from Echo.
+
+9
+00:00:42.090 --> 00:00:47.380
+There is some pinching up here where the cape would be attached.
+
+10
+00:00:47.380 --> 00:00:55.659
+Notice that it doesn't have uniform quadding, we have some geometry that is split in order
+
+11
+00:00:55.659 --> 00:01:01.859
+to give us that kind of look to the cloak that it's attached, the geometry or the cloth
+
+12
+00:01:01.859 --> 00:01:05.659
+kind of has these ripples in it as regular clothing would.
+
+13
+00:01:05.659 --> 00:01:10.620
+Now while this looks really good, the problem is that when we go to simulate this, we're
+
+14
+00:01:10.620 --> 00:01:12.420
+going to run into a lot of issues.
+
+15
+00:01:12.420 --> 00:01:17.340
+Also this mesh over here is double-sided, and it's got very high detail at the corners.
+
+16
+00:01:17.340 --> 00:01:22.019
+The problem again with this is that those simulated vertices will come in contact with
+
+17
+00:01:22.019 --> 00:01:27.260
+one another and they'll penetrate one another, and that's going to cause problems with the
+
+18
+00:01:27.260 --> 00:01:28.260
+simulation.
+
+19
+00:01:28.260 --> 00:01:30.859
+So what we want to actually do is make something called a proxy mesh, and we can see
+
+20
+00:01:30.859 --> 00:01:36.159
+the proxy mesh right over here on the left-hand side of our mesh.
+
+21
+00:01:36.159 --> 00:01:43.299
+The proxy mesh is used to put the simulation on, so we actually take our cloth simulation,
+
+22
+00:01:43.299 --> 00:01:48.099
+run it on the proxy mesh, and then link that proxy mesh to our render mesh.
+
+23
+00:01:48.180 --> 00:01:54.780
+So the render mesh is offset, but it's offset in a way that doesn't allow for that inner
+
+24
+00:01:54.780 --> 00:02:00.980
+penetration of the simulation particles in our clothing simulation, and what we'll
+
+25
+00:02:00.980 --> 00:02:06.799
+get out of this is this really highly detailed render mesh that looks like it's rendering
+
+26
+00:02:06.799 --> 00:02:12.680
+like real clothing, but we're not seeing a bunch of artifacting or having a lot of
+
+27
+00:02:12.680 --> 00:02:14.099
+issues with it.
+
+28
+00:02:14.099 --> 00:02:18.659
+The other thing that we need to talk about too is creating level of detail meshes or
+
+29
+00:02:18.659 --> 00:02:19.659
+LODs.
+
+30
+00:02:19.659 --> 00:02:23.259
+Now we can create these manually inside of our digital content creation, or we can
+
+31
+00:02:23.259 --> 00:02:28.900
+use Unreal Engine's built-in LOD tools to create, and no matter what type of cloth
+
+32
+00:02:28.900 --> 00:02:34.460
+you are creating, you do need to make a level of detail for it.
+
+33
+00:02:34.460 --> 00:02:38.099
+As it gets further and further away from the camera, we really want to reduce not only
+
+34
+00:02:38.099 --> 00:02:43.659
+the amount of vertices that are in it, but all of the clothing cloth settings so
+
+35
+00:02:43.659 --> 00:02:47.780
+that we can really make sure that when it's super far away from the camera, it's not
+
+36
+00:02:47.780 --> 00:02:52.900
+consuming as many resources because it doesn't need to really be simulating cloth when it's
+
+37
+00:02:52.900 --> 00:02:55.300
+only 16 pixels on the screen.

@@ -1,0 +1,217 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:12.199
+So the other kind of part of this puzzle in terms of whether or not we're considering things for whether we should be replicating data to an actor is dormancy.
+
+2
+00:00:12.199 --> 00:00:23.199
+Dormancy essentially is the concept of whether when relevancy is kind of okay, this thing is kind of like probably should be considered,
+
+3
+00:00:23.199 --> 00:00:35.200
+but are there kind of extra factors that we can kind of bear in mind that maybe would mean that, you know, it's too far away or it's on the wrong team or I'm the wrong owner and therefore it's not relevant.
+
+4
+00:00:35.200 --> 00:00:43.259
+Dormancy is a bit more of a kind of global idea of, you know, actually no one needs to care about this thing at all right now.
+
+5
+00:00:43.259 --> 00:00:48.259
+So it's kind of it's a bit more of a global state. It's less of a connection by connection basis.
+
+6
+00:00:48.259 --> 00:01:05.260
+And so taking, for example, we've got like in gameplay code, we have we've done some kind of game set up and we have a cube that has a color variable and that color variable is replicated, right?
+
+7
+00:01:05.260 --> 00:01:14.260
+So by what we've kind of seen, we've we talked before about the idea that we can do like a net cull, a net frequency update.
+
+8
+00:01:14.260 --> 00:01:21.260
+This is this value about how frequently this value updates. So say, I don't know, it's every 100 milliseconds.
+
+9
+00:01:21.260 --> 00:01:29.260
+We can still imagine that our we've talked before about the fact that the server is having to kind of like check its shadow set of data, seeing if it's the same as the client.
+
+10
+00:01:29.260 --> 00:01:34.260
+So even if we reduce our net relevancy to like, you know, 100 milliseconds every 0.1 seconds,
+
+11
+00:01:34.260 --> 00:01:43.260
+that's still going to be checking against this shadow set of data 10 times a second for whether or not this cube has the right color against every other client.
+
+12
+00:01:44.260 --> 00:01:57.260
+That's 10 times more checks than we know is happening, right? Obviously, in this particular situation, you could align your net update with the kind of frequency with which we're changing this color.
+
+13
+00:01:57.260 --> 00:02:05.260
+But if you imagine some kind of more complex scenario or if those two things aren't perfectly in sync, suddenly it becomes not a perfect tool to solve that problem.
+
+14
+00:02:06.420 --> 00:02:14.419
+If we just have some kind of, if you could think about some other kind of like game event, like something like a door opening, for example,
+
+15
+00:02:14.419 --> 00:02:20.419
+the, you know, we don't need every player to be constantly checking, hey, is this door open?
+
+16
+00:02:20.419 --> 00:02:26.419
+We know that that kind of that door will never be open until someone interacts with it, and then it becomes open.
+
+17
+00:02:26.419 --> 00:02:33.419
+And it's only at the point that it opens that information changes. And at the point that it's open, again, it will stay open until someone else interacts with it.
+
+18
+00:02:33.419 --> 00:02:38.419
+So we don't really need our server to be constantly checking against this information.
+
+19
+00:02:38.419 --> 00:02:41.419
+That's where dormancy can kind of help us.
+
+20
+00:02:42.419 --> 00:02:52.419
+Dormancy basically gives us the opportunity to say, you know, for a start, this thing will perhaps, you know, never become relevant,
+
+21
+00:02:52.419 --> 00:02:59.419
+but also that this object can be like irrelevant to every connection until some particular event happens.
+
+22
+00:02:59.419 --> 00:03:10.419
+So if we were to take our cube changing color every second, what we could do is we could set that cube to be net dormant.
+
+23
+00:03:10.419 --> 00:03:15.419
+So dormant all is kind of one setting that you could choose, but we can also set it to be dormant initial.
+
+24
+00:03:15.419 --> 00:03:23.419
+And that would essentially say, just presume server that I am dormant right now.
+
+25
+00:03:23.419 --> 00:03:30.419
+And then the way you can temporarily break that, so this is what we'll kind of go into this flow in a little bit.
+
+26
+00:03:30.419 --> 00:03:38.419
+But when something is dormant initial, what it essentially means is I'm not even going to bother checking any of the other stuff about this thing.
+
+27
+00:03:38.419 --> 00:03:40.419
+I'm just going to ignore this thing.
+
+28
+00:03:40.419 --> 00:03:50.419
+And then the way that the kind of other side of that coin to setting something as dormant initial is use this function called set net dormancy or flush net dormancy.
+
+29
+00:03:50.419 --> 00:04:01.780
+And that's essentially notifying the server, hey, some relevant bit of information about this thing has changed and therefore make this thing temporarily undormant.
+
+30
+00:04:01.780 --> 00:04:11.780
+And now you can bother doing the rest of the checks about like relevancy to see if it's within distance, to see if it's, you know, on the same team, if it's got the right connection.
+
+31
+00:04:12.780 --> 00:04:16.779
+But that way you've kind of saved the server all of those checks in the first place.
+
+32
+00:04:16.779 --> 00:04:20.779
+And we know for a fact that we only change this cube's color on a certain frequency.
+
+33
+00:04:20.779 --> 00:04:25.779
+So it's only when we change that cube's color that we would flush its net dormancy.
+
+34
+00:04:26.779 --> 00:04:34.259
+So by default, when you're looking at an actor, if you go to dormancy, by default, it's awake.
+
+35
+00:04:34.259 --> 00:04:38.259
+That means that basically this thing is assumed to be kind of dormant.
+
+36
+00:04:38.259 --> 00:04:43.259
+Hypothetically, it could go undormant. Game code could affect that.
+
+37
+00:04:43.259 --> 00:04:48.259
+But by default, it's just going to be like, I'm kind of assuming that I'm mostly undormant all the time.
+
+38
+00:04:48.259 --> 00:04:57.259
+But the other kind of states that you can be aware of, you've got never, which is a little bit like our kind of always relevant is to basically say this thing will never go dormant.
+
+39
+00:04:57.259 --> 00:05:01.259
+You know, it's always going to be out of dormancy.
+
+40
+00:05:01.259 --> 00:05:07.259
+But the kind of more save your CPU cycles, save your connection is to be an initial.
+
+41
+00:05:07.259 --> 00:05:14.259
+And this would say that from the beginning of the game, this thing is kind of irrelevant until I say otherwise.
+
+42
+00:05:14.259 --> 00:05:18.259
+And then you would do this kind of, you know, flush net dormancy.
+
+43
+00:05:18.259 --> 00:05:20.259
+And that's the kind of, like I said, the other side of this coin.
+
+44
+00:05:20.259 --> 00:05:30.259
+This would temporarily set this thing to not be dormant anymore for like until every client has kind of received that whatever updated state.
+
+45
+00:05:30.259 --> 00:05:32.259
+And then it would go back to being dormant.
+
+46
+00:05:32.259 --> 00:05:34.259
+So that's kind of the other side of this coin.
+
+47
+00:05:34.259 --> 00:05:42.949
+The other thing that you can use is, if I go back to my defaults, is dormant all.
+
+48
+00:05:42.949 --> 00:05:50.949
+And that essentially means that this thing might currently not be dormant, but kind of wants to become dormant as soon as it can.
+
+49
+00:05:50.949 --> 00:05:56.949
+So that might be for an actor that initially might need its state replicated to act as on first connection.
+
+50
+00:05:56.949 --> 00:05:59.949
+But once that's done, then it can kind of go to being dormant.
+
+51
+00:05:59.949 --> 00:06:07.949
+So dormant initially is be like, assume that whatever state I've been put in in the world now is just my starting state.
+
+52
+00:06:07.949 --> 00:06:11.949
+I'm kind of baked into the level and no one needs to care about me until I say so.
+
+53
+00:06:11.949 --> 00:06:16.949
+This is similar, but it's just to say, you know, right at the beginning, I might have some state that I need to replicate,
+
+54
+00:06:16.949 --> 00:06:23.949
+but almost immediately I kind of want to become dormant again so the game will naturally boil everything down.

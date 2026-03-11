@@ -1,0 +1,633 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:07.169
+Hello and welcome to this course, Interactive Materials for Gameplay.
+
+2
+00:00:07.169 --> 00:00:13.130
+This course is based in Unreal Engine 5.5.
+
+3
+00:00:13.130 --> 00:00:23.129
+Now, with this course comes some project files and we're going to be relying relatively heavily on the project for the course.
+
+4
+00:00:23.129 --> 00:00:32.450
+It's going to have a number of different exercises and also a few different examples that you can pick apart in your own time.
+
+5
+00:00:32.450 --> 00:00:37.450
+However, what we do use is something that's called the teaching aid for this.
+
+6
+00:00:37.450 --> 00:00:42.450
+Now, hopefully this should fire up when you first log into the project.
+
+7
+00:00:42.450 --> 00:00:50.450
+If it doesn't, you'll be able to find the teaching aid in the directory Content Teaching Tools Teaching Aid.
+
+8
+00:00:50.450 --> 00:01:00.700
+It is a editor utility widget, so if you right-hand click on it, you'll have the choice to run editor utility widget.
+
+9
+00:01:00.700 --> 00:01:03.829
+Now, I'll just demonstrate this quickly.
+
+10
+00:01:03.829 --> 00:01:11.310
+So as you can see in the top right corner here, I have a forward, back, beginning and end button.
+
+11
+00:01:11.310 --> 00:01:16.310
+And you'll see, as I flick through these, it will do a couple of things.
+
+12
+00:01:16.310 --> 00:01:22.310
+It will move the editor camera around the level so that you're looking at the appropriate thing.
+
+13
+00:01:22.310 --> 00:01:31.310
+And it will also change the content browser so we will be able to view the exact assets and examples that we need.
+
+14
+00:01:31.310 --> 00:01:36.310
+So it just makes the whole thing a little bit easier to follow along with.
+
+15
+00:01:36.310 --> 00:01:42.310
+And again, if you want to get hold of this and it doesn't automatically fire up,
+
+16
+00:01:42.310 --> 00:01:50.819
+it does. You might want to just dock it in the top right hand corner here so it doesn't get in your way.
+
+17
+00:01:50.819 --> 00:02:00.920
+You can grab it from training tools. You'll see there is a training aid here. Right-hand click and just push run editor utility widget.
+
+18
+00:02:00.920 --> 00:02:03.920
+So as this course, we have a couple of goals.
+
+19
+00:02:03.920 --> 00:02:10.919
+Our main outcomes that we want from this is that you will understand three key things.
+
+20
+00:02:10.919 --> 00:02:22.430
+The parameters that you can control on a material, how you can change these parameters and the type of different effects that you can create.
+
+21
+00:02:22.430 --> 00:02:29.430
+So we will be going through a lot of different examples that will show you all of the different ways that we'll be able to do this.
+
+22
+00:02:29.430 --> 00:02:36.740
+So let's start off talking about what you can actually control.
+
+23
+00:02:36.740 --> 00:02:41.840
+Well, within a material, we can control pretty much anything.
+
+24
+00:02:41.840 --> 00:02:45.840
+We can pass in variables and we can change stuff for runtime.
+
+25
+00:02:45.840 --> 00:02:50.840
+It's going to allow us to control most different settings of the material.
+
+26
+00:02:50.840 --> 00:02:54.840
+So to start with, we'll be able to control all the standard nodes.
+
+27
+00:02:54.840 --> 00:03:00.840
+So standard nodes would be the base colour, normal, roughness, emissive, metallic,
+
+28
+00:03:00.840 --> 00:03:08.840
+specular, any of the textures that we're using and the opacity or the opacity mask.
+
+29
+00:03:08.840 --> 00:03:16.840
+So all of these are manipulatable at runtime and we'll be able to connect it to gameplay functionality.
+
+30
+00:03:16.840 --> 00:03:21.939
+One of the next things that's important to understand is something called UVs.
+
+31
+00:03:21.939 --> 00:03:26.939
+Now, you're probably aware of what UVs do and how they are used.
+
+32
+00:03:26.939 --> 00:03:34.939
+Now, they're standardly used as a means of wrapping textures around meshes.
+
+33
+00:03:34.939 --> 00:03:50.939
+Now, a UV space will usually be a UV map, which will tell us where a pixel from a texture would need to be mapped upon a pixel from a mesh.
+
+34
+00:03:50.939 --> 00:03:58.939
+So if we were to unwrap a texture, how would we wrap it around the object that we've created in 3D?
+
+35
+00:03:58.939 --> 00:04:03.030
+Now, we're going to be using UVs in lots of different ways.
+
+36
+00:04:03.030 --> 00:04:11.030
+Now, the model UVs, these ones here, this is the standard use of UVs you're probably used to.
+
+37
+00:04:11.030 --> 00:04:18.579
+And this is where the texture is just mapped upon a static mesh.
+
+38
+00:04:18.579 --> 00:04:22.579
+But next up, what we have here is screen space UVs.
+
+39
+00:04:22.579 --> 00:04:38.579
+So what this is doing is rather than using the UVs for the object, it is actually taking the UVs from the screen and using that to figure out how to show you the texture.
+
+40
+00:04:38.579 --> 00:04:44.579
+So you can see here as I move around, the texture is mapping to the screen rather than to the object.
+
+41
+00:04:44.579 --> 00:04:56.579
+Next up is something called world space. Rather than using the local object, what we're doing is we're looking at where a specific pixel appears within the entire level.
+
+42
+00:04:56.579 --> 00:05:01.579
+So the world. And we're using that in order to map texture.
+
+43
+00:05:01.579 --> 00:05:12.670
+So you can see here, for example, that if I was to move this cube around, the texture would not move with it.
+
+44
+00:05:12.670 --> 00:05:21.800
+That's because it's tracking it in the world space. Now, we work in three planes, X, Y and Z.
+
+45
+00:05:21.800 --> 00:05:30.800
+So you can see there is some oddity in this when it comes to a specific angle because it's trying to map it in those three planes.
+
+46
+00:05:30.800 --> 00:05:37.930
+And if you are halfway between two of them, it's not going to easily fit within those parameters.
+
+47
+00:05:37.930 --> 00:05:53.019
+Finally, what we have is the object bounds. Now, this looks a little bit like our surface space, but all of the objects that we have within Unreal have something that's called a bounds.
+
+48
+00:05:53.019 --> 00:06:00.019
+And a bounds is a invisible box, which is often used for something called frustrum culling.
+
+49
+00:06:00.019 --> 00:06:07.019
+It is used for determining if a mesh should be rendered to the screen.
+
+50
+00:06:07.019 --> 00:06:12.019
+So it's looking to see if it is within the frustrum of the camera.
+
+51
+00:06:12.019 --> 00:06:17.019
+It is its main use. However, we can also use it for lots of other different things.
+
+52
+00:06:17.019 --> 00:06:29.019
+In this case, we are using it to map something to an object over its bounds and allow us to create effects that would work on numerous different meshes,
+
+53
+00:06:29.019 --> 00:06:37.019
+because it uses the bounds rather than the mesh itself as a method of mapping textures to it.
+
+54
+00:06:37.019 --> 00:06:44.699
+So UVs are an important element to understand. So how can we manipulate UVs?
+
+55
+00:06:44.699 --> 00:06:49.699
+Well, we can do them in a number of ways, but the standard methods would be to pan the UVs.
+
+56
+00:06:49.699 --> 00:07:00.889
+This is going to allow us to move the UVs in a specific direction, often used for creating things like water running down a material.
+
+57
+00:07:00.889 --> 00:07:14.449
+We can rotate them in order to create different effects, or we can scale. Next up, something that we haven't talked about yet, and that is World Position Offset.
+
+58
+00:07:14.449 --> 00:07:21.769
+Now, what World Position Offset does is it can be found. Let me just open up one of these materials.
+
+59
+00:07:21.769 --> 00:07:29.769
+So we can find it here on the output pen for our material, World Position Offset.
+
+60
+00:07:29.769 --> 00:07:41.769
+And what this is, is it is determining how we move a pixel, or in this case, a vertices.
+
+61
+00:07:41.769 --> 00:07:52.769
+So we can manipulate the vertices which are within a mesh, and we can use World Position Offset to animate it or to move those.
+
+62
+00:07:52.769 --> 00:08:09.769
+Now, this is most commonly used in foliage tools, because what you can do in that case is you can create a relatively cheap swaying of trees or grass.
+
+63
+00:08:10.769 --> 00:08:14.769
+So that it's a cheap method to create some kind of effect like that.
+
+64
+00:08:14.769 --> 00:08:25.990
+Now, the main thing to note is if I was to jump in to wireframe mode and select, you can see that it's moving these vertices around.
+
+65
+00:08:25.990 --> 00:08:30.990
+So that is what is being offset by World Position Offset.
+
+66
+00:08:30.990 --> 00:08:38.990
+Now, the vertices are not actually moving. They're only being rendered. They're only being moving in the rendering.
+
+67
+00:08:38.990 --> 00:08:43.990
+So this isn't going to change any collisions or anything like that.
+
+68
+00:08:43.990 --> 00:08:51.120
+Now, in this, as you can see, I've noted here that we're using the bounding box as a mask.
+
+69
+00:08:51.120 --> 00:08:57.120
+And you can see at the bottom, we have a rather dark feet and a rather light top.
+
+70
+00:08:57.120 --> 00:09:00.120
+That's the first use of using the bounding box.
+
+71
+00:09:00.120 --> 00:09:10.120
+So all of these different things are swaying, but the effect is becoming less the further down money we get in this situation.
+
+72
+00:09:10.120 --> 00:09:23.120
+And even though we have multiple material slots for these characters, because they're both working off of the same bounding box, it functions sort of seamlessly.
+
+73
+00:09:23.309 --> 00:09:33.309
+So we can see here, if you want to check them out, we've got different material suggestions for each of the shrink and grow.
+
+74
+00:09:33.309 --> 00:09:42.820
+So let's open one of these up. If I open up Rotate, you're going to see that we've got a couple of different parts here that are worth looking at.
+
+75
+00:09:42.820 --> 00:09:49.139
+Firstly, we are calculating the bounding box mask using Z.
+
+76
+00:09:49.139 --> 00:09:54.139
+And you can see that this is the calculation on how to do that.
+
+77
+00:09:54.139 --> 00:10:00.139
+And I'm displaying this part of the base color so we can see the change.
+
+78
+00:10:00.139 --> 00:10:06.590
+And I've just got the rotate around the world axis here.
+
+79
+00:10:06.590 --> 00:10:11.980
+And I'm just animating using time through a sine wave.
+
+80
+00:10:11.980 --> 00:10:14.980
+Multipliers are just going to determinate the speed.
+
+81
+00:10:14.980 --> 00:10:21.100
+OK. And all of them look roughly like that. So feel free to check out any of the other materials.
+
+82
+00:10:21.100 --> 00:10:27.100
+So just as an end point to this little bit of theory, let's talk over what we're going to be covering, really.
+
+83
+00:10:27.100 --> 00:10:37.100
+So we have our materials and our materials are what we physically see, which is rendered within the scene.
+
+84
+00:10:37.100 --> 00:10:43.100
+And we can effect or change values in these from numerous different places.
+
+85
+00:10:43.100 --> 00:10:49.100
+So the most commonplace probably going to use is something that's called a dynamic material instance.
+
+86
+00:10:49.100 --> 00:11:00.100
+And what these are is we will create a material instance at runtime and assign it to a mesh or a decal or something else.
+
+87
+00:11:00.100 --> 00:11:04.100
+And we can then change those variables.
+
+88
+00:11:04.100 --> 00:11:10.100
+So we can change them like they're variables and we can update the material within our coding.
+
+89
+00:11:10.100 --> 00:11:18.100
+So within Blueprints or C++. So that way we have a programmatic control over what the material does.
+
+90
+00:11:18.100 --> 00:11:30.100
+Next thing we have is the mesh itself. So we can save variables to the mesh itself and we can change some of their settings.
+
+91
+00:11:30.100 --> 00:11:38.100
+Then we can draw on those settings within a material and we can update and we can change stuff by just looking at the mesh.
+
+92
+00:11:38.100 --> 00:11:42.870
+Also, we have something that's called a material parameter collection.
+
+93
+00:11:42.870 --> 00:11:53.870
+What a material parameter collection is, is it is an asset where we can save a almost like universal file where we can save variables in it.
+
+94
+00:11:53.870 --> 00:12:03.870
+And these variables can be accessed directly within a material without having to create an instance, without having to do any programing.
+
+95
+00:12:03.870 --> 00:12:08.870
+And it can update any material which is using those parameters.
+
+96
+00:12:08.870 --> 00:12:20.899
+Finally, there are a number of variables which are accessible in the material itself, which we can use in order to make it seem dynamic, such as time.
+
+97
+00:12:20.899 --> 00:12:30.899
+Time is something that we often run through a sine wave in order to animate, like when we have those back and forth animations with the world position offset.
+
+98
+00:12:30.899 --> 00:12:39.899
+You can also use screen location or things such as camera distance in order to change the animations.
+
+99
+00:12:39.899 --> 00:12:49.029
+So that will bring us to the end of this first video, where we're just going over a bunch of the theory and making sure everyone has the foundations in place
+
+100
+00:12:49.029 --> 00:12:53.029
+so that we can jump into the examples and exercises.
+
+101
+00:12:53.029 --> 00:13:03.309
+OK, so we've looked at what you can affect within a material and also where you can update information.
+
+102
+00:13:03.309 --> 00:13:10.889
+Let's look at the different ways that materials can be displayed within Unreal.
+
+103
+00:13:10.889 --> 00:13:16.889
+So the first way that you're probably very accustomed to is surface.
+
+104
+00:13:16.889 --> 00:13:30.940
+So what we're doing in this instance is we're taking a skeletal mesh or a static mesh and we are wrapping the material around it so that it can be displayed within the world.
+
+105
+00:13:30.940 --> 00:13:34.940
+Next up, what we have is a decal.
+
+106
+00:13:34.940 --> 00:13:48.940
+And a decal works very similar to surface, but rather than it being part of the mesh when it's rendered, it is projected onto a mesh afterwards.
+
+107
+00:13:48.940 --> 00:13:55.940
+So you can see here as I move this around, it will move around the different elements.
+
+108
+00:13:55.940 --> 00:14:00.940
+And if I was to rotate it, you can see how the projection is stretched.
+
+109
+00:14:00.940 --> 00:14:11.940
+This is great for things such as road markings or grime and muck or cracks or something like that.
+
+110
+00:14:11.940 --> 00:14:16.940
+Something that you want to put over a material to make it look a little bit different.
+
+111
+00:14:16.940 --> 00:14:20.460
+Next up, we have light functions.
+
+112
+00:14:20.460 --> 00:14:28.460
+Now, light functions, you'll find a slot for the material in the details panel of most light actors.
+
+113
+00:14:28.460 --> 00:14:31.460
+And what these do is they work as a mask.
+
+114
+00:14:31.460 --> 00:14:41.460
+So rather than actually projecting the material, it's going to prevent it showing through.
+
+115
+00:14:41.460 --> 00:14:47.460
+So you can see here that the black of the face no longer this spotlight shows up on.
+
+116
+00:14:47.460 --> 00:14:54.159
+Now, these are mostly used in order to get a more realistic looking light.
+
+117
+00:14:54.159 --> 00:15:04.159
+So when you've got a standard bulb that is being projected against the wall, it won't be just a smooth transition.
+
+118
+00:15:04.159 --> 00:15:11.159
+It will actually show some kind of pattern depending on what kind of bulb you're using.
+
+119
+00:15:11.159 --> 00:15:18.159
+So if you want to get a very realistic looking bulb, that's where you'd use a relatively cheap light function.
+
+120
+00:15:18.159 --> 00:15:20.159
+Next up, we have widgets.
+
+121
+00:15:20.159 --> 00:15:24.159
+Now, widgets are Unreal's heads up display.
+
+122
+00:15:24.159 --> 00:15:31.159
+A widget uses Unreal's system that's called UMG, which stands for Unreal Motion Graphics.
+
+123
+00:15:31.159 --> 00:15:35.159
+And this is when you want to create something 2D.
+
+124
+00:15:35.159 --> 00:15:45.159
+Now, most commonly, this would be things such as menu systems or heads up displays that you want to attach to the screen.
+
+125
+00:15:45.159 --> 00:15:48.159
+However, they can actually be placed within the world.
+
+126
+00:15:48.159 --> 00:15:55.159
+So you can see here that we have this example and this is our widget.
+
+127
+00:15:55.159 --> 00:16:03.159
+And it's actually rather than it being on the screen itself, we are placing a plane within the world
+
+128
+00:16:03.159 --> 00:16:07.159
+and we are rendering that widget onto the plane.
+
+129
+00:16:07.159 --> 00:16:20.159
+This is often used for things such as like health bars on characters or any menus that you're using within virtual reality.
+
+130
+00:16:20.159 --> 00:16:27.159
+Because in virtual reality, you really don't want to be doing stuff on the screen itself because it really messes with the eyes.
+
+131
+00:16:27.159 --> 00:16:31.929
+So that's widgets in world space.
+
+132
+00:16:31.929 --> 00:16:35.929
+The other option we've got is in screen space and I'll just show you this.
+
+133
+00:16:35.929 --> 00:16:41.929
+So in screen space, you can see we've got our little character's face that appears in front of us.
+
+134
+00:16:41.929 --> 00:16:46.929
+But it appears on the actual screen rather than in the world.
+
+135
+00:16:46.929 --> 00:16:53.279
+And this would be your menu systems and your heads up display, health bar and so on.
+
+136
+00:16:53.279 --> 00:16:59.470
+OK, final one I want to talk about is the post process material.
+
+137
+00:16:59.470 --> 00:17:07.470
+So if you are working with Unreal, the way Unreal will work is it will go away
+
+138
+00:17:07.470 --> 00:17:14.470
+and it's going to look at each of the different material instances that are on the screen.
+
+139
+00:17:14.470 --> 00:17:19.470
+And it's going to put them into little buckets to calculate what they'll look like.
+
+140
+00:17:19.470 --> 00:17:25.470
+And then afterwards, it's going to composite them all together into the G buffer.
+
+141
+00:17:25.470 --> 00:17:32.470
+So we'd get elements like we would get a base colour pass, lighting pass, metallic roughness and so on.
+
+142
+00:17:32.470 --> 00:17:37.470
+And these are all composited together in order to make the final output.
+
+143
+00:17:37.470 --> 00:17:42.470
+And that final output, we can then do something with it afterwards.
+
+144
+00:17:42.470 --> 00:17:48.470
+So after the scene has been rendered, we can apply a material to it.
+
+145
+00:17:48.470 --> 00:17:54.470
+In this case, I've just used it to carve a section out from the centre of the screen
+
+146
+00:17:54.470 --> 00:17:59.470
+and show us the green face. But it can be used for lots and lots of different things.
+
+147
+00:17:59.470 --> 00:18:09.470
+And the great thing is you have access to all of the G buffers that have been created previously to it.
+
+148
+00:18:09.470 --> 00:18:16.470
+So usually these are using something that's called post process volumes,
+
+149
+00:18:16.470 --> 00:18:21.470
+which can be set to Unbound or just a specific one.
+
+150
+00:18:21.470 --> 00:18:25.470
+As you can see, this appears when I enter this box.
+
+151
+00:18:25.470 --> 00:18:27.630
+So that's post process.
+
+152
+00:18:27.630 --> 00:18:33.660
+So we've gone over all of the different things that we can change within a material.
+
+153
+00:18:33.660 --> 00:18:36.660
+We've looked at where we might get the inputs in order to control them.
+
+154
+00:18:36.660 --> 00:18:42.859
+And then we've looked at the different methods of display for materials.
+
+155
+00:18:42.859 --> 00:18:44.859
+That's it for the theory.
+
+156
+00:18:44.859 --> 00:18:48.859
+Next, we're going to start looking at some specific examples
+
+157
+00:18:48.859 --> 00:18:53.859
+and do a few exercises to see how we would control them.
+
+158
+00:18:53.859 --> 00:18:55.109
+Thank you very much.

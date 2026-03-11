@@ -1,0 +1,717 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.200
+So first off, the server-client model.
+
+2
+00:00:03.200 --> 00:00:05.200
+We've talked about this in previous sessions,
+
+3
+00:00:05.200 --> 00:00:07.200
+if you've watched any of the previous ones,
+
+4
+00:00:07.200 --> 00:00:11.439
+but Unreal operates on an authoritative server model.
+
+5
+00:00:11.439 --> 00:00:17.039
+So what that means is that really what the server says goes,
+
+6
+00:00:17.039 --> 00:00:21.000
+the server maintains the actual true state of things.
+
+7
+00:00:21.000 --> 00:00:26.199
+Obviously, there's a discrepancy here when you're not doing multiplayer games.
+
+8
+00:00:26.199 --> 00:00:29.199
+That's referred, let's say, kind of like,
+
+9
+00:00:29.199 --> 00:00:31.199
+configuration that's referred to as standalone.
+
+10
+00:00:31.199 --> 00:00:34.200
+That essentially means you are playing the game locally,
+
+11
+00:00:34.200 --> 00:00:38.200
+meaning the client and server are essentially the same thing.
+
+12
+00:00:38.200 --> 00:00:42.200
+So in the situation of single or local multiplayer,
+
+13
+00:00:42.200 --> 00:00:46.200
+there is a single, the client machine is essentially the server's machine.
+
+14
+00:00:46.200 --> 00:00:48.200
+There's really no server.
+
+15
+00:00:48.200 --> 00:00:52.200
+But it's worth mentioning that very, very early on,
+
+16
+00:00:52.200 --> 00:00:54.200
+we talked about the idea that we had,
+
+17
+00:00:54.200 --> 00:00:55.200
+I think this is in the first training session,
+
+18
+00:00:55.200 --> 00:00:58.200
+we have these different pragmas that you could use to define
+
+19
+00:00:58.200 --> 00:01:01.200
+whether or not the code you're working in is server code or client code.
+
+20
+00:01:01.200 --> 00:01:05.200
+And that is true when you're in standalone or when you're in editor,
+
+21
+00:01:05.200 --> 00:01:08.200
+that is true for both, both of those things are true.
+
+22
+00:01:08.200 --> 00:01:10.200
+It is both client and server.
+
+23
+00:01:10.200 --> 00:01:13.200
+So hypothetically, in standalone,
+
+24
+00:01:13.200 --> 00:01:17.200
+when you're playing just a single-player game or a local multiplayer,
+
+25
+00:01:17.200 --> 00:01:20.200
+you are kind of a client and a server.
+
+26
+00:01:20.200 --> 00:01:24.390
+So in that situation, the client is authoritative.
+
+27
+00:01:24.390 --> 00:01:28.390
+We'll talk about what authority specifically means shortly.
+
+28
+00:01:28.390 --> 00:01:31.390
+But yeah, it has full control over everything.
+
+29
+00:01:31.390 --> 00:01:32.390
+All the data is local.
+
+30
+00:01:32.390 --> 00:01:35.390
+We don't have to worry about data going to any other computers,
+
+31
+00:01:35.390 --> 00:01:36.390
+to any other clients or the server.
+
+32
+00:01:36.390 --> 00:01:40.390
+And we don't have to worry about data importantly coming from anywhere.
+
+33
+00:01:40.390 --> 00:01:44.390
+Then we have the kind of other situation, which is a network setup.
+
+34
+00:01:44.390 --> 00:01:49.390
+And what that means is the server is always fully authoritative
+
+35
+00:01:49.390 --> 00:01:54.390
+and players that connect to the server are kind of referred to as clients.
+
+36
+00:01:54.390 --> 00:01:58.390
+And as we said, it's the server that holds the true state of the game.
+
+37
+00:01:58.390 --> 00:02:05.390
+In that situation, the kind of all relevant gameplay logic
+
+38
+00:02:05.390 --> 00:02:10.389
+is and definitely should be local to the server.
+
+39
+00:02:10.389 --> 00:02:15.389
+But there are aspects of data that would be kind of remote
+
+40
+00:02:15.389 --> 00:02:17.389
+that either the server just doesn't care about
+
+41
+00:02:17.389 --> 00:02:20.389
+or technically the client would have authority over.
+
+42
+00:02:20.389 --> 00:02:22.389
+Again, we'll talk about those in a little bit.
+
+43
+00:02:22.389 --> 00:02:25.389
+And then there's also another configuration to kind of bear in mind
+
+44
+00:02:25.389 --> 00:02:30.389
+where one of the players can be simultaneously the client and the server.
+
+45
+00:02:30.389 --> 00:02:33.319
+We'll talk about that a little bit more in a bit.
+
+46
+00:02:33.319 --> 00:02:35.319
+So the types of servers.
+
+47
+00:02:35.319 --> 00:02:39.319
+We've got dedicated, which is the kind of standard setup
+
+48
+00:02:39.319 --> 00:02:43.319
+for a lot of the kind of competitive games you'll be playing online.
+
+49
+00:02:43.319 --> 00:02:48.319
+So in this context, the server runs an entirely distinct machine.
+
+50
+00:02:48.319 --> 00:02:51.319
+The server would run in a kind of headless configuration
+
+51
+00:02:51.319 --> 00:02:53.319
+some people might refer to it as.
+
+52
+00:02:53.319 --> 00:02:56.319
+This essentially means that the server doesn't need to be doing any of the things
+
+53
+00:02:56.319 --> 00:02:59.319
+you as a player would typically care about in a game.
+
+54
+00:02:59.319 --> 00:03:01.319
+It doesn't need to be listening for input.
+
+55
+00:03:01.319 --> 00:03:02.319
+It doesn't need to render visuals.
+
+56
+00:03:02.319 --> 00:03:06.319
+There are no local clients on this machine.
+
+57
+00:03:06.319 --> 00:03:10.319
+So all the server is really there to do is process input changes
+
+58
+00:03:10.319 --> 00:03:14.319
+like messages that might be coming from clients
+
+59
+00:03:14.319 --> 00:03:16.319
+kind of ticking the game over
+
+60
+00:03:16.319 --> 00:03:19.319
+and just maintaining that authoritative state of the game
+
+61
+00:03:19.319 --> 00:03:24.539
+and then dispatching that information to each of the connected clients.
+
+62
+00:03:24.539 --> 00:03:26.539
+It receives information from clients to verify,
+
+63
+00:03:26.539 --> 00:03:29.539
+so that might be things like inputs and then clients informing them
+
+64
+00:03:29.539 --> 00:03:32.539
+where the client thinks that their location is.
+
+65
+00:03:32.539 --> 00:03:35.060
+And then alternative to that, we have the listen server.
+
+66
+00:03:35.060 --> 00:03:37.060
+This is what I was just referring to a minute ago.
+
+67
+00:03:38.060 --> 00:03:42.060
+This is essentially where a single client will also act as server.
+
+68
+00:03:42.060 --> 00:03:46.060
+So this is not really a suitable setup for anything
+
+69
+00:03:46.060 --> 00:03:51.310
+that is meant to be certainly competitive games
+
+70
+00:03:51.310 --> 00:03:56.310
+or anything with a lot of players playing locally,
+
+71
+00:03:56.310 --> 00:03:59.310
+with a lot of players playing in a single session.
+
+72
+00:03:59.310 --> 00:04:01.310
+It's not because of the kind of additional costs
+
+73
+00:04:01.310 --> 00:04:04.310
+of rendering a screen, listening for input,
+
+74
+00:04:04.310 --> 00:04:07.310
+hosting on additional kind of client configuration.
+
+75
+00:04:07.310 --> 00:04:10.310
+There's only a kind of, there's a more limited subset of situations
+
+76
+00:04:10.310 --> 00:04:13.310
+where a listen server is really acceptable.
+
+77
+00:04:13.310 --> 00:04:16.310
+Most of the time that's going to be probably more cooperative games
+
+78
+00:04:16.310 --> 00:04:22.310
+because it's probably relatively obvious that if you are a listen server,
+
+79
+00:04:22.310 --> 00:04:24.310
+your ping is going to be close to zero.
+
+80
+00:04:24.310 --> 00:04:27.310
+So you're going to have a massive advantage
+
+81
+00:04:27.310 --> 00:04:29.310
+over other players connected to your game.
+
+82
+00:04:29.310 --> 00:04:31.310
+So if you're in a competitive environment,
+
+83
+00:04:31.310 --> 00:04:33.310
+that's probably not going to be suitable.
+
+84
+00:04:33.310 --> 00:04:36.310
+And also when you're, even if you are doing a,
+
+85
+00:04:36.310 --> 00:04:38.310
+some kind of cooperative game at scale,
+
+86
+00:04:38.310 --> 00:04:41.310
+purely the extra cost put on your CPU
+
+87
+00:04:41.310 --> 00:04:45.310
+of having to do all those kind of local client calculations,
+
+88
+00:04:45.310 --> 00:04:47.310
+it's just going to mean that it's not necessarily
+
+89
+00:04:47.310 --> 00:04:48.310
+such a suitable configuration.
+
+90
+00:04:48.310 --> 00:04:52.310
+So dedicated server is going to be suitable for all situations.
+
+91
+00:04:52.310 --> 00:04:56.310
+Listen server is admittedly easier to set up,
+
+92
+00:04:56.310 --> 00:05:00.310
+but is really only going to be suitable for probably non-competitive,
+
+93
+00:05:00.310 --> 00:05:03.310
+probably small scope, like no more than, you know,
+
+94
+00:05:03.310 --> 00:05:06.310
+four to eight players maybe, kind of set up.
+
+95
+00:05:06.310 --> 00:05:08.470
+The other thing about dedicated server,
+
+96
+00:05:08.470 --> 00:05:10.470
+you might be familiar with this term is that, you know,
+
+97
+00:05:10.470 --> 00:05:15.470
+some games would choose to give out a copy of their game
+
+98
+00:05:15.470 --> 00:05:18.470
+where you can turn your own computers into dedicated servers.
+
+99
+00:05:18.470 --> 00:05:21.470
+So it depends, that's kind of a design decision on you as a developer
+
+100
+00:05:21.470 --> 00:05:24.470
+of whether or not you want to expose the functionality
+
+101
+00:05:24.470 --> 00:05:27.470
+to host, for players to host their own dedicated servers
+
+102
+00:05:27.470 --> 00:05:31.470
+or whether you want, you know, the acquisition of dedicated servers
+
+103
+00:05:31.470 --> 00:05:34.470
+to be something that you purely do as a kind of proprietary thing
+
+104
+00:05:34.470 --> 00:05:36.470
+where people would have to either purchase servers
+
+105
+00:05:36.470 --> 00:05:39.470
+or you as a developer take on the responsibility
+
+106
+00:05:39.470 --> 00:05:42.470
+of hosting all dedicated servers for your game.
+
+107
+00:05:42.470 --> 00:05:46.910
+So just talking about like how someone actually, you know,
+
+108
+00:05:46.910 --> 00:05:49.910
+when a client is trying to join, connect to a server,
+
+109
+00:05:49.910 --> 00:05:53.910
+let's just talk a little bit about how that process actually goes.
+
+110
+00:05:54.910 --> 00:05:59.910
+There's actually a very good post in Unreal documentation,
+
+111
+00:05:59.910 --> 00:06:01.910
+which I can kind of come back to, that kind of goes through
+
+112
+00:06:01.910 --> 00:06:04.910
+a little bit in kind of more detail, but in the kind of like,
+
+113
+00:06:04.910 --> 00:06:09.910
+in the broad scope of things, yeah, we just kind of go,
+
+114
+00:06:09.910 --> 00:06:11.910
+worth going over this kind of high level flow.
+
+115
+00:06:11.910 --> 00:06:14.910
+So the first step is we have our client make a request
+
+116
+00:06:14.910 --> 00:06:16.910
+for a connection to our server.
+
+117
+00:06:16.910 --> 00:06:19.910
+At that point, the server can reject,
+
+118
+00:06:19.910 --> 00:06:21.910
+accept or reject that connection request.
+
+119
+00:06:21.910 --> 00:06:24.910
+There's some kind of like handshaking that goes on.
+
+120
+00:06:24.910 --> 00:06:26.910
+And then once the connection is accepted,
+
+121
+00:06:26.910 --> 00:06:28.910
+the server is going to send information down
+
+122
+00:06:28.910 --> 00:06:30.910
+to the client for them to proceed.
+
+123
+00:06:30.910 --> 00:06:33.910
+At that point, the server is going to kind of
+
+124
+00:06:33.910 --> 00:06:35.910
+tell the client what map to load
+
+125
+00:06:35.910 --> 00:06:38.910
+and then proceed to wait for the client to load the desired map.
+
+126
+00:06:38.910 --> 00:06:41.910
+And once the server receives that callback,
+
+127
+00:06:41.910 --> 00:06:43.910
+the pre-login function is called in the game mode.
+
+128
+00:06:43.910 --> 00:06:46.910
+We talked about this in I think our second session
+
+129
+00:06:46.910 --> 00:06:48.910
+about the kind of game flow.
+
+130
+00:06:48.910 --> 00:06:51.910
+And it's critical step, this kind of pre-login function,
+
+131
+00:06:51.910 --> 00:06:55.910
+because it's at that point that you can inject gameplay code
+
+132
+00:06:55.910 --> 00:06:58.910
+that can kind of choose to accept or reject that connection.
+
+133
+00:06:58.910 --> 00:07:01.910
+So whilst we said the server decides to accept or reject
+
+134
+00:07:01.910 --> 00:07:03.910
+the connection very early in the flow,
+
+135
+00:07:03.910 --> 00:07:05.910
+that is not something that you as a developer
+
+136
+00:07:05.910 --> 00:07:07.910
+would typically have access to
+
+137
+00:07:07.910 --> 00:07:09.910
+unless you went changing engine code.
+
+138
+00:07:09.910 --> 00:07:11.910
+The kind of point at which you as a developer
+
+139
+00:07:11.910 --> 00:07:14.910
+would typically inject that the kind of capability
+
+140
+00:07:14.910 --> 00:07:16.910
+to reject or accept a connection
+
+141
+00:07:16.910 --> 00:07:19.910
+is going to be in the game mode base pre-login function,
+
+142
+00:07:19.910 --> 00:07:21.910
+which you can obviously override
+
+143
+00:07:21.910 --> 00:07:23.910
+in your game mode classes.
+
+144
+00:07:23.910 --> 00:07:27.680
+If that is then accepted by your pre-login,
+
+145
+00:07:27.680 --> 00:07:30.680
+we then go on to call login game mode.
+
+146
+00:07:30.680 --> 00:07:34.680
+And it's a login that we would call,
+
+147
+00:07:34.680 --> 00:07:37.680
+we would create the player controller on the server.
+
+148
+00:07:37.680 --> 00:07:40.680
+And it's, you know, as with all of this flow,
+
+149
+00:07:40.680 --> 00:07:42.680
+we'll talk a little bit more about this,
+
+150
+00:07:42.680 --> 00:07:45.680
+but whenever you create actors on the server,
+
+151
+00:07:45.680 --> 00:07:48.680
+those actors are then kind of inherently replicated to the client.
+
+152
+00:07:48.680 --> 00:07:52.680
+So that login function will create the player controller on the server
+
+153
+00:07:52.680 --> 00:07:55.680
+and that then gets replicated to the client.
+
+154
+00:07:55.680 --> 00:08:00.680
+It's also really important to note that the player controller
+
+155
+00:08:00.680 --> 00:08:02.680
+will get its begin play called.
+
+156
+00:08:02.680 --> 00:08:04.680
+So it's just understanding, like it's important to understand
+
+157
+00:08:04.680 --> 00:08:06.680
+where that's going to occur in that flow.
+
+158
+00:08:06.680 --> 00:08:08.680
+It would be at this point.
+
+159
+00:08:08.680 --> 00:08:11.680
+And then lastly, the server is going to call post login
+
+160
+00:08:11.680 --> 00:08:13.680
+on the game mode.
+
+161
+00:08:13.680 --> 00:08:16.680
+And that's basically the point at which it's now safe
+
+162
+00:08:16.680 --> 00:08:19.680
+to call RPC functions on the player controller.
+
+163
+00:08:19.680 --> 00:08:21.680
+You can expect those functions.
+
+164
+00:08:21.680 --> 00:08:24.680
+We've not talked really about what RPCs are yet,
+
+165
+00:08:24.680 --> 00:08:29.680
+but it's at the point of post login getting called
+
+166
+00:08:29.680 --> 00:08:31.680
+that we can be certain that that connection is set up,
+
+167
+00:08:31.680 --> 00:08:33.679
+that the client has that player controller,
+
+168
+00:08:33.679 --> 00:08:36.679
+and therefore RPCs are going to kind of flow through to that client.
+
+169
+00:08:39.679 --> 00:08:42.679
+As I said, there's a kind of more detailed post.
+
+170
+00:08:42.679 --> 00:08:44.679
+I believe it's actually by a member of the community,
+
+171
+00:08:44.679 --> 00:08:46.679
+not an Epic dev themselves,
+
+172
+00:08:46.679 --> 00:08:50.679
+but it just goes into this flow in more detail
+
+173
+00:08:50.679 --> 00:08:52.679
+and more granular function by function call.
+
+174
+00:08:52.679 --> 00:08:54.679
+You'll actually see this in the presenter notes.
+
+175
+00:08:54.679 --> 00:08:59.679
+So if you're more interested in more specific detail about this,
+
+176
+00:08:59.679 --> 00:09:06.679
+there's a good post about this on the Epic community forums.
+
+177
+00:09:06.679 --> 00:09:09.679
+And that's actually part of the presenter notes in this presentation.
+
+178
+00:09:09.679 --> 00:09:11.679
+So if you're interested in following up on that,
+
+179
+00:09:11.679 --> 00:09:13.679
+just follow that link in the presenter notes.

@@ -1,0 +1,305 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.370
+A significant hurdle when authoring UI with a code backend is that I'm grabbing parts
+
+2
+00:00:05.370 --> 00:00:09.660
+of the visuals that don't yet exist. For instance, how can we update a text field
+
+3
+00:00:09.660 --> 00:00:13.640
+in code when the field itself was added later in Blueprint, because we won't have
+
+4
+00:00:13.640 --> 00:00:17.620
+a reference to it? Luckily, Unreal presents two exceptionally
+
+5
+00:00:17.620 --> 00:00:22.100
+important new property specifiers to empower the UI programmer, that being the bind widget
+
+6
+00:00:22.100 --> 00:00:26.339
+and the bind widget anim. Let's take a look at how we'd go about
+
+7
+00:00:26.339 --> 00:00:30.339
+using them, and what functions we'd bring in around them to develop more smarter pieces
+
+8
+00:00:30.339 --> 00:00:34.649
+of UI. Bind widget is a meta specifier intended for
+
+9
+00:00:34.649 --> 00:00:39.549
+use with widget pointers in our user widget classes, and allows a designer to populate
+
+10
+00:00:39.549 --> 00:00:45.090
+native C++ level members with a designer created widget. This does kind of fly in the
+
+11
+00:00:45.090 --> 00:00:49.409
+face of the general Unreal development pipeline that have a blueprint layer sitting on top
+
+12
+00:00:49.409 --> 00:00:54.929
+of a C++ one. In this case, we're essentially leaving a gap in the C++ layer for a blueprint
+
+13
+00:00:54.929 --> 00:00:59.899
+layer to fill it in for us. Let's talk through a practical example.
+
+14
+00:00:59.899 --> 00:01:05.260
+Let's say we've got a C++ class based off of user widget with a uTextBlock member.
+
+15
+00:01:05.260 --> 00:01:08.959
+The uTextBlock container is exactly what you'd think it is, it's a widget capable
+
+16
+00:01:08.959 --> 00:01:14.150
+of rendering text in UMG. If we flag this up with the bind widget
+
+17
+00:01:14.150 --> 00:01:17.590
+specifier, we're saying to the compiler that this particular widget is populated
+
+18
+00:01:17.590 --> 00:01:21.430
+from the designer layer. We don't need to initialise it in the native code like
+
+19
+00:01:21.430 --> 00:01:26.379
+we would with an actor component. This frees up any UI designers to implement the text
+
+20
+00:01:26.379 --> 00:01:30.459
+block for us and change its visuals, its positions, its parenting, and any other parameters
+
+21
+00:01:30.459 --> 00:01:35.450
+that they may need to adjust as per the design. As engineers, we're now free to assume
+
+22
+00:01:35.450 --> 00:01:39.969
+that this field is now valid and can carry on developing as we would otherwise.
+
+23
+00:01:39.969 --> 00:01:43.609
+But of course, it is a pointer, so validity checks are still always a pretty smart idea.
+
+24
+00:01:43.609 --> 00:01:48.290
+But you may be asking yourself, why can we assume it's valid? Well, the blueprint
+
+25
+00:01:48.290 --> 00:01:53.290
+will fail to compile if it's not compliant with the underlying native code.
+
+26
+00:01:53.290 --> 00:01:57.549
+Bind widget is signaling to the blueprint layer, hey, I need a widget of this type
+
+27
+00:01:57.549 --> 00:02:02.189
+with this specific name to properly work, so you need to add one.
+
+28
+00:02:02.189 --> 00:02:06.349
+Failure to comply will manifest much like any other blueprint compilation failure.
+
+29
+00:02:06.349 --> 00:02:10.289
+A warning error will be thrown up as soon as we try and play the game in the editor,
+
+30
+00:02:10.289 --> 00:02:14.610
+and a whole host of errors will be thrown into the log, so it's not a good time.
+
+31
+00:02:14.610 --> 00:02:18.009
+It's worth noting that the bind widget will happily bind to an existing widget as
+
+32
+00:02:18.009 --> 00:02:22.009
+long as it matches in name and in type. The compiler isn't looking for the creation
+
+33
+00:02:22.009 --> 00:02:27.020
+of such a widget, it's merely looking for the existence of one. Once we compile with
+
+34
+00:02:27.020 --> 00:02:31.419
+a compliant widget in the designer, the blueprint compiler is going to populate the underlying
+
+35
+00:02:31.419 --> 00:02:37.379
+C++ with the designer version of the widget, filling any gaps we may have deliberately left.
+
+36
+00:02:37.379 --> 00:02:40.840
+At this point, we've not actually got any widgets in the viewport, we're still
+
+37
+00:02:40.840 --> 00:02:44.639
+just looking at the designer. Why would we need any widgets to be passed
+
+38
+00:02:44.639 --> 00:02:48.250
+down into the native code when we're not actually running the game?
+
+39
+00:02:48.250 --> 00:02:52.810
+This is where our smart UI elements come into play.
+
+40
+00:02:52.810 --> 00:02:57.129
+SynchronizeProperties is a virtual function that we can override to develop smart, responsive
+
+41
+00:02:57.129 --> 00:03:03.379
+UI tools. In many ways, it mirrors the on-construction or post-edit property virtuals we typically
+
+42
+00:03:03.379 --> 00:03:07.659
+use when authoring smart actor classes. It will be called every time a property changes
+
+43
+00:03:07.659 --> 00:03:12.500
+within a specified widget in both the designer and at runtime.
+
+44
+00:03:12.500 --> 00:03:16.219
+Because it's called both at runtime and in the designer, we more often than not want
+
+45
+00:03:16.219 --> 00:03:20.060
+to branch the logic inside depending on the current environment.
+
+46
+00:03:20.060 --> 00:03:25.539
+Wrapping logic in a isDesignTime check means we can quite easily run design-only
+
+47
+00:03:27.020 --> 00:03:30.860
+So let's take a look at a practical example of how we'd use BindWidget in combination
+
+48
+00:03:30.860 --> 00:03:35.319
+with SynchronizeProperties to empower the UI designers as well as ourselves to build
+
+49
+00:03:35.319 --> 00:03:40.180
+more complex pieces of UI. In this example, we're implementing the
+
+50
+00:03:40.180 --> 00:03:45.169
+SynchronizeProperties function and supering it back up the chain so there's nothing special there.
+
+51
+00:03:45.169 --> 00:03:48.889
+We're then checking to see if we're in the designer, and if so, we check to see
+
+52
+00:03:48.889 --> 00:03:54.900
+if the container widget is valid. containerWidget in this instance is a BindWidget property.
+
+53
+00:03:54.900 --> 00:03:58.819
+If we've yet to create a valid widget in the designer for this property to bind to,
+
+54
+00:03:58.819 --> 00:04:02.000
+when we compile we're going to hit a null pointer.
+
+55
+00:04:02.000 --> 00:04:05.599
+If it does exist, however, we're going to remove all the children that are inside so
+
+56
+00:04:05.599 --> 00:04:09.199
+we've got a fresh container to work with before proceeding through our dynamic spawn
+
+57
+00:04:09.199 --> 00:04:14.030
+of as many children as the child number is set to.
+
+58
+00:04:14.030 --> 00:04:17.709
+Of course this is a very simplistic example but even here we can see the implications
+
+59
+00:04:17.709 --> 00:04:21.139
+of real authoring. The alternative would be a designer manually
+
+60
+00:04:21.139 --> 00:04:24.980
+creating a vertical box and dragging in as many images as they want directly.
+
+61
+00:04:25.750 --> 00:04:28.949
+Why have the specifications changed and we need to increase the number of images?
+
+62
+00:04:28.949 --> 00:04:31.269
+Suddenly we're dealing with a less than trivial UI rework.
+
+63
+00:04:32.300 --> 00:04:36.379
+With smart and sensible use of SynchronizeProperties, we can author responsive pieces
+
+64
+00:04:36.379 --> 00:04:39.899
+of UI that empower the team as opposed to laboring them with more work than is
+
+65
+00:04:39.899 --> 00:04:45.019
+strictly necessary. bindWidgetAnim allows us to grab named
+
+66
+00:04:45.019 --> 00:04:49.259
+animations from the designer much in the same way that we grab widgets when using the bind widget.
+
+67
+00:04:50.139 --> 00:04:55.660
+When defining animations in native C++, we simply create a member of type UWidgetAnimation
+
+68
+00:04:55.699 --> 00:04:58.819
+and use the name of the animation to create the underlying binding.
+
+69
+00:05:00.379 --> 00:05:04.379
+When we want the animation to play, it's as simple as calling the playAnimation from within
+
+70
+00:05:04.379 --> 00:05:10.290
+our user widget, passing along the bound animation. Much like bindWidget, a failure to
+
+71
+00:05:10.290 --> 00:05:14.129
+bind to an animation of a particular name will also cause a compilation failure.
+
+72
+00:05:14.720 --> 00:05:18.560
+We'll also fail to compile if the widget animation isn't marked with the transient
+
+73
+00:05:18.560 --> 00:05:23.949
+specifier along with the bindWidgetAnim meta. This is primarily due to how widgets
+
+74
+00:05:23.990 --> 00:05:28.269
+themselves play animations under the hood. During the compilation, the animations themselves
+
+75
+00:05:28.269 --> 00:05:32.269
+get copied out of the user widget into a holding container as part of the transient package.
+
+76
+00:05:32.990 --> 00:05:37.069
+Marking the animations as transient prevents these copied versions from being serialized.

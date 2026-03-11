@@ -1,0 +1,265 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:03.830
+So let's begin with the AI controller.
+
+2
+00:00:03.830 --> 00:00:06.610
+A controller in Unreal Engine 4 is a non-physical actor
+
+3
+00:00:06.610 --> 00:00:08.609
+that can possess a pawn or derived actor
+
+4
+00:00:08.609 --> 00:00:10.439
+such as the character.
+
+5
+00:00:10.439 --> 00:00:12.179
+Built already into Unreal Engine 4,
+
+6
+00:00:12.179 --> 00:00:14.060
+we have several derived types of controllers
+
+7
+00:00:14.060 --> 00:00:16.059
+such as the one that we're discussing right now.
+
+8
+00:00:16.059 --> 00:00:17.660
+But it's worth mentioning the player control
+
+9
+00:00:17.660 --> 00:00:19.480
+at the very least.
+
+10
+00:00:19.480 --> 00:00:21.219
+The player controller can be best described
+
+11
+00:00:21.219 --> 00:00:22.620
+as the will of the player.
+
+12
+00:00:22.620 --> 00:00:24.879
+So we can surmise that the AI controller
+
+13
+00:00:24.879 --> 00:00:28.839
+is the simulated will of an AI agent.
+
+14
+00:00:28.839 --> 00:00:30.699
+All controllers, no matter what type,
+
+15
+00:00:30.699 --> 00:00:34.270
+share some common functionality and traits.
+
+16
+00:00:34.270 --> 00:00:35.990
+The first is that the control of a pawn
+
+17
+00:00:35.990 --> 00:00:37.490
+is done with the possess function
+
+18
+00:00:37.490 --> 00:00:39.030
+and it's relinquished with the calling
+
+19
+00:00:39.030 --> 00:00:41.479
+of the unpossessed function.
+
+20
+00:00:41.479 --> 00:00:43.740
+Controllers also have a one-to-one relationship
+
+21
+00:00:43.740 --> 00:00:45.859
+with a pawn, meaning a single pawn
+
+22
+00:00:45.859 --> 00:00:47.060
+can only have one controller,
+
+23
+00:00:47.060 --> 00:00:50.579
+which works perfectly for most AI.
+
+24
+00:00:50.579 --> 00:00:52.960
+Where the AI controller differs from the base controller
+
+25
+00:00:52.960 --> 00:00:54.799
+or any derived player controller,
+
+26
+00:00:54.799 --> 00:00:57.299
+is that it's exclusively created on the server
+
+27
+00:00:57.299 --> 00:00:59.219
+and it's never replicated to any clients
+
+28
+00:00:59.219 --> 00:01:01.030
+in a networked game.
+
+29
+00:01:01.030 --> 00:01:03.070
+This is important as AI must be authoritative
+
+30
+00:01:03.070 --> 00:01:06.969
+and in networked games, the server is that source of truth.
+
+31
+00:01:06.969 --> 00:01:09.189
+The AI controller houses four main components
+
+32
+00:01:09.189 --> 00:01:11.969
+that allow AI agents to function in our games.
+
+33
+00:01:11.969 --> 00:01:14.569
+The components being the behavior tree component
+
+34
+00:01:14.569 --> 00:01:17.629
+and this can be best described as the brain of the AI.
+
+35
+00:01:17.629 --> 00:01:18.890
+The blackboard component,
+
+36
+00:01:18.890 --> 00:01:21.909
+best described as the memory of the AI.
+
+37
+00:01:21.909 --> 00:01:24.209
+The perception component, and as the name suggests,
+
+38
+00:01:24.209 --> 00:01:26.670
+this derives what senses the AI has.
+
+39
+00:01:26.670 --> 00:01:28.230
+Followed by the path following component
+
+40
+00:01:28.230 --> 00:01:30.030
+and again, pretty self-explanatory.
+
+41
+00:01:30.069 --> 00:01:33.599
+This allows the AI to navigate the level.
+
+42
+00:01:33.599 --> 00:01:35.719
+Previously, triggering AI logic used to be done
+
+43
+00:01:35.719 --> 00:01:37.519
+either through Blueprint or through code
+
+44
+00:01:37.519 --> 00:01:40.700
+by starting the behavior tree when we possess the pawn.
+
+45
+00:01:40.700 --> 00:01:42.840
+However, the AI controller now exposes control
+
+46
+00:01:42.840 --> 00:01:46.000
+in Blueprint and Native C++ to allow the AI logic
+
+47
+00:01:46.000 --> 00:01:49.250
+to begin immediately when possessing the pawn.
+
+48
+00:01:49.250 --> 00:01:50.750
+The AI controller also implements
+
+49
+00:01:50.750 --> 00:01:53.920
+the generic team agent interface.
+
+50
+00:01:53.920 --> 00:01:55.519
+This interface implements functionality
+
+51
+00:01:55.519 --> 00:01:57.760
+that allows for querying what team and AI agent
+
+52
+00:01:57.760 --> 00:01:59.920
+may be on, as well as what their attitude
+
+53
+00:01:59.920 --> 00:02:03.299
+towards another actor might be.
+
+54
+00:02:03.299 --> 00:02:05.959
+Unreal implements a generic team identification system
+
+55
+00:02:05.959 --> 00:02:07.819
+straight out of the box, which is flexible
+
+56
+00:02:07.819 --> 00:02:09.379
+and completely up to the developer
+
+57
+00:02:09.379 --> 00:02:13.020
+to implement in whatever way they see fit.
+
+58
+00:02:13.020 --> 00:02:14.979
+Lastly, the AI controller provides programs
+
+59
+00:02:14.979 --> 00:02:16.819
+with a handy entry function to determine
+
+60
+00:02:16.819 --> 00:02:20.659
+how our AI agent selects the target that they focus on.
+
+61
+00:02:20.659 --> 00:02:23.020
+The actor's perception updated function
+
+62
+00:02:23.020 --> 00:02:24.180
+sends through an array of actors
+
+63
+00:02:24.180 --> 00:02:26.900
+they have perceived recently.
+
+64
+00:02:26.900 --> 00:02:29.219
+Once again, the implementation of this is left empty
+
+65
+00:02:29.219 --> 00:02:30.780
+to allow each developer to implement
+
+66
+00:02:30.780 --> 00:02:32.759
+their own target selection process.

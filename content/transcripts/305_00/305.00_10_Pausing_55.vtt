@@ -1,0 +1,277 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:07.200
+In this section, we'll cover adding the logic to our Blueprint to listen for our Pause Dispatcher event,
+
+2
+00:00:07.200 --> 00:00:10.199
+pause the playing sequence, and wait for player input.
+
+3
+00:00:10.199 --> 00:00:16.129
+So we'll jump back over to the project, and in our BP Sequence Trigger Brox example,
+
+4
+00:00:16.129 --> 00:00:20.129
+this is where we're going to start adding the additional logic to this Blueprint.
+
+5
+00:00:20.129 --> 00:00:24.129
+I'm going to take our Event Begin Play and just move it up a little bit out of the way.
+
+6
+00:00:24.129 --> 00:00:29.320
+And the first thing that I want to do is drag off of the Event Begin Play,
+
+7
+00:00:29.320 --> 00:00:34.320
+and I'm going to search for Get Actor of Class.
+
+8
+00:00:34.320 --> 00:00:35.320
+Go ahead and do this.
+
+9
+00:00:35.320 --> 00:00:39.640
+And then under the Actor Class, this is where we're going to drop down,
+
+10
+00:00:39.640 --> 00:00:45.670
+and we're going to search for our BP Sequence Manager.
+
+11
+00:00:45.670 --> 00:00:49.700
+Select this, hit Compile.
+
+12
+00:00:49.700 --> 00:00:52.700
+Next, we're going to drag off of this Get Actor's Class,
+
+13
+00:00:52.700 --> 00:00:57.729
+and we're going to add a Bind Event.
+
+14
+00:00:57.729 --> 00:01:00.729
+And we can go ahead and turn back on Context Sensitive if need be.
+
+15
+00:01:00.729 --> 00:01:05.730
+And we're going to look for, and it'll probably be at the very top here,
+
+16
+00:01:05.730 --> 00:01:09.730
+we're going to look for a Bind Event to the Pause Dispatcher.
+
+17
+00:01:09.730 --> 00:01:12.730
+Now, if you're having trouble finding it, we can just continue typing here.
+
+18
+00:01:12.730 --> 00:01:19.689
+So Bind Event to, and we're going to do Pause to the Pause,
+
+19
+00:01:19.689 --> 00:01:25.319
+Bind Event to, and uncheck Context Sensitive, and there we go.
+
+20
+00:01:25.319 --> 00:01:28.319
+Bind Event to Pause Dispatcher.
+
+21
+00:01:28.319 --> 00:01:29.510
+And there we go.
+
+22
+00:01:29.510 --> 00:01:32.510
+And I'm going to select all these nodes and just move them up a little bit more
+
+23
+00:01:32.510 --> 00:01:34.510
+so we have some room.
+
+24
+00:01:34.510 --> 00:01:37.510
+And now what I'm going to do is drag off of our event,
+
+25
+00:01:37.510 --> 00:01:40.510
+and we'll just keep Context Sensitive on,
+
+26
+00:01:40.510 --> 00:01:44.510
+and we're going to look for a Add Event, Add Custom Event.
+
+27
+00:01:44.510 --> 00:01:49.609
+And we'll give this a name just called Pause Dispatcher.
+
+28
+00:01:49.609 --> 00:01:53.689
+There we go. There's our custom event.
+
+29
+00:01:53.689 --> 00:01:55.689
+Go ahead and hit Compile, and we are ready to go.
+
+30
+00:01:55.689 --> 00:01:59.689
+Now, if you do get this target on the Bind Event to Pause Dispatcher
+
+31
+00:01:59.689 --> 00:02:04.689
+is not selected, what we need to do is just drag our Out Actors to the target itself,
+
+32
+00:02:04.689 --> 00:02:09.189
+hit Compile, and our error should go away.
+
+33
+00:02:09.189 --> 00:02:12.189
+Now, from our Pause Dispatcher event, I'm going to drag off of this
+
+34
+00:02:12.189 --> 00:02:14.189
+and create a Branch Node.
+
+35
+00:02:14.189 --> 00:02:19.189
+This is going to allow us to be able to target a condition,
+
+36
+00:02:19.189 --> 00:02:21.189
+and if that condition is true, do something.
+
+37
+00:02:21.189 --> 00:02:23.189
+If it's false, do something else.
+
+38
+00:02:23.189 --> 00:02:27.189
+Now, in this case, our condition is going to be our IsPlane variable
+
+39
+00:02:27.189 --> 00:02:28.189
+that we created earlier.
+
+40
+00:02:28.189 --> 00:02:31.189
+So I'm just going to drag this IsPlane and drag it onto the condition.
+
+41
+00:02:31.189 --> 00:02:33.189
+You see that it's automatically hooked up.
+
+42
+00:02:33.189 --> 00:02:37.289
+Go ahead and hit Compile, and we should be good to go.
+
+43
+00:02:37.289 --> 00:02:42.289
+So the next thing that we're going to do is drag our Main Sequence variable into here,
+
+44
+00:02:42.289 --> 00:02:47.289
+and we are going to select our Get Main Sequence.
+
+45
+00:02:47.289 --> 00:02:52.289
+And then from here, if we drag off, we are going to search for a Pause.
+
+46
+00:02:52.289 --> 00:02:55.289
+Now, we can keep Context Sensitive here,
+
+47
+00:02:55.289 --> 00:02:59.289
+and we are looking for the Sequence Player, Pause Sequence Player.
+
+48
+00:02:59.289 --> 00:03:02.289
+And you can see the engine automatically creates our translator.
+
+49
+00:03:02.289 --> 00:03:04.289
+We'll move this up to here.
+
+50
+00:03:04.289 --> 00:03:09.280
+So next, we're going to connect from our branch, the True, to our Pause.
+
+51
+00:03:09.280 --> 00:03:12.280
+And essentially, what this is going to do, move back here,
+
+52
+00:03:12.280 --> 00:03:15.280
+is when our event is fired, we're going to create this custom event,
+
+53
+00:03:15.280 --> 00:03:19.280
+and if it's playing, we're going to go ahead and Pause.
+
+54
+00:03:19.280 --> 00:03:22.280
+So again, the event fires. It is playing for the check.
+
+55
+00:03:22.280 --> 00:03:23.280
+Yes, it is.
+
+56
+00:03:23.280 --> 00:03:26.280
+Let's go ahead and Pause our Sequence Player.
+
+57
+00:03:26.280 --> 00:03:29.729
+The last thing that we want to do is drag off of our Pause,
+
+58
+00:03:29.729 --> 00:03:33.729
+and we are going to search for a Destroy Actor.
+
+59
+00:03:33.729 --> 00:03:36.300
+And you'll notice that the target is Self.
+
+60
+00:03:36.300 --> 00:03:38.300
+So it's going to be this Blueprint,
+
+61
+00:03:38.300 --> 00:03:42.300
+in particularly the instance that's going to be added to our level.
+
+62
+00:03:42.300 --> 00:03:46.300
+So this hails from what we created in our 205 class,
+
+63
+00:03:46.300 --> 00:03:49.300
+which was we want to go ahead and destroy the Actor,
+
+64
+00:03:49.300 --> 00:03:51.300
+which in this case will be the collision volume,
+
+65
+00:03:51.300 --> 00:03:53.300
+the Blueprint itself in the level.
+
+66
+00:03:53.300 --> 00:03:56.300
+Not all of them, just the single instance,
+
+67
+00:03:56.300 --> 00:04:01.300
+to ensure that the player won't retrigger this Sequence again.
+
+68
+00:04:01.300 --> 00:04:04.300
+So this is an optional thing, but we'll do that just as a check.
+
+69
+00:04:04.300 --> 00:04:09.780
+So this should be the logic that we need for our Pause event.

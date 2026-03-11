@@ -1,0 +1,485 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:09.480
+Alright, now that we have our landscape material working and set up and we have verified that
+
+2
+00:00:09.480 --> 00:00:15.359
+we're at a good point to move on to modifying it to include things like Landscape Grass.
+
+3
+00:00:15.359 --> 00:00:20.219
+Now for those of you who are not aware, Landscape Grass is a way to spawn hundreds
+
+4
+00:00:20.219 --> 00:00:27.000
+of different meshes in an area around the player and as the player moves throughout
+
+5
+00:00:27.000 --> 00:00:33.799
+the world these spawned meshes will kind of follow the player around so this gives the illusion that
+
+6
+00:00:33.799 --> 00:00:40.560
+the world is filled with hundreds if not thousands of actors but in fact all of these actors are just
+
+7
+00:00:40.560 --> 00:00:47.000
+spawned in a radial distance around the user. Now in order to do this we do need to do a few
+
+8
+00:00:47.000 --> 00:00:50.280
+things first we're gonna need to go to foliage and then we're gonna need to create
+
+9
+00:00:50.280 --> 00:00:54.240
+a landscape grass type so let's go ahead and do that now inside of the editor so I'm gonna hit
+
+10
+00:00:54.240 --> 00:00:58.640
+control space to bring up my content browser. I'm just gonna right click here and we're gonna
+
+11
+00:00:58.640 --> 00:01:05.239
+go up to our foliage and then landscape grass type so I'm gonna click on this and we're just
+
+12
+00:01:05.239 --> 00:01:11.560
+gonna call this landscape grass underscore zero zero and then we're gonna double click on it
+
+13
+00:01:11.560 --> 00:01:19.040
+to open it up. Now once it's opened we will need to add a grass variety to this by pressing
+
+14
+00:01:19.239 --> 00:01:25.480
+the add to array element and then once we've done that we will be able to select any type
+
+15
+00:01:25.480 --> 00:01:30.599
+of static mesh we want so let's go ahead and do that now so we're gonna pop back over here
+
+16
+00:01:30.599 --> 00:01:35.599
+so with this open again our grass varieties we just add an element to the array there we go
+
+17
+00:01:35.599 --> 00:01:42.000
+and then we come down here to our grass mesh and we're gonna add probably not that box
+
+18
+00:01:42.000 --> 00:01:47.799
+but let's look for I think we have some grass around here somewhere there we go I just saw
+
+19
+00:01:47.799 --> 00:01:57.950
+it I'm gonna add this well this Donnie Willow static mesh right here about also gonna take
+
+20
+00:01:57.950 --> 00:02:03.670
+this grass density and set this down to like a hundred because I don't want a crazy huge amount
+
+21
+00:02:03.670 --> 00:02:09.750
+of these and so we're gonna go ahead and hit save and I'm just gonna leave this at one for
+
+22
+00:02:09.750 --> 00:02:14.710
+now so we're gonna close that so the next thing that we need to do here is we're gonna go
+
+23
+00:02:14.710 --> 00:02:20.590
+into our material and inside of our material we're gonna add this new node called landscape
+
+24
+00:02:20.590 --> 00:02:27.870
+grass and the cool thing about this particular node is that we have total control over how the
+
+25
+00:02:27.870 --> 00:02:34.590
+landscape grass is actually applied to our landscape through our shader logic now for us
+
+26
+00:02:34.590 --> 00:02:38.229
+what we're actually going to be doing is we're going to be building this so what we're gonna
+
+27
+00:02:38.229 --> 00:02:43.990
+do is we're gonna take the slope and we're gonna multiply that by the grass amount and we're also
+
+28
+00:02:43.990 --> 00:02:49.030
+going to take a landscape layer blend now if you're not familiar landscape layer blends are
+
+29
+00:02:49.030 --> 00:02:54.710
+an option that we can use inside of the landscape tool to help us paint different
+
+30
+00:02:54.710 --> 00:03:00.310
+textures on our landscape but in our particular instance what we're gonna be doing is we're gonna
+
+31
+00:03:00.310 --> 00:03:06.189
+be using this landscape layer blend to help us mask out areas that should have this grass
+
+32
+00:03:06.189 --> 00:03:11.110
+bond and shouldn't have this grass bond and you might be thinking well why would we want
+
+33
+00:03:11.110 --> 00:03:18.110
+to do this well the reason that we would want to do this is so that we can remove grass from
+
+34
+00:03:18.110 --> 00:03:23.270
+underneath buildings or maybe in areas that it shouldn't be in and while the procedural
+
+35
+00:03:23.270 --> 00:03:28.949
+landscape grass is super useful and very very very performant it does have the one
+
+36
+00:03:28.949 --> 00:03:36.590
+side effect of not being editable so this gives us kind of the ability to edit that really
+
+37
+00:03:36.590 --> 00:03:40.310
+cool grass as well as control the placement so what we're gonna do first is we're gonna
+
+38
+00:03:40.310 --> 00:03:45.990
+pop back over to the editor here and we are gonna hit ctrl space to pull up our matte
+
+39
+00:03:45.990 --> 00:03:50.780
+landscape so we're gonna double click on this to open it up now the landscape grass
+
+40
+00:03:50.780 --> 00:03:55.139
+is a node that we'll have to add and it's not actually inside the main material
+
+41
+00:03:55.139 --> 00:04:01.030
+node here what we do is we right click in the event graph of the material editor
+
+42
+00:04:01.030 --> 00:04:05.669
+and we're gonna look for landscape and if we come down here you can see we have
+
+43
+00:04:05.669 --> 00:04:13.449
+this landscape grass output there it is alright and notice that it does have an input here so
+
+44
+00:04:13.449 --> 00:04:17.370
+what we're gonna do is first we're gonna select this and we're gonna hit the add element
+
+45
+00:04:17.370 --> 00:04:23.920
+I'm gonna hit that twice so I'm just going to delete one of these there we go and it's gonna
+
+46
+00:04:23.920 --> 00:04:27.920
+have we can give it a name and this name right here signifies the name that is going into
+
+47
+00:04:27.920 --> 00:04:34.610
+here and then we're gonna come here and just select our landscape grass so next what we're
+
+48
+00:04:34.610 --> 00:04:38.449
+gonna do is we're gonna set up our logic for this to follow so first off we're gonna
+
+49
+00:04:38.449 --> 00:04:43.569
+grab from here we're gonna grab our slope all right and then what we're gonna do is hold
+
+50
+00:04:43.569 --> 00:04:48.490
+down the one key and click and we're going to right click on this and go convert to parameter
+
+51
+00:04:48.490 --> 00:04:56.670
+I'm gonna call this grass amount and give it a default value of 1.0 then what we're
+
+52
+00:04:56.670 --> 00:05:01.470
+gonna do is we are going to multiply our slope times our grass amounts and what this is
+
+53
+00:05:01.470 --> 00:05:06.829
+going to do is it's going to make it so that we don't get any grass on our slope areas
+
+54
+00:05:06.829 --> 00:05:12.430
+and in the areas that are non sloped we can actually control the amount of grass here so
+
+55
+00:05:12.430 --> 00:05:18.149
+as we increase this number here we're gonna add more grass or more points to sample grass
+
+56
+00:05:18.149 --> 00:05:22.509
+to and as we decrease this number we're gonna remove the points so we're gonna remove the
+
+57
+00:05:22.509 --> 00:05:27.870
+amount of grass that can be sampled so let's go ahead and multiply these two together so we're
+
+58
+00:05:27.870 --> 00:05:32.139
+gonna do that by holding down the M key and clicking here and that's gonna add us our
+
+59
+00:05:32.139 --> 00:05:38.350
+multiply so there we go all right so next what we need to do is we're gonna hold down
+
+60
+00:05:38.350 --> 00:05:45.069
+the one key again and click and add a constant and then I'm just gonna control C and control
+
+61
+00:05:45.069 --> 00:05:49.910
+V to copy that and give it a default value of one so again hold down the one key and
+
+62
+00:05:49.910 --> 00:05:54.709
+left click to add a constant give it a value of zero and then duplicate that and give
+
+63
+00:05:54.709 --> 00:06:01.110
+it a value of one and these are gonna represent basically areas that don't have grass in areas
+
+64
+00:06:01.110 --> 00:06:05.550
+that do have grass so what we're gonna do for this is we're gonna left click and look
+
+65
+00:06:05.550 --> 00:06:13.199
+for our landscape and we want our landscape layer blend and we're going to have to give
+
+66
+00:06:13.199 --> 00:06:17.399
+this two layers so once it's added to the graph we're going to go ahead and press this add
+
+67
+00:06:17.399 --> 00:06:23.019
+elements twice and then we do need to give these some types of names in order to make it
+
+68
+00:06:23.019 --> 00:06:29.339
+easier for us to read so we're gonna call this first one remove grass and we're gonna
+
+69
+00:06:29.339 --> 00:06:36.610
+call the next one add grass and again we're gonna plug the zero into the remove grass
+
+70
+00:06:36.610 --> 00:06:40.790
+because when we don't have grass we don't want any information and we're gonna add
+
+71
+00:06:40.790 --> 00:06:45.709
+the one into the add grass because in areas where we do have grass we're going to want
+
+72
+00:06:45.709 --> 00:06:51.470
+that to have information last but not least we are going to need to multiply these
+
+73
+00:06:51.470 --> 00:06:55.230
+two nodes together to combine them so what I'm gonna do is I'm gonna take this multiply
+
+74
+00:06:55.230 --> 00:07:00.350
+I'm gonna hit ctrl C ctrl V and then we're gonna plug this in like so and like this
+
+75
+00:07:00.350 --> 00:07:07.500
+one as well and once that's done we're finally gonna plug this in like so all right so let's
+
+76
+00:07:07.500 --> 00:07:17.740
+go ahead and apply and save and I'm gonna just close this down for now and right
+
+77
+00:07:17.740 --> 00:07:23.199
+now we're not actually going to be seeing anything happening and the reason for that
+
+78
+00:07:23.199 --> 00:07:29.279
+is what we have to do next for this to work is we need to actually go inside of our landscape
+
+79
+00:07:29.279 --> 00:07:36.310
+tool and then in the painting we need to add weight blended layers so we need to actually
+
+80
+00:07:36.310 --> 00:07:42.009
+add some layers or some masks to represent where the grass should be and where the grass
+
+81
+00:07:42.009 --> 00:07:46.389
+shouldn't be so let's go back over to the editor now we're gonna come up to our
+
+82
+00:07:46.389 --> 00:07:50.709
+selection we're gonna go down to landscape and then we're gonna come over to paint and
+
+83
+00:07:50.709 --> 00:07:53.829
+if we're not seeing anything in here that's okay we're gonna pop back out of this real
+
+84
+00:07:53.829 --> 00:07:59.069
+quick and just select our landscape I'm gonna hit ctrl space and we're just gonna take this
+
+85
+00:07:59.069 --> 00:08:05.949
+instance here and just reapply it sometimes we need to refresh our landscape in order
+
+86
+00:08:05.949 --> 00:08:09.870
+to get things to work here so oops and I did the wrong thing we're gonna grab that
+
+87
+00:08:09.870 --> 00:08:15.829
+instance and reapply that there we go all right that's what I wanted and now what
+
+88
+00:08:15.829 --> 00:08:18.089
+we're gonna do is we're gonna come back up to our landscape and there we go you
+
+89
+00:08:18.089 --> 00:08:23.930
+see I have my two layers there so we're just gonna hit this create layer info and it's
+
+90
+00:08:23.930 --> 00:08:29.449
+going to remove grass layer for now this is okay because we're just doing this as
+
+91
+00:08:29.449 --> 00:08:36.490
+a testing level and we're gonna go ahead and hit save there we go so we have our
+
+92
+00:08:36.490 --> 00:08:43.080
+two our add and our remove so we're right now we don't really have anything in there
+
+93
+00:08:43.080 --> 00:08:47.899
+so if I was to click on this add grass and paint there we go look at that I've added
+
+94
+00:08:47.899 --> 00:08:54.379
+some in that location and then if I was to up well hold down shift and do this
+
+95
+00:08:54.379 --> 00:08:58.820
+on the right layer there we go I will remove that grass there so if I want to
+
+96
+00:08:58.820 --> 00:09:02.460
+actually add grass to everything I can right click on this and go fill layer
+
+97
+00:09:02.460 --> 00:09:10.700
+and this is gonna add grass pretty much everywhere should be getting some
+
+98
+00:09:10.700 --> 00:09:17.980
+over here I'm not sure why it's not showing up over there what's showing up
+
+99
+00:09:17.980 --> 00:09:22.299
+over here so it looks like there just might be some weird type of interact
+
+100
+00:09:22.299 --> 00:09:25.740
+yes it's going as I I get over there so it might just be some weird
+
+101
+00:09:25.740 --> 00:09:31.860
+interaction there but the one thing to uh to take note of here is that we are
+
+102
+00:09:31.860 --> 00:09:37.320
+definitely able to remove grass because if I come over here to this
+
+103
+00:09:37.320 --> 00:09:41.960
+remove grass you can see I'm removing the grass like you would expect so I'm
+
+104
+00:09:41.960 --> 00:09:47.519
+not sure why it is not painting over here on these sides it should be no
+
+105
+00:09:47.519 --> 00:09:52.379
+idea why let's just come here and we're gonna rebuild our materials real
+
+106
+00:09:52.379 --> 00:09:58.210
+quick and let's see if that no it didn't have any effect interesting no it's not a
+
+107
+00:09:58.210 --> 00:10:02.289
+world partition level so it should be happening let's just try to do this
+
+108
+00:10:02.289 --> 00:10:09.230
+one more time here we're gonna go to our content and let's just replace oh
+
+109
+00:10:09.230 --> 00:10:18.809
+there we go so that's working weird the instance back in there okay so I
+
+110
+00:10:18.809 --> 00:10:22.789
+just had to reset apparently and now everything is working the way that it
+
+111
+00:10:22.789 --> 00:10:27.549
+should and the other thing to point out here is notice that while we do have a
+
+112
+00:10:27.549 --> 00:10:32.549
+majority of the surface here free there is a little bit of grass in there so
+
+113
+00:10:32.549 --> 00:10:37.389
+you know this is why it is useful to have this set up because we can then
+
+114
+00:10:37.389 --> 00:10:42.309
+just come in here and kind of start to remove some of these should we want
+
+115
+00:10:42.309 --> 00:10:49.299
+to get rid of them don't know why he's not removing them as I was talking
+
+116
+00:10:49.299 --> 00:11:06.639
+about this so might just have this because my brush is a little bit too
+
+117
+00:11:06.639 --> 00:11:10.320
+small oh there we go I think was my brush was a little bit too small so
+
+118
+00:11:10.320 --> 00:11:13.399
+there we go there it is removing everything off of the side of that
+
+119
+00:11:13.399 --> 00:11:25.350
+cliff there so all right fantastic so what we need to do next is get
+
+120
+00:11:25.350 --> 00:11:30.509
+everything set up so that we can also have different physical materials
+
+121
+00:11:30.509 --> 00:11:34.269
+on our landscapes

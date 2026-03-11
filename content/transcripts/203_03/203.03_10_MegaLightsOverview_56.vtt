@@ -1,0 +1,129 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:05.259
+MegaLights is a brand new lighting system introduced in 5.4.
+
+2
+00:00:05.259 --> 00:00:10.259
+MegaLights is still experimental and is definitely not recommended for production.
+
+3
+00:00:10.259 --> 00:00:12.359
+You have been warned.
+
+4
+00:00:12.359 --> 00:00:21.359
+MegaLights is essentially Nanite for lighting, whereby the engine calls only the highest visual fidelity based on the player's position within the world.
+
+5
+00:00:21.359 --> 00:00:28.359
+This new system allows us to essentially remove the performance cap of how many lights can be included in our scene.
+
+6
+00:00:28.359 --> 00:00:37.359
+Now that doesn't mean that with MegaLights enabled we can have free reign to place a million dynamic lights in our scene and assume the engine will handle everything accordingly.
+
+7
+00:00:37.359 --> 00:00:45.359
+We still need to be cognizant of the performance cost of dynamic lighting and regularly profile our scenes to ensure tip-top performance.
+
+8
+00:00:45.359 --> 00:00:50.939
+MegaLights is used on all lights with the exception of our directional light and skylight.
+
+9
+00:00:50.939 --> 00:00:55.939
+MegaLights does support volumetric fog and reduces the performance cost of dynamic shadows.
+
+10
+00:00:55.939 --> 00:01:01.939
+This has been a major performance gain on platforms such as PlayStation 5 and Xbox Series X.
+
+11
+00:01:01.939 --> 00:01:07.939
+With MegaLights still in the experimental stage, keep in mind that MegaLights still has some limitations.
+
+12
+00:01:07.939 --> 00:01:15.799
+To enable MegaLights on your project, simply check the MegaLights enable checkbox in the project settings.
+
+13
+00:01:15.799 --> 00:01:19.799
+Once the setting is enabled, the project will use MegaLights by default.
+
+14
+00:01:19.799 --> 00:01:30.799
+However, you can individually control whether a light leverages MegaLights by enabling or disabling the MegaLights parameter within the light actor.
+
+15
+00:01:30.799 --> 00:01:38.310
+When using MegaLights, it's still important to keep your scene optimized and avoid common performance pitfalls with your lighting actors.
+
+16
+00:01:38.310 --> 00:01:46.310
+Avoid placing lighting actors inside scene geometry, optimize your light bounds, and avoid tightly packing light actors together.
+
+17
+00:01:47.310 --> 00:01:59.310
+You can debug your MegaLights by using the cvar command, r.megalights.debug1, which hopefully in future updates this will be an actual stat, but for now you have to do it through a cvar.
+
+18
+00:01:59.310 --> 00:02:07.269
+By default, MegaLights uses ray tracing as the primary means of calculating the scene and culling distances.
+
+19
+00:02:07.269 --> 00:02:15.270
+Simplified Nanite meshes combined with more aggressive culling settings will have an impact on the overall scene quality when using MegaLights.
+
+20
+00:02:15.270 --> 00:02:21.270
+Take note, MegaLights is still experimental and evolving and may change in subsequent updates.
+
+21
+00:02:21.270 --> 00:02:27.069
+You can adjust the Nanite fallback mesh within the static mesh actors detail window.
+
+22
+00:02:27.069 --> 00:02:36.069
+You can change the fallback target from auto to percentage triangles or relative error and adjust those settings accordingly.
+
+23
+00:02:36.069 --> 00:02:44.069
+Note, the changes won't apply until you hit apply changes in the details panel.
+
+24
+00:02:44.069 --> 00:02:53.939
+When comparing performance, it's important to understand that MegaLights is solving all direct lighting and replaces a variety of deferred rendering passes.
+
+25
+00:02:53.939 --> 00:03:08.939
+This applies to shadow depths, foreshadows, and virtual shadow maps, deferred lighting lights, volumetric fog for shadowed lights, and removes the light evaluation for light scattering within volumetric fog.
+
+26
+00:03:08.939 --> 00:03:12.939
+Also be aware that MegaLights is not compatible with forward rendering.
+
+27
+00:03:15.150 --> 00:03:18.150
+Here are some pro tips when using MegaLights.
+
+28
+00:03:18.150 --> 00:03:26.219
+Utilize your ray trace debug views, particularly world normal, to show the data MegaLights is using to calculate your scene.
+
+29
+00:03:26.219 --> 00:03:31.979
+You can also use the Lumen overview debug view as well.
+
+30
+00:03:31.979 --> 00:03:39.979
+Now note, MegaLights does not support previous gen consoles such as PlayStation 4, Xbox One, or the Nintendo Switch.
+
+31
+00:03:39.979 --> 00:03:49.979
+Lastly, while MegaLights uses ray tracing for the scene, it does leverage screen space traces for smaller scale geometry when the data is missing.
+
+32
+00:03:49.979 --> 00:03:53.979
+That will conclude our course on atmospheric lighting.

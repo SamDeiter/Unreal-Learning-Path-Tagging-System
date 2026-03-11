@@ -1,0 +1,357 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:06.259
+So now we know the genetic makeup of an AI agent and how we can achieve navigation.
+
+2
+00:00:06.259 --> 00:00:10.259
+We can now look at how we can allow our AI agents to query the world for information,
+
+3
+00:00:10.259 --> 00:00:13.259
+and this is where the Environment Query System really comes in.
+
+4
+00:00:13.259 --> 00:00:18.260
+The Environment Query System is a feature within Unreal that is used to gather data about the environment.
+
+5
+00:00:18.260 --> 00:00:22.649
+Example use of this can be to find an ideal position to attack the player from,
+
+6
+00:00:22.649 --> 00:00:26.190
+or to find where the nearest health pickup might be.
+
+7
+00:00:26.190 --> 00:00:32.609
+It's important to note that the Environment Query System plugin must be enabled in order to access this in the editor.
+
+8
+00:00:32.609 --> 00:00:38.609
+Environment Queries are a powerful tool for developers, each query is tailored to the scenario in mind.
+
+9
+00:00:38.609 --> 00:00:44.859
+An Environment Query is made up of generators, tests and contexts to provide a full desired result,
+
+10
+00:00:44.859 --> 00:00:47.859
+and we'll discuss each one of those in just a second.
+
+11
+00:00:47.859 --> 00:00:51.280
+Environment Queries can be called from within the Behaviour Tree directly,
+
+12
+00:00:51.280 --> 00:00:55.280
+but they can also be called in isolation from the native C++.
+
+13
+00:00:55.280 --> 00:00:59.020
+Although we are discussing Environment Queries in the context of AI,
+
+14
+00:00:59.020 --> 00:01:04.019
+it's important to note that we can make use of this system to drive pretty much any other gameplay system.
+
+15
+00:01:04.019 --> 00:01:07.719
+In the image on the left we can see that we create an Environment Query
+
+16
+00:01:07.719 --> 00:01:11.879
+much in the same way that we create a Behaviour Tree or a Blackboard Asset.
+
+17
+00:01:11.879 --> 00:01:15.879
+The image to the right however shows what an Environment Query looks like in the editor content browser.
+
+18
+00:01:15.879 --> 00:01:19.810
+Let's take a look at how we go about creating our own Environment Queries,
+
+19
+00:01:19.810 --> 00:01:22.810
+and it's only natural that we start with the generators.
+
+20
+00:01:22.810 --> 00:01:27.290
+Generators are key to the genetic makeup of an EQS.
+
+21
+00:01:27.290 --> 00:01:31.319
+They are essentially used to generate an array of locations or actors.
+
+22
+00:01:31.319 --> 00:01:36.379
+These are often referred to as items, and these items can then be tested and weighed.
+
+23
+00:01:36.379 --> 00:01:39.450
+There are different types of generator already in Unreal,
+
+24
+00:01:39.450 --> 00:01:44.450
+so a small example of these would be generating a list of all actors of class to return a list of actors.
+
+25
+00:01:44.450 --> 00:01:49.450
+Alternatively, we can generate a list of points in a circle, grid or donor orientation.
+
+26
+00:01:49.450 --> 00:01:54.989
+So now that we know that a generator is used to give us a set of actors or locations known as items.
+
+27
+00:01:54.989 --> 00:02:00.379
+However, a generator alone is not capable of doing such a task without the use of contexts.
+
+28
+00:02:00.379 --> 00:02:05.500
+Environment contexts give generators and tests a frame of reference to use.
+
+29
+00:02:05.500 --> 00:02:08.729
+Contexts can range from something simple such as the querier,
+
+30
+00:02:08.729 --> 00:02:12.729
+to more complex contexts such as all actors of class.
+
+31
+00:02:12.729 --> 00:02:16.979
+Contexts can be set up to return one or many items.
+
+32
+00:02:16.979 --> 00:02:23.530
+It's important to note that whatever generator you choose may not be fully compatible with the intended context.
+
+33
+00:02:23.530 --> 00:02:29.530
+More specifically, not all generators can produce items based off of an input of multiple contexts.
+
+34
+00:02:29.530 --> 00:02:33.199
+On top of all the contexts that come out of the box with Unreal,
+
+35
+00:02:33.199 --> 00:02:37.199
+we can also create our own context in both Blueprint and C++.
+
+36
+00:02:37.199 --> 00:02:43.740
+So now we know we can use a generator to give us a set of actors or locations known as items.
+
+37
+00:02:43.740 --> 00:02:50.030
+However, a generator alone is not capable of doing such a task without the use of contexts.
+
+38
+00:02:50.030 --> 00:02:54.030
+Environment contexts give generators and tests a frame of reference to use.
+
+39
+00:02:54.030 --> 00:02:57.639
+Contexts can range from something as simple as the querier,
+
+40
+00:02:57.639 --> 00:03:01.639
+to more complex contexts such as all actors of class.
+
+41
+00:03:01.639 --> 00:03:05.639
+Contexts can be set up to return one or many items,
+
+42
+00:03:05.639 --> 00:03:09.639
+but it's important to know what generator you're going to be pairing with what context.
+
+43
+00:03:09.639 --> 00:03:13.639
+Not all generators can deal with multiple items being returned by a context.
+
+44
+00:03:13.639 --> 00:03:17.960
+On top of contexts already provided by the Unreal Engine,
+
+45
+00:03:17.960 --> 00:03:21.960
+you can also create your own contexts both in Blueprint and in C++.
+
+46
+00:03:21.960 --> 00:03:24.060
+So let's quickly recap what we know so far.
+
+47
+00:03:24.060 --> 00:03:27.060
+We can use generators to create a choice of items,
+
+48
+00:03:27.060 --> 00:03:31.060
+and contexts give us a reference to use when generating those items.
+
+49
+00:03:31.060 --> 00:03:34.060
+So whilst we can use these two in conjunction to give a result,
+
+50
+00:03:34.060 --> 00:03:38.060
+we can make use of tests to better refine our result.
+
+51
+00:03:38.060 --> 00:03:43.379
+Tests can be performed to determine which item is the best option out of all of them.
+
+52
+00:03:43.379 --> 00:03:47.379
+Whatever best means in any given circumstance can be tweaked depending on the developer
+
+53
+00:03:47.379 --> 00:03:49.379
+and the technical specification of the task.
+
+54
+00:03:49.379 --> 00:03:52.979
+Unreal already offers a wide range of tests that we can make use of,
+
+55
+00:03:52.979 --> 00:03:56.979
+so a small example of these would be sorting all items by distance,
+
+56
+00:03:56.979 --> 00:04:00.979
+sorting all items by the dot product in relation to the querier's orientation,
+
+57
+00:04:00.979 --> 00:04:05.340
+filtering out items that don't have line of sight with the querier,
+
+58
+00:04:05.340 --> 00:04:09.659
+and then we can see if these items are overlapping with anything in the world.
+
+59
+00:04:09.659 --> 00:04:13.659
+So for instance, are these items generated within the bounds of some kind of geometry?
+
+60
+00:04:13.659 --> 00:04:18.579
+However, like we said, if these tests don't meet your particular specifications,
+
+61
+00:04:18.579 --> 00:04:20.579
+then by all means you can author your own tests,
+
+62
+00:04:20.579 --> 00:04:24.189
+and these can be created quite easily within C++.
+
+63
+00:04:24.189 --> 00:04:27.189
+Multiple tests can be attached to a single generator
+
+64
+00:04:27.189 --> 00:04:30.189
+so we can mix and match to get the best results possible.
+
+65
+00:04:30.189 --> 00:04:32.740
+As we can see in the above image,
+
+66
+00:04:32.740 --> 00:04:35.740
+there are some common properties of the tests that we can actually discuss.
+
+67
+00:04:35.740 --> 00:04:39.089
+The test purpose defines what our test aims to do,
+
+68
+00:04:39.089 --> 00:04:43.089
+whether that is to be filter them out from the entire batch entirely,
+
+69
+00:04:43.089 --> 00:04:46.089
+to score the items, or a combination of the two.
+
+70
+00:04:46.089 --> 00:04:49.149
+It's important to know that in the case of filter and score,
+
+71
+00:04:49.149 --> 00:04:53.149
+filtering will be done before scoring to avoid calculating the score on items
+
+72
+00:04:53.149 --> 00:04:55.149
+that have already been filtered out.
+
+73
+00:04:55.149 --> 00:04:58.730
+Each test will expose a different set of filter properties
+
+74
+00:04:58.730 --> 00:05:02.730
+if filtering or filter and score is selected in the test purpose dropdown.
+
+75
+00:05:02.730 --> 00:05:05.759
+In the example above, we've used the distance test,
+
+76
+00:05:05.759 --> 00:05:08.759
+which will filter out any items that are further away than our desired threshold.
+
+77
+00:05:08.759 --> 00:05:12.399
+With scoring, we follow a similar pattern.
+
+78
+00:05:12.399 --> 00:05:15.399
+If score or score and filter are selected in the test purpose,
+
+79
+00:05:15.399 --> 00:05:18.399
+then we get to decide how our items will be scored.
+
+80
+00:05:18.399 --> 00:05:24.040
+Again, the score properties will vary depending on the test that's being used.
+
+81
+00:05:24.040 --> 00:05:27.040
+In the example above, we can define that points further away from the querier,
+
+82
+00:05:27.040 --> 00:05:29.040
+our AI agent in this case,
+
+83
+00:05:29.040 --> 00:05:33.199
+will be weighted heavier than those that are closer to the querier.
+
+84
+00:05:33.199 --> 00:05:36.199
+However, if we wish to flip this around, we could do this in two ways.
+
+85
+00:05:36.199 --> 00:05:41.199
+The first way would be to flip the scoring equation to use inverse linear.
+
+86
+00:05:41.199 --> 00:05:45.199
+The second way in which we could achieve this is by altering the scoring factor to be negative one.
+
+87
+00:05:45.199 --> 00:05:48.199
+We're essentially going to flip the return value.
+
+88
+00:05:48.199 --> 00:05:52.870
+It's highly recommended that you place filtering tests ahead of your scoring tests,
+
+89
+00:05:52.870 --> 00:05:56.870
+again so the scoring calculations can only take place on valid items.

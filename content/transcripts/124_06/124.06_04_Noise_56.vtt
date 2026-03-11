@@ -1,0 +1,193 @@
+WEBVTT
+
+1
+00:00:01.540 --> 00:00:07.940
+Hello and welcome to this video where we will be going through exercise two.
+
+2
+00:00:08.900 --> 00:00:18.500
+For this we will be using the noise stimulus to detect a noise and have an ARA run towards it.
+
+3
+00:00:20.910 --> 00:00:25.949
+But back in the engine what I would like you to do is come to the slide number two here
+
+4
+00:00:26.910 --> 00:00:40.079
+which is exercise two noise stimulus. Now if I hit simulate what you're seeing is we have a small
+
+5
+00:00:40.079 --> 00:00:48.259
+system here where these explosive barrels are getting dropped at random between these different
+
+6
+00:00:48.259 --> 00:00:58.320
+areas. What I'd like to do with this is make it so that the NPC character here will be able
+
+7
+00:00:58.320 --> 00:01:06.859
+to detect it and move towards it. Now what I'm going to do is open up the state tree so that
+
+8
+00:01:06.859 --> 00:01:12.260
+we can have a quick look. And again this is very similar to the last one we were looking at.
+
+9
+00:01:12.900 --> 00:01:18.579
+We have an out of combat section at the top where we just set the character to wander about
+
+10
+00:01:19.540 --> 00:01:28.659
+and in the second section we have a heard something and going to investigate that and
+
+11
+00:01:29.379 --> 00:01:36.750
+wait for one second until returning back to the root. And the way that we are communicating
+
+12
+00:01:36.750 --> 00:01:41.310
+with this state tree you can see on the left hand side here is we have an evaluator for
+
+13
+00:01:41.310 --> 00:01:47.920
+e-hearing and all this is going to be doing is this is going to monitor two different
+
+14
+00:01:47.920 --> 00:01:56.670
+variables a boolean if you've heard something and the location that the noise came from.
+
+15
+00:01:56.670 --> 00:02:10.659
+Okay so now let's have a quick look at the AI noise. Now for this we already have the
+
+16
+00:02:10.659 --> 00:02:17.199
+perception update set up for us and you can see that this is relatively similar to what we were
+
+17
+00:02:17.199 --> 00:02:23.599
+previously doing. We are looking on target perception updated and we'll update as that
+
+18
+00:02:23.599 --> 00:02:32.930
+comes through. For this we are checking for the class stimulus and we use the AI sense
+
+19
+00:02:32.930 --> 00:02:42.180
+hearing in this case. If this is true we are going to know something has heard and we are
+
+20
+00:02:42.180 --> 00:02:49.169
+going to have a we're going to set the location on the stimulus location. So it's a very simple
+
+21
+00:02:49.810 --> 00:02:55.409
+script similar to what we did in the last exercise. You'll also see that we have an event
+
+22
+00:02:55.409 --> 00:03:05.810
+to reset these two values and that we will trigger just once the AI has approached and
+
+23
+00:03:05.810 --> 00:03:14.419
+got to it. Okay now so where do we need to put the actual code? In this case you will see
+
+24
+00:03:14.419 --> 00:03:20.349
+that there is a BPNoiseMaker. Now what I'd like you to do is open this up and have a look
+
+25
+00:03:22.879 --> 00:03:30.509
+and it has primarily one piece of code. What this does is when the
+
+26
+00:03:31.550 --> 00:03:38.509
+when the component is hit the cylinder it will turn on a particle effect,
+
+27
+00:03:39.650 --> 00:03:47.979
+hide everything, play a sound at the location, wait one second and then destroy the actor.
+
+28
+00:03:48.620 --> 00:03:56.509
+So it's relatively straightforward. Now we only need to do one extra thing to get this to work
+
+29
+00:03:57.759 --> 00:04:04.689
+and we talked about this previously but in song stimuli you are going to need to
+
+30
+00:04:04.689 --> 00:04:10.770
+manually report when you want it to be triggered and this is one of those cases.
+
+31
+00:04:11.520 --> 00:04:15.599
+So what I'm going to do is drag off after the play sound and location
+
+32
+00:04:17.220 --> 00:04:24.899
+and I'm going to type in reportNoiseEvent and that's going to give us this
+
+33
+00:04:25.699 --> 00:04:35.620
+noise here. I'm just going to use the actor location to plug that in and that is all the
+
+34
+00:04:35.620 --> 00:04:41.699
+code that I need you to do at this point. Apart from one thing we need to set a maximum
+
+35
+00:04:41.699 --> 00:04:51.149
+range. For this I'm going to set this in as 3000. I'm going to compile and save.
+
+36
+00:04:51.149 --> 00:04:56.589
+You'll see that we also have a loudness. This acts as a multiplier for the range
+
+37
+00:04:56.589 --> 00:05:01.230
+so if you change that to two that would make the range an equivalent of 6000
+
+38
+00:05:02.110 --> 00:05:08.589
+and it just allows you to have two different controls and you can change.
+
+39
+00:05:09.870 --> 00:05:14.430
+Then the last thing I need to do is I need to note down the instigator.
+
+40
+00:05:15.069 --> 00:05:25.470
+Before that I'm just going to grab the reference to self and plug that into the instigator.
+
+41
+00:05:31.649 --> 00:05:39.300
+You can now see that once the noise is reported the character is alerted to it
+
+42
+00:05:40.019 --> 00:05:58.620
+and will move to the find location. If we were to have a quick look at how the
+
+43
+00:05:58.620 --> 00:06:07.250
+AI perception component is set up, again in this case we have a sets config that we've set up as
+
+44
+00:06:07.250 --> 00:06:13.810
+the AI hearing and we are setting it up as a hearing. Our hearing range I've set to a very
+
+45
+00:06:13.810 --> 00:06:21.009
+long distance and again detection by affiliation has increased and making sure it starts in
+
+46
+00:06:21.009 --> 00:06:25.889
+neighborhoods. That's all that we need to do in order to get this up and running.
+
+47
+00:06:27.360 --> 00:06:30.959
+That brings us to the end of this video on using noise stimulus.
+
+48
+00:06:31.860 --> 00:06:40.660
+Next up we're going to be doing a quick example using touch.

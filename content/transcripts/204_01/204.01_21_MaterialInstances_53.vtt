@@ -1,0 +1,165 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:06.540
+The first thing I want to talk about in material optimizations is this concept of parent materials.
+
+2
+00:00:06.540 --> 00:00:13.839
+Now, parent material workflow is not an optimization for performance, but it is a workflow optimization,
+
+3
+00:00:13.839 --> 00:00:18.839
+as setting your materials up in this manner will allow your team members to work faster,
+
+4
+00:00:18.839 --> 00:00:25.339
+and also allow you to make massive sweeping changes to the materials in your project with a few clicks of a button.
+
+5
+00:00:25.899 --> 00:00:30.899
+Material instances work using a parent-child relationship.
+
+6
+00:00:30.899 --> 00:00:35.899
+So, on the left-hand side of the screen, we have a biological parent setup.
+
+7
+00:00:35.899 --> 00:00:41.399
+In this very simplified setup of biology, we have parents that pass traits on down to their children.
+
+8
+00:00:41.399 --> 00:00:48.899
+So, these two parents come together, and out of the red, green, or blue boxes that they have available,
+
+9
+00:00:48.899 --> 00:00:54.509
+their children will be a red, green, or blue box.
+
+10
+00:00:54.509 --> 00:01:02.009
+And the reason I'm bringing this up is that, again, in biology, we have parents that have traits that are passed on down to their children,
+
+11
+00:01:02.009 --> 00:01:08.010
+and their children will select one of those traits, and that's what they'll be presented with.
+
+12
+00:01:08.010 --> 00:01:11.010
+And this is how our parent material system can work.
+
+13
+00:01:11.010 --> 00:01:20.829
+Next to this parent-children example, we have two parent materials, a matte ENV building parent and a matte ENV glass parent.
+
+14
+00:01:20.829 --> 00:01:25.829
+Taking a look at the matte ENV building parent, to the right of it, we have some material instances.
+
+15
+00:01:25.829 --> 00:01:32.829
+Notice that the first instance, brick 01, looks almost identical to our matte ENV building parent.
+
+16
+00:01:32.829 --> 00:01:40.829
+The next to that brick 01, we have brick 02. This looks almost identical, but it's a completely different color.
+
+17
+00:01:40.829 --> 00:01:49.829
+Finally, we have our rock 01 instance, and this looks nothing like either brick 01, brick 02, or even the base parent.
+
+18
+00:01:49.829 --> 00:01:55.180
+And this really signifies the power of this system.
+
+19
+00:01:55.180 --> 00:02:04.140
+This means that we can have parent materials that can control massive amounts of props inside of our project,
+
+20
+00:02:04.140 --> 00:02:11.139
+and when we work inside of them, we can make these changes and have all of those changes propagated down to the children.
+
+21
+00:02:11.139 --> 00:02:17.139
+Now underneath that, I have this matte ENV glass parent, and notice there's three different ones of those.
+
+22
+00:02:17.139 --> 00:02:23.139
+Now, the variation inside of these is not as extreme as the above example,
+
+23
+00:02:23.139 --> 00:02:32.289
+but the reason we have two different versions is because when you're making parent materials,
+
+24
+00:02:32.289 --> 00:02:38.289
+making one monolithic or massive parent material will not help your project,
+
+25
+00:02:38.289 --> 00:02:43.289
+and is actually a very inefficient way to work with materials inside of Unreal Engine.
+
+26
+00:02:43.289 --> 00:02:51.289
+This is because when we build one massive monolithic parent material to try and meet every single need of our materials,
+
+27
+00:02:51.289 --> 00:02:58.520
+we are going to generate a lot of extra permutations of that material.
+
+28
+00:02:58.520 --> 00:03:09.520
+Remember, when we're building materials using our material graph, what we are doing is we're actually using a visual interface to write our material.
+
+29
+00:03:09.520 --> 00:03:20.520
+We are not going to be doing this in one draw call, so if we put everything inside of one material that's not going to allow us to save any instructions,
+
+30
+00:03:20.520 --> 00:03:28.520
+that is going to just make that one massive shader extremely inefficient, and also generate a ton of shader permutations,
+
+31
+00:03:28.520 --> 00:03:33.930
+which is going to blow out our shader cache file, causing long compile times.
+
+32
+00:03:33.930 --> 00:03:42.030
+What's a better way to approach this is to separate your parent materials into different categories.
+
+33
+00:03:42.030 --> 00:03:47.030
+For example, if we have environment, we have an environment parent material.
+
+34
+00:03:47.030 --> 00:03:50.030
+If we have special effects, we have one for that.
+
+35
+00:03:50.030 --> 00:03:54.030
+If we need one for glass, we have one for glass, and so on.
+
+36
+00:03:54.030 --> 00:04:02.030
+This way we have a very versatile material, but one that is not set up to meet every need,
+
+37
+00:04:02.030 --> 00:04:06.030
+but to meet many needs of a select group of assets.
+
+38
+00:04:06.030 --> 00:04:11.030
+There is no limit on the amount of parent materials you can have, or material instances,
+
+39
+00:04:11.030 --> 00:04:15.030
+but you should take some time to consider how you're going to set things up,
+
+40
+00:04:15.030 --> 00:04:22.029
+so that when you are utilizing parent materials and material instances in your project,
+
+41
+00:04:22.029 --> 00:04:27.029
+artists and designers will understand which materials they should be using to base their work off of.

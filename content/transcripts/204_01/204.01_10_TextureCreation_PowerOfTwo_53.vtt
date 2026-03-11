@@ -1,0 +1,249 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:04.290
+No matter where you get your textures for use inside
+
+2
+00:00:04.290 --> 00:00:06.009
+of Unreal Engine 5, whether it's something
+
+3
+00:00:06.009 --> 00:00:07.690
+you've created yourself or something
+
+4
+00:00:07.690 --> 00:00:10.330
+you've downloaded from online or purchased
+
+5
+00:00:10.330 --> 00:00:12.849
+from one of the many online asset stores,
+
+6
+00:00:12.849 --> 00:00:15.890
+you need to make sure that texture adheres to a few
+
+7
+00:00:15.890 --> 00:00:16.850
+rules.
+
+8
+00:00:16.850 --> 00:00:19.250
+The first rule is that no matter
+
+9
+00:00:19.250 --> 00:00:22.969
+what dimension that texture is in the x or the y-axis,
+
+10
+00:00:22.969 --> 00:00:26.089
+that dimension needs to be a power of 2.
+
+11
+00:00:26.089 --> 00:00:29.109
+That means that the x-axis or the y-axis
+
+12
+00:00:29.109 --> 00:00:36.509
+needs to be something like 2, 4, 8, 16, 32, 64, 128, 256, 512,
+
+13
+00:00:36.509 --> 00:00:42.390
+1024, 2048, 4096, and 8192.
+
+14
+00:00:42.390 --> 00:00:47.429
+Anything from one of those numbers in the x or the y-axis
+
+15
+00:00:47.429 --> 00:00:50.880
+will give you a texture that will
+
+16
+00:00:50.880 --> 00:00:55.679
+work with Unreal's built-in texture streaming systems,
+
+17
+00:00:55.679 --> 00:00:58.399
+as well as make sure that that texture packs more
+
+18
+00:00:58.439 --> 00:01:00.240
+efficiently into memory.
+
+19
+00:01:00.240 --> 00:01:02.359
+When you import a texture into Unreal,
+
+20
+00:01:02.359 --> 00:01:04.599
+it's going to tell you a number of different things.
+
+21
+00:01:04.599 --> 00:01:08.680
+For example, it'll first tell you the imported size,
+
+22
+00:01:08.680 --> 00:01:12.359
+as well as the streaming method, the size it takes on disk,
+
+23
+00:01:12.359 --> 00:01:14.319
+and the number of mipmaps.
+
+24
+00:01:14.319 --> 00:01:18.319
+Now, mipmap might be a new term to many people.
+
+25
+00:01:18.319 --> 00:01:21.200
+And mipmap is something that Unreal
+
+26
+00:01:21.200 --> 00:01:23.799
+does behind the scenes if your texture meets
+
+27
+00:01:23.799 --> 00:01:25.840
+this power of 2 requirement.
+
+28
+00:01:25.840 --> 00:01:28.480
+Mipmaps are level of details for your texture,
+
+29
+00:01:28.480 --> 00:01:31.640
+and they're a way to help reduce your texture's cost when
+
+30
+00:01:31.640 --> 00:01:35.019
+it's viewed in a distance very far away from the camera.
+
+31
+00:01:35.019 --> 00:01:38.079
+We'll cover mipmapping in the next few slides.
+
+32
+00:01:38.079 --> 00:01:40.079
+But it's important to understand
+
+33
+00:01:40.079 --> 00:01:42.120
+that in order to have this advantage
+
+34
+00:01:42.120 --> 00:01:44.200
+and have Unreal do this work for you,
+
+35
+00:01:44.200 --> 00:01:49.359
+your texture needs to maintain that power of 2 ratio.
+
+36
+00:01:49.359 --> 00:01:51.359
+Let's take a look at the next texture.
+
+37
+00:01:51.359 --> 00:01:54.959
+This next texture, again, imported at 1024 by 1024.
+
+38
+00:01:54.959 --> 00:01:57.040
+Note a method, virtual stream.
+
+39
+00:01:57.040 --> 00:01:59.719
+That's right, if we're dealing with virtual textures,
+
+40
+00:01:59.719 --> 00:02:02.200
+no matter if those are streaming virtual textures
+
+41
+00:02:02.200 --> 00:02:04.159
+or runtime virtual textures,
+
+42
+00:02:04.159 --> 00:02:07.930
+we need to ensure that the data we're feeding into there
+
+43
+00:02:07.930 --> 00:02:10.469
+meets this power of 2 requirement.
+
+44
+00:02:10.469 --> 00:02:13.110
+As you can see, we still have a very small resource size
+
+45
+00:02:13.110 --> 00:02:14.870
+because we're using virtual textures
+
+46
+00:02:14.870 --> 00:02:17.580
+and very important number of mips, 11.
+
+47
+00:02:17.580 --> 00:02:19.500
+The last version of this texture,
+
+48
+00:02:19.500 --> 00:02:23.520
+imported at 1,000 by 1,000, method not streamed.
+
+49
+00:02:23.520 --> 00:02:27.199
+Resource size, 512, number of mips, 1.
+
+50
+00:02:27.199 --> 00:02:28.539
+This is very bad.
+
+51
+00:02:28.539 --> 00:02:30.439
+This means that this particular texture,
+
+52
+00:02:30.439 --> 00:02:31.759
+no matter where we use it
+
+53
+00:02:31.759 --> 00:02:34.520
+or no matter how far away it is from the camera,
+
+54
+00:02:34.520 --> 00:02:36.879
+will always be used at full resolution.
+
+55
+00:02:36.879 --> 00:02:39.439
+And this is gonna create a number of different problems,
+
+56
+00:02:39.439 --> 00:02:42.860
+both visually and for performance.
+
+57
+00:02:42.860 --> 00:02:46.099
+Now, in order to check any of your texture settings,
+
+58
+00:02:46.099 --> 00:02:47.800
+we can open up Unreal.
+
+59
+00:02:47.800 --> 00:02:51.840
+And by double clicking on a texture, like so,
+
+60
+00:02:51.840 --> 00:02:54.180
+we'll open it up inside of the texture editor.
+
+61
+00:02:54.180 --> 00:02:58.280
+And in the details at the top is where all of the settings
+
+62
+00:02:58.280 --> 00:03:00.159
+for this texture should be located.

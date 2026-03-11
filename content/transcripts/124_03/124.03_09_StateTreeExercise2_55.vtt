@@ -1,0 +1,709 @@
+WEBVTT
+
+1
+00:00:01.600 --> 00:00:08.080
+Welcome back to this next video. In this, we're going to be adding the second branch.
+
+2
+00:00:08.080 --> 00:00:12.400
+So we're going to be adding a little bit more functionality and learning how to
+
+3
+00:00:12.400 --> 00:00:16.000
+transition between different states in the state tree.
+
+4
+00:00:17.570 --> 00:00:21.570
+So we're back into our state tree here, and you can see that we have
+
+5
+00:00:21.570 --> 00:00:26.530
+our standard task. We've got root, idle, and then wanderabout.
+
+6
+00:00:27.329 --> 00:00:31.570
+So before we go on any further, I just want to sort of demonstrate
+
+7
+00:00:31.570 --> 00:00:35.090
+that you can see here what we've got is...
+
+8
+00:00:36.929 --> 00:00:42.530
+What's interesting is we've got this sort of down, so we can follow the path that this is going,
+
+9
+00:00:42.530 --> 00:00:46.130
+where previously we were working with the tree in the behavior tree,
+
+10
+00:00:46.130 --> 00:00:48.770
+where we just had to follow the path from the tree.
+
+11
+00:00:48.770 --> 00:00:54.929
+This is much more like conventional coding. We will follow a certain path.
+
+12
+00:00:54.929 --> 00:01:01.009
+By default, root is going to go into its child state and then into its child state again,
+
+13
+00:01:01.009 --> 00:01:05.090
+and you can see here that we have this little arrow at the end that says root.
+
+14
+00:01:05.810 --> 00:01:13.650
+That means if we select it, by default we have no transitions, but it will return
+
+15
+00:01:13.650 --> 00:01:19.969
+to the root as once we've finished this section of tasks.
+
+16
+00:01:21.040 --> 00:01:25.359
+Now we're going to change this. We're going to add in some transitions in a minute.
+
+17
+00:01:26.000 --> 00:01:33.579
+However, what is interesting is we have a number of different tasks here,
+
+18
+00:01:34.140 --> 00:01:41.180
+where previously we would create a sequence which would run these tasks one after the other.
+
+19
+00:01:42.129 --> 00:01:45.010
+The state tree works a little bit differently.
+
+20
+00:01:45.650 --> 00:01:51.569
+Now we have four tasks, change color, change speed, find random location, and move to location.
+
+21
+00:01:53.219 --> 00:01:57.140
+And by default these will all be kicked off. They will be kicked off in order,
+
+22
+00:01:57.780 --> 00:02:03.459
+but as you can see, so we're changing color, we're changing speed, finding random location,
+
+23
+00:02:03.459 --> 00:02:09.060
+then move to that location. They won't all stop together. So the first thing is
+
+24
+00:02:09.780 --> 00:02:14.500
+to move to a location we first have to finish the random location in order to
+
+25
+00:02:14.500 --> 00:02:22.289
+get the input variable. So they still go in order. However, the move to location
+
+26
+00:02:22.289 --> 00:02:29.650
+is a longer task and that will continue until it's reached the location or it's failed to get
+
+27
+00:02:29.650 --> 00:02:34.849
+out there. Now if we were to look at change color, we've got change color up here, you can
+
+28
+00:02:34.849 --> 00:02:39.969
+see that there is no finished task in here. And we don't actually require one. We only need
+
+29
+00:02:39.969 --> 00:02:48.689
+one finished task. And in this case we are using it on the move to location.
+
+30
+00:02:49.650 --> 00:02:53.650
+Now the interesting thing is you don't actually have to have...
+
+31
+00:02:54.689 --> 00:03:01.330
+If I was to remove these, so just connect, disconnect, finish task here, and run,
+
+32
+00:03:02.289 --> 00:03:10.530
+what we're going to see is the characters will basically finish off their first run
+
+33
+00:03:10.530 --> 00:03:15.729
+through the event. Then when they got to the end they're just stuck because they don't know
+
+34
+00:03:15.729 --> 00:03:20.289
+that the task is finished. We haven't told it, therefore it cannot transition out of it.
+
+35
+00:03:21.409 --> 00:03:27.889
+Now what is interesting though is it doesn't really matter where your finished task is.
+
+36
+00:03:27.969 --> 00:03:34.560
+So if I was to copy the finished task here and bung it after my change color like that,
+
+37
+00:03:35.360 --> 00:03:41.069
+now the thing about change color is that's going to happen almost instantaneously. So
+
+38
+00:03:41.069 --> 00:03:44.669
+that's going to be the first thing that happens on our list, change color. We're
+
+39
+00:03:44.669 --> 00:03:50.000
+telling it we finished the task successfully at that point. However, if I was to run,
+
+40
+00:03:52.000 --> 00:03:57.599
+what we would find now is after the characters have reached their destination,
+
+41
+00:03:57.599 --> 00:04:03.039
+they're going to transition again. So it's not instantly ending the task,
+
+42
+00:04:03.039 --> 00:04:09.680
+and it is still waiting for all of the tasks to finish, but it's marked as finished so that
+
+43
+00:04:09.680 --> 00:04:16.000
+it knows that it can transition out of this. So that's a bit of an interesting element.
+
+44
+00:04:16.000 --> 00:04:22.110
+You don't necessarily... here it's waiting for all of the paths to finish.
+
+45
+00:04:23.220 --> 00:04:29.779
+So you need a finished task somewhere in all of your tasks, and if you don't, by default,
+
+46
+00:04:29.779 --> 00:04:37.899
+it's not going to know what to do on a transition. Now let's look about
+
+47
+00:04:37.899 --> 00:04:45.819
+transitioning. Now the first thing that we want to do to transition is, since we are copying
+
+48
+00:04:45.819 --> 00:04:52.379
+our previous example, we want to check something. So we want to know when something specifically
+
+49
+00:04:52.379 --> 00:04:57.180
+happens, and we want to know when you are close to the character. And to do that,
+
+50
+00:04:57.180 --> 00:05:04.779
+we're going to use a global task. So I'm going to push plus here and search for check.
+
+51
+00:05:05.680 --> 00:05:14.259
+We should have a check for player. Now, as you can see, this is just a task like any other.
+
+52
+00:05:14.259 --> 00:05:20.339
+The only difference is that I'm running it as a global task. And this is quite nice because
+
+53
+00:05:20.339 --> 00:05:27.459
+it means we are now going to be able to access the variables that were bound within this
+
+54
+00:05:27.459 --> 00:05:34.420
+from anywhere. And if we were to look at this task, and we just find it,
+
+55
+00:05:37.439 --> 00:05:46.100
+check for player. See, it's very similar to what we created in our service. We're just grabbing
+
+56
+00:05:46.100 --> 00:05:53.779
+the NPC, which is of type Context, and the player character checking the distance. And if they're
+
+57
+00:05:53.779 --> 00:06:03.920
+close enough, we are going to save the player character to the player. So I'm going to compile
+
+58
+00:06:03.920 --> 00:06:15.360
+and save that. Now what we need to do next is, we want to create a new state. So under the root,
+
+59
+00:06:15.360 --> 00:06:21.120
+I'm going to add a new state in, a child state, and I'm going to call this draw
+
+60
+00:06:23.579 --> 00:06:32.060
+weapon. And this is going to be a transitional state. And from the draw weapon, what we'll have
+
+61
+00:06:32.060 --> 00:06:40.850
+is a couple of tasks in here. So again, I'm going to change the color, change color,
+
+62
+00:06:41.490 --> 00:06:55.600
+and I am going to add draw weapon. Okay, and again, we need to check. We need to make sure
+
+63
+00:06:55.600 --> 00:07:02.319
+that we've got the variable set up. Now, if I was to compile, you'll see that it's complaining
+
+64
+00:07:02.319 --> 00:07:08.879
+that draw weapon hasn't got to change a color for this. So again, in the parameters,
+
+65
+00:07:08.959 --> 00:07:23.360
+I'm going to add a new one called color, and is of a linear color. Now I'm going to set this
+
+66
+00:07:23.360 --> 00:07:31.759
+to a kind of pink, I think. Okay, then I'm going to connect that up to our parameter color,
+
+67
+00:07:33.120 --> 00:07:39.279
+and we're going to draw the weapon. Okay, and that's all of the tasks that I need in there.
+
+68
+00:07:41.170 --> 00:07:47.810
+Now, what we want to do is, at the moment, we're never going to get to this task,
+
+69
+00:07:47.810 --> 00:07:53.250
+because we're going to go that the Wonder About, when completed, is sending us back to root,
+
+70
+00:07:53.970 --> 00:07:58.370
+and the root is never going to get to draw weapon. So we're just going to continue
+
+71
+00:07:58.370 --> 00:08:07.379
+through this loop of Wonder About to root. So we want to create a transition.
+
+72
+00:08:08.879 --> 00:08:14.959
+So what we're going to do is come down to this purple transition section at the bottom,
+
+73
+00:08:15.600 --> 00:08:21.839
+and push plus. We're going to push plus twice, so we've got two different transitions.
+
+74
+00:08:22.639 --> 00:08:29.680
+Now, with the transition, what we have is a trigger, a transition to, and a condition.
+
+75
+00:08:30.399 --> 00:08:35.200
+So what I'm going to do is, I'm going to keep the standard trigger fine.
+
+76
+00:08:35.200 --> 00:08:40.639
+On state completed, go back to root. That's okay. I can leave that. I can just shut that down.
+
+77
+00:08:41.419 --> 00:08:50.799
+Now, the second one here, I want to check on tick at this point. So we've got a couple
+
+78
+00:08:50.799 --> 00:08:55.919
+of choices, but tick is a good one for us to go. So we've got tick, and I don't want to
+
+79
+00:08:55.919 --> 00:09:04.690
+transition to root. I want to transition to draw weapon. Now, we've also got a condition at the
+
+80
+00:09:04.690 --> 00:09:12.210
+bottom here. And I'm going to push plus on the condition. And the condition that I'm looking for
+
+81
+00:09:12.210 --> 00:09:18.929
+is, I want to check our global task. So the condition, I'm going to go plus,
+
+82
+00:09:19.490 --> 00:09:29.539
+I'm going to go object is valid. So here we go here. And we have object is valid.
+
+83
+00:09:31.870 --> 00:09:39.789
+And the object that we want to connect to is our global task. And we are looking for player,
+
+84
+00:09:39.789 --> 00:09:47.679
+which is an output of our global task. Check for player, player. There you go. So we're checking
+
+85
+00:09:47.679 --> 00:09:56.799
+to see if the player is valid. And if it is, on tick, it is going to send us to our draw
+
+86
+00:09:56.799 --> 00:10:05.759
+weapon, which is giving us the task of change color and draw weapon. Okay, so let's test this
+
+87
+00:10:05.759 --> 00:10:11.840
+out. We're back into the engine now and we got our characters. If I push play, as you can see,
+
+88
+00:10:11.840 --> 00:10:17.440
+everyone's going to start off by being yellow and just wandering around. And then when I get
+
+89
+00:10:17.440 --> 00:10:23.200
+close enough to one of them, it's going to log the player and they will draw their weapon.
+
+90
+00:10:24.419 --> 00:10:28.659
+And you can see here that all of the characters are now standing there,
+
+91
+00:10:29.299 --> 00:10:36.580
+and it's now stuck in that thing. You can see it for a second there. It jumps back into the
+
+92
+00:10:36.580 --> 00:10:43.139
+wanderer about as it's flashing yellow. But generally speaking, they're just standing there
+
+93
+00:10:43.139 --> 00:10:52.740
+with their weapons drawn. So let's prevent that jumping back into the wanderer about.
+
+94
+00:10:53.460 --> 00:10:58.580
+Now, if their weapons are drawn on the wanderer about, what I'm going to do is I'm going to
+
+95
+00:10:58.580 --> 00:11:05.860
+create a entry condition. So I'm going to push plus, and again, I'm going to look for object
+
+96
+00:11:05.860 --> 00:11:13.419
+is valid and the check for player, player. This time I'm going to invert it. So that's
+
+97
+00:11:13.419 --> 00:11:19.389
+going to take us to the, it's going to mean our only option here is to go to the draw weapon
+
+98
+00:11:19.389 --> 00:11:28.129
+state and let's try that out. So if I wander over to one of these characters, they turn and look at
+
+99
+00:11:28.129 --> 00:11:39.230
+me and they never go back into the wanderer about. Okay, so that's working well, but
+
+100
+00:11:39.230 --> 00:11:51.149
+let's jump on and see what's next. Right, so let's complete this entry. So we've got the
+
+101
+00:11:51.149 --> 00:11:56.590
+draw weapon that will send us back to root and then we'll come through back to the draw weapon state.
+
+102
+00:11:57.230 --> 00:12:06.049
+But let's add in an extra state here. Off of the root, add state. I'm going to call this
+
+103
+00:12:06.690 --> 00:12:16.590
+tack player. Now, one of the things I want to do while I'm still here is I'm going to give
+
+104
+00:12:16.590 --> 00:12:21.870
+these a sort of default color. And in order to change the default colors, I need to come down to
+
+105
+00:12:21.870 --> 00:12:28.190
+this theme section here. So we've got the default color. I'm going to add in a couple of others. So
+
+106
+00:12:28.750 --> 00:12:39.340
+I've got the idle color, which we're going to go in as yellow, and let's have our attack
+
+107
+00:12:39.340 --> 00:12:50.080
+color as pink. So that should do. Okay, and now what I can do is I can change this to our idle
+
+108
+00:12:50.080 --> 00:12:59.250
+color. It's a bit difficult to see that, but I'm just going to make that a bit of a darker
+
+109
+00:13:01.139 --> 00:13:11.120
+yellow. And we can change all of our attack ones to the attack color. Okay, so it's just
+
+110
+00:13:12.240 --> 00:13:19.580
+slightly easier to see what's going on at any one point. Okay, so with the attack color, I am
+
+111
+00:13:19.580 --> 00:13:29.820
+going to add in a couple more states. I'm going to add a chase color and the swing weapon.
+
+112
+00:13:30.779 --> 00:13:42.190
+So I will add another care one and drag that so it's under the attack player. I'm going to call
+
+113
+00:13:42.190 --> 00:13:58.940
+this chase player. Add state, add child state, and this is going to be swing weapon
+
+114
+00:14:04.299 --> 00:14:09.500
+within the attack player. So I'll have another entry condition, and this is going to be the same
+
+115
+00:14:09.500 --> 00:14:17.500
+entry condition as we had before. Object is valid, and we are checking the check for player.
+
+116
+00:14:19.679 --> 00:14:26.799
+So it's only going to be able to enter if we've already found the player. So let's start
+
+117
+00:14:26.799 --> 00:14:35.139
+off by setting up the chase player state. Now in this, we are going to need two different tasks.
+
+118
+00:14:35.860 --> 00:14:42.340
+The first one is going to be chase actor, and the second one is going to be update
+
+119
+00:14:42.340 --> 00:14:49.330
+speed based on distance. All this is going to do is it's going to chase the actor,
+
+120
+00:14:49.330 --> 00:14:53.889
+and it's going to change the speed of the actor based on how far away it is.
+
+121
+00:14:54.980 --> 00:15:01.779
+Now let's have a quick play with these. So in order to get this working, you can see that
+
+122
+00:15:01.779 --> 00:15:07.940
+we've got some inputs here. The context is fine. The actor should chase. Well, from this,
+
+123
+00:15:07.940 --> 00:15:14.049
+we can go check for player and get the player. However, we've got distance from player here.
+
+124
+00:15:14.850 --> 00:15:19.090
+We don't have the distance from player. So this is something we're going to need to get.
+
+125
+00:15:19.169 --> 00:15:25.090
+We could get this in a number of different ways. However, what I'm going to do is I'm going to
+
+126
+00:15:25.090 --> 00:15:30.450
+jump into the check for player blueprint, and we can see that we have this little
+
+127
+00:15:30.450 --> 00:15:33.889
+tick button here that if I push, it's going to open up directly.
+
+128
+00:15:34.909 --> 00:15:40.590
+And you can see that we have the distance here. So we have the distance from the player at this
+
+129
+00:15:40.590 --> 00:15:46.669
+point. So this is a good place that we can can grab it. And all I need to do to grab it
+
+130
+00:15:46.750 --> 00:15:52.289
+is promote this to a variable. I'm going to plug this into our chain,
+
+131
+00:15:54.159 --> 00:16:04.559
+and I'm going to set this to distance to layer. And again, if I want this to be visible from
+
+132
+00:16:04.559 --> 00:16:11.200
+outside so we can access it and use it as an input for a task, I have to change the category
+
+133
+00:16:11.200 --> 00:16:20.110
+to output. And that selects it in output. So now we can get the distance from the player
+
+134
+00:16:20.110 --> 00:16:27.700
+and the player from this task. So I save that, jump back into our chart,
+
+135
+00:16:28.419 --> 00:16:37.740
+and update speed based on distance from player to a drop down. Again, find the global task,
+
+136
+00:16:37.740 --> 00:16:45.539
+ST check for player and select distance from player. Okay, I'm going to change the colors
+
+137
+00:16:45.539 --> 00:16:52.909
+of these so they're all within the attack section. Now we are never going to get into
+
+138
+00:16:52.909 --> 00:16:59.789
+this chase player at this point, because the draw state is going to send us back to root,
+
+139
+00:16:59.789 --> 00:17:05.390
+and we're going to come back to the draw state each time. So what I want to do here
+
+140
+00:17:05.390 --> 00:17:10.750
+is when we've got to the draw state, the transition at the end, I want to add something in.
+
+141
+00:17:11.390 --> 00:17:17.470
+On state complete, I want to go to attack player. So that's going to take us down
+
+142
+00:17:17.470 --> 00:17:27.119
+into this loop here. Now, what I'm going to do on chase player is I'm going to add a transition,
+
+143
+00:17:27.119 --> 00:17:33.440
+so it doesn't go to root as well, just goes back to attack player. And I'm going to do
+
+144
+00:17:33.440 --> 00:17:41.680
+the same here for swing weapon. So once you've got into this loop for attack player,
+
+145
+00:17:42.319 --> 00:17:49.119
+there isn't much ability to get back to root. We're controlling the state at this point.
+
+146
+00:17:49.680 --> 00:17:56.720
+I hit compile, everything looks okay. Let's jump into the engine and test this out. So if I push
+
+147
+00:17:56.720 --> 00:18:01.869
+play, see we have our characters that are wandering around, but when I get close enough
+
+148
+00:18:01.869 --> 00:18:08.769
+to them, we'll draw his weapon and start to follow me. And then based on how far away I am,
+
+149
+00:18:08.769 --> 00:18:14.980
+they're going to run faster or slower. All I'm doing there is taking the distance from
+
+150
+00:18:14.980 --> 00:18:21.059
+the characters and then updating or reducing their speed accordingly.
+
+151
+00:18:27.359 --> 00:18:30.880
+Okay, so let's put in the final part. When they're close enough,
+
+152
+00:18:30.880 --> 00:18:38.910
+let's get them to attack the player. Okay, so let's jump back into the state tree.
+
+153
+00:18:41.660 --> 00:18:47.660
+So now we're always going back to the attack player here. So in order to specify between
+
+154
+00:18:47.660 --> 00:18:54.779
+chasing the player and swinging the weapon, we can use an entry condition on the chase player.
+
+155
+00:18:55.500 --> 00:19:05.299
+So if I push plus on an entry condition, and I want to do a float compare. So what we have
+
+156
+00:19:05.299 --> 00:19:16.059
+here is we want to check if something is greater than, and we are looking for, let's say,
+
+157
+00:19:17.019 --> 00:19:26.450
+100. And in the left we need the distance to player. So what's this doing is it's only
+
+158
+00:19:26.450 --> 00:19:32.690
+letting you into this condition if the distance to player is more than 100.
+
+159
+00:19:33.940 --> 00:19:41.220
+Okay, so that means that we would, if we are close, we're not going to go into the
+
+160
+00:19:41.220 --> 00:19:48.980
+chase player. We're going to go into the swing weapon. So in the swing weapon we want to add
+
+161
+00:19:48.980 --> 00:19:57.380
+one task. I'm going to push plus, and I'm going to search for attack, and select STT attack.
+
+162
+00:19:58.180 --> 00:20:03.779
+Now this all looks fine. The context is automatically connected up, so we should be okay.
+
+163
+00:20:04.579 --> 00:20:08.660
+However, I would like to make one change, and I want to demonstrate something.
+
+164
+00:20:09.220 --> 00:20:15.859
+Here we have STT attack, and that comes from the file name. Now you might not want to use
+
+165
+00:20:15.859 --> 00:20:21.700
+the file name. You might want to have some kind of different phrase so that you can sort of read
+
+166
+00:20:21.700 --> 00:20:27.380
+it better within the chart. Now if I push on the edit button, so that's that little pen
+
+167
+00:20:27.380 --> 00:20:35.490
+by the STT attack, and jump in, now under class settings you can see I have a blueprint
+
+168
+00:20:35.490 --> 00:20:47.380
+display name. If I change that to swing weapon and push compile, you'll now see the text just
+
+169
+00:20:47.380 --> 00:20:54.579
+says swing weapon. It also means when we're actually searching for it, we'll find this under
+
+170
+00:20:54.579 --> 00:21:00.740
+swing weapon, rather than the file name. So it's good to know that exists, because it
+
+171
+00:21:00.740 --> 00:21:04.900
+sometimes causes some kind of confusion when you're looking for specific tasks.
+
+172
+00:21:05.859 --> 00:21:11.890
+Right, so it's only going into the chase player if the player is over 100 centimeters away,
+
+173
+00:21:11.890 --> 00:21:22.140
+otherwise it's going to swing the weapon. Let's compile and try this out. You can now see
+
+174
+00:21:22.380 --> 00:21:34.990
+my character and they will chase me if I get further away, otherwise they'll surround me
+
+175
+00:21:34.990 --> 00:21:43.789
+and start trying to hit me. And with that, we've come to the end of the course.
+
+176
+00:21:43.789 --> 00:21:49.789
+So thank you for sticking with us. I hope you've gone through some of the exercises and
+
+177
+00:21:49.789 --> 00:21:55.549
+have a good understanding of how the AI, both the AI systems work. Thanks a lot. Bye.

@@ -1,0 +1,1085 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:04.740
+The last thing that we're going to look at in this course is animating the
+
+2
+00:00:04.740 --> 00:00:09.660
+suspension using Control Rig so that it reacts in real time to the movement of
+
+3
+00:00:09.660 --> 00:00:16.910
+the tires. Now this is really great to use where you want to add the extra
+
+4
+00:00:16.910 --> 00:00:20.589
+level of detail and you want your vehicle to have a realistic suspension
+
+5
+00:00:20.589 --> 00:00:25.480
+system. Now if this was something you were setting up on a custom vehicle of
+
+6
+00:00:25.480 --> 00:00:28.980
+your own it's important to think about how your suspension system is
+
+7
+00:00:28.980 --> 00:00:33.380
+going to work and use that to inform how your skeleton hierarchy should be
+
+8
+00:00:33.380 --> 00:00:38.109
+set up and how your different meshes should be skinned. And generally our
+
+9
+00:00:38.109 --> 00:00:42.869
+advice would be to align all of your bones X forward and Z up for ease of
+
+10
+00:00:42.869 --> 00:00:46.770
+setup when you're using Control Rig in engine but there are times where it can
+
+11
+00:00:46.770 --> 00:00:50.630
+also help to have your bone pointing straight down a mesh depending on the
+
+12
+00:00:50.630 --> 00:00:55.829
+movement that piece of the suspension system is going through. Some useful
+
+13
+00:00:55.829 --> 00:00:58.670
+things to think about when you're actually creating your skeleton for a
+
+14
+00:00:58.670 --> 00:01:03.570
+suspension system is for something like the lower part of the suspension spring
+
+15
+00:01:03.570 --> 00:01:07.969
+where it attaches to the control arm. It can be useful to create a bone at this
+
+16
+00:01:07.969 --> 00:01:11.849
+pivot point so that you can match that location in engine and always know that
+
+17
+00:01:11.849 --> 00:01:15.049
+it's pivoting from the correct place when the control arm is moving.
+
+18
+00:01:15.049 --> 00:01:20.719
+When you're setting up the rear axle if you align the bone with one of the
+
+19
+00:01:20.719 --> 00:01:24.579
+rear wheels it doesn't really matter which side you can then copy the
+
+20
+00:01:24.579 --> 00:01:28.379
+movement of that rear wheel as it moves up and down and aim the other
+
+21
+00:01:28.379 --> 00:01:32.299
+end of the rear axle towards the opposite wheel so always keep that rear
+
+22
+00:01:32.299 --> 00:01:36.219
+axle aligned with both wheels and we'll go over how to do this in the demo
+
+23
+00:01:36.219 --> 00:01:43.750
+shortly and for meshes like the rear suspension and damper meshes where they
+
+24
+00:01:43.750 --> 00:01:47.549
+attach to the rear axle you can actually make these bones children of
+
+25
+00:01:47.549 --> 00:01:50.150
+the rear axle so that they automatically follow its movement
+
+26
+00:01:50.150 --> 00:01:54.469
+without any extra setup in engine and some useful tips for when you're
+
+27
+00:01:54.469 --> 00:01:58.909
+skidding your meshes remember that anything that's a hard surface should be
+
+28
+00:01:58.909 --> 00:02:03.829
+weighted to just one bone so things like control arms and if your vehicle
+
+29
+00:02:03.829 --> 00:02:07.109
+maybe has doors things like that these should be weighted to just a single bone
+
+30
+00:02:07.109 --> 00:02:11.569
+and for the accurate visual compression of something like these
+
+31
+00:02:11.569 --> 00:02:15.689
+suspension springs the weighting should be a perfect gradient between the bones
+
+32
+00:02:15.689 --> 00:02:22.969
+at each end of the spring as you can see in this image here so the first
+
+33
+00:02:22.969 --> 00:02:27.650
+thing we need to do is create a new control rig asset and we'll do that by
+
+34
+00:02:27.650 --> 00:02:32.979
+finding our skeletal mesh so inside a meshes folder here with our skeletal
+
+35
+00:02:32.979 --> 00:02:39.979
+mesh will right-click come up to create and then choose control rig and I'm just
+
+36
+00:02:39.979 --> 00:02:48.969
+going to rename this CR underscore suspension demo and I'll double click to
+
+37
+00:02:48.969 --> 00:02:56.990
+open that up just dock inside our main window here and before we set up
+
+38
+00:02:56.990 --> 00:03:01.310
+any of the control rigs rig logic the first thing we need to do is add this
+
+39
+00:03:01.310 --> 00:03:06.699
+to our cars animation blueprint so that it gets taken into account at runtime so
+
+40
+00:03:06.699 --> 00:03:11.020
+coming back to our content browser and back to the vehicles folder we'll find
+
+41
+00:03:11.020 --> 00:03:16.740
+our ABP chaos vehicle and inside here just before the output pose so
+
+42
+00:03:16.740 --> 00:03:21.590
+that this gets executed after our wheel controller information I'm going to
+
+43
+00:03:21.590 --> 00:03:29.400
+right-click and search for control rig and then connect up the logic here
+
+44
+00:03:29.400 --> 00:03:34.599
+this means that we're running our our blueprint information for the car and
+
+45
+00:03:34.599 --> 00:03:38.520
+for the wheels first and then we'll be running the control rig information
+
+46
+00:03:38.520 --> 00:03:44.139
+that will apply on top of the cars pose and with this control rig node we
+
+47
+00:03:44.139 --> 00:03:48.819
+actually need to specify which control rig we want to use so inside the
+
+48
+00:03:48.819 --> 00:03:53.819
+details panel under the control rig class here currently set to none we'll
+
+49
+00:03:53.819 --> 00:04:00.189
+search for our CR underscore suspension demo and then we'll just compile and
+
+50
+00:04:00.189 --> 00:04:06.460
+save that and now we can start setting up our rig logic now the first
+
+51
+00:04:06.460 --> 00:04:09.580
+thing that we're going to do is start with the rear suspension because that's
+
+52
+00:04:09.580 --> 00:04:14.020
+the most simple setup so inside our blueprint what I've done is actually
+
+53
+00:04:14.020 --> 00:04:17.740
+move the camera a little closer up so that we can see the rear suspension
+
+54
+00:04:17.740 --> 00:04:21.459
+moving and see what sort of changes we're making to it as we update and
+
+55
+00:04:21.459 --> 00:04:29.149
+create this this control rig so the way we have the joints or the bone set
+
+56
+00:04:29.149 --> 00:04:35.180
+up for the rear suspension here is our rear axle if I search for it so
+
+57
+00:04:35.180 --> 00:04:41.120
+make sure I select the right bone and the joints location is the same as
+
+58
+00:04:41.120 --> 00:04:46.279
+the right hand rear wheel so what we can do with this is copy the movement of
+
+59
+00:04:46.279 --> 00:04:50.879
+that right hand rear wheel and paste it onto the rear axle so that wherever
+
+60
+00:04:50.879 --> 00:04:54.720
+that wheel goes this rear axle will also go so it'll move up and down as
+
+61
+00:04:54.720 --> 00:05:00.670
+this wheel moves up and down and what it also means is we can point the
+
+62
+00:05:00.670 --> 00:05:06.500
+other end of the rear axle towards the left hand rear wheel and what
+
+63
+00:05:06.500 --> 00:05:10.620
+that will do is maintain the left hand being following the left wheel on
+
+64
+00:05:10.620 --> 00:05:16.879
+the right hand side following the right wheel so let's get that set up so we're
+
+65
+00:05:16.879 --> 00:05:22.410
+going to get the information of the right rear wheel so we now have the
+
+66
+00:05:22.410 --> 00:05:28.160
+transform information of this and we're going to choose in fact let's
+
+67
+00:05:28.160 --> 00:05:33.519
+just drag in the rear axle as well we're going to choose set transforms for
+
+68
+00:05:33.519 --> 00:05:38.970
+the rear axle bone and if I plug up these executes just connect the
+
+69
+00:05:38.970 --> 00:05:45.000
+transforms and see what we get when we hit play you'll now see that we
+
+70
+00:05:45.000 --> 00:05:51.810
+automatically have movement from the rear axle that's being copied from the
+
+71
+00:05:51.810 --> 00:05:56.879
+rear wheel but we also have a little bit of rotation that you know isn't
+
+72
+00:05:56.879 --> 00:06:03.259
+exactly very mechanically accurate so back inside our control rig instead of
+
+73
+00:06:03.259 --> 00:06:07.740
+copying the whole transforms what we can do is just copy the translation
+
+74
+00:06:07.740 --> 00:06:11.980
+values and because we know this wheel only moves up and down we only want to
+
+75
+00:06:11.980 --> 00:06:18.629
+copy the translate Z axis so if we compile that and press play you can see
+
+76
+00:06:18.629 --> 00:06:22.269
+now that as I move forwards and backwards we don't get that rotation
+
+77
+00:06:22.269 --> 00:06:27.079
+that we used to get but we do get the up-and-down movement and because of
+
+78
+00:06:27.079 --> 00:06:32.339
+the way our bones are set up so because we have the children bones for
+
+79
+00:06:32.339 --> 00:06:38.790
+our rear suspension connected to the rear axle we get all this free movement and
+
+80
+00:06:38.790 --> 00:06:43.389
+compression of the rear suspension without having to do any sort of extra
+
+81
+00:06:43.389 --> 00:06:48.720
+setup inside the control rig but you can see on the left-hand side that it's very
+
+82
+00:06:48.720 --> 00:06:52.800
+very loose against the wheel and it's not really following mechanically
+
+83
+00:06:52.800 --> 00:06:57.600
+accurately so what we'll do next is just tell the rear axle to constantly
+
+84
+00:06:57.600 --> 00:07:01.319
+point towards the rear left-hand wheel and that should fix that for us
+
+85
+00:07:01.319 --> 00:07:07.819
+so I'm going to get an aim node here so right-click search for aim and
+
+86
+00:07:07.819 --> 00:07:14.990
+the bone that we want to aim would be the rear axle so if I select that and
+
+87
+00:07:14.990 --> 00:07:20.410
+use the small arrow here that'll put that information in there and we need to
+
+88
+00:07:20.410 --> 00:07:25.389
+set our axis that we want to point along and for us this is minus one in Y
+
+89
+00:07:25.389 --> 00:07:32.730
+and our target that we want to aim towards is going to be the left-hand
+
+90
+00:07:32.730 --> 00:07:38.920
+rear wheel so if I drag that in and choose get bone I pop open the
+
+91
+00:07:38.920 --> 00:07:41.839
+transform values we can pick the translation and plug that straight into
+
+92
+00:07:41.839 --> 00:07:47.300
+target and the executes and we can see that something has changed and
+
+93
+00:07:47.300 --> 00:07:51.209
+something has updated here and the last thing we need to change here is set
+
+94
+00:07:51.209 --> 00:07:55.889
+our secondary weight to zero because this is usually used for something like
+
+95
+00:07:55.889 --> 00:08:01.029
+a pole vector and it's something we don't have in this case so if I hit
+
+96
+00:08:01.029 --> 00:08:06.519
+play again we can now see that both the right side and the left side of our
+
+97
+00:08:06.519 --> 00:08:12.879
+rear axle is following each wheel and animating as the wheels
+
+98
+00:08:12.879 --> 00:08:20.829
+move up and down over these bumps so just as a recap what we're doing here
+
+99
+00:08:20.829 --> 00:08:27.029
+is setting the transforms of the rear axle based on the movement of the the
+
+100
+00:08:27.029 --> 00:08:31.829
+right rear wheel and we're actually only choosing the Z translation axis for
+
+101
+00:08:31.829 --> 00:08:38.200
+that and then we're aiming the rear axle bone towards the left hand rear
+
+102
+00:08:38.200 --> 00:08:43.730
+wheel and again using translations as the target so that the right hand side
+
+103
+00:08:43.730 --> 00:08:46.929
+of the rear axle always follows the right wheel and the left hand side
+
+104
+00:08:46.929 --> 00:08:53.470
+always points towards the left wheel now the front suspension is a little more
+
+105
+00:08:53.470 --> 00:08:57.740
+complex because it has a few more moving parts so we're going to break it
+
+106
+00:08:57.740 --> 00:09:02.379
+down into three different steps first we'll take a look at the sort of hub
+
+107
+00:09:02.379 --> 00:09:05.539
+of the wheel and make sure that that follows the movement of the tires as
+
+108
+00:09:05.539 --> 00:09:10.490
+they turn and as they translate up and down but we'll do this using a parent
+
+109
+00:09:10.490 --> 00:09:13.450
+constraint node just to show you a different way of how to copy
+
+110
+00:09:13.450 --> 00:09:19.320
+transforms from one thing to another then we'll set up the control arms just
+
+111
+00:09:19.320 --> 00:09:22.120
+making sure that they always point towards the wheels as they move up and
+
+112
+00:09:22.120 --> 00:09:26.889
+down and lastly we'll make sure that the lower end of the spring and damper
+
+113
+00:09:26.889 --> 00:09:31.370
+system is following that lower control arm so that when it moves we get the
+
+114
+00:09:31.370 --> 00:09:34.929
+accurate compression of the springs and just making sure that it's
+
+115
+00:09:34.929 --> 00:09:37.690
+pivoting from the right place as they followed the movement of the lower
+
+116
+00:09:37.690 --> 00:09:43.460
+controller so the first thing I'm going to do is just bring this back
+
+117
+00:09:43.460 --> 00:09:46.980
+here and actually create a sequence node just so that we can break up the
+
+118
+00:09:46.980 --> 00:09:53.929
+logic into two different flows oh well as many flows as we we want to so this
+
+119
+00:09:53.929 --> 00:10:10.450
+will be our rear suspension at the top so rear suspension there we go and we'll
+
+120
+00:10:10.450 --> 00:10:16.090
+create our front suspension just down here so the first thing we want to do
+
+121
+00:10:16.090 --> 00:10:20.250
+is make sure that the the hub of our wheel this sort of gray bit that we
+
+122
+00:10:20.250 --> 00:10:25.720
+have inside here follows the the tire as it moves up and down and we'll use a
+
+123
+00:10:25.840 --> 00:10:31.480
+parent constraint node for that so if I right-click and search for parent
+
+124
+00:10:31.480 --> 00:10:38.580
+constraint here we can choose a child bone or child sort of element of the
+
+125
+00:10:38.580 --> 00:10:43.059
+rig to follow a parent and what's great about the parent constraint node
+
+126
+00:10:43.059 --> 00:10:47.220
+is you can actually filter out different axes for translation rotation
+
+127
+00:10:47.220 --> 00:10:52.330
+and scale and that's something that we'll be doing with this so if we input the
+
+128
+00:10:52.330 --> 00:10:57.850
+information for our child and our parent we want the wheel front turn R
+
+129
+00:10:57.850 --> 00:11:06.399
+and L to follow the wheel front R and L so if we select the wheel front turn
+
+130
+00:11:06.399 --> 00:11:12.429
+R as our child inside the parent heading just down here we pop open item
+
+131
+00:11:12.429 --> 00:11:15.990
+this is where we pop the parent information and that will be the wheel
+
+132
+00:11:15.990 --> 00:11:26.139
+front R so if we connect this logic up and then play in level you can see that
+
+133
+00:11:26.139 --> 00:11:30.379
+I've just moved the camera a little bit so we can see the front suspension a
+
+134
+00:11:30.379 --> 00:11:34.480
+bit better you'll see that on the right hand side now that sort of
+
+135
+00:11:34.480 --> 00:11:40.100
+interior wheel hub is following the movement of that front right hand tire
+
+136
+00:11:40.100 --> 00:11:45.320
+which is great we don't quite want all the rotation that it's giving us so
+
+137
+00:11:45.320 --> 00:11:49.210
+we can filter out some of these individual axes but we have the
+
+138
+00:11:49.210 --> 00:11:53.320
+following which is which is excellent so far now something else that's great
+
+139
+00:11:53.320 --> 00:11:58.590
+about the parent constraint node is this maintain offset option that means
+
+140
+00:11:58.590 --> 00:12:03.029
+that it's going to maintain its position its initial location whilst
+
+141
+00:12:03.029 --> 00:12:07.950
+also having the transforms applied to it from the front wheel if we were to
+
+142
+00:12:07.950 --> 00:12:13.149
+turn that off what you would see that it actually snaps to the location of
+
+143
+00:12:13.149 --> 00:12:17.460
+that front wheel and we get some real funky results because it ends up
+
+144
+00:12:17.460 --> 00:12:23.740
+inside the wheel mesh so having an option to maintain the offset or maintain the
+
+145
+00:12:23.740 --> 00:12:28.179
+the initial position of that bone is a really great feature of the parent
+
+146
+00:12:28.179 --> 00:12:33.340
+constraint but something we know we don't want is some of this rotation
+
+147
+00:12:33.340 --> 00:12:40.690
+value so we know we only want the movement up and down and the rotation
+
+148
+00:12:40.690 --> 00:12:45.610
+the turning of the wheel left and right so for us that would be the Z
+
+149
+00:12:45.610 --> 00:12:52.500
+translation axis and the Z rotation axis so if we test that out now I just
+
+150
+00:12:52.500 --> 00:13:00.480
+spawn in a better location now we'll see that wheel hub moving up and down
+
+151
+00:13:00.480 --> 00:13:05.240
+on the right hand side there and as we turn left and right we can see that
+
+152
+00:13:05.240 --> 00:13:10.519
+it does only turn left and right but we're getting some funky results here
+
+153
+00:13:10.519 --> 00:13:14.399
+it's no longer rolling with the wheel which is good but there's one more
+
+154
+00:13:14.399 --> 00:13:18.720
+setting we need to just tweak to fix this sort of unusual movement we've got
+
+155
+00:13:18.720 --> 00:13:24.259
+and it's just to do with the rotation order so coming down here to
+
+156
+00:13:24.259 --> 00:13:29.129
+our advanced settings we have the option to edit the rotation order for
+
+157
+00:13:29.129 --> 00:13:33.149
+the filter so when we've edited these values here and for us if we set
+
+158
+00:13:33.149 --> 00:13:42.779
+it to Y X Z we know that this is going to fix our sort of strange
+
+159
+00:13:42.779 --> 00:13:53.370
+rotation issues there so as we roll forwards we can see that this of
+
+160
+00:13:53.370 --> 00:13:58.169
+interior hub is following along with the wheel and as we turn left and right
+
+161
+00:13:58.169 --> 00:14:04.639
+it's also rotating left and right which is the first step so I'm just
+
+162
+00:14:04.639 --> 00:14:09.980
+going to repeat this for the left hand side so if I use ctrl D to duplicate
+
+163
+00:14:09.980 --> 00:14:14.600
+our parent constraint with all the settings set up already I'm going to
+
+164
+00:14:14.600 --> 00:14:23.570
+change our front turn R to be front turn L and then change our wheel front
+
+165
+00:14:23.730 --> 00:14:32.860
+R to wheel front L compile and save that and when we hit play what we should
+
+166
+00:14:32.860 --> 00:14:37.100
+see is our left and right side follow the wheels as they turn left and
+
+167
+00:14:37.100 --> 00:14:41.570
+right and as they move up and down they're also moving up and down which
+
+168
+00:14:41.570 --> 00:14:46.029
+is great so that's the first step for us as our front suspension setting
+
+169
+00:14:46.029 --> 00:14:50.019
+up that sort of interior wheel hub and the next step will be taking a
+
+170
+00:14:50.019 --> 00:14:57.970
+look at the control arms so we'll first start with the upper control arm
+
+171
+00:14:58.090 --> 00:15:02.750
+and we're going to use another aim node like we did with the rear axle but
+
+172
+00:15:02.750 --> 00:15:06.070
+we'll need to add an offset this time and do our best to make sure that the
+
+173
+00:15:06.070 --> 00:15:10.309
+control arm maintains its original position so the idea is that we're
+
+174
+00:15:10.309 --> 00:15:14.830
+pointing our control arm towards the rear sorry not the rear but the the
+
+175
+00:15:14.830 --> 00:15:18.750
+front wheel hub that we've just used in the parent constraint and is
+
+176
+00:15:18.750 --> 00:15:27.519
+following the the front wheel so if I search for another aim node and add a
+
+177
+00:15:27.600 --> 00:15:34.159
+pin to our sequence node and connect these up our child bone would be our
+
+178
+00:15:34.159 --> 00:15:38.159
+control arm here and what we'll do obviously we're going to use the upper
+
+179
+00:15:38.159 --> 00:15:43.899
+control arm so we'll select that so our upper control arm and our target is
+
+180
+00:15:43.899 --> 00:15:49.779
+going to be the turn wheel that we have here so wheel front turn R if I
+
+181
+00:15:49.779 --> 00:15:55.539
+drag that in whoops drag that into the graph choose get bone and again
+
+182
+00:15:55.539 --> 00:16:00.549
+popping up and transform we can connect the translation to the target and now
+
+183
+00:16:00.549 --> 00:16:05.029
+aim axis we know wants to be positive Y and we can check this by seeing what
+
+184
+00:16:05.029 --> 00:16:09.230
+the orientation axis of the bone is so if you were to select the bone come
+
+185
+00:16:09.230 --> 00:16:14.340
+up to your options here and choose display axis on selection if I whoops I
+
+186
+00:16:14.340 --> 00:16:18.059
+disconnect the logic first you can see that we're pointing down the
+
+187
+00:16:18.059 --> 00:16:22.580
+positive Y axis here and that's what we want to point towards and our wheel
+
+188
+00:16:22.659 --> 00:16:29.440
+hub as it moves up and down so if I reconnect this logic back up set our aim
+
+189
+00:16:29.440 --> 00:16:37.809
+axis to 0 in X and 1 in Y and again set our secondary weight to 0 as we
+
+190
+00:16:37.809 --> 00:16:44.649
+did with the rear axle we can now see that our upper control arm is pointing
+
+191
+00:16:44.649 --> 00:16:51.480
+directly towards our turn bone so if we hit play in the level here we'll
+
+192
+00:16:51.480 --> 00:16:56.929
+see that as this wheel turns and moves up and down that control arm also moves up
+
+193
+00:16:56.929 --> 00:17:01.809
+and down and stays pointing towards it essentially but we need to add an
+
+194
+00:17:01.809 --> 00:17:04.930
+offset so that we can kind of reposition it to where it used to be
+
+195
+00:17:04.930 --> 00:17:12.589
+and and fix its initial orientation to do that we're simply going to add to
+
+196
+00:17:12.589 --> 00:17:17.309
+the translation values of the target and we'll use an add node for that so
+
+197
+00:17:17.309 --> 00:17:21.269
+if I just make some space here and drag off the translation search for add
+
+198
+00:17:21.269 --> 00:17:29.059
+what we're going to do in the beeping here is add 14 to our Z axis and just
+
+199
+00:17:29.059 --> 00:17:32.299
+through some trial and error we found that works quite well for our setup
+
+200
+00:17:32.299 --> 00:17:35.420
+but you might find that yours is different depending on you know how
+
+201
+00:17:35.420 --> 00:17:41.130
+your joints are set up so coming back into the level here we can see
+
+202
+00:17:41.130 --> 00:17:46.250
+that now it stays pointing towards that that wheel turn joint that we have
+
+203
+00:17:46.250 --> 00:17:50.779
+however it's now in its original location so that we don't have it
+
+204
+00:17:50.779 --> 00:17:54.859
+pointing directly at the bone we just have that offset to fix the initial
+
+205
+00:17:54.859 --> 00:18:04.319
+positioning and now we can repeat these steps with the lower control arm
+
+206
+00:18:04.319 --> 00:18:10.880
+so if we were to duplicate this aim node with control D and connect that
+
+207
+00:18:10.880 --> 00:18:17.220
+up we'll change our our upper control arm to be the our lower control arm
+
+208
+00:18:17.220 --> 00:18:24.240
+and the target is still going to be the transform of our front turn R
+
+209
+00:18:24.240 --> 00:18:27.880
+however the add value is going to be slightly different for this lower
+
+210
+00:18:27.880 --> 00:18:34.180
+control arm so I'll just duplicate this add node and connect the same translation
+
+211
+00:18:34.180 --> 00:18:40.119
+pin up from our wheel turn and connect that to the target and this
+
+212
+00:18:40.119 --> 00:18:50.319
+time we're going to use minus 4.5 in our z-axis and let's just
+
+213
+00:18:50.319 --> 00:19:01.339
+test that out so we can now see that the upper and the lower control arm
+
+214
+00:19:01.339 --> 00:19:06.660
+are always pointing towards that wheel turn bone and always moving up and down
+
+215
+00:19:06.660 --> 00:19:10.920
+as that wheels moving up and down as well and they're not affected when we
+
+216
+00:19:10.920 --> 00:19:15.099
+turn the wheels left and right so this is looking like a pretty good
+
+217
+00:19:15.099 --> 00:19:19.619
+setup so far now let's just repeat that for the left hand side so both the
+
+218
+00:19:19.619 --> 00:19:26.220
+control arms on both sides will be moving up and down with the wheels now
+
+219
+00:19:26.220 --> 00:19:31.539
+because all of the joints in our skeleton are Z up and X forward that
+
+220
+00:19:31.539 --> 00:19:36.220
+means that we can use this same logic on the left hand side so what we can do
+
+221
+00:19:36.220 --> 00:19:42.380
+here is just duplicate this with control D and just change some of the
+
+222
+00:19:42.380 --> 00:19:46.579
+values from underscore R or the right hand version to be the left hand
+
+223
+00:19:46.579 --> 00:19:58.569
+version so if I select wheel front turn L to be our target and then move
+
+224
+00:19:58.569 --> 00:20:15.579
+over to the L upper control arm and then the L lower control arm we can see
+
+225
+00:20:15.579 --> 00:20:21.099
+that we've instantly got something that oh if I connect it we've instantly got
+
+226
+00:20:21.099 --> 00:20:25.980
+something that is sort of affecting our our control arms here but there's
+
+227
+00:20:25.980 --> 00:20:30.579
+just one value we need to update and that's the axis so if we show the
+
+228
+00:20:30.579 --> 00:20:35.579
+display axis on selection again if I just disconnect there we can see that
+
+229
+00:20:35.579 --> 00:20:40.539
+for these two joints here the upper and lower control arm joints it's the
+
+230
+00:20:40.539 --> 00:20:44.059
+negative Y axis that we need to point because we're pointing to the left here
+
+231
+00:20:44.059 --> 00:20:49.740
+compared to the if I select the right joints compared to the positive Y axis
+
+232
+00:20:49.740 --> 00:20:56.460
+for the right hand side so if we just flip the Y value to be negative 1 for
+
+233
+00:20:56.460 --> 00:21:02.480
+both of these this is a great benefit of having all of your joints set up in
+
+234
+00:21:02.480 --> 00:21:07.279
+the same way like a lot of this logic here could be reused quite easily just
+
+235
+00:21:07.279 --> 00:21:12.940
+by changing one or two settings so if we test that out in the scene now we can
+
+236
+00:21:12.940 --> 00:21:16.859
+see that both of our control arms are moving up and down as the wheels are
+
+237
+00:21:16.859 --> 00:21:20.940
+moving up and down and they're essentially just following the movement
+
+238
+00:21:20.940 --> 00:21:26.690
+mechanically accurately so the next step that we need to take is to make
+
+239
+00:21:26.690 --> 00:21:30.690
+sure that our suspension Springs and damper system are sort of compressing
+
+240
+00:21:30.930 --> 00:21:35.140
+and expanding as the wheels are moving up and down so let's take a look at that
+
+241
+00:21:35.140 --> 00:21:42.079
+now with the way that we've set up the bones for the spring and damper system
+
+242
+00:21:42.079 --> 00:21:46.720
+they'll always follow the movement of the chassis so if we take a look here
+
+243
+00:21:46.720 --> 00:21:52.089
+the top end of the suspension or the spring system is parented to the root
+
+244
+00:21:52.089 --> 00:21:57.490
+which means wherever the chassis goes this entire spring will follow because
+
+245
+00:21:57.490 --> 00:22:03.460
+the lower end is a child of the upper end now so that we can make the lower
+
+246
+00:22:03.460 --> 00:22:07.940
+end always follow the control arm we've actually added like a mount bone or a
+
+247
+00:22:07.940 --> 00:22:14.180
+mount joint as a child of the lower control arm so wherever this bone goes
+
+248
+00:22:14.180 --> 00:22:17.740
+we're going to make sure that the lower end of the spring system
+
+249
+00:22:17.740 --> 00:22:23.269
+follows essentially dynamically connecting the base of the spring to
+
+250
+00:22:23.269 --> 00:22:28.609
+the lower control arm and this is a really simple setup with a get and set
+
+251
+00:22:28.609 --> 00:22:34.180
+transform node if we get the values of our damper mount here by dragging it in
+
+252
+00:22:34.180 --> 00:22:42.819
+and choose get bone we can then set the values of our damper end bone so
+
+253
+00:22:42.819 --> 00:22:47.460
+connecting up these transforms and connecting up the logic we add an
+
+254
+00:22:47.460 --> 00:22:54.720
+extra pin to our sequence here now if we hit play on the right hand side
+
+255
+00:22:54.720 --> 00:23:00.440
+what we should see is our spring compressing and expanding as we go
+
+256
+00:23:00.440 --> 00:23:10.970
+over these bumps so if we do the same with the right hand side sorry the
+
+257
+00:23:10.970 --> 00:23:17.390
+left hand side so find the lower control arm damper mount and get that
+
+258
+00:23:17.390 --> 00:23:24.109
+bone transform and then the front damper end will set the transform on
+
+259
+00:23:24.109 --> 00:23:31.109
+this bone again connect to the transform values compile and save and
+
+260
+00:23:31.109 --> 00:23:36.029
+now when we hit play what we should see that is our front suspension
+
+261
+00:23:36.029 --> 00:23:39.829
+system is fully operational so our springs are moving our control arms are
+
+262
+00:23:39.829 --> 00:23:44.509
+moving and when we move left and right that sort of interior wheel hub is also
+
+263
+00:23:44.509 --> 00:23:50.420
+following the movement of the wheels so that's all it takes for us to set up
+
+264
+00:23:50.420 --> 00:23:56.079
+the suspension system for the front and the rear of our vehicle so I've
+
+265
+00:23:56.079 --> 00:23:58.880
+just moved the camera back so that we can see both sets of suspension
+
+266
+00:23:58.880 --> 00:24:02.480
+working and on this rough terrain here you can see our front wheels are
+
+267
+00:24:02.480 --> 00:24:06.799
+working our back wheels are working and our chaos vehicle is essentially
+
+268
+00:24:06.799 --> 00:24:10.460
+complete now so if we wanted to we could go back in and tweak some of the
+
+269
+00:24:10.460 --> 00:24:14.900
+handling settings but in terms of the suspension the control rig that's all
+
+270
+00:24:14.900 --> 00:24:18.740
+set up and ready to go and however the wheels end up moving and we know that
+
+271
+00:24:18.740 --> 00:24:24.740
+that's going to react in real time to to their movement

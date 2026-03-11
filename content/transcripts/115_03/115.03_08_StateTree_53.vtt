@@ -1,0 +1,421 @@
+WEBVTT
+
+1
+00:00:01.070 --> 00:00:06.120
+Now on to another new addition to UE5, the state tree.
+
+2
+00:00:06.120 --> 00:00:08.279
+So what is a state tree?
+
+3
+00:00:08.279 --> 00:00:09.800
+In short, they're a general purpose
+
+4
+00:00:09.800 --> 00:00:11.560
+hierarchical state machine.
+
+5
+00:00:11.560 --> 00:00:13.839
+They combine the selectors from behavior trees
+
+6
+00:00:13.839 --> 00:00:16.000
+with states and transitions that you would usually see
+
+7
+00:00:16.000 --> 00:00:18.160
+in state machine architectures.
+
+8
+00:00:18.160 --> 00:00:20.079
+States are arranged in a tree structure
+
+9
+00:00:20.079 --> 00:00:22.719
+and these states contain evaluators, tasks,
+
+10
+00:00:22.719 --> 00:00:26.469
+and transitions which we're all gonna discuss shortly.
+
+11
+00:00:26.469 --> 00:00:27.829
+A selection of states can be triggered
+
+12
+00:00:27.829 --> 00:00:29.550
+at any location on the tree
+
+13
+00:00:29.589 --> 00:00:32.920
+but it initially starts from the root of the tree.
+
+14
+00:00:32.920 --> 00:00:35.159
+In order to create a state tree asset however,
+
+15
+00:00:35.159 --> 00:00:37.880
+you must first select a schema for your state tree
+
+16
+00:00:37.880 --> 00:00:39.640
+and current schemas are available.
+
+17
+00:00:39.640 --> 00:00:41.719
+The first one being the mass state tree
+
+18
+00:00:41.719 --> 00:00:46.250
+and the last one being the state tree component.
+
+19
+00:00:46.250 --> 00:00:49.719
+Let's take a look at the anatomy of a state tree.
+
+20
+00:00:49.719 --> 00:00:51.859
+First of all, in figure one, we have the root
+
+21
+00:00:51.859 --> 00:00:53.799
+and this is the first state selected
+
+22
+00:00:53.799 --> 00:00:56.469
+when the state tree is running.
+
+23
+00:00:56.469 --> 00:00:58.829
+Next in figure two, we have the selector state
+
+24
+00:00:58.829 --> 00:01:02.070
+and this refers to a state that has child states.
+
+25
+00:01:02.070 --> 00:01:04.450
+This state will never be selected directly
+
+26
+00:01:04.450 --> 00:01:08.239
+and selection will continue to one of its child states.
+
+27
+00:01:08.239 --> 00:01:10.959
+In figure three, we can see the state enter condition
+
+28
+00:01:10.959 --> 00:01:12.739
+and this refers to the list of conditions
+
+29
+00:01:12.739 --> 00:01:16.010
+that determine when a state can be selected.
+
+30
+00:01:16.010 --> 00:01:18.290
+In figure four, we have a task
+
+31
+00:01:18.290 --> 00:01:20.010
+and this refers to a set of actions
+
+32
+00:01:20.010 --> 00:01:21.569
+that belonged to a state
+
+33
+00:01:21.569 --> 00:01:25.019
+and are executed when the state becomes active.
+
+34
+00:01:25.019 --> 00:01:26.700
+Lastly, we have transition
+
+35
+00:01:26.700 --> 00:01:28.060
+and this defines the condition
+
+36
+00:01:28.099 --> 00:01:30.900
+that triggers the state selection process.
+
+37
+00:01:30.900 --> 00:01:33.540
+A transition is triggered when a task completes,
+
+38
+00:01:33.540 --> 00:01:38.719
+succeeds or fails or when a monitor condition succeeds.
+
+39
+00:01:38.719 --> 00:01:40.560
+A state contains a list of conditions
+
+40
+00:01:40.560 --> 00:01:41.879
+which must be met in order
+
+41
+00:01:41.879 --> 00:01:45.640
+to consider the state for activation.
+
+42
+00:01:45.640 --> 00:01:47.019
+During the selection process,
+
+43
+00:01:47.019 --> 00:01:49.299
+each state's conditions are evaluated.
+
+44
+00:01:49.299 --> 00:01:51.739
+If they pass, then the selection process proceeds
+
+45
+00:01:51.739 --> 00:01:54.599
+to the state's child states if there are any.
+
+46
+00:01:54.599 --> 00:01:56.060
+If there are no child states,
+
+47
+00:01:56.060 --> 00:01:59.120
+then the state itself will be activated.
+
+48
+00:01:59.120 --> 00:02:03.180
+Each state consists of evaluators, tasks and transitions.
+
+49
+00:02:03.180 --> 00:02:06.840
+The data in the state tree flows from root to its leaves.
+
+50
+00:02:06.840 --> 00:02:09.000
+This means the data exposed by any state
+
+51
+00:02:09.000 --> 00:02:12.490
+will be available for the other states down the tree.
+
+52
+00:02:12.490 --> 00:02:14.930
+It's important to note that when a state is selected,
+
+53
+00:02:14.930 --> 00:02:16.729
+it will activate all of the states
+
+54
+00:02:16.729 --> 00:02:19.900
+from the root to the leaf state.
+
+55
+00:02:19.900 --> 00:02:22.800
+All tasks are executed for all active states,
+
+56
+00:02:22.800 --> 00:02:26.240
+starting from the root down to the selected state.
+
+57
+00:02:26.240 --> 00:02:28.259
+A state can contain multiple tasks
+
+58
+00:02:28.259 --> 00:02:30.020
+that are all run concurrently
+
+59
+00:02:30.020 --> 00:02:33.419
+for as long as the state remains active.
+
+60
+00:02:33.419 --> 00:02:35.860
+A task in a state tree is similar in concept
+
+61
+00:02:35.860 --> 00:02:38.099
+to tasks in a behavior tree.
+
+62
+00:02:38.099 --> 00:02:40.180
+A task is an action that is executed
+
+63
+00:02:40.180 --> 00:02:42.560
+when its owning state is activated.
+
+64
+00:02:42.560 --> 00:02:44.379
+It provides an output to the state tree.
+
+65
+00:02:44.379 --> 00:02:47.219
+Some common examples would be the selection of a target
+
+66
+00:02:47.219 --> 00:02:49.659
+or the playing of an animation.
+
+67
+00:02:49.659 --> 00:02:52.719
+All tasks inside a state will run concurrently.
+
+68
+00:02:52.719 --> 00:02:55.000
+Once the first completes, it will trigger a transition
+
+69
+00:02:55.000 --> 00:02:58.560
+which can result in the selection of a new state entirely.
+
+70
+00:02:58.560 --> 00:03:01.240
+Global tasks provide a way to run regular tasks
+
+71
+00:03:01.240 --> 00:03:03.159
+that are associated with the tree
+
+72
+00:03:03.159 --> 00:03:05.870
+rather than a specific state.
+
+73
+00:03:05.870 --> 00:03:07.849
+These tasks can contain variables
+
+74
+00:03:07.849 --> 00:03:10.349
+and execute custom code when the tree starts,
+
+75
+00:03:10.349 --> 00:03:12.710
+ends, and ticks.
+
+76
+00:03:12.710 --> 00:03:14.750
+Gathered data can be used during state selection
+
+77
+00:03:14.750 --> 00:03:17.110
+and will be available, as the name suggests,
+
+78
+00:03:17.110 --> 00:03:19.759
+globally throughout the state tree.
+
+79
+00:03:19.759 --> 00:03:21.699
+For example, we could have a global task
+
+80
+00:03:21.699 --> 00:03:24.520
+that determines the current time of day.
+
+81
+00:03:24.520 --> 00:03:26.060
+Since the global tasks are started
+
+82
+00:03:26.060 --> 00:03:28.120
+before the root state in the tree,
+
+83
+00:03:28.120 --> 00:03:30.360
+this information would be available when the tree starts
+
+84
+00:03:30.360 --> 00:03:33.569
+and during the first state selection.
+
+85
+00:03:33.569 --> 00:03:35.990
+If this state tree was controlling an AI,
+
+86
+00:03:35.990 --> 00:03:38.210
+the state selection could result in different behavior
+
+87
+00:03:38.210 --> 00:03:40.960
+during the night versus the day.
+
+88
+00:03:40.960 --> 00:03:43.939
+A transition is pretty self-explanatory.
+
+89
+00:03:43.939 --> 00:03:46.120
+It can point to another state in the tree
+
+90
+00:03:46.120 --> 00:03:49.599
+which will trigger a state selection process once again.
+
+91
+00:03:49.599 --> 00:03:51.620
+A transition can contain trigger conditions
+
+92
+00:03:51.620 --> 00:03:55.030
+that need to be met before the transition can occur.
+
+93
+00:03:55.030 --> 00:03:57.669
+Transitions are evaluated starting with the leaf state
+
+94
+00:03:57.669 --> 00:04:00.289
+and progressing upwards towards the root.
+
+95
+00:04:00.289 --> 00:04:03.110
+During this process, the first transition that succeeds
+
+96
+00:04:03.110 --> 00:04:06.169
+and leads to a state selection will be selected.
+
+97
+00:04:06.169 --> 00:04:10.580
+This hierarchy allows for grouping of common transitions.
+
+98
+00:04:10.580 --> 00:04:13.659
+Completion transitions, however, now trigger at the state
+
+99
+00:04:13.659 --> 00:04:16.579
+where the task that is completed is located.
+
+100
+00:04:16.579 --> 00:04:18.740
+For example, if the execution is currently
+
+101
+00:04:18.740 --> 00:04:22.699
+at root guard leaf and the task at guard state completes,
+
+102
+00:04:22.699 --> 00:04:27.629
+transitions on guard and root are handled skipping leaf.
+
+103
+00:04:27.649 --> 00:04:29.310
+It's important to note that tick
+
+104
+00:04:29.310 --> 00:04:32.069
+and event triggered transitions will have a precedence
+
+105
+00:04:32.069 --> 00:04:33.670
+over completion transitions.

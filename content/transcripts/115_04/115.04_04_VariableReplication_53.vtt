@@ -1,0 +1,605 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:04.980
+The bedrock of Unreal's networking is replication.
+
+2
+00:00:04.980 --> 00:00:08.140
+So let's break down what replicates and when.
+
+3
+00:00:08.140 --> 00:00:10.900
+Simply put, variable replication is the process
+
+4
+00:00:10.900 --> 00:00:12.740
+of sending an authoritative value
+
+5
+00:00:12.740 --> 00:00:15.439
+of a variable over the network.
+
+6
+00:00:15.439 --> 00:00:18.559
+Networked actors have got a net update frequency
+
+7
+00:00:18.559 --> 00:00:19.679
+and this is used to determine
+
+8
+00:00:19.679 --> 00:00:22.320
+how often an actor replicates.
+
+9
+00:00:22.320 --> 00:00:24.519
+The server keeps track of shadow data
+
+10
+00:00:24.519 --> 00:00:26.699
+and this is essentially a copy of the last value
+
+11
+00:00:26.699 --> 00:00:28.699
+that was sent to each client.
+
+12
+00:00:28.699 --> 00:00:30.440
+The server compares the shadow data
+
+13
+00:00:30.440 --> 00:00:32.759
+against its current set of values
+
+14
+00:00:32.759 --> 00:00:33.880
+and if there's a disparity,
+
+15
+00:00:33.880 --> 00:00:36.719
+we'll try and send an updated value down to that client,
+
+16
+00:00:36.719 --> 00:00:39.079
+bringing it back in sync.
+
+17
+00:00:39.079 --> 00:00:41.799
+This check comes with an inherent network cost.
+
+18
+00:00:41.799 --> 00:00:44.479
+So if we don't anticipate this value changing very often,
+
+19
+00:00:44.479 --> 00:00:46.280
+we can reduce the net update frequency
+
+20
+00:00:46.280 --> 00:00:48.539
+on a per actor basis.
+
+21
+00:00:48.539 --> 00:00:50.399
+Managing the net update frequency rates
+
+22
+00:00:50.399 --> 00:00:51.759
+is fairly low hanging fruit
+
+23
+00:00:51.759 --> 00:00:54.240
+in regards to improving network performance.
+
+24
+00:00:54.240 --> 00:00:55.759
+Like most areas of engineering,
+
+25
+00:00:55.759 --> 00:00:59.409
+if we can do something less, then we probably should.
+
+26
+00:00:59.409 --> 00:01:01.530
+One element of networking that is often forgotten
+
+27
+00:01:01.530 --> 00:01:05.400
+is how do we handle clients joining midway through a game?
+
+28
+00:01:05.400 --> 00:01:07.680
+How Unreal handles replication for these new clients
+
+29
+00:01:07.680 --> 00:01:09.760
+is to simply send down the authoritative data
+
+30
+00:01:09.760 --> 00:01:11.319
+as soon as they connect.
+
+31
+00:01:11.319 --> 00:01:12.579
+After all, their default values
+
+32
+00:01:12.579 --> 00:01:14.760
+are likely to be out of sync with the server,
+
+33
+00:01:14.760 --> 00:01:17.950
+thus triggering a disparity through a net update.
+
+34
+00:01:17.950 --> 00:01:20.269
+Not all types can be replicated.
+
+35
+00:01:20.269 --> 00:01:21.510
+Some are strongly supported,
+
+36
+00:01:21.510 --> 00:01:23.790
+some absolutely are not strongly supported
+
+37
+00:01:23.790 --> 00:01:25.109
+and some require a bit of nuance
+
+38
+00:01:25.109 --> 00:01:28.049
+on the part of the developer to get them to play nice.
+
+39
+00:01:28.049 --> 00:01:30.489
+So straight off the bat, we've got our atomic types,
+
+40
+00:01:30.489 --> 00:01:34.209
+that being the bools, the ints and the floats.
+
+41
+00:01:34.209 --> 00:01:35.730
+We also have support for structs
+
+42
+00:01:35.730 --> 00:01:37.310
+that contain these atomic types.
+
+43
+00:01:37.310 --> 00:01:38.349
+These can be sent over the network
+
+44
+00:01:38.349 --> 00:01:41.459
+as a single block of data.
+
+45
+00:01:41.459 --> 00:01:42.980
+Enums can also be replicated.
+
+46
+00:01:42.980 --> 00:01:45.859
+They take advantage of their underlying Uint8 typing
+
+47
+00:01:45.859 --> 00:01:46.920
+to be sent over the network
+
+48
+00:01:46.920 --> 00:01:49.939
+and then are coerced back into their enum types
+
+49
+00:01:49.939 --> 00:01:52.219
+on the other side.
+
+50
+00:01:52.219 --> 00:01:55.540
+Arrays are also supported with only their changed elements
+
+51
+00:01:55.540 --> 00:01:58.120
+being sent over the network at any one time.
+
+52
+00:01:58.120 --> 00:01:59.099
+It's worth noting, however,
+
+53
+00:01:59.459 --> 00:02:01.340
+that if you RPC down an array,
+
+54
+00:02:01.340 --> 00:02:03.019
+the whole array will be sent,
+
+55
+00:02:03.019 --> 00:02:05.849
+not just the changed elements.
+
+56
+00:02:05.849 --> 00:02:07.590
+Unfortunately, there's no current support
+
+57
+00:02:07.590 --> 00:02:09.689
+for serialization of TMaps.
+
+58
+00:02:09.689 --> 00:02:12.129
+A very common and easy alternative to this data structure
+
+59
+00:02:12.129 --> 00:02:14.409
+is to have an array of structs instead
+
+60
+00:02:14.409 --> 00:02:17.050
+and replicate that array.
+
+61
+00:02:17.050 --> 00:02:18.849
+Pointers are supported for replication,
+
+62
+00:02:18.849 --> 00:02:20.590
+but only when the thing it's pointing to
+
+63
+00:02:20.590 --> 00:02:22.849
+is replicated in its own right.
+
+64
+00:02:22.849 --> 00:02:25.490
+Under the hood, the pointer gets turned into a GUID.
+
+65
+00:02:25.490 --> 00:02:27.689
+It's this GUID that then gets sent over the network
+
+66
+00:02:27.689 --> 00:02:29.889
+in place of that pointer.
+
+67
+00:02:29.930 --> 00:02:31.590
+When the GUID is received on the client,
+
+68
+00:02:31.590 --> 00:02:32.729
+we can then marry it back up
+
+69
+00:02:32.729 --> 00:02:34.770
+to the actor that it once pointed to,
+
+70
+00:02:34.770 --> 00:02:38.719
+rebuilding the pointer on the client.
+
+71
+00:02:38.719 --> 00:02:40.259
+To make a variable replicated,
+
+72
+00:02:40.259 --> 00:02:42.580
+we need to do the following.
+
+73
+00:02:42.580 --> 00:02:43.620
+Firstly, we need to make sure
+
+74
+00:02:43.620 --> 00:02:45.500
+we're working with a replicated object,
+
+75
+00:02:45.500 --> 00:02:47.939
+and that can either be calling set replicated to true
+
+76
+00:02:47.939 --> 00:02:49.379
+when working with an actor,
+
+77
+00:02:49.379 --> 00:02:51.819
+typically called in the body of the constructor.
+
+78
+00:02:51.819 --> 00:02:54.020
+Alternatively, we need to call set is replicated
+
+79
+00:02:54.020 --> 00:02:56.919
+by default if we're working with a component.
+
+80
+00:02:56.919 --> 00:02:58.300
+Finally, if we're working with a blueprint
+
+81
+00:02:58.300 --> 00:02:59.419
+that supports replication,
+
+82
+00:02:59.419 --> 00:03:02.460
+setting the be replicate flag to true in the class defaults
+
+83
+00:03:02.460 --> 00:03:06.490
+will also cause this object to replicate.
+
+84
+00:03:06.490 --> 00:03:08.750
+To actually flag a variable as replicated,
+
+85
+00:03:08.750 --> 00:03:10.490
+we have a couple of options.
+
+86
+00:03:10.490 --> 00:03:13.250
+Firstly, we can add the replicated property specified
+
+87
+00:03:13.250 --> 00:03:14.370
+to the variable,
+
+88
+00:03:14.370 --> 00:03:16.409
+and this is the most basic form of replication.
+
+89
+00:03:16.409 --> 00:03:18.210
+When this variable changes server side,
+
+90
+00:03:18.210 --> 00:03:22.300
+it's gonna propagate down to all of the relevant clients.
+
+91
+00:03:22.300 --> 00:03:24.259
+Alternatively, we can use the replicated
+
+92
+00:03:24.259 --> 00:03:25.900
+using property specifier,
+
+93
+00:03:25.900 --> 00:03:27.860
+and this will also propagate the change down,
+
+94
+00:03:27.860 --> 00:03:30.460
+but it will also let developers specify a function to call
+
+95
+00:03:30.699 --> 00:03:32.219
+once the value has arrived.
+
+96
+00:03:32.219 --> 00:03:34.180
+In this example, when the property changes,
+
+97
+00:03:34.180 --> 00:03:36.039
+the my func function is called,
+
+98
+00:03:36.039 --> 00:03:37.180
+allowing us to drive gameplay
+
+99
+00:03:37.180 --> 00:03:40.030
+as soon as we have an update.
+
+100
+00:03:40.030 --> 00:03:42.550
+It's worth noting that a value will not be replicated
+
+101
+00:03:42.550 --> 00:03:44.530
+if the value that you set it to on the server
+
+102
+00:03:44.530 --> 00:03:46.169
+is the same as the value on the client,
+
+103
+00:03:46.169 --> 00:03:48.509
+because it hasn't actually changed after all.
+
+104
+00:03:48.509 --> 00:03:50.770
+Similarly, if your game can run in both single
+
+105
+00:03:50.770 --> 00:03:52.530
+and multiplayer environments,
+
+106
+00:03:52.530 --> 00:03:54.849
+we must be diligent in making sure critical gameplay
+
+107
+00:03:54.849 --> 00:03:57.509
+isn't done in on rep functions.
+
+108
+00:03:57.509 --> 00:03:59.050
+If we're running a single player game,
+
+109
+00:03:59.050 --> 00:04:02.099
+the on rep isn't going to be called.
+
+110
+00:04:02.099 --> 00:04:03.419
+Lastly, we need to override
+
+111
+00:04:03.419 --> 00:04:06.620
+the get lifetime replicated props function of your class,
+
+112
+00:04:06.620 --> 00:04:08.159
+flagging to the engine that this variable
+
+113
+00:04:08.159 --> 00:04:09.620
+needs to be replicated.
+
+114
+00:04:09.620 --> 00:04:12.219
+And we do this by employing the do rep lifetime macro
+
+115
+00:04:12.219 --> 00:04:14.229
+as outlined above.
+
+116
+00:04:14.229 --> 00:04:16.829
+Do rep lifetime is just the base macro.
+
+117
+00:04:16.829 --> 00:04:17.970
+However, we can actually employ
+
+118
+00:04:17.970 --> 00:04:20.910
+the do rep lifetime condition macro instead.
+
+119
+00:04:20.910 --> 00:04:23.250
+This will let us specify a specific condition
+
+120
+00:04:23.250 --> 00:04:24.829
+that needs to be met before this variable
+
+121
+00:04:24.829 --> 00:04:27.670
+is considered for replication.
+
+122
+00:04:27.670 --> 00:04:29.089
+Something that is often forgotten
+
+123
+00:04:29.089 --> 00:04:30.329
+when working with replication
+
+124
+00:04:31.170 --> 00:04:34.279
+is that the actual act of replicating takes time.
+
+125
+00:04:34.279 --> 00:04:35.839
+A client may hit a big patch of lag
+
+126
+00:04:35.839 --> 00:04:38.240
+just after you send the variable over the network.
+
+127
+00:04:38.240 --> 00:04:39.639
+So it's critical we take this into account
+
+128
+00:04:39.639 --> 00:04:41.600
+when we write our systems.
+
+129
+00:04:41.600 --> 00:04:43.199
+We might send two values over the network
+
+130
+00:04:43.199 --> 00:04:45.040
+and have them arrive in a different order.
+
+131
+00:04:45.040 --> 00:04:46.819
+So we really need to waterproof our systems
+
+132
+00:04:46.819 --> 00:04:49.430
+against common and easy gotchas like this.
+
+133
+00:04:49.430 --> 00:04:51.670
+For instance, we can wrap our two variables in a struct
+
+134
+00:04:51.670 --> 00:04:53.550
+and send that over the network instead,
+
+135
+00:04:53.550 --> 00:04:56.300
+ensuring they arrive at the same time.
+
+136
+00:04:56.300 --> 00:04:58.300
+Another critical thing we need to take into account
+
+137
+00:04:58.300 --> 00:05:02.350
+is how well our clients deal with a lack of information.
+
+138
+00:05:02.350 --> 00:05:03.470
+If we're moving something
+
+139
+00:05:03.470 --> 00:05:05.149
+and replicating its new location,
+
+140
+00:05:05.149 --> 00:05:06.230
+do we just stop moving it
+
+141
+00:05:06.230 --> 00:05:07.430
+while we wait for the next packet?
+
+142
+00:05:07.430 --> 00:05:08.810
+Of course not.
+
+143
+00:05:08.810 --> 00:05:10.750
+We often want to consider elements of client side
+
+144
+00:05:10.750 --> 00:05:12.550
+prediction when we work with larger systems
+
+145
+00:05:12.550 --> 00:05:14.050
+to make client interactions
+
+146
+00:05:14.050 --> 00:05:16.470
+feel more responsive and smooth.
+
+147
+00:05:16.470 --> 00:05:17.790
+I'd highly recommend we take a look
+
+148
+00:05:17.790 --> 00:05:19.550
+at the character movement component
+
+149
+00:05:19.550 --> 00:05:20.750
+as a real standard example
+
+150
+00:05:20.750 --> 00:05:22.930
+of how we can smooth out a client experience
+
+151
+00:05:22.930 --> 00:05:25.050
+so the server is essentially invisible.

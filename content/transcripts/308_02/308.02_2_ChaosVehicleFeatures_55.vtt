@@ -1,0 +1,193 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:06.049
+As you can see, there's quite a bit to go over with this course, so let's just jump straight in.
+
+2
+00:00:06.049 --> 00:00:09.550
+So, Chaos vehicle features. What is a Chaos vehicle?
+
+3
+00:00:09.550 --> 00:00:19.769
+So, the Chaos vehicles plugin is a lightweight system for performing vehicle physics simulations in UE5.
+
+4
+00:00:19.769 --> 00:00:24.989
+And it's been built from the ground up and replaces the legacy UE4 system.
+
+5
+00:00:24.989 --> 00:00:31.989
+Now this gives you increased reliability, so the system supports AsyncTick physics overview mode,
+
+6
+00:00:31.989 --> 00:00:35.990
+which gives you more reliable simulations and more predictable results.
+
+7
+00:00:35.990 --> 00:00:42.380
+It has a similar setup as the legacy system, so a vehicle is still represented by a skeletal mesh
+
+8
+00:00:42.380 --> 00:00:46.380
+and one or more blueprints, one or more wheel blueprints, should I say,
+
+9
+00:00:46.380 --> 00:00:53.880
+making it easier for anyone familiar with the legacy system to switch to the new Chaos system.
+
+10
+00:00:53.880 --> 00:00:58.880
+It still uses a physics asset to provide the appropriate collision geometry for a vehicle.
+
+11
+00:00:58.880 --> 00:01:04.359
+And there's increased flexibility with this as well, because a vehicle can now have any number of wheels,
+
+12
+00:01:04.359 --> 00:01:08.579
+as well as any number of forward and reverse gears.
+
+13
+00:01:08.579 --> 00:01:14.579
+It also has some more experimental features that can give you less of a realistic and more like an arcade-like feel.
+
+14
+00:01:14.579 --> 00:01:19.579
+So, using direct controls for individual roll, pitch and yaw torque,
+
+15
+00:01:19.579 --> 00:01:23.579
+you can really get something feeling really cool and not necessarily super realistic.
+
+16
+00:01:23.579 --> 00:01:31.159
+Chaos vehicles also now features a modular system, which gives you real-time construction and destruction of your vehicles.
+
+17
+00:01:31.159 --> 00:01:38.159
+Now this is only available when using this specific modular vehicle system, which we won't be taking a look at today,
+
+18
+00:01:38.159 --> 00:01:44.159
+but we will take a quick look at the differences between the two systems so that you can see how each one is used.
+
+19
+00:01:44.159 --> 00:01:52.379
+So both the Chaos vehicle system and the modular vehicle system have both been designed from the ground up
+
+20
+00:01:52.379 --> 00:01:56.379
+and can exist in the same project together and be used in tandem.
+
+21
+00:01:56.379 --> 00:02:05.750
+And the main differences between the two systems are the vehicle's composition and the simulation representation.
+
+22
+00:02:05.750 --> 00:02:07.750
+So what do I mean by that?
+
+23
+00:02:07.750 --> 00:02:13.069
+The standard vehicle system bases your vehicle on a skeletal mesh.
+
+24
+00:02:13.069 --> 00:02:19.069
+And this skeletal mesh will contain all of the different parts of your vehicle, skinned to a skeleton hierarchy.
+
+25
+00:02:19.069 --> 00:02:26.069
+And that's set up in such a way that everything moves in the correct way and pivots from the correct points based on the position of all these bones.
+
+26
+00:02:26.069 --> 00:02:32.620
+It's also a fixed topology, so these meshes are fixed, you can't change them.
+
+27
+00:02:32.620 --> 00:02:36.680
+It uses the physics asset for the collision of the vehicle.
+
+28
+00:02:36.680 --> 00:02:45.680
+And any animation that happens on the vehicle is skeletal mesh animation, so it's the joints driving the movement of the mesh.
+
+29
+00:02:45.680 --> 00:02:55.030
+Compared to the modular system, where you're not using skeletal meshes, instead it's a hierarchy of geometry collection components.
+
+30
+00:02:55.030 --> 00:03:03.030
+And this means that you can add or remove these different components at runtime, giving you the ability to construct or destructure a vehicle whenever you like.
+
+31
+00:03:03.030 --> 00:03:09.860
+And each geometry component can have its own simulation component to drive its behavior at runtime.
+
+32
+00:03:09.860 --> 00:03:13.860
+And this means that each part of the car can be doing different things at the same time.
+
+33
+00:03:13.860 --> 00:03:26.620
+When it comes to the simulation representation, the standard vehicle system uses one component to drive the entire simulation, and it's the wheel controller for wheeled vehicle.
+
+34
+00:03:26.620 --> 00:03:35.139
+Whereas the modular vehicle system is a collection of separate simulation components assigned to a simulation tree.
+
+35
+00:03:35.139 --> 00:03:43.389
+Now these modules can operate independently of one another, and any of the simulation components can be added or removed at any point in time.
+
+36
+00:03:43.389 --> 00:03:47.389
+Thus giving you the construction or destruction ability.
+
+37
+00:03:47.389 --> 00:03:54.379
+But like I said, you can use these two systems in tandem within the same project.
+
+38
+00:03:54.379 --> 00:04:00.379
+So if your vehicles have really varied requirements, you're not going to be forced to use just one of these systems.
+
+39
+00:04:00.379 --> 00:04:07.819
+Because Chaos Vehicles is a plugin, the first thing you're going to need is to enable the plugin.
+
+40
+00:04:07.819 --> 00:04:17.720
+We also need a skeletal mesh for our vehicle, and along with that we need a physics asset.
+
+41
+00:04:17.720 --> 00:04:23.259
+Then we'll need one or more wheels blueprints for the front wheels and the back wheels.
+
+42
+00:04:23.259 --> 00:04:27.259
+In our case we'll be setting one up for the front wheels and one for the back wheels.
+
+43
+00:04:27.259 --> 00:04:33.639
+And then a vehicle blueprint, which is going to take all of this information and then translate it from...
+
+44
+00:04:33.639 --> 00:04:38.410
+Which is going to combine all of this information into movement onto the car.
+
+45
+00:04:38.410 --> 00:04:44.569
+And then an animation blueprint to determine what the car looks like when it's moving.
+
+46
+00:04:44.569 --> 00:04:48.110
+And the last thing will be a float curve asset.
+
+47
+00:04:48.110 --> 00:04:51.110
+And this is just going to represent the torque curve for the engine.
+
+48
+00:04:51.110 --> 00:04:59.110
+So that when we hit the throttle or hit accelerate, the vehicle will accelerate in a manner of our choosing.

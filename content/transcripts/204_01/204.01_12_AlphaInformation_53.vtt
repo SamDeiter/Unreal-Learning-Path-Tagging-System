@@ -1,0 +1,197 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.790
+Now, when working with alpha information inside of Unreal Engine 5, there are two ways to
+
+2
+00:00:06.790 --> 00:00:08.050
+go about this.
+
+3
+00:00:08.050 --> 00:00:11.750
+The first way is to use an embedded alpha, and an example of this is on the left-hand
+
+4
+00:00:11.750 --> 00:00:13.169
+side of the screen.
+
+5
+00:00:13.169 --> 00:00:18.149
+The embedded alpha works by storing the alpha information in the alpha channel of
+
+6
+00:00:18.149 --> 00:00:24.420
+any texture, and then we sample that information by pulling from the alpha output of our
+
+7
+00:00:24.420 --> 00:00:28.100
+texture sampler and wiring that into our opacity mask, and while this is a valid
+
+8
+00:00:28.100 --> 00:00:33.820
+way to work, the issue is that any information that's stored inside of the alpha channel
+
+9
+00:00:33.820 --> 00:00:37.179
+of a texture comes into Unreal uncompressed.
+
+10
+00:00:37.179 --> 00:00:41.659
+This makes that texture take up roughly two times the amount of memory.
+
+11
+00:00:41.659 --> 00:00:45.020
+Now on the right-hand side of the screen, we have the same exact texture, but this
+
+12
+00:00:45.020 --> 00:00:51.439
+time we have separated the alpha channel out into its own texture, and working like
+
+13
+00:00:51.439 --> 00:00:56.560
+another material sampler inside of our material, we simply feed that information into our
+
+14
+00:00:56.560 --> 00:00:58.020
+opacity mask.
+
+15
+00:00:58.020 --> 00:01:05.819
+This has the added advantage of allowing us to have a cheaper texture footprint, and
+
+16
+00:01:05.819 --> 00:01:11.870
+also allows us to do something interesting, which we're going to take a look at in this slide.
+
+17
+00:01:11.870 --> 00:01:18.069
+Now here we have an embedded versus a separate alpha for a leaf texture, and in the slide
+
+18
+00:01:18.069 --> 00:01:21.790
+in front of us, everything looks kind of similar, but let's go ahead and take a look
+
+19
+00:01:21.790 --> 00:01:27.549
+at this inside of Unreal to see what the advantage and disadvantage of these methods are.
+
+20
+00:01:27.549 --> 00:01:31.590
+So inside of Unreal, here is our scene, and if we look at these in close inspection, they
+
+21
+00:01:31.590 --> 00:01:37.150
+look pretty good, they're looking very similar to one another, so let's say that this one
+
+22
+00:01:37.150 --> 00:01:40.430
+over here, which is our embedded, let's open up its material so we can see it's
+
+23
+00:01:40.430 --> 00:01:45.609
+just got a simple material setup, but say a technical director or a technical artist,
+
+24
+00:01:45.609 --> 00:01:49.870
+somebody comes by and says, hey, we need to get back some memory from our alpha.
+
+25
+00:01:49.870 --> 00:01:53.430
+So what we can actually do with this is if we open up this texture here, if we come
+
+26
+00:01:53.469 --> 00:01:59.950
+to our LOD bias, we can quickly just bias this down, and that is going to reduce this in size.
+
+27
+00:01:59.950 --> 00:02:05.230
+Now if we take a look at this, and let's just compare by setting this back to zero,
+
+28
+00:02:05.230 --> 00:02:09.710
+so we can see here that while it does take it down in size, it does reduce the
+
+29
+00:02:09.710 --> 00:02:11.229
+quality of this a little bit.
+
+30
+00:02:11.229 --> 00:02:17.469
+So inside of the branch here, we're losing a lot of the detail, it looks a little just
+
+31
+00:02:17.469 --> 00:02:21.229
+kind of muddy versus setting this at zero here.
+
+32
+00:02:21.229 --> 00:02:24.189
+So let's go ahead and leave that at one, let's just close this.
+
+33
+00:02:24.189 --> 00:02:30.479
+So over here, what we have is again the exact same setup, but slightly different in
+
+34
+00:02:30.479 --> 00:02:34.719
+that it uses the alpha channel as a separate texture.
+
+35
+00:02:34.719 --> 00:02:38.800
+So what we can do actually here is, check this out, we can open up this alpha, and
+
+36
+00:02:38.800 --> 00:02:45.639
+if we come here and change our LOD bias to one, we've set this down to 85 KB in size,
+
+37
+00:02:45.639 --> 00:02:51.639
+and if we take a look at that, we've got some little dots there, but we can
+
+38
+00:02:51.639 --> 00:02:55.240
+try and fix that if we come here to our MIP gen settings and set like a
+
+39
+00:02:55.240 --> 00:02:57.039
+sharpen filter, look at that.
+
+40
+00:02:57.039 --> 00:02:58.680
+So we sharpened that back up.
+
+41
+00:02:58.680 --> 00:03:05.280
+So what we have done is we have actually improved this by reducing it.
+
+42
+00:03:05.280 --> 00:03:10.039
+We've made it take up less texture memory while still maintaining the exact
+
+43
+00:03:10.039 --> 00:03:11.960
+same visual results.
+
+44
+00:03:11.960 --> 00:03:16.000
+And this is really important because all of our optimizations should allow us to
+
+45
+00:03:16.000 --> 00:03:19.599
+still have the artwork look the way the artist intended it.
+
+46
+00:03:19.599 --> 00:03:23.439
+So we always want to try to make sure that when we're optimizing stuff, we're not destroying
+
+47
+00:03:23.439 --> 00:03:24.759
+the artwork.
+
+48
+00:03:24.759 --> 00:03:31.000
+And this is a great example of how we can allow artists freedom, but also have the
+
+49
+00:03:31.000 --> 00:03:36.319
+freedom to make some performance optimizations should we need to based on content demands.

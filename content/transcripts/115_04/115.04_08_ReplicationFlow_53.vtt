@@ -1,0 +1,345 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:04.230
+With the core concepts of networking within Unreal now covered,
+
+2
+00:00:04.230 --> 00:00:07.730
+it's time we look at how our data gets from the server to the client,
+
+3
+00:00:07.730 --> 00:00:11.310
+namely the actor replication flow.
+
+4
+00:00:11.310 --> 00:00:13.310
+In terms of the replication flow,
+
+5
+00:00:13.310 --> 00:00:18.309
+the bulk of the work takes place in the server replicate actors function of the net driver.
+
+6
+00:00:18.309 --> 00:00:23.660
+This is the function where the server determines what is relevant to each client.
+
+7
+00:00:23.660 --> 00:00:26.160
+Once all actors have been gathered for each client,
+
+8
+00:00:26.160 --> 00:00:28.660
+the server will then replicate components and their data,
+
+9
+00:00:28.660 --> 00:00:33.159
+as well as data within the actors directly that has changed since the last update.
+
+10
+00:00:33.159 --> 00:00:37.880
+When it comes to replication, the actor class provides key replication framework functions
+
+11
+00:00:37.880 --> 00:00:42.380
+and variables that control how and when an actor is replicated across the network.
+
+12
+00:00:42.380 --> 00:00:46.200
+The functions and properties listed here are the key ones that we really should take note of,
+
+13
+00:00:46.200 --> 00:00:49.909
+so let's cover each one and see what they do.
+
+14
+00:00:49.909 --> 00:00:52.909
+Firstly we've got the net update frequency which we covered earlier.
+
+15
+00:00:52.909 --> 00:00:55.909
+This determines how often an actor replicates.
+
+16
+00:00:55.909 --> 00:00:59.570
+Next we've got the pre-replication function inside of actor,
+
+17
+00:00:59.570 --> 00:01:03.070
+and this is called before any replication actually takes place.
+
+18
+00:01:03.070 --> 00:01:06.159
+From there we've got the be only relevant to owner bool,
+
+19
+00:01:06.159 --> 00:01:10.159
+and setting this to true means we only replicate down to our owning client.
+
+20
+00:01:10.159 --> 00:01:15.189
+Next we've got the is relevancy owner for function inside the actor.
+
+21
+00:01:15.189 --> 00:01:17.689
+So if we are only relevant to our owning client,
+
+22
+00:01:17.689 --> 00:01:20.689
+we fall into the is relevancy owner for function
+
+23
+00:01:20.689 --> 00:01:24.189
+to bind onto any custom relevancy logic we may have set up.
+
+24
+00:01:24.189 --> 00:01:28.439
+Lastly we've got the is net relevant for function inside of actor.
+
+25
+00:01:28.439 --> 00:01:30.439
+So if we're not only relevant to our owner,
+
+26
+00:01:30.439 --> 00:01:33.939
+we're going to fall into this backup is net relevant for function
+
+27
+00:01:33.939 --> 00:01:35.939
+to see if there's any custom logic here.
+
+28
+00:01:35.939 --> 00:01:39.129
+With those functions and properties in mind,
+
+29
+00:01:39.129 --> 00:01:43.129
+we can now take a look at the high level flow of the replication process.
+
+30
+00:01:43.129 --> 00:01:47.450
+Firstly we loop over all actively replicated actors.
+
+31
+00:01:47.450 --> 00:01:51.450
+By this we mean we refer to any actors that have the be replicates flag set to true.
+
+32
+00:01:51.450 --> 00:01:56.090
+From there we determine if this actor is initially dormant.
+
+33
+00:01:56.090 --> 00:01:59.540
+If it comes back as dormant, we can just ignore it.
+
+34
+00:01:59.540 --> 00:02:04.040
+Next we determine if this actor needs to update by checking the net update frequency value.
+
+35
+00:02:04.040 --> 00:02:08.780
+So if it replicated too recently, we can ignore this one as well.
+
+36
+00:02:08.780 --> 00:02:13.280
+Next we check if the actor is only relevant to the owner falling into the previously mentioned
+
+37
+00:02:13.280 --> 00:02:16.330
+is relevancy owner for function.
+
+38
+00:02:16.330 --> 00:02:20.830
+If this returns true, then we add this actor to the list of actors owned by the connection.
+
+39
+00:02:20.830 --> 00:02:24.419
+If it returns false, we just ignore it.
+
+40
+00:02:24.419 --> 00:02:26.419
+Next we call the pre replication function,
+
+41
+00:02:26.419 --> 00:02:31.919
+and this function allows developers to decide if properties within the actor want to replicate to that given connection.
+
+42
+00:02:32.990 --> 00:02:35.490
+It's worth noting that if you want to utilize this functionality,
+
+43
+00:02:35.490 --> 00:02:42.229
+you must use the do rep lifetime active override macro in your get lifetime replicated props function.
+
+44
+00:02:42.229 --> 00:02:44.229
+If this actor passes all of these tests,
+
+45
+00:02:44.229 --> 00:02:49.560
+we're going to add it to a list of actors that we're going to consider for this particular update.
+
+46
+00:02:49.560 --> 00:02:52.560
+So now that we've built a list of actors that we want to replicate,
+
+47
+00:02:52.560 --> 00:02:55.060
+we need to see if we can replicate them.
+
+48
+00:02:55.060 --> 00:02:57.879
+Firstly, we determine if the actor is dormant.
+
+49
+00:02:57.879 --> 00:03:01.379
+If it's not, we then see if it has an actor channel open yet.
+
+50
+00:03:01.379 --> 00:03:06.039
+The actor channel essentially being a connection between the server and the client representation.
+
+51
+00:03:06.039 --> 00:03:08.039
+If the actor channel is not open yet,
+
+52
+00:03:08.039 --> 00:03:12.539
+we need to check if it's because the client has yet to load into the level that the actor resides in.
+
+53
+00:03:12.539 --> 00:03:16.840
+If the client hasn't loaded that level, we're just going to skip this actor.
+
+54
+00:03:16.840 --> 00:03:22.340
+Next, we determine if the actor is relevant to this connection by calling the is net relevant for function.
+
+55
+00:03:22.340 --> 00:03:26.199
+If it's not relevant, then this actor will be skipped.
+
+56
+00:03:26.199 --> 00:03:32.819
+If we pass all of these checks, we can assume this actor is now owned by this connection and can be free to replicate it.
+
+57
+00:03:32.819 --> 00:03:38.020
+With our list of actors that are relevant to this connection, we perform the following steps.
+
+58
+00:03:38.020 --> 00:03:42.520
+First, we sort the actor by priority, and then for each of those sorted actors,
+
+59
+00:03:42.520 --> 00:03:46.520
+we check that the connection hasn't loaded the level that this actor is in yet.
+
+60
+00:03:46.520 --> 00:03:50.159
+If there's an actor channel open, we close it.
+
+61
+00:03:50.159 --> 00:03:56.659
+Every second, we determine if this actor is relevant for this connection by calling its is net relevant for function.
+
+62
+00:03:56.659 --> 00:04:00.939
+If it's not relevant for five seconds, then we close the channel entirely.
+
+63
+00:04:00.939 --> 00:04:05.439
+If the actor is relevant and we don't have an actor channel for it, we'll open one.
+
+64
+00:04:05.439 --> 00:04:11.710
+When dealing with a saturated connection, we fall into a deferred update cycle of sorts.
+
+65
+00:04:11.710 --> 00:04:17.500
+We loop through the remaining actors in the list and assess how long they've been relevant or irrelevant for.
+
+66
+00:04:17.500 --> 00:04:22.500
+If they've been relevant for less than a second, we forcibly push an update into the next tick.
+
+67
+00:04:22.500 --> 00:04:26.319
+We can't possibly have drifted too far out of sync from the server in that time.
+
+68
+00:04:26.319 --> 00:04:29.819
+If they've been relevant for more than a second, we call the is net relevant for
+
+69
+00:04:29.819 --> 00:04:34.079
+to determine if we do need to push an update into the next tick at all.
+
+70
+00:04:34.079 --> 00:04:38.579
+For any actors that pass all of these checks, the actor is replicated to the connection
+
+71
+00:04:38.579 --> 00:04:42.269
+using the U channel replicate actor function.
+
+72
+00:04:42.269 --> 00:04:45.769
+We started in the server replicate actors function in the net driver,
+
+73
+00:04:45.769 --> 00:04:50.269
+and we've now covered how we decide what actors will be replicated to a connection.
+
+74
+00:04:50.269 --> 00:04:54.750
+It's time now that we look at how we replicate actors through that connection.
+
+75
+00:04:54.750 --> 00:04:58.279
+We start with the replicate actor function inside U channel.
+
+76
+00:04:58.279 --> 00:05:03.279
+This function is responsible for replicating an actor and all of its components to that connection.
+
+77
+00:05:03.279 --> 00:05:06.819
+With this, there is also a flow that we can take a look at, but don't worry,
+
+78
+00:05:06.819 --> 00:05:10.529
+it is much more simple than the previous ones.
+
+79
+00:05:10.529 --> 00:05:14.529
+Firstly, we determine if this is the first update since this actor channel was opened,
+
+80
+00:05:14.529 --> 00:05:19.220
+and if so, we serialize any specific information that is needed.
+
+81
+00:05:19.220 --> 00:05:22.720
+Next, we determine if the connection owns the actor in question.
+
+82
+00:05:22.720 --> 00:05:25.720
+If it's not owned and the actor's role is autonomous proxy,
+
+83
+00:05:25.720 --> 00:05:30.439
+then the role will be downgraded to simulated proxy.
+
+84
+00:05:30.439 --> 00:05:33.439
+Next, we replicate any changed properties within the actor,
+
+85
+00:05:33.439 --> 00:05:37.759
+and then we replicate any changed properties within the actor's components.
+
+86
+00:05:37.759 --> 00:05:41.759
+Finally, for any deleted components, we're going to send a special delete command.

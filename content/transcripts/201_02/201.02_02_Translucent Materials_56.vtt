@@ -1,0 +1,945 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:08.619
+Hi, welcome back, and thank you for your interest in learning more about translucent materials.
+
+2
+00:00:08.619 --> 00:00:13.320
+In this class, we'll review our agenda for the upcoming lessons, and then we'll develop
+
+3
+00:00:13.320 --> 00:00:19.179
+a translucent material from an empty and sad material graph.
+
+4
+00:00:19.179 --> 00:00:22.800
+Alright, let's go.
+
+5
+00:00:22.800 --> 00:00:29.460
+So as I just anticipated, in the first module we'll explore the creation of a translucent
+
+6
+00:00:29.460 --> 00:00:30.850
+material.
+
+7
+00:00:30.850 --> 00:00:36.770
+We'll be starting out with some ground theory on the Fresnel effect, understanding what
+
+8
+00:00:36.770 --> 00:00:41.969
+it is, especially in relation to glass shaders.
+
+9
+00:00:41.969 --> 00:00:48.109
+Once the theory is covered, we'll be ready to develop our first translucent material.
+
+10
+00:00:48.109 --> 00:00:53.109
+In the next video, we'll be uncovering how to customize these translucent materials
+
+11
+00:00:53.109 --> 00:00:59.649
+using decals to fake reflections and looks.
+
+12
+00:00:59.649 --> 00:01:04.810
+Then we're also going to look into developing bump offset materials in engine using the
+
+13
+00:01:04.810 --> 00:01:10.650
+noise node, which is a node we haven't really explored yet, so that's going to be new
+
+14
+00:01:10.650 --> 00:01:12.290
+for you guys.
+
+15
+00:01:12.290 --> 00:01:16.329
+And to conclude this first module, we'll dial up the complexity knob and learn how
+
+16
+00:01:16.329 --> 00:01:22.629
+to create a blurred glass effect using the spiral blur material function.
+
+17
+00:01:22.629 --> 00:01:28.189
+Then in the second module of this class, we'll uncover the concept of shading models
+
+18
+00:01:28.189 --> 00:01:32.439
+by looking at two-sided foliage shaders in particular.
+
+19
+00:01:32.439 --> 00:01:38.120
+We'll break down some theory again on shader models and their properties, as well as developing
+
+20
+00:01:38.120 --> 00:01:41.760
+a wind effect in a two-sided shader model.
+
+21
+00:01:41.760 --> 00:01:49.549
+We'll be concluding this course with material functions and creating a dissolve transition
+
+22
+00:01:49.549 --> 00:01:50.900
+material.
+
+23
+00:01:50.900 --> 00:01:55.579
+We'll learn how to use bounding box and dot product nodes.
+
+24
+00:01:55.579 --> 00:02:00.500
+Then we'll check out how to wrap up this dissolve effect into a parent material, a
+
+25
+00:02:00.500 --> 00:02:06.019
+material function, and then make an instance out of it to make it real versatile.
+
+26
+00:02:06.019 --> 00:02:13.300
+Okay, cool, let's get started with some Fresnel theory now.
+
+27
+00:02:13.300 --> 00:02:19.879
+So the Fresnel effect makes surfaces more or less reflective depending on the glancing
+
+28
+00:02:19.879 --> 00:02:24.849
+angles at which you look at that object from.
+
+29
+00:02:24.849 --> 00:02:30.729
+And in Unreal Engine shading models, this is built into most materials automatically.
+
+30
+00:02:30.729 --> 00:02:35.610
+So when you create a material, it calculates how reflective surfaces should be based on
+
+31
+00:02:35.610 --> 00:02:37.969
+their viewing angles.
+
+32
+00:02:37.969 --> 00:02:43.229
+Also just so you know, the Fresnel effect is a core component of the PBR.
+
+33
+00:02:43.229 --> 00:02:49.310
+The PBR system aims to simulate how light actually behaves in the real world.
+
+34
+00:02:49.310 --> 00:02:53.939
+And the Fresnel is actually one of those real-world behaviors.
+
+35
+00:02:53.939 --> 00:02:58.419
+The engine does a pretty good job already at replicating it automatically based on the
+
+36
+00:02:58.419 --> 00:03:04.469
+base color, metallic, roughness, and specular properties of an material.
+
+37
+00:03:04.469 --> 00:03:09.050
+And as you can see in these percentages down here on the left, at direct angles
+
+38
+00:03:09.050 --> 00:03:14.569
+like at around 0 degrees, you see more base color and texture.
+
+39
+00:03:14.569 --> 00:03:21.680
+And at shallow angles closer to 90 degrees, you see more reflections.
+
+40
+00:03:21.680 --> 00:03:28.000
+And for most materials like plastic, metal, or water, the default behavior of the Fresnel
+
+41
+00:03:28.000 --> 00:03:30.439
+already handles this effect correctly.
+
+42
+00:03:30.439 --> 00:03:36.389
+But we can actually customize and adjust these values by tweaking the Fresnel node,
+
+43
+00:03:36.389 --> 00:03:39.860
+which we'll talk about in just a moment.
+
+44
+00:03:39.860 --> 00:03:44.979
+So the one in this slide is a typical example to understanding the Fresnel effect.
+
+45
+00:03:44.979 --> 00:03:49.349
+Imagine you're looking straight down at a pool or a lake.
+
+46
+00:03:49.349 --> 00:03:52.449
+You won't see a lot of reflections in the water.
+
+47
+00:03:52.449 --> 00:03:58.169
+But if you adjust your head and get more parallel to the water surface, you'll see more and
+
+48
+00:03:58.169 --> 00:04:00.449
+more reflections in it.
+
+49
+00:04:00.449 --> 00:04:06.849
+And the pool will behave almost like a mirror, reflecting the sky or anything around it.
+
+50
+00:04:06.849 --> 00:04:11.509
+The Fresnel node lets you customize three main properties.
+
+51
+00:04:11.509 --> 00:04:18.709
+The exponent in, the base reflect fraction in, which is a whole tongue twister and
+
+52
+00:04:18.709 --> 00:04:24.649
+I challenge you to post the video now and try pronouncing it yourself.
+
+53
+00:04:24.649 --> 00:04:26.410
+Okay, welcome back.
+
+54
+00:04:26.410 --> 00:04:29.459
+And then the normal.
+
+55
+00:04:29.459 --> 00:04:34.279
+You can trick these values through simple float parameters or by connecting entire series
+
+56
+00:04:34.279 --> 00:04:38.959
+of nodes to them, depending on what you want to achieve in your material.
+
+57
+00:04:38.959 --> 00:04:42.759
+Let's review for a moment the Fresnel index up close.
+
+58
+00:04:42.759 --> 00:04:48.279
+The Fresnel node can be pretty much connected to any kind of input in the main material
+
+59
+00:04:48.279 --> 00:04:54.439
+node, like the emissive, the subsurface, the roughness, the specular, metallic, and
+
+60
+00:04:54.439 --> 00:04:55.439
+the normal.
+
+61
+00:04:55.439 --> 00:05:01.899
+And each one of these outputs, of course, will output a different effect.
+
+62
+00:05:01.899 --> 00:05:06.060
+This is as far as we'll go with the slides, but remember that each step that
+
+63
+00:05:06.060 --> 00:05:11.379
+I will be taking in Unreal will also be displayed through screenshots and instructions
+
+64
+00:05:11.379 --> 00:05:15.660
+here in the slides, so you can easily follow along.
+
+65
+00:05:15.660 --> 00:05:19.060
+So let's jump into the engine and create our first translucent material.
+
+66
+00:05:19.060 --> 00:05:24.680
+Okay, we're in the translucent object section of our default map that should be firing
+
+67
+00:05:24.680 --> 00:05:27.399
+up whenever you open the project for the first time.
+
+68
+00:05:27.399 --> 00:05:33.579
+And here we can take a look at the three examples we'll be dealing with today.
+
+69
+00:05:33.579 --> 00:05:40.660
+We'll be starting with reviewing a very simple glass material, then see how this tinted,
+
+70
+00:05:40.660 --> 00:05:43.029
+thin glass was made.
+
+71
+00:05:43.029 --> 00:05:46.629
+And then lastly, this complex glass material.
+
+72
+00:05:46.629 --> 00:05:50.829
+If you move the camera around, you can really see how the different indexes of refraction
+
+73
+00:05:50.829 --> 00:05:55.970
+play a role here in the way that these surfaces react to their environments.
+
+74
+00:05:55.970 --> 00:05:58.079
+And it's pretty cool.
+
+75
+00:05:58.079 --> 00:06:02.160
+Before diving deeper in the creation of our first translucent material, I just wanted
+
+76
+00:06:02.160 --> 00:06:06.000
+to show you something quickly because it's important to mention it.
+
+77
+00:06:06.000 --> 00:06:12.000
+So if we click up here on this lit button, we will be able to change our view mode.
+
+78
+00:06:12.000 --> 00:06:15.660
+Right now it's lit, which is the default kind of view mode.
+
+79
+00:06:15.660 --> 00:06:21.339
+But if we go down to optimization view modes, we can see the shader complexity.
+
+80
+00:06:21.339 --> 00:06:25.279
+And if we click on it, Unreal Engine will provide us with an overview of how complex
+
+81
+00:06:25.279 --> 00:06:31.339
+the shaders in our map are, starting from green, which is good, and then leading to
+
+82
+00:06:31.339 --> 00:06:36.959
+pink and light pink, which really means that those materials are eating up a lot of
+
+83
+00:06:36.959 --> 00:06:39.000
+our system resources.
+
+84
+00:06:39.000 --> 00:06:45.139
+So any translucent material we have in this map really requires a lot of computational
+
+85
+00:06:45.139 --> 00:06:46.300
+power.
+
+86
+00:06:46.300 --> 00:06:51.720
+And this is important to keep in mind for optimization purposes, especially if you're
+
+87
+00:06:51.720 --> 00:06:57.120
+interested in developing or optimizing environments for video games.
+
+88
+00:06:57.120 --> 00:07:01.949
+Okay, let's switch back the view mode to lit.
+
+89
+00:07:01.949 --> 00:07:05.310
+And then we can click our first preview mesh.
+
+90
+00:07:05.310 --> 00:07:11.259
+And here down in the details panel, we can open up the glass material.
+
+91
+00:07:11.259 --> 00:07:17.790
+Alright, so the first thing I want to do is just click in an empty area of the graph
+
+92
+00:07:17.790 --> 00:07:23.029
+to show you that the blend mode of the main material was changed from its default
+
+93
+00:07:23.029 --> 00:07:27.720
+value, which is opaque, to translucent.
+
+94
+00:07:27.720 --> 00:07:31.319
+I'm going to be clicking on this arrow over here to reset the blend mode to the
+
+95
+00:07:31.319 --> 00:07:35.399
+default value, which is opaque as we just said.
+
+96
+00:07:35.399 --> 00:07:40.639
+And as you can see here, the opacity input of the material node was grayed out.
+
+97
+00:07:40.639 --> 00:07:45.360
+And that's because we need to change the blend mode to translucent or additive in
+
+98
+00:07:45.360 --> 00:07:48.800
+order for us to customize the opacity properties of this material.
+
+99
+00:07:48.800 --> 00:07:53.319
+Alright, there is another thing we need to keep in mind when working with translucent
+
+100
+00:07:53.319 --> 00:07:54.649
+materials.
+
+101
+00:07:54.649 --> 00:07:57.910
+And that's the lighting mode that we can find down here.
+
+102
+00:07:57.910 --> 00:08:03.180
+Now, right now the lighting mode is set to surface translucency volume.
+
+103
+00:08:03.180 --> 00:08:07.300
+And that's the reason why we can change the specularity, the roughness, and the
+
+104
+00:08:07.300 --> 00:08:09.579
+metallic properties of our material.
+
+105
+00:08:09.579 --> 00:08:14.259
+And the surface translucency volume and the surface forward shading are actually the
+
+106
+00:08:14.259 --> 00:08:17.819
+most complex kind of lighting modes you can have.
+
+107
+00:08:17.819 --> 00:08:21.720
+The simplest one is the volumetric non-directional.
+
+108
+00:08:21.720 --> 00:08:25.519
+And if we turn that on, switching it back to its default value, we don't have access
+
+109
+00:08:25.519 --> 00:08:30.259
+to the metallic, specular, and roughness properties of the material anymore.
+
+110
+00:08:30.259 --> 00:08:35.820
+So the material will stay translucent, but it will be limited in its capacity.
+
+111
+00:08:35.820 --> 00:08:39.019
+Let's switch it back to translucency volume.
+
+112
+00:08:39.019 --> 00:08:41.820
+And here we have the input pins available again.
+
+113
+00:08:41.820 --> 00:08:47.059
+Now you can see here that we also have the refraction index available to customize
+
+114
+00:08:47.059 --> 00:08:48.480
+in this material.
+
+115
+00:08:48.480 --> 00:08:51.460
+And this is something that is not enabled by default.
+
+116
+00:08:51.460 --> 00:08:57.460
+So if we go here in the search bar, we can type refraction.
+
+117
+00:08:57.460 --> 00:09:03.460
+You can see that the refraction method was changed from the default value, which is none,
+
+118
+00:09:03.460 --> 00:09:05.240
+to index of refraction.
+
+119
+00:09:05.240 --> 00:09:09.879
+A refraction method set to none prevents us from being able to change the refraction
+
+120
+00:09:09.879 --> 00:09:11.419
+index of a material.
+
+121
+00:09:11.419 --> 00:09:16.659
+And if we switch it back to index of refraction, we will be able to customize it to our liking.
+
+122
+00:09:16.659 --> 00:09:23.549
+Okay, so just so you know, this feature level switch is a bit of an advanced node.
+
+123
+00:09:23.549 --> 00:09:27.950
+And it lets us switch between different quality settings based on the hardware capabilities
+
+124
+00:09:27.950 --> 00:09:31.330
+of the device running a game, for example.
+
+125
+00:09:31.330 --> 00:09:36.990
+So in the case of a mobile phone or an older computer, the feature level switch would be
+
+126
+00:09:36.990 --> 00:09:44.070
+switching the shading model from SM6 or SM5 to PS 3.1, for example, which is commonly
+
+127
+00:09:44.070 --> 00:09:46.070
+used for mobiles.
+
+128
+00:09:46.070 --> 00:09:51.509
+But this is quite of an advanced concept and we want to dive deeper into this.
+
+129
+00:09:51.509 --> 00:09:58.470
+So the last thing I want to show you is the translucency pass advanced option that
+
+130
+00:09:58.470 --> 00:10:04.350
+you can change here, which basically lets you specify whether this particular translucent
+
+131
+00:10:04.350 --> 00:10:08.830
+material needs to be rendered before the depth of field, after the depth of field,
+
+132
+00:10:08.830 --> 00:10:10.669
+or after the motion blur.
+
+133
+00:10:10.669 --> 00:10:16.110
+So sometimes when you're rendering a translucent material with depth of field from a cinematic
+
+134
+00:10:16.110 --> 00:10:21.190
+camera or any kind of camera in Unreal Engine, it will be badly sorted compared to what
+
+135
+00:10:21.190 --> 00:10:22.470
+you have in your map.
+
+136
+00:10:22.470 --> 00:10:25.730
+This translucency pass lets you alter that.
+
+137
+00:10:25.730 --> 00:10:29.210
+Probably before depth of field works in most of the cases, but in case you're struggling
+
+138
+00:10:29.210 --> 00:10:32.610
+with that, here is this option.
+
+139
+00:10:32.610 --> 00:10:37.009
+So let's go back to our map now and create our first translucent material.
+
+140
+00:10:37.009 --> 00:10:41.990
+I'm going to be right-clicking on the Content Browser and then add a new material
+
+141
+00:10:41.990 --> 00:10:46.049
+and we can call it M underscore Translucent.
+
+142
+00:10:46.049 --> 00:10:49.149
+Then I will double-click on it to open it up.
+
+143
+00:10:49.149 --> 00:10:54.269
+And here again, we'll do the first three steps that I just outlined in the simple glass
+
+144
+00:10:54.269 --> 00:10:55.350
+material.
+
+145
+00:10:55.350 --> 00:11:00.190
+So we'll be changing the blend mode from opaque to translucent, and this will give
+
+146
+00:11:00.190 --> 00:11:05.070
+us access to the opacity, but we'll gray out the metallic, specular, and roughness,
+
+147
+00:11:05.070 --> 00:11:07.730
+which we want to have available in this case.
+
+148
+00:11:07.730 --> 00:11:11.549
+So if we scroll down, we have the lighting mode.
+
+149
+00:11:11.549 --> 00:11:17.669
+And here we can switch from volumetric non-directional to surface forward shading.
+
+150
+00:11:17.669 --> 00:11:22.909
+Okay, this enables the metallic, specular, and roughness properties of our material.
+
+151
+00:11:22.990 --> 00:11:26.789
+Now we just need a refraction, which is disabled.
+
+152
+00:11:26.789 --> 00:11:33.330
+So let's just type refraction here in the details search bar and change the refraction
+
+153
+00:11:33.330 --> 00:11:36.750
+method from none to index of refraction.
+
+154
+00:11:36.750 --> 00:11:39.750
+All right, we're going to keep things simple over here.
+
+155
+00:11:39.750 --> 00:11:44.309
+So I'm going to press three on my keyboard and then click in an emptier of the graph
+
+156
+00:11:44.309 --> 00:11:47.470
+to create a constant tree vector.
+
+157
+00:11:47.470 --> 00:11:52.500
+And then I'm going to color it gray, but you can really color it however you like
+
+158
+00:11:52.539 --> 00:11:55.700
+and plug this output pane to the base color.
+
+159
+00:11:55.700 --> 00:11:59.299
+It's going to take a second for Unreal to compute the changes that we made because as
+
+160
+00:11:59.299 --> 00:12:05.019
+we just mentioned, translucent materials tend to be quite heavy on our hardware.
+
+161
+00:12:05.019 --> 00:12:10.419
+So then we want to be promoting two parameters, the metallic, specular, and roughness properties
+
+162
+00:12:10.419 --> 00:12:11.940
+of our material.
+
+163
+00:12:11.940 --> 00:12:20.149
+So let's right click on each one of them and promote two parameters.
+
+164
+00:12:20.149 --> 00:12:26.070
+Okay, we'll be setting the metallic to 0.5, but really whatever you feel like.
+
+165
+00:12:26.070 --> 00:12:30.669
+The specular to one, and the roughness, we can keep it at zero.
+
+166
+00:12:30.669 --> 00:12:35.110
+And then we'll promote two parameter, the opacity as well.
+
+167
+00:12:35.110 --> 00:12:37.549
+And I'm going to set it to 0.5.
+
+168
+00:12:37.549 --> 00:12:40.629
+Feel free to experiment around with these values if you want to.
+
+169
+00:12:40.629 --> 00:12:44.149
+The more you experiment, the better you're going to learn these concepts.
+
+170
+00:12:44.149 --> 00:12:49.029
+Okay, let's now take care of the refraction index and customize it a little bit to
+
+171
+00:12:49.029 --> 00:12:50.070
+our liking.
+
+172
+00:12:50.070 --> 00:12:53.870
+So I'm going to right click in an emptier of the graph and then type in the search
+
+173
+00:12:53.870 --> 00:12:55.429
+bar Fresnel.
+
+174
+00:12:55.429 --> 00:13:01.629
+And here I have the chance to adding either a Fresnel node or a Fresnel function.
+
+175
+00:13:01.629 --> 00:13:06.590
+We're going to be looking into the Fresnel function node in the upcoming classes.
+
+176
+00:13:06.590 --> 00:13:11.100
+So for now, let's just keep it simple and use the Fresnel node instead.
+
+177
+00:13:11.100 --> 00:13:18.299
+Okay, now we want to right click on exponent in and then promote to parameter.
+
+178
+00:13:18.299 --> 00:13:21.940
+I'm just going to be setting it to a high value like 10.
+
+179
+00:13:21.940 --> 00:13:26.580
+So now we're going to be adding a lerp node by typing L on the keyboard and left clicking
+
+180
+00:13:26.580 --> 00:13:28.909
+on the graph.
+
+181
+00:13:28.909 --> 00:13:34.230
+And the Fresnel node will be driving the alpha mask between the A and the B inputs
+
+182
+00:13:34.230 --> 00:13:36.190
+of the linear interpolate node.
+
+183
+00:13:36.190 --> 00:13:41.750
+So let's press one on the keyboard and add a constant value that will change to one
+
+184
+00:13:41.750 --> 00:13:47.269
+and connect it to the A. Then right click on the B and promote that to a parameter
+
+185
+00:13:47.269 --> 00:13:49.629
+that we're going to be calling refraction.
+
+186
+00:13:50.649 --> 00:13:54.529
+Okay, and let's set the refraction to something like 1.4.
+
+187
+00:13:54.529 --> 00:14:00.690
+Okay, we can plug the lerp node to the refraction value.
+
+188
+00:14:00.690 --> 00:14:06.690
+And if we move the value of the refraction around, we can really see how the reflection
+
+189
+00:14:06.690 --> 00:14:13.559
+on the surface wraps differently based on our refraction value.
+
+190
+00:14:13.559 --> 00:14:16.700
+And that's pretty cool to see.
+
+191
+00:14:16.700 --> 00:14:20.700
+Okay, this was our first translucent material.
+
+192
+00:14:20.700 --> 00:14:25.590
+And now I'm just going to hit save to apply all my changes.
+
+193
+00:14:25.590 --> 00:14:30.070
+And let's go back to our viewport to review the other two materials we have at our disposal
+
+194
+00:14:30.070 --> 00:14:31.850
+over here.
+
+195
+00:14:31.850 --> 00:14:35.169
+The first one is the painted thin material.
+
+196
+00:14:35.169 --> 00:14:39.169
+So I'm just going to be clicking on the preview mesh and down here in the details,
+
+197
+00:14:39.169 --> 00:14:42.389
+I can find this simple glass material.
+
+198
+00:14:42.389 --> 00:14:48.070
+Okay, so we won't dive too deep into this because we'll look at it further in the
+
+199
+00:14:48.070 --> 00:14:49.710
+ray tracing class.
+
+200
+00:14:49.710 --> 00:14:53.870
+But the first thing we notice if we click in an empty area of the graph is that the
+
+201
+00:14:53.870 --> 00:14:59.669
+blend mode of this material is set to translucent just like it was for the simple glass.
+
+202
+00:14:59.669 --> 00:15:05.110
+But the shading model is set to thin translucent, which is a very specific kind of shading
+
+203
+00:15:05.110 --> 00:15:08.669
+model that was recently introduced in the engine.
+
+204
+00:15:08.669 --> 00:15:13.870
+And thin translucent shading models help us create realistic see-through materials
+
+205
+00:15:13.870 --> 00:15:17.519
+like tinted glass or plastic.
+
+206
+00:15:17.519 --> 00:15:22.039
+Now you can see here that we have metallic specular and roughness exposed.
+
+207
+00:15:22.039 --> 00:15:27.320
+So you can already guess that the lighting mode was changed here to surface forward
+
+208
+00:15:27.320 --> 00:15:28.700
+shading.
+
+209
+00:15:28.700 --> 00:15:33.899
+Okay, so in order for us to be able to use thin translucent materials, we need to
+
+210
+00:15:33.899 --> 00:15:39.139
+add a thin translucent material output expression.
+
+211
+00:15:39.139 --> 00:15:41.580
+And there can be just one in the graph at a time.
+
+212
+00:15:41.580 --> 00:15:45.899
+So in this case, we have two and Unreal is giving us an error.
+
+213
+00:15:45.899 --> 00:15:51.059
+Then we can really plug in here any color or constant three vector or any kind of nodes
+
+214
+00:15:51.059 --> 00:15:54.460
+that we want to stain our tinted glass material.
+
+215
+00:15:54.460 --> 00:15:56.460
+I'm going to be deleting that.
+
+216
+00:15:56.460 --> 00:16:00.820
+And now let's go back to our viewport and review the most complex of the three
+
+217
+00:16:00.820 --> 00:16:01.820
+glass materials.
+
+218
+00:16:01.820 --> 00:16:05.100
+So I'm going to be clicking on this preview mesh.
+
+219
+00:16:05.100 --> 00:16:10.980
+Then down here, I get access to the material instance of the complex glass.
+
+220
+00:16:11.500 --> 00:16:15.779
+Let's review the parent node real quick by clicking on its parent material.
+
+221
+00:16:15.779 --> 00:16:22.980
+Okay, so the main idea behind this complex glass is really similar to what we just applied
+
+222
+00:16:22.980 --> 00:16:27.740
+to the simple glass material, but it was expanded much further.
+
+223
+00:16:27.740 --> 00:16:34.299
+So we took this Fresnel node and then we used it as alpha input to all these lerp nodes
+
+224
+00:16:34.299 --> 00:16:40.720
+that are mapping the minimum and maximum properties of this main material.
+
+225
+00:16:40.720 --> 00:16:46.519
+And we can really see it in action in the material instance, especially in the refraction
+
+226
+00:16:46.519 --> 00:16:49.179
+mean and max values.
+
+227
+00:16:49.179 --> 00:16:54.519
+We can really start seeing how the Fresnel node is being affected and affecting the
+
+228
+00:16:54.519 --> 00:17:00.259
+opacity between the mean and max parameters of each surface properties.
+
+229
+00:17:00.259 --> 00:17:01.799
+And that's really, really cool.
+
+230
+00:17:01.799 --> 00:17:05.880
+Okay, that was it for the in-engine session of this video.
+
+231
+00:17:05.880 --> 00:17:09.400
+Let's switch back to the slides to conclude the class.
+
+232
+00:17:09.480 --> 00:17:14.359
+Okay, that was it for this class, but you can find some additional documentation at
+
+233
+00:17:14.359 --> 00:17:20.279
+this link if you're interested in further expanding your knowledge in material properties.
+
+234
+00:17:20.279 --> 00:17:24.359
+Thanks for sticking around, and in the upcoming lesson, we will look into faking
+
+235
+00:17:24.359 --> 00:17:32.200
+effects when it comes to translucent objects, as well as other advanced translucent features.
+
+236
+00:17:32.200 --> 00:17:32.700
+See you there.

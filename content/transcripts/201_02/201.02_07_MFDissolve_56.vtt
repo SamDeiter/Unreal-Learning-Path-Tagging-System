@@ -1,0 +1,1677 @@
+WEBVTT
+
+1
+00:00:01.419 --> 00:00:03.060
+Hi.
+
+2
+00:00:03.060 --> 00:00:05.299
+In this class, we'll be reviewing the concept
+
+3
+00:00:05.299 --> 00:00:07.459
+of material functions, and we'll
+
+4
+00:00:07.459 --> 00:00:10.060
+be creating a really cool dissolve effect transition
+
+5
+00:00:10.060 --> 00:00:12.630
+material from the ground up.
+
+6
+00:00:12.630 --> 00:00:14.310
+Let's get started.
+
+7
+00:00:14.310 --> 00:00:16.070
+Now, you know the deal at this point.
+
+8
+00:00:16.070 --> 00:00:19.089
+Since the exercise today will be quite extensive,
+
+9
+00:00:19.089 --> 00:00:21.070
+I'll be jumping directly into the engine
+
+10
+00:00:21.070 --> 00:00:22.149
+and close the slides.
+
+11
+00:00:22.149 --> 00:00:25.010
+Remember that each step that I will be taking in Unreal
+
+12
+00:00:25.010 --> 00:00:28.070
+will also be displayed through screenshots and instructions
+
+13
+00:00:28.070 --> 00:00:31.149
+here in the PowerPoint file provided with this course.
+
+14
+00:00:31.149 --> 00:00:33.429
+Together with the sample material and its embedded
+
+15
+00:00:33.429 --> 00:00:36.189
+material function we will check out in just a moment,
+
+16
+00:00:36.189 --> 00:00:38.229
+you should be able to walk in the right direction
+
+17
+00:00:38.229 --> 00:00:40.590
+as we draft a new material out.
+
+18
+00:00:40.590 --> 00:00:42.869
+We also have some comments and explanations
+
+19
+00:00:42.869 --> 00:00:44.170
+in the finished graphs for you
+
+20
+00:00:44.170 --> 00:00:47.109
+to understand what's happening under the hood.
+
+21
+00:00:47.109 --> 00:00:48.750
+But we'll also be talking about them
+
+22
+00:00:48.750 --> 00:00:50.689
+as we build the new materials out.
+
+23
+00:00:50.689 --> 00:00:53.289
+Our goal for today is to create a dissolve effect
+
+24
+00:00:53.289 --> 00:00:54.710
+transition.
+
+25
+00:00:54.710 --> 00:00:57.329
+We'll be storing this effect into a material function
+
+26
+00:00:57.329 --> 00:01:00.270
+to easily have access to it whenever we need it.
+
+27
+00:01:00.270 --> 00:01:04.500
+So let's fire up the engine and see how to achieve that.
+
+28
+00:01:04.500 --> 00:01:07.700
+So today, we're not going to be working from our default map.
+
+29
+00:01:07.700 --> 00:01:09.819
+So let's click on this icon over here
+
+30
+00:01:09.819 --> 00:01:12.340
+and browse through the era of the content browser
+
+31
+00:01:12.340 --> 00:01:15.840
+where this map is stored together with some other ones.
+
+32
+00:01:15.840 --> 00:01:17.780
+And the map we're going to be using today
+
+33
+00:01:17.780 --> 00:01:20.379
+is called MatDissolveSample.
+
+34
+00:01:20.379 --> 00:01:23.400
+So let's double click on it to open it up.
+
+35
+00:01:23.400 --> 00:01:24.120
+OK.
+
+36
+00:01:24.120 --> 00:01:27.200
+What we have displayed here are three example objects
+
+37
+00:01:27.200 --> 00:01:29.200
+sharing the final look of the material
+
+38
+00:01:29.239 --> 00:01:31.239
+we'll be developing today.
+
+39
+00:01:31.239 --> 00:01:34.840
+And as you can see, the animated texture on it,
+
+40
+00:01:34.840 --> 00:01:38.909
+it's quite fast, and we're getting some artifacts.
+
+41
+00:01:38.909 --> 00:01:40.629
+That's because Lumen struggles when
+
+42
+00:01:40.629 --> 00:01:44.900
+trying to compute glowing effects with fast movements.
+
+43
+00:01:44.900 --> 00:01:46.439
+Let's try to slow it down a little.
+
+44
+00:01:46.439 --> 00:01:48.980
+So I'm just going to select one of the meshes
+
+45
+00:01:48.980 --> 00:01:50.420
+with this material.
+
+46
+00:01:50.420 --> 00:01:55.260
+And if we open up its material instance from the Details panel,
+
+47
+00:01:55.260 --> 00:01:57.019
+we would find out that we wouldn't
+
+48
+00:01:57.060 --> 00:01:59.819
+be able to tweak the texture speed directly
+
+49
+00:01:59.819 --> 00:02:02.819
+from the material instance because it wasn't
+
+50
+00:02:02.819 --> 00:02:04.780
+exposed to any parameter.
+
+51
+00:02:04.780 --> 00:02:09.000
+We'd need to open up its parent material down here.
+
+52
+00:02:09.000 --> 00:02:11.840
+And then if we pan a little bit to the left,
+
+53
+00:02:11.840 --> 00:02:14.240
+we'll find this Panner node.
+
+54
+00:02:14.240 --> 00:02:18.919
+And if we switch the speed Y to 0.2 and then save our
+
+55
+00:02:18.919 --> 00:02:22.680
+changes and navigate back to our map,
+
+56
+00:02:22.680 --> 00:02:25.840
+we would see that now the speed of the animated texture
+
+57
+00:02:25.840 --> 00:02:27.599
+would be reduced.
+
+58
+00:02:27.599 --> 00:02:30.479
+So the parent material that we just opened
+
+59
+00:02:30.479 --> 00:02:33.159
+is the finished product that we will be developing today.
+
+60
+00:02:33.159 --> 00:02:34.960
+And together with its material function
+
+61
+00:02:34.960 --> 00:02:36.960
+that you can find here in the middle,
+
+62
+00:02:36.960 --> 00:02:40.560
+and you can open up by double clicking on it,
+
+63
+00:02:40.560 --> 00:02:42.199
+you should be able to follow along.
+
+64
+00:02:42.199 --> 00:02:43.800
+And if you ever get stuck, you
+
+65
+00:02:43.800 --> 00:02:46.479
+can always go back to either the material function
+
+66
+00:02:46.479 --> 00:02:50.550
+or the master material and review the final product.
+
+67
+00:02:50.550 --> 00:02:54.550
+OK, so I'm going to be closing all of those down now.
+
+68
+00:02:54.550 --> 00:02:57.550
+And let's go ahead and start building our material
+
+69
+00:02:57.550 --> 00:02:58.949
+from scratch.
+
+70
+00:02:58.949 --> 00:03:01.990
+So I'm going to navigate to the in class material folder.
+
+71
+00:03:01.990 --> 00:03:04.669
+And then under Dissolve in Class,
+
+72
+00:03:04.669 --> 00:03:07.389
+I'm going to be creating our parent material
+
+73
+00:03:07.389 --> 00:03:11.979
+that I'm going to be calling M underscore Dissolve.
+
+74
+00:03:11.979 --> 00:03:14.419
+And then I'm going to be creating a material function
+
+75
+00:03:14.419 --> 00:03:16.340
+by right clicking in the content browser
+
+76
+00:03:16.340 --> 00:03:19.740
+and then navigating to Material, Advanced,
+
+77
+00:03:19.740 --> 00:03:21.099
+and Material Function.
+
+78
+00:03:21.139 --> 00:03:22.939
+The main naming convention for this one
+
+79
+00:03:22.939 --> 00:03:26.020
+is MF underscore, and then I'm going
+
+80
+00:03:26.020 --> 00:03:28.689
+to be calling it teleporter.
+
+81
+00:03:28.689 --> 00:03:32.469
+Then I'll Control-Shift-S to save all my changes.
+
+82
+00:03:32.469 --> 00:03:34.750
+All right, let's go ahead and open up
+
+83
+00:03:34.750 --> 00:03:36.629
+our material function.
+
+84
+00:03:36.629 --> 00:03:39.669
+All right, so first of all, if we check out
+
+85
+00:03:39.669 --> 00:03:41.349
+the stats panel, we can see that we're
+
+86
+00:03:41.349 --> 00:03:43.310
+getting an arrow because we're missing
+
+87
+00:03:43.310 --> 00:03:45.550
+the function output result.
+
+88
+00:03:45.550 --> 00:03:48.050
+And that's really just because we're previewing this node
+
+89
+00:03:48.050 --> 00:03:50.590
+already, even though nothing is connected to it.
+
+90
+00:03:50.629 --> 00:03:53.550
+So if we right click on it and stop previewing the node,
+
+91
+00:03:53.550 --> 00:03:56.240
+that arrow will be gone.
+
+92
+00:03:56.240 --> 00:03:57.919
+Now, before we get started, I just
+
+93
+00:03:57.919 --> 00:04:00.080
+wanted to mention that we've talked in depth
+
+94
+00:04:00.080 --> 00:04:03.759
+about material functions in the Masking Materials and Material
+
+95
+00:04:03.759 --> 00:04:05.280
+Functions course already.
+
+96
+00:04:05.280 --> 00:04:06.919
+So if you haven't checked that out yet,
+
+97
+00:04:06.919 --> 00:04:09.199
+I'd encourage you to watch that series of classes
+
+98
+00:04:09.199 --> 00:04:13.560
+first to better understand what we'll be developing today.
+
+99
+00:04:13.560 --> 00:04:15.360
+The development of material functions
+
+100
+00:04:15.360 --> 00:04:17.120
+can be quite abstract if you're just
+
+101
+00:04:17.120 --> 00:04:19.439
+following along without having a rough idea
+
+102
+00:04:19.439 --> 00:04:20.639
+of the final picture.
+
+103
+00:04:20.639 --> 00:04:23.319
+And we won't be able to preview what we're creating today
+
+104
+00:04:23.319 --> 00:04:25.620
+until we really embed this material function
+
+105
+00:04:25.620 --> 00:04:28.399
+into its parent material and play around with its parameters
+
+106
+00:04:28.399 --> 00:04:30.319
+in a material instance.
+
+107
+00:04:30.319 --> 00:04:32.300
+So I'll be overlaying some visual previews
+
+108
+00:04:32.300 --> 00:04:35.040
+of the final product as we draft this out.
+
+109
+00:04:35.040 --> 00:04:37.899
+And this should help you better understand what we're doing.
+
+110
+00:04:37.899 --> 00:04:40.040
+All right, let's start out by panning a little bit
+
+111
+00:04:40.040 --> 00:04:42.839
+to the left because this material is
+
+112
+00:04:42.839 --> 00:04:47.279
+going to be quite extensive and will need a lot of space.
+
+113
+00:04:47.279 --> 00:04:49.579
+OK, then in an empty area of the graph,
+
+114
+00:04:49.620 --> 00:04:55.379
+I'm going to be right clicking and search for a bounding box
+
+115
+00:04:55.379 --> 00:04:58.220
+based 0 to 1 UV.
+
+116
+00:04:58.220 --> 00:05:00.860
+So this bounding box material function
+
+117
+00:05:00.860 --> 00:05:02.779
+is actually a material function
+
+118
+00:05:02.779 --> 00:05:06.379
+that generates normalized UV coordinates in the 0 to 1
+
+119
+00:05:06.379 --> 00:05:09.660
+range based on an object bounding box.
+
+120
+00:05:09.660 --> 00:05:12.620
+A bounding box is an invisible rectangular box
+
+121
+00:05:12.620 --> 00:05:17.250
+that perfectly fits around your entire 3D object.
+
+122
+00:05:17.250 --> 00:05:19.930
+And since it is a material function, as I just mentioned,
+
+123
+00:05:19.970 --> 00:05:22.009
+if you double click on it, you will
+
+124
+00:05:22.009 --> 00:05:25.449
+be able to actually see how it was developed.
+
+125
+00:05:25.449 --> 00:05:28.410
+But as usual, make sure to not apply any changes
+
+126
+00:05:28.410 --> 00:05:31.850
+if you move any nodes around because this material function
+
+127
+00:05:31.850 --> 00:05:33.930
+is part of our edging content.
+
+128
+00:05:33.930 --> 00:05:36.180
+So I'm just going to close it down.
+
+129
+00:05:36.180 --> 00:05:38.339
+And the first we want to do is actually
+
+130
+00:05:38.339 --> 00:05:42.819
+invert this 0 to 1 range with a 1 minus node.
+
+131
+00:05:42.819 --> 00:05:45.699
+So I'm going to drag out of the RGB output pin
+
+132
+00:05:45.699 --> 00:05:48.430
+and then search for 1 minus.
+
+133
+00:05:48.430 --> 00:05:54.350
+OK, now we want to go on and create a function input.
+
+134
+00:05:54.350 --> 00:05:56.709
+Function input represent the exposed pins
+
+135
+00:05:56.709 --> 00:05:58.829
+when a material function gets embedded
+
+136
+00:05:58.829 --> 00:06:00.589
+into its parent material.
+
+137
+00:06:00.589 --> 00:06:02.389
+They kind of work like parameters
+
+138
+00:06:02.389 --> 00:06:04.310
+for material instances.
+
+139
+00:06:04.310 --> 00:06:06.069
+In this first section of the graph,
+
+140
+00:06:06.069 --> 00:06:08.629
+we will be exposing a few pins to be able to control
+
+141
+00:06:08.629 --> 00:06:11.910
+the way we cut our material.
+
+142
+00:06:11.910 --> 00:06:14.269
+And this vector tree constant in particular
+
+143
+00:06:14.269 --> 00:06:17.790
+will allow us to define the shape and overall extension
+
+144
+00:06:17.790 --> 00:06:23.670
+of the cut in the x, y, and z vertex position of our object.
+
+145
+00:06:23.670 --> 00:06:28.629
+Because as usual, the RGB values of a vector tree node
+
+146
+00:06:28.629 --> 00:06:32.110
+represent the x, y, and z-coordinates in the world.
+
+147
+00:06:32.110 --> 00:06:38.149
+So a full red would mean a full cut in the x-axis.
+
+148
+00:06:38.149 --> 00:06:42.149
+A full green would mean a full cut in the y-axis.
+
+149
+00:06:42.149 --> 00:06:46.029
+And a full blue, a full cut in the z-axis.
+
+150
+00:06:46.069 --> 00:06:48.870
+For now, we're going to keep this value as black.
+
+151
+00:06:48.870 --> 00:06:53.819
+So let's name this function input plane cut.
+
+152
+00:06:53.819 --> 00:06:57.500
+And make sure that use preview value as default is turned on.
+
+153
+00:06:57.500 --> 00:06:59.980
+We're going to leave the sort priority at 0.
+
+154
+00:06:59.980 --> 00:07:02.660
+OK, now after this 1 minus node,
+
+155
+00:07:02.660 --> 00:07:04.660
+we want to be adding a dot product.
+
+156
+00:07:04.660 --> 00:07:07.300
+So I'm going to extend out of the output pin
+
+157
+00:07:07.300 --> 00:07:10.939
+and then type dot to create a dot product.
+
+158
+00:07:10.939 --> 00:07:12.699
+And then we want to connect the output
+
+159
+00:07:12.699 --> 00:07:16.100
+pin of the plane cut to the b input of the dot.
+
+160
+00:07:16.100 --> 00:07:19.620
+Now the dot product computes the length of one vector
+
+161
+00:07:19.620 --> 00:07:21.699
+projected onto another.
+
+162
+00:07:21.699 --> 00:07:23.459
+We've also used it in the development
+
+163
+00:07:23.459 --> 00:07:28.379
+of cotton and silk-like shaders in lesson 3 for faking effects.
+
+164
+00:07:28.379 --> 00:07:30.899
+Now since we're using the bounding box material function,
+
+165
+00:07:30.899 --> 00:07:32.540
+the result of this dot product
+
+166
+00:07:32.540 --> 00:07:35.180
+will be local space or object-oriented,
+
+167
+00:07:35.180 --> 00:07:37.500
+so relative to our object.
+
+168
+00:07:37.500 --> 00:07:41.060
+If we were to rotate the object around in the 3D space,
+
+169
+00:07:41.100 --> 00:07:44.300
+the cut will stay as it is, as you can see.
+
+170
+00:07:44.300 --> 00:07:47.660
+Now we want to add more granular control over our cut.
+
+171
+00:07:47.660 --> 00:07:50.100
+And we want to define where exactly it will
+
+172
+00:07:50.100 --> 00:07:52.180
+take place on our object.
+
+173
+00:07:52.180 --> 00:07:55.060
+So let's add one more function input
+
+174
+00:07:55.060 --> 00:08:00.389
+and call it length, then switch its input type from vector 3
+
+175
+00:08:00.389 --> 00:08:03.670
+to scalar, and then make sure that use preview value
+
+176
+00:08:03.670 --> 00:08:05.910
+as default is turned on.
+
+177
+00:08:05.910 --> 00:08:07.509
+Now what we get from the dot product
+
+178
+00:08:07.509 --> 00:08:10.230
+is basically a gradient ranging from 0
+
+179
+00:08:10.230 --> 00:08:15.430
+to 1 across our chosen axis, either the x, the y, or the z.
+
+180
+00:08:15.430 --> 00:08:17.750
+If we now drag out of the dot product
+
+181
+00:08:17.750 --> 00:08:20.589
+and we add a divide node, we're
+
+182
+00:08:20.589 --> 00:08:23.029
+basically scaling down the gradient range
+
+183
+00:08:23.029 --> 00:08:24.790
+that we've got from the dot product
+
+184
+00:08:24.790 --> 00:08:27.790
+and essentially zooming into it.
+
+185
+00:08:27.790 --> 00:08:30.589
+So let's plug the length scalar output
+
+186
+00:08:30.589 --> 00:08:32.870
+into the b input of the divide.
+
+187
+00:08:32.870 --> 00:08:36.669
+And since this division is happening after our dot
+
+188
+00:08:36.669 --> 00:08:40.549
+product is not going to impact the cut in its three
+
+189
+00:08:40.549 --> 00:08:44.350
+dimensions, this scalar function input
+
+190
+00:08:44.350 --> 00:08:47.029
+will just allow us to basically tweak
+
+191
+00:08:47.029 --> 00:08:49.549
+how extended our cut will be.
+
+192
+00:08:49.549 --> 00:08:53.990
+Now let's allow ourselves to add a texture on top
+
+193
+00:08:53.990 --> 00:08:56.190
+of the sliced area only.
+
+194
+00:08:56.190 --> 00:08:58.789
+So by pressing A on my keyboard and clicking
+
+195
+00:08:58.789 --> 00:09:02.350
+on an empty area of the graph, I will be adding an add node.
+
+196
+00:09:02.350 --> 00:09:04.590
+And then I will connect the output
+
+197
+00:09:04.629 --> 00:09:06.950
+pin of the divide node to the a.
+
+198
+00:09:06.950 --> 00:09:12.070
+And I will go down here and add yet one more function input
+
+199
+00:09:12.070 --> 00:09:15.580
+that I will be calling texture.
+
+200
+00:09:15.580 --> 00:09:18.580
+I will use the prevalue as default
+
+201
+00:09:18.580 --> 00:09:21.259
+and then set the sort priority to 2.
+
+202
+00:09:21.259 --> 00:09:24.659
+And let's make also sure that the length scalar has
+
+203
+00:09:24.659 --> 00:09:27.330
+a sort priority of 1.
+
+204
+00:09:27.330 --> 00:09:32.659
+OK, now let's create one more function input that's
+
+205
+00:09:32.659 --> 00:09:37.120
+going to be called fake texture.
+
+206
+00:09:37.159 --> 00:09:39.789
+It's going to be a scalar.
+
+207
+00:09:39.789 --> 00:09:42.029
+We're going to use the prevalue as default.
+
+208
+00:09:42.029 --> 00:09:45.210
+And its sorting priority is going to be 3.
+
+209
+00:09:45.210 --> 00:09:47.370
+And then if I press M on the keyboard
+
+210
+00:09:47.370 --> 00:09:50.730
+and click on an empty area of the graph, I can add a multiply.
+
+211
+00:09:50.730 --> 00:09:54.850
+And we want to multiply the input texture with the input
+
+212
+00:09:54.850 --> 00:09:56.090
+fake texture.
+
+213
+00:09:56.090 --> 00:09:59.049
+Basically, by multiplying these two nodes,
+
+214
+00:09:59.049 --> 00:10:00.970
+we're defining how much of the texture
+
+215
+00:10:00.970 --> 00:10:03.649
+we want to see based on the sliced area
+
+216
+00:10:03.649 --> 00:10:06.100
+that it is applied to.
+
+217
+00:10:06.100 --> 00:10:08.779
+So let's now connect the multiply output pin
+
+218
+00:10:08.779 --> 00:10:12.049
+to the B input of the add.
+
+219
+00:10:12.049 --> 00:10:15.450
+OK, now let's add even more granular control here.
+
+220
+00:10:15.450 --> 00:10:18.129
+I'm going to be moving the output result to the side.
+
+221
+00:10:18.129 --> 00:10:21.049
+And now we want to be able to linearly dissolve
+
+222
+00:10:21.049 --> 00:10:25.370
+the sliced area without distorting its extension.
+
+223
+00:10:25.370 --> 00:10:27.690
+So if I extend out of the add node,
+
+224
+00:10:27.690 --> 00:10:30.169
+we can add add subtract node that will
+
+225
+00:10:30.169 --> 00:10:32.580
+allow us to do exactly that.
+
+226
+00:10:32.580 --> 00:10:35.539
+Now let's create one more function input
+
+227
+00:10:35.539 --> 00:10:40.159
+that we're going to be calling dissolve offset.
+
+228
+00:10:40.159 --> 00:10:44.720
+It's going to be a scalar used for the value as default.
+
+229
+00:10:44.720 --> 00:10:48.360
+And the sorting priority is going to be 4.
+
+230
+00:10:48.360 --> 00:10:50.240
+And then we want to plug it to the B
+
+231
+00:10:50.240 --> 00:10:52.240
+input of the subtract.
+
+232
+00:10:52.240 --> 00:10:56.279
+OK, now let's compare it with the length function input
+
+233
+00:10:56.279 --> 00:10:57.879
+that we exposed.
+
+234
+00:10:57.879 --> 00:11:00.919
+While the length will either extend or reduce
+
+235
+00:11:00.919 --> 00:11:04.159
+the overall area of our cut, the dissolve scalar
+
+236
+00:11:04.159 --> 00:11:06.919
+will simply allow us to offset the sliced area
+
+237
+00:11:06.919 --> 00:11:08.600
+along our subject.
+
+238
+00:11:08.600 --> 00:11:10.399
+Now as we expand this node, we need
+
+239
+00:11:10.399 --> 00:11:14.360
+the result of this subtract node to range from 0 to 1
+
+240
+00:11:14.360 --> 00:11:17.200
+rather than larger values, especially
+
+241
+00:11:17.200 --> 00:11:20.440
+because we'll be using it as an alpha mask in lerp nodes
+
+242
+00:11:20.440 --> 00:11:21.759
+as we move along.
+
+243
+00:11:21.759 --> 00:11:26.440
+So we want to add a clamp node after this subtract
+
+244
+00:11:26.440 --> 00:11:28.159
+before proceeding further.
+
+245
+00:11:28.159 --> 00:11:30.000
+And this is going to be providing us
+
+246
+00:11:30.000 --> 00:11:32.240
+with more predictable results because we're
+
+247
+00:11:32.240 --> 00:11:35.379
+going to be keeping the range from 0 to 1.
+
+248
+00:11:35.379 --> 00:11:39.220
+So now we're able to granularly control our sliced
+
+249
+00:11:39.220 --> 00:11:42.460
+area and offset it around if we want to.
+
+250
+00:11:42.460 --> 00:11:44.620
+We can also add a texture to it
+
+251
+00:11:44.620 --> 00:11:47.940
+and define how much of the texture we want to see.
+
+252
+00:11:47.940 --> 00:11:50.019
+Now let's give us more artistic control
+
+253
+00:11:50.019 --> 00:11:53.539
+by allowing us to tint the interior surface of our sliced
+
+254
+00:11:53.539 --> 00:11:55.779
+area to any color we want.
+
+255
+00:11:55.779 --> 00:11:58.059
+So let's add one more function input.
+
+256
+00:11:58.059 --> 00:12:00.620
+I know that's a lot of function inputs.
+
+257
+00:12:00.620 --> 00:12:05.730
+And we're going to be calling it interiorTint.
+
+258
+00:12:05.730 --> 00:12:08.169
+The input type is going to be vector3.
+
+259
+00:12:08.169 --> 00:12:10.490
+We want to use the preview value as default.
+
+260
+00:12:10.490 --> 00:12:13.620
+And the sort priority is going to be 5.
+
+261
+00:12:13.620 --> 00:12:18.059
+Now we want to be adding the tint only to our sliced area.
+
+262
+00:12:18.059 --> 00:12:21.500
+So we'll need to use the result of this clamp node
+
+263
+00:12:21.500 --> 00:12:24.220
+as alpha mask in a lerp.
+
+264
+00:12:24.220 --> 00:12:26.460
+So let's press L on the keyboard
+
+265
+00:12:26.460 --> 00:12:28.419
+and click in an interior of the graph
+
+266
+00:12:28.500 --> 00:12:31.340
+and then connect the clamp to the alpha,
+
+267
+00:12:31.340 --> 00:12:33.620
+interiorTint to the A,
+
+268
+00:12:33.620 --> 00:12:35.899
+and then I'm going to be pressing 1 on my keyboard
+
+269
+00:12:35.899 --> 00:12:38.659
+and add a constant value of 0
+
+270
+00:12:38.659 --> 00:12:41.700
+that we're really going to be using as a dummy value
+
+271
+00:12:41.700 --> 00:12:43.419
+because we don't want the tint to be applied
+
+272
+00:12:43.419 --> 00:12:47.100
+to the unsliced area of our object at all.
+
+273
+00:12:47.100 --> 00:12:49.659
+So I'm just going to be plugging it to the B.
+
+274
+00:12:49.659 --> 00:12:51.820
+Okay, if we see an example of how the material
+
+275
+00:12:51.820 --> 00:12:54.500
+looks like now, we can see this black area
+
+276
+00:12:54.500 --> 00:12:57.059
+on the interior part of our object.
+
+277
+00:12:57.100 --> 00:13:00.179
+That's because our shader is not two-sided.
+
+278
+00:13:00.179 --> 00:13:03.620
+So only its outer normals are being calculated.
+
+279
+00:13:03.620 --> 00:13:06.299
+We need a way to tell Unreal that we want our tint
+
+280
+00:13:06.299 --> 00:13:09.220
+to affect the interior side of the object.
+
+281
+00:13:09.220 --> 00:13:11.899
+And we have a very useful material expression to do that
+
+282
+00:13:11.899 --> 00:13:14.139
+called two-sided sign.
+
+283
+00:13:14.139 --> 00:13:16.379
+So let's right-click in an emptier of the graph
+
+284
+00:13:16.379 --> 00:13:19.860
+and add a two-sided sign expression.
+
+285
+00:13:19.860 --> 00:13:22.860
+Now we want to use this two-sided sign information
+
+286
+00:13:22.860 --> 00:13:25.539
+as the driver and alpha to define
+
+287
+00:13:25.539 --> 00:13:28.740
+where we will be displaying our texture
+
+288
+00:13:28.740 --> 00:13:31.120
+versus the tinted color.
+
+289
+00:13:31.120 --> 00:13:34.120
+So let's add one more Lerp node by pressing L
+
+290
+00:13:34.120 --> 00:13:36.559
+on the keyboard and left-clicking on the graph.
+
+291
+00:13:36.559 --> 00:13:39.080
+And then we want to plug the two-sided sign
+
+292
+00:13:39.080 --> 00:13:44.070
+into the alpha, the result of the Lerp to the B,
+
+293
+00:13:44.070 --> 00:13:47.190
+and the interior tint to the A.
+
+294
+00:13:47.190 --> 00:13:48.870
+Now the result of this Lerp node
+
+295
+00:13:48.870 --> 00:13:51.309
+can be connected to the output result.
+
+296
+00:13:51.309 --> 00:13:54.029
+And it will be providing us with the formation
+
+297
+00:13:54.029 --> 00:13:57.870
+to cover the emissive color of our main material.
+
+298
+00:13:57.870 --> 00:14:01.070
+But we need one more output pen
+
+299
+00:14:01.070 --> 00:14:04.429
+to output our opacity mask for our main material
+
+300
+00:14:04.429 --> 00:14:08.149
+because this material needs to have transparent areas.
+
+301
+00:14:08.149 --> 00:14:10.350
+Now for now, we've always been dealing
+
+302
+00:14:10.350 --> 00:14:12.669
+with function inputs to allow anybody
+
+303
+00:14:12.669 --> 00:14:14.070
+using our material function
+
+304
+00:14:14.070 --> 00:14:18.509
+to input information into our function.
+
+305
+00:14:18.509 --> 00:14:20.669
+And now we're gonna be right-clicking on the graph
+
+306
+00:14:20.710 --> 00:14:24.549
+and we're gonna be adding a function output
+
+307
+00:14:24.549 --> 00:14:28.190
+to add another output pen to our material function.
+
+308
+00:14:28.190 --> 00:14:29.990
+Now let's go ahead and rename
+
+309
+00:14:29.990 --> 00:14:34.679
+this first function output to emissive.
+
+310
+00:14:34.679 --> 00:14:37.200
+And we can keep the sort priority to zero.
+
+311
+00:14:37.200 --> 00:14:39.600
+And then this second function output
+
+312
+00:14:39.600 --> 00:14:42.440
+is gonna be called opacity mask.
+
+313
+00:14:42.440 --> 00:14:46.059
+And the sort priority is gonna be one.
+
+314
+00:14:46.059 --> 00:14:50.419
+And lastly, we wanna connect the output pen of the clamp
+
+315
+00:14:50.419 --> 00:14:53.700
+to the output opacity mask, okay?
+
+316
+00:14:53.700 --> 00:14:57.139
+The last thing we wanna do now before applying our changes
+
+317
+00:14:57.139 --> 00:14:59.820
+is just clicking in an empty area of the graph
+
+318
+00:14:59.820 --> 00:15:04.340
+and then expose our material function to our library.
+
+319
+00:15:04.340 --> 00:15:06.100
+Now we can save
+
+320
+00:15:06.100 --> 00:15:08.460
+and the changes will be applied automatically.
+
+321
+00:15:08.460 --> 00:15:11.299
+Okay, let's click on this icon over here
+
+322
+00:15:11.299 --> 00:15:13.379
+to navigate to the content browser
+
+323
+00:15:13.379 --> 00:15:18.149
+and open up our parent material.
+
+324
+00:15:18.149 --> 00:15:19.309
+The first thing we wanna do
+
+325
+00:15:19.309 --> 00:15:21.909
+is click in an empty area of the graph
+
+326
+00:15:21.909 --> 00:15:26.070
+and change the blend mode from opaque to masked
+
+327
+00:15:26.070 --> 00:15:29.129
+to have access to the opacity mask.
+
+328
+00:15:29.129 --> 00:15:31.129
+Then we wanna right-click on base color
+
+329
+00:15:31.129 --> 00:15:33.570
+and promote these two parameter.
+
+330
+00:15:33.570 --> 00:15:36.250
+And this base color is basically gonna be
+
+331
+00:15:36.250 --> 00:15:39.090
+the color of our unslized area.
+
+332
+00:15:39.090 --> 00:15:40.370
+So I'm gonna double-click on it
+
+333
+00:15:40.370 --> 00:15:42.250
+and you can choose any color you want.
+
+334
+00:15:42.250 --> 00:15:45.539
+I'm gonna choose something like orange.
+
+335
+00:15:45.539 --> 00:15:47.860
+Now we can right-click in an empty area of the graph
+
+336
+00:15:47.860 --> 00:15:51.120
+and then type mf teleporter
+
+337
+00:15:51.120 --> 00:15:55.460
+to embed our material function into its parent material.
+
+338
+00:15:55.460 --> 00:15:57.740
+And then we can right-click on plain cut
+
+339
+00:15:57.740 --> 00:16:00.409
+and promote two parameter.
+
+340
+00:16:00.409 --> 00:16:02.370
+And we can color these fully blue
+
+341
+00:16:02.370 --> 00:16:06.929
+cause we want our cut to happen on the Z axis.
+
+342
+00:16:06.929 --> 00:16:11.169
+Then let's right-click on length and promote two parameter.
+
+343
+00:16:11.169 --> 00:16:13.009
+We can keep the length at zero
+
+344
+00:16:13.009 --> 00:16:16.370
+but let's change the slider max value to three
+
+345
+00:16:16.370 --> 00:16:18.730
+to contain the maximum length.
+
+346
+00:16:18.730 --> 00:16:21.529
+Now let's right-click in an empty area of the graph
+
+347
+00:16:22.049 --> 00:16:23.570
+and add a texture sample.
+
+348
+00:16:23.570 --> 00:16:25.289
+And then we want to right-click on it
+
+349
+00:16:25.289 --> 00:16:27.210
+and convert these two parameter.
+
+350
+00:16:27.210 --> 00:16:31.879
+And we can just simply call it texture effects.
+
+351
+00:16:31.879 --> 00:16:33.799
+The type of texture we wanna use
+
+352
+00:16:33.799 --> 00:16:39.200
+is the widget grid vertex color material.
+
+353
+00:16:39.200 --> 00:16:42.000
+And then if we press P on our keyboard
+
+354
+00:16:42.000 --> 00:16:43.840
+and left-click in an empty area of the graph
+
+355
+00:16:43.840 --> 00:16:47.269
+we can add a panner to animate this texture.
+
+356
+00:16:47.269 --> 00:16:51.419
+And we can set the speed Y to something small like 0.2
+
+357
+00:16:51.419 --> 00:16:53.340
+and then connect the output pin of the panner
+
+358
+00:16:53.340 --> 00:16:55.700
+to the UVs of the texture effects
+
+359
+00:16:55.700 --> 00:16:58.919
+and then the RGB of the texture effect to the texture.
+
+360
+00:16:58.919 --> 00:17:00.000
+Then we can right-click
+
+361
+00:17:00.000 --> 00:17:04.380
+and promote the fade texture to parameter.
+
+362
+00:17:04.380 --> 00:17:09.140
+And we can set its slider mean to something like minus one
+
+363
+00:17:09.140 --> 00:17:12.210
+and the max to 0.5.
+
+364
+00:17:12.210 --> 00:17:15.410
+Okay, then let's right-click on the dissolve effect
+
+365
+00:17:15.410 --> 00:17:17.769
+and promote two parameter
+
+366
+00:17:17.769 --> 00:17:21.369
+and we can set the slider max to one.
+
+367
+00:17:21.369 --> 00:17:23.970
+Lastly, let's right-click on interior tint
+
+368
+00:17:23.970 --> 00:17:27.039
+and promote that to parameter as well.
+
+369
+00:17:27.039 --> 00:17:33.829
+And let's give it a tint that we can see like pink.
+
+370
+00:17:33.829 --> 00:17:36.710
+Now we can go ahead and plug the output pin
+
+371
+00:17:36.710 --> 00:17:39.589
+of the opacity mask into the input bit
+
+372
+00:17:39.589 --> 00:17:42.430
+of the opacity mask of our main material.
+
+373
+00:17:42.430 --> 00:17:45.109
+And then we want to be able to control
+
+374
+00:17:45.109 --> 00:17:47.430
+the strength of our emissive.
+
+375
+00:17:47.430 --> 00:17:49.509
+So let's press S on our keyboard
+
+376
+00:17:49.509 --> 00:17:51.349
+to create a scalar parameter
+
+377
+00:17:51.349 --> 00:17:54.349
+that we can call emissive strength.
+
+378
+00:17:54.349 --> 00:17:57.869
+Now we want to press M to multiply it.
+
+379
+00:17:57.869 --> 00:18:00.589
+So let's connect the emissive output
+
+380
+00:18:00.589 --> 00:18:03.230
+of the MF teleporter to the A
+
+381
+00:18:03.230 --> 00:18:05.349
+and the emissive strength to the B.
+
+382
+00:18:05.349 --> 00:18:07.750
+And then let's connect the output pin of the multiplier
+
+383
+00:18:07.750 --> 00:18:09.710
+to the emissive color.
+
+384
+00:18:09.710 --> 00:18:15.130
+Okay, we can save and then navigate to our viewport.
+
+385
+00:18:15.490 --> 00:18:18.809
+And in here, we can right-click on our parent material
+
+386
+00:18:18.809 --> 00:18:21.690
+and then create a material instance for it.
+
+387
+00:18:21.690 --> 00:18:25.130
+So I'm going to be calling it MI and the score dissolve
+
+388
+00:18:26.849 --> 00:18:30.589
+and control shift dash apply all.
+
+389
+00:18:30.589 --> 00:18:33.990
+Okay, now if I drag this material instance
+
+390
+00:18:33.990 --> 00:18:36.750
+onto one of the cans,
+
+391
+00:18:36.750 --> 00:18:38.950
+it's going to be applied directly.
+
+392
+00:18:38.950 --> 00:18:43.769
+And let's double-click on it to have it here undocked.
+
+393
+00:18:43.769 --> 00:18:46.609
+I'm going to be playing around with the dissolve offset,
+
+394
+00:18:46.609 --> 00:18:50.250
+the emissive strength, the fade texture, and the length.
+
+395
+00:18:50.250 --> 00:18:52.769
+Let's start by playing a bit with the length.
+
+396
+00:18:52.809 --> 00:18:56.849
+You can see here that our material will start dissolving
+
+397
+00:18:56.849 --> 00:18:59.210
+and right now the fade texture is set to zero
+
+398
+00:18:59.210 --> 00:19:02.589
+so we don't see any texture at all.
+
+399
+00:19:02.589 --> 00:19:04.789
+And if we increase the emissive strength,
+
+400
+00:19:04.789 --> 00:19:08.990
+also our interior tint will start shining through.
+
+401
+00:19:08.990 --> 00:19:10.309
+And here with the dissolve offset,
+
+402
+00:19:10.309 --> 00:19:11.950
+you can see that we can really define
+
+403
+00:19:11.950 --> 00:19:15.430
+where this cut is happening on the can.
+
+404
+00:19:15.430 --> 00:19:18.259
+Let's switch back to our slides now.
+
+405
+00:19:18.259 --> 00:19:20.539
+So that was it for this class,
+
+406
+00:19:20.539 --> 00:19:23.779
+but you can find some additional documentation at this link
+
+407
+00:19:24.339 --> 00:19:26.420
+if you're interested in further expanding your knowledge
+
+408
+00:19:26.420 --> 00:19:28.299
+in material functions.
+
+409
+00:19:28.299 --> 00:19:31.019
+And here you can also find even more resources
+
+410
+00:19:31.019 --> 00:19:33.460
+to dive deeper into animated materials
+
+411
+00:19:33.460 --> 00:19:35.900
+and customize them to your liking.
+
+412
+00:19:35.900 --> 00:19:38.740
+We're almost at the end of this entire series of classes
+
+413
+00:19:38.740 --> 00:19:41.259
+on translucent materials and VFX.
+
+414
+00:19:41.259 --> 00:19:43.619
+We won't be diving into hands-on exercises
+
+415
+00:19:43.619 --> 00:19:45.460
+or new theories any further,
+
+416
+00:19:45.460 --> 00:19:47.740
+but in the upcoming lessons, we will do a recap
+
+417
+00:19:47.740 --> 00:19:51.339
+on everything we learned so far and say our goodbyes.
+
+418
+00:19:51.339 --> 00:19:54.380
+Thank you for sticking around and I'll see you there.
+
+419
+00:19:54.380 --> 00:19:55.220
+Bye.

@@ -1,0 +1,337 @@
+WEBVTT
+
+1
+00:00:01.500 --> 00:00:06.620
+Hello and welcome to this video. In this, we're going to carry on with the exercise
+
+2
+00:00:06.620 --> 00:00:12.460
+and we are going to create a secondary branch to our behavior tree.
+
+3
+00:00:13.259 --> 00:00:19.820
+And so I'll jump back into the engine. So I'm going to go back into our behavior tree.
+
+4
+00:00:21.230 --> 00:00:28.109
+We're going to create a secondary path across here, and I'm going to call this Follow Player.
+
+5
+00:00:28.589 --> 00:00:38.109
+I'm going to drag off. I'm going to select another sequence and I will rename this to Follow Player.
+
+6
+00:00:40.109 --> 00:00:47.310
+Okay, now we can put the tasks in in a second, but what we want to do is we want to have a way
+
+7
+00:00:47.310 --> 00:00:53.469
+of making sure that we can choose which one of these paths we're going to move between.
+
+8
+00:00:54.750 --> 00:00:59.630
+And what we're going to use in this case is if the player has been detected.
+
+9
+00:01:00.829 --> 00:01:06.590
+We're going to use a service in order to figure this out.
+
+10
+00:01:07.230 --> 00:01:11.709
+So I'm going to come up here and I'm going to do a drop down on service
+
+11
+00:01:12.430 --> 00:01:21.500
+and I'm going to select BT Service Blueprint Base. Okay, and we talked about service before.
+
+12
+00:01:22.060 --> 00:01:33.859
+I'm going to call this S is Player Close. And that's going to create another class,
+
+13
+00:01:33.859 --> 00:01:37.540
+which is very similar to the tasks that we've been working on before.
+
+14
+00:01:38.340 --> 00:01:44.819
+It's got eight overridable functions. And for this we're going to do everything on
+
+15
+00:01:44.819 --> 00:01:50.819
+Receive Tick AI. And this is good because it's going to run on every tick
+
+16
+00:01:50.819 --> 00:01:56.340
+and it's also going to allow us access to the controlled MPC Pawn.
+
+17
+00:01:57.739 --> 00:02:02.060
+Okay, so we have something that looks a little bit like us.
+
+18
+00:02:03.469 --> 00:02:08.750
+And what I'm going to do is the first thing I want to do is get the player character.
+
+19
+00:02:09.389 --> 00:02:20.750
+So I'm going to type in Get Player Pawn. And to start off with, to prevent any errors,
+
+20
+00:02:20.750 --> 00:02:25.150
+I'm just going to check to see if this is a valid Pawn. So I'll type in and go
+
+21
+00:02:25.150 --> 00:02:31.710
+is valid and select the question mark so that we've got a branch here.
+
+22
+00:02:32.430 --> 00:02:40.879
+And I'll plug that directly in. Now we've got the controlled Pawn and I want to see the
+
+23
+00:02:40.879 --> 00:02:46.319
+distance between these two and check to see if it's below a certain value.
+
+24
+00:02:46.879 --> 00:02:50.639
+So what I'm going to do is I'm going to drag off of the controlled Pawn
+
+25
+00:02:51.599 --> 00:03:00.750
+and I'm going to go Get Actor Location. Now give me a vector of where the actor is in the world.
+
+26
+00:03:00.750 --> 00:03:07.810
+I'm going to do the same for the Get Player Pawn. So Get Actor Location.
+
+27
+00:03:09.550 --> 00:03:13.629
+I want to know the distance between these two. So if I drag off and type in
+
+28
+00:03:14.590 --> 00:03:21.740
+distance, you'll see that we have a function to measure the distance between two vectors.
+
+29
+00:03:22.610 --> 00:03:31.090
+And that will return the value as a float. So I'm now going to push down B to bring up a branch
+
+30
+00:03:31.650 --> 00:03:38.930
+and left click. And I want to check to see if this float is below a certain value.
+
+31
+00:03:38.930 --> 00:03:45.330
+So I'm going to do less there. And for this I'm going to use 150.
+
+32
+00:03:46.699 --> 00:03:56.699
+And I'll plug this into the branch. So only if the player character is under 150 centimeters
+
+33
+00:03:56.699 --> 00:04:06.500
+from the MPC will this do whatever we attach to true. And for this we want to get some
+
+34
+00:04:06.500 --> 00:04:13.860
+information out of this. So again we're going to need to use a variable. And I'm going to
+
+35
+00:04:13.860 --> 00:04:20.750
+call this variable player. I'm going to make an instance editable by hitting this little I.
+
+36
+00:04:21.389 --> 00:04:33.379
+And I want this to be a blackboard key selector. I'll drag this in, drag off and go
+
+37
+00:04:33.939 --> 00:04:40.899
+set blackboard value as object this time. And I'll plug that into true.
+
+38
+00:04:43.139 --> 00:04:53.019
+And I will get the player, get player pawn. And we can be pretty sure this is valid
+
+39
+00:04:53.019 --> 00:05:00.480
+seeing as we've checked just a little bit back. So that should be fine. Now with the service
+
+40
+00:05:00.480 --> 00:05:06.720
+you don't need the end execute because this is going to run regardless. And there's no sort
+
+41
+00:05:06.720 --> 00:05:12.240
+of fail condition on this. It will just run. So I'm going to go compile and save.
+
+42
+00:05:13.170 --> 00:05:20.180
+Now let's use this within our behavior tree. You jump back to our behavior tree. I've got my
+
+43
+00:05:20.180 --> 00:05:25.939
+followed player. I'm going to drag off and I'm just going to add in a change color task.
+
+44
+00:05:26.579 --> 00:05:32.500
+And that's so that we can see if this is working or not. I'm going to change that to red.
+
+45
+00:05:32.500 --> 00:05:38.750
+So I've got the red one. And make sure the else there is a one as well. So we've got a
+
+46
+00:05:38.750 --> 00:05:46.500
+red color. Now I want to run this service. I'm going to add it to the selector here.
+
+47
+00:05:47.060 --> 00:05:53.379
+So I'm going to right-hand click, come down to add service and I'm going to select is player
+
+48
+00:05:53.379 --> 00:06:03.550
+close. Now that's going to run. You can see every 0.4 or 0.6 seconds. I can change the
+
+49
+00:06:03.550 --> 00:06:09.569
+interval here, but I'm quite happy with it running that frequently. Now there is one thing
+
+50
+00:06:09.569 --> 00:06:15.089
+I want to change though. At the moment, by default, the player variable is going to be
+
+51
+00:06:15.089 --> 00:06:21.660
+saved to the self actor blackboard key. We really want it to be saved to the player
+
+52
+00:06:21.660 --> 00:06:28.060
+because that's what we're going to be using to determine how we move through the behavior tree.
+
+53
+00:06:29.889 --> 00:06:33.250
+Now there's one more thing that we need to add to get this to work, and that is on the
+
+54
+00:06:33.250 --> 00:06:39.089
+wander around. If you right-hand click, come down, we want to add a decorator.
+
+55
+00:06:39.730 --> 00:06:46.209
+And if you remember, the decorators are what we use as filters. And this is what we can use to
+
+56
+00:06:46.209 --> 00:06:52.209
+stop the behavior tree going down this path. So I'm going to come up and I'm going to use
+
+57
+00:06:52.209 --> 00:06:59.860
+the blackboard. Now I'll select the blackboard and I'm going to change the
+
+58
+00:07:00.689 --> 00:07:08.589
+key query. I'm going to change to is not set and select player. So what this is saying
+
+59
+00:07:08.589 --> 00:07:18.220
+is only do this if the player is not set. Right, so let's try this out. I'm going to push save,
+
+60
+00:07:18.939 --> 00:07:25.860
+and then we're going to jump back into the level. Here we go. We can see we've got all
+
+61
+00:07:25.860 --> 00:07:30.740
+the different characters, and if I wander up to one, follow him around for a little bit,
+
+62
+00:07:32.240 --> 00:07:39.389
+you should see that he turns red. So he's detected us and he is now going to turn red.
+
+63
+00:07:40.500 --> 00:07:45.660
+There you go. You can see that one's turning red as well. Now this isn't ideal,
+
+64
+00:07:45.660 --> 00:07:50.620
+and that's because even though they are detecting the player when we get close to them,
+
+65
+00:07:52.000 --> 00:08:00.879
+it's waiting until the entire task is finished before it turns red. That's not what we want.
+
+66
+00:08:00.879 --> 00:08:08.589
+We want them to instantaneously detect the player. So how do we do this? I'm going to jump back
+
+67
+00:08:08.589 --> 00:08:17.139
+into the baby tree and select the wander about task as you select the blackboard decorator.
+
+68
+00:08:17.949 --> 00:08:26.209
+Now at the top, we've got a flow control set and we've got observer aborts. Now we have
+
+69
+00:08:26.209 --> 00:08:31.089
+no abort set at this point, so I'm going to do a drop down. I'm just going to change this
+
+70
+00:08:31.089 --> 00:08:36.419
+to south and you can see that's going to show that this entire area would be aborted.
+
+71
+00:08:37.250 --> 00:08:43.490
+So I'm going to save, jump in, and now try it out again. So as soon as I walk up to a character,
+
+72
+00:08:45.120 --> 00:08:51.519
+as soon as it runs that service, it will abort the activity it's doing at that point.
+
+73
+00:08:54.190 --> 00:09:00.379
+Okay, now that's looking good. Let's make them do something else rather than just stand
+
+74
+00:09:00.379 --> 00:09:06.620
+around. And that's quite straightforward because we've already written a lot of the code that we
+
+75
+00:09:06.620 --> 00:09:14.289
+need for this. So we've changed the color. Let's come in here and change the speed next.
+
+76
+00:09:18.370 --> 00:09:25.600
+And we're going to change the speed to, let's set it to 400. So they're now running after
+
+77
+00:09:25.600 --> 00:09:34.220
+the character. And the final instruction we're going to use move to again. What we're going
+
+78
+00:09:34.220 --> 00:09:41.100
+to do in this one is rather than move to the self actor, we're going to move to the player.
+
+79
+00:09:42.639 --> 00:09:47.120
+So let's save that. And so your entire chart should look a bit like this.
+
+80
+00:09:48.620 --> 00:09:55.360
+And I'm now going to run. And as we detect the players, you can now see
+
+81
+00:09:56.080 --> 00:09:58.960
+all the characters are going to chase the player that we've got.
+
+82
+00:10:02.240 --> 00:10:07.059
+So there you go. We can collect up the NPCs as we move forward.
+
+83
+00:10:13.809 --> 00:10:19.570
+And with that, that brings us to the end of our behavior tree exercise. Next up,
+
+84
+00:10:19.570 --> 00:10:34.370
+we're going to be looking at state trees and how they vary from the behavior trees.

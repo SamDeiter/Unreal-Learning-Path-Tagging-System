@@ -1,0 +1,4021 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:03.220
+Hi, everyone. My name is Martin Cousins.
+
+2
+00:00:03.220 --> 00:00:05.299
+I'm going to be your host for this training session
+
+3
+00:00:05.299 --> 00:00:07.620
+into Introduction to AI in Unreal Engine
+
+4
+00:00:07.620 --> 00:00:10.820
+for Programmers for Unreal 5.5.
+
+5
+00:00:10.820 --> 00:00:12.339
+So what are we going to cover today?
+
+6
+00:00:12.339 --> 00:00:15.300
+We've got looking into the AI Controller, Behavior Tree,
+
+7
+00:00:15.300 --> 00:00:17.820
+Blackboard, Navigation Mesh, EQS,
+
+8
+00:00:17.820 --> 00:00:20.620
+or the Environmental Query System, AI Perception,
+
+9
+00:00:20.620 --> 00:00:22.820
+and then a little bit about some of the useful plugins
+
+10
+00:00:22.820 --> 00:00:25.620
+that can be useful tools in your belt
+
+11
+00:00:25.620 --> 00:00:26.899
+if you're working with AI stuff.
+
+12
+00:00:26.899 --> 00:00:28.620
+So that's smart objects, state trees,
+
+13
+00:00:28.620 --> 00:00:31.660
+mass entity, and lastly the zone graph.
+
+14
+00:00:31.660 --> 00:00:33.420
+So first off the AI Controller.
+
+15
+00:00:33.420 --> 00:00:36.579
+Now this is the third session in a series of five.
+
+16
+00:00:36.579 --> 00:00:38.659
+So some of these, this initial concept
+
+17
+00:00:38.659 --> 00:00:40.340
+is going to be a little bit of repetition
+
+18
+00:00:40.340 --> 00:00:42.219
+from previous sessions that you may have seen,
+
+19
+00:00:42.219 --> 00:00:45.060
+but just as a kind of like building up the basis again.
+
+20
+00:00:45.060 --> 00:00:46.740
+So when we're talking about the AI Controller,
+
+21
+00:00:46.740 --> 00:00:49.299
+this is a controller that is specifically designed
+
+22
+00:00:49.299 --> 00:00:52.299
+to possess and control AI objects.
+
+23
+00:00:52.299 --> 00:00:54.899
+It's a non-physical actor that can possess a pawn
+
+24
+00:00:54.899 --> 00:00:56.179
+like any controller can.
+
+25
+00:00:57.140 --> 00:00:59.299
+It's got a couple of functions made available to it
+
+26
+00:00:59.299 --> 00:01:01.380
+through onPossess and onUnPossess,
+
+27
+00:01:01.380 --> 00:01:03.659
+meaning the AI Controller can be notified.
+
+28
+00:01:03.659 --> 00:01:05.140
+And what the AI Controller,
+
+29
+00:01:05.140 --> 00:01:07.340
+and generally controllers in broad
+
+30
+00:01:07.340 --> 00:01:08.219
+are kind of meant to represent
+
+31
+00:01:08.219 --> 00:01:09.700
+is the kind of a will of the thing
+
+32
+00:01:09.700 --> 00:01:11.019
+that they are controlling.
+
+33
+00:01:11.019 --> 00:01:14.420
+So in this context, being the AI Controller,
+
+34
+00:01:14.420 --> 00:01:17.579
+it's kind of represents the will of an AI entity,
+
+35
+00:01:17.579 --> 00:01:19.180
+an AI actor.
+
+36
+00:01:19.180 --> 00:01:20.299
+That can be any agent.
+
+37
+00:01:20.299 --> 00:01:21.540
+Typically it's going to be
+
+38
+00:01:21.540 --> 00:01:25.140
+some kind of humanoid-esque character, probably,
+
+39
+00:01:25.140 --> 00:01:26.579
+but really this could be there
+
+40
+00:01:26.579 --> 00:01:29.340
+to kind of represent any controllable pawn
+
+41
+00:01:29.659 --> 00:01:32.219
+and represent its kind of logic and thinking.
+
+42
+00:01:32.219 --> 00:01:33.700
+Whereas the pawn is meant to be there
+
+43
+00:01:33.700 --> 00:01:36.219
+to represent the actual physical actions
+
+44
+00:01:36.219 --> 00:01:38.980
+being performed in the world.
+
+45
+00:01:40.260 --> 00:01:41.620
+As with other controllers,
+
+46
+00:01:41.620 --> 00:01:43.420
+AI Controllers have a one-to-one relationship
+
+47
+00:01:43.420 --> 00:01:44.420
+with the pawn.
+
+48
+00:01:44.420 --> 00:01:48.900
+If you have something like a hack and slash
+
+49
+00:01:48.900 --> 00:01:51.379
+where you want kind of mob behavior
+
+50
+00:01:51.379 --> 00:01:55.620
+and you want 20 enemies being controlled by one manager,
+
+51
+00:01:55.620 --> 00:01:59.260
+that's not really the kind of fundamental basis
+
+52
+00:01:59.260 --> 00:02:00.260
+for an AI Controller.
+
+53
+00:02:00.260 --> 00:02:03.299
+It is intended to have a one controller controls one pawn,
+
+54
+00:02:03.299 --> 00:02:05.659
+one pawn is controlled by a single controller.
+
+55
+00:02:06.540 --> 00:02:08.340
+So if you need something else,
+
+56
+00:02:08.340 --> 00:02:09.939
+you might need to look into
+
+57
+00:02:09.939 --> 00:02:11.300
+a more bespoke implementation.
+
+58
+00:02:11.300 --> 00:02:13.259
+The standard intent for an AI Controller
+
+59
+00:02:13.259 --> 00:02:15.849
+is a one-to-one relationship.
+
+60
+00:02:15.849 --> 00:02:17.930
+So a couple of notes about the AI Controller.
+
+61
+00:02:17.930 --> 00:02:19.490
+It only exists on the server.
+
+62
+00:02:20.370 --> 00:02:21.810
+We've spoken about this before
+
+63
+00:02:21.810 --> 00:02:25.370
+in our second session on Gameplay Framework,
+
+64
+00:02:25.370 --> 00:02:27.930
+but essentially the server
+
+65
+00:02:27.969 --> 00:02:30.050
+is really what houses all the controllers.
+
+66
+00:02:30.050 --> 00:02:33.009
+For player controllers, each individual client player
+
+67
+00:02:33.009 --> 00:02:34.889
+will see their own player controller.
+
+68
+00:02:34.889 --> 00:02:38.530
+But really it is just a general pervading logic.
+
+69
+00:02:38.530 --> 00:02:41.169
+The server is the authoritative state
+
+70
+00:02:41.169 --> 00:02:43.009
+and therefore it should be the server
+
+71
+00:02:43.009 --> 00:02:45.770
+making all the decisions about what the AIs are doing.
+
+72
+00:02:45.770 --> 00:02:47.729
+And therefore the AI controllers,
+
+73
+00:02:47.729 --> 00:02:50.009
+which are the brain should exist on the server.
+
+74
+00:02:50.009 --> 00:02:52.409
+And really all the AI pawns
+
+75
+00:02:52.409 --> 00:02:54.330
+are there to do on each individual client
+
+76
+00:02:54.330 --> 00:02:56.129
+is kind of mimics the behavior
+
+77
+00:02:56.129 --> 00:02:57.770
+that the server is deciding.
+
+78
+00:02:58.449 --> 00:02:59.689
+You wouldn't want a clash
+
+79
+00:02:59.689 --> 00:03:01.250
+between different bits of AI logic.
+
+80
+00:03:01.250 --> 00:03:03.569
+You wouldn't want an AI on the client side
+
+81
+00:03:03.569 --> 00:03:04.610
+to be thinking one thing
+
+82
+00:03:04.610 --> 00:03:06.169
+and the AI on the server side
+
+83
+00:03:06.169 --> 00:03:07.409
+to be thinking another thing.
+
+84
+00:03:07.409 --> 00:03:09.530
+So all of that logic is centralized on the server
+
+85
+00:03:09.530 --> 00:03:13.689
+and it's simply the clients kind of parrot the actions
+
+86
+00:03:13.689 --> 00:03:17.099
+of what the brain decides to do.
+
+87
+00:03:17.099 --> 00:03:20.900
+So the AI Controller houses kind of four main components.
+
+88
+00:03:20.900 --> 00:03:22.580
+The behavior tree component,
+
+89
+00:03:22.580 --> 00:03:24.939
+which inherits from the brain component.
+
+90
+00:03:24.939 --> 00:03:28.099
+So it's pretty explicit there.
+
+91
+00:03:28.099 --> 00:03:30.819
+It's kind of the thing that actually does the thinking.
+
+92
+00:03:30.819 --> 00:03:31.979
+The blackboard component.
+
+93
+00:03:31.979 --> 00:03:33.460
+So if you think of,
+
+94
+00:03:33.460 --> 00:03:35.020
+we'll talk more about blackboards in a bit,
+
+95
+00:03:35.020 --> 00:03:36.659
+but this is essentially the,
+
+96
+00:03:36.659 --> 00:03:38.300
+close thing is the memory,
+
+97
+00:03:38.300 --> 00:03:39.699
+the way they're kind of,
+
+98
+00:03:39.699 --> 00:03:42.659
+the brain kind of hold onto data between frames
+
+99
+00:03:42.659 --> 00:03:45.259
+across time for use later.
+
+100
+00:03:45.259 --> 00:03:47.379
+Perception component, pretty self-explanatory.
+
+101
+00:03:47.379 --> 00:03:49.500
+This is essentially how the AI
+
+102
+00:03:49.500 --> 00:03:51.979
+can sense things about the world.
+
+103
+00:03:51.979 --> 00:03:53.860
+We'll go into more detail about that later.
+
+104
+00:03:53.860 --> 00:03:56.180
+And then lastly, the path following component,
+
+105
+00:03:56.180 --> 00:03:59.460
+which is how AI agents follow paths
+
+106
+00:03:59.460 --> 00:04:02.099
+use the navigation system that Unreal provides.
+
+107
+00:04:03.939 --> 00:04:05.259
+This didn't used to be the case,
+
+108
+00:04:05.259 --> 00:04:07.259
+but in more recent versions of Unreal,
+
+109
+00:04:07.259 --> 00:04:08.819
+I don't have the exact point
+
+110
+00:04:08.819 --> 00:04:11.740
+at which this became a thing to hand,
+
+111
+00:04:11.740 --> 00:04:13.819
+but in more recent versions of Unreal,
+
+112
+00:04:15.180 --> 00:04:17.899
+AIs can now kind of initiate the AI logic
+
+113
+00:04:17.899 --> 00:04:20.060
+as soon as they get possessed.
+
+114
+00:04:20.060 --> 00:04:21.259
+They didn't used to be able to do this,
+
+115
+00:04:21.259 --> 00:04:23.339
+but if I just quickly jump to the engine,
+
+116
+00:04:23.379 --> 00:04:25.579
+that is through,
+
+117
+00:04:27.519 --> 00:04:29.439
+if we go into an AI controller,
+
+118
+00:04:29.439 --> 00:04:30.759
+there has a,
+
+119
+00:04:30.759 --> 00:04:35.120
+there's a bull called start AI logic on possess.
+
+120
+00:04:35.120 --> 00:04:36.439
+So if that's ticked,
+
+121
+00:04:36.439 --> 00:04:41.160
+then as soon as that AI controller gets initializes,
+
+122
+00:04:41.160 --> 00:04:42.959
+as soon as it possesses an entity,
+
+123
+00:04:42.959 --> 00:04:44.959
+it will start its AI logic
+
+124
+00:04:44.959 --> 00:04:48.279
+if it has a behavior tree component
+
+125
+00:04:48.279 --> 00:04:50.160
+already on the controller.
+
+126
+00:04:50.160 --> 00:04:52.920
+We'll get into more of this later.
+
+127
+00:04:52.920 --> 00:04:55.199
+Importantly, AI controllers implement
+
+128
+00:04:55.199 --> 00:04:57.560
+what's called a generic team interface.
+
+129
+00:04:57.560 --> 00:04:59.079
+This is something that you,
+
+130
+00:04:59.079 --> 00:05:02.079
+I don't believe you can perceive in blueprint
+
+131
+00:05:02.079 --> 00:05:04.040
+because it is more of a C plus plus concept.
+
+132
+00:05:04.040 --> 00:05:06.399
+So if we just quickly jump to the C plus plus,
+
+133
+00:05:06.399 --> 00:05:07.240
+we can actually see this.
+
+134
+00:05:07.240 --> 00:05:15.139
+If I just go to ai-controller.h,
+
+135
+00:05:15.139 --> 00:05:18.930
+generic team, yeah.
+
+136
+00:05:18.930 --> 00:05:22.129
+And you can see that it implements this interface.
+
+137
+00:05:22.129 --> 00:05:25.209
+This interface is really a way for controllers
+
+138
+00:05:25.209 --> 00:05:26.689
+and other entities in the world.
+
+139
+00:05:26.689 --> 00:05:30.009
+It's Unreal's built-in way for entities
+
+140
+00:05:30.009 --> 00:05:31.889
+to perceive themselves and each other
+
+141
+00:05:31.889 --> 00:05:33.370
+as part of a particular team,
+
+142
+00:05:33.370 --> 00:05:35.769
+as they kind of name would imply.
+
+143
+00:05:35.769 --> 00:05:38.930
+So this is useful for some of the perception components
+
+144
+00:05:38.930 --> 00:05:40.769
+we'll get to in a little bit.
+
+145
+00:05:40.769 --> 00:05:44.370
+It helps basically entities give an idea of like,
+
+146
+00:05:44.370 --> 00:05:46.410
+should I treat this thing as an enemy?
+
+147
+00:05:46.410 --> 00:05:47.610
+Should I treat this thing as a friend
+
+148
+00:05:47.610 --> 00:05:49.209
+or am I neutral to it?
+
+149
+00:05:49.209 --> 00:05:53.370
+The standard implementation is as soon as two agents
+
+150
+00:05:53.370 --> 00:05:56.329
+are on different teams, they're automatically enemies.
+
+151
+00:05:56.329 --> 00:05:57.889
+We'll get into that more in a bit,
+
+152
+00:05:57.889 --> 00:06:00.370
+but just know that Unreal has a default implementation
+
+153
+00:06:00.370 --> 00:06:02.050
+of the idea of teams.
+
+154
+00:06:02.050 --> 00:06:04.810
+Then by default, that's on the AI controller
+
+155
+00:06:04.810 --> 00:06:05.930
+and it kind of implements it.
+
+156
+00:06:05.930 --> 00:06:07.410
+I think it just goes to,
+
+157
+00:06:07.410 --> 00:06:08.970
+I think the default implementation is
+
+158
+00:06:08.970 --> 00:06:11.850
+it's just the default team, which is like,
+
+159
+00:06:11.850 --> 00:06:14.329
+I think the teams are represented by a byte
+
+160
+00:06:14.329 --> 00:06:17.410
+and so they're just team 255, like the maximum.
+
+161
+00:06:17.410 --> 00:06:18.649
+And you would have to kind of manually
+
+162
+00:06:18.649 --> 00:06:20.009
+implement that yourselves.
+
+163
+00:06:20.009 --> 00:06:24.399
+But just again, worth mentioning that the agent,
+
+164
+00:06:24.399 --> 00:06:27.920
+the interface can be implemented on objects,
+
+165
+00:06:27.920 --> 00:06:30.000
+but it isn't a blueprint interface.
+
+166
+00:06:30.000 --> 00:06:32.120
+So none of this functionality is exposed to blueprint
+
+167
+00:06:32.120 --> 00:06:34.399
+and would have to be kind of driven on C++,
+
+168
+00:06:34.399 --> 00:06:35.360
+but that is there.
+
+169
+00:06:36.839 --> 00:06:38.600
+And then, yeah, last of all,
+
+170
+00:06:38.600 --> 00:06:39.839
+it's kind of just worth mentioning
+
+171
+00:06:39.839 --> 00:06:42.040
+that we've got a kind of entry function
+
+172
+00:06:42.040 --> 00:06:44.920
+for selecting possible targets based on our perception.
+
+173
+00:06:44.920 --> 00:06:46.240
+We have this function,
+
+174
+00:06:46.240 --> 00:06:49.120
+actors perception updated function,
+
+175
+00:06:49.120 --> 00:06:51.279
+which sends through an array of any actors
+
+176
+00:06:51.279 --> 00:06:52.480
+that have been recently perceived.
+
+177
+00:06:52.519 --> 00:06:55.560
+And then that way the AI can kind of make decisions
+
+178
+00:06:55.560 --> 00:06:59.660
+about possible targets for its various logic.
+
+179
+00:06:59.660 --> 00:07:01.939
+So that's the behavior tree.
+
+180
+00:07:01.939 --> 00:07:04.180
+Next, we have the good kind of going into,
+
+181
+00:07:04.180 --> 00:07:06.939
+in the broad at least, going into kind of more detail.
+
+182
+00:07:08.060 --> 00:07:12.980
+As we already mentioned, we have the behavior tree itself.
+
+183
+00:07:12.980 --> 00:07:14.379
+The behavior tree component
+
+184
+00:07:14.379 --> 00:07:17.100
+is really what hosts the behavior tree.
+
+185
+00:07:17.100 --> 00:07:18.220
+So the behavior tree component
+
+186
+00:07:18.220 --> 00:07:20.740
+is the kind of brain of the AI agent.
+
+187
+00:07:20.740 --> 00:07:23.899
+It inherits from brain components, as I already mentioned,
+
+188
+00:07:23.899 --> 00:07:27.139
+and it's actually held on the AI controller.
+
+189
+00:07:27.139 --> 00:07:31.100
+AI controllers won't have a brain component automatically.
+
+190
+00:07:31.100 --> 00:07:32.540
+You can either add one
+
+191
+00:07:33.459 --> 00:07:38.459
+or you can generate one at runtime by calling it on C++.
+
+192
+00:07:38.579 --> 00:07:40.379
+We'll go into that in a little bit.
+
+193
+00:07:40.379 --> 00:07:41.779
+You can call a function at runtime
+
+194
+00:07:41.779 --> 00:07:44.620
+to kind of create a behavior tree component
+
+195
+00:07:44.620 --> 00:07:46.019
+if one doesn't already exist.
+
+196
+00:07:46.019 --> 00:07:49.019
+We'll go into more detail about that in a minute.
+
+197
+00:07:49.060 --> 00:07:51.819
+But a couple of things about the behavior tree component.
+
+198
+00:07:51.819 --> 00:07:52.980
+It does make an assumption
+
+199
+00:07:52.980 --> 00:07:54.939
+that the owner is an AI controller.
+
+200
+00:07:54.939 --> 00:07:56.420
+So we talked about this again,
+
+201
+00:07:56.420 --> 00:07:58.060
+I think in the second session,
+
+202
+00:07:58.060 --> 00:08:01.339
+but essentially these two things are tightly linked.
+
+203
+00:08:01.339 --> 00:08:03.379
+Behavior tree component without an AI controller
+
+204
+00:08:03.379 --> 00:08:04.980
+doesn't really make sense.
+
+205
+00:08:04.980 --> 00:08:07.699
+So it does kind of, the behavior tree component
+
+206
+00:08:07.699 --> 00:08:10.139
+is aware of the AI controller
+
+207
+00:08:10.139 --> 00:08:11.939
+that should be holding onto it.
+
+208
+00:08:11.939 --> 00:08:14.220
+It even has functions like getAIOwner,
+
+209
+00:08:14.220 --> 00:08:16.180
+which really, really strongly implied that, you know,
+
+210
+00:08:16.220 --> 00:08:18.980
+this component is meant to be held by an AI.
+
+211
+00:08:21.100 --> 00:08:23.339
+The, yeah, it's a blueprint spawnable component,
+
+212
+00:08:23.339 --> 00:08:25.660
+so you can add it onto your controllers
+
+213
+00:08:25.660 --> 00:08:27.500
+if you kind of want that preset up.
+
+214
+00:08:27.500 --> 00:08:28.579
+As I already mentioned,
+
+215
+00:08:28.579 --> 00:08:32.059
+that idea of running logic on possess doesn't work
+
+216
+00:08:32.059 --> 00:08:35.740
+if you haven't pre-added a behavior tree component yourself,
+
+217
+00:08:35.740 --> 00:08:37.179
+but there are other ways of doing it.
+
+218
+00:08:37.179 --> 00:08:40.059
+You can run a behavior tree at runtime
+
+219
+00:08:40.059 --> 00:08:42.860
+and that will automatically add a behavior tree component
+
+220
+00:08:42.860 --> 00:08:45.419
+if one doesn't already exist to the AI controller.
+
+221
+00:08:47.740 --> 00:08:49.220
+Yep.
+
+222
+00:08:49.220 --> 00:08:53.500
+So, as we already said, it exposes,
+
+223
+00:08:53.500 --> 00:08:54.580
+the behavior tree component itself
+
+224
+00:08:54.580 --> 00:08:57.659
+exposes what behavior tree you want to use.
+
+225
+00:08:57.659 --> 00:08:59.259
+One will be created at runtime
+
+226
+00:08:59.259 --> 00:09:00.980
+if we choose to run a behavior tree,
+
+227
+00:09:00.980 --> 00:09:02.419
+if that's not present.
+
+228
+00:09:03.500 --> 00:09:04.820
+It's the behavior tree component
+
+229
+00:09:04.820 --> 00:09:07.620
+that's in charge of running that behavior tree
+
+230
+00:09:07.620 --> 00:09:09.820
+and it doesn't come automatically attached.
+
+231
+00:09:09.820 --> 00:09:12.620
+So just to kind of actually quickly demonstrate this,
+
+232
+00:09:12.620 --> 00:09:20.220
+if I were to just make some new AI controller,
+
+233
+00:09:20.220 --> 00:09:23.059
+make a blueprint that inherits from AI controller,
+
+234
+00:09:23.059 --> 00:09:28.190
+we could see that no behavior tree exists.
+
+235
+00:09:28.230 --> 00:09:30.509
+We can very quickly add one ourselves.
+
+236
+00:09:32.919 --> 00:09:36.120
+Sorry, English spelling a behavior there, my bad.
+
+237
+00:09:36.120 --> 00:09:38.039
+So yeah, we can just add a behavior tree ourselves
+
+238
+00:09:38.039 --> 00:09:42.960
+and like I said, this run,
+
+239
+00:09:42.960 --> 00:09:45.679
+or is it start?
+
+240
+00:09:45.679 --> 00:09:47.759
+Yeah, start AI won't work
+
+241
+00:09:47.759 --> 00:09:50.840
+unless there is a behavior tree added,
+
+242
+00:09:50.840 --> 00:09:53.120
+but the other way we can do that is through this function,
+
+243
+00:09:53.120 --> 00:09:55.679
+which is run behavior tree,
+
+244
+00:09:55.679 --> 00:09:58.960
+and you essentially provide a behavior tree to run
+
+245
+00:09:58.960 --> 00:10:00.879
+and it will automatically create
+
+246
+00:10:00.879 --> 00:10:02.840
+an appropriate behavior tree component.
+
+247
+00:10:02.840 --> 00:10:06.759
+So those are the kind of two ways of doing it.
+
+248
+00:10:06.759 --> 00:10:07.919
+So the behavior tree itself,
+
+249
+00:10:07.919 --> 00:10:09.679
+we talked a little bit about the component.
+
+250
+00:10:09.679 --> 00:10:12.840
+The behavior tree is obviously essentially is,
+
+251
+00:10:12.840 --> 00:10:14.039
+as we said, the brain.
+
+252
+00:10:14.039 --> 00:10:15.919
+It allows us, it's a way
+
+253
+00:10:15.919 --> 00:10:19.240
+of structuring decision-making essentially.
+
+254
+00:10:19.240 --> 00:10:21.960
+It can be paired with blackboards to,
+
+255
+00:10:21.960 --> 00:10:25.720
+which introduced the concept of memory to make decisions,
+
+256
+00:10:25.720 --> 00:10:28.120
+gather up information about the world it's in
+
+257
+00:10:28.120 --> 00:10:31.320
+and make decisions based off that information.
+
+258
+00:10:31.320 --> 00:10:34.679
+It's essentially built in a hierarchical manner.
+
+259
+00:10:34.679 --> 00:10:36.120
+It's a set of nodes that control
+
+260
+00:10:36.120 --> 00:10:37.240
+the flow of decision-making.
+
+261
+00:10:37.240 --> 00:10:39.159
+So it might, for people who aren't used
+
+262
+00:10:39.159 --> 00:10:40.440
+to seeing things like behavior trees,
+
+263
+00:10:40.440 --> 00:10:42.879
+it might look a little bit like a flow diagram.
+
+264
+00:10:44.200 --> 00:10:45.960
+And when you're creating a behavior tree,
+
+265
+00:10:45.960 --> 00:10:47.159
+it has its own editor graph.
+
+266
+00:10:47.159 --> 00:10:51.879
+So when you might already be used to blueprinting,
+
+267
+00:10:51.879 --> 00:10:53.000
+if you go into a behavior tree,
+
+268
+00:10:53.000 --> 00:10:54.200
+it's gonna look a little bit different
+
+269
+00:10:54.200 --> 00:10:56.639
+because as with several systems in Unreal,
+
+270
+00:10:56.639 --> 00:10:59.000
+it has its own kind of bespoke editor.
+
+271
+00:10:59.000 --> 00:11:00.200
+The other thing that's worth mentioning
+
+272
+00:11:00.200 --> 00:11:02.480
+is a lot of behavior tree logic is event-driven.
+
+273
+00:11:02.480 --> 00:11:06.200
+It's not really on tick, even though it might look like it.
+
+274
+00:11:06.200 --> 00:11:08.000
+A lot of what the behavior tree is doing
+
+275
+00:11:08.000 --> 00:11:10.080
+is sitting and waiting for updates
+
+276
+00:11:10.080 --> 00:11:14.019
+from whatever is the kind of most relevant node.
+
+277
+00:11:14.019 --> 00:11:15.340
+So this is just an example
+
+278
+00:11:15.340 --> 00:11:17.419
+of a behavior tree that we've got here.
+
+279
+00:11:17.419 --> 00:11:19.980
+This is one, if you download the example project,
+
+280
+00:11:19.980 --> 00:11:20.940
+this is the behavior tree
+
+281
+00:11:20.980 --> 00:11:23.740
+that we've already got in our fundamentals folder.
+
+282
+00:11:23.740 --> 00:11:25.059
+If we go to fundamentals behavior tree,
+
+283
+00:11:25.059 --> 00:11:27.340
+it's just this BT example.
+
+284
+00:11:27.340 --> 00:11:30.019
+And essentially this is just a very, very simple setup.
+
+285
+00:11:30.019 --> 00:11:32.659
+In a kind of fully shift game,
+
+286
+00:11:32.659 --> 00:11:34.259
+it's much more likely that we would have
+
+287
+00:11:34.259 --> 00:11:36.940
+a far more substantial setup.
+
+288
+00:11:36.940 --> 00:11:39.259
+We're gonna go into what each of these nodes is
+
+289
+00:11:39.259 --> 00:11:44.100
+and how they work very briefly in a little bit, sorry.
+
+290
+00:11:44.100 --> 00:11:46.100
+But kind of very briefly just to talk about it,
+
+291
+00:11:46.100 --> 00:11:48.019
+what this is ultimately doing
+
+292
+00:11:48.059 --> 00:11:51.460
+is behavior trees are importantly structured
+
+293
+00:11:51.460 --> 00:11:53.620
+top to bottom, left to right.
+
+294
+00:11:53.620 --> 00:11:55.419
+And you can actually see that denoted
+
+295
+00:11:55.419 --> 00:11:57.379
+by these little numbers on each of these nodes.
+
+296
+00:11:57.379 --> 00:11:59.820
+You can see no two of them share a number.
+
+297
+00:11:59.820 --> 00:12:01.940
+This is the order of priority of these nodes.
+
+298
+00:12:01.940 --> 00:12:03.139
+So as we can see,
+
+299
+00:12:03.139 --> 00:12:05.220
+we'll go into what each of these nodes actually is
+
+300
+00:12:05.220 --> 00:12:07.899
+and what they do, but we have our first node here.
+
+301
+00:12:07.899 --> 00:12:09.059
+So this is zero,
+
+302
+00:12:09.059 --> 00:12:11.299
+and then this would be the second node considered.
+
+303
+00:12:11.299 --> 00:12:13.379
+And then we would always get to this sequence.
+
+304
+00:12:13.379 --> 00:12:16.059
+Again, we'll talk more about what these do, three, four, five.
+
+305
+00:12:16.059 --> 00:12:19.100
+And then only after all of these are considered,
+
+306
+00:12:19.100 --> 00:12:20.340
+then we would go over here.
+
+307
+00:12:20.340 --> 00:12:24.899
+So the left to rightness of these nodes is very important.
+
+308
+00:12:24.899 --> 00:12:29.700
+An interesting caveat or an interesting just eccentricity
+
+309
+00:12:29.700 --> 00:12:32.220
+of the behavior tree system to be aware of
+
+310
+00:12:32.220 --> 00:12:36.620
+is that the way in which the left to rightness
+
+311
+00:12:36.620 --> 00:12:37.700
+of these nodes is assessed
+
+312
+00:12:37.700 --> 00:12:39.700
+might not always be completely obvious.
+
+313
+00:12:39.700 --> 00:12:42.899
+So one might assume that because this node
+
+314
+00:12:42.899 --> 00:12:45.980
+is now kind of the arrow is pointing more to the left,
+
+315
+00:12:45.980 --> 00:12:48.100
+this node would be higher priority.
+
+316
+00:12:48.100 --> 00:12:49.100
+That's actually not the case.
+
+317
+00:12:49.100 --> 00:12:50.740
+You can see this has still been assigned four
+
+318
+00:12:50.740 --> 00:12:52.100
+and this has been assigned three.
+
+319
+00:12:52.100 --> 00:12:55.259
+It's actually the left most side of the node
+
+320
+00:12:55.259 --> 00:12:58.460
+is used to assess whether or not one node
+
+321
+00:12:58.460 --> 00:13:00.539
+is higher priority.
+
+322
+00:13:00.539 --> 00:13:02.220
+It's a strange little quirk of the system,
+
+323
+00:13:02.220 --> 00:13:03.779
+but just important to be aware of
+
+324
+00:13:03.779 --> 00:13:06.860
+because if you have particularly long names,
+
+325
+00:13:06.860 --> 00:13:08.460
+it can actually end up in a situation
+
+326
+00:13:08.460 --> 00:13:12.620
+where your nodes act in perhaps slightly surprising ways.
+
+327
+00:13:12.620 --> 00:13:16.340
+So purely because this runEQS query is so wide
+
+328
+00:13:16.340 --> 00:13:18.259
+because the name is so long,
+
+329
+00:13:18.259 --> 00:13:20.340
+it's actually ended up being a higher priority.
+
+330
+00:13:20.340 --> 00:13:23.259
+But as soon as that becomes even slightly more to the right,
+
+331
+00:13:23.259 --> 00:13:24.940
+you see this now shifts down in priority.
+
+332
+00:13:24.940 --> 00:13:28.899
+So that's just the left to rightness is preserved here,
+
+333
+00:13:28.899 --> 00:13:30.379
+but it's just what exactly that means
+
+334
+00:13:30.379 --> 00:13:32.299
+in the context of particularly long names.
+
+335
+00:13:32.299 --> 00:13:35.820
+If I just gave this some absurdly long name,
+
+336
+00:13:35.820 --> 00:13:38.860
+you can overwrite the names of the nodes.
+
+337
+00:13:39.860 --> 00:13:44.679
+If I just change this to move to some long name
+
+338
+00:13:44.679 --> 00:13:49.220
+and I just add a load of ease.
+
+339
+00:13:49.220 --> 00:13:50.820
+Well, that's shifted it all to the right.
+
+340
+00:13:50.820 --> 00:13:52.779
+But either way, you might want to centralize that, right?
+
+341
+00:13:52.779 --> 00:13:54.740
+That might seem like it makes sense,
+
+342
+00:13:54.740 --> 00:14:03.840
+but now suddenly, if I were to save this.
+
+343
+00:14:03.840 --> 00:14:05.320
+Okay, well, for some reason,
+
+344
+00:14:06.440 --> 00:14:09.120
+maybe it doesn't actually read the override name
+
+345
+00:14:09.120 --> 00:14:10.759
+that you choose, but I've definitely had this before
+
+346
+00:14:10.759 --> 00:14:12.759
+when I've had long function names
+
+347
+00:14:12.799 --> 00:14:15.440
+that it has...
+
+348
+00:14:15.440 --> 00:14:17.639
+Oh no, yeah, that is done exactly as we expected.
+
+349
+00:14:17.639 --> 00:14:19.720
+Sorry, no, I misread the...
+
+350
+00:14:19.720 --> 00:14:22.360
+But as you can see, we've got a very long name now
+
+351
+00:14:22.360 --> 00:14:25.279
+and this is now node three and this is node four
+
+352
+00:14:25.279 --> 00:14:28.759
+because the left side has been pushed so far to the side.
+
+353
+00:14:30.000 --> 00:14:32.440
+So just a little quirk that's worth bearing in mind.
+
+354
+00:14:36.440 --> 00:14:38.600
+But yeah, generally what this is doing
+
+355
+00:14:38.600 --> 00:14:42.679
+is we can assume that the kind of leftmost behavior
+
+356
+00:14:42.679 --> 00:14:43.919
+is the highest priority behavior
+
+357
+00:14:43.960 --> 00:14:46.120
+and this is the kind of fallback behavior.
+
+358
+00:14:46.120 --> 00:14:49.240
+We've got a behavior tree that's essentially
+
+359
+00:14:49.240 --> 00:14:50.399
+choosing to do some behavior.
+
+360
+00:14:50.399 --> 00:14:52.039
+If we have a target,
+
+361
+00:14:52.039 --> 00:14:53.919
+then we try and find a point around the target.
+
+362
+00:14:53.919 --> 00:14:55.720
+We move to them and then we attack them.
+
+363
+00:14:55.720 --> 00:14:58.679
+And if we don't, so this is the higher priority.
+
+364
+00:14:58.679 --> 00:15:00.080
+If we have a target,
+
+365
+00:15:00.080 --> 00:15:02.159
+we'll go into how we're achieving that in a little bit.
+
+366
+00:15:02.159 --> 00:15:03.519
+And then the fallback behavior
+
+367
+00:15:03.519 --> 00:15:05.879
+is we just find some location around us,
+
+368
+00:15:05.879 --> 00:15:06.799
+we wait for five seconds
+
+369
+00:15:06.799 --> 00:15:09.399
+and then we move to that location and just repeat that.
+
+370
+00:15:09.399 --> 00:15:11.519
+So that's what this behavior tree is doing.
+
+371
+00:15:11.559 --> 00:15:13.360
+It's relatively simple.
+
+372
+00:15:13.360 --> 00:15:15.639
+Again, in a kind of full release game,
+
+373
+00:15:15.639 --> 00:15:17.480
+you would expect to see quite a lot
+
+374
+00:15:17.480 --> 00:15:19.120
+more sizable behavior trees,
+
+375
+00:15:19.120 --> 00:15:22.440
+but this is just introducing some simple concepts,
+
+376
+00:15:22.440 --> 00:15:24.519
+the general structure that behavior tree might have
+
+377
+00:15:24.519 --> 00:15:25.600
+and just to kind of demonstrate
+
+378
+00:15:25.600 --> 00:15:32.779
+how each of these nodes works.
+
+379
+00:15:32.779 --> 00:15:34.980
+So we've already kind of taken a little look
+
+380
+00:15:34.980 --> 00:15:36.500
+at some of these nodes,
+
+381
+00:15:36.500 --> 00:15:38.340
+but the actual behavior tree is made up
+
+382
+00:15:38.340 --> 00:15:40.659
+of five key groups of nodes.
+
+383
+00:15:40.659 --> 00:15:42.779
+We have the root node, composite nodes
+
+384
+00:15:42.779 --> 00:15:44.779
+with which there are three different types,
+
+385
+00:15:44.779 --> 00:15:47.220
+and then task nodes, decorators, and surfaces.
+
+386
+00:15:47.220 --> 00:15:49.889
+And we'll go into each of those in more detail now.
+
+387
+00:15:49.889 --> 00:15:52.850
+So the root node, this is just our start point.
+
+388
+00:15:52.850 --> 00:15:54.250
+It can't be deleted.
+
+389
+00:15:54.250 --> 00:15:57.129
+The root node can only have one connection.
+
+390
+00:15:57.129 --> 00:15:59.009
+And if the connection from the root node
+
+391
+00:15:59.009 --> 00:16:01.570
+to any other nodes is disconnected,
+
+392
+00:16:01.570 --> 00:16:04.769
+then essentially the entire behavior tree is disabled.
+
+393
+00:16:04.769 --> 00:16:06.529
+We'll talk more about what decorators
+
+394
+00:16:06.529 --> 00:16:08.730
+and surfaces are in a second,
+
+395
+00:16:08.730 --> 00:16:11.169
+but the root node can't have decorators
+
+396
+00:16:11.169 --> 00:16:12.610
+or surfaces attached to it.
+
+397
+00:16:12.610 --> 00:16:14.889
+And it's kind of got no inherent functionality.
+
+398
+00:16:14.889 --> 00:16:16.610
+It's really just an entry point.
+
+399
+00:16:16.610 --> 00:16:19.090
+And if you are to select the root node,
+
+400
+00:16:19.090 --> 00:16:20.210
+really all you're doing
+
+401
+00:16:20.210 --> 00:16:22.129
+is talking about the behavior tree as a whole.
+
+402
+00:16:22.129 --> 00:16:24.649
+So the kind of default behavior,
+
+403
+00:16:24.649 --> 00:16:26.129
+whereas with most of the nodes,
+
+404
+00:16:26.129 --> 00:16:28.049
+you can kind of set properties about them.
+
+405
+00:16:28.049 --> 00:16:31.649
+You can specify bits of information about that node itself.
+
+406
+00:16:31.649 --> 00:16:34.049
+The root node, all you do is no different
+
+407
+00:16:34.049 --> 00:16:37.490
+to kind of clicking off in the behavior tree in general.
+
+408
+00:16:37.490 --> 00:16:40.570
+All you do is assign the blackboard,
+
+409
+00:16:40.570 --> 00:16:41.409
+but that is kind of,
+
+410
+00:16:41.409 --> 00:16:42.610
+that's nothing to do with the root.
+
+411
+00:16:42.610 --> 00:16:43.929
+That's the behavior tree itself.
+
+412
+00:16:43.929 --> 00:16:45.450
+It's just to say that the root node
+
+413
+00:16:45.450 --> 00:16:52.639
+kind of has no extra information that you can set.
+
+414
+00:16:52.639 --> 00:16:54.600
+So then we have composite nodes.
+
+415
+00:16:54.600 --> 00:16:57.240
+Composite nodes essentially define our,
+
+416
+00:16:57.240 --> 00:17:00.600
+kind of a branch in our behavior tree's logic.
+
+417
+00:17:00.600 --> 00:17:02.840
+And each different kind of composite node
+
+418
+00:17:02.840 --> 00:17:05.839
+determines rules for how that branch is executed.
+
+419
+00:17:05.839 --> 00:17:08.319
+Only composite nodes can be attached to the root node.
+
+420
+00:17:08.319 --> 00:17:10.319
+So tasks, decorators, surfaces
+
+421
+00:17:10.319 --> 00:17:13.119
+can't be utilized directly off the root node.
+
+422
+00:17:13.480 --> 00:17:16.559
+The first node that your root node enters into
+
+423
+00:17:16.559 --> 00:17:18.400
+needs to be a composite node.
+
+424
+00:17:18.400 --> 00:17:20.559
+And composite node, unlike the root node,
+
+425
+00:17:20.559 --> 00:17:23.099
+do support both decorators and surfaces.
+
+426
+00:17:24.599 --> 00:17:26.240
+As you said, there are three types of competent nodes.
+
+427
+00:17:26.240 --> 00:17:28.440
+We have selectors, sequences, and simple parallels,
+
+428
+00:17:28.440 --> 00:17:31.339
+and we'll kind of go into those in more detail now.
+
+429
+00:17:31.339 --> 00:17:33.740
+So first off, we have selectors.
+
+430
+00:17:33.740 --> 00:17:35.700
+Selectors essentially,
+
+431
+00:17:37.140 --> 00:17:40.660
+kind of two, we've talked about kind of priority,
+
+432
+00:17:40.660 --> 00:17:43.299
+but the other important concept to understand
+
+433
+00:17:43.299 --> 00:17:45.579
+in behavior trees is there is this concept
+
+434
+00:17:45.579 --> 00:17:47.420
+of success and failure.
+
+435
+00:17:47.420 --> 00:17:50.019
+Nodes could really have three states.
+
+436
+00:17:50.019 --> 00:17:52.299
+They have, they can succeed, they can fail,
+
+437
+00:17:52.299 --> 00:17:53.579
+or they can be kind of pending.
+
+438
+00:17:53.579 --> 00:17:56.299
+They can be, you know, not finished yet.
+
+439
+00:17:56.299 --> 00:17:59.299
+But ultimately, once a node concludes,
+
+440
+00:17:59.299 --> 00:18:01.420
+it will either succeed or fail.
+
+441
+00:18:01.420 --> 00:18:04.380
+So the purposes of selectors and sequences
+
+442
+00:18:04.380 --> 00:18:06.019
+is respond in different ways
+
+443
+00:18:06.019 --> 00:18:07.960
+to this idea of success and failure.
+
+444
+00:18:07.960 --> 00:18:10.920
+The purpose of selector, as kind of implied by the name,
+
+445
+00:18:10.920 --> 00:18:15.319
+is there to select a particular behavior.
+
+446
+00:18:15.319 --> 00:18:18.039
+So a selector can have multiple children,
+
+447
+00:18:18.039 --> 00:18:19.839
+and what the selector is there to do
+
+448
+00:18:19.839 --> 00:18:23.559
+is find the first successful child.
+
+449
+00:18:23.559 --> 00:18:25.059
+So it goes from left to right,
+
+450
+00:18:25.059 --> 00:18:27.039
+as with all behavior trees by default.
+
+451
+00:18:27.039 --> 00:18:28.079
+It will go from left to right
+
+452
+00:18:28.079 --> 00:18:29.279
+through each of the children
+
+453
+00:18:29.279 --> 00:18:32.359
+and find the first child that succeeds
+
+454
+00:18:32.359 --> 00:18:33.880
+and then return itself.
+
+455
+00:18:33.880 --> 00:18:36.400
+So a selector, you enter the selector,
+
+456
+00:18:36.400 --> 00:18:39.400
+the selector goes from left, assesses the first child.
+
+457
+00:18:39.400 --> 00:18:40.819
+If that child succeeds,
+
+458
+00:18:40.819 --> 00:18:44.119
+the selector itself will instantly succeed
+
+459
+00:18:44.119 --> 00:18:44.960
+and exit out.
+
+460
+00:18:44.960 --> 00:18:47.200
+And then, you know, if the flow returns to the selector,
+
+461
+00:18:47.200 --> 00:18:49.519
+it will then start from the beginning again.
+
+462
+00:18:49.519 --> 00:18:52.279
+If the first child fails,
+
+463
+00:18:52.279 --> 00:18:54.019
+then it will move on to the next child
+
+464
+00:18:54.019 --> 00:18:56.119
+and ask that child if it succeeds or fail.
+
+465
+00:18:56.119 --> 00:18:59.359
+And the selector will keep going left to the right
+
+466
+00:18:59.359 --> 00:19:01.680
+as long as the children keep failing
+
+467
+00:19:01.680 --> 00:19:03.079
+until it gets to the last child.
+
+468
+00:19:03.079 --> 00:19:05.319
+And if the last child fails,
+
+469
+00:19:05.339 --> 00:19:06.980
+then the entire selector fails.
+
+470
+00:19:06.980 --> 00:19:09.839
+So as well as the children having concepts
+
+471
+00:19:09.839 --> 00:19:11.740
+of failing and succeeding,
+
+472
+00:19:11.740 --> 00:19:15.240
+the selector itself has a concept of failing and succeeding.
+
+473
+00:19:15.240 --> 00:19:17.920
+The selector fails if all of its children fail.
+
+474
+00:19:17.920 --> 00:19:21.779
+As soon as the selector finds one child that succeeds,
+
+475
+00:19:21.779 --> 00:19:24.240
+the selector itself succeeds and exits out.
+
+476
+00:19:26.250 --> 00:19:28.630
+The sequence is kind of the opposite, the inversion.
+
+477
+00:19:28.630 --> 00:19:32.690
+So where the selector is trying to find a single node
+
+478
+00:19:32.690 --> 00:19:33.890
+that succeeds,
+
+479
+00:19:33.910 --> 00:19:37.009
+the sequence is trying to,
+
+480
+00:19:37.009 --> 00:19:40.609
+essentially is intending to execute all of its children
+
+481
+00:19:40.609 --> 00:19:43.470
+and will stop as soon as it hits one that fails.
+
+482
+00:19:43.470 --> 00:19:46.849
+So whereas the selector expects one succeeding child,
+
+483
+00:19:46.849 --> 00:19:48.549
+the sequencer kind of hopes,
+
+484
+00:19:48.549 --> 00:19:51.690
+as much as, you know, code desires anything,
+
+485
+00:19:51.690 --> 00:19:54.549
+for all of its children to succeed,
+
+486
+00:19:54.549 --> 00:19:57.049
+as I'm sure we all do in life.
+
+487
+00:19:57.049 --> 00:19:59.289
+So the same as selector,
+
+488
+00:19:59.289 --> 00:20:02.289
+the same as all behavior trees run left to right,
+
+489
+00:20:02.329 --> 00:20:05.730
+a sequence will execute its leftmost child first.
+
+490
+00:20:05.730 --> 00:20:07.529
+If that child fails,
+
+491
+00:20:07.529 --> 00:20:11.069
+the sequence will instantly itself fail and exit out.
+
+492
+00:20:12.069 --> 00:20:13.410
+If that child succeeds,
+
+493
+00:20:13.410 --> 00:20:15.289
+it moves to the right onto its next child
+
+494
+00:20:15.289 --> 00:20:18.309
+and will proceed and will keep executing the next child
+
+495
+00:20:18.309 --> 00:20:20.329
+when the previous child succeeds.
+
+496
+00:20:20.329 --> 00:20:22.049
+If the previous child succeeds,
+
+497
+00:20:22.049 --> 00:20:23.849
+as soon as one of them fails,
+
+498
+00:20:23.849 --> 00:20:28.849
+it will exit out of the behavior and continue onwards.
+
+499
+00:20:30.220 --> 00:20:32.200
+And then lastly, we have simple parallel.
+
+500
+00:20:32.200 --> 00:20:35.759
+This is less for controlling flow and more just
+
+501
+00:20:35.759 --> 00:20:37.960
+it's kind of useful bit of functionality.
+
+502
+00:20:38.880 --> 00:20:43.880
+Essentially, we have a kind of main task
+
+503
+00:20:43.960 --> 00:20:46.200
+that the parallel executes.
+
+504
+00:20:46.200 --> 00:20:49.640
+It's important to mention that what the parallel,
+
+505
+00:20:49.640 --> 00:20:51.880
+the kind of parallel node does,
+
+506
+00:20:51.880 --> 00:20:55.079
+is it executes a tree whilst performing a task.
+
+507
+00:20:55.079 --> 00:20:58.700
+So the task itself must be a task node,
+
+508
+00:20:58.700 --> 00:21:00.839
+which again, we'll talk about next.
+
+509
+00:21:00.839 --> 00:21:05.079
+And then what it expects from the kind of second branch
+
+510
+00:21:05.079 --> 00:21:07.680
+is likely going to be a composite node.
+
+511
+00:21:07.680 --> 00:21:10.039
+You could maybe plug a task into that as well.
+
+512
+00:21:10.039 --> 00:21:11.660
+I've never tried that myself,
+
+513
+00:21:11.660 --> 00:21:15.079
+but the typical plan would be to have a, you know,
+
+514
+00:21:15.079 --> 00:21:18.119
+an entire kind of other branch of your tree.
+
+515
+00:21:18.119 --> 00:21:19.799
+And that branch is executed
+
+516
+00:21:19.799 --> 00:21:23.480
+whilst the primary task is being executed.
+
+517
+00:21:23.480 --> 00:21:27.119
+An example of this might be you have some kind of
+
+518
+00:21:28.119 --> 00:21:31.759
+look at player logic that you want to execute
+
+519
+00:21:31.759 --> 00:21:35.000
+whilst attacking the player or something like that.
+
+520
+00:21:35.000 --> 00:21:38.119
+So you can perform actions in the background
+
+521
+00:21:38.119 --> 00:21:40.059
+whilst you're doing a certain thing.
+
+522
+00:21:40.059 --> 00:21:41.240
+The other thing that you have
+
+523
+00:21:41.240 --> 00:21:43.480
+is this finish mode variable.
+
+524
+00:21:43.480 --> 00:21:47.920
+You can, if I were to just quickly add in a parallel node,
+
+525
+00:21:47.920 --> 00:21:49.000
+I don't think I've got one here,
+
+526
+00:21:49.000 --> 00:21:50.480
+but if I add in a parallel,
+
+527
+00:21:50.480 --> 00:21:53.720
+you can see you've got a couple of different finish modes.
+
+528
+00:21:53.720 --> 00:21:56.000
+You have immediate and delayed.
+
+529
+00:21:56.039 --> 00:21:58.839
+Immediate essentially means as soon as the task finishes,
+
+530
+00:21:58.839 --> 00:22:02.200
+the tree that is underneath it gets aborted.
+
+531
+00:22:02.200 --> 00:22:05.400
+So it stops executing regardless of what it's doing.
+
+532
+00:22:05.400 --> 00:22:08.799
+Otherwise we have delayed where when the task,
+
+533
+00:22:08.799 --> 00:22:10.200
+whatever task is plugged in here,
+
+534
+00:22:10.200 --> 00:22:12.480
+finishes, concludes, succeeds, or fails,
+
+535
+00:22:13.319 --> 00:22:16.720
+the tree will get to its own natural finish state
+
+536
+00:22:16.720 --> 00:22:20.849
+before then exiting out.
+
+537
+00:22:20.849 --> 00:22:23.089
+So that's all of our composite nodes.
+
+538
+00:22:23.089 --> 00:22:25.150
+Next, we have task nodes.
+
+539
+00:22:25.150 --> 00:22:27.369
+Task nodes are essentially the nodes that do things.
+
+540
+00:22:27.529 --> 00:22:29.390
+It's again, implied by the name.
+
+541
+00:22:30.410 --> 00:22:31.529
+And they essentially,
+
+542
+00:22:31.529 --> 00:22:34.490
+this is like a little bit like our function call.
+
+543
+00:22:34.490 --> 00:22:36.049
+They're the things that do things.
+
+544
+00:22:36.049 --> 00:22:38.950
+The majority of a behavior tree
+
+545
+00:22:38.950 --> 00:22:41.009
+is likely to be made up of task nodes.
+
+546
+00:22:42.170 --> 00:22:45.930
+And task nodes themselves support decorators and services
+
+547
+00:22:45.930 --> 00:22:47.730
+and are obviously intended to be placed
+
+548
+00:22:47.730 --> 00:22:49.730
+on the behavior tree graph.
+
+549
+00:22:49.730 --> 00:22:52.089
+There's a couple of preexisting task nodes,
+
+550
+00:22:52.089 --> 00:22:54.930
+but you can also make your own in Blueprint,
+
+551
+00:22:54.930 --> 00:22:58.000
+which we'll talk about a little bit more in a bit.
+
+552
+00:22:58.000 --> 00:23:01.000
+But just some examples of kind of preexisting ones
+
+553
+00:23:01.000 --> 00:23:02.359
+is if you just look under,
+
+554
+00:23:02.359 --> 00:23:03.759
+if you right click inside a behavior tree
+
+555
+00:23:03.759 --> 00:23:04.680
+and you've got tasks,
+
+556
+00:23:04.680 --> 00:23:06.079
+these are the ones we've made ourselves,
+
+557
+00:23:06.079 --> 00:23:07.960
+but you can see the kind of things
+
+558
+00:23:07.960 --> 00:23:09.339
+that you might already have available to you
+
+559
+00:23:09.339 --> 00:23:10.180
+in the engine.
+
+560
+00:23:10.180 --> 00:23:11.799
+Move to being a very, very common one
+
+561
+00:23:11.799 --> 00:23:14.240
+that's obviously using the nav system,
+
+562
+00:23:14.240 --> 00:23:16.880
+playing sounds, playing animations,
+
+563
+00:23:16.880 --> 00:23:18.440
+running an EQS query.
+
+564
+00:23:18.440 --> 00:23:19.660
+You can see the kinds of things
+
+565
+00:23:19.660 --> 00:23:23.410
+that you might use a task for.
+
+566
+00:23:23.410 --> 00:23:25.410
+Next, we have decorators.
+
+567
+00:23:25.410 --> 00:23:27.369
+As has kind of already been mentioned,
+
+568
+00:23:27.369 --> 00:23:30.650
+decorators can be added to either composites or task nodes.
+
+569
+00:23:30.650 --> 00:23:34.170
+And decorators essentially give us a way
+
+570
+00:23:34.170 --> 00:23:39.170
+to inject branching kind of conditions onto our logic.
+
+571
+00:23:40.589 --> 00:23:42.450
+So yeah, other behavior trees,
+
+572
+00:23:42.450 --> 00:23:47.170
+obviously behavior trees aren't a unique to Unreal.
+
+573
+00:23:47.170 --> 00:23:49.970
+They have their own kind of like bespoke implementation,
+
+574
+00:23:49.970 --> 00:23:51.450
+but obviously behavior trees are a concept
+
+575
+00:23:51.450 --> 00:23:53.569
+that exists outside of Unreal as a whole.
+
+576
+00:23:53.569 --> 00:23:56.769
+So the terminology here might be slightly different,
+
+577
+00:23:56.769 --> 00:23:58.809
+but I believe these would be called conditionals
+
+578
+00:23:58.809 --> 00:24:01.289
+in other behavior tree systems.
+
+579
+00:24:01.289 --> 00:24:04.630
+So essentially we can add decorators to other nodes,
+
+580
+00:24:04.630 --> 00:24:07.990
+be that composite nodes or task nodes,
+
+581
+00:24:07.990 --> 00:24:11.170
+and they give us a way to kind of affect
+
+582
+00:24:11.170 --> 00:24:14.490
+the context in which that node will actually execute.
+
+583
+00:24:15.829 --> 00:24:17.589
+And in certain contexts,
+
+584
+00:24:17.589 --> 00:24:21.630
+depending on the kind of decorator that you've got applied,
+
+585
+00:24:21.630 --> 00:24:23.789
+you can actually even use that decorator
+
+586
+00:24:24.549 --> 00:24:26.509
+to abort out of other parts of the tree.
+
+587
+00:24:26.509 --> 00:24:27.990
+We said it before about this idea
+
+588
+00:24:27.990 --> 00:24:31.670
+of behavior trees being event-based.
+
+589
+00:24:31.670 --> 00:24:33.589
+Some of that event-based behavior
+
+590
+00:24:33.589 --> 00:24:35.890
+really comes out in this idea
+
+591
+00:24:35.890 --> 00:24:38.829
+that we kind of listen to changes within our,
+
+592
+00:24:38.829 --> 00:24:42.190
+or we can listen to changes within our decorators
+
+593
+00:24:42.190 --> 00:24:44.430
+for when that decorator state changes,
+
+594
+00:24:44.430 --> 00:24:46.730
+we can instantly alter our behavior.
+
+595
+00:24:48.390 --> 00:24:51.750
+So particularly in the context of a decorator,
+
+596
+00:24:51.750 --> 00:24:54.269
+this is an example of one that we've used in this tree
+
+597
+00:24:54.269 --> 00:24:55.470
+where we've got a decorator
+
+598
+00:24:55.470 --> 00:24:58.589
+that is listening to a blackboard key.
+
+599
+00:24:58.589 --> 00:25:01.750
+We'll talk more about blackboard keys in a little bit,
+
+600
+00:25:01.750 --> 00:25:04.950
+but essentially just imagine this is a variable
+
+601
+00:25:04.950 --> 00:25:06.869
+and this variable can change.
+
+602
+00:25:06.869 --> 00:25:09.309
+And this is an if saying
+
+603
+00:25:09.309 --> 00:25:11.710
+that we don't want to perform all of this logic
+
+604
+00:25:11.710 --> 00:25:15.349
+if this variable doesn't have a valid value in it.
+
+605
+00:25:15.349 --> 00:25:16.269
+But as well as that,
+
+606
+00:25:16.269 --> 00:25:19.710
+we have the ability to kind of abort parts of the tree.
+
+607
+00:25:19.710 --> 00:25:20.990
+So as you can see here,
+
+608
+00:25:21.029 --> 00:25:25.869
+this isn't true for all blackboards, for all decorators,
+
+609
+00:25:25.869 --> 00:25:27.509
+but for some of them,
+
+610
+00:25:27.509 --> 00:25:30.630
+particularly blackboard-based decorators,
+
+611
+00:25:30.630 --> 00:25:33.470
+we have this option for kind of aborting.
+
+612
+00:25:33.470 --> 00:25:34.309
+And you can kind of see
+
+613
+00:25:34.309 --> 00:25:35.589
+we've got these different options here.
+
+614
+00:25:35.589 --> 00:25:37.930
+We can not abort at all.
+
+615
+00:25:37.930 --> 00:25:42.390
+We can abort just the tree itself.
+
+616
+00:25:42.390 --> 00:25:46.109
+We can abort any part of the behavior tree
+
+617
+00:25:46.109 --> 00:25:48.430
+that is lower priority than this node.
+
+618
+00:25:48.430 --> 00:25:49.390
+And we can do both.
+
+619
+00:25:49.390 --> 00:25:52.509
+We can abort this part of the tree itself
+
+620
+00:25:52.509 --> 00:25:55.140
+and everything that is lower priority.
+
+621
+00:25:55.140 --> 00:25:57.940
+And the two situations which we can abort
+
+622
+00:25:57.940 --> 00:25:59.980
+is when the result has changed.
+
+623
+00:25:59.980 --> 00:26:02.420
+So this depends on what query
+
+624
+00:26:02.420 --> 00:26:04.660
+are we asking about this variable
+
+625
+00:26:04.660 --> 00:26:07.180
+and has the output of that query changed?
+
+626
+00:26:07.180 --> 00:26:08.500
+Is it true or false?
+
+627
+00:26:08.500 --> 00:26:11.140
+And the other situation in which we can react to that
+
+628
+00:26:11.140 --> 00:26:12.400
+is when the value itself,
+
+629
+00:26:12.400 --> 00:26:14.539
+so the data being plugged in,
+
+630
+00:26:14.539 --> 00:26:17.819
+our actual, the value inside our variable has changed
+
+631
+00:26:17.819 --> 00:26:19.099
+regardless of whether or not
+
+632
+00:26:19.099 --> 00:26:20.779
+we're going to react to it in a different way,
+
+633
+00:26:20.779 --> 00:26:23.140
+regardless of whether our output is true or false,
+
+634
+00:26:23.140 --> 00:26:25.740
+just because the input data has changed,
+
+635
+00:26:25.740 --> 00:26:28.640
+we want to possibly abort in that situation.
+
+636
+00:26:28.640 --> 00:26:31.240
+So it gives us this kind of very powerful logic
+
+637
+00:26:31.240 --> 00:26:34.579
+to react to things more instantaneously
+
+638
+00:26:35.740 --> 00:26:37.099
+only in certain situations,
+
+639
+00:26:37.099 --> 00:26:40.640
+only in certain priority levels.
+
+640
+00:26:40.640 --> 00:26:42.099
+So we'll just change that back to,
+
+641
+00:26:42.099 --> 00:26:44.660
+I think this was set to kind of lower priority.
+
+642
+00:26:46.279 --> 00:26:47.579
+So that's decorators.
+
+643
+00:26:47.579 --> 00:26:49.779
+And then lastly, we have service nodes.
+
+644
+00:26:49.779 --> 00:26:52.819
+Service nodes are essentially give us a way to implement
+
+645
+00:26:54.710 --> 00:26:57.789
+almost in the background behavior.
+
+646
+00:26:58.730 --> 00:27:01.150
+They essentially execute,
+
+647
+00:27:01.150 --> 00:27:03.109
+they are a kind of node that you attach,
+
+648
+00:27:03.109 --> 00:27:06.190
+as we already said, to either composites or tasks,
+
+649
+00:27:06.190 --> 00:27:10.190
+and they will execute on a defined frequency
+
+650
+00:27:10.190 --> 00:27:12.230
+as long as the node that they are attached to
+
+651
+00:27:12.230 --> 00:27:14.509
+or the part of the branch that they are attached to
+
+652
+00:27:14.509 --> 00:27:16.089
+is being executed.
+
+653
+00:27:16.089 --> 00:27:21.089
+So we've got an example in the behavior tree here.
+
+654
+00:27:21.430 --> 00:27:25.230
+We've got a, this is a very, very common one.
+
+655
+00:27:25.230 --> 00:27:29.869
+I think the only default engine service
+
+656
+00:27:29.869 --> 00:27:31.490
+is to run an EQS.
+
+657
+00:27:31.490 --> 00:27:33.289
+This EQS actually isn't doing anything,
+
+658
+00:27:33.289 --> 00:27:35.650
+but it's just kind of there to demonstrate its use.
+
+659
+00:27:35.650 --> 00:27:37.690
+But essentially as long as we are within
+
+660
+00:27:37.690 --> 00:27:40.490
+one of these nodes within this part of the tree,
+
+661
+00:27:40.490 --> 00:27:43.569
+this EQS will be, this service will be running.
+
+662
+00:27:43.569 --> 00:27:46.410
+And what it will be doing is on an interval of 0.5 seconds
+
+663
+00:27:46.410 --> 00:27:48.529
+with a variance of 0.1.
+
+664
+00:27:48.529 --> 00:27:52.970
+So between every 0.4 to 0.6 seconds,
+
+665
+00:27:52.970 --> 00:27:54.809
+we will run an EQS query.
+
+666
+00:27:54.809 --> 00:27:58.250
+We will talk more about what an EQS query actually is
+
+667
+00:27:58.250 --> 00:27:59.730
+a little bit later, but you know,
+
+668
+00:27:59.730 --> 00:28:02.049
+this same thing could apply to any logic,
+
+669
+00:28:02.049 --> 00:28:04.970
+swap EQS query out for whatever logic you want to do.
+
+670
+00:28:04.970 --> 00:28:09.450
+It could be try and find a possible reload point.
+
+671
+00:28:09.450 --> 00:28:12.269
+So try and find the most powerful weapon in the map
+
+672
+00:28:12.269 --> 00:28:14.990
+on a periodic, like every 10 seconds,
+
+673
+00:28:14.990 --> 00:28:16.869
+just check if the most powerful weapon in the map
+
+674
+00:28:16.869 --> 00:28:19.269
+has spawned in and then maybe we would want to react
+
+675
+00:28:19.269 --> 00:28:20.670
+to that logic in some way.
+
+676
+00:28:21.890 --> 00:28:26.490
+So again, they are essentially time-based logic
+
+677
+00:28:26.490 --> 00:28:29.150
+that will execute whilst their part of the tree
+
+678
+00:28:29.150 --> 00:28:30.529
+is being executed.
+
+679
+00:28:30.529 --> 00:28:33.210
+Obviously, if you were to add a service to a task,
+
+680
+00:28:34.230 --> 00:28:36.730
+then that service would only execute
+
+681
+00:28:36.730 --> 00:28:39.789
+whilst that task is being executed.
+
+682
+00:28:39.789 --> 00:28:41.670
+So it's a little bit like running parallel behavior.
+
+683
+00:28:42.309 --> 00:28:45.230
+In some ways, the parallel node and service nodes
+
+684
+00:28:45.230 --> 00:28:47.430
+kind of perform a somewhat similar function.
+
+685
+00:28:49.380 --> 00:28:50.619
+Yeah, as we already said,
+
+686
+00:28:50.619 --> 00:28:53.339
+EQS is one of the kind of preexisting ones
+
+687
+00:28:53.339 --> 00:28:54.900
+that exist in Unreal.
+
+688
+00:28:56.420 --> 00:28:58.460
+And yeah, it's important to mention
+
+689
+00:28:58.460 --> 00:29:02.500
+that services don't have to tick.
+
+690
+00:29:02.500 --> 00:29:07.440
+They can also, they can just be used
+
+691
+00:29:07.440 --> 00:29:09.400
+for kind of like entry and exit logic
+
+692
+00:29:09.400 --> 00:29:10.240
+for when their tree,
+
+693
+00:29:10.240 --> 00:29:12.259
+part of the tree has been entered and exited.
+
+694
+00:29:13.220 --> 00:29:15.259
+And knowledge of relevancy from networking
+
+695
+00:29:15.259 --> 00:29:18.079
+can also be kind of leveraged within them.
+
+696
+00:29:18.079 --> 00:29:19.740
+As with tasks decorators,
+
+697
+00:29:19.740 --> 00:29:22.740
+and really all of the fundamental parts
+
+698
+00:29:22.740 --> 00:29:24.500
+of the behavior tree system,
+
+699
+00:29:24.500 --> 00:29:27.700
+all of this stuff can be created in Blueprint and C++.
+
+700
+00:29:29.980 --> 00:29:35.009
+So when we're talking about behavior trees in general,
+
+701
+00:29:36.130 --> 00:29:37.890
+one of the things that's worth mentioning
+
+702
+00:29:37.890 --> 00:29:40.490
+is the fact that all of these nodes,
+
+703
+00:29:40.490 --> 00:29:41.930
+when we see a behavior tree,
+
+704
+00:29:41.930 --> 00:29:44.210
+it might be an expectation
+
+705
+00:29:44.210 --> 00:29:48.809
+that when we have multiple AIs running this behavior tree,
+
+706
+00:29:48.809 --> 00:29:52.450
+each AI would end up with a copy of that behavior tree.
+
+707
+00:29:52.450 --> 00:29:54.490
+And to a degree, they do.
+
+708
+00:29:54.490 --> 00:29:56.650
+But when you have multiple AIs
+
+709
+00:29:56.650 --> 00:29:58.089
+using the same behavior tree,
+
+710
+00:29:58.089 --> 00:29:59.529
+actually the default behavior
+
+711
+00:29:59.529 --> 00:30:01.450
+is that each of these nodes
+
+712
+00:30:01.450 --> 00:30:04.569
+is shared between each of the AIs.
+
+713
+00:30:04.569 --> 00:30:07.690
+So if you have 20 AIs
+
+714
+00:30:07.690 --> 00:30:10.369
+running this BT example behavior tree,
+
+715
+00:30:10.369 --> 00:30:12.690
+this selector, this sequence,
+
+716
+00:30:12.690 --> 00:30:16.809
+this run EQS query would by default all be shared.
+
+717
+00:30:16.809 --> 00:30:19.410
+So there is actually only one EQS query.
+
+718
+00:30:19.410 --> 00:30:20.569
+There's only one sequence.
+
+719
+00:30:20.569 --> 00:30:24.029
+There is only one selector that all of these AIs share.
+
+720
+00:30:24.029 --> 00:30:27.599
+That is the default implementation for nodes.
+
+721
+00:30:27.599 --> 00:30:29.119
+Obviously this comes with certain benefits.
+
+722
+00:30:29.119 --> 00:30:32.000
+It's improved CPU usage, it's improved memory usage.
+
+723
+00:30:32.000 --> 00:30:35.180
+We just don't need to use or do as much stuff.
+
+724
+00:30:35.180 --> 00:30:40.180
+But obviously when we want kind of like instanced
+
+725
+00:30:40.259 --> 00:30:42.299
+or agent-specific data,
+
+726
+00:30:43.400 --> 00:30:45.420
+that becomes a little bit of a challenge, right?
+
+727
+00:30:45.420 --> 00:30:47.599
+The fact that all of this information is always shared
+
+728
+00:30:47.599 --> 00:30:49.980
+between everyone using that behavior tree
+
+729
+00:30:49.980 --> 00:30:51.779
+has performance advantages,
+
+730
+00:30:51.779 --> 00:30:56.440
+but it comes at the cost of we have all of the
+
+731
+00:30:56.440 --> 00:30:58.700
+information that is used across these things is shared.
+
+732
+00:30:58.700 --> 00:31:02.059
+And so that is kind of undesirable for obvious reasons.
+
+733
+00:31:02.059 --> 00:31:04.720
+So in comes the various ways
+
+734
+00:31:04.720 --> 00:31:07.099
+that we can kind of introduce this concept,
+
+735
+00:31:07.099 --> 00:31:10.339
+introduce ways to provide
+
+736
+00:31:10.339 --> 00:31:12.200
+that kind of more instance-based logic.
+
+737
+00:31:12.200 --> 00:31:16.180
+So the first example is we have instancing nodes.
+
+738
+00:31:16.180 --> 00:31:18.779
+This is essentially for particular nodes
+
+739
+00:31:18.779 --> 00:31:20.539
+in our behavior tree.
+
+740
+00:31:20.539 --> 00:31:23.500
+We can introduce the idea that this node,
+
+741
+00:31:23.500 --> 00:31:26.059
+for every copy of this node, it will be an instance.
+
+742
+00:31:26.059 --> 00:31:29.859
+So it won't be shared by each person
+
+743
+00:31:29.859 --> 00:31:30.980
+using this behavior tree.
+
+744
+00:31:30.980 --> 00:31:34.660
+For every agent using this behavior tree,
+
+745
+00:31:34.660 --> 00:31:36.140
+you would have a copy of this node.
+
+746
+00:31:36.140 --> 00:31:38.230
+That's what an instance node does.
+
+747
+00:31:38.230 --> 00:31:40.509
+This is defined in C++.
+
+748
+00:31:40.509 --> 00:31:43.109
+I don't believe you can define this in Blueprint,
+
+749
+00:31:43.109 --> 00:31:45.029
+and you would do it typically in the constructor.
+
+750
+00:31:45.029 --> 00:31:48.029
+So this is just an example in the,
+
+751
+00:31:48.029 --> 00:31:50.230
+we'll talk about this specifically in a second,
+
+752
+00:31:50.230 --> 00:31:53.609
+but from the C++ for the Blueprint base,
+
+753
+00:31:53.609 --> 00:31:56.069
+which is when you're going to make your own
+
+754
+00:31:56.069 --> 00:31:57.309
+behavior tree tasks,
+
+755
+00:31:57.309 --> 00:31:59.009
+you would inherit from Blueprint base,
+
+756
+00:31:59.009 --> 00:32:02.029
+and you can see this be create node instances set to true.
+
+757
+00:32:02.029 --> 00:32:04.390
+So there are a couple of other nodes that use this
+
+758
+00:32:04.390 --> 00:32:05.789
+by default in the engine.
+
+759
+00:32:06.309 --> 00:32:07.710
+Play animation, run behavior tree dynamic
+
+760
+00:32:07.710 --> 00:32:08.990
+would also use this.
+
+761
+00:32:08.990 --> 00:32:11.930
+But essentially whenever you're creating
+
+762
+00:32:11.930 --> 00:32:14.549
+a behavior tree node that you want to be instanced,
+
+763
+00:32:14.549 --> 00:32:15.789
+so you don't want to be shared
+
+764
+00:32:15.789 --> 00:32:18.009
+by all instances of this behavior tree,
+
+765
+00:32:18.009 --> 00:32:20.069
+you would use, in the constructor,
+
+766
+00:32:20.069 --> 00:32:23.190
+you would set this be create node instance to true.
+
+767
+00:32:23.190 --> 00:32:26.789
+And then obviously every agent that uses that node,
+
+768
+00:32:26.789 --> 00:32:29.950
+even if you use that node multiple times within your tree,
+
+769
+00:32:29.950 --> 00:32:31.750
+there would be a unique copy
+
+770
+00:32:31.750 --> 00:32:34.150
+for each of those instances in that tree
+
+771
+00:32:34.190 --> 00:32:38.150
+for each node, for each agent using that tree.
+
+772
+00:32:38.150 --> 00:32:40.130
+Obviously this comes with performance
+
+773
+00:32:40.130 --> 00:32:41.690
+and memory usage costs.
+
+774
+00:32:41.690 --> 00:32:43.930
+You are essentially duplicating data.
+
+775
+00:32:43.930 --> 00:32:45.849
+More things need to be performed against.
+
+776
+00:32:45.849 --> 00:32:49.809
+There are more nodes that the CPU has to consider.
+
+777
+00:32:49.809 --> 00:32:52.250
+So these obviously has certain performance costs.
+
+778
+00:32:52.250 --> 00:32:54.130
+So you should really only be using these
+
+779
+00:32:54.130 --> 00:32:56.950
+when you don't feel there is a way
+
+780
+00:32:56.950 --> 00:33:00.089
+to kind of achieve this another way.
+
+781
+00:33:00.089 --> 00:33:01.890
+The other way that you can do this
+
+782
+00:33:01.890 --> 00:33:03.329
+is through node memory.
+
+783
+00:33:03.369 --> 00:33:06.650
+So again, this is more of a C plus plus concept.
+
+784
+00:33:06.650 --> 00:33:10.109
+The node memory isn't really available
+
+785
+00:33:10.109 --> 00:33:12.089
+to the blueprint end of things,
+
+786
+00:33:12.089 --> 00:33:14.609
+but it essentially allows us to create
+
+787
+00:33:14.609 --> 00:33:16.930
+a kind of custom struct or class
+
+788
+00:33:16.930 --> 00:33:20.890
+that represents an individual node's memory.
+
+789
+00:33:20.890 --> 00:33:24.029
+And then that memory will automatically be passed around
+
+790
+00:33:24.029 --> 00:33:27.650
+by functions within the C plus plus,
+
+791
+00:33:27.650 --> 00:33:30.410
+within native implementation of that node.
+
+792
+00:33:30.490 --> 00:33:33.809
+And you can access and utilize that memory.
+
+793
+00:33:33.809 --> 00:33:36.210
+There's a function that essentially defines
+
+794
+00:33:36.210 --> 00:33:38.569
+how big this block of memory is.
+
+795
+00:33:38.569 --> 00:33:40.609
+So we'll actually just quickly look at the C plus plus
+
+796
+00:33:40.609 --> 00:33:43.130
+for this, it's probably the best example.
+
+797
+00:33:43.130 --> 00:33:48.130
+So if we look at the BT task move two,
+
+798
+00:33:55.960 --> 00:34:01.250
+and if I were to, wrong node there,
+
+799
+00:34:02.700 --> 00:34:04.339
+if we were to just jump in here,
+
+800
+00:34:05.259 --> 00:34:07.099
+there's a couple of nodes that we kind of need
+
+801
+00:34:07.099 --> 00:34:07.940
+to be aware of.
+
+802
+00:34:07.940 --> 00:34:13.070
+So first off we have the get instance memory size.
+
+803
+00:34:13.670 --> 00:34:15.590
+So this is essentially saying,
+
+804
+00:34:15.590 --> 00:34:18.429
+how big does the block of memory need to be
+
+805
+00:34:18.429 --> 00:34:22.949
+for whatever memory this node is gonna need?
+
+806
+00:34:22.949 --> 00:34:26.630
+So obviously this would be done on a case by case basis,
+
+807
+00:34:26.630 --> 00:34:28.869
+but the typical thing is you would implement
+
+808
+00:34:28.869 --> 00:34:32.530
+some struct or class that represents the memory
+
+809
+00:34:32.530 --> 00:34:34.030
+that this node needs.
+
+810
+00:34:34.550 --> 00:34:35.789
+And then you would fill it with all that data.
+
+811
+00:34:35.789 --> 00:34:37.789
+And then really, as long as you're not doing anything
+
+812
+00:34:37.789 --> 00:34:39.750
+kind of like crazy or dynamic,
+
+813
+00:34:39.750 --> 00:34:42.429
+you can just use size of to return
+
+814
+00:34:42.429 --> 00:34:44.710
+just whatever the size of that struct or class is.
+
+815
+00:34:44.710 --> 00:34:47.510
+And then that's all you kind of need to fill in.
+
+816
+00:34:47.510 --> 00:34:49.730
+Then with all of the functions that this,
+
+817
+00:34:51.110 --> 00:34:53.030
+well, certainly a lot of the functions
+
+818
+00:34:53.030 --> 00:34:55.150
+that this node can utilize,
+
+819
+00:34:55.150 --> 00:34:59.110
+that memory is exposed to that function
+
+820
+00:34:59.110 --> 00:35:01.389
+through this UN8 pointer.
+
+821
+00:35:01.389 --> 00:35:03.469
+Obviously this is just a pointer
+
+822
+00:35:03.949 --> 00:35:06.110
+to the kind of like start point of that memory.
+
+823
+00:35:06.110 --> 00:35:07.949
+And so you would just need to cast that.
+
+824
+00:35:07.949 --> 00:35:09.590
+So typically you'll see this in,
+
+825
+00:35:09.590 --> 00:35:10.710
+this is an example,
+
+826
+00:35:10.710 --> 00:35:13.389
+the move to node is an existing unreal node
+
+827
+00:35:13.389 --> 00:35:15.269
+that utilizes this functionality.
+
+828
+00:35:15.269 --> 00:35:18.630
+But you can see here that we are kind of casting
+
+829
+00:35:18.630 --> 00:35:20.710
+that memory to our actual struct
+
+830
+00:35:20.710 --> 00:35:23.030
+and then utilizing the memory from that structure.
+
+831
+00:35:23.030 --> 00:35:25.420
+This is how you would utilize it.
+
+832
+00:35:25.420 --> 00:35:27.380
+And the other two functions just to be aware of
+
+833
+00:35:27.380 --> 00:35:29.820
+is this initialize memory and cleanup memory
+
+834
+00:35:29.820 --> 00:35:33.000
+where you essentially create your instance
+
+835
+00:35:33.000 --> 00:35:34.840
+of this struct and you clean up
+
+836
+00:35:34.840 --> 00:35:36.000
+that instance of that struct.
+
+837
+00:35:36.000 --> 00:35:37.800
+So those are the kind of things to be aware of
+
+838
+00:35:37.800 --> 00:35:39.000
+when you're using this.
+
+839
+00:35:39.920 --> 00:35:41.820
+And as you've already seen,
+
+840
+00:35:43.960 --> 00:35:45.480
+there are examples in the engine
+
+841
+00:35:45.480 --> 00:35:47.659
+that already utilize this, you can use for reference.
+
+842
+00:35:47.659 --> 00:35:49.760
+And the other thing to mention is that this,
+
+843
+00:35:49.760 --> 00:35:50.800
+whatever this memory is,
+
+844
+00:35:50.800 --> 00:35:53.039
+it's not part of the U object data system.
+
+845
+00:35:53.039 --> 00:35:54.639
+So you wouldn't be making a,
+
+846
+00:35:54.639 --> 00:35:57.079
+if you were to make a struct or a class,
+
+847
+00:35:57.079 --> 00:35:59.960
+this wouldn't be inheriting from U object.
+
+848
+00:35:59.960 --> 00:36:02.480
+This is stuff that it needs to be manually
+
+849
+00:36:02.960 --> 00:36:05.480
+created, managed, and cleaned up.
+
+850
+00:36:05.480 --> 00:36:08.079
+But as we already saw, we have these initialize memory
+
+851
+00:36:08.079 --> 00:36:12.070
+and cleanup memory functions specifically for that.
+
+852
+00:36:12.070 --> 00:36:13.630
+So yeah, these are some examples
+
+853
+00:36:13.630 --> 00:36:15.849
+of where we might be using those.
+
+854
+00:36:17.449 --> 00:36:19.090
+I think I've kind of already covered,
+
+855
+00:36:19.090 --> 00:36:21.809
+we've got our initialization, we've got our cleanup.
+
+856
+00:36:21.809 --> 00:36:24.230
+This is how we might use it within a task.
+
+857
+00:36:24.230 --> 00:36:27.349
+So we've got this pointer to our memory here, we cast it.
+
+858
+00:36:28.369 --> 00:36:31.369
+And then similarly, we've also got here an example
+
+859
+00:36:31.369 --> 00:36:33.889
+of how even outside of one of those functions
+
+860
+00:36:33.889 --> 00:36:37.170
+that passes in the kind of memory pointer,
+
+861
+00:36:37.170 --> 00:36:40.889
+as long as we have access to the task node itself,
+
+862
+00:36:40.889 --> 00:36:42.369
+you can, well, as long as we have access
+
+863
+00:36:42.369 --> 00:36:43.909
+to the behavior tree component,
+
+864
+00:36:43.909 --> 00:36:46.989
+and yeah, we can use this get node memory
+
+865
+00:36:46.989 --> 00:36:50.429
+and then find the instance containing this node
+
+866
+00:36:50.429 --> 00:36:51.769
+and then get the memory in that way.
+
+867
+00:36:51.769 --> 00:36:54.769
+So there are ways outside of the node itself
+
+868
+00:36:54.769 --> 00:36:58.360
+to actually access this stuff if that's required.
+
+869
+00:36:58.360 --> 00:37:00.119
+And then the last example,
+
+870
+00:37:00.119 --> 00:37:01.960
+which is more blueprint facing
+
+871
+00:37:01.960 --> 00:37:04.539
+and is kind of probably going to be the most common way
+
+872
+00:37:04.539 --> 00:37:07.280
+to manage this memory is through blackboard storage.
+
+873
+00:37:07.280 --> 00:37:08.840
+We already kind of mentioned the idea
+
+874
+00:37:08.840 --> 00:37:11.840
+of the blackboard being the way,
+
+875
+00:37:11.840 --> 00:37:13.500
+the kind of agent's memory.
+
+876
+00:37:13.500 --> 00:37:15.280
+And so yeah, blackboard storage
+
+877
+00:37:15.280 --> 00:37:16.840
+is obviously a way to do that.
+
+878
+00:37:18.039 --> 00:37:20.840
+Essentially, blackboard storage can be accessed
+
+879
+00:37:20.840 --> 00:37:23.800
+within any individual node.
+
+880
+00:37:23.800 --> 00:37:25.840
+You just need to pass in a particular,
+
+881
+00:37:25.840 --> 00:37:28.719
+you need to expose a particular property.
+
+882
+00:37:29.239 --> 00:37:30.480
+The variable that you'd be exposing
+
+883
+00:37:30.480 --> 00:37:32.320
+is called a blackboard key selector.
+
+884
+00:37:32.320 --> 00:37:35.239
+And what that lets us do is it kind of lets us get
+
+885
+00:37:35.239 --> 00:37:40.239
+and set data from and to a given blackboard.
+
+886
+00:37:40.380 --> 00:37:41.920
+The kind of thing to bear in mind
+
+887
+00:37:41.920 --> 00:37:43.239
+that whenever you are working with this
+
+888
+00:37:43.239 --> 00:37:47.159
+is it will only support a kind of like subset of types
+
+889
+00:37:47.159 --> 00:37:49.480
+that are suitable for blackboards,
+
+890
+00:37:49.480 --> 00:37:52.900
+but that does cover the vast majority of situations.
+
+891
+00:37:54.920 --> 00:37:56.400
+Yeah, so the blackboard data itself
+
+892
+00:37:56.400 --> 00:37:58.480
+is really the memory of our AI.
+
+893
+00:37:58.480 --> 00:38:01.440
+We've covered the way that individual nodes
+
+894
+00:38:01.440 --> 00:38:04.440
+can kind of have this memory so we can instance them.
+
+895
+00:38:04.440 --> 00:38:07.039
+The node itself can have memory
+
+896
+00:38:07.039 --> 00:38:09.159
+on a kind of per node basis.
+
+897
+00:38:09.159 --> 00:38:12.039
+But if we, generally the blackboard
+
+898
+00:38:12.039 --> 00:38:15.320
+is where we kind of would handle the agent's
+
+899
+00:38:15.320 --> 00:38:17.639
+more global memory to be possibly shared
+
+900
+00:38:17.639 --> 00:38:19.880
+between different nodes.
+
+901
+00:38:19.880 --> 00:38:22.900
+So yeah, the blackboard data is a kind of agent's memory.
+
+902
+00:38:24.400 --> 00:38:26.360
+And it is, the blackboard itself
+
+903
+00:38:26.800 --> 00:38:28.760
+is specifically engineered to work alongside
+
+904
+00:38:28.760 --> 00:38:30.239
+the behavior tree.
+
+905
+00:38:30.239 --> 00:38:31.360
+The way that data is stored
+
+906
+00:38:31.360 --> 00:38:32.460
+is through these blackboard keys,
+
+907
+00:38:32.460 --> 00:38:34.400
+which we kind of already mentioned.
+
+908
+00:38:34.400 --> 00:38:38.239
+The number of entries available in the blackboard
+
+909
+00:38:38.239 --> 00:38:42.239
+used to be 255 as of 5.2.
+
+910
+00:38:42.239 --> 00:38:45.440
+So this blackboard key type that we've said
+
+911
+00:38:45.440 --> 00:38:47.920
+it used to essentially store an ID under the hood.
+
+912
+00:38:47.920 --> 00:38:50.320
+Now the ID used to be a UINT8,
+
+913
+00:38:50.320 --> 00:38:54.059
+which is a value that can only go from zero to 255.
+
+914
+00:38:54.059 --> 00:38:57.179
+As of 5.2, that changed to an IN32.
+
+915
+00:38:57.179 --> 00:38:58.980
+So I suspect it's very likely
+
+916
+00:38:58.980 --> 00:39:02.940
+that we no longer have this cap of 255 entries.
+
+917
+00:39:02.940 --> 00:39:05.980
+I imagine that's now whatever the maximum capacity
+
+918
+00:39:05.980 --> 00:39:07.900
+of an IN32 is.
+
+919
+00:39:09.480 --> 00:39:10.820
+Don't quote me on that.
+
+920
+00:39:10.820 --> 00:39:12.300
+It's worth exploring on your own.
+
+921
+00:39:12.300 --> 00:39:14.659
+When I have tried to make blackboards
+
+922
+00:39:14.659 --> 00:39:17.780
+that have more than 255 entries in them,
+
+923
+00:39:17.780 --> 00:39:19.639
+they didn't complain.
+
+924
+00:39:19.639 --> 00:39:23.300
+But you know, be conscious that that is a change
+
+925
+00:39:23.380 --> 00:39:25.219
+that has taken place, but I can't,
+
+926
+00:39:25.219 --> 00:39:27.400
+I am not completely certain of the recipe
+
+927
+00:39:27.400 --> 00:39:29.840
+that there isn't some kind of other place
+
+928
+00:39:29.840 --> 00:39:32.920
+that is in some way limiting you to 255 entries.
+
+929
+00:39:34.420 --> 00:39:37.860
+Ultimately, 255 entries is a lot,
+
+930
+00:39:37.860 --> 00:39:40.099
+accounting for the fact that blackboards
+
+931
+00:39:40.099 --> 00:39:41.860
+can't store container types.
+
+932
+00:39:41.860 --> 00:39:44.460
+So they can't have arrays and maps.
+
+933
+00:39:44.460 --> 00:39:46.900
+And so if you do need, for some reason,
+
+934
+00:39:46.900 --> 00:39:49.539
+large quantities of actors,
+
+935
+00:39:49.539 --> 00:39:51.260
+we'll talk about this in a little bit,
+
+936
+00:39:51.260 --> 00:39:53.059
+actors or any kind of data,
+
+937
+00:39:54.340 --> 00:39:56.579
+there might be special ways to construct that
+
+938
+00:39:56.579 --> 00:39:59.260
+to kind of avoid hitting up against this entry limit
+
+939
+00:39:59.260 --> 00:40:00.300
+if it does exist.
+
+940
+00:40:01.739 --> 00:40:04.099
+The other thing to mention about blackboards as well
+
+941
+00:40:04.099 --> 00:40:06.099
+is that blackboards can inherit from each other.
+
+942
+00:40:06.099 --> 00:40:07.420
+So you can introduce a blackboard
+
+943
+00:40:07.420 --> 00:40:09.579
+that introduces types A, B, and C,
+
+944
+00:40:09.579 --> 00:40:10.820
+inherit from that blackboard,
+
+945
+00:40:10.820 --> 00:40:15.019
+and then you'll automatically get those blackboard keys
+
+946
+00:40:15.019 --> 00:40:18.960
+introduced to any child blackboards.
+
+947
+00:40:18.960 --> 00:40:20.800
+So we talked about the kind of like
+
+948
+00:40:20.840 --> 00:40:22.559
+smaller subset of types
+
+949
+00:40:22.559 --> 00:40:25.079
+that would be suitable for blackboards.
+
+950
+00:40:25.079 --> 00:40:28.440
+This would include vector, rotators,
+
+951
+00:40:28.440 --> 00:40:30.840
+bools, int32s, floats,
+
+952
+00:40:30.840 --> 00:40:33.280
+a kind of lot of these standard atomic types.
+
+953
+00:40:33.280 --> 00:40:36.719
+We can also implement U classes, U objects,
+
+954
+00:40:36.719 --> 00:40:40.440
+so the actual class type itself,
+
+955
+00:40:40.440 --> 00:40:42.880
+objects, so instances of objects,
+
+956
+00:40:43.719 --> 00:40:47.639
+F names, enums, strings, structs.
+
+957
+00:40:47.639 --> 00:40:49.320
+With these kind of specialized types,
+
+958
+00:40:49.360 --> 00:40:53.360
+like objects and structs and enums,
+
+959
+00:40:53.360 --> 00:40:55.199
+it's not just a kind of generic,
+
+960
+00:40:55.199 --> 00:40:58.320
+broad concept of an enum or a struct.
+
+961
+00:40:58.320 --> 00:41:02.280
+You do actually have the ability to specify
+
+962
+00:41:02.280 --> 00:41:03.760
+kind of more information about that.
+
+963
+00:41:03.760 --> 00:41:05.800
+So if you were to specify an object,
+
+964
+00:41:05.800 --> 00:41:06.880
+you can actually say,
+
+965
+00:41:06.880 --> 00:41:09.519
+hey, is there a particular class
+
+966
+00:41:09.519 --> 00:41:12.079
+that this should be inheriting from?
+
+967
+00:41:12.079 --> 00:41:13.960
+The default would probably be actor.
+
+968
+00:41:15.039 --> 00:41:16.960
+But also the same thing for an enum.
+
+969
+00:41:16.960 --> 00:41:18.599
+If you just say this is an enum key,
+
+970
+00:41:18.719 --> 00:41:20.320
+you can also specify,
+
+971
+00:41:20.320 --> 00:41:22.960
+is there a particular enum type that this should be?
+
+972
+00:41:22.960 --> 00:41:26.360
+And lastly, if you went to struct,
+
+973
+00:41:26.360 --> 00:41:28.039
+similarly, you can specify
+
+974
+00:41:29.440 --> 00:41:32.840
+what kind of struct should this be using?
+
+975
+00:41:32.840 --> 00:41:37.599
+So it is not purely just the abstract concept of an enum.
+
+976
+00:41:37.599 --> 00:41:39.480
+It can be a kind of typed enum.
+
+977
+00:41:41.079 --> 00:41:45.360
+The other thing to mention is that since Unreal 5.5,
+
+978
+00:41:45.360 --> 00:41:47.519
+there is also the idea of instance structs.
+
+979
+00:41:47.519 --> 00:41:49.679
+This is not a talk we're gonna kind of go into those,
+
+980
+00:41:49.679 --> 00:41:51.880
+but if you're pre-5.5,
+
+981
+00:41:51.880 --> 00:41:55.400
+I'm not sure that same type will be available to you,
+
+982
+00:41:55.400 --> 00:41:57.440
+but instance structs are essentially structs
+
+983
+00:41:57.440 --> 00:41:59.320
+that behave a little bit more like objects
+
+984
+00:41:59.320 --> 00:42:01.400
+in that they occupy
+
+985
+00:42:03.360 --> 00:42:04.719
+location in memory on the heap,
+
+986
+00:42:04.719 --> 00:42:06.519
+and that memory can be shared
+
+987
+00:42:06.519 --> 00:42:08.639
+between multiple instances of the struct,
+
+988
+00:42:08.639 --> 00:42:11.239
+giving you that kind of nice editor
+
+989
+00:42:12.760 --> 00:42:15.000
+editability of a struct,
+
+990
+00:42:15.000 --> 00:42:16.760
+but with the idea that when you're passing
+
+991
+00:42:16.760 --> 00:42:17.880
+this struct around,
+
+992
+00:42:17.880 --> 00:42:19.880
+you're actually passing around a pointer
+
+993
+00:42:19.880 --> 00:42:22.360
+to a location in memory that is shared.
+
+994
+00:42:22.360 --> 00:42:24.360
+Worth looking into in your own time,
+
+995
+00:42:24.360 --> 00:42:25.960
+but just worth mentioning that instance structs
+
+996
+00:42:25.960 --> 00:42:28.599
+have been introduced as a blackboard type.
+
+997
+00:42:28.599 --> 00:42:29.559
+For all the types,
+
+998
+00:42:29.559 --> 00:42:31.440
+it's just worth looking at the blackboard key
+
+999
+00:42:31.440 --> 00:42:32.840
+all types.header,
+
+1000
+00:42:34.000 --> 00:42:36.000
+just to kind of see all the types available to you,
+
+1001
+00:42:36.000 --> 00:42:37.199
+but this is kind of like
+
+1002
+00:42:37.199 --> 00:42:40.519
+most of the types you would typically be using.
+
+1003
+00:42:40.519 --> 00:42:42.719
+And as I've already mentioned,
+
+1004
+00:42:42.719 --> 00:42:44.239
+container types aren't supported.
+
+1005
+00:42:44.239 --> 00:42:47.679
+So maps, arrays, none of these types would be available.

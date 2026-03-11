@@ -1,0 +1,737 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.290
+Hi, everyone. In this lesson, we're going to take a quick look at Landscape and some
+
+2
+00:00:06.290 --> 00:00:11.289
+of the tools and things you can use to get running and get ready to build your stuff
+
+3
+00:00:11.289 --> 00:00:17.379
+in Unreal for your game worlds. So let's get started. One of the first things that
+
+4
+00:00:17.379 --> 00:00:22.420
+a lot of people run into as in problem-wise when it comes to building your world and
+
+5
+00:00:22.420 --> 00:00:29.839
+using Landscape is how to interpret exactly how the section size, the scale, the section
+
+6
+00:00:29.839 --> 00:00:34.320
+per component and number of components as well as overall resolution all relate to each
+
+7
+00:00:34.320 --> 00:00:39.590
+other. Now you'll see this here, this little section I took from our documentation. I put
+
+8
+00:00:39.590 --> 00:00:43.030
+it in the slide so you can have a quick reference to be able to see how all these
+
+9
+00:00:43.030 --> 00:00:47.909
+work together. Now it's up to you how high of a resolution you want to go. Keep
+
+10
+00:00:47.909 --> 00:00:53.210
+in mind when you do choose a particular resolution, you need to actually consider
+
+11
+00:00:53.210 --> 00:00:58.409
+what it is you're doing and how you're approaching your world. You may not need a
+
+12
+00:00:58.409 --> 00:01:05.609
+highly deep, highly detailed polygon world. If you're setting something out, maybe
+
+13
+00:01:05.609 --> 00:01:10.450
+you're tossing it out to a mobile device and you just need something to convey the
+
+14
+00:01:10.450 --> 00:01:14.879
+idea of terrain in your character running on it. Then again, if you're working on
+
+15
+00:01:14.879 --> 00:01:20.299
+a higher level game, such as for PC or for console, you may want to go higher with
+
+16
+00:01:20.299 --> 00:01:25.040
+your resolution based on what you want to do for your world and how believable
+
+17
+00:01:25.040 --> 00:01:31.439
+those assets are going to be. This chart here shows you the relationship of how the landscape
+
+18
+00:01:31.439 --> 00:01:37.200
+component size as well as overall vertices size and quads all relate together, giving
+
+19
+00:01:37.200 --> 00:01:41.959
+you your total components. So keep these things in mind and the goals that you want
+
+20
+00:01:41.959 --> 00:01:46.519
+to tackle. Let's go and jump into Unreal and take a look at a few things and then
+
+21
+00:01:46.519 --> 00:01:52.459
+we'll get back into the slides and break down a few concepts. In Unreal, the level
+
+22
+00:01:52.459 --> 00:01:56.579
+I'm initially opening here is our in class speed building. We're going to go
+
+23
+00:01:56.579 --> 00:02:00.060
+back to that in just a bit, but as a reference point, we're going to leave
+
+24
+00:02:00.060 --> 00:02:04.140
+that open for now and we'll talk about some of the concepts we talked
+
+25
+00:02:04.140 --> 00:02:08.460
+about for building and we'll build a quick world later on in this section
+
+26
+00:02:08.460 --> 00:02:14.080
+of the course. Before we dive in too deep though into that, let's go and
+
+27
+00:02:14.080 --> 00:02:18.560
+take a look at the building of our terrain and maybe importing if you
+
+28
+00:02:18.560 --> 00:02:23.620
+wanted to say bring in a height map. Let me show you how to do that. So we go to
+
+29
+00:02:23.620 --> 00:02:27.580
+file, I'm going to go to new level. I'm going to choose a basic level. I'm
+
+30
+00:02:27.580 --> 00:02:32.729
+going to say create. In here I'm also going to delete the ground first
+
+31
+00:02:32.729 --> 00:02:38.849
+and then we're going to switch over to landscape mode. Now you can choose
+
+32
+00:02:38.849 --> 00:02:42.889
+whatever resolution you want. I'm going to leave this for now because what
+
+33
+00:02:42.889 --> 00:02:48.280
+we're going to do is bring in some height map data. Now if I hit create
+
+34
+00:02:48.319 --> 00:02:53.240
+it'll build my initial terrain and then we're going to get a node just below
+
+35
+00:02:53.240 --> 00:03:00.430
+saying height map. So I can right-click on this. As I do I can go to import from
+
+36
+00:03:00.430 --> 00:03:07.430
+export to file. In here I can choose what height map I want. Now for this
+
+37
+00:03:07.430 --> 00:03:12.830
+class I provided for you a free open source height map that you can use. So
+
+38
+00:03:12.830 --> 00:03:17.030
+you're more than welcome to use it or one that you already have. To be able to
+
+39
+00:03:17.069 --> 00:03:20.310
+access that I'm going to click on height map. You want to make sure you
+
+40
+00:03:20.310 --> 00:03:24.509
+click turn that on and then I'm going to click on the little dot interface
+
+41
+00:03:24.509 --> 00:03:28.110
+here to pull up the height map we want. I want to make sure it's
+
+42
+00:03:28.110 --> 00:03:31.469
+grayscale. That's going to be the most helpful and you can choose how
+
+43
+00:03:31.469 --> 00:03:36.009
+strong that's going to be by simply changing that in a desired DCC
+
+44
+00:03:36.009 --> 00:03:40.189
+Photoshop or whatever you might have it here on hand. So I'm going to click
+
+45
+00:03:40.189 --> 00:03:44.889
+on this. I'm going to say open. It's going to load it for us. From here I
+
+46
+00:03:44.949 --> 00:03:49.169
+can choose what kind of resolution I want. Overall this is looking great. You
+
+47
+00:03:49.169 --> 00:03:53.330
+also see there's a generic material which we can adjust and add later on if
+
+48
+00:03:53.330 --> 00:03:59.659
+need be. So I'm going to go ahead and click on import. It's going to now
+
+49
+00:03:59.659 --> 00:04:04.979
+import that height map, adjust it to what I have set in place and make it
+
+50
+00:04:04.979 --> 00:04:11.210
+so that our terrain is ready to go. From here we can go to sculpt if we
+
+51
+00:04:11.210 --> 00:04:16.089
+need to add more to it and you can see that it's grabbed the height map. Now
+
+52
+00:04:16.129 --> 00:04:19.930
+you could cheat also and get out of landscape if you ever needed to do
+
+53
+00:04:19.930 --> 00:04:23.810
+this. You can simply select your terrain if you wanted it more
+
+54
+00:04:23.810 --> 00:04:28.490
+dramatic and simply just use the scale option to maybe pull up some
+
+55
+00:04:28.490 --> 00:04:32.529
+of those resolution issues that you're like hey you know that just
+
+56
+00:04:32.529 --> 00:04:36.290
+isn't strong enough. We can do it through the widget which is a little
+
+57
+00:04:36.290 --> 00:04:41.370
+slow believe it or not or we can punch in those variables if we
+
+58
+00:04:41.370 --> 00:04:46.810
+needed to in our landscape editing tools because you'll notice when
+
+59
+00:04:46.810 --> 00:04:51.129
+you go to the details you won't necessarily have as much maybe
+
+60
+00:04:51.129 --> 00:04:54.269
+control as you want but hey we can still do it you'll just have to
+
+61
+00:04:54.269 --> 00:04:58.449
+fuddle with the numbers a bit more but you can also do it via the
+
+62
+00:04:58.449 --> 00:05:04.370
+managing of your editing of your terrain. So in this case we'll
+
+63
+00:05:04.370 --> 00:05:08.810
+say the z axis we're going to set this up to like 500 if we wanted
+
+64
+00:05:08.810 --> 00:05:15.040
+to. There it goes. And that looks a lot better. Now we have
+
+65
+00:05:15.040 --> 00:05:19.259
+the Lord of the Rings level environment. From here we can
+
+66
+00:05:19.259 --> 00:05:22.019
+load our materials and get things going. But believe it or
+
+67
+00:05:22.019 --> 00:05:26.350
+not loading a height map is actually that easy. Let's maybe
+
+68
+00:05:26.350 --> 00:05:29.550
+lower this down just a bit. We'll go to maybe half we'll go
+
+69
+00:05:29.550 --> 00:05:33.930
+to 350. Well, it's kind of half more 250 would be half.
+
+70
+00:05:34.779 --> 00:05:38.019
+Look at that. That's actually pretty nice. And it's all up to
+
+71
+00:05:38.019 --> 00:05:41.420
+you how you want to do it. And also what kind of resolution you
+
+72
+00:05:41.420 --> 00:05:44.449
+want to have. So we're going to get out of this for a
+
+73
+00:05:44.449 --> 00:05:47.050
+second. And we're going to go back into that environment
+
+74
+00:05:47.250 --> 00:05:49.689
+that we have laid out. And we're also going to go to the
+
+75
+00:05:49.689 --> 00:05:52.850
+slides really quick. And we're going to look at some
+
+76
+00:05:52.850 --> 00:05:57.500
+concepts. So let's go and do that first. So in the tools
+
+77
+00:05:57.500 --> 00:06:00.740
+that we have, once you've built your terrain, you can
+
+78
+00:06:00.740 --> 00:06:05.500
+choose sculpt. And in sculpt, you can left mouse click, you
+
+79
+00:06:05.500 --> 00:06:09.139
+can erase if you wanted to, that's a shift button plus the
+
+80
+00:06:09.139 --> 00:06:12.500
+left mouse click. There's smooth. If you want to smooth
+
+81
+00:06:12.500 --> 00:06:16.660
+things over, you can flatten. There's also a ramp, erosion,
+
+82
+00:06:16.819 --> 00:06:21.100
+hydro erosion, noise, general noise in your scene. And
+
+83
+00:06:21.100 --> 00:06:23.620
+again, this is important depending on your resolution.
+
+84
+00:06:23.860 --> 00:06:27.500
+It may look really bad if you have low resolution. So keep
+
+85
+00:06:27.500 --> 00:06:31.060
+that in mind. There's re topo for sections as needed. Maybe
+
+86
+00:06:31.060 --> 00:06:34.100
+you need one area to be a bit more dense and have a
+
+87
+00:06:34.100 --> 00:06:38.839
+stronger look, visibility, mirror, copy and select. Now
+
+88
+00:06:38.839 --> 00:06:41.899
+when it comes to visibility, if you wanted to like cave out a
+
+89
+00:06:41.899 --> 00:06:45.600
+secret hideout for per side of the mountain, and you
+
+90
+00:06:45.600 --> 00:06:48.600
+literally want it so you can climb inside of it, you can
+
+91
+00:06:48.600 --> 00:06:51.920
+actually do that. And that actually can maybe work in your
+
+92
+00:06:51.920 --> 00:06:59.100
+favor. Alright, so manage, let's go and take a look at
+
+93
+00:06:59.100 --> 00:07:00.939
+it real quick. And we're going to take a look at the
+
+94
+00:07:00.939 --> 00:07:04.620
+sculpting features with a built in material height map in
+
+95
+00:07:04.620 --> 00:07:10.079
+a scene already existing. From the scene that I have,
+
+96
+00:07:10.079 --> 00:07:12.720
+we're going to go ahead and open up the content folder
+
+97
+00:07:13.000 --> 00:07:17.279
+and go to our levels. And in our levels, we're going to go
+
+98
+00:07:17.279 --> 00:07:21.819
+to in class speed building. And we're not going to save,
+
+99
+00:07:21.819 --> 00:07:26.410
+you can save it if you want, I'm not going to. So in
+
+100
+00:07:26.410 --> 00:07:28.689
+this environment, let's go and take a look at what we
+
+101
+00:07:28.689 --> 00:07:32.740
+can do when it comes to sculpting. So I'm going to go
+
+102
+00:07:32.740 --> 00:07:37.180
+to my landscape mode. With my landscape move set, I'm
+
+103
+00:07:37.180 --> 00:07:39.379
+going to go ahead and do some sculpting in here. Now
+
+104
+00:07:39.379 --> 00:07:41.860
+you'll notice when I sculpt, the material is
+
+105
+00:07:41.860 --> 00:07:46.040
+reacting. This is actually pretty great. Now this is
+
+106
+00:07:46.040 --> 00:07:50.160
+literally just built into the material. If we wanted to
+
+107
+00:07:50.160 --> 00:07:53.480
+say go to paint, you will see the all the different
+
+108
+00:07:53.480 --> 00:07:56.180
+materials that are set up in here. And this is
+
+109
+00:07:56.180 --> 00:07:59.680
+basically a material that we made ahead of time. And
+
+110
+00:07:59.680 --> 00:08:01.959
+then when we build our terrain, this will be able to
+
+111
+00:08:01.959 --> 00:08:06.660
+be loaded. In this material, there is and let's go to
+
+112
+00:08:06.660 --> 00:08:10.139
+the folder for it. These default layer infos that get
+
+113
+00:08:10.139 --> 00:08:13.180
+created when you build out your material and you load
+
+114
+00:08:13.180 --> 00:08:17.240
+your shader texture network. So this is all I'm not
+
+115
+00:08:17.240 --> 00:08:19.279
+going to get into in this particular class. But we
+
+116
+00:08:19.279 --> 00:08:22.480
+do have a landscape class that goes into this in
+
+117
+00:08:22.480 --> 00:08:25.199
+more detail. The reason why I say that is because
+
+118
+00:08:25.199 --> 00:08:29.240
+it does dive into the weeds a bit. And what I'm
+
+119
+00:08:29.240 --> 00:08:31.879
+showing you here is the possibility of what your
+
+120
+00:08:31.879 --> 00:08:37.730
+shader can do. In our class, you will actually see
+
+121
+00:08:37.730 --> 00:08:40.889
+this shader that I'm working with underneath world
+
+122
+00:08:40.889 --> 00:08:44.090
+building for games. If you scroll down, you'll be
+
+123
+00:08:44.090 --> 00:08:46.210
+able to find it under materials and there you'll
+
+124
+00:08:46.210 --> 00:08:50.080
+see a landscape shader. So we're going to open up
+
+125
+00:08:50.080 --> 00:08:53.240
+this landscape shader for a second. And we're going
+
+126
+00:08:53.240 --> 00:08:55.960
+to take a look at the parent material for it. I'll
+
+127
+00:08:55.960 --> 00:08:59.039
+look at the instance material first and get an
+
+128
+00:08:59.039 --> 00:09:01.919
+idea of what's set up here. You'll notice there's
+
+129
+00:09:01.919 --> 00:09:07.450
+UV control, as well as a few other things such as
+
+130
+00:09:07.450 --> 00:09:10.409
+slope blend in detail. So again, we're not going
+
+131
+00:09:10.409 --> 00:09:13.450
+to get deep into this to show you how to craft
+
+132
+00:09:13.450 --> 00:09:16.409
+this because it this goes into the material
+
+133
+00:09:16.409 --> 00:09:18.970
+classes as well as a landscape. But I did want to
+
+134
+00:09:18.970 --> 00:09:21.490
+show you the height information which is loaded
+
+135
+00:09:21.490 --> 00:09:26.009
+in here. Now this is free on our marketplace. And
+
+136
+00:09:26.009 --> 00:09:31.090
+again, this particular one is the stylized Pro
+
+137
+00:09:31.129 --> 00:09:35.169
+Vin call that you'll see in our marketplace and
+
+138
+00:09:35.169 --> 00:09:38.490
+is a really awesome group of assets. If I pull
+
+139
+00:09:38.490 --> 00:09:40.289
+this down for a second and rotate the camera,
+
+140
+00:09:40.529 --> 00:09:44.129
+you'll see it has like a very ghibli looking set
+
+141
+00:09:44.129 --> 00:09:49.450
+environment. So in here, you'll see that they spent
+
+142
+00:09:49.450 --> 00:09:51.730
+a lot of work on this, you'll see that there are
+
+143
+00:09:51.730 --> 00:09:56.649
+layers for materials to work with, as well as a
+
+144
+00:09:56.649 --> 00:09:59.649
+landscape blend. Now this is very important to
+
+145
+00:09:59.649 --> 00:10:03.610
+have this landscape blend allows us to be able to
+
+146
+00:10:03.610 --> 00:10:06.289
+have these different aspects of textures in our
+
+147
+00:10:06.289 --> 00:10:11.529
+scene, you will see a set attribute in here,
+
+148
+00:10:11.570 --> 00:10:15.570
+which allows you to set and plug in what you need
+
+149
+00:10:15.850 --> 00:10:19.450
+and a world alignment blend in our scene, looking
+
+150
+00:10:19.450 --> 00:10:23.210
+at the slope, sharpness and slope bias. This
+
+151
+00:10:23.210 --> 00:10:24.889
+allows us to have that kind of that height
+
+152
+00:10:24.889 --> 00:10:29.639
+effect in our environment. You also see a
+
+153
+00:10:29.639 --> 00:10:32.399
+distance based tessellation and placement in
+
+154
+00:10:32.399 --> 00:10:35.200
+here. Now one thing I want to mention when
+
+155
+00:10:35.200 --> 00:10:38.159
+working with your environment, you want to make
+
+156
+00:10:38.159 --> 00:10:40.600
+sure especially if you're managing a lot of
+
+157
+00:10:40.600 --> 00:10:43.720
+overhead, like your trains pretty dense, like
+
+158
+00:10:43.720 --> 00:10:48.399
+maybe like that last map that we loaded, is
+
+159
+00:10:48.399 --> 00:10:51.720
+like, maybe you have a really detailed height
+
+160
+00:10:51.720 --> 00:10:55.840
+map, you can to help with that load, go in
+
+161
+00:10:55.840 --> 00:11:00.000
+here, select the terrain, and at any time in
+
+162
+00:11:00.000 --> 00:11:04.399
+your environment, you can choose to make that a
+
+163
+00:11:04.399 --> 00:11:08.269
+nanited terrain if you wanted to. Now this is
+
+164
+00:11:08.269 --> 00:11:11.389
+really up to you how you want to tackle it. And
+
+165
+00:11:11.389 --> 00:11:15.269
+if you want to go that route, to be able to do
+
+166
+00:11:15.269 --> 00:11:18.230
+so you simply select your terrain. Now you
+
+167
+00:11:18.230 --> 00:11:20.269
+would think normally you would say, Hey, I
+
+168
+00:11:20.269 --> 00:11:22.830
+want to grab this terrain, maybe in the
+
+169
+00:11:22.830 --> 00:11:26.029
+outliner, or over here, you won't see the
+
+170
+00:11:26.029 --> 00:11:29.029
+nanite pop up in these particular areas. But
+
+171
+00:11:29.029 --> 00:11:32.429
+you will find it when you do a search in the
+
+172
+00:11:32.429 --> 00:11:35.990
+objects details, and you will find enable
+
+173
+00:11:35.990 --> 00:11:39.070
+nanite. And you can build this right here. And
+
+174
+00:11:39.070 --> 00:11:42.269
+this can help with very complex terrain. So keep
+
+175
+00:11:42.269 --> 00:11:44.710
+that in mind. That is very helpful. And with
+
+176
+00:11:44.710 --> 00:11:47.909
+each new build of Unreal, it gets better, faster,
+
+177
+00:11:47.950 --> 00:11:52.840
+stronger. So in the next video, what we're going
+
+178
+00:11:52.840 --> 00:11:55.080
+to do is build a little bit of our world
+
+179
+00:11:55.240 --> 00:11:58.000
+by placing some of these objects in here, and
+
+180
+00:11:58.039 --> 00:12:00.720
+populating our environment, so that you can get a
+
+181
+00:12:00.720 --> 00:12:02.919
+better idea of some of the things you can do
+
+182
+00:12:03.200 --> 00:12:04.799
+when it comes to using some of the tools that
+
+183
+00:12:04.799 --> 00:12:07.399
+we've already covered so far. Thanks again.
+
+184
+00:12:07.679 --> 00:12:08.919
+Transcribed by https://otter.ai

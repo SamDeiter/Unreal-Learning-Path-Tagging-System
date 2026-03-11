@@ -1,0 +1,937 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:04.299
+In this video, we'll look at some of the core concepts of
+
+2
+00:00:04.299 --> 00:00:07.599
+using OSC specifically inside Unreal Engine.
+
+3
+00:00:07.599 --> 00:00:11.380
+The first step and the only step we need to take to start
+
+4
+00:00:11.380 --> 00:00:15.220
+using Open Sound Control inside Unreal Engine is to go
+
+5
+00:00:15.220 --> 00:00:20.070
+to the plugin tab and enable Open Sound Control plugin.
+
+6
+00:00:20.070 --> 00:00:24.230
+You'll see a number of other plugins inside here that use OSC,
+
+7
+00:00:24.230 --> 00:00:26.109
+which are not necessary for this course.
+
+8
+00:00:26.109 --> 00:00:30.030
+Suffice to say they can be used in various environments such as
+
+9
+00:00:30.030 --> 00:00:32.990
+with virtual production or even something like Live Link Face,
+
+10
+00:00:32.990 --> 00:00:35.850
+if you wanted to remotely trigger a capture session.
+
+11
+00:00:35.850 --> 00:00:38.429
+Let's start with a simple scenario
+
+12
+00:00:38.429 --> 00:00:40.829
+for Open Sound Control communication.
+
+13
+00:00:40.829 --> 00:00:42.670
+It is a peer-to-peer protocol,
+
+14
+00:00:42.670 --> 00:00:47.670
+which means we have one as a sender and one as a receiver.
+
+15
+00:00:47.670 --> 00:00:51.450
+Let's start with this very basic scenario where we have
+
+16
+00:00:51.450 --> 00:00:53.270
+computer A and computer B,
+
+17
+00:00:53.270 --> 00:00:57.350
+and computer A is trying to send message to computer B.
+
+18
+00:00:57.350 --> 00:00:59.829
+Now let's look at what we're going to use
+
+19
+00:00:59.829 --> 00:01:02.270
+it inside Unreal Engine projects.
+
+20
+00:01:02.270 --> 00:01:05.510
+There are two key components we're going to use.
+
+21
+00:01:05.510 --> 00:01:09.709
+One is OSC client and one is OSC server.
+
+22
+00:01:09.709 --> 00:01:11.750
+For a OSC client,
+
+23
+00:01:11.750 --> 00:01:14.709
+OSC client is a node or
+
+24
+00:01:14.709 --> 00:01:18.310
+a component we're going to use to send message,
+
+25
+00:01:18.310 --> 00:01:21.950
+and an OSC server is a receiver which
+
+26
+00:01:21.950 --> 00:01:26.549
+listens to the OSC messages send it from the client.
+
+27
+00:01:26.549 --> 00:01:28.599
+For those who are familiar with
+
+28
+00:01:28.599 --> 00:01:30.400
+more traditional multiplayer setups
+
+29
+00:01:30.400 --> 00:01:32.200
+or using something like WebSockets,
+
+30
+00:01:32.200 --> 00:01:33.959
+this might seem a little bit inverted,
+
+31
+00:01:33.959 --> 00:01:37.159
+which yes, we feel that way as well, so rest assured.
+
+32
+00:01:37.159 --> 00:01:38.760
+Traditionally, you would have
+
+33
+00:01:38.760 --> 00:01:41.000
+a server who is sending messages to
+
+34
+00:01:41.000 --> 00:01:43.840
+a client who is receiving them but yes,
+
+35
+00:01:43.840 --> 00:01:45.500
+in this scenario for OSC,
+
+36
+00:01:45.500 --> 00:01:47.400
+you actually have the client who sends
+
+37
+00:01:47.400 --> 00:01:50.810
+messages to the server who receives them.
+
+38
+00:01:50.810 --> 00:01:55.689
+Now let's look back to our OSC sample scenario,
+
+39
+00:01:55.689 --> 00:02:00.049
+where computer A tries to send a message to computer B.
+
+40
+00:02:00.049 --> 00:02:02.930
+Now we said that the computer A as
+
+41
+00:02:02.930 --> 00:02:08.289
+the sender has an IP A.A.A.A and computer B as the receiver,
+
+42
+00:02:08.289 --> 00:02:12.250
+it has the IP of B.B.B.B,
+
+43
+00:02:12.250 --> 00:02:17.810
+and it has port BBBBB forwarded to computer B.
+
+44
+00:02:17.810 --> 00:02:19.849
+So now on computer A,
+
+45
+00:02:19.849 --> 00:02:21.650
+computer A wants to create
+
+46
+00:02:21.650 --> 00:02:24.889
+an OSC client targeting computer B.
+
+47
+00:02:24.889 --> 00:02:28.289
+In this node, the send IP address,
+
+48
+00:02:28.289 --> 00:02:30.710
+we're going to put in computer B's address,
+
+49
+00:02:30.710 --> 00:02:34.689
+B.B.B.B, and we want to specify that we're going to
+
+50
+00:02:34.689 --> 00:02:38.090
+send this message through the port BBBBB,
+
+51
+00:02:38.090 --> 00:02:41.650
+where we know it's already opened on B's side.
+
+52
+00:02:41.650 --> 00:02:43.960
+Right, and just noting of course that
+
+53
+00:02:43.960 --> 00:02:46.360
+IP addresses and ports are almost always,
+
+54
+00:02:46.360 --> 00:02:47.879
+to my knowledge, numbers,
+
+55
+00:02:47.879 --> 00:02:50.919
+we're just using letters here to be illustrative.
+
+56
+00:02:50.919 --> 00:02:53.479
+Also note that even if you're working on
+
+57
+00:02:53.479 --> 00:02:56.759
+a local area network where everyone's on the same subnet,
+
+58
+00:02:56.759 --> 00:02:59.000
+you don't actually need to open any ports,
+
+59
+00:02:59.000 --> 00:03:02.479
+but you do need to put a port number in here to match
+
+60
+00:03:02.479 --> 00:03:04.080
+across the server and client
+
+61
+00:03:04.080 --> 00:03:06.620
+or the message will not successfully send.
+
+62
+00:03:06.620 --> 00:03:10.840
+Also, the client must have a unique name as does the server.
+
+63
+00:03:10.840 --> 00:03:12.680
+Don't go ahead and just name
+
+64
+00:03:12.680 --> 00:03:16.919
+your server computer and then name your client computer,
+
+65
+00:03:16.919 --> 00:03:19.199
+and then all clients also need a unique name.
+
+66
+00:03:19.199 --> 00:03:22.139
+You can call them client one, client two, etc.
+
+67
+00:03:22.139 --> 00:03:23.900
+But if anything is duplicated,
+
+68
+00:03:23.900 --> 00:03:26.520
+then the message will also not successfully send,
+
+69
+00:03:26.520 --> 00:03:29.699
+and you won't have a very useful error message
+
+70
+00:03:29.699 --> 00:03:31.419
+informing you of the reason why.
+
+71
+00:03:31.419 --> 00:03:32.580
+As you might be able to tell,
+
+72
+00:03:32.580 --> 00:03:34.500
+we have run into this issue before.
+
+73
+00:03:34.500 --> 00:03:37.280
+Computer B as a receiver,
+
+74
+00:03:37.280 --> 00:03:40.479
+in order to receive the messages from Computer A,
+
+75
+00:03:40.479 --> 00:03:43.639
+Computer B will need a OSCE server.
+
+76
+00:03:43.639 --> 00:03:47.919
+On Computer B, that's used to create OSCE server node,
+
+77
+00:03:47.919 --> 00:03:50.840
+and inside this node,
+
+78
+00:03:51.039 --> 00:03:54.560
+we have to put in the receive IP address and the port.
+
+79
+00:03:54.560 --> 00:03:56.599
+The receive IP address,
+
+80
+00:03:56.599 --> 00:04:00.080
+we don't need to specify who we're receiving it from.
+
+81
+00:04:00.080 --> 00:04:03.960
+OSCE server is just a representation of Computer B,
+
+82
+00:04:03.960 --> 00:04:08.159
+so it's there and listening to any coming messages.
+
+83
+00:04:08.159 --> 00:04:10.219
+In the receive IP address,
+
+84
+00:04:10.219 --> 00:04:13.560
+we can either put in Computer B's IP,
+
+85
+00:04:13.560 --> 00:04:17.540
+in this case, we use b.b.b.b as a representation,
+
+86
+00:04:17.540 --> 00:04:19.800
+or we can just leave it blank,
+
+87
+00:04:19.920 --> 00:04:24.120
+and it will by default try to use the first IP address
+
+88
+00:04:24.120 --> 00:04:28.000
+it can got from the computer's system.
+
+89
+00:04:28.000 --> 00:04:29.399
+And in the port,
+
+90
+00:04:29.399 --> 00:04:33.759
+we're going to put in the open port for Computer B.
+
+91
+00:04:33.759 --> 00:04:37.399
+So in our case, we use b.b.b.b to show it,
+
+92
+00:04:37.399 --> 00:04:39.839
+but in reality, remember,
+
+93
+00:04:39.839 --> 00:04:44.720
+it must be a number-based port.
+
+94
+00:04:44.720 --> 00:04:48.360
+So once we put into those two information,
+
+95
+00:04:48.399 --> 00:04:49.839
+this OSCE server will know
+
+96
+00:04:49.839 --> 00:04:53.560
+that it is representing the Computer B address,
+
+97
+00:04:53.560 --> 00:04:58.560
+and it is listening to any OSCE message
+
+98
+00:04:58.639 --> 00:05:01.339
+coming from port b.b.b.b.
+
+99
+00:05:01.339 --> 00:05:03.680
+And by default, the start listening will be checked,
+
+100
+00:05:03.680 --> 00:05:06.040
+but just double check to make sure it is checked,
+
+101
+00:05:06.040 --> 00:05:09.259
+so it is listening to the coming messages.
+
+102
+00:05:09.259 --> 00:05:11.040
+And same as OSCE client,
+
+103
+00:05:11.040 --> 00:05:14.639
+we need to give the server a unique name.
+
+104
+00:05:14.639 --> 00:05:17.199
+On this slide, we're showing some of the additional nodes
+
+105
+00:05:17.240 --> 00:05:20.759
+that you have access to when you're sending an OSCE message.
+
+106
+00:05:20.759 --> 00:05:22.720
+And rest assured, we'll go over all of these
+
+107
+00:05:22.720 --> 00:05:25.279
+in more detail, but just note, for example,
+
+108
+00:05:25.279 --> 00:05:27.540
+the center column where we're seeing values
+
+109
+00:05:27.540 --> 00:05:31.199
+like add float, add string, add bool, add integer.
+
+110
+00:05:31.199 --> 00:05:33.800
+This should give you a sense of the wide variety
+
+111
+00:05:33.800 --> 00:05:35.279
+of different kinds of messages
+
+112
+00:05:35.279 --> 00:05:37.839
+that can be sent using OSCE.
+
+113
+00:05:37.839 --> 00:05:40.319
+And now let's look how a receiver side
+
+114
+00:05:40.319 --> 00:05:42.839
+is getting those messages.
+
+115
+00:05:42.839 --> 00:05:45.300
+So on the receiver side,
+
+116
+00:05:45.300 --> 00:05:48.879
+we can use get OSCE message flow at index,
+
+117
+00:05:48.879 --> 00:05:51.420
+get OSCE message string at index,
+
+118
+00:05:51.420 --> 00:05:55.259
+get bool at index, and et cetera.
+
+119
+00:05:55.259 --> 00:05:58.040
+So we can see that we can use these nodes
+
+120
+00:05:58.040 --> 00:06:00.319
+to get different kinds of values
+
+121
+00:06:00.319 --> 00:06:02.019
+and from different orders.
+
+122
+00:06:02.019 --> 00:06:06.339
+So say we send a message with the first one is a float
+
+123
+00:06:06.339 --> 00:06:08.259
+and the second one is a string,
+
+124
+00:06:08.259 --> 00:06:10.060
+we can imagine that we're going to start
+
+125
+00:06:10.060 --> 00:06:11.379
+to combine things together,
+
+126
+00:06:11.379 --> 00:06:13.899
+and we get the float at index zero,
+
+127
+00:06:13.899 --> 00:06:17.259
+and we get a string at index one, et cetera.
+
+128
+00:06:17.259 --> 00:06:20.839
+So this is a way we can start to create
+
+129
+00:06:20.839 --> 00:06:25.540
+and receive a more complicated OSCE message structure.
+
+130
+00:06:25.540 --> 00:06:27.980
+And note that we're using an event delegate here.
+
+131
+00:06:27.980 --> 00:06:29.699
+Again, we'll go over this in more detail,
+
+132
+00:06:29.699 --> 00:06:31.699
+but this would be the traditional way
+
+133
+00:06:31.699 --> 00:06:37.009
+to make sure that the correct messages are being received.
+
+134
+00:06:37.009 --> 00:06:41.990
+Now let's see how to structure a OSCE message.
+
+135
+00:06:41.990 --> 00:06:45.569
+Now let's say computer A wants to send a float
+
+136
+00:06:45.569 --> 00:06:50.569
+to computer B with the address slash test slash send float.
+
+137
+00:06:51.230 --> 00:06:56.199
+And the value of the float will be 0.35.
+
+138
+00:06:56.199 --> 00:06:58.600
+Now the first step is we want to make
+
+139
+00:06:58.600 --> 00:07:00.600
+an empty OSCE message.
+
+140
+00:07:00.600 --> 00:07:04.720
+As you can see here, this is the make OSCE message.
+
+141
+00:07:04.720 --> 00:07:05.939
+This will be an empty one.
+
+142
+00:07:05.939 --> 00:07:08.360
+We can start to fill things inside.
+
+143
+00:07:08.360 --> 00:07:12.000
+So first thing we want to set the address.
+
+144
+00:07:12.480 --> 00:07:14.560
+Inside Unreal, we can use this node,
+
+145
+00:07:14.560 --> 00:07:17.040
+convert string to OSCE address,
+
+146
+00:07:17.040 --> 00:07:19.420
+and we can type in our string,
+
+147
+00:07:19.420 --> 00:07:21.360
+or actually it will be our address here,
+
+148
+00:07:21.360 --> 00:07:24.339
+slash test slash send float.
+
+149
+00:07:24.339 --> 00:07:25.600
+Now we have this message.
+
+150
+00:07:25.600 --> 00:07:29.360
+The output of this message will be the same OSCE message,
+
+151
+00:07:29.360 --> 00:07:32.980
+but now with the correct address.
+
+152
+00:07:32.980 --> 00:07:35.220
+So we get this output,
+
+153
+00:07:35.220 --> 00:07:38.819
+and we add a float to this OSCE message,
+
+154
+00:07:38.819 --> 00:07:42.850
+and our value would be 0.35.
+
+155
+00:07:43.649 --> 00:07:46.569
+Now we still continue to grab the output of this message,
+
+156
+00:07:46.569 --> 00:07:49.449
+and we want to grab our OSCE client,
+
+157
+00:07:49.449 --> 00:07:51.810
+which is now targeting computer B.
+
+158
+00:07:55.139 --> 00:07:57.500
+So we will send this message
+
+159
+00:07:57.500 --> 00:08:01.439
+to our computer B OSCE client here
+
+160
+00:08:01.439 --> 00:08:04.699
+with a send OSCE message node.
+
+161
+00:08:04.699 --> 00:08:07.899
+And finally, we want to clear the OSCE message
+
+162
+00:08:07.899 --> 00:08:09.379
+just like a best practice.
+
+163
+00:08:09.379 --> 00:08:11.779
+So we make sure the next one we're sending
+
+164
+00:08:11.819 --> 00:08:13.819
+has a clear start.
+
+165
+00:08:13.819 --> 00:08:16.699
+Right, and we can either make an OSCE message
+
+166
+00:08:16.699 --> 00:08:18.060
+like we have here at the beginning,
+
+167
+00:08:18.060 --> 00:08:21.180
+or this can be a variable that is saved and reused.
+
+168
+00:08:21.180 --> 00:08:23.540
+I will just say you should be careful about that
+
+169
+00:08:23.540 --> 00:08:27.620
+because it's very easy to accidentally resend old data,
+
+170
+00:08:27.620 --> 00:08:28.959
+which is why it can be useful
+
+171
+00:08:28.959 --> 00:08:31.839
+to make a fresh OSCE message each time.
+
+172
+00:08:31.839 --> 00:08:35.139
+Also, please note that at the beginning of the string,
+
+173
+00:08:35.139 --> 00:08:37.419
+when you're converting to an OSCE address,
+
+174
+00:08:37.419 --> 00:08:39.379
+that that front slash is very important.
+
+175
+00:08:39.379 --> 00:08:43.019
+It will not work without that first slash.
+
+176
+00:08:43.019 --> 00:08:45.279
+Now let's move on to computer B.
+
+177
+00:08:45.279 --> 00:08:48.779
+So now we know computer A already sent a float value
+
+178
+00:08:48.779 --> 00:08:51.419
+of 0.35 to computer B,
+
+179
+00:08:51.419 --> 00:08:53.740
+and B wants to receive this message,
+
+180
+00:08:53.740 --> 00:08:56.059
+and we will use this float value
+
+181
+00:08:56.059 --> 00:09:01.059
+to change an actor scale according to the received float.
+
+182
+00:09:01.179 --> 00:09:04.860
+So now let's see how to structure this on the B side.
+
+183
+00:09:05.830 --> 00:09:08.990
+So first, we will drag our OSCE server,
+
+184
+00:09:09.029 --> 00:09:13.509
+which we already created as a representation of computer B.
+
+185
+00:09:13.509 --> 00:09:17.909
+It has continued to listen to the coming OSCE message
+
+186
+00:09:17.909 --> 00:09:20.710
+from port BBBBB.
+
+187
+00:09:20.710 --> 00:09:24.590
+And now we know we want to find an OSCE message
+
+188
+00:09:24.590 --> 00:09:29.590
+with the specific address called slash test slash send float.
+
+189
+00:09:29.590 --> 00:09:31.750
+So we will start with this node,
+
+190
+00:09:31.750 --> 00:09:34.789
+convert string to OSCE address.
+
+191
+00:09:34.789 --> 00:09:35.870
+And inside the string,
+
+192
+00:09:35.870 --> 00:09:40.600
+we will put in the OSCE message address.
+
+193
+00:09:40.600 --> 00:09:45.600
+And we want to bind an event to our OSCE server here,
+
+194
+00:09:45.639 --> 00:09:48.779
+which, so this event is called bind event
+
+195
+00:09:48.779 --> 00:09:52.700
+to on OSCE address pattern matches path.
+
+196
+00:09:52.700 --> 00:09:56.679
+So it will continue to listen to new OSCE messages
+
+197
+00:09:56.679 --> 00:10:00.740
+and it will filter and check if there's any OSCE message
+
+198
+00:10:00.740 --> 00:10:02.639
+with the same address we set here.
+
+199
+00:10:03.700 --> 00:10:07.059
+If it matches, it will trigger this custom event
+
+200
+00:10:07.059 --> 00:10:09.919
+to fire here.
+
+201
+00:10:09.919 --> 00:10:12.980
+And now when this event is triggered,
+
+202
+00:10:12.980 --> 00:10:16.779
+we want to get the float value from this message.
+
+203
+00:10:16.779 --> 00:10:19.899
+The way to get it will be drag out
+
+204
+00:10:19.899 --> 00:10:22.500
+from this message output here.
+
+205
+00:10:22.500 --> 00:10:24.000
+And we will use the node,
+
+206
+00:10:24.000 --> 00:10:27.100
+get OSCE message float at index.
+
+207
+00:10:27.100 --> 00:10:30.500
+In our case, we know we want to get the index zero,
+
+208
+00:10:30.500 --> 00:10:32.100
+the first one.
+
+209
+00:10:32.100 --> 00:10:36.019
+So we use this node and it will output a value.
+
+210
+00:10:36.019 --> 00:10:38.679
+And we know we want to change an actor scale
+
+211
+00:10:38.679 --> 00:10:40.179
+using this float value.
+
+212
+00:10:40.179 --> 00:10:43.940
+So we will just hook into set actor scale 3D
+
+213
+00:10:43.940 --> 00:10:48.940
+and we will convert the float value into a vector 3D.
+
+214
+00:10:49.059 --> 00:10:51.340
+On this slide, we're looking at how to construct
+
+215
+00:10:51.340 --> 00:10:53.740
+an OSCE bundle, which allows you to send
+
+216
+00:10:53.740 --> 00:10:56.419
+as many OSCE messages as you'd like.
+
+217
+00:10:56.419 --> 00:10:58.259
+In the example we're demonstrating here,
+
+218
+00:10:58.259 --> 00:11:02.080
+we're showing how to send an XYZ coordinate value.
+
+219
+00:11:02.960 --> 00:11:05.360
+So you can see where we have convert string to OSCE address.
+
+220
+00:11:05.360 --> 00:11:10.360
+We're using the pathing of float X, float Y, float Z,
+
+221
+00:11:10.779 --> 00:11:13.639
+and all of that gets added into OSCE messages,
+
+222
+00:11:13.639 --> 00:11:16.600
+which are then added into a single bundle.
+
+223
+00:11:16.600 --> 00:11:18.779
+The one OSCE bundle is sent.
+
+224
+00:11:18.779 --> 00:11:20.740
+We clear it, clear the messages,
+
+225
+00:11:20.740 --> 00:11:23.139
+and then can once again send this again.
+
+226
+00:11:23.139 --> 00:11:25.919
+So this is not unlike the way that you would replicate
+
+227
+00:11:25.919 --> 00:11:29.559
+the transform values of say a player in a scene,
+
+228
+00:11:29.559 --> 00:11:30.700
+but instead of doing this
+
+229
+00:11:30.700 --> 00:11:32.320
+in a traditional multiplayer setting,
+
+230
+00:11:32.320 --> 00:11:35.620
+we can do it entirely with OSCE signals.
+
+231
+00:11:35.620 --> 00:11:36.539
+In the next video,
+
+232
+00:11:36.539 --> 00:11:38.940
+we'll look at how to configure your firewall
+
+233
+00:11:38.940 --> 00:11:40.379
+and set a port forwarding
+
+234
+00:11:40.379 --> 00:11:43.100
+to ensure that OSCE works as expected.

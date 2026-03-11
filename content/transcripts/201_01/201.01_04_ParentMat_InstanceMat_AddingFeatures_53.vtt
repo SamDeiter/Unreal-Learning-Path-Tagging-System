@@ -1,0 +1,1289 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.680
+In this lesson, we're gonna take a look at parent materials
+
+2
+00:00:03.680 --> 00:00:06.960
+and instance materials and how to add new features
+
+3
+00:00:06.960 --> 00:00:10.480
+to get your material to be a bit more robust.
+
+4
+00:00:10.480 --> 00:00:11.679
+So let's get started.
+
+5
+00:00:11.679 --> 00:00:13.119
+So one of the things I'm gonna emphasize
+
+6
+00:00:13.119 --> 00:00:16.039
+is make sure that you work from a parent material
+
+7
+00:00:16.039 --> 00:00:17.719
+and you make and always get in the habit
+
+8
+00:00:17.719 --> 00:00:20.239
+of making instance materials from those parent materials
+
+9
+00:00:20.239 --> 00:00:23.079
+and then apply those instance materials to your objects.
+
+10
+00:00:23.079 --> 00:00:24.359
+The reason why you wanna do that
+
+11
+00:00:24.359 --> 00:00:28.280
+is you can actually control a set of parent materials
+
+12
+00:00:28.280 --> 00:00:30.199
+where one handles translucency,
+
+13
+00:00:30.239 --> 00:00:31.879
+another one handles flesh,
+
+14
+00:00:31.879 --> 00:00:35.000
+another one handles hard surface organic,
+
+15
+00:00:35.000 --> 00:00:36.679
+another one non-organic.
+
+16
+00:00:36.679 --> 00:00:38.960
+You can actually categorize things in such a way
+
+17
+00:00:38.960 --> 00:00:41.939
+and make instance materials from those parent materials
+
+18
+00:00:41.939 --> 00:00:44.640
+to have quick control over your environment
+
+19
+00:00:44.640 --> 00:00:47.200
+without having to recompile your shader.
+
+20
+00:00:47.200 --> 00:00:51.759
+So this is a very optimized ideal way to work in Unreal
+
+21
+00:00:51.759 --> 00:00:53.600
+to get changes quickly done
+
+22
+00:00:53.600 --> 00:00:55.380
+and to be able to swap out textures.
+
+23
+00:00:55.380 --> 00:00:57.579
+As you can see here in the instance material,
+
+24
+00:00:57.579 --> 00:00:59.079
+we have quick access to these
+
+25
+00:00:59.159 --> 00:01:01.859
+and we can also control variables.
+
+26
+00:01:01.859 --> 00:01:03.740
+Let's briefly take a look in Unreal
+
+27
+00:01:03.740 --> 00:01:07.170
+at what I have set up for you.
+
+28
+00:01:07.170 --> 00:01:09.450
+So in Unreal, we have a sample material.
+
+29
+00:01:09.450 --> 00:01:10.689
+This one's just a little shadier
+
+30
+00:01:10.689 --> 00:01:12.549
+than probably what you have in your scene.
+
+31
+00:01:12.549 --> 00:01:14.989
+Don't worry about it, it's still the same thing.
+
+32
+00:01:14.989 --> 00:01:17.810
+And this is concerning our first topic.
+
+33
+00:01:17.810 --> 00:01:20.439
+Now I'm gonna double click on that material
+
+34
+00:01:20.439 --> 00:01:22.700
+and we can see that we have full control
+
+35
+00:01:22.700 --> 00:01:24.489
+of this material.
+
+36
+00:01:24.489 --> 00:01:25.810
+And we have several sliders
+
+37
+00:01:25.810 --> 00:01:28.049
+as we can swap out also the texture.
+
+38
+00:01:28.049 --> 00:01:30.489
+You'll notice down below we have a metallic switch.
+
+39
+00:01:30.930 --> 00:01:32.650
+Now yours is probably off by default,
+
+40
+00:01:32.650 --> 00:01:35.069
+but with it on, you'll notice at the top,
+
+41
+00:01:35.069 --> 00:01:37.090
+we actually have a metalness area.
+
+42
+00:01:37.090 --> 00:01:41.030
+And I just loaded a simple blank white texture.
+
+43
+00:01:41.030 --> 00:01:43.049
+In the parent material, these can be any textures
+
+44
+00:01:43.049 --> 00:01:45.189
+because in the instance as we're in here,
+
+45
+00:01:45.189 --> 00:01:47.390
+I can swap them out at any time.
+
+46
+00:01:47.390 --> 00:01:52.230
+So if we turn this off, you'll notice now
+
+47
+00:01:52.230 --> 00:01:56.290
+we have the ability to control our base material
+
+48
+00:01:56.290 --> 00:02:01.780
+via a slider and that'll control our intensity
+
+49
+00:02:01.780 --> 00:02:05.060
+outside of a texture.
+
+50
+00:02:05.060 --> 00:02:07.579
+Let's move that back to default.
+
+51
+00:02:07.579 --> 00:02:09.780
+And if we turn that back on metallic,
+
+52
+00:02:09.780 --> 00:02:12.300
+you'll now see the texture populate.
+
+53
+00:02:12.300 --> 00:02:13.979
+And that's what we're gonna build.
+
+54
+00:02:13.979 --> 00:02:16.419
+We're gonna build this in Unreal.
+
+55
+00:02:16.419 --> 00:02:19.039
+And this is what you call a static switch parameter.
+
+56
+00:02:19.039 --> 00:02:21.180
+It makes it a lot easier for your material,
+
+57
+00:02:21.180 --> 00:02:22.819
+especially if you don't wanna actually use
+
+58
+00:02:22.819 --> 00:02:25.500
+that 4K material for an object in the distance.
+
+59
+00:02:25.500 --> 00:02:27.460
+You can turn some of these off.
+
+60
+00:02:27.460 --> 00:02:28.819
+Now there are some things in Unreal
+
+61
+00:02:28.819 --> 00:02:31.340
+that automatically do some of this for you.
+
+62
+00:02:31.340 --> 00:02:33.120
+That's it for more of the advanced classes.
+
+63
+00:02:33.639 --> 00:02:35.520
+And we're not gonna get into it here.
+
+64
+00:02:35.520 --> 00:02:37.340
+Let's momentarily get back to the slides
+
+65
+00:02:37.340 --> 00:02:38.979
+and then we're gonna jump back into Unreal
+
+66
+00:02:38.979 --> 00:02:40.180
+and build some of this.
+
+67
+00:02:40.180 --> 00:02:42.180
+So step-by-step I'm laying this out.
+
+68
+00:02:42.180 --> 00:02:44.400
+So feel free to follow along
+
+69
+00:02:44.400 --> 00:02:47.400
+and you can even use that material sample that I have
+
+70
+00:02:47.400 --> 00:02:49.759
+that'll help you and point you in the right direction
+
+71
+00:02:49.759 --> 00:02:51.560
+as you're building things out.
+
+72
+00:02:51.560 --> 00:02:52.840
+So let's go ahead and start building
+
+73
+00:02:52.840 --> 00:02:54.620
+the static switch parameter.
+
+74
+00:02:54.620 --> 00:02:57.680
+I'm also gonna point out to you a few other ways
+
+75
+00:02:57.680 --> 00:02:59.599
+you can build nodes to make your material
+
+76
+00:02:59.599 --> 00:03:04.000
+a little bit more stronger in the use and function
+
+77
+00:03:04.000 --> 00:03:06.120
+and to just make it more robust.
+
+78
+00:03:06.120 --> 00:03:09.360
+And then we're gonna take a look at that UVs up close.
+
+79
+00:03:09.360 --> 00:03:11.000
+So here in Unreal,
+
+80
+00:03:11.000 --> 00:03:13.099
+I'm gonna move this out of the way for now.
+
+81
+00:03:13.099 --> 00:03:15.159
+And we're gonna go and make our own material.
+
+82
+00:03:15.159 --> 00:03:17.000
+Let's go and right click here.
+
+83
+00:03:17.000 --> 00:03:20.120
+We're gonna put it on this white object here.
+
+84
+00:03:20.120 --> 00:03:22.199
+I'm gonna click on material
+
+85
+00:03:22.199 --> 00:03:26.879
+and we'll call this M underscore demo.
+
+86
+00:03:26.879 --> 00:03:29.409
+And I'm gonna double click on that material.
+
+87
+00:03:29.409 --> 00:03:31.969
+He's off screen, but we'll pull him into screen.
+
+88
+00:03:31.969 --> 00:03:32.810
+Here we go.
+
+89
+00:03:32.810 --> 00:03:34.050
+That's better.
+
+90
+00:03:34.050 --> 00:03:38.479
+Now at any time you can go in here and again,
+
+91
+00:03:38.479 --> 00:03:40.419
+open up that material that I've made
+
+92
+00:03:40.419 --> 00:03:42.659
+by simply double clicking on it.
+
+93
+00:03:42.659 --> 00:03:44.460
+But I wanna point out if you've forgotten,
+
+94
+00:03:44.460 --> 00:03:46.080
+you wanna go to the parent material
+
+95
+00:03:46.080 --> 00:03:47.539
+if you wanna see the structure
+
+96
+00:03:47.539 --> 00:03:49.379
+and what I'm gonna be building.
+
+97
+00:03:49.379 --> 00:03:52.539
+And that's gonna be helpful for you.
+
+98
+00:03:52.539 --> 00:03:55.990
+Let's go to our homegrown material here that we made.
+
+99
+00:03:55.990 --> 00:03:56.830
+I'm gonna go full screen
+
+100
+00:03:56.830 --> 00:04:00.150
+so you can see everything as we're building things out.
+
+101
+00:04:00.150 --> 00:04:01.270
+I'm gonna cheat a little bit
+
+102
+00:04:01.949 --> 00:04:03.310
+and I'm gonna borrow that first part
+
+103
+00:04:03.310 --> 00:04:05.310
+when it has the albedo information.
+
+104
+00:04:05.310 --> 00:04:07.629
+Cause we already went over that in the first class
+
+105
+00:04:07.629 --> 00:04:09.870
+and we wanna make sure we're using our time efficiently.
+
+106
+00:04:09.870 --> 00:04:12.090
+So I'm just gonna copy this for now
+
+107
+00:04:12.090 --> 00:04:14.189
+and I'm gonna paste it into our scene.
+
+108
+00:04:14.189 --> 00:04:18.540
+And then we're just gonna connect that to the base color.
+
+109
+00:04:18.540 --> 00:04:21.000
+If anytime you wanna be able to have a quick way
+
+110
+00:04:21.000 --> 00:04:23.100
+to be able to make a scale of parameters
+
+111
+00:04:23.100 --> 00:04:25.040
+such as this little guy here
+
+112
+00:04:25.040 --> 00:04:27.899
+and have it directly connected to any of these nodes,
+
+113
+00:04:27.899 --> 00:04:29.699
+execution nodes here,
+
+114
+00:04:29.699 --> 00:04:31.300
+you can actually right click the metallic
+
+115
+00:04:31.300 --> 00:04:33.379
+and say, promote to parameter.
+
+116
+00:04:33.379 --> 00:04:37.120
+And then look, hey, we have a metallic control
+
+117
+00:04:37.120 --> 00:04:40.459
+or even specular, right click, promote to parameter.
+
+118
+00:04:40.459 --> 00:04:43.379
+Like that, we have specular control.
+
+119
+00:04:43.379 --> 00:04:44.740
+And that's really up to you
+
+120
+00:04:44.740 --> 00:04:45.879
+but that's a quick way to do that
+
+121
+00:04:45.879 --> 00:04:47.459
+and saves a bit of time.
+
+122
+00:04:47.459 --> 00:04:48.779
+We're gonna make our own metallic
+
+123
+00:04:48.779 --> 00:04:50.240
+cause we're gonna create a switch for it.
+
+124
+00:04:50.240 --> 00:04:51.959
+So I'm gonna delete this part.
+
+125
+00:04:51.959 --> 00:04:54.959
+What we wanna do now is go in here
+
+126
+00:04:54.959 --> 00:04:57.480
+and make our metallic texture.
+
+127
+00:04:57.480 --> 00:04:59.639
+So I'm gonna actually borrow that texture again.
+
+128
+00:04:59.639 --> 00:05:01.740
+It's just a white blank texture.
+
+129
+00:05:02.259 --> 00:05:05.779
+I'm just gonna copy this from the original
+
+130
+00:05:05.779 --> 00:05:09.230
+and just paste it in here for now.
+
+131
+00:05:09.230 --> 00:05:10.930
+Next, I'm gonna go in here
+
+132
+00:05:10.930 --> 00:05:13.689
+and I wanna make a multiply
+
+133
+00:05:13.689 --> 00:05:15.610
+as well as a few other things.
+
+134
+00:05:15.610 --> 00:05:16.810
+Now we'll keep this metalness.
+
+135
+00:05:16.810 --> 00:05:18.699
+We don't need to change the name.
+
+136
+00:05:18.699 --> 00:05:20.879
+Keep my finger on the M key, left click.
+
+137
+00:05:20.879 --> 00:05:22.449
+There we go.
+
+138
+00:05:22.449 --> 00:05:24.050
+Keep my finger on the S key.
+
+139
+00:05:24.050 --> 00:05:29.209
+Now, if I want, I can do a promote to a parameter
+
+140
+00:05:29.290 --> 00:05:31.970
+to have it quickly connected to that B
+
+141
+00:05:31.970 --> 00:05:34.129
+and just rename this.
+
+142
+00:05:34.129 --> 00:05:38.050
+And we'll call this metalist intensity.
+
+143
+00:05:38.050 --> 00:05:43.949
+And if it helps you, you can say texture driven.
+
+144
+00:05:43.949 --> 00:05:45.670
+And we'll make sure we set that to one.
+
+145
+00:05:45.670 --> 00:05:50.160
+So it's always on.
+
+146
+00:05:50.160 --> 00:05:51.879
+I'm gonna connect that texture that I have.
+
+147
+00:05:51.879 --> 00:05:54.449
+And again, I'm just using generic one.
+
+148
+00:05:54.449 --> 00:05:56.370
+And now we can make a switch
+
+149
+00:05:56.370 --> 00:05:58.709
+which will derive between us going in here
+
+150
+00:05:58.709 --> 00:06:00.490
+whether we wanna use a texture
+
+151
+00:06:00.490 --> 00:06:03.740
+or we wanna use a scalar parameter.
+
+152
+00:06:03.740 --> 00:06:06.180
+To do that, I'm gonna right click in here
+
+153
+00:06:06.180 --> 00:06:11.300
+and type in scalar,
+
+154
+00:06:11.300 --> 00:06:12.879
+or I should say static, sorry.
+
+155
+00:06:12.899 --> 00:06:17.550
+Static switch parameter.
+
+156
+00:06:17.550 --> 00:06:18.389
+There we go.
+
+157
+00:06:18.389 --> 00:06:20.029
+So we need a static switch parameter.
+
+158
+00:06:20.029 --> 00:06:21.430
+My apologies for that.
+
+159
+00:06:21.430 --> 00:06:23.230
+The static switch parameter is gonna make it
+
+160
+00:06:23.230 --> 00:06:25.470
+so we can flip between the texture
+
+161
+00:06:25.470 --> 00:06:26.870
+and using a scalar.
+
+162
+00:06:26.870 --> 00:06:28.550
+I meant to mention scalar,
+
+163
+00:06:28.550 --> 00:06:31.149
+but I for some reason called him that temporarily.
+
+164
+00:06:31.149 --> 00:06:34.949
+Sorry, Mr. Static switch parameter told me to offend you.
+
+165
+00:06:34.949 --> 00:06:38.410
+We're gonna call this here metallic.
+
+166
+00:06:38.410 --> 00:06:39.769
+And if we want to,
+
+167
+00:06:39.769 --> 00:06:40.970
+we can just put a question mark
+
+168
+00:06:40.970 --> 00:06:43.769
+cause like whether you're using texture or not,
+
+169
+00:06:43.769 --> 00:06:46.250
+it's up to you how you do that.
+
+170
+00:06:46.250 --> 00:06:47.529
+We can't promote this one
+
+171
+00:06:47.529 --> 00:06:49.810
+cause it requires logic in here.
+
+172
+00:06:49.810 --> 00:06:51.689
+So what we can do is just keep your finger
+
+173
+00:06:51.689 --> 00:06:53.490
+on the S key and left click.
+
+174
+00:06:53.490 --> 00:06:56.959
+And this is gonna be our base base,
+
+175
+00:06:56.959 --> 00:07:03.949
+no texture metal.
+
+176
+00:07:03.949 --> 00:07:06.459
+I'm gonna put that right into false.
+
+177
+00:07:06.459 --> 00:07:08.019
+And I can leave that at zero and we'll be fine.
+
+178
+00:07:08.019 --> 00:07:11.660
+Multiply it to true.
+
+179
+00:07:11.660 --> 00:07:15.399
+And then we're gonna connect that to metallic.
+
+180
+00:07:15.399 --> 00:07:18.779
+So now if I apply this,
+
+181
+00:07:18.779 --> 00:07:21.180
+we find that material,
+
+182
+00:07:21.779 --> 00:07:24.449
+let me lower this just a little bit.
+
+183
+00:07:24.449 --> 00:07:25.810
+I can right click in here
+
+184
+00:07:25.810 --> 00:07:29.810
+and say create an immaterial instance.
+
+185
+00:07:29.810 --> 00:07:33.490
+If we go into this material instance,
+
+186
+00:07:33.490 --> 00:07:35.730
+I'm just, I'll dock this here.
+
+187
+00:07:35.730 --> 00:07:37.730
+We can see we have the albedo,
+
+188
+00:07:37.730 --> 00:07:41.050
+albedo tint, albedo intensity there.
+
+189
+00:07:41.050 --> 00:07:44.089
+We also have base, not metal.
+
+190
+00:07:44.089 --> 00:07:45.649
+So we can control this here,
+
+191
+00:07:45.649 --> 00:07:50.279
+not metal, texture driven.
+
+192
+00:07:50.279 --> 00:07:53.439
+But if we want to, we can turn on the texture part.
+
+193
+00:07:53.439 --> 00:07:57.389
+And when we do, it shows up to the party and there it is.
+
+194
+00:07:57.389 --> 00:08:00.089
+And we can control the intensity of that down below.
+
+195
+00:08:00.089 --> 00:08:01.290
+Now again, I haven't grouped these.
+
+196
+00:08:01.290 --> 00:08:03.050
+We've already talked about grouping.
+
+197
+00:08:03.050 --> 00:08:04.410
+So we don't need to group this.
+
+198
+00:08:04.410 --> 00:08:06.230
+You guys kind of get the idea of that.
+
+199
+00:08:06.230 --> 00:08:07.069
+And to save time,
+
+200
+00:08:07.069 --> 00:08:09.610
+I haven't grouped them in this particular case.
+
+201
+00:08:09.610 --> 00:08:10.769
+And then now we can control
+
+202
+00:08:10.769 --> 00:08:15.370
+how strong that's going to be.
+
+203
+00:08:15.370 --> 00:08:17.689
+Pretty sweet using that static switch parameter
+
+204
+00:08:17.689 --> 00:08:19.509
+that keeps things a little bit cleaner
+
+205
+00:08:19.509 --> 00:08:21.850
+and makes it so that if you need to switch them
+
+206
+00:08:21.850 --> 00:08:24.250
+and you don't need that texture information
+
+207
+00:08:24.250 --> 00:08:26.730
+can make things a bit lighter.
+
+208
+00:08:26.730 --> 00:08:27.850
+There are other areas
+
+209
+00:08:27.850 --> 00:08:30.970
+where you can actually make things a bit more complex.
+
+210
+00:08:30.970 --> 00:08:37.960
+And this is derived from my sample.
+
+211
+00:08:37.960 --> 00:08:40.600
+And I'm copying this particular group of nodes
+
+212
+00:08:40.600 --> 00:08:43.940
+and just want to point them out real quick.
+
+213
+00:08:43.940 --> 00:08:47.159
+So this set of nodes that I have here,
+
+214
+00:08:47.159 --> 00:08:49.299
+this allows us to go in here
+
+215
+00:08:49.299 --> 00:08:51.700
+and even have a cheap contrast,
+
+216
+00:08:51.700 --> 00:08:55.620
+as well as actually be able to control the albedo tint.
+
+217
+00:08:55.620 --> 00:08:56.820
+So if I wanted to plug that in,
+
+218
+00:08:56.820 --> 00:08:58.980
+I would have that ability to do that.
+
+219
+00:08:58.980 --> 00:09:01.519
+Now there are multiple different ways to get cheap contrast.
+
+220
+00:09:01.519 --> 00:09:03.899
+And obviously this is called cheap contrast,
+
+221
+00:09:03.899 --> 00:09:05.740
+and this allows you to be able to do that.
+
+222
+00:09:05.740 --> 00:09:07.940
+Now, these things we're going to talk about later.
+
+223
+00:09:07.940 --> 00:09:09.860
+These are called material functions.
+
+224
+00:09:09.860 --> 00:09:11.820
+These material functions allow materials
+
+225
+00:09:11.820 --> 00:09:13.059
+that have functionality,
+
+226
+00:09:13.059 --> 00:09:14.539
+and they open the doorway for us
+
+227
+00:09:14.539 --> 00:09:17.700
+to actually make a more customized look and feel.
+
+228
+00:09:17.700 --> 00:09:20.960
+And that'll be towards the end of this course.
+
+229
+00:09:20.960 --> 00:09:21.919
+Let me go and delete this for now,
+
+230
+00:09:21.919 --> 00:09:25.200
+because we don't really need it.
+
+231
+00:09:25.200 --> 00:09:26.600
+Let's go and make that UV set.
+
+232
+00:09:26.600 --> 00:09:29.659
+That's going to make things look a lot better.
+
+233
+00:09:29.659 --> 00:09:33.259
+So to be able to handle or edit our UVs,
+
+234
+00:09:33.259 --> 00:09:36.250
+we're going to need a couple items in play.
+
+235
+00:09:36.250 --> 00:09:39.029
+One of them is I keep my finger on the U key left click.
+
+236
+00:09:39.029 --> 00:09:42.169
+This is my texture coordinates.
+
+237
+00:09:42.169 --> 00:09:43.129
+The texture coordinates here,
+
+238
+00:09:43.129 --> 00:09:44.389
+I'm going to keep my finger on the M key
+
+239
+00:09:44.389 --> 00:09:46.639
+and we get multiply.
+
+240
+00:09:46.639 --> 00:09:49.200
+What we want to do is have overall tiling.
+
+241
+00:09:49.200 --> 00:09:51.860
+This texture coordinates is going to act like a gateway
+
+242
+00:09:51.860 --> 00:09:53.919
+so that Unreal knows our intentions,
+
+243
+00:09:53.919 --> 00:09:56.200
+and it knows that whatever I connect to this,
+
+244
+00:09:56.200 --> 00:09:58.120
+it's going to lump things in such a way
+
+245
+00:09:58.120 --> 00:10:01.990
+and understand that I'm using this for UVs.
+
+246
+00:10:01.990 --> 00:10:04.309
+I'm going to go ahead and I'm going to keep my finger
+
+247
+00:10:04.309 --> 00:10:05.529
+on the S key.
+
+248
+00:10:05.529 --> 00:10:07.149
+I'm going to call this tiling.
+
+249
+00:10:07.149 --> 00:10:09.470
+This is my overall tiling.
+
+250
+00:10:09.470 --> 00:10:10.889
+And you can say, if you want to,
+
+251
+00:10:10.889 --> 00:10:16.399
+you can call it like tiling overall.
+
+252
+00:10:16.399 --> 00:10:18.399
+And I'm going to connect that into the B channel
+
+253
+00:10:18.399 --> 00:10:21.419
+and UV coordinates and connect it into the A channel.
+
+254
+00:10:21.419 --> 00:10:24.889
+I'm going to set this to one
+
+255
+00:10:24.889 --> 00:10:28.279
+to make sure that my tiling is on.
+
+256
+00:10:28.279 --> 00:10:30.440
+Next, this is a micro set up here,
+
+257
+00:10:30.440 --> 00:10:31.980
+or I should say macro,
+
+258
+00:10:31.980 --> 00:10:34.659
+what's controlling the whole set.
+
+259
+00:10:34.659 --> 00:10:36.980
+What I want now is to have a little bit more
+
+260
+00:10:36.980 --> 00:10:38.139
+of a micro set up,
+
+261
+00:10:38.139 --> 00:10:41.129
+where I'm controlling things on the U and the V.
+
+262
+00:10:41.129 --> 00:10:43.480
+So I'm keeping my finger on the S key.
+
+263
+00:10:43.480 --> 00:10:49.840
+This is going to be my offset U.
+
+264
+00:10:49.840 --> 00:10:52.740
+I can duplicate that control D,
+
+265
+00:10:52.740 --> 00:10:54.460
+that's our key for that.
+
+266
+00:10:54.460 --> 00:10:58.100
+And I can make this offset V.
+
+267
+00:10:58.100 --> 00:10:59.679
+I want to make sure that both of these are on.
+
+268
+00:10:59.679 --> 00:11:04.980
+So make sure the one is on for each.
+
+269
+00:11:04.980 --> 00:11:06.320
+There we go.
+
+270
+00:11:06.320 --> 00:11:07.740
+But to be able to be able to do,
+
+271
+00:11:08.220 --> 00:11:10.720
+to get this to work correctly, I should say,
+
+272
+00:11:10.720 --> 00:11:13.120
+to be able to be able to do this,
+
+273
+00:11:14.100 --> 00:11:18.059
+we want to use a thing called a append vector.
+
+274
+00:11:18.059 --> 00:11:23.500
+So I'm going to type in append vector.
+
+275
+00:11:23.500 --> 00:11:24.440
+What this does,
+
+276
+00:11:24.440 --> 00:11:26.580
+it allows us to be able to actually
+
+277
+00:11:26.580 --> 00:11:29.279
+have a secondary control.
+
+278
+00:11:29.279 --> 00:11:32.399
+And we can pipe this into an add or multiply.
+
+279
+00:11:32.399 --> 00:11:36.120
+So I can grab this UV offset, plug it into each channel,
+
+280
+00:11:36.120 --> 00:11:40.470
+grab this offset here and plug it into the B channel.
+
+281
+00:11:40.470 --> 00:11:42.549
+And now if I want, I can choose,
+
+282
+00:11:42.549 --> 00:11:46.500
+let me hit the hotkey A and left click and add,
+
+283
+00:11:46.500 --> 00:11:50.200
+hit my finger with the M key and left click or multiply.
+
+284
+00:11:50.200 --> 00:11:52.759
+Now the difference between these, if I did add,
+
+285
+00:11:52.759 --> 00:11:55.600
+things would shuffle and stay pretty linear,
+
+286
+00:11:55.600 --> 00:11:59.090
+straightforward with no size changes.
+
+287
+00:11:59.090 --> 00:12:00.830
+And I'd have to connect this here
+
+288
+00:12:00.830 --> 00:12:03.840
+and have to connect this here.
+
+289
+00:12:03.840 --> 00:12:06.919
+Or if I want, I can do multiply.
+
+290
+00:12:06.919 --> 00:12:09.639
+And I prefer multiply because it scales it a little bit
+
+291
+00:12:09.639 --> 00:12:11.600
+and can maybe hide some of the imperfections
+
+292
+00:12:12.240 --> 00:12:13.080
+after the texture.
+
+293
+00:12:13.080 --> 00:12:14.960
+So I can pull this into the A channel
+
+294
+00:12:14.960 --> 00:12:16.879
+and pull this into the B channel.
+
+295
+00:12:16.879 --> 00:12:18.480
+And then I grab each one of these
+
+296
+00:12:18.480 --> 00:12:21.820
+and put it into the UV slots for each one.
+
+297
+00:12:21.820 --> 00:12:25.139
+And then I hit apply.
+
+298
+00:12:25.139 --> 00:12:26.240
+With those plugged in,
+
+299
+00:12:26.240 --> 00:12:28.639
+we're going to make sure that you hit save.
+
+300
+00:12:28.639 --> 00:12:30.610
+I just hit apply.
+
+301
+00:12:30.610 --> 00:12:31.970
+And then now we look at our instance
+
+302
+00:12:31.970 --> 00:12:36.799
+and you'll see we have UVs all ready to go.
+
+303
+00:12:36.799 --> 00:12:40.840
+Now again, each one of these should be in a group.
+
+304
+00:12:40.840 --> 00:12:42.879
+I didn't do it because just to save time
+
+305
+00:12:42.919 --> 00:12:44.679
+that we went over in the first class,
+
+306
+00:12:44.679 --> 00:12:46.879
+but you can now see down here, the UV,
+
+307
+00:12:48.840 --> 00:12:51.659
+the offset U, the offset V,
+
+308
+00:12:51.659 --> 00:12:57.789
+and you'll see it scaling and then the overall tiling.
+
+309
+00:12:57.789 --> 00:13:01.169
+So again, using that and the multiply or the add
+
+310
+00:13:01.169 --> 00:13:03.690
+can determine how that's going to shuffle.
+
+311
+00:13:03.690 --> 00:13:05.840
+And I can show you really quick.
+
+312
+00:13:05.840 --> 00:13:09.519
+I go in here and then switch this to an add
+
+313
+00:13:09.519 --> 00:13:14.080
+for both of these and then apply.
+
+314
+00:13:14.080 --> 00:13:17.710
+We can now go into here and change things.
+
+315
+00:13:17.710 --> 00:13:20.100
+And you'll notice it's a lot linear.
+
+316
+00:13:20.100 --> 00:13:23.000
+There's no stretching going on.
+
+317
+00:13:23.000 --> 00:13:25.720
+Now it does make it so it repeats more.
+
+318
+00:13:25.720 --> 00:13:28.220
+So it squishes it, but the other way around,
+
+319
+00:13:28.220 --> 00:13:31.000
+multiply has a little bit more of a scale connected to it.
+
+320
+00:13:31.000 --> 00:13:32.679
+Well, that's it with this lesson.
+
+321
+00:13:32.679 --> 00:13:33.559
+In the next lesson,
+
+322
+00:13:33.559 --> 00:13:37.000
+we're going to take a look at creating masked materials.

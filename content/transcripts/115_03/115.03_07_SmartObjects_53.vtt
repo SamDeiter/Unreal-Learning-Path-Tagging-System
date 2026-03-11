@@ -1,0 +1,237 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.549
+Now that we've covered how our AI can sense the world around them, we can discuss how
+
+2
+00:00:05.549 --> 00:00:09.580
+we can tailor the environment to give them objects to interact with.
+
+3
+00:00:09.580 --> 00:00:14.460
+This is a new system added in Unreal Engine 5 called the smart object system.
+
+4
+00:00:14.460 --> 00:00:16.719
+So what are smart objects?
+
+5
+00:00:16.719 --> 00:00:20.339
+As the name suggests, they're objects placed in the world that both AI agents
+
+6
+00:00:20.339 --> 00:00:22.929
+and players can interact with.
+
+7
+00:00:22.929 --> 00:00:26.550
+These objects contain all of the necessary information to handle the interaction logic
+
+8
+00:00:26.550 --> 00:00:29.260
+for that object.
+
+9
+00:00:29.260 --> 00:00:34.960
+Smart objects are part of a global database of smart objects and they use partitioning logic.
+
+10
+00:00:34.960 --> 00:00:41.049
+This means that they can be queried at runtime using things such as location as an example.
+
+11
+00:00:41.049 --> 00:00:46.060
+One of the key advantages of this system is that it also uses a reservation system.
+
+12
+00:00:46.060 --> 00:00:51.890
+This means that other AI agents or players can be aware of in-use smart objects near them.
+
+13
+00:00:51.890 --> 00:00:57.450
+This prevents multiple AI agents selecting the same object at the same time.
+
+14
+00:00:57.450 --> 00:01:02.840
+Smart objects have their own subsystem that keeps track of all of the smart objects in your level.
+
+15
+00:01:02.840 --> 00:01:07.799
+This subsystem is created automatically in the level when the smart object plugin is enabled.
+
+16
+00:01:07.799 --> 00:01:12.439
+It's worth noting that only one smart object subsystem can exist at any one time.
+
+17
+00:01:12.439 --> 00:01:17.890
+However, it is worth noting that in multiplayer games, the smart object subsystem is only
+
+18
+00:01:17.890 --> 00:01:21.900
+instantiated on the server or authority machine.
+
+19
+00:01:21.900 --> 00:01:25.579
+As we can see in the picture at the bottom of this slide, the smart object subsystem
+
+20
+00:01:25.579 --> 00:01:29.459
+is used to query for and return smart objects.
+
+21
+00:01:29.459 --> 00:01:33.260
+It's essentially a cache for our AI to bounce off of.
+
+22
+00:01:33.260 --> 00:01:37.780
+The smart object collection contains a list of all smart object components associated
+
+23
+00:01:37.780 --> 00:01:39.859
+within the level.
+
+24
+00:01:39.859 --> 00:01:44.620
+The collection holds all shared configurations and is used to create all runtime instances
+
+25
+00:01:44.620 --> 00:01:50.299
+of smart objects to enable efficient, large world simulation outside of loaded areas.
+
+26
+00:01:50.299 --> 00:01:55.319
+And again, there is only one smart object collection per level.
+
+27
+00:01:55.319 --> 00:01:59.359
+So now we know what smart objects are and how the backend system works, but how do
+
+28
+00:01:59.359 --> 00:02:02.500
+we go about creating a smart object of our own?
+
+29
+00:02:02.500 --> 00:02:05.400
+Well that's where the smart object component comes in.
+
+30
+00:02:05.400 --> 00:02:09.280
+Smart object components can be added to any actor, thus converting them to a smart
+
+31
+00:02:09.280 --> 00:02:13.919
+object, and these will be picked up in the smart object subsystem.
+
+32
+00:02:13.919 --> 00:02:18.990
+This component sets up and stores the configuration of a given smart object template.
+
+33
+00:02:18.990 --> 00:02:22.949
+This component still adheres to the world partitioning logic, so an actor holding this
+
+34
+00:02:22.949 --> 00:02:27.469
+component can still be loaded and unloaded, whether using the world partitioning or level
+
+35
+00:02:27.469 --> 00:02:29.569
+streaming systems.
+
+36
+00:02:29.569 --> 00:02:33.889
+If the actor holding this component is spawned at runtime, then it will not remain in memory
+
+37
+00:02:33.889 --> 00:02:36.810
+once it has been unloaded.
+
+38
+00:02:36.810 --> 00:02:41.250
+A smart object definition is a data structure that contains immutable data that is shared
+
+39
+00:02:41.250 --> 00:02:44.620
+between multiple instances of a smart object.
+
+40
+00:02:44.620 --> 00:02:49.219
+This definition stores filtering information such as user-required tags, descriptive tags
+
+41
+00:02:49.219 --> 00:02:52.789
+and the default set of behaviors to execute on interaction.
+
+42
+00:02:52.789 --> 00:02:56.689
+It also exposes out one or more available slots that can be used by either AI agents
+
+43
+00:02:56.689 --> 00:02:58.719
+or players.
+
+44
+00:02:58.719 --> 00:03:01.259
+Each of these slots contain the following.
+
+45
+00:03:01.259 --> 00:03:05.719
+Firstly we have the location and rotation of the slot relative to the parent anchor,
+
+46
+00:03:05.719 --> 00:03:09.360
+both of which are baked in from editor placement.
+
+47
+00:03:09.360 --> 00:03:14.080
+They also allow us to define a specific behavior per slot that can override the default
+
+48
+00:03:14.080 --> 00:03:16.969
+set of behaviors for this object.
+
+49
+00:03:16.969 --> 00:03:23.039
+They also allow us to define a set of gameplay tags, user tags and runtime tags.
+
+50
+00:03:23.080 --> 00:03:26.520
+Lastly we come to smart object behavior definitions.
+
+51
+00:03:26.520 --> 00:03:32.340
+These definitions contain the data needed by an AI agent or player for a given interaction.
+
+52
+00:03:32.340 --> 00:03:35.139
+Some common behavior examples are gameplay behaviors.
+
+53
+00:03:35.139 --> 00:03:39.280
+These are used by a pawn or actor to perform their behaviors.
+
+54
+00:03:39.280 --> 00:03:42.819
+There's player behaviors and this behavior is specifically built for player characters
+
+55
+00:03:42.819 --> 00:03:45.270
+that can use smart objects.
+
+56
+00:03:45.270 --> 00:03:48.949
+Or you could use the mass entity behaviors, which is a behavior that makes use of the
+
+57
+00:03:48.949 --> 00:03:54.189
+smart object behavior definition to configure a smart object to be used by mass entities
+
+58
+00:03:54.189 --> 00:03:58.830
+rather than usual gameplay behavior actor pawn architectures.
+
+59
+00:03:58.830 --> 00:04:03.389
+Finally it's worth noting that gameplay behaviors can be implemented directly in Blueprint.

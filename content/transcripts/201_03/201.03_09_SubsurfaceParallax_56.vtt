@@ -1,0 +1,1085 @@
+WEBVTT
+
+1
+00:00:01.330 --> 00:00:06.370
+Hi everyone, in this video, we're going to take a look at a subsurface profile compared
+
+2
+00:00:06.370 --> 00:00:11.189
+to a subsurface, as well as we're going to take a deep look at our parallax control,
+
+3
+00:00:11.189 --> 00:00:13.630
+and how that compares to a bump offset.
+
+4
+00:00:13.630 --> 00:00:16.500
+So let's get started.
+
+5
+00:00:16.500 --> 00:00:21.460
+One thing I wanted to point out when it comes to adding subsurface, or even using
+
+6
+00:00:21.460 --> 00:00:24.739
+multiple type of subsurface materials.
+
+7
+00:00:24.739 --> 00:00:27.420
+So you can use a simple, simple one.
+
+8
+00:00:27.420 --> 00:00:32.719
+And I should say nodes that complement the subsurface material, such as the Fresnel index,
+
+9
+00:00:32.719 --> 00:00:37.380
+you'll notice there's also a complex or more complex Fresnel index, which allow you to
+
+10
+00:00:37.380 --> 00:00:39.100
+have a bit more control.
+
+11
+00:00:39.100 --> 00:00:43.060
+Now these are some of the outputs for it, I don't go over it in this class, because
+
+12
+00:00:43.060 --> 00:00:46.259
+I rarely find use cases for this.
+
+13
+00:00:46.259 --> 00:00:49.859
+But I wanted to point it out because it is a good call out to be able to actually
+
+14
+00:00:49.859 --> 00:00:54.579
+see the power of some of these material functions that we've created for you.
+
+15
+00:00:54.579 --> 00:00:58.880
+You can control the contrast, you can use cheap contrast, you can control the power
+
+16
+00:00:58.880 --> 00:01:04.019
+of it, invert the Fresnel index, this is kind of a nice little add, and camera vector
+
+17
+00:01:04.019 --> 00:01:05.459
+as well as normal vector.
+
+18
+00:01:05.459 --> 00:01:10.340
+So you have those options in there when working with a subsurface control.
+
+19
+00:01:10.340 --> 00:01:13.359
+You'll notice there's multiple ways to be able to get the look that you want, like
+
+20
+00:01:13.359 --> 00:01:15.439
+I showed you demonstrate it.
+
+21
+00:01:15.439 --> 00:01:19.019
+But there are different aspects of it that you may not need.
+
+22
+00:01:19.019 --> 00:01:24.579
+Now if you work, and what I mean by that is say you want to use a subsurface look and
+
+23
+00:01:24.579 --> 00:01:26.659
+feel but you need a human.
+
+24
+00:01:26.659 --> 00:01:30.340
+Now if you're using or creating a stylized piece, you might be able to get away with
+
+25
+00:01:30.340 --> 00:01:34.060
+just using a subsurface option within your material.
+
+26
+00:01:34.060 --> 00:01:39.260
+But you may want to get deeper into things and make it so that you're using a subsurface
+
+27
+00:01:39.260 --> 00:01:41.260
+profile.
+
+28
+00:01:41.260 --> 00:01:43.700
+And that data can be very helpful.
+
+29
+00:01:43.700 --> 00:01:45.680
+You'll see it in our metahumans.
+
+30
+00:01:45.680 --> 00:01:49.239
+So let's actually jump into Unreal and break that down a little bit.
+
+31
+00:01:49.239 --> 00:01:53.760
+And then we're going to look at the parallax control as a material option.
+
+32
+00:01:53.760 --> 00:01:58.200
+So inside of Unreal, you'll see here I have a metahuman head.
+
+33
+00:01:58.200 --> 00:02:01.680
+This was made a customized metahuman.
+
+34
+00:02:01.680 --> 00:02:04.260
+And I applied the metahuman material in here.
+
+35
+00:02:04.260 --> 00:02:09.080
+This is using a subsurface profile on the end is using a standard subsurface.
+
+36
+00:02:09.080 --> 00:02:14.479
+So this is what you can see what I mean by you may be happy with a simple subsurface
+
+37
+00:02:14.479 --> 00:02:19.680
+because it kind of pushes values a little bit harder, faster, and you can get to where
+
+38
+00:02:19.680 --> 00:02:23.539
+you need to go a little bit quicker and you can make things a little bit more extreme.
+
+39
+00:02:23.539 --> 00:02:26.960
+So it might work on a more stylized look and feel.
+
+40
+00:02:26.960 --> 00:02:31.800
+But over here, this is a more realistic subsurface you can use.
+
+41
+00:02:31.800 --> 00:02:36.680
+Let's go and take a look at this metahuman synthesized material.
+
+42
+00:02:36.680 --> 00:02:40.259
+And I'm going to pull over the material into our viewer here.
+
+43
+00:02:40.259 --> 00:02:41.900
+You'll see it gets pretty deep.
+
+44
+00:02:41.900 --> 00:02:43.719
+There's all the artists, the lights.
+
+45
+00:02:43.719 --> 00:02:46.280
+There's the bake groom, we don't have a groom on him.
+
+46
+00:02:46.280 --> 00:02:48.039
+There's the base color.
+
+47
+00:02:48.039 --> 00:02:49.360
+And there's the bit normal.
+
+48
+00:02:49.360 --> 00:02:54.080
+And there's all these different ones in here that you can use and be given you the
+
+49
+00:02:54.080 --> 00:02:58.120
+ability to be able to control all the different aspects of the skin.
+
+50
+00:02:58.120 --> 00:03:02.680
+Now again, this is a pretty big deep dive, we don't go into it here, but you're more
+
+51
+00:03:02.680 --> 00:03:04.960
+than welcome to take a look at this up close.
+
+52
+00:03:04.960 --> 00:03:08.680
+And you can kind of see the control that you have to be able to push things in the
+
+53
+00:03:08.680 --> 00:03:10.280
+direction that you need.
+
+54
+00:03:10.280 --> 00:03:13.240
+You'll see there's a clay material here and chest.
+
+55
+00:03:13.280 --> 00:03:17.759
+All these things allow us to make us or allow us to be able to have a stronger
+
+56
+00:03:17.759 --> 00:03:20.199
+look and feels for our characters.
+
+57
+00:03:21.469 --> 00:03:24.550
+Now, did I just say feels I did.
+
+58
+00:03:25.590 --> 00:03:29.550
+So if we go in here, you can see there's a deep dive in all of these
+
+59
+00:03:29.550 --> 00:03:33.349
+parts, even of normal control if we needed to and LODs.
+
+60
+00:03:33.629 --> 00:03:36.830
+Now, again, we're not going to be dealing with those in detail, but I
+
+61
+00:03:36.830 --> 00:03:40.469
+wanted to let you know, as you look as you have the skin scattering, you can
+
+62
+00:03:40.469 --> 00:03:45.310
+also increase these elements, as well as go in here and control your specular,
+
+63
+00:03:45.590 --> 00:03:46.629
+if you needed to.
+
+64
+00:03:46.909 --> 00:03:50.990
+And there's a specular map slot for it, if you needed that in there.
+
+65
+00:03:51.270 --> 00:03:54.750
+And the cavity map power, if you needed that, you can see the cavity
+
+66
+00:03:54.750 --> 00:03:59.629
+map can affect an overall kind of look and feel for this, almost the
+
+67
+00:03:59.629 --> 00:04:03.550
+spec or if you want to make the guy a little more shvety, you can do so.
+
+68
+00:04:04.629 --> 00:04:07.590
+And look, yes, he's already sweating because we're talking about him.
+
+69
+00:04:07.870 --> 00:04:11.590
+So that allows you to get a little bit more control and a little bit more
+
+70
+00:04:11.590 --> 00:04:12.830
+realism for sure.
+
+71
+00:04:13.030 --> 00:04:16.910
+But again, if you're just doing stylized, you can probably be happy with just
+
+72
+00:04:16.910 --> 00:04:20.589
+using a subsurface and just making it so you have multiple options for
+
+73
+00:04:20.589 --> 00:04:23.670
+control, like what I showed you with the Jade material.
+
+74
+00:04:24.480 --> 00:04:27.399
+Now let's go and change our focus for a bit here and take a look at the
+
+75
+00:04:27.399 --> 00:04:29.560
+parallax occlusion here.
+
+76
+00:04:29.800 --> 00:04:31.879
+This parallax occlusion is pretty great.
+
+77
+00:04:32.120 --> 00:04:36.480
+It gives us the optical illusion of three dimensional objects, but they're not here.
+
+78
+00:04:36.720 --> 00:04:43.199
+Now the only downside about this is the parallax occlusion is a pretty hefty, or
+
+79
+00:04:43.199 --> 00:04:44.959
+I should say expensive material.
+
+80
+00:04:45.519 --> 00:04:49.720
+If we go down to our optimization view modes and we go to shader complexity.
+
+81
+00:04:49.720 --> 00:04:53.920
+Now this guy didn't always show up when we hit alt eight, but it does now.
+
+82
+00:04:53.959 --> 00:04:56.560
+So if we click on it, you'll actually see a load.
+
+83
+00:04:56.839 --> 00:05:00.279
+And when it loads, you'll see that he is of the darker nature
+
+84
+00:05:00.279 --> 00:05:01.879
+here than the light green.
+
+85
+00:05:02.199 --> 00:05:06.279
+Now, keep in mind, he's not as expensive as he used to be.
+
+86
+00:05:06.519 --> 00:05:08.759
+But he still is an expensive material.
+
+87
+00:05:08.959 --> 00:05:13.240
+So if you do use them in quite, maybe you have quite a bit or a lot of
+
+88
+00:05:13.240 --> 00:05:16.800
+materials that use it, just be mindful of it that you can use it.
+
+89
+00:05:17.079 --> 00:05:19.800
+Notice it's hitting here, which is still okay.
+
+90
+00:05:20.000 --> 00:05:22.920
+He's slightly more expensive than the ideal light green.
+
+91
+00:05:23.240 --> 00:05:28.160
+But when it starts to get red and pink, those were things start to get a little
+
+92
+00:05:28.160 --> 00:05:29.199
+bit more complicated.
+
+93
+00:05:29.560 --> 00:05:33.439
+Also, some people don't know this, but you're like, well, I'm going to check
+
+94
+00:05:33.439 --> 00:05:35.439
+out my material and look at it in preview mode.
+
+95
+00:05:35.839 --> 00:05:40.839
+The preview mode may not always highlight the complicated detail you might have.
+
+96
+00:05:41.079 --> 00:05:44.199
+And sometimes it's better to just look at it here to be able to look at the
+
+97
+00:05:44.199 --> 00:05:47.079
+complexity here to get the full breakdown.
+
+98
+00:05:47.079 --> 00:05:49.480
+We've improved that greatly, but just be aware.
+
+99
+00:05:49.519 --> 00:05:53.160
+I just for good checking my P's and Q's.
+
+100
+00:05:53.439 --> 00:05:56.319
+I like to check the optimization view mode and their shader
+
+101
+00:05:56.319 --> 00:05:58.439
+complexity in this particular viewport.
+
+102
+00:05:58.959 --> 00:06:02.480
+So the nice thing about working with this, and I'll show you the setup in
+
+103
+00:06:02.519 --> 00:06:07.399
+just a second, is as I move my camera around, this looks like this object has
+
+104
+00:06:07.399 --> 00:06:10.519
+three-dimensional parts to it, and it does not.
+
+105
+00:06:10.920 --> 00:06:16.360
+This is literally just using an optical illusion to make you think these are
+
+106
+00:06:16.360 --> 00:06:17.160
+three-dimensional.
+
+107
+00:06:17.360 --> 00:06:21.480
+Now, the only problem you can run into is you can get blurry areas on the
+
+108
+00:06:21.480 --> 00:06:23.439
+edges and extreme angles.
+
+109
+00:06:23.639 --> 00:06:25.839
+Let's actually crack open this.
+
+110
+00:06:25.839 --> 00:06:27.519
+We'll pick on this particular material.
+
+111
+00:06:28.399 --> 00:06:31.120
+This is part of our sample pack where you can see this up close.
+
+112
+00:06:31.160 --> 00:06:34.120
+I'm going to double click, and let's bring this one over.
+
+113
+00:06:34.120 --> 00:06:35.360
+We're going to look at the parent two.
+
+114
+00:06:35.959 --> 00:06:39.040
+Let's open this up, and you'll see the global parameters.
+
+115
+00:06:39.639 --> 00:06:40.839
+Yes, they are grouped.
+
+116
+00:06:41.439 --> 00:06:42.079
+I did not.
+
+117
+00:06:42.399 --> 00:06:47.319
+This is part of our pack, so I didn't set that up.
+
+118
+00:06:47.720 --> 00:06:51.199
+So you'll see there's the base color, the height and the normal, the shadows,
+
+119
+00:06:51.199 --> 00:06:54.680
+and they use PDO, and you're like, well, what do these even mean, Sean?
+
+120
+00:06:54.959 --> 00:06:56.759
+Well, let's go into the parent material, take a look.
+
+121
+00:06:57.649 --> 00:06:58.930
+I'm going to go and crack this open.
+
+122
+00:06:59.290 --> 00:07:01.730
+This will make things a little bit clearer what's going on under the hood.
+
+123
+00:07:02.209 --> 00:07:04.250
+Ah, parallax occlusion mapping.
+
+124
+00:07:04.329 --> 00:07:06.170
+You can see there's a lot of options here.
+
+125
+00:07:06.529 --> 00:07:11.769
+So we have a height map control, a height ratio here, and minimum steps
+
+126
+00:07:12.009 --> 00:07:12.769
+and max steps.
+
+127
+00:07:12.769 --> 00:07:16.970
+Now these steps are going to help with the value of how these angles are going
+
+128
+00:07:16.970 --> 00:07:20.129
+to be handled so you can adjust these as you need.
+
+129
+00:07:20.329 --> 00:07:24.449
+These are suggested for this particular look and feel for this piece.
+
+130
+00:07:24.649 --> 00:07:28.769
+So if you can see, if I switch this to a flat plane, you can really see the
+
+131
+00:07:28.810 --> 00:07:30.930
+effect on how this can fake the eye.
+
+132
+00:07:31.129 --> 00:07:35.850
+These are great for like sci fi interiors and you need it to make people think
+
+133
+00:07:36.050 --> 00:07:39.689
+there's more than actually is, but you will see some blurry areas.
+
+134
+00:07:39.689 --> 00:07:43.170
+So just be aware of that, especially if your camera's moving rapidly.
+
+135
+00:07:43.569 --> 00:07:44.529
+You will see that.
+
+136
+00:07:44.730 --> 00:07:46.529
+So it does fall apart a little bit.
+
+137
+00:07:46.850 --> 00:07:47.889
+So just be aware of that.
+
+138
+00:07:48.089 --> 00:07:50.089
+You'll see the texture is pretty simplistic.
+
+139
+00:07:50.290 --> 00:07:52.209
+You see that the white is the higher
+
+140
+00:07:52.410 --> 00:07:57.009
+points of interest, the gray middle ground and the black, the indented.
+
+141
+00:07:57.209 --> 00:07:58.410
+And that's what you got to think about
+
+142
+00:07:58.610 --> 00:08:01.529
+when you are making this height texture for it.
+
+143
+00:08:01.730 --> 00:08:03.370
+You got to think in those terms.
+
+144
+00:08:03.569 --> 00:08:05.930
+You'll see there's a static boolean false.
+
+145
+00:08:06.129 --> 00:08:10.529
+This specify manual texture size.
+
+146
+00:08:10.730 --> 00:08:12.449
+This one gets a little bit into the weeds.
+
+147
+00:08:12.449 --> 00:08:13.610
+I want to get into this too much.
+
+148
+00:08:13.810 --> 00:08:19.250
+But you have the option to control size as well as shadow occlusion.
+
+149
+00:08:19.449 --> 00:08:23.689
+You can turn things off and on if you run into problems, display problems.
+
+150
+00:08:23.889 --> 00:08:24.730
+So we give you that.
+
+151
+00:08:24.769 --> 00:08:26.769
+You notice there's a light vector MPC.
+
+152
+00:08:26.970 --> 00:08:30.250
+Speaking of the divot, we talked about the MPCs earlier.
+
+153
+00:08:30.449 --> 00:08:32.889
+So you can control that light vector if you needed to.
+
+154
+00:08:33.090 --> 00:08:36.889
+A big quick scaler into a mask that goes into the light vector.
+
+155
+00:08:37.090 --> 00:08:39.090
+So if you're animating that or you
+
+156
+00:08:39.090 --> 00:08:41.809
+just need to adjust it with a blueprint, you can do so.
+
+157
+00:08:42.009 --> 00:08:45.250
+And then you'll see there's a normal map that mirrors kind of what we have
+
+158
+00:08:45.450 --> 00:08:49.450
+in general for our texture, and then you'll see a little bit of extras
+
+159
+00:08:49.649 --> 00:08:51.850
+in here in a world alignment.
+
+160
+00:08:51.850 --> 00:08:55.120
+Now, you're probably wondering why the world alignment.
+
+161
+00:08:55.320 --> 00:08:58.960
+Well, you'll see the one that I have, the other one.
+
+162
+00:08:59.159 --> 00:09:00.360
+Just for a second.
+
+163
+00:09:00.559 --> 00:09:04.740
+This one here, I'll double click on it.
+
+164
+00:09:04.940 --> 00:09:10.519
+And this guy is without a instance material.
+
+165
+00:09:10.720 --> 00:09:12.720
+You'll notice he does not have a world
+
+166
+00:09:12.919 --> 00:09:16.480
+alignment and he's doing OK, but you can use that world
+
+167
+00:09:16.679 --> 00:09:19.080
+alignment just to adjust some visuals.
+
+168
+00:09:19.279 --> 00:09:21.519
+And what I mean by that, let's actually
+
+169
+00:09:21.720 --> 00:09:25.509
+move this camera or I should move the light around here.
+
+170
+00:09:25.710 --> 00:09:26.549
+It's all dark.
+
+171
+00:09:26.549 --> 00:09:30.389
+This is what I mean by the preview, not quite showing you actually everything.
+
+172
+00:09:30.389 --> 00:09:31.870
+It looks like the dark side of the moon.
+
+173
+00:09:32.070 --> 00:09:33.629
+Anyway, you move the camera around.
+
+174
+00:09:33.830 --> 00:09:36.110
+Dagnabbit. Why?
+
+175
+00:09:36.309 --> 00:09:38.230
+So let's go into the view.
+
+176
+00:09:38.429 --> 00:09:41.590
+So if we go into our view here and let's actually create a light so we can
+
+177
+00:09:41.590 --> 00:09:44.990
+see this better, so we pull up a light point like there we go.
+
+178
+00:09:45.190 --> 00:09:52.970
+Let's pull that out and move it up and move it in and increase the strength.
+
+179
+00:09:53.169 --> 00:09:57.620
+So this light area,
+
+180
+00:09:57.779 --> 00:10:03.620
+this light will show us a bit of that surface and will even try to imitate
+
+181
+00:10:03.820 --> 00:10:07.460
+what we have by hitting that texture the way that we want.
+
+182
+00:10:07.659 --> 00:10:13.879
+Now, you'll notice it is getting let's set it says light to be built.
+
+183
+00:10:14.080 --> 00:10:16.330
+There you go. Let's do movable there.
+
+184
+00:10:16.529 --> 00:10:19.570
+And let's also switch to Lumen.
+
+185
+00:10:19.769 --> 00:10:24.049
+The changes aren't going to be huge when you do use Lumen with this.
+
+186
+00:10:24.250 --> 00:10:27.529
+And what I mean by that, it's still going to try to render visually,
+
+187
+00:10:27.690 --> 00:10:34.139
+give you that optical illusion in here.
+
+188
+00:10:34.340 --> 00:10:36.379
+It'll still try to adhere.
+
+189
+00:10:36.379 --> 00:10:37.580
+See, we're already Lumen.
+
+190
+00:10:37.779 --> 00:10:41.580
+I already did change it, so we didn't need to worry about that so much.
+
+191
+00:10:41.779 --> 00:10:43.419
+You do want to again make sure you're
+
+192
+00:10:43.620 --> 00:10:46.899
+using hardware texturing and use hardware support with that.
+
+193
+00:10:47.100 --> 00:10:48.419
+So we're good. We're good.
+
+194
+00:10:48.620 --> 00:10:53.700
+It just thought probably because I had some previous settings for baking.
+
+195
+00:10:53.899 --> 00:10:55.220
+But again, as I move this light
+
+196
+00:10:55.419 --> 00:10:58.220
+around, you'll notice we're getting some highlights.
+
+197
+00:10:58.220 --> 00:11:01.259
+We also have some other lights in here, too,
+
+198
+00:11:01.460 --> 00:11:03.740
+that we need and want for our visuals.
+
+199
+00:11:03.940 --> 00:11:06.860
+And we can change these in our scene.
+
+200
+00:11:06.860 --> 00:11:10.860
+And you'll see the parallax is taking that information, which is pretty great.
+
+201
+00:11:11.059 --> 00:11:12.179
+You will notice, though,
+
+202
+00:11:12.379 --> 00:11:17.179
+when I move the light around that we're not getting actual geometry shadows.
+
+203
+00:11:17.379 --> 00:11:19.059
+So that's where it can break down.
+
+204
+00:11:19.259 --> 00:11:20.539
+So just keep that in mind.
+
+205
+00:11:20.740 --> 00:11:24.019
+Don't just we're not getting a shadow here and here.
+
+206
+00:11:24.019 --> 00:11:25.659
+And that's what I was trying to demonstrate here.
+
+207
+00:11:25.659 --> 00:11:26.620
+But he's just not thinking.
+
+208
+00:11:26.779 --> 00:11:30.220
+He's not deep enough and his colors off, so it wouldn't quite show.
+
+209
+00:11:30.419 --> 00:11:32.659
+But that's the thing you have to keep in mind.
+
+210
+00:11:32.860 --> 00:11:34.899
+So if you're using this to really fool
+
+211
+00:11:35.100 --> 00:11:39.659
+the eye, it literally is just giving a mirage type of effect.
+
+212
+00:11:39.860 --> 00:11:42.179
+So it isn't actually geometry.
+
+213
+00:11:42.379 --> 00:11:44.259
+That's it doesn't try to imitate the
+
+214
+00:11:44.460 --> 00:11:48.139
+shadow as probably as accurately as some people would want.
+
+215
+00:11:48.340 --> 00:11:52.740
+So if we compare the effect with let's move this over here.
+
+216
+00:11:52.940 --> 00:11:56.019
+If we compare the effect to a bump offset, which is the old school way,
+
+217
+00:11:56.179 --> 00:11:57.779
+it actually works pretty good.
+
+218
+00:11:57.980 --> 00:12:00.580
+Now you'll see the bump offset does catch the light.
+
+219
+00:12:00.779 --> 00:12:03.059
+Looks pretty great. That isn't too shabby.
+
+220
+00:12:03.259 --> 00:12:05.700
+But if we compare that over here
+
+221
+00:12:05.899 --> 00:12:09.700
+to a parallax, parallax looks pretty good.
+
+222
+00:12:09.899 --> 00:12:15.259
+And the fact that we are getting a more three dimensional look and feel to
+
+223
+00:12:15.460 --> 00:12:21.279
+everything, it's not too bad, but you'll notice it does blur on the edges where
+
+224
+00:12:21.480 --> 00:12:24.519
+the bump offset does not blur on the edges as much.
+
+225
+00:12:24.679 --> 00:12:27.759
+So that is the plus and minus for each.
+
+226
+00:12:27.960 --> 00:12:32.120
+But we do get a better kind of lighting set up with these.
+
+227
+00:12:32.320 --> 00:12:36.000
+When you mess with it's going to move this back down.
+
+228
+00:12:36.200 --> 00:12:37.720
+Let's move this over.
+
+229
+00:12:37.919 --> 00:12:39.559
+And you'll see the
+
+230
+00:12:39.759 --> 00:12:43.679
+stones catching light a bit better than some of the other pieces.
+
+231
+00:12:43.879 --> 00:12:46.159
+There you go. He's a cranked up light anyway.
+
+232
+00:12:46.360 --> 00:12:52.759
+So to be fair and you'll see that these rocks are moving around
+
+233
+00:12:52.919 --> 00:12:57.320
+the stones and actually catches light pretty well, especially on the side,
+
+234
+00:12:57.519 --> 00:13:01.879
+specifically the sides, it does a pretty good job of that.
+
+235
+00:13:02.080 --> 00:13:04.399
+You notice it just popped along with the shadow.
+
+236
+00:13:04.399 --> 00:13:06.830
+And that's because we're going past our attenuation.
+
+237
+00:13:07.029 --> 00:13:08.950
+But again, it's really up to you how
+
+238
+00:13:09.149 --> 00:13:12.750
+you want to do it, because the bottom is not too bad, it's not too shabby.
+
+239
+00:13:12.950 --> 00:13:17.590
+But this gives you a bit more three dimensional look and feel to your stuff.
+
+240
+00:13:17.789 --> 00:13:19.669
+But there can be a blur factor.
+
+241
+00:13:19.870 --> 00:13:21.870
+So that's why some of those other
+
+242
+00:13:22.070 --> 00:13:23.389
+options were available.
+
+243
+00:13:23.590 --> 00:13:28.360
+Let's click on this and go into the material to be able to control that.
+
+244
+00:13:28.559 --> 00:13:32.200
+And if we go open this up again,
+
+245
+00:13:32.399 --> 00:13:35.720
+you'll see that we have these steps to control things.
+
+246
+00:13:35.919 --> 00:13:40.399
+Number of raised shaders casting and be able to create the effect.
+
+247
+00:13:40.600 --> 00:13:47.740
+And there's also keeping the max low gives us visual distortion and default is 30.
+
+248
+00:13:47.779 --> 00:13:50.039
+So if you wanted to,
+
+249
+00:13:50.240 --> 00:13:55.230
+you can crank this up to like maybe 50 if you want it.
+
+250
+00:13:55.429 --> 00:14:03.080
+And we hit apply and we'll move in and it gets a little bit crisper,
+
+251
+00:14:03.279 --> 00:14:07.519
+but it does cost more GPU wise, give them mine.
+
+252
+00:14:07.720 --> 00:14:10.480
+We are still getting blurry on the edge there.
+
+253
+00:14:10.679 --> 00:14:14.820
+And then we can go back to the 16 if you wanted to.
+
+254
+00:14:15.019 --> 00:14:17.740
+Let's go back from we did 50, right?
+
+255
+00:14:17.740 --> 00:14:20.840
+Let's do
+
+256
+00:14:21.240 --> 00:14:23.000
+60 again,
+
+257
+00:14:23.200 --> 00:14:27.210
+16, I think it was what I had before.
+
+258
+00:14:27.409 --> 00:14:30.179
+And then we hit apply.
+
+259
+00:14:30.379 --> 00:14:32.019
+And then you can see the difference between them.
+
+260
+00:14:32.220 --> 00:14:33.500
+It's a little bit slight there.
+
+261
+00:14:33.700 --> 00:14:36.320
+You see it more on the sides.
+
+262
+00:14:36.519 --> 00:14:38.480
+But that's it with this one.
+
+263
+00:14:38.679 --> 00:14:43.039
+Hopefully you guys found this enlightening and a good way to approach your materials.
+
+264
+00:14:43.240 --> 00:14:47.799
+These are two or several complex materials to look at.
+
+265
+00:14:48.000 --> 00:14:51.879
+This guy is a lot less complex than earlier versions of unreal.
+
+266
+00:14:52.039 --> 00:14:54.000
+Where he was red and pink.
+
+267
+00:14:54.200 --> 00:14:57.000
+And you'll notice he's just a darker green, which is fantastic.
+
+268
+00:14:57.200 --> 00:15:00.480
+That means you might be able to use them a little bit more liberally,
+
+269
+00:15:00.679 --> 00:15:03.039
+if I can talk, but that's it with this course.
+
+270
+00:15:03.240 --> 00:15:06.200
+We'll do a quick course wrap up, but I hope you enjoyed it.
+
+271
+00:15:06.399 --> 00:15:08.000
+And thanks again.

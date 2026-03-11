@@ -1,0 +1,389 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.919
+So next up, let's go on to exercise three, and in this we're going to be looking at
+
+2
+00:00:07.360 --> 00:00:15.869
+using the post process material. So as you can see here, I have a little scene in front of us
+
+3
+00:00:15.869 --> 00:00:20.989
+where we have some random shapes. And what we're going to be doing here is we're going
+
+4
+00:00:20.989 --> 00:00:26.269
+to be using the post process in order to create an outline effect with these.
+
+5
+00:00:26.269 --> 00:00:33.390
+So what we're going to be using is the custom depth buffer. So let's have a look at this to
+
+6
+00:00:33.390 --> 00:00:42.909
+start with. We have a post process volume, and for this we have the post process material,
+
+7
+00:00:42.909 --> 00:00:47.229
+as you can see down in the details panel, and we have one assigned, and that's the one
+
+8
+00:00:47.229 --> 00:00:52.829
+that we have here. But at the moment it's doing nothing. And let's have a look why.
+
+9
+00:00:52.829 --> 00:01:01.579
+So if I open this up, and kill this down, see that we have nothing plugged into our
+
+10
+00:01:01.579 --> 00:01:06.379
+post process material. Even more importantly, our material domain is incorrect. We have this
+
+11
+00:01:06.379 --> 00:01:12.939
+in surface. So we do a drop down, change this to post process, and apply. You're going to see
+
+12
+00:01:12.939 --> 00:01:19.980
+that the world goes black. And that's because this post process material is taking over
+
+13
+00:01:20.060 --> 00:01:26.700
+the screen. If I move outside of the post process volume, you can see that it's no longer in
+
+14
+00:01:26.700 --> 00:01:34.900
+action. I can always make the post process volume have an infinite extent by taking unbound,
+
+15
+00:01:34.900 --> 00:01:41.680
+tick this button here. That means that anywhere it would apply. But for simplicity, we just
+
+16
+00:01:41.680 --> 00:01:48.769
+want to be able to jump out of it. Okay, so let's jump into our post process material.
+
+17
+00:01:51.439 --> 00:01:58.239
+And one of the most important nodes that you'd ever want to use within a post process material
+
+18
+00:01:58.879 --> 00:02:03.519
+is Scene Textures. So if I was to right-hand-click and click in Scene,
+
+19
+00:02:04.480 --> 00:02:13.280
+Texture, let's put it correctly, you'll see that I get a node that looks like this. If I
+
+20
+00:02:13.280 --> 00:02:18.960
+was to plug this into the emissive color, it's going to give us an error. And that's because
+
+21
+00:02:19.919 --> 00:02:26.240
+the default material domain is Surface, and we're working in post process. So the Surface domain
+
+22
+00:02:26.240 --> 00:02:32.560
+is not available to us. However, with this selected, you'll see that we have a drop down
+
+23
+00:02:32.560 --> 00:02:37.840
+box in the left hand corner here. And this is going to give us access to a whole load of
+
+24
+00:02:37.840 --> 00:02:44.479
+different, well, buffers really. And these are going to be things such as, for example,
+
+25
+00:02:44.479 --> 00:02:50.560
+we have the world normals, the metallic buffer, the specular. So if I was to select world normals,
+
+26
+00:02:50.560 --> 00:02:56.560
+for example, you can see that we get different values depending on the direction the normals
+
+27
+00:02:56.560 --> 00:03:02.560
+are looking in. To apply, you can now see that that applies it to the world here where
+
+28
+00:03:02.560 --> 00:03:07.620
+blue is directly up. Now these buffers, you can actually have a look at if you
+
+29
+00:03:08.500 --> 00:03:13.620
+jump into buffer visualization. You'll see that we have a lot of the buffers here,
+
+30
+00:03:13.620 --> 00:03:21.090
+so that we've got things such as like metallic, and the post process seems to be overpowering
+
+31
+00:03:21.090 --> 00:03:28.050
+that. But these are similar to what we will be able to grab within here, because these are
+
+32
+00:03:28.050 --> 00:03:35.729
+the G buffers. So as you are calculating the screen, the Unreal is going away and it's
+
+33
+00:03:35.729 --> 00:03:45.810
+taking each of the different meshes and effects and stuff like that, and it's breaking them down
+
+34
+00:03:45.810 --> 00:03:52.930
+into individual render buckets. And then afterwards it will compile them all together into a G buffer,
+
+35
+00:03:52.930 --> 00:03:58.689
+which is a texture the size of your screen, which it will use then in order to generate
+
+36
+00:03:58.689 --> 00:04:03.729
+the final image. So these are all of the different G buffers. We have diffuse color,
+
+37
+00:04:03.729 --> 00:04:12.349
+scene color for example, which is just plain color, scene depth, or scene color, diffuse color.
+
+38
+00:04:12.349 --> 00:04:18.990
+You can see we've got a load of different elements here. Now we are going to be working
+
+39
+00:04:18.990 --> 00:04:25.470
+with, so the first thing is we want the original scene back here. We need to use that,
+
+40
+00:04:25.470 --> 00:04:34.050
+and we can get that by selecting the post process input zero. So you'll see once we've selected
+
+41
+00:04:34.050 --> 00:04:38.750
+that, we're back to normal. We jump in the level, the level looks like it's normal,
+
+42
+00:04:39.699 --> 00:04:46.259
+but this will allow us to do an overlay or do sort of different creations.
+
+43
+00:04:47.250 --> 00:04:53.490
+So what I'm going to do is I'm going to hold down the L key, left click into the material
+
+44
+00:04:53.490 --> 00:05:01.310
+chart, and I'm going to plug this alert into the output pen, and I'm going to plug our post
+
+45
+00:05:01.310 --> 00:05:07.949
+process into the A. We've touched on lerps before. If the alpha is zero, it will show what's
+
+46
+00:05:07.949 --> 00:05:14.990
+picked in A. If the alpha is one, it will show what's in B. And anything in between,
+
+47
+00:05:14.990 --> 00:05:22.740
+it will give us different values. Now I'm going to duplicate this scene texture by pressing
+
+48
+00:05:22.740 --> 00:05:31.579
+CTRL D. And in order for us to create this outline, what I'm going to do is I'm going to
+
+49
+00:05:31.579 --> 00:05:41.220
+use something that's called scene depth. Now, if you search for depth, you see that we've
+
+50
+00:05:41.220 --> 00:05:48.180
+got scene depth here. If I was to plug that directly in, we would get pure white.
+
+51
+00:05:48.980 --> 00:05:55.459
+And that's because the input for a material is looking for values between zero and one.
+
+52
+00:05:56.019 --> 00:06:02.660
+But what scene depth is returning is it's returning the depth of the pixel
+
+53
+00:06:03.540 --> 00:06:11.379
+based on in centimeters away from the camera. So in order to get any kind of value that we can
+
+54
+00:06:11.379 --> 00:06:18.899
+see, I'm going to need to divide this. So let's say I divide this by, I don't know, let's say
+
+55
+00:06:18.899 --> 00:06:28.779
+four thousand and now apply. You can have a look in the scene. You can see that we now have
+
+56
+00:06:29.339 --> 00:06:37.660
+the scene depth. This is going to tell us how far away a specific actor is in centimeters
+
+57
+00:06:37.660 --> 00:06:42.699
+divided by a thousand. So things that are black are going to be close by. Things that are white
+
+58
+00:06:42.699 --> 00:06:50.699
+are going to be far away. And that's useful for us. Now it's not actually scene depth that
+
+59
+00:06:50.699 --> 00:06:59.180
+we want to use. What we want to use is something that's called custom depth. And this
+
+60
+00:06:59.259 --> 00:07:03.980
+runs in exactly the same way as the scene depth. So if I still apply it through four thousand,
+
+61
+00:07:04.540 --> 00:07:09.899
+we can see that. But now we only see one of these cones and one of these spheres.
+
+62
+00:07:11.040 --> 00:07:20.480
+So why is that? That's because the cone and the sphere, I have ticked on the box
+
+63
+00:07:20.480 --> 00:07:30.800
+for custom depth. So you can see here we have custom depth. So what this will do
+
+64
+00:07:31.360 --> 00:07:38.019
+is as soon as I mark it as rendered in the custom depth, rendering custom depth pass here,
+
+65
+00:07:38.819 --> 00:07:43.540
+what it's going to do is there is a secondary depth pass. So the first depth pass we showed
+
+66
+00:07:43.540 --> 00:07:49.459
+showed the entire scene. The secondary depth pass, the custom depth, will only show any of
+
+67
+00:07:49.459 --> 00:07:58.610
+the elements that have this box ticked. So this allows us to tick these and show them within
+
+68
+00:07:58.610 --> 00:08:07.740
+this pass. So if we jump back into the material, what we can do is I'm going to
+
+69
+00:08:07.740 --> 00:08:13.889
+let's add some extra code in. I'm going to take the color, do a divide, but this time by
+
+70
+00:08:13.889 --> 00:08:26.699
+fifty thousand. Then I'm going to do a one minus. So this just swaps it over. So
+
+71
+00:08:26.699 --> 00:08:34.370
+rather from black to one, we white, we are swapping them over. And then I will do a
+
+72
+00:08:34.370 --> 00:08:44.399
+clap. I'm going to clamp this value only to point nine. I'm going to plug that into the alpha
+
+73
+00:08:47.009 --> 00:08:50.610
+and into the second pin here. I'm just going to plug a color. So I'm going to push four
+
+74
+00:08:51.779 --> 00:08:58.750
+and I'm going to go to blue, make sure the alpha is one, and plug that into the
+
+75
+00:08:58.750 --> 00:09:02.909
+lower. Now, because it's only point nine, it will never be completely blue.
+
+76
+00:09:03.549 --> 00:09:11.019
+It will always be at least 10 percent the post process texture. Now if I go save and apply,
+
+77
+00:09:12.590 --> 00:09:19.090
+you can see that these are outlined. Now one of the things you might notice is it jitters
+
+78
+00:09:19.090 --> 00:09:26.690
+a little bit. Now we can fix that by in the post process volume, we can change the blendable
+
+79
+00:09:26.690 --> 00:09:35.100
+location. So if I was to search here, we just change it to, I usually find that
+
+80
+00:09:35.820 --> 00:09:42.860
+seeing color after depth of field will calm it down a bit. Then that looks a lot better.
+
+81
+00:09:42.860 --> 00:09:51.100
+So you can now see we've created a way of drawing an x-ray around these different items.
+
+82
+00:09:52.669 --> 00:09:56.909
+Now that's a good demonstration. It's a good basic way of putting stuff together. However,
+
+83
+00:09:56.909 --> 00:10:04.190
+we can get a lot more advanced for this. Let's jump on to the next version here.
+
+84
+00:10:05.259 --> 00:10:11.820
+You can see that we have an effect with the scrolling B. Now these scrolling stripes.
+
+85
+00:10:12.539 --> 00:10:19.440
+Now this is really, really useful in order to highlight an object. It is good for a UI
+
+86
+00:10:19.440 --> 00:10:23.440
+within the world. You can see here we've got a couple of other abilities as well.
+
+87
+00:10:23.440 --> 00:10:30.480
+We're using the depth field so that if there's something in the way, it doesn't do the x-ray
+
+88
+00:10:30.480 --> 00:10:35.980
+effect so that we can just create this highlighting effect. I think if I come into
+
+89
+00:10:35.980 --> 00:10:57.970
+the world here and just run up to this here, you should see that the character now has it.
+
+90
+00:10:59.519 --> 00:11:04.240
+Because all I've done, and so now the character is fully displayed on this.
+
+91
+00:11:04.799 --> 00:11:10.620
+In order to create this effect, it's quite simple. You can see that we have this model here.
+
+92
+00:11:10.620 --> 00:11:19.230
+If I was to open this up, what I've done is when the third person character gets close to it,
+
+93
+00:11:19.870 --> 00:11:25.789
+I will set the rendered custom depth value to true. It allows me to just turn that rendered
+
+94
+00:11:25.789 --> 00:11:32.429
+depth pass on to true and then I can dictate within the post process volume how that would
+
+95
+00:11:32.429 --> 00:11:41.389
+be calculated. So that programmatically you can do at runtime and that's just by changing the
+
+96
+00:11:42.269 --> 00:11:48.590
+flicking this box, this value on if a mesh or skeletal mesh is rendered in the custom depth
+
+97
+00:11:48.590 --> 00:11:59.389
+house.

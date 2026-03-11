@@ -1,0 +1,1081 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:06.099
+So, widget-overrideable functions. We've talked a little bit about the widget editor itself.
+
+2
+00:00:06.099 --> 00:00:10.099
+Let's go a bit more detail into the blueprint-y side of things.
+
+3
+00:00:10.099 --> 00:00:13.669
+The key functions to be aware of.
+
+4
+00:00:13.669 --> 00:00:17.670
+OnInitialize, Preconstruct, Construct, Tick and Destruct.
+
+5
+00:00:17.670 --> 00:00:20.670
+You could get a long way with all of these really.
+
+6
+00:00:20.670 --> 00:00:26.269
+Preconstruct is a function we've talked a little bit about already.
+
+7
+00:00:26.269 --> 00:00:30.269
+This essentially gets called as soon as our widget gets created.
+
+8
+00:00:30.670 --> 00:00:33.670
+This is similar to Construct, which we'll talk about in a second.
+
+9
+00:00:33.670 --> 00:00:39.869
+But this function, Preconstruct, gets called both at design time in the game and in editor.
+
+10
+00:00:39.869 --> 00:00:42.270
+So, that has a lot in common with synchronized properties.
+
+11
+00:00:42.270 --> 00:00:44.469
+We've kind of already highlighted the discrepancy there,
+
+12
+00:00:44.469 --> 00:00:49.469
+that Preconstruct is only for user widgets and downwards and is exposed to Blueprint.
+
+13
+00:00:49.469 --> 00:00:53.469
+Synchronized properties is anything from UWidget downwards
+
+14
+00:00:53.469 --> 00:00:58.670
+and it also has the burden of responsibility of funneling data down from the UWidget
+
+15
+00:00:58.670 --> 00:01:01.070
+down to the SWidget.
+
+16
+00:01:01.070 --> 00:01:05.670
+So, in any pre-existing Unreal widget, you'll see they have a synchronized properties value
+
+17
+00:01:05.670 --> 00:01:07.670
+and they are sending data down to the SWidget.
+
+18
+00:01:07.670 --> 00:01:10.670
+So, it has additional stuff that it's doing.
+
+19
+00:01:10.670 --> 00:01:13.670
+But other than that, they have a lot in common there.
+
+20
+00:01:18.140 --> 00:01:23.140
+Yes, OnInitialized is called as the widget is created
+
+21
+00:01:23.140 --> 00:01:28.140
+and it has absolutely no correlation for whether or not the widget is actually displayed.
+
+22
+00:01:28.140 --> 00:01:31.140
+So, an important thing about Construct and Preconstruct
+
+23
+00:01:31.140 --> 00:01:37.140
+is that these will be called when our widget actually gets put onto screen.
+
+24
+00:01:37.140 --> 00:01:42.140
+So, Construct is kind of the closest thing to an active begin play function.
+
+25
+00:01:42.140 --> 00:01:44.140
+It's kind of like our widget has started.
+
+26
+00:01:44.140 --> 00:01:50.140
+But a kind of important caveat is that it's very typical that Construct might get called multiple times.
+
+27
+00:01:50.140 --> 00:01:54.140
+So, every time you add a widget to Viewport,
+
+28
+00:01:54.140 --> 00:01:57.140
+it's Construct and it's Preconstruct will get called.
+
+29
+00:01:57.140 --> 00:02:00.140
+Every time you remove a widget from the Viewport,
+
+30
+00:02:00.140 --> 00:02:02.140
+we get a Destruct get called.
+
+31
+00:02:02.140 --> 00:02:05.140
+So, this is kind of like equivalent-ish to our end play.
+
+32
+00:02:05.140 --> 00:02:10.139
+But again, a widget that gets added to screen or removed from screen multiple times
+
+33
+00:02:10.139 --> 00:02:13.139
+will have Construct and Destruct called multiple times.
+
+34
+00:02:13.139 --> 00:02:18.580
+If you really want something a little bit closer to the real functionality of begin play,
+
+35
+00:02:18.580 --> 00:02:20.580
+which is this thing gets called once,
+
+36
+00:02:20.580 --> 00:02:23.580
+with the caveat that in multiplayer scenarios,
+
+37
+00:02:23.580 --> 00:02:26.580
+with things becoming out of relevancy, begin play might get called multiple times.
+
+38
+00:02:26.580 --> 00:02:29.580
+So, I'm slightly flipping there.
+
+39
+00:02:29.580 --> 00:02:33.580
+The onInitialize is a function that gets called only once.
+
+40
+00:02:33.580 --> 00:02:37.580
+And it has absolutely no bearing on whether or not that widget gets displayed,
+
+41
+00:02:37.580 --> 00:02:38.580
+a widget could never get added to screen.
+
+42
+00:02:38.580 --> 00:02:42.580
+It's onInitialize that gets called the moment that widget gets created.
+
+43
+00:02:42.580 --> 00:02:47.580
+It's important to mention that onInitialize is called very, very early in the process.
+
+44
+00:02:47.580 --> 00:02:53.580
+So early, in fact, that if you have variables that are marked as exposed on spawn,
+
+45
+00:02:53.580 --> 00:02:59.580
+those variables won't even have their exposed on spawn value set yet on Initialize.
+
+46
+00:02:59.580 --> 00:03:03.580
+If that's a little bit confusing, I'm not completely sure what I mean by that.
+
+47
+00:03:03.580 --> 00:03:05.580
+Let's actually just do a quick demonstration.
+
+48
+00:03:05.580 --> 00:03:10.770
+So, if we go to our widget, this is just our new widget.
+
+49
+00:03:10.770 --> 00:03:12.770
+I'm just going to delete all the content we put in there,
+
+50
+00:03:12.770 --> 00:03:14.770
+because we just don't need it.
+
+51
+00:03:14.770 --> 00:03:18.770
+We can leave the visuals, that doesn't matter too much.
+
+52
+00:03:18.770 --> 00:03:27.129
+So, if we do our pre-construct, we do a print string here,
+
+53
+00:03:27.129 --> 00:03:30.129
+you can see we've got the bool for whether or not we're in design time.
+
+54
+00:03:30.129 --> 00:03:38.520
+We're going to do our construct, and we're going to say pre-construct here,
+
+55
+00:03:38.520 --> 00:03:58.240
+construct here, destruct, you can see where this is going, and initialize.
+
+56
+00:03:58.240 --> 00:04:14.159
+Okay, so, if we were to add this widget to our screen,
+
+57
+00:04:14.159 --> 00:04:17.089
+you can see all of those things will get called.
+
+58
+00:04:17.089 --> 00:04:21.089
+I've got a kind of server setup running here, let me just go into standalone.
+
+59
+00:04:21.089 --> 00:04:25.139
+What I'm going to do is I'm actually going to do begin play,
+
+60
+00:04:25.139 --> 00:04:28.139
+I'm going to promote that to a variable,
+
+61
+00:04:28.139 --> 00:04:34.189
+and what I'll do is I'll just quickly put in a debug key here.
+
+62
+00:04:34.189 --> 00:04:38.189
+So, debug key one, and I'm just going to do a flip-flop.
+
+63
+00:04:38.189 --> 00:04:40.189
+Very useful in control flow function,
+
+64
+00:04:40.189 --> 00:04:42.189
+but you're just quickly trying to test things.
+
+65
+00:04:42.189 --> 00:04:49.149
+And so, on the flip, we're going to put the widget on screen,
+
+66
+00:04:49.149 --> 00:04:54.850
+on flop, these are not official terms.
+
+67
+00:04:54.850 --> 00:04:56.850
+We're going to remove it from parent,
+
+68
+00:04:56.850 --> 00:04:59.069
+we're just going to remove it from the screen.
+
+69
+00:04:59.069 --> 00:05:02.069
+So, let's just see what happens.
+
+70
+00:05:02.069 --> 00:05:06.300
+So, when we begin play, you see on initialize gets called,
+
+71
+00:05:06.300 --> 00:05:09.300
+and then I added the screen, pre-construct and then construct get called,
+
+72
+00:05:09.300 --> 00:05:12.300
+so obviously the kind of lower one is being done first,
+
+73
+00:05:12.300 --> 00:05:15.300
+you can see pre-construct is getting called first, destruct is called,
+
+74
+00:05:15.300 --> 00:05:18.360
+add it again, pre-construct and construct.
+
+75
+00:05:18.360 --> 00:05:20.360
+The object isn't getting deleted, it's not changing,
+
+76
+00:05:20.360 --> 00:05:23.360
+but it's getting called multiple times, right?
+
+77
+00:05:23.360 --> 00:05:25.360
+But the other element to kind of bear in mind here,
+
+78
+00:05:25.360 --> 00:05:28.740
+again, initialize only getting called once,
+
+79
+00:05:28.740 --> 00:05:31.740
+is that if you do expose on spawn,
+
+80
+00:05:31.740 --> 00:05:33.740
+so you might not be familiar with this,
+
+81
+00:05:33.740 --> 00:05:37.740
+but this is a concept not unique to UMG, but it's also for any actors.
+
+82
+00:05:37.740 --> 00:05:40.740
+If you have some data that you kind of want to be,
+
+83
+00:05:40.740 --> 00:05:42.740
+you know, something you can set as that thing gets created,
+
+84
+00:05:42.740 --> 00:05:46.740
+I'm just going to do like some string,
+
+85
+00:05:46.740 --> 00:05:50.970
+and mark it instance editable and expose on spawn,
+
+86
+00:05:50.970 --> 00:05:54.970
+you'll see that when I go to my level blueprint,
+
+87
+00:05:54.970 --> 00:05:59.470
+if something is marked as expose on spawn,
+
+88
+00:05:59.470 --> 00:06:01.470
+if I refresh this node,
+
+89
+00:06:01.470 --> 00:06:05.470
+you can see I now get to pass in some value for some string to be,
+
+90
+00:06:05.470 --> 00:06:10.470
+so I'm just going to type in some cool phrase,
+
+91
+00:06:10.470 --> 00:06:16.660
+and if we print that on our construct,
+
+92
+00:06:16.660 --> 00:06:21.660
+instead of saying construct, we print what the cool phrase is,
+
+93
+00:06:21.660 --> 00:06:25.379
+or even our pre-construct,
+
+94
+00:06:25.379 --> 00:06:33.879
+when I press one, they both say some cool phrase,
+
+95
+00:06:33.879 --> 00:06:36.879
+so clearly, that value has been passed in.
+
+96
+00:06:36.879 --> 00:06:45.500
+However, if I were to do the same thing with our initialize,
+
+97
+00:06:45.500 --> 00:06:48.500
+it's, well, actually, what I'm going to do is I'm going to give it some initial value,
+
+98
+00:06:48.500 --> 00:06:50.500
+because otherwise you're going to see nothing,
+
+99
+00:06:50.500 --> 00:06:52.500
+so I'm just going to do ee,
+
+100
+00:06:52.500 --> 00:06:58.769
+and when I play, you see it says ee,
+
+101
+00:06:58.769 --> 00:07:03.769
+and that's because initialize is called so early in the flow
+
+102
+00:07:03.769 --> 00:07:07.769
+that it's before our,
+
+103
+00:07:07.769 --> 00:07:10.769
+even before our expose on spawn variables
+
+104
+00:07:10.769 --> 00:07:13.769
+have been kind of properly assigned,
+
+105
+00:07:13.769 --> 00:07:15.769
+so just an important thing to bear in mind
+
+106
+00:07:15.769 --> 00:07:17.769
+when you're working with some of this stuff
+
+107
+00:07:17.769 --> 00:07:19.769
+is that initialize is very powerful,
+
+108
+00:07:19.769 --> 00:07:22.769
+but it's literally, you should really only be setting internal data.
+
+109
+00:07:22.769 --> 00:07:25.769
+You can't rely on data necessarily coming into the widget
+
+110
+00:07:25.769 --> 00:07:28.769
+because it's called so early
+
+111
+00:07:28.769 --> 00:07:30.769
+that that data may not even be valid yet.
+
+112
+00:07:30.769 --> 00:07:32.769
+Just a little thing to bear in mind.
+
+113
+00:07:32.769 --> 00:07:36.470
+And then the last element here is tick,
+
+114
+00:07:36.470 --> 00:07:40.470
+which is very synonymous with this tick we're already kind of used to.
+
+115
+00:07:40.470 --> 00:07:42.470
+This is a thing that's called once per frame.
+
+116
+00:07:42.470 --> 00:07:47.470
+Unlike actor tick, same as construct,
+
+117
+00:07:47.470 --> 00:07:50.470
+this tick is only called whilst that widget is on screen,
+
+118
+00:07:50.470 --> 00:07:53.470
+so if I can just quickly demonstrate that.
+
+119
+00:07:53.470 --> 00:07:59.620
+If we go to our widget tick,
+
+120
+00:07:59.620 --> 00:08:07.230
+I'm just going to say hello because I'm lazy.
+
+121
+00:08:07.230 --> 00:08:11.949
+You can see it's peering lots.
+
+122
+00:08:11.949 --> 00:08:14.949
+I take it off screen, and it's not printing anymore,
+
+123
+00:08:14.949 --> 00:08:17.949
+and I put it back on screen, and it's printing a lot again.
+
+124
+00:08:17.949 --> 00:08:24.079
+If you're wondering where that other hello came from,
+
+125
+00:08:24.079 --> 00:08:25.079
+that was actually our initialize,
+
+126
+00:08:25.079 --> 00:08:29.399
+so I'll, yeah, that wasn't the tick for having once.
+
+127
+00:08:29.399 --> 00:08:32.399
+So, yeah, that's kind of everything
+
+128
+00:08:32.399 --> 00:08:35.399
+about the kind of initial core functions,
+
+129
+00:08:35.399 --> 00:08:37.399
+core events to kind of know about.
+
+130
+00:08:37.399 --> 00:08:40.399
+Obviously, these all have C++ equivalents,
+
+131
+00:08:40.399 --> 00:08:42.399
+so these are all called native on initialize,
+
+132
+00:08:42.399 --> 00:08:44.399
+native on reconstruct, native reconstruct,
+
+133
+00:08:44.399 --> 00:08:46.399
+native construct, native tick, native destruct,
+
+134
+00:08:46.399 --> 00:08:50.399
+so do exactly the same things but in C++.
+
+135
+00:08:50.399 --> 00:08:52.820
+Then we've got some input functions.
+
+136
+00:08:52.820 --> 00:08:56.820
+This is kind of just a small subset of what's available,
+
+137
+00:08:56.820 --> 00:08:58.820
+but we'll just kind of quickly discuss some of them.
+
+138
+00:08:58.820 --> 00:09:02.820
+So we have mouse put button up and down,
+
+139
+00:09:02.820 --> 00:09:04.820
+so down is quite self-explanatory
+
+140
+00:09:04.820 --> 00:09:07.820
+as the button goes down, so as you click in,
+
+141
+00:09:07.820 --> 00:09:11.820
+mouse button up or key up is as these buttons go up,
+
+142
+00:09:11.820 --> 00:09:13.820
+and they pass in some kind of data
+
+143
+00:09:13.820 --> 00:09:16.820
+about what the widget's current geometry is,
+
+144
+00:09:16.820 --> 00:09:19.820
+information about the mouse or button event,
+
+145
+00:09:19.820 --> 00:09:21.820
+so what key was clicked,
+
+146
+00:09:21.820 --> 00:09:24.820
+where was your cursor on screen, that kind of thing.
+
+147
+00:09:24.820 --> 00:09:26.820
+A couple of important things to bear in mind
+
+148
+00:09:26.820 --> 00:09:29.820
+is that mouse button events
+
+149
+00:09:29.820 --> 00:09:34.820
+will probably only be called when the cursor is on,
+
+150
+00:09:34.820 --> 00:09:37.820
+so there's a variable you can set in the player controller
+
+151
+00:09:37.820 --> 00:09:39.820
+to say show mouse cursor,
+
+152
+00:09:39.820 --> 00:09:41.820
+but also they'll only trigger
+
+153
+00:09:41.820 --> 00:09:45.820
+when there is actually kind of physical widget geometry
+
+154
+00:09:45.820 --> 00:09:47.820
+under the cursor,
+
+155
+00:09:47.820 --> 00:09:50.820
+so even if you set this widget as a focus,
+
+156
+00:09:50.820 --> 00:09:53.820
+the mouse events will only be viable
+
+157
+00:09:53.820 --> 00:09:57.820
+when the mouse is intersecting visible,
+
+158
+00:09:57.820 --> 00:10:00.820
+and I'm not talking about visible as in the player can see it,
+
+159
+00:10:00.820 --> 00:10:03.820
+I mean with the visibility setting of visible,
+
+160
+00:10:03.820 --> 00:10:06.820
+i.e. they can be hit by tracing,
+
+161
+00:10:06.820 --> 00:10:08.820
+to make it completely clear what I mean,
+
+162
+00:10:08.820 --> 00:10:10.820
+whenever you're dealing with widgets,
+
+163
+00:10:10.820 --> 00:10:12.820
+there is a visibility setting here,
+
+164
+00:10:12.820 --> 00:10:16.320
+and we have a couple of different settings,
+
+165
+00:10:16.320 --> 00:10:18.320
+we have not hit testable,
+
+166
+00:10:18.320 --> 00:10:20.320
+which is the kind of standard setting
+
+167
+00:10:20.320 --> 00:10:22.320
+for things that might contain other things,
+
+168
+00:10:22.320 --> 00:10:24.320
+but shouldn't be hittable themselves,
+
+169
+00:10:24.320 --> 00:10:26.320
+either from navigation or from clicking,
+
+170
+00:10:26.320 --> 00:10:29.320
+we have hidden, so it occupies space,
+
+171
+00:10:29.320 --> 00:10:30.320
+but you can't see it,
+
+172
+00:10:30.320 --> 00:10:32.320
+collapsed, which means it doesn't occupy space
+
+173
+00:10:32.320 --> 00:10:33.320
+and you can't see it,
+
+174
+00:10:33.320 --> 00:10:34.320
+and last of all we have visible,
+
+175
+00:10:34.320 --> 00:10:36.320
+which means this thing does occupy space,
+
+176
+00:10:36.320 --> 00:10:37.320
+you can see it,
+
+177
+00:10:37.320 --> 00:10:39.320
+and it can be hit,
+
+178
+00:10:39.320 --> 00:10:41.320
+either by trying to navigate around the screen
+
+179
+00:10:41.320 --> 00:10:43.320
+with your gamepad or your keyboard,
+
+180
+00:10:43.320 --> 00:10:45.320
+and it can also be clicked on,
+
+181
+00:10:45.320 --> 00:10:49.320
+so it's only when your cursor is over something that is visible,
+
+182
+00:10:49.320 --> 00:10:52.320
+that is part of that widget,
+
+183
+00:10:52.320 --> 00:10:55.320
+that your mouse events will get called,
+
+184
+00:10:55.320 --> 00:10:58.320
+sorry, accidentally opening applications there,
+
+185
+00:10:58.320 --> 00:11:00.320
+we have onMouseMove,
+
+186
+00:11:00.320 --> 00:11:02.320
+so that's whilst your mouse is moving
+
+187
+00:11:02.320 --> 00:11:04.320
+within geometry of that widget,
+
+188
+00:11:04.320 --> 00:11:06.320
+onKeyDown does the same thing,
+
+189
+00:11:06.320 --> 00:11:08.320
+it doesn't have that same requirement
+
+190
+00:11:08.320 --> 00:11:12.320
+for the visible geometry,
+
+191
+00:11:12.320 --> 00:11:15.320
+but onKeyDown likely won't get called in your widget
+
+192
+00:11:15.320 --> 00:11:18.320
+unless your widget is the focus of a player,
+
+193
+00:11:18.320 --> 00:11:21.320
+we'll talk a little bit about focus in a little bit,
+
+194
+00:11:21.320 --> 00:11:24.320
+but the short explanation is that
+
+195
+00:11:24.320 --> 00:11:28.320
+when you want something to receive,
+
+196
+00:11:28.320 --> 00:11:29.320
+keyboard or gamepad input,
+
+197
+00:11:29.320 --> 00:11:32.320
+the easiest thing to do is set that widget
+
+198
+00:11:32.320 --> 00:11:34.320
+to be the focus of that player controller,
+
+199
+00:11:34.320 --> 00:11:36.320
+which you can just do through a very easy function,
+
+200
+00:11:36.320 --> 00:11:39.320
+you can just go like this,
+
+201
+00:11:39.320 --> 00:11:41.320
+I put a widget on screen,
+
+202
+00:11:41.320 --> 00:11:44.320
+and I just say setFocus,
+
+203
+00:11:44.320 --> 00:11:46.320
+and that's the kind of simplest way to do it,
+
+204
+00:11:46.320 --> 00:11:48.320
+there are other kind of caveats to bear in mind,
+
+205
+00:11:48.320 --> 00:11:50.320
+but I have now set this widget to be focused,
+
+206
+00:11:50.320 --> 00:11:53.320
+that widget could then set children of it
+
+207
+00:11:53.320 --> 00:11:55.320
+to be focused as well,
+
+208
+00:11:55.320 --> 00:11:58.320
+but that's the easiest way to say that
+
+209
+00:11:58.320 --> 00:12:00.320
+now this can probably receive,
+
+210
+00:12:00.320 --> 00:12:02.320
+the only kind of other thing to bear in mind
+
+211
+00:12:02.320 --> 00:12:05.320
+is that widget actually has to be marked as focusable,
+
+212
+00:12:05.320 --> 00:12:07.320
+so if I went to my new widget,
+
+213
+00:12:07.320 --> 00:12:11.509
+you would need to go to the designer,
+
+214
+00:12:11.509 --> 00:12:12.509
+to a hierarchy here,
+
+215
+00:12:12.509 --> 00:12:15.509
+and just make sure that it is actually a focusable widget,
+
+216
+00:12:15.509 --> 00:12:17.509
+so you just need this all ticked,
+
+217
+00:12:17.509 --> 00:12:23.509
+and now that object is likely to receive onKeyDown
+
+218
+00:12:23.509 --> 00:12:30.179
+and functions onKeyDown, onKeyUp,
+
+219
+00:12:30.179 --> 00:12:31.179
+and then onPreviewKeyDown,
+
+220
+00:12:31.179 --> 00:12:35.179
+so this is, whereas there is a mouse button down,
+
+221
+00:12:35.179 --> 00:12:38.179
+mouse button up, key down, key up,
+
+222
+00:12:38.179 --> 00:12:41.179
+previewKeyDown only exists for key down,
+
+223
+00:12:41.179 --> 00:12:43.179
+there is no preview mouse down,
+
+224
+00:12:43.179 --> 00:12:45.179
+there is no preview key up,
+
+225
+00:12:45.179 --> 00:12:47.179
+it's only for key down,
+
+226
+00:12:47.179 --> 00:12:50.179
+and whereas the standard functionality
+
+227
+00:12:50.179 --> 00:12:51.179
+for all of these input events
+
+228
+00:12:51.179 --> 00:12:55.179
+is input kind of funnels to the deepest,
+
+229
+00:12:55.179 --> 00:12:59.179
+most focused widget that it possibly can,
+
+230
+00:12:59.179 --> 00:13:04.179
+and if that widget can then essentially respond to that event,
+
+231
+00:13:04.179 --> 00:13:06.179
+you can see we can return either a handled
+
+232
+00:13:06.179 --> 00:13:09.179
+or an unhandled response to this input to say,
+
+233
+00:13:09.179 --> 00:13:11.179
+oh, I did something with this input
+
+234
+00:13:11.179 --> 00:13:13.179
+or I didn't do something with this input,
+
+235
+00:13:13.179 --> 00:13:15.179
+it doesn't matter if you actually did,
+
+236
+00:13:15.179 --> 00:13:17.179
+but this is just saying to the system,
+
+237
+00:13:17.179 --> 00:13:19.179
+oh, maybe you should look elsewhere
+
+238
+00:13:19.179 --> 00:13:21.179
+for someone else who can deal with this,
+
+239
+00:13:21.179 --> 00:13:22.179
+this is essentially saying,
+
+240
+00:13:22.179 --> 00:13:24.179
+you know, look elsewhere or don't,
+
+241
+00:13:24.179 --> 00:13:25.179
+handled means I've done it,
+
+242
+00:13:25.179 --> 00:13:27.179
+you don't need to look any further,
+
+243
+00:13:27.179 --> 00:13:28.179
+unhandled means no,
+
+244
+00:13:28.179 --> 00:13:30.179
+maybe kind of bubble this up the chain,
+
+245
+00:13:30.179 --> 00:13:31.179
+and so what that will do is
+
+246
+00:13:31.179 --> 00:13:33.179
+the input will go to the deepest,
+
+247
+00:13:33.179 --> 00:13:34.179
+most focused widget,
+
+248
+00:13:34.179 --> 00:13:38.179
+and if the input is unhandled,
+
+249
+00:13:38.179 --> 00:13:41.179
+then naturally the input will filter up
+
+250
+00:13:41.179 --> 00:13:43.179
+the actual widget hierarchy
+
+251
+00:13:43.179 --> 00:13:44.179
+to the kind of next widget up
+
+252
+00:13:44.179 --> 00:13:45.179
+to see if it can handle that input
+
+253
+00:13:45.179 --> 00:13:48.730
+and so on and so forth.
+
+254
+00:13:48.730 --> 00:13:49.730
+On previewKeyDown,
+
+255
+00:13:49.730 --> 00:13:52.730
+it kind of gets called before any of that stuff
+
+256
+00:13:52.730 --> 00:13:55.730
+and gives widgets further up the hierarchy
+
+257
+00:13:55.730 --> 00:13:56.730
+the opportunity to kind of steal
+
+258
+00:13:56.730 --> 00:14:00.730
+that input before it gets to the widgets below it
+
+259
+00:14:00.730 --> 00:14:01.730
+so that you can kind of do
+
+260
+00:14:01.730 --> 00:14:04.730
+a kind of top-down parent overrules child
+
+261
+00:14:04.730 --> 00:14:08.730
+kind of thing in case you need that functionality
+
+262
+00:14:08.730 --> 00:14:09.730
+in any places.
+
+263
+00:14:09.730 --> 00:14:12.919
+So that's just a little bit of a taster
+
+264
+00:14:12.919 --> 00:14:13.919
+of all the things available.
+
+265
+00:14:13.919 --> 00:14:16.919
+You should absolutely look into the user widget
+
+266
+00:14:16.919 --> 00:14:18.919
+to kind of get a more full picture.
+
+267
+00:14:18.919 --> 00:14:20.919
+There's a lot of caveats with all of these things,
+
+268
+00:14:20.919 --> 00:14:21.919
+so definitely look into it some more,
+
+269
+00:14:21.919 --> 00:14:23.919
+but those are kind of some key functions
+
+270
+00:14:23.919 --> 00:14:25.919
+to just be aware of.

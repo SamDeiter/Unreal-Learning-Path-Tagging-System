@@ -1,0 +1,777 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:07.280
+We'll kick off today by starting with layered materials, so we'll cover how to use layered materials
+
+2
+00:00:07.280 --> 00:00:11.800
+We'll go about the old way that we may have approached layered materials in Unreal Engine
+
+3
+00:00:12.080 --> 00:00:15.720
+Then we'll talk about the Megascans approach and then also a new way
+
+4
+00:00:16.079 --> 00:00:23.480
+Which we'll take moving forward on our layered material journey. So layered materials. You've got the three different examples here
+
+5
+00:00:23.480 --> 00:00:28.239
+We've got the old way. We've got the Megascans way and we've got the new way and we'll talk about these
+
+6
+00:00:28.960 --> 00:00:36.439
+Different approaches as we go forward so layered materials are used in Unreal Engine to combine elements
+
+7
+00:00:36.439 --> 00:00:37.840
+That could be edited
+
+8
+00:00:37.899 --> 00:00:40.500
+So it's used to keep executions cleaner
+
+9
+00:00:41.659 --> 00:00:45.780
+You'll see in future examples that a node graphs can get very complex
+
+10
+00:00:46.719 --> 00:00:51.500
+When using previous ways, so just found finding ways to streamline that process
+
+11
+00:00:52.259 --> 00:00:54.659
+And we can we can use these
+
+12
+00:00:55.460 --> 00:00:57.460
+layered materials approaches for example
+
+13
+00:00:58.340 --> 00:01:03.619
+Snow on rock or moss on wood or anything where you want to kind of create some variation
+
+14
+00:01:04.260 --> 00:01:09.060
+Layered on top of an existing material and you can also make it face a certain direction
+
+15
+00:01:09.060 --> 00:01:12.060
+So with the snow on rock, for example, we can get it
+
+16
+00:01:12.060 --> 00:01:15.739
+So it just falls on the top of the rock and not anywhere else
+
+17
+00:01:15.739 --> 00:01:20.579
+So layered materials can be really powerful in that approach. So the old way was
+
+18
+00:01:21.099 --> 00:01:25.879
+Using multiple make material attributes and then also using material functions
+
+19
+00:01:25.959 --> 00:01:28.120
+We'll dig into the later
+
+20
+00:01:28.840 --> 00:01:36.760
+Megascans way and then also layered materials and blend materials and you can see two examples here where we've got
+
+21
+00:01:37.239 --> 00:01:41.680
+one with using other material expressions and then one without so
+
+22
+00:01:42.000 --> 00:01:46.480
+You can see that just just from this graph alone without using them
+
+23
+00:01:46.959 --> 00:01:48.760
+It creates unnecessary
+
+24
+00:01:48.760 --> 00:01:53.480
+Complexity is hard to read what exactly is going on and when you do use them
+
+25
+00:01:53.560 --> 00:01:59.689
+It's a much more streamlined approach to the information to highlight the old way briefly
+
+26
+00:02:00.390 --> 00:02:04.870
+Just you understand the process here. We're working with material functions and layered
+
+27
+00:02:05.950 --> 00:02:09.349
+Material functions. So this is specifically for layering
+
+28
+00:02:09.349 --> 00:02:13.189
+So the steps to do this would be to right-click in your content browser
+
+29
+00:02:13.469 --> 00:02:17.930
+You can go to the material section here and then select material function
+
+30
+00:02:18.509 --> 00:02:21.210
+You'd create a couple of material parameters
+
+31
+00:02:21.210 --> 00:02:26.150
+Which are scalar parameters or vector parameters and we'll load up an example here in a second
+
+32
+00:02:26.150 --> 00:02:28.030
+Just so you can see exactly what's going on
+
+33
+00:02:28.030 --> 00:02:33.210
+I would have some kind of material layer some kind of function input expression and then
+
+34
+00:02:33.409 --> 00:02:39.490
+Some network to define the material layer and then you'd have the function output into the final material
+
+35
+00:02:39.490 --> 00:02:44.650
+so we'll jump into the editor now just to show you the old way of doing things and
+
+36
+00:02:45.169 --> 00:02:49.110
+Here's an example of how we may have approached layered materials
+
+37
+00:02:49.810 --> 00:02:54.629
+Say we want some bark and we want some moss growing on the back. So we had
+
+38
+00:02:55.409 --> 00:02:58.090
+Our material functions here, which we just reference
+
+39
+00:02:58.169 --> 00:03:03.050
+So we've got a material function for wood and a material function for moss so you can dig into all these
+
+40
+00:03:03.330 --> 00:03:07.610
+Nodes if you'd like we're just in the back and it's called moss simple
+
+41
+00:03:08.250 --> 00:03:11.530
+Material we've got the the function here at wood
+
+42
+00:03:11.610 --> 00:03:17.050
+So whenever you see a material function like this, you can just click the search button here
+
+43
+00:03:17.050 --> 00:03:20.650
+So we'll go to search and we've got the material function, which is wood
+
+44
+00:03:21.689 --> 00:03:23.370
+so again
+
+45
+00:03:23.370 --> 00:03:28.879
+Consider amount of complexity going on. We'll close this wood material
+
+46
+00:03:28.879 --> 00:03:32.979
+We've also got the moss material here and we can just find that again
+
+47
+00:03:33.439 --> 00:03:37.139
+And that's kind of overview of how we may have approached
+
+48
+00:03:37.780 --> 00:03:39.020
+Moss
+
+49
+00:03:39.020 --> 00:03:41.939
+Close that down and then essentially we just layer blend
+
+50
+00:03:42.639 --> 00:03:49.360
+Which there'll be many to choose from we got the base material here, which is the wood or the back in our example
+
+51
+00:03:49.360 --> 00:03:54.900
+we got the top material, which is the moss and then we alpha it to keep the
+
+52
+00:03:55.479 --> 00:03:57.479
+Z axis up. So
+
+53
+00:03:57.719 --> 00:04:04.840
+Again, we just got a const here for the blend bias as well and a world align blend going into the material
+
+54
+00:04:05.199 --> 00:04:10.580
+Attributes property looking at a slightly more complex set up you can see the way
+
+55
+00:04:11.039 --> 00:04:13.979
+How we've made some kind of tiling snow here
+
+56
+00:04:13.979 --> 00:04:19.399
+So again, I'll dig into the editor show you exactly where this content is so you can dig into it yourself
+
+57
+00:04:19.399 --> 00:04:23.319
+but we're not going to spend too long looking at this approach because
+
+58
+00:04:23.759 --> 00:04:26.639
+There's also a newer way which would be better
+
+59
+00:04:26.639 --> 00:04:33.279
+But it just helps show you context about how you may have set up materials. So you understand how we got to the end result
+
+60
+00:04:33.949 --> 00:04:40.089
+So from the content package here, we were using the rock underscore SNW for snow
+
+61
+00:04:40.670 --> 00:04:44.589
+Underscore complex and so you can see the breakdown here again
+
+62
+00:04:44.589 --> 00:04:48.029
+You can dig into it in your own time got a few different maps going on
+
+63
+00:04:48.709 --> 00:04:54.550
+Here and then also we've got the material function which is snow covering this instance so you can find
+
+64
+00:04:55.069 --> 00:04:56.910
+all this content
+
+65
+00:04:56.910 --> 00:05:03.430
+Inside your content browser to really break down and dissect the material of exactly what is going on here
+
+66
+00:05:03.910 --> 00:05:09.959
+The next slide approach to talk about is the mega scans approach, which is a really nice straightforward process
+
+67
+00:05:10.079 --> 00:05:16.800
+It does a lot of the heavy lifting for you under the hood so you can get going with your assets, but essentially
+
+68
+00:05:17.519 --> 00:05:20.879
+Mega scans are selected from the the quixel bridge
+
+69
+00:05:21.649 --> 00:05:25.170
+So if you load up the quixel bridge, you can add these to your project
+
+70
+00:05:25.290 --> 00:05:28.610
+You can see the quixel bridge on the drop down here
+
+71
+00:05:28.610 --> 00:05:32.750
+If not, you can get quixel bridge from the marketplace
+
+72
+00:05:33.149 --> 00:05:37.550
+There's some good documentation online of how to get quixel bridge added to your project
+
+73
+00:05:37.550 --> 00:05:40.990
+So then you want to click the little icon here
+
+74
+00:05:41.389 --> 00:05:47.470
+Which is a quality pull down on the bottom right of the asset and then you can select what desired
+
+75
+00:05:47.670 --> 00:05:50.430
+Materials you would like for this mega scans
+
+76
+00:05:51.069 --> 00:05:57.990
+Asset, so just a quick note here that using this tool will require a material instance from the current bridge version
+
+77
+00:05:58.269 --> 00:06:02.550
+Set of materials so it may not work with old material instances
+
+78
+00:06:02.550 --> 00:06:09.629
+So if you're having any issues with the instancing of the material just make sure your your bridge version is is set correctly
+
+79
+00:06:10.069 --> 00:06:14.709
+And maybe then just restart the project and you should be good to go from there
+
+80
+00:06:15.230 --> 00:06:17.360
+Now, let's look at the new way to make
+
+81
+00:06:18.079 --> 00:06:22.399
+Material layers, so we first want to create a material layer
+
+82
+00:06:22.399 --> 00:06:28.000
+So you can just right-click in your content browser go to materials and select material layer
+
+83
+00:06:28.000 --> 00:06:30.519
+You can call it either grunge or something else
+
+84
+00:06:31.019 --> 00:06:35.600
+Whatever you'd like and this first one will be a bit of our noise kind of texture
+
+85
+00:06:35.600 --> 00:06:41.519
+So once it's made open it up and you'll see these three nodes on the right hand side here
+
+86
+00:06:41.720 --> 00:06:44.240
+Then we want to create a material layer
+
+87
+00:06:44.800 --> 00:06:50.800
+To make the make material attribute. So if you just right-click and say make material attributes
+
+88
+00:06:50.800 --> 00:06:52.600
+You'll get this box here
+
+89
+00:06:52.600 --> 00:06:58.300
+And then we also want to drag in an albedo which is our texture sample there and our normal
+
+90
+00:06:58.420 --> 00:07:04.620
+And any other texture items that you might want to make the material more visually dynamic
+
+91
+00:07:05.100 --> 00:07:10.939
+So once you have them connect them into the input attributes node like so and then save
+
+92
+00:07:12.019 --> 00:07:17.339
+This new material layer and then sticking with your grunge material
+
+93
+00:07:17.339 --> 00:07:22.620
+I just forget about this image on the right for now, but sticking with the grunge material you want to right-click
+
+94
+00:07:23.620 --> 00:07:25.620
+the diffuse texture
+
+95
+00:07:26.019 --> 00:07:30.620
+Convert that to a parameter call it diffuse right-click the normal
+
+96
+00:07:31.620 --> 00:07:35.220
+Convert that to a parameter call it norm or normal or something like this
+
+97
+00:07:35.220 --> 00:07:41.740
+And then that that means we can switch out the textures whenever we want on the fly rather than coming back into the main
+
+98
+00:07:41.740 --> 00:07:42.579
+material layer
+
+99
+00:07:42.579 --> 00:07:48.360
+So then save that grunge material and then create a new material layer
+
+100
+00:07:48.420 --> 00:07:55.259
+Which is similar to this image on the right hand side and then we can call that whatever you'd like based on
+
+101
+00:07:55.420 --> 00:08:01.779
+What its purpose is say it's a dirt or grass or grime something like this where we're going to create a new material layer
+
+102
+00:08:01.939 --> 00:08:06.980
+We want to repeat the first process. So we want to make material attributes
+
+103
+00:08:07.060 --> 00:08:13.180
+We want a diffuse and a normal and then this time we want an albedo tint
+
+104
+00:08:13.180 --> 00:08:19.519
+So you can hold down three and left-click to create this type of node here and then right-click
+
+105
+00:08:19.980 --> 00:08:25.160
+convert to parameter call it the albedo tint and then
+
+106
+00:08:25.259 --> 00:08:27.459
+plug that into a multiply of
+
+107
+00:08:28.399 --> 00:08:30.399
+the material attributes
+
+108
+00:08:30.610 --> 00:08:37.009
+So to show you exactly what we've got going on here. We've got our grunge layer, which is a texture sample
+
+109
+00:08:37.649 --> 00:08:43.370
+Here and then also the make material attributes and then we've also got our second layer
+
+110
+00:08:43.409 --> 00:08:49.809
+Which is our diffuse and normal going into the multiply like that. So we have tuned layers
+
+111
+00:08:49.809 --> 00:08:52.470
+Now we have the grunge and the layer tile
+
+112
+00:08:53.350 --> 00:09:00.710
+Now we want to create a master material to plug these into so you can just right-click in your content browser go to create material
+
+113
+00:09:00.710 --> 00:09:02.409
+and then
+
+114
+00:09:02.409 --> 00:09:05.490
+Whatever naming convention you use you could call it
+
+115
+00:09:06.529 --> 00:09:07.889
+master
+
+116
+00:09:07.889 --> 00:09:10.570
+Material or you could name it something else
+
+117
+00:09:11.169 --> 00:09:17.590
+But in the master material, we want to right-click and type in material attributes layers
+
+118
+00:09:17.590 --> 00:09:20.789
+And that will give us this box that you can see in this image here
+
+119
+00:09:20.990 --> 00:09:25.750
+Now before you plug anything in what you can do is you can go to the details panel and
+
+120
+00:09:26.029 --> 00:09:31.149
+You'll see a little tick box there called use material attributes. And if you click that
+
+121
+00:09:32.029 --> 00:09:37.029
+That will automatically connect everything up. So it'll condense the master material
+
+122
+00:09:37.549 --> 00:09:44.330
+Attributes here and go straight into the material attributes layer. So this will be your master material setup
+
+123
+00:09:44.389 --> 00:09:47.509
+So once it looks like that you can save and close
+
+124
+00:09:48.620 --> 00:09:55.519
+So then in your master material now the node that you just created the material attributes layer node
+
+125
+00:09:55.620 --> 00:09:59.519
+You can select that and drop down these layers
+
+126
+00:09:59.820 --> 00:10:05.399
+So in the first layer, you could add the layer tile for example in the background
+
+127
+00:10:05.399 --> 00:10:12.379
+You could add that grunge layer that you created. So we've still not made our blend asset
+
+128
+00:10:12.379 --> 00:10:16.840
+Yep, we'll make that in a second. But that's what your material expression should look like
+
+129
+00:10:16.840 --> 00:10:21.500
+So I'll just jump back into my editor and then in this master material
+
+130
+00:10:21.500 --> 00:10:25.720
+I'll select my material attributes layers and then here are the layers
+
+131
+00:10:26.379 --> 00:10:28.379
+That we just want to be selecting here
+
+132
+00:10:28.379 --> 00:10:32.440
+So you've got your your background layer asset and your layer 2 asset
+
+133
+00:10:32.440 --> 00:10:36.730
+And then once our material layers are assigned in our master
+
+134
+00:10:36.730 --> 00:10:42.210
+We now want to make our blend material that you just saw so go back to your content browser
+
+135
+00:10:43.049 --> 00:10:45.049
+we want to make another
+
+136
+00:10:46.049 --> 00:10:52.309
+Material layer blend and load this into the blend asset slot. So this is going to be
+
+137
+00:10:53.500 --> 00:10:56.940
+Material, so I will jump into editor and show you this now
+
+138
+00:10:57.379 --> 00:11:01.690
+So if you just right-click in some empty space go to materials
+
+139
+00:11:01.690 --> 00:11:04.429
+And then you want to create a layer blend this time
+
+140
+00:11:04.429 --> 00:11:12.590
+So material layer blend and then we've just called this matte blend here, but you can essentially see this type of blended
+
+141
+00:11:13.230 --> 00:11:19.389
+Material setup that you need if you ever looking for these these are called the the function
+
+142
+00:11:19.990 --> 00:11:25.549
+inputs, so if you just right-click function input, you can see that there and then that would be
+
+143
+00:11:26.350 --> 00:11:31.549
+Material attributes type of leave. Yeah material attributes. So if ever you need to create those
+
+144
+00:11:32.230 --> 00:11:36.590
+That's how you create that but essentially we do want to blend these two attributes
+
+145
+00:11:37.269 --> 00:11:43.429
+Over the alpha which is another parameter into this output materials attributes
+
+146
+00:11:43.990 --> 00:11:48.580
+So as we can see, we keep the node structure for this simple
+
+147
+00:11:48.580 --> 00:11:51.779
+We just want to add the alpha condition just by right-clicking
+
+148
+00:11:52.799 --> 00:11:56.799
+To create a scalar prompter. You can actually use the s hotkey here
+
+149
+00:11:56.799 --> 00:12:00.840
+So you can S and left-click and you can create a parameter with a name there
+
+150
+00:12:00.840 --> 00:12:05.960
+You just want to call this alpha and then this is just the simple blend that we want to use
+
+151
+00:12:06.320 --> 00:12:11.759
+So now we can go back to the master material and connect the material attributes layer
+
+152
+00:12:12.279 --> 00:12:17.360
+To this blend. So as you saw before this blend node material here
+
+153
+00:12:17.360 --> 00:12:20.480
+We just want to put our blend material into there
+
+154
+00:12:20.960 --> 00:12:24.559
+And now we can make an instance of this master material
+
+155
+00:12:24.559 --> 00:12:29.860
+So you can right-click on the material and create a new instance based on that
+
+156
+00:12:30.470 --> 00:12:37.509
+So now we have an alpha slot in the instance that we can use to turn on and manipulate the layer
+
+157
+00:12:37.509 --> 00:12:40.090
+So let's just jump in the editor to show that now
+
+158
+00:12:40.950 --> 00:12:46.730
+So we can just go to that master material that we created a right-click create new material instance
+
+159
+00:12:47.590 --> 00:12:49.590
+Call this whatever you would like
+
+160
+00:12:50.269 --> 00:12:57.789
+Install one or anything like that and you'll see that now we have our layers here where you'll see the background layer grunge
+
+161
+00:12:57.789 --> 00:13:01.190
+And you've got the layer tile and also the blend assets
+
+162
+00:13:01.710 --> 00:13:07.440
+And so with the original blend material that we created with the alpha
+
+163
+00:13:08.080 --> 00:13:11.879
+We can turn it on and off and manipulate that layer in the parameters tab
+
+164
+00:13:12.759 --> 00:13:19.200
+So using that existing blend asset, we have the alpha 0 to 1 and we can manipulate that
+
+165
+00:13:19.200 --> 00:13:22.600
+But we want some more complex blending
+
+166
+00:13:22.600 --> 00:13:28.799
+Going on in our material to create a little bit more of the desired outcome that we want
+
+167
+00:13:28.799 --> 00:13:35.559
+So we're layering up these effects. So we want to create another layer blend material
+
+168
+00:13:35.559 --> 00:13:42.240
+So just right-click materials go to your layer blend same as we did before and then this this time
+
+169
+00:13:42.240 --> 00:13:44.519
+We want an alpha in place to get more realistic
+
+170
+00:13:45.720 --> 00:13:50.360
+Something to control the effect instead of the overall fade in and out
+
+171
+00:13:50.440 --> 00:13:53.679
+So to do this will create
+
+172
+00:13:54.559 --> 00:13:57.240
+this type of material setup, so
+
+173
+00:13:58.039 --> 00:14:03.240
+You'll you'll now be able to see that the intensity will replace the alpha control
+
+174
+00:14:03.320 --> 00:14:08.840
+So in the master material attribute layer node, we can adjust these as needed
+
+175
+00:14:09.639 --> 00:14:12.919
+We'll also need to create new layers
+
+176
+00:14:13.759 --> 00:14:19.960
+Quickly with established layers all ones we built to switch them in and out. So this is our current
+
+177
+00:14:21.519 --> 00:14:28.769
+Attribute layer node you can see that we've got a texture sample just grabbing from the green channel
+
+178
+00:14:29.289 --> 00:14:35.649
+We've got a multiply into a scalar called intensity again. You can just s and left-click there
+
+179
+00:14:36.090 --> 00:14:38.649
+We've got a contrast one, which is a power
+
+180
+00:14:38.850 --> 00:14:44.649
+So we go from the multiplier to the power and then into the exponent there to get the contrast
+
+181
+00:14:44.690 --> 00:14:50.850
+We clump the two values and then the rest is similar to how you had created before
+
+182
+00:14:51.129 --> 00:14:57.250
+So this is our now new blend material that we're plugged into this master material
+
+183
+00:14:57.690 --> 00:15:01.289
+And it means that we have more control over this effect
+
+184
+00:15:01.490 --> 00:15:06.409
+So we can also create a new layers quickly by adding new layers up here
+
+185
+00:15:06.649 --> 00:15:11.649
+Once you've got the establishing layers, you can switch them out with this plus button
+
+186
+00:15:11.649 --> 00:15:16.850
+So it speeds up the process of how we want to combine and mix these effects
+
+187
+00:15:16.850 --> 00:15:23.129
+So pro tip here is you want to be careful not to make too many layers as you it will cause the materials
+
+188
+00:15:23.210 --> 00:15:26.090
+complexity to grow pick and choose the best parts and
+
+189
+00:15:26.690 --> 00:15:32.730
+maybe create different master materials based on what you need the outcome to be if you want to
+
+190
+00:15:33.450 --> 00:15:40.120
+Have lots of customizable options. So the system makes things cleaner, but not necessarily lighter and
+
+191
+00:15:41.019 --> 00:15:46.500
+Here is the documentation if you want to first of all go into the old way of creating material layers
+
+192
+00:15:46.500 --> 00:15:53.580
+We've got the documentation there, but also the new way material layers our approach. It's a little bit of a context switch in your head
+
+193
+00:15:54.299 --> 00:15:56.299
+It'll take a bit of trial and error
+
+194
+00:15:56.580 --> 00:16:02.700
+But hopefully that was just a good starting point for you to dig into using material layers inside of Unreal Engine

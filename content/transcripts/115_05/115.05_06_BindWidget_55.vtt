@@ -1,0 +1,869 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.839
+Next up we're talking about bind widget, bind widget animations and synchronize properties.
+
+2
+00:00:05.839 --> 00:00:14.080
+So these are all different functionalities that we can use to facilitate communicating from our blueprint down to our C++
+
+3
+00:00:14.080 --> 00:00:20.480
+and being able to do various things in C++ that we can kind of trust either ourselves at a later date
+
+4
+00:00:20.480 --> 00:00:25.039
+or some other member of our team possibly designers or more visually oriented people
+
+5
+00:00:25.039 --> 00:00:30.079
+can utilize functionality that we've done in C++ without having to worry too much exactly about
+
+6
+00:00:30.079 --> 00:00:37.890
+the way our implementation works. So first off bind widgets. Bind widgets is a Mesopets specifier that
+
+7
+00:00:37.890 --> 00:00:44.689
+you can put on widget pointers in our user widget classes and it allows the designer to populate
+
+8
+00:00:44.689 --> 00:00:51.490
+native C++ level members with a designer created widget. This kind of flies in the face of general
+
+9
+00:00:51.490 --> 00:00:56.450
+unreal development pipeline the blueprint layer sitting on top of a C++ one in this case we're
+
+10
+00:00:56.450 --> 00:01:00.049
+essentially leaving a gap in the C++ layer for the blueprint layer to fill in for us.
+
+11
+00:01:01.890 --> 00:01:07.090
+So let's talk through a practical example let's say that we've got a C++ base class off of a
+
+12
+00:01:07.090 --> 00:01:13.090
+user widget with a text block member and the text block container is exactly what you'd think
+
+13
+00:01:13.090 --> 00:01:17.090
+a widget capable of rendering text in UMG I've kind of already mentioned that a little bit earlier
+
+14
+00:01:17.090 --> 00:01:21.730
+in the in the session if we flag this up with the bind widget specifier we're saying that
+
+15
+00:01:21.730 --> 00:01:26.290
+to the compiler this particular widget is populated from the designer layer we kind of said
+
+16
+00:01:27.010 --> 00:01:31.890
+it will exist at some point but we don't actually need to initialize ourselves in code
+
+17
+00:01:32.769 --> 00:01:35.890
+we would like we would with something like an actor component or something like that
+
+18
+00:01:36.609 --> 00:01:40.609
+we're just going to say that we're going to work with this bit of information but it's
+
+19
+00:01:40.609 --> 00:01:46.209
+actually going to get created later down the inheritance hierarchy by someone on top in
+
+20
+00:01:46.209 --> 00:01:51.969
+the blueprint layer. This frees up any UI designers to implement the text box and change
+
+21
+00:01:51.969 --> 00:01:57.489
+its visuals its positions its parenting we're not baking in you know how this is childed
+
+22
+00:01:57.489 --> 00:02:02.209
+we're not baking anything by its hierarchy we're just simply saying there will be a text widget
+
+23
+00:02:02.209 --> 00:02:06.609
+with this name and we're going to do some things with it anything else that gets done with it
+
+24
+00:02:06.609 --> 00:02:12.719
+that's kind of up to whoever is putting that into place and as engineers we're now going
+
+25
+00:02:12.719 --> 00:02:17.280
+to free this we're kind of free to assume that this is now valid and we can carry on
+
+26
+00:02:17.280 --> 00:02:22.319
+developing as we would otherwise this is also kind of just as a flow optimization it just kind
+
+27
+00:02:22.319 --> 00:02:27.120
+of means that we can kind of offload some of that thinking about exactly how this stuff is going to
+
+28
+00:02:27.120 --> 00:02:32.719
+be laid out to kind of further down the road again whether that's us a later date or whether
+
+29
+00:02:32.719 --> 00:02:35.919
+that's someone else on the team it just means that we can kind of work with the bits that
+
+30
+00:02:35.919 --> 00:02:41.039
+really matter and not get really really hung up on you know what is the exact hierarchical
+
+31
+00:02:41.039 --> 00:02:49.330
+structure of all of these things. So one question you might have is that like if we're saying
+
+32
+00:02:49.330 --> 00:02:54.770
+you know where we're kind of saying this thing exists but how can we trust that it's going to
+
+33
+00:02:54.770 --> 00:02:58.289
+exist how can we trust the designer is actually going to make the thing that we need them to make
+
+34
+00:02:58.289 --> 00:03:02.849
+or you know ourselves at a later date how are we going to trust ourselves the reason this
+
+35
+00:03:02.849 --> 00:03:06.770
+works is the blueprint will actually fail to compile if it's not compliant with the underlying
+
+36
+00:03:06.770 --> 00:03:11.810
+native code so bind widget essentially signals to the blueprint layer hey I need a widget of
+
+37
+00:03:11.810 --> 00:03:16.610
+this type with this specific name to work properly so you need to add one this kind of manifests
+
+38
+00:03:16.610 --> 00:03:21.729
+itself in a compilation failure and there's also I don't know what version of Unreal they actually
+
+39
+00:03:21.729 --> 00:03:28.370
+introduced this but I don't think this used to be the case but when you have widgets that
+
+40
+00:03:28.370 --> 00:03:35.009
+implement bind functionality such as our segmented bar widget any bind widgets there's actually a
+
+41
+00:03:35.009 --> 00:03:40.370
+separate window that highlights all of the kind of bindable bits of information and they'll show
+
+42
+00:03:40.370 --> 00:03:45.569
+you you know there is a there is a this is the kind of this is what the widget type is
+
+43
+00:03:45.569 --> 00:03:49.969
+this is what the widget is called and there's this kind of like little health check to tell you oh hey
+
+44
+00:03:49.969 --> 00:03:53.569
+we've got a binding here we'll get into actually this is an example that we'll jump to later but
+
+45
+00:03:53.569 --> 00:03:57.250
+it's just kind of worth highlighting that as well as just the pure compilation failure
+
+46
+00:03:57.250 --> 00:04:01.969
+um you can also there's this kind of separate window that is going to highlight to you you
+
+47
+00:04:01.969 --> 00:04:05.729
+know exactly what bindings it's looking for ahead of time and what those things are meant
+
+48
+00:04:05.729 --> 00:04:09.090
+to be called and what type they're meant to be so it's just a very very helpful little window
+
+49
+00:04:11.120 --> 00:04:20.430
+um yeah so but yeah the blueprint is going to fail to compile and we've got that bind
+
+50
+00:04:20.430 --> 00:04:24.829
+window functionality so we talked about bind widgets uh synchronized properties is something
+
+51
+00:04:24.829 --> 00:04:29.069
+else we're going to mention um this is a virtual function that we can override to
+
+52
+00:04:29.069 --> 00:04:35.069
+develop smart responsive ui tools so in many ways it kind of mirrors on construction or post
+
+53
+00:04:35.069 --> 00:04:39.389
+edit property virtuals that we would see when we're working with actor classes so for anyone
+
+54
+00:04:39.389 --> 00:04:44.110
+who's familiar with those things um it'll be called every time a property changes
+
+55
+00:04:44.110 --> 00:04:51.470
+within a specified widget in both the designer and it can get called at runtime not in exactly
+
+56
+00:04:51.470 --> 00:04:55.870
+the same way it does in designer so don't let that that can be a little bit confusing
+
+57
+00:04:55.870 --> 00:05:01.949
+it's not every time a single value changes um but it does have um it
+
+58
+00:05:04.370 --> 00:05:09.089
+when our when our widget at least gets constructed and needs to pass our information down to slate
+
+59
+00:05:09.089 --> 00:05:14.449
+at runtime that is when um our synchronized properties get called but anytime we're
+
+60
+00:05:14.449 --> 00:05:18.689
+changing data inside our designer it will get recalled because our entire widget gets
+
+61
+00:05:18.689 --> 00:05:24.060
+reconstructed the the kind of key point in here is it's not just runtime it is also in
+
+62
+00:05:24.060 --> 00:05:32.220
+design time so um we're able to respond to changes made in design at design time and
+
+63
+00:05:32.860 --> 00:05:38.939
+give visual feedback obviously um it's you know probably quite important to know whether or not we
+
+64
+00:05:38.939 --> 00:05:45.819
+are currently working in a design time environment or runtime logic so there is also an is is design
+
+65
+00:05:45.819 --> 00:05:50.139
+time function that we can kind of use to branch to you know if we need to do particular design
+
+66
+00:05:50.139 --> 00:05:55.259
+time behavior or you know ignore certain bits of behavior that we would only be able to
+
+67
+00:05:55.259 --> 00:05:59.019
+trust because they they're referencing things that we know will only exist at runtime or
+
+68
+00:05:59.019 --> 00:06:02.220
+something like that we've got this is design time function to kind of let us know about that
+
+69
+00:06:03.569 --> 00:06:08.529
+it's worth noting that synchronized properties has quite a lot in common with another function
+
+70
+00:06:08.529 --> 00:06:15.089
+called pre-construct which we'll bring up again later but pre-construct was a later introduction
+
+71
+00:06:15.089 --> 00:06:20.689
+to umg as part of u4's life cycle and there are some relatively subtle differences between the
+
+72
+00:06:20.689 --> 00:06:24.290
+two things but the biggest one is that synchronized properties isn't exposed to
+
+73
+00:06:24.290 --> 00:06:29.970
+blueprints or it's a c++ only function secondly pre-construct is defined in in user
+
+74
+00:06:29.970 --> 00:06:35.649
+widgets so pre-construct is a user widget downwards function that is exposed to blueprints
+
+75
+00:06:35.649 --> 00:06:40.529
+whereas synchronized properties is available to is only in c++ but it's available to anything
+
+76
+00:06:41.410 --> 00:06:46.930
+u widget and downwards and you know part of synchronized properties responsibility is not
+
+77
+00:06:46.930 --> 00:06:52.290
+just to communicate information from blueprint down to your c++ but it's also to communicate
+
+78
+00:06:52.290 --> 00:06:57.889
+information from the umg down to the slate so it's already being used for something
+
+79
+00:06:57.889 --> 00:07:02.529
+something else as well which is also worth mentioning that it's very important that when
+
+80
+00:07:02.529 --> 00:07:06.449
+you're doing a synchronized property when you're overriding your synchronized
+
+81
+00:07:06.449 --> 00:07:10.689
+properties functionality that you do call your super function because like i said
+
+82
+00:07:10.689 --> 00:07:15.490
+synchronized properties is also responsible for communicating information down from your umg down
+
+83
+00:07:15.490 --> 00:07:19.569
+to slate so if that parent function isn't called suddenly your slate widget isn't going
+
+84
+00:07:19.569 --> 00:07:23.649
+to work properly and you know your slate widget is what you actually see on screen what you
+
+85
+00:07:23.649 --> 00:07:29.500
+actually click on so that that's quite important but yeah again the discrepancies between
+
+86
+00:07:29.500 --> 00:07:35.420
+pre-construct and synchronized properties if you actually dig into the the c++ you'll see that
+
+87
+00:07:35.420 --> 00:07:39.100
+they're actually called in quite similar ways at quite similar times so you can kind of see
+
+88
+00:07:39.100 --> 00:07:44.139
+they they do perform a fair amount of similar functionality they both have this kind of
+
+89
+00:07:44.139 --> 00:07:52.370
+capability of both design and runtime implementation so if we were to kind of look at a practical
+
+90
+00:07:52.370 --> 00:07:56.209
+example i've kind of already prefaced this a little bit by opening up that widget before
+
+91
+00:07:56.610 --> 00:08:01.970
+um but this is how we might use a bind widget in in combination with synchronized properties to
+
+92
+00:08:01.970 --> 00:08:07.810
+kind of make a setup that we were to do the c++ code and kind of know how it's going to work
+
+93
+00:08:07.810 --> 00:08:12.370
+but we actually don't need to worry about the like real detail about where are these widgets
+
+94
+00:08:12.370 --> 00:08:15.410
+going to go how are they going to be laid out with each other how are they going to be colored
+
+95
+00:08:15.410 --> 00:08:19.889
+it's not our responsibility the only bit that we care about is we just need widget x and we're
+
+96
+00:08:19.889 --> 00:08:25.089
+going to do y thing with it everything else is kind of up to the designer so what we've got
+
+97
+00:08:25.089 --> 00:08:30.930
+here is a kind of widget that is meant to represent a kind of a health bar and the kind of key
+
+98
+00:08:30.930 --> 00:08:35.570
+elements here is well i can actually just jump to the c++ function rather than using the slide
+
+99
+00:08:35.570 --> 00:08:42.210
+presentation here so if i just jump to a 115 section again if you have this project
+
+100
+00:08:42.210 --> 00:08:45.090
+downloaded all of this this code will be available to you so you can look at this
+
+101
+00:08:45.090 --> 00:08:51.570
+c++ code in your at your own leisure so we've got this relatively simple segmented bar widget
+
+102
+00:08:51.570 --> 00:08:57.409
+you can see this is a c++ class that inherits from user widget we've got our synchronized
+
+103
+00:08:57.409 --> 00:09:01.409
+properties function which we've already mentioned we've got a construct function we don't need to
+
+104
+00:09:01.409 --> 00:09:07.330
+worry too much about that but we've also got our various variables and importantly here we've
+
+105
+00:09:07.330 --> 00:09:13.409
+got a t object pointer we talked about this in maybe our first session maybe our second i'm
+
+106
+00:09:13.409 --> 00:09:18.370
+pretty sure it was our first t object pointer basically being the kind of more modern version
+
+107
+00:09:18.370 --> 00:09:24.289
+of just a kind of raw pointer so this could just as easily be look like this but t object
+
+108
+00:09:24.289 --> 00:09:29.090
+pointer has certain editor time kind of advantages over you can spend your own time
+
+109
+00:09:29.090 --> 00:09:33.059
+looking into that if you're not kind of familiar with that either way we were saying
+
+110
+00:09:33.059 --> 00:09:38.580
+there's a there's a kind of a widget of type horizontal box and it's called hb segments
+
+111
+00:09:38.580 --> 00:09:42.179
+we've marked this up as a bind widget so essentially say we're going to act as though this
+
+112
+00:09:42.179 --> 00:09:46.980
+widget exists but the burden is kind of on the designer or whoever is making the blueprint
+
+113
+00:09:46.980 --> 00:09:52.019
+that implements this widget to actually make sure that this gets created then we've got
+
+114
+00:09:52.019 --> 00:09:55.700
+some additional bits of information we've got like a segment class we've got the number of
+
+115
+00:09:55.700 --> 00:09:59.700
+segments we want we've got some padding between those segments we'll also come to
+
+116
+00:09:59.700 --> 00:10:05.299
+this in a little bit but we've also got a a bindable widget animation so if we go into
+
+117
+00:10:05.299 --> 00:10:12.289
+our c++ we can see the kind of most of the heavy lifting here is being done inside our
+
+118
+00:10:12.289 --> 00:10:16.370
+synchronized properties as i as you can see first and foremost we're calling our super function
+
+119
+00:10:16.370 --> 00:10:22.129
+because we want our code to work and then you can see we're doing this is design time check
+
+120
+00:10:22.129 --> 00:10:25.570
+this isn't particularly important i don't actually need to do this here because this this
+
+121
+00:10:25.570 --> 00:10:30.049
+functionality would be just as valid in runtime it's just i've kind of just put this here to
+
+122
+00:10:30.049 --> 00:10:34.210
+show you us using it to say you know if we're not in design time then we don't want to do
+
+123
+00:10:34.210 --> 00:10:37.970
+this but actually in in reality there's there's no reason why we wouldn't want to do that i'm
+
+124
+00:10:37.970 --> 00:10:42.370
+kind of just showing it off but the kind of other important element here is that hypothetically
+
+125
+00:10:42.370 --> 00:10:47.250
+there are scenarios where synchronized property could get called whilst our bind widgets are null
+
+126
+00:10:47.250 --> 00:10:52.370
+so it's quite important to do the this null checking if you're going to be relying whilst we
+
+127
+00:10:52.370 --> 00:10:57.009
+can like trust that someone else does have to make this until if they try to compile or
+
+128
+00:10:57.009 --> 00:11:02.850
+utilize this widget until that bind widget is actually properly set up this is going to be null
+
+129
+00:11:02.850 --> 00:11:06.929
+so one of the other things we should be very careful about is when we're trying to use this
+
+130
+00:11:06.929 --> 00:11:10.450
+functionality when we're trying to use bind widgets we should be checking for it out these things
+
+131
+00:11:10.450 --> 00:11:16.450
+are null first to make sure we're not actually just you know getting a null reference exceptions
+
+132
+00:11:16.450 --> 00:11:21.950
+and things like that and then we just get hard crashes so the logic here is relatively simple
+
+133
+00:11:21.950 --> 00:11:26.110
+we've got this horizontal box we're calling clear children this is a kind of general function
+
+134
+00:11:26.110 --> 00:11:30.350
+you can call on most panel type widgets and it just essentially says remove every element that's
+
+135
+00:11:30.350 --> 00:11:34.029
+currently inside this panel and kind of discard them and then we're just doing a for loop for
+
+136
+00:11:34.029 --> 00:11:42.909
+our segment count which by default is 10 so from 0 to 10 and for everything we're using this create
+
+137
+00:11:42.909 --> 00:11:48.110
+widget we've already talked about this and again one of the viable things to pass in as an owner
+
+138
+00:11:48.110 --> 00:11:52.509
+of a widget is another widget and we are inside a widget so this is fine and then we're just
+
+139
+00:11:52.509 --> 00:11:56.429
+passing in this segment widget class again we've checked up here whether or not that's null
+
+140
+00:11:56.429 --> 00:12:04.000
+so we wouldn't even get here if it wasn't if it was sorry no and then last of all
+
+141
+00:12:04.000 --> 00:12:11.759
+where now that this has been created we're adding that created widget to our horizontal box
+
+142
+00:12:11.759 --> 00:12:18.240
+and typically this is a kind of this isn't a hard and fast rule if you created your own panels
+
+143
+00:12:18.240 --> 00:12:22.879
+you wouldn't have to do this but there's this typical kind of thing there's these add child to
+
+144
+00:12:22.879 --> 00:12:28.000
+panel functions and normally what they'll do is return a reference to the slot that now contains
+
+145
+00:12:28.000 --> 00:12:33.200
+that child and that lets you do things kind of layout data about that slot and so in this
+
+146
+00:12:33.200 --> 00:12:37.120
+context we're using that opportunity to get hold of the horizontal box slot that this
+
+147
+00:12:37.120 --> 00:12:42.399
+new segment is now inside of and we're setting our padding so this segment padding can kind of
+
+148
+00:12:42.399 --> 00:12:48.879
+come into play i pressed f11 there accidentally and now it's trying to do a build sorry about
+
+149
+00:12:48.879 --> 00:12:54.480
+that um yeah and you can see we're just uh relying on our padding padding is basically an
+
+150
+00:12:54.480 --> 00:12:59.440
+amount it's relative the name kind of does what it says in the tin but padding is basically
+
+151
+00:12:59.440 --> 00:13:02.960
+the amount that a widget kind of sets itself away from other widgets
+
+152
+00:13:04.769 --> 00:13:10.769
+so the c++ there's relatively simple um just see if there's anything else i kind of want to mention
+
+153
+00:13:10.769 --> 00:13:15.169
+there well i guess we'll go ahead to the bind widget animations first and then we'll kind of
+
+154
+00:13:15.169 --> 00:13:21.149
+actually just demonstrate that working um so next up we have bind widget animations we've kind
+
+155
+00:13:21.149 --> 00:13:25.149
+of already prefaced this a little bit this essentially does exactly the same thing that
+
+156
+00:13:25.149 --> 00:13:31.870
+you would expect it's a it's a bind widgets but it's specifically for animations um so this
+
+157
+00:13:31.870 --> 00:13:37.070
+essentially does allows us to specify an animation say you know i'm gonna rely on this animation
+
+158
+00:13:37.070 --> 00:13:41.789
+existing but it's not my responsibility to make that animation either myself at a later date or
+
+159
+00:13:41.789 --> 00:13:46.029
+someone whoever is doing the blueprint that implements this c++ class is the person who
+
+160
+00:13:46.029 --> 00:13:51.070
+has to make the animation and that animation just needs to have a particular name no matter
+
+161
+00:13:51.070 --> 00:13:58.750
+what kind of animation it is um all animations are u widget animations so whereas with um bind
+
+162
+00:13:58.750 --> 00:14:03.230
+widgets you kind of have to make sure that the name is right and the type is right with widget
+
+163
+00:14:03.230 --> 00:14:07.070
+animations they're all widget animations so the only thing you actually need to worry about is
+
+164
+00:14:07.070 --> 00:14:13.389
+that the animation name is correct um and yeah the other kind of thing is specifically for
+
+165
+00:14:13.389 --> 00:14:17.070
+bind widget animations they need to be marked as transient you'll get complaints if you don't
+
+166
+00:14:17.070 --> 00:14:22.779
+do that so just a little thing to kind of bear in mind there and yeah i think that's that's
+
+167
+00:14:22.779 --> 00:14:26.860
+kind of everything we're talking about here for the the bindables let's just quickly demonstrate
+
+168
+00:14:26.860 --> 00:14:34.299
+this working so as i said we've got a uh i've made a widget that inherits from our um our
+
+169
+00:14:34.299 --> 00:14:39.259
+segmented bar widget you know this could be a health bar this could be an xp bar this could
+
+170
+00:14:39.259 --> 00:14:43.820
+be mana whatever you like um but this is kind of just to demonstrate that functionality you
+
+171
+00:14:43.820 --> 00:14:49.419
+can see we've got our our bind widgets all kind of set up you can look at my hierarchy it's
+
+172
+00:14:49.419 --> 00:14:55.659
+relatively simple really um i can add obviously as much as i like i can wrap this um horizontal
+
+173
+00:14:55.659 --> 00:15:03.500
+box inside a border if i like i can and i'll make that border just like dark red so that it's kind
+
+174
+00:15:03.500 --> 00:15:13.580
+of clearer um and i could add i don't know uh i could wrap that inside a another horizontal box
+
+175
+00:15:13.580 --> 00:15:24.399
+and i could say uh put a text block next to it um and just say health if i'm going to spell it
+
+176
+00:15:24.399 --> 00:15:31.570
+right and then i can make this fill up the rest of the space um so you can see that clearly
+
+177
+00:15:31.570 --> 00:15:36.690
+the um the there's no complaints here right even though there's a huge difference between
+
+178
+00:15:36.690 --> 00:15:41.649
+my horizontal box being the only widget in the widget and being inside a border which is inside
+
+179
+00:15:41.649 --> 00:15:47.009
+a horizontal box but clearly the only thing that the c++ cares about is that there is a widget with
+
+180
+00:15:47.009 --> 00:15:52.210
+this name that it is a horizontal box um and we already kind of showed some of the variables that
+
+181
+00:15:52.210 --> 00:15:56.049
+are available but we've got the segment count and you can just see as i'm changing that
+
+182
+00:15:56.850 --> 00:16:00.929
+this is cool every time i'm changing this our synchronized properties function is getting
+
+183
+00:16:00.929 --> 00:16:05.730
+called again and so we can kind of respond obviously there's no currently no rule saying that
+
+184
+00:16:05.730 --> 00:16:12.289
+i i need to um not extend outside the bounds of my widget if i did want to very very quickly
+
+185
+00:16:12.289 --> 00:16:16.929
+do that i could actually specify some clip bounds so i could just go to my horizontal box
+
+186
+00:16:16.929 --> 00:16:26.909
+and just do clip oh for some reason the c key button on my keyboard is temporarily not working
+
+187
+00:16:26.909 --> 00:16:33.340
+if i um specify some clip bounds then we would actually get slightly more sane looking behavior
+
+188
+00:16:33.340 --> 00:16:40.220
+but what that would that wouldn't actually reduce the um number of uh we still actually
+
+189
+00:16:40.220 --> 00:16:45.179
+have 87 segments here you just can't see them uh but that is a way that we kind of solve that
+
+190
+00:16:45.179 --> 00:16:51.889
+problem um so again as you can see uh it doesn't care about the rest of the hierarchy
+
+191
+00:16:51.889 --> 00:16:55.409
+doesn't care what else is going on in this widget it just cares that there's a widget called
+
+192
+00:16:55.409 --> 00:16:59.409
+segments and again just to demonstrate what would actually be happening if we didn't have this
+
+193
+00:16:59.409 --> 00:17:06.690
+set up correctly even something as minor as a change to say hey hb segments two um and then
+
+194
+00:17:06.690 --> 00:17:11.009
+i go to compile you can see it's no longer filling with data properly and we're going to get
+
+195
+00:17:11.009 --> 00:17:15.809
+a complaint that you know there's this data that should be bound but it's not bound we can
+
+196
+00:17:15.809 --> 00:17:21.009
+go to our bind widget and say hey i'm looking for a widget called hb segments um but it's not
+
+197
+00:17:21.009 --> 00:17:29.460
+found so you know this the spelling is is very very important here um and the same thing applies
+
+198
+00:17:29.460 --> 00:17:36.740
+to our animations um whereas you know again we uh if i were to make um let's just temporarily
+
+199
+00:17:36.740 --> 00:17:51.069
+call that hb segments e a segment and if i make a vertical box and call that hb segments
+
+200
+00:17:52.640 --> 00:17:57.710
+or i don't know why it doesn't oh it's probably not letting me do that essentially it's uh it's
+
+201
+00:17:57.710 --> 00:18:02.750
+looking specifically for a horizontal box called hb segments um even if there's a another widget
+
+202
+00:18:02.750 --> 00:18:07.150
+with the same name but it's a different type that's not going to be suitable either is all
+
+203
+00:18:07.150 --> 00:18:14.980
+i'm trying to say with this um but the kind of that same burden of type isn't there for our
+
+204
+00:18:15.619 --> 00:18:19.859
+uh for our widget animations because all widget animations are widget animations
+
+205
+00:18:20.660 --> 00:18:25.140
+so all you need to do there is make sure that you have the animation has the right name
+
+206
+00:18:25.140 --> 00:18:28.500
+regardless of what the animation is doing you could do a million things you could do one thing
+
+207
+00:18:28.500 --> 00:18:32.819
+you could do no things there just needs to be an animation with that name in this context
+
+208
+00:18:32.819 --> 00:18:36.420
+i've just made an appear animation which is going to fade our widget in using our render
+
+209
+00:18:36.420 --> 00:18:43.140
+opacity from zero to one um i'm not actually using this anywhere i don't think oh or am i
+
+210
+00:18:44.130 --> 00:18:49.710
+um if i go to our construct oh i am actually playing it when we play construct well done me
+
+211
+00:18:49.710 --> 00:18:57.059
+um so yeah you can see i'm utilizing in c++ there um but we've got the same problem here
+
+212
+00:18:57.059 --> 00:19:03.859
+so if i go to our animations thing and i just change this to anim appear i just do a little
+
+213
+00:19:03.859 --> 00:19:12.339
+typo and i forget the r suddenly i we're gonna get complaints um and you know it's gonna say
+
+214
+00:19:12.339 --> 00:19:15.220
+you know it's gonna say you know this this doesn't work we're expecting an
+
+215
+00:19:15.220 --> 00:19:24.210
+animation called anim appear anima pia doesn't count um so names really matter here and again
+
+216
+00:19:24.210 --> 00:19:27.490
+you can see i've uh it's very easy to forget that you're still in animation mode
+
+217
+00:19:27.490 --> 00:19:38.369
+so i'm clearly still got that animation selected just need to select off that

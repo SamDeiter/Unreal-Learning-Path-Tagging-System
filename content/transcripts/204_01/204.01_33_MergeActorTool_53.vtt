@@ -1,0 +1,753 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.799
+In this part of our optimization tools,
+
+2
+00:00:03.799 --> 00:00:05.839
+I want to talk about the Merge Actor tool,
+
+3
+00:00:05.839 --> 00:00:08.240
+as the Merge Actor tool is the basis
+
+4
+00:00:08.240 --> 00:00:12.039
+for a lot of different optimization workflows inside
+
+5
+00:00:12.039 --> 00:00:12.880
+of UE5.
+
+6
+00:00:12.880 --> 00:00:16.320
+Now at its core, what the Merge Actor tool does
+
+7
+00:00:16.320 --> 00:00:18.719
+is it takes a group of static meshes
+
+8
+00:00:18.719 --> 00:00:21.879
+and allows you to merge them so
+
+9
+00:00:21.879 --> 00:00:23.359
+that we get one static mesh.
+
+10
+00:00:23.359 --> 00:00:24.800
+Now we can take this even further
+
+11
+00:00:24.800 --> 00:00:27.160
+and merge the materials as well so
+
+12
+00:00:27.160 --> 00:00:30.719
+that we get one static mesh and one material.
+
+13
+00:00:30.719 --> 00:00:32.799
+Now in the screen in front of us, we
+
+14
+00:00:32.799 --> 00:00:35.880
+have an example of an area where merging
+
+15
+00:00:35.880 --> 00:00:37.079
+would be really beneficial.
+
+16
+00:00:37.079 --> 00:00:40.240
+This little area here is comprised of 61 static meshes
+
+17
+00:00:40.240 --> 00:00:41.799
+and 19 materials.
+
+18
+00:00:41.799 --> 00:00:44.280
+It's also an area that's outside of the interaction
+
+19
+00:00:44.280 --> 00:00:46.119
+area for this experience.
+
+20
+00:00:46.119 --> 00:00:49.039
+So this is a lot of static meshes, and more importantly,
+
+21
+00:00:49.039 --> 00:00:51.799
+a lot of materials that are in an area
+
+22
+00:00:51.799 --> 00:00:53.619
+that the user isn't going to see up close
+
+23
+00:00:53.619 --> 00:00:55.320
+or interact with in any way.
+
+24
+00:00:55.320 --> 00:00:57.240
+So we want to make sure that those areas are
+
+25
+00:00:57.240 --> 00:00:59.960
+as cheap as possible to render.
+
+26
+00:01:00.000 --> 00:01:03.000
+We've done this in the image on the right-hand side
+
+27
+00:01:03.000 --> 00:01:07.280
+by combining all of those meshes into one static mesh
+
+28
+00:01:07.280 --> 00:01:08.400
+with one material.
+
+29
+00:01:08.400 --> 00:01:11.000
+Now they both come in at 51k triangles,
+
+30
+00:01:11.000 --> 00:01:13.359
+but that's not really that big of a concern.
+
+31
+00:01:13.359 --> 00:01:16.239
+The bigger concern is the amount of meshes
+
+32
+00:01:16.239 --> 00:01:19.079
+and the amount of materials, because the more that we
+
+33
+00:01:19.079 --> 00:01:21.400
+can reduce the amount of meshes and materials,
+
+34
+00:01:21.400 --> 00:01:23.519
+the more we can reduce draw calls
+
+35
+00:01:23.519 --> 00:01:26.599
+or how many items have to be drawn to the screen per frame,
+
+36
+00:01:26.599 --> 00:01:29.040
+which is going to increase our performance.
+
+37
+00:01:29.079 --> 00:01:33.719
+Now to activate the Merge Actor tool,
+
+38
+00:01:33.719 --> 00:01:35.200
+we're going to go up to our tools
+
+39
+00:01:35.200 --> 00:01:37.280
+and then select Merge Actors.
+
+40
+00:01:37.280 --> 00:01:39.879
+And then all of the Merge Actor tool options
+
+41
+00:01:39.879 --> 00:01:40.920
+will become available.
+
+42
+00:01:40.920 --> 00:01:43.379
+Let's pop over to the editor now and see how this works.
+
+43
+00:01:43.379 --> 00:01:45.719
+So again, we're going to come up here to Tools,
+
+44
+00:01:45.719 --> 00:01:47.879
+and then we're going to go to Merge Actors.
+
+45
+00:01:47.879 --> 00:01:50.879
+And by default, we have the merge, but if I click on this,
+
+46
+00:01:50.879 --> 00:01:52.879
+you can see we have Merge, Simplify, Batch,
+
+47
+00:01:52.879 --> 00:01:53.799
+and Approximate.
+
+48
+00:01:53.799 --> 00:01:56.560
+So each one of these will merge our actors
+
+49
+00:01:56.560 --> 00:01:59.239
+in a different way, shape, or form.
+
+50
+00:01:59.280 --> 00:02:01.920
+Let's take a look at what merge does by selecting
+
+51
+00:02:01.920 --> 00:02:05.040
+these chairs and this table.
+
+52
+00:02:05.040 --> 00:02:09.159
+And we're just going to go with the default settings, which
+
+53
+00:02:09.159 --> 00:02:11.879
+is we're going to disable Merge Materials.
+
+54
+00:02:11.879 --> 00:02:15.280
+And we're going to go ahead and just select Merge Actors.
+
+55
+00:02:15.280 --> 00:02:17.240
+We'll come up to our merged assets,
+
+56
+00:02:17.240 --> 00:02:21.039
+and we will just overwrite this static mesh one.
+
+57
+00:02:21.039 --> 00:02:22.199
+And that's already done.
+
+58
+00:02:22.199 --> 00:02:23.280
+Look how quick that was.
+
+59
+00:02:23.280 --> 00:02:25.599
+Let's just inspect this first and see what we've got.
+
+60
+00:02:25.599 --> 00:02:28.599
+So 11,908 triangles.
+
+61
+00:02:28.639 --> 00:02:31.560
+That's not the greatest, but we do
+
+62
+00:02:31.560 --> 00:02:33.759
+have one mesh with four materials on it.
+
+63
+00:02:33.759 --> 00:02:37.039
+So if we find this in our Content Browser
+
+64
+00:02:37.039 --> 00:02:39.080
+here and pull it out, there we go.
+
+65
+00:02:39.080 --> 00:02:41.960
+So that is one mesh with four materials,
+
+66
+00:02:41.960 --> 00:02:44.199
+still 11,000 triangles.
+
+67
+00:02:44.199 --> 00:02:46.240
+We could live with that, but let's see what
+
+68
+00:02:46.240 --> 00:02:48.360
+else we can do with this tool.
+
+69
+00:02:48.360 --> 00:02:50.039
+So let's reselect these.
+
+70
+00:02:50.039 --> 00:02:51.360
+And now what we're going to do
+
+71
+00:02:51.360 --> 00:02:55.199
+is I'm going to enable our merge materials.
+
+72
+00:02:55.199 --> 00:02:57.000
+This is going to merge everything down
+
+73
+00:02:57.039 --> 00:02:58.919
+so that we have one mesh, one material.
+
+74
+00:02:58.919 --> 00:03:00.199
+Let's go ahead and do that now.
+
+75
+00:03:00.199 --> 00:03:01.719
+So we're going to say Merge Actors.
+
+76
+00:03:01.719 --> 00:03:03.960
+We're going to come up here to our merged assets,
+
+77
+00:03:03.960 --> 00:03:07.159
+and we will just go back over static mesh one
+
+78
+00:03:07.159 --> 00:03:08.199
+and save that again.
+
+79
+00:03:08.199 --> 00:03:10.199
+Yes, and that was pretty quick.
+
+80
+00:03:10.199 --> 00:03:13.319
+So let's just inspect this and see what we have.
+
+81
+00:03:13.319 --> 00:03:15.400
+So we have one mesh, there we go.
+
+82
+00:03:15.400 --> 00:03:18.080
+One material, still 11,000 triangles.
+
+83
+00:03:18.080 --> 00:03:20.599
+But again, that's not too big of an issue.
+
+84
+00:03:20.599 --> 00:03:24.120
+Let's just pull this out and see what we have.
+
+85
+00:03:24.159 --> 00:03:27.039
+Now one thing to notice, the statue
+
+86
+00:03:27.039 --> 00:03:32.599
+itself is actually missing its kind of glass looking texture.
+
+87
+00:03:32.599 --> 00:03:34.590
+This is one of the things that's kind
+
+88
+00:03:34.590 --> 00:03:35.710
+of a trade-off between this tool.
+
+89
+00:03:35.710 --> 00:03:37.310
+You have to make decisions about what
+
+90
+00:03:37.310 --> 00:03:39.030
+you're going to merge together.
+
+91
+00:03:39.030 --> 00:03:41.909
+I suggest that you merge things together
+
+92
+00:03:41.909 --> 00:03:43.870
+that are of similar surface types.
+
+93
+00:03:43.870 --> 00:03:46.710
+So all three of these would be good.
+
+94
+00:03:46.710 --> 00:03:48.469
+The reason I would leave this alone
+
+95
+00:03:48.469 --> 00:03:51.990
+is because of this unique glass material on it.
+
+96
+00:03:51.990 --> 00:03:54.870
+Remember, merging actors is about optimization
+
+97
+00:03:54.870 --> 00:03:57.949
+for performance, so we also don't
+
+98
+00:03:57.949 --> 00:03:59.389
+want to destroy the artwork.
+
+99
+00:03:59.389 --> 00:04:01.430
+So by merging all this down, we're destroying the artwork.
+
+100
+00:04:01.430 --> 00:04:03.030
+So again, we're going to have to make
+
+101
+00:04:03.030 --> 00:04:04.509
+trade-offs for different things.
+
+102
+00:04:04.509 --> 00:04:06.310
+So let's delete this one out of the scene.
+
+103
+00:04:06.310 --> 00:04:09.789
+We've still got a few other things in our merge actors
+
+104
+00:04:09.789 --> 00:04:10.430
+that we can do.
+
+105
+00:04:10.430 --> 00:04:12.229
+So we have looked at merge.
+
+106
+00:04:12.229 --> 00:04:14.349
+Let's take a look at simplify.
+
+107
+00:04:14.349 --> 00:04:16.230
+So let's just go ahead right away,
+
+108
+00:04:16.230 --> 00:04:18.310
+and we'll leave this with the default settings,
+
+109
+00:04:18.310 --> 00:04:19.389
+and we'll just merge.
+
+110
+00:04:19.389 --> 00:04:21.589
+We're going to go up here to merged assets,
+
+111
+00:04:21.629 --> 00:04:25.069
+and we will take this SMProxy chair and save over the top.
+
+112
+00:04:25.069 --> 00:04:27.230
+Yes, and we'll give this just a moment to generate,
+
+113
+00:04:27.230 --> 00:04:31.560
+and we'll be right back.
+
+114
+00:04:31.560 --> 00:04:33.920
+All right, so that has finished generating.
+
+115
+00:04:33.920 --> 00:04:35.319
+So let's go ahead and just take
+
+116
+00:04:35.319 --> 00:04:36.759
+a look at what we got here.
+
+117
+00:04:36.759 --> 00:04:38.079
+So here's our SMProxy chair.
+
+118
+00:04:38.079 --> 00:04:39.600
+So let's open this up and see.
+
+119
+00:04:39.600 --> 00:04:40.720
+We'll check that out.
+
+120
+00:04:40.720 --> 00:04:42.319
+That's actually kind of cool.
+
+121
+00:04:42.319 --> 00:04:45.800
+We're at 1,500 triangles, and we've
+
+122
+00:04:45.800 --> 00:04:47.639
+got one mesh, one material.
+
+123
+00:04:47.639 --> 00:04:49.199
+So what this has actually done is
+
+124
+00:04:49.199 --> 00:04:52.720
+it's gone through and recreated this mesh for us.
+
+125
+00:04:52.759 --> 00:04:54.839
+So let's just pull this out and have a look at it.
+
+126
+00:04:54.839 --> 00:04:56.759
+So that's actually pretty good.
+
+127
+00:04:56.759 --> 00:04:59.040
+That looks really, really good considering the fact
+
+128
+00:04:59.040 --> 00:05:01.040
+that it did for us all automatically.
+
+129
+00:05:01.040 --> 00:05:02.279
+So that is the simplify.
+
+130
+00:05:02.279 --> 00:05:04.439
+Simplify is just going to take all that stuff,
+
+131
+00:05:04.439 --> 00:05:07.360
+simplify it down, and give us a new mesh, new material.
+
+132
+00:05:07.360 --> 00:05:09.759
+So it's going to reduce our poly and triangle count
+
+133
+00:05:09.759 --> 00:05:11.680
+as well as reduce our material count.
+
+134
+00:05:11.680 --> 00:05:13.199
+So that's a big win.
+
+135
+00:05:13.199 --> 00:05:15.399
+So the next thing that we're going to look at here,
+
+136
+00:05:15.399 --> 00:05:18.399
+I'm going to select these, and we're going to close this,
+
+137
+00:05:18.399 --> 00:05:20.399
+and we're going to go to our batch.
+
+138
+00:05:20.439 --> 00:05:22.319
+So what batch is going to do is it
+
+139
+00:05:22.319 --> 00:05:25.040
+is going to take our static meshes
+
+140
+00:05:25.040 --> 00:05:29.000
+and replace them with instanced static mesh versions.
+
+141
+00:05:29.000 --> 00:05:31.360
+Now, one of the drawbacks to this
+
+142
+00:05:31.360 --> 00:05:34.519
+is if we have multiple meshes selected
+
+143
+00:05:34.519 --> 00:05:36.600
+that are all unique meshes, this tool's
+
+144
+00:05:36.600 --> 00:05:38.600
+not going to work as well.
+
+145
+00:05:38.600 --> 00:05:40.759
+If we notice right now, it says the current settings
+
+146
+00:05:40.759 --> 00:05:43.600
+will result in one instanced static mesh component.
+
+147
+00:05:43.600 --> 00:05:45.160
+Two actors will be replaced.
+
+148
+00:05:45.160 --> 00:05:46.759
+And what that's telling me is basically
+
+149
+00:05:46.759 --> 00:05:49.639
+it's only going to be able to replace the chairs because those
+
+150
+00:05:49.680 --> 00:05:51.839
+are the only things that are identical.
+
+151
+00:05:51.839 --> 00:05:54.199
+It can't replace the table or the statue
+
+152
+00:05:54.199 --> 00:05:57.000
+because we don't have any other identical components
+
+153
+00:05:57.000 --> 00:05:57.720
+for it.
+
+154
+00:05:57.720 --> 00:06:00.160
+Now, I'm not going to merge the actors on this one,
+
+155
+00:06:00.160 --> 00:06:03.319
+but I am going to kick it down to approximate.
+
+156
+00:06:03.319 --> 00:06:06.600
+Now, what approximate does is it generates new mesh,
+
+157
+00:06:06.600 --> 00:06:08.079
+new material, but this is more
+
+158
+00:06:08.079 --> 00:06:10.959
+geared towards when you're trying to merge Nanite meshes.
+
+159
+00:06:10.959 --> 00:06:13.879
+Now, it will work on regular static meshes,
+
+160
+00:06:13.879 --> 00:06:16.959
+but it is geared towards Nanite meshes.
+
+161
+00:06:16.959 --> 00:06:18.920
+Let's go ahead and see how this works by just
+
+162
+00:06:18.920 --> 00:06:21.480
+clicking the Merge Actors button now.
+
+163
+00:06:21.480 --> 00:06:23.519
+We're going to come up here to our merged assets,
+
+164
+00:06:23.519 --> 00:06:26.920
+and we will do this approximate SM chair.
+
+165
+00:06:26.920 --> 00:06:30.040
+Click Save, Override, and we'll be back in just a moment
+
+166
+00:06:30.040 --> 00:06:40.759
+once this finishes.
+
+167
+00:06:40.759 --> 00:06:42.399
+All right, now that that has finished,
+
+168
+00:06:42.399 --> 00:06:43.920
+let's go ahead and see what the results are
+
+169
+00:06:43.920 --> 00:06:45.240
+by hitting Control-Space.
+
+170
+00:06:45.240 --> 00:06:50.500
+And I believe it was the right here.
+
+171
+00:06:50.500 --> 00:06:52.860
+No, it was the approximate chair, so there we go.
+
+172
+00:06:52.860 --> 00:06:54.160
+There's the approximate chair.
+
+173
+00:06:54.160 --> 00:06:56.939
+So that has done quite a number on this.
+
+174
+00:06:56.939 --> 00:06:59.980
+Let's go ahead and take a look at what its stats are.
+
+175
+00:06:59.980 --> 00:07:01.899
+So 1998, that's pretty good.
+
+176
+00:07:01.899 --> 00:07:05.939
+One mesh, one material, but we do have some issues there.
+
+177
+00:07:05.939 --> 00:07:09.220
+We're getting some kind of crazy looking geometry.
+
+178
+00:07:09.220 --> 00:07:11.019
+But again, remember, this is trying
+
+179
+00:07:11.019 --> 00:07:15.139
+to work for Nanite meshes or meshes that have
+
+180
+00:07:15.139 --> 00:07:17.579
+tons of detail inside of them.
+
+181
+00:07:17.579 --> 00:07:22.029
+So when you are going through using Merge Actors,
+
+182
+00:07:22.029 --> 00:07:25.709
+there are also a number of settings inside of this tool
+
+183
+00:07:25.709 --> 00:07:29.709
+that will help adjust how everything is corrected.
+
+184
+00:07:29.709 --> 00:07:31.589
+I highly suggest that everybody take a look
+
+185
+00:07:31.589 --> 00:07:35.339
+at these settings and adjust, build,
+
+186
+00:07:35.339 --> 00:07:37.500
+so you can more familiarize yourselves
+
+187
+00:07:37.500 --> 00:07:40.579
+with how each mode in the Merge Actor tool
+
+188
+00:07:40.579 --> 00:07:46.500
+works and how it can help benefit your project's meshes.

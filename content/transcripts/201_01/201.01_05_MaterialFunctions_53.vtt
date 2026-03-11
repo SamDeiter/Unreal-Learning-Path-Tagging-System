@@ -1,0 +1,2577 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.680
+In this lesson, we're gonna take a look at material
+
+2
+00:00:03.680 --> 00:00:05.719
+functions and how to create one.
+
+3
+00:00:05.719 --> 00:00:07.360
+So let's get started.
+
+4
+00:00:07.360 --> 00:00:10.880
+So the material functions many will ask is exactly
+
+5
+00:00:10.880 --> 00:00:11.839
+what is it used for?
+
+6
+00:00:11.839 --> 00:00:13.269
+Why is it important?
+
+7
+00:00:13.269 --> 00:00:15.509
+Well, it allows you to embed materials
+
+8
+00:00:15.509 --> 00:00:19.269
+within materials, avoiding an unnecessary clutter.
+
+9
+00:00:19.269 --> 00:00:23.030
+So it allows you to encapsulize information
+
+10
+00:00:23.030 --> 00:00:26.870
+and functionality within a material set
+
+11
+00:00:26.870 --> 00:00:30.019
+that you can bring into a parent material.
+
+12
+00:00:30.019 --> 00:00:33.219
+It can be saved in packages and migrated as well
+
+13
+00:00:33.219 --> 00:00:36.159
+as reused across multiple materials.
+
+14
+00:00:36.159 --> 00:00:38.799
+So you can actually create them and expose them
+
+15
+00:00:38.799 --> 00:00:41.420
+to your library and to be able to call upon
+
+16
+00:00:41.420 --> 00:00:42.780
+the one that you've crafted.
+
+17
+00:00:42.780 --> 00:00:45.740
+It's really convenient and really great to work with.
+
+18
+00:00:45.740 --> 00:00:48.340
+And we have several different examples
+
+19
+00:00:48.340 --> 00:00:50.460
+and ones that you can use inside
+
+20
+00:00:50.460 --> 00:00:52.500
+of our material library.
+
+21
+00:00:52.500 --> 00:00:54.759
+What we're gonna do here is I'm gonna show you
+
+22
+00:00:54.759 --> 00:00:58.299
+how to create one from scratch into Unreal.
+
+23
+00:00:58.340 --> 00:01:01.020
+And we're going to be imitating a look and feel
+
+24
+00:01:01.020 --> 00:01:04.819
+of caustics of water bouncing off of water,
+
+25
+00:01:04.819 --> 00:01:08.379
+light bouncing off of water and then back onto a surface.
+
+26
+00:01:08.379 --> 00:01:11.209
+Let me show you on Unreal what our goals are.
+
+27
+00:01:11.209 --> 00:01:13.829
+As you can see here, a light is bouncing up
+
+28
+00:01:13.829 --> 00:01:17.230
+on the ceiling and we have an effect using a thing
+
+29
+00:01:17.230 --> 00:01:19.709
+called, if we scroll down,
+
+30
+00:01:19.709 --> 00:01:22.189
+it is called a light function material.
+
+31
+00:01:22.189 --> 00:01:25.349
+That's gonna be our end goal to be able to create this
+
+32
+00:01:25.349 --> 00:01:28.670
+and craft this and then plug that material in here.
+
+33
+00:01:28.670 --> 00:01:32.310
+And we're going to expose and make it so that it fits
+
+34
+00:01:32.310 --> 00:01:35.530
+in the category of a light function material
+
+35
+00:01:35.530 --> 00:01:38.180
+and will fit within this light.
+
+36
+00:01:38.180 --> 00:01:40.760
+I know it sounds complex, but it really isn't.
+
+37
+00:01:40.760 --> 00:01:43.560
+So let me walk you through this.
+
+38
+00:01:43.560 --> 00:01:47.060
+So let's go to our in class material folder.
+
+39
+00:01:47.060 --> 00:01:48.260
+We're gonna right click here
+
+40
+00:01:48.260 --> 00:01:51.760
+and we're gonna create a brand new material.
+
+41
+00:01:51.760 --> 00:01:53.930
+So I'm gonna click right here
+
+42
+00:01:53.930 --> 00:01:59.730
+and we're gonna call this one M underscore new caustics.
+
+43
+00:02:01.959 --> 00:02:04.120
+And this is going to be our parent material,
+
+44
+00:02:04.120 --> 00:02:06.819
+our goal and result.
+
+45
+00:02:06.819 --> 00:02:09.180
+We do wanna make a material function.
+
+46
+00:02:09.180 --> 00:02:10.360
+This is very important.
+
+47
+00:02:10.360 --> 00:02:12.280
+This is a very important part of the process
+
+48
+00:02:12.280 --> 00:02:15.000
+and we can't leave out because what's gonna happen
+
+49
+00:02:15.000 --> 00:02:16.719
+is we're gonna bring those material functions
+
+50
+00:02:16.719 --> 00:02:19.400
+into this final material.
+
+51
+00:02:19.400 --> 00:02:22.180
+So let's go and make a material function.
+
+52
+00:02:22.180 --> 00:02:24.180
+So I'm gonna right click here
+
+53
+00:02:24.180 --> 00:02:27.280
+and we're gonna go in here underneath our material.
+
+54
+00:02:27.280 --> 00:02:30.460
+And we're gonna go to our material function
+
+55
+00:02:30.460 --> 00:02:31.740
+and you'll find it here.
+
+56
+00:02:31.740 --> 00:02:35.020
+Don't get it confused with material function instance
+
+57
+00:02:35.020 --> 00:02:37.219
+or material instance.
+
+58
+00:02:37.219 --> 00:02:40.939
+These will have other places at other times.
+
+59
+00:02:40.939 --> 00:02:42.139
+And in this particular case,
+
+60
+00:02:42.139 --> 00:02:44.020
+we just need a material function.
+
+61
+00:02:44.020 --> 00:02:46.280
+And yes, you can make an instance of it,
+
+62
+00:02:46.280 --> 00:02:48.080
+but we're gonna be focusing on this.
+
+63
+00:02:48.080 --> 00:02:51.960
+And this also plays a different role.
+
+64
+00:02:51.960 --> 00:02:54.020
+Let's go and click on this material function.
+
+65
+00:02:54.020 --> 00:02:54.939
+There we go.
+
+66
+00:02:54.939 --> 00:02:58.219
+I'm gonna put MF on here and put underscore.
+
+67
+00:02:58.219 --> 00:03:04.490
+And we're gonna call this base water,
+
+68
+00:03:04.490 --> 00:03:06.129
+or you can even call it a wave effect.
+
+69
+00:03:06.129 --> 00:03:10.939
+So let's call it wave.
+
+70
+00:03:10.939 --> 00:03:14.699
+There we go, waves, works good enough.
+
+71
+00:03:14.699 --> 00:03:17.580
+Let's go ahead and open up this material.
+
+72
+00:03:17.580 --> 00:03:19.460
+Now, let me minimize it just for a second
+
+73
+00:03:19.460 --> 00:03:21.400
+cause I wanna point this,
+
+74
+00:03:21.400 --> 00:03:22.620
+I wanna make this clear
+
+75
+00:03:22.620 --> 00:03:25.210
+cause it's very important to consider this.
+
+76
+00:03:25.210 --> 00:03:27.050
+If you do get lost at any time,
+
+77
+00:03:27.050 --> 00:03:29.530
+feel free to click on the light
+
+78
+00:03:29.530 --> 00:03:30.449
+as you're following along
+
+79
+00:03:31.030 --> 00:03:32.430
+and go to that material on the details,
+
+80
+00:03:32.430 --> 00:03:34.770
+just scroll down a bit to under light function,
+
+81
+00:03:34.770 --> 00:03:36.129
+double click on it.
+
+82
+00:03:36.129 --> 00:03:39.050
+And in here, you can actually follow along
+
+83
+00:03:39.050 --> 00:03:40.569
+and see what I've done.
+
+84
+00:03:40.569 --> 00:03:41.969
+But to explain it a bit better,
+
+85
+00:03:41.969 --> 00:03:43.870
+let me show you what's going on.
+
+86
+00:03:43.870 --> 00:03:45.090
+This is the parent material,
+
+87
+00:03:45.090 --> 00:03:47.360
+which we're going to build things out.
+
+88
+00:03:47.360 --> 00:03:51.060
+Inside of here is the exposed material function.
+
+89
+00:03:51.060 --> 00:03:53.259
+And it's basically exposed to the library
+
+90
+00:03:53.259 --> 00:03:55.159
+so we can call it up.
+
+91
+00:03:55.159 --> 00:03:56.840
+So you can double click on that
+
+92
+00:03:56.840 --> 00:04:00.330
+and that will bring you into the material function.
+
+93
+00:04:00.330 --> 00:04:01.729
+Now don't let this intimidate you.
+
+94
+00:04:01.729 --> 00:04:03.330
+There's a lot going on here,
+
+95
+00:04:03.330 --> 00:04:05.409
+but a good amount of it is repetitive.
+
+96
+00:04:05.409 --> 00:04:06.710
+And I'm gonna walk you through this
+
+97
+00:04:06.710 --> 00:04:08.409
+so you can understand the concept.
+
+98
+00:04:08.409 --> 00:04:09.870
+So you can start exploring on your own
+
+99
+00:04:09.870 --> 00:04:13.009
+to make really good material functions.
+
+100
+00:04:13.009 --> 00:04:13.969
+And I'm telling you,
+
+101
+00:04:13.969 --> 00:04:16.689
+anytime you can, you can go to our library
+
+102
+00:04:16.689 --> 00:04:19.329
+and you can call up just by typing in MF
+
+103
+00:04:19.329 --> 00:04:21.509
+and you can see all the wonderful material functions
+
+104
+00:04:21.509 --> 00:04:25.370
+that we have for several different types of looks and feels.
+
+105
+00:04:25.370 --> 00:04:27.569
+And I do encourage you to go in here
+
+106
+00:04:27.569 --> 00:04:30.569
+and even reverse engineer and experiment with these.
+
+107
+00:04:30.569 --> 00:04:33.850
+So you can understand what's going on under the hood.
+
+108
+00:04:33.850 --> 00:04:36.009
+All right, so I just want to make that clear
+
+109
+00:04:36.009 --> 00:04:38.220
+so you don't get lost in any way.
+
+110
+00:04:38.220 --> 00:04:42.029
+Let's go and pull this one over
+
+111
+00:04:42.029 --> 00:04:43.509
+and we'll do the same thing with the parent.
+
+112
+00:04:43.509 --> 00:04:48.279
+We'll pull that out of the way.
+
+113
+00:04:48.279 --> 00:04:49.759
+So let's go ahead and get started.
+
+114
+00:04:49.759 --> 00:04:52.060
+Now, like usual, this happens a lot
+
+115
+00:04:52.060 --> 00:04:54.860
+when you make a material function, actually every time.
+
+116
+00:04:54.860 --> 00:04:56.819
+It's gonna give you an error.
+
+117
+00:04:56.819 --> 00:05:01.180
+So don't let that confuse you in any way.
+
+118
+00:05:01.180 --> 00:05:03.100
+All you need to do is right click here
+
+119
+00:05:03.100 --> 00:05:05.629
+and just say stop preview node.
+
+120
+00:05:05.629 --> 00:05:06.750
+I do want to mention,
+
+121
+00:05:06.750 --> 00:05:09.629
+and you'll notice it said shader model six.
+
+122
+00:05:09.629 --> 00:05:11.750
+Whenever you're working with Unreal,
+
+123
+00:05:11.750 --> 00:05:14.009
+you want to try to turn it on.
+
+124
+00:05:14.009 --> 00:05:17.779
+You want to turn on SM6 and double check your system
+
+125
+00:05:17.779 --> 00:05:19.500
+and see if it's on or not.
+
+126
+00:05:19.500 --> 00:05:21.589
+You can see mine is on.
+
+127
+00:05:21.589 --> 00:05:27.170
+This is helpful for many aspects of working with Lumen.
+
+128
+00:05:27.170 --> 00:05:29.329
+Okay, let's go to our full screen
+
+129
+00:05:29.329 --> 00:05:30.689
+and let's start building this out.
+
+130
+00:05:30.689 --> 00:05:32.649
+And I'm gonna point you in the right direction
+
+131
+00:05:32.689 --> 00:05:34.569
+on some of the textures that we're gonna need.
+
+132
+00:05:34.569 --> 00:05:37.180
+So don't worry about that.
+
+133
+00:05:37.180 --> 00:05:38.980
+Okay, so one of the things we want to do
+
+134
+00:05:38.980 --> 00:05:41.980
+is we want to determine what it is that we're making
+
+135
+00:05:41.980 --> 00:05:43.759
+and how it's going to be,
+
+136
+00:05:44.819 --> 00:05:46.740
+how we're going to access some of the features.
+
+137
+00:05:46.740 --> 00:05:48.860
+And the nice thing about this is you can do that
+
+138
+00:05:48.860 --> 00:05:52.740
+using a thing called a function input.
+
+139
+00:05:52.740 --> 00:05:54.980
+Function inputs are fantastic.
+
+140
+00:05:54.980 --> 00:05:56.879
+And you'll find this right here.
+
+141
+00:05:56.879 --> 00:05:58.819
+You'll notice in a pull down
+
+142
+00:05:58.819 --> 00:06:00.660
+that you can choose multiple things
+
+143
+00:06:00.660 --> 00:06:02.990
+for what you want to do for your function.
+
+144
+00:06:02.990 --> 00:06:04.629
+In our particular case, the first one,
+
+145
+00:06:04.629 --> 00:06:07.810
+we want to make sure that it's set to vector two
+
+146
+00:06:07.810 --> 00:06:09.870
+because we're really just working with a 2D texture
+
+147
+00:06:09.870 --> 00:06:12.459
+that we're gonna project on a wall.
+
+148
+00:06:12.459 --> 00:06:14.459
+Also make sure that you name it correctly.
+
+149
+00:06:14.459 --> 00:06:20.110
+So in this case, we'll call this wave coordinates.
+
+150
+00:06:20.110 --> 00:06:23.410
+We can just call it coordinates
+
+151
+00:06:23.410 --> 00:06:25.970
+and I spelled coordinates wrong.
+
+152
+00:06:25.970 --> 00:06:27.170
+We'll just put wave cord.
+
+153
+00:06:27.170 --> 00:06:29.589
+It is kind of long otherwise.
+
+154
+00:06:29.589 --> 00:06:32.009
+This will show up in the material function
+
+155
+00:06:32.009 --> 00:06:33.970
+when we drag it into the parent material.
+
+156
+00:06:33.970 --> 00:06:36.189
+So you can truncate them anytime you want.
+
+157
+00:06:38.730 --> 00:06:39.970
+We have this one set up,
+
+158
+00:06:39.970 --> 00:06:42.810
+but we need to make sure that Unreal knows our intentions
+
+159
+00:06:42.810 --> 00:06:44.649
+because this is great and all,
+
+160
+00:06:44.649 --> 00:06:47.050
+but Unreal doesn't know on what context
+
+161
+00:06:47.050 --> 00:06:48.829
+we want this to be displayed.
+
+162
+00:06:48.829 --> 00:06:50.250
+So I'm gonna give my finger the U key
+
+163
+00:06:50.250 --> 00:06:53.949
+and then I'm gonna call up a texture coordinate.
+
+164
+00:06:53.949 --> 00:06:55.610
+I'm gonna now grab the texture coordinates
+
+165
+00:06:55.610 --> 00:06:58.060
+and put it into my preview.
+
+166
+00:06:58.060 --> 00:06:58.899
+There you go.
+
+167
+00:06:58.899 --> 00:07:00.600
+That's working just great.
+
+168
+00:07:00.600 --> 00:07:04.459
+We can at any time also tell it to sort priority.
+
+169
+00:07:04.459 --> 00:07:07.600
+You also notice here we have used preview value
+
+170
+00:07:07.600 --> 00:07:08.439
+as default.
+
+171
+00:07:08.439 --> 00:07:09.639
+I like to turn these on.
+
+172
+00:07:09.639 --> 00:07:12.319
+Well, that's because I've been using Unreal for a while.
+
+173
+00:07:12.319 --> 00:07:15.019
+And in the past, if you didn't turn these on,
+
+174
+00:07:15.019 --> 00:07:16.199
+it wouldn't display correctly.
+
+175
+00:07:16.199 --> 00:07:17.879
+Wouldn't even show up to the party,
+
+176
+00:07:17.879 --> 00:07:19.699
+but I just get in the habit of turning them on.
+
+177
+00:07:19.699 --> 00:07:20.680
+Nowadays we have it
+
+178
+00:07:20.680 --> 00:07:23.540
+so that's not necessarily a determining factor,
+
+179
+00:07:23.540 --> 00:07:25.000
+whether it's gonna show up,
+
+180
+00:07:25.000 --> 00:07:28.490
+but I like to turn that on just for good measure.
+
+181
+00:07:28.490 --> 00:07:31.350
+All right, so we need to do a few more things.
+
+182
+00:07:31.350 --> 00:07:33.149
+So one of them is we need to make sure
+
+183
+00:07:33.149 --> 00:07:35.829
+that we have a 2D constant control
+
+184
+00:07:35.829 --> 00:07:37.629
+of the positioning of each of these waves.
+
+185
+00:07:37.629 --> 00:07:41.069
+So they're not all the same when you're working.
+
+186
+00:07:41.069 --> 00:07:44.540
+So we're gonna need a thing called a two constant vector.
+
+187
+00:07:44.540 --> 00:07:47.360
+So keep my finger on the two key and we'll left click.
+
+188
+00:07:47.360 --> 00:07:49.279
+And I'm gonna do that three times.
+
+189
+00:07:49.279 --> 00:07:51.120
+Now these numbers don't have to be perfect
+
+190
+00:07:51.120 --> 00:07:53.879
+nor do they have to be exactly what I have in here.
+
+191
+00:07:53.879 --> 00:07:55.759
+They can be whatever you want them to be
+
+192
+00:07:55.759 --> 00:07:59.459
+because shifting these is gonna change the look a bit.
+
+193
+00:07:59.459 --> 00:08:01.339
+So they do need to be off from each other
+
+194
+00:08:01.339 --> 00:08:02.920
+and not exactly the same.
+
+195
+00:08:02.920 --> 00:08:07.100
+So the first one we're just gonna set that to 0.4.
+
+196
+00:08:07.100 --> 00:08:08.259
+And then the second number in here,
+
+197
+00:08:08.259 --> 00:08:12.019
+we're gonna set that in the first two vector.
+
+198
+00:08:12.019 --> 00:08:16.310
+We're gonna set that to a 0.35.
+
+199
+00:08:16.310 --> 00:08:17.829
+Here we go.
+
+200
+00:08:17.829 --> 00:08:19.410
+The next one we will go
+
+201
+00:08:19.410 --> 00:08:21.290
+and let's shift this just a little bit.
+
+202
+00:08:21.290 --> 00:08:24.029
+And they can be a little bit farther from each other.
+
+203
+00:08:24.029 --> 00:08:27.459
+In this case, it's a 0.8.
+
+204
+00:08:27.459 --> 00:08:29.980
+My numbers that I have in here are a little bit longer.
+
+205
+00:08:29.980 --> 00:08:32.460
+And this little effect is a cool little effect
+
+206
+00:08:32.460 --> 00:08:34.710
+that we have in Paragon.
+
+207
+00:08:34.710 --> 00:08:40.779
+And I'm gonna go to Y and we'll do 0.14.
+
+208
+00:08:40.779 --> 00:08:46.580
+And we'll go to another one here, 0.651.
+
+209
+00:08:46.580 --> 00:08:48.059
+Doesn't have to have that extra.
+
+210
+00:08:48.059 --> 00:08:50.440
+It could just simply just be 65.
+
+211
+00:08:50.440 --> 00:08:52.299
+And then finally we do zero point
+
+212
+00:08:52.299 --> 00:08:55.059
+and these will be pretty close, 75.
+
+213
+00:08:55.059 --> 00:08:56.179
+And that works just great.
+
+214
+00:08:56.179 --> 00:08:59.259
+And we should be rock and rolling from that point.
+
+215
+00:08:59.259 --> 00:09:01.179
+Now what we want to do is go in here
+
+216
+00:09:01.179 --> 00:09:03.460
+and actually have it so they're connected.
+
+217
+00:09:03.460 --> 00:09:05.500
+The shifting of things is gonna help
+
+218
+00:09:05.500 --> 00:09:07.669
+with the wave coordinates.
+
+219
+00:09:07.669 --> 00:09:09.149
+So we're gonna be able,
+
+220
+00:09:09.149 --> 00:09:11.789
+we need to actually go in here and use an ad for these
+
+221
+00:09:11.789 --> 00:09:14.389
+so we can stack these appropriately.
+
+222
+00:09:14.389 --> 00:09:18.070
+So the ad and the multiply can be used to stack things,
+
+223
+00:09:18.070 --> 00:09:19.110
+but you gotta keep in mind
+
+224
+00:09:19.110 --> 00:09:20.590
+what kind of effect you're going for.
+
+225
+00:09:20.590 --> 00:09:22.429
+The ad in this case is gonna work good
+
+226
+00:09:22.429 --> 00:09:24.730
+and gonna make it so that if we do do a shift,
+
+227
+00:09:24.730 --> 00:09:26.350
+it's not going to scale any things.
+
+228
+00:09:26.350 --> 00:09:27.309
+And then we talked about that,
+
+229
+00:09:27.309 --> 00:09:29.710
+that the ad can keep things pretty linear
+
+230
+00:09:29.710 --> 00:09:32.009
+and the multiply is going to multiply things
+
+231
+00:09:32.009 --> 00:09:34.950
+and stretch and change the shape of things.
+
+232
+00:09:34.950 --> 00:09:36.929
+So we don't really wanna change the shape.
+
+233
+00:09:36.929 --> 00:09:40.139
+So I'm gonna give a few of the A key for ad
+
+234
+00:09:40.139 --> 00:09:42.250
+and do three of them.
+
+235
+00:09:43.009 --> 00:09:44.549
+Nothing needs to change really,
+
+236
+00:09:44.549 --> 00:09:46.409
+but we need to plug in these guys
+
+237
+00:09:46.409 --> 00:09:49.009
+into the B channel of each.
+
+238
+00:09:49.009 --> 00:09:52.009
+We're gonna grab the final execution of the X and Y,
+
+239
+00:09:52.009 --> 00:09:54.570
+which is the top white button,
+
+240
+00:09:54.570 --> 00:09:59.690
+or I should say execution string here.
+
+241
+00:09:59.690 --> 00:10:02.659
+And we're gonna put those all into the B.
+
+242
+00:10:02.659 --> 00:10:04.779
+Now we need a secondary channel in here.
+
+243
+00:10:04.779 --> 00:10:07.210
+It's based on our coordinates in here
+
+244
+00:10:07.210 --> 00:10:08.629
+and our coordinates are pretty default.
+
+245
+00:10:08.629 --> 00:10:10.649
+That's just one in one and that's fine.
+
+246
+00:10:10.649 --> 00:10:12.330
+Again, you can change these
+
+247
+00:10:12.330 --> 00:10:15.279
+once you decide what look you want.
+
+248
+00:10:15.279 --> 00:10:16.200
+I'm gonna pull the string down
+
+249
+00:10:16.200 --> 00:10:18.759
+to the each channel for each one of them.
+
+250
+00:10:18.759 --> 00:10:19.600
+Boom, look at that.
+
+251
+00:10:19.600 --> 00:10:22.559
+Pretty easy, pretty straightforward.
+
+252
+00:10:22.559 --> 00:10:24.379
+It's not that intimidating.
+
+253
+00:10:24.379 --> 00:10:26.299
+And at any time you can reroute these
+
+254
+00:10:26.299 --> 00:10:28.480
+and make it so they're not so noodly.
+
+255
+00:10:28.480 --> 00:10:31.000
+That does, it gets a little noodly here,
+
+256
+00:10:31.000 --> 00:10:31.960
+but I think we'll be okay.
+
+257
+00:10:31.960 --> 00:10:35.059
+I think we'll live.
+
+258
+00:10:35.059 --> 00:10:39.019
+All right, so we have here an opportunity here
+
+259
+00:10:39.019 --> 00:10:41.139
+where we need to actually maybe control the speed.
+
+260
+00:10:41.139 --> 00:10:43.259
+And the reason why is because we could leave it
+
+261
+00:10:43.259 --> 00:10:44.740
+and just have like some motion
+
+262
+00:10:45.299 --> 00:10:46.340
+and not have speed control,
+
+263
+00:10:46.340 --> 00:10:47.940
+but it's better to control the speed.
+
+264
+00:10:47.940 --> 00:10:48.779
+And to be able to do that,
+
+265
+00:10:48.779 --> 00:10:52.740
+we're gonna need another function input.
+
+266
+00:10:52.740 --> 00:10:55.500
+There you go, boom, function input.
+
+267
+00:10:55.500 --> 00:10:57.860
+We need to change this to a scalar parameter.
+
+268
+00:10:57.860 --> 00:11:00.200
+So scroll down, find, or actually he's at the top,
+
+269
+00:11:00.200 --> 00:11:02.299
+scroll down or scroll up,
+
+270
+00:11:02.299 --> 00:11:04.980
+get the scalar parameter going.
+
+271
+00:11:04.980 --> 00:11:06.059
+Fantastic.
+
+272
+00:11:06.059 --> 00:11:08.179
+That last number here for preview value,
+
+273
+00:11:08.179 --> 00:11:10.580
+we wanna make sure it shows up to the party all the time
+
+274
+00:11:10.580 --> 00:11:13.059
+so we're gonna keep that one on there.
+
+275
+00:11:13.059 --> 00:11:15.200
+You know, it's gonna turn red.
+
+276
+00:11:15.200 --> 00:11:17.879
+Now you'll find this a lot with Unreal
+
+277
+00:11:17.879 --> 00:11:21.120
+using some of these functions and even using a vector.
+
+278
+00:11:21.120 --> 00:11:23.419
+You'll notice a color vector will change color
+
+279
+00:11:23.419 --> 00:11:25.000
+based on positioning.
+
+280
+00:11:25.000 --> 00:11:27.919
+So the RGB will relate to almost an XYZ.
+
+281
+00:11:27.919 --> 00:11:29.519
+It's actually kind of cool.
+
+282
+00:11:29.519 --> 00:11:32.519
+So this one's gonna keep this one on and ready to go.
+
+283
+00:11:32.519 --> 00:11:33.879
+We're gonna go and add a multiply,
+
+284
+00:11:33.879 --> 00:11:36.720
+keep it for the M key and create a multiply.
+
+285
+00:11:36.720 --> 00:11:40.240
+And then I'm gonna create a thing called a time node.
+
+286
+00:11:40.240 --> 00:11:44.440
+This again, this acts like an input here.
+
+287
+00:11:44.440 --> 00:11:47.279
+If you control, control alt,
+
+288
+00:11:47.279 --> 00:11:48.799
+you'll see the time node is used to add
+
+289
+00:11:48.799 --> 00:11:50.399
+the passage of time to material.
+
+290
+00:11:50.399 --> 00:11:54.080
+So it's actually these little red functions here
+
+291
+00:11:54.080 --> 00:11:57.360
+are allowing me to be able to let Unreal know
+
+292
+00:11:57.360 --> 00:12:00.970
+my intentions as they bring in the data.
+
+293
+00:12:00.970 --> 00:12:02.570
+I'm gonna pull the string to the B channel
+
+294
+00:12:02.570 --> 00:12:07.009
+and I'm gonna pull this one into the A
+
+295
+00:12:07.009 --> 00:12:12.289
+and let's change its name to speed.
+
+296
+00:12:12.289 --> 00:12:13.110
+There we go.
+
+297
+00:12:13.110 --> 00:12:17.809
+And also turn on use preview value as default.
+
+298
+00:12:17.809 --> 00:12:18.649
+Awesome.
+
+299
+00:12:18.649 --> 00:12:20.870
+We're rocking and rolling so far.
+
+300
+00:12:20.870 --> 00:12:23.509
+Check your stuff to make sure you have what I have.
+
+301
+00:12:23.509 --> 00:12:24.470
+Fantastic.
+
+302
+00:12:24.470 --> 00:12:25.990
+All right, that's my really low budget
+
+303
+00:12:25.990 --> 00:12:27.470
+Sean Connery voice.
+
+304
+00:12:27.470 --> 00:12:30.669
+So let's go in here now
+
+305
+00:12:30.669 --> 00:12:33.820
+and we're gonna actually pull in some panner.
+
+306
+00:12:33.820 --> 00:12:34.960
+So keep your finger on the P key.
+
+307
+00:12:34.960 --> 00:12:36.919
+This is a hotkey for panner.
+
+308
+00:12:36.919 --> 00:12:39.059
+We did this in the very first texture class.
+
+309
+00:12:39.059 --> 00:12:43.330
+We made an animated texture, which is a lot of fun.
+
+310
+00:12:43.330 --> 00:12:46.889
+And we're gonna make sure here with these four,
+
+311
+00:12:46.889 --> 00:12:48.350
+cause we're gonna have one at the top
+
+312
+00:12:48.350 --> 00:12:52.029
+that's directly related to the coordinates here.
+
+313
+00:12:52.029 --> 00:12:55.970
+And we're gonna punch in our wave control vector
+
+314
+00:12:55.970 --> 00:12:57.169
+and I'm gonna close my stats.
+
+315
+00:12:57.169 --> 00:12:59.620
+So I have a little more real estate.
+
+316
+00:12:59.620 --> 00:13:02.659
+I'm gonna pull this into the coordinates here
+
+317
+00:13:02.659 --> 00:13:07.870
+for each one of them.
+
+318
+00:13:07.870 --> 00:13:10.539
+There we go.
+
+319
+00:13:10.539 --> 00:13:11.659
+I'm just doing this a bit,
+
+320
+00:13:11.659 --> 00:13:13.299
+probably a little bit early here.
+
+321
+00:13:13.299 --> 00:13:15.740
+We do wanna make sure that these guys are firing,
+
+322
+00:13:15.740 --> 00:13:17.899
+but we also need to make sure that they're firing off
+
+323
+00:13:17.899 --> 00:13:19.700
+from each other just a bit.
+
+324
+00:13:19.700 --> 00:13:21.860
+What that means is the first one,
+
+325
+00:13:21.860 --> 00:13:25.899
+we're gonna set this to a 0.1 across the board
+
+326
+00:13:25.899 --> 00:13:28.200
+in the X and the Y.
+
+327
+00:13:28.200 --> 00:13:33.820
+The second one, we can make negative 0.1
+
+328
+00:13:33.820 --> 00:13:38.370
+in the X and a negative 0.1 in the Y.
+
+329
+00:13:38.370 --> 00:13:39.879
+That works great.
+
+330
+00:13:39.879 --> 00:13:42.879
+But the third one, we kind of need to do a combo plate.
+
+331
+00:13:42.879 --> 00:13:47.279
+So we're gonna do a negative 0.1 on the X
+
+332
+00:13:47.279 --> 00:13:50.480
+and then a positive 0.1 on the Y.
+
+333
+00:13:50.480 --> 00:13:52.840
+And we're gonna flip that for the last one.
+
+334
+00:13:52.840 --> 00:13:56.200
+So we're gonna do a 0.1 positive on the X
+
+335
+00:13:56.200 --> 00:13:59.600
+and a negative 0.1 on the Y.
+
+336
+00:14:00.509 --> 00:14:03.789
+I'm gonna move this back a little bit, just a tad,
+
+337
+00:14:03.789 --> 00:14:05.899
+and let's go ahead and keep rocking.
+
+338
+00:14:05.899 --> 00:14:09.299
+All right, now we're gonna go in here
+
+339
+00:14:09.299 --> 00:14:11.019
+and control the texture information
+
+340
+00:14:11.019 --> 00:14:12.259
+because that's really important.
+
+341
+00:14:12.259 --> 00:14:17.730
+And again, we're going to be using our input texture
+
+342
+00:14:17.730 --> 00:14:20.370
+for this, function input, I should say.
+
+343
+00:14:20.370 --> 00:14:23.049
+And that's gonna, again, act as a gateway.
+
+344
+00:14:23.049 --> 00:14:26.370
+So we're creating functionality.
+
+345
+00:14:26.370 --> 00:14:28.169
+I'm gonna move this to the bottom.
+
+346
+00:14:28.169 --> 00:14:30.620
+I'm not gonna get them completely set up just yet,
+
+347
+00:14:30.620 --> 00:14:32.220
+but there are a couple of things I need to do.
+
+348
+00:14:32.220 --> 00:14:36.529
+One, let's change its name to texture.
+
+349
+00:14:36.529 --> 00:14:38.330
+If we want to, we can do sorting priority.
+
+350
+00:14:38.330 --> 00:14:39.870
+I'm gonna leave it at zero.
+
+351
+00:14:39.870 --> 00:14:41.250
+Unreal will just try to stack it
+
+352
+00:14:41.250 --> 00:14:46.120
+in the basically who came first.
+
+353
+00:14:46.120 --> 00:14:47.120
+With that in there,
+
+354
+00:14:47.120 --> 00:14:49.240
+you wanna make sure we have 2D in here.
+
+355
+00:14:49.240 --> 00:14:50.919
+So let's click on this
+
+356
+00:14:50.919 --> 00:14:55.639
+and make sure that we have a 2D input vector too.
+
+357
+00:14:55.639 --> 00:14:56.879
+And Unreal will let you know,
+
+358
+00:14:56.879 --> 00:14:58.740
+actually I should say texture, my bad.
+
+359
+00:14:58.740 --> 00:15:00.490
+It should be texture.
+
+360
+00:15:00.490 --> 00:15:02.289
+I always do that.
+
+361
+00:15:02.289 --> 00:15:06.450
+So let's go and grab that here.
+
+362
+00:15:06.450 --> 00:15:07.490
+There we go.
+
+363
+00:15:07.490 --> 00:15:09.490
+Function input texture 2D.
+
+364
+00:15:09.490 --> 00:15:10.490
+That's important.
+
+365
+00:15:10.490 --> 00:15:12.460
+Don't wanna miss that step.
+
+366
+00:15:12.460 --> 00:15:13.919
+So before we've finished that one,
+
+367
+00:15:13.919 --> 00:15:15.340
+let's actually connect these
+
+368
+00:15:15.340 --> 00:15:16.759
+because there really isn't,
+
+369
+00:15:16.759 --> 00:15:19.360
+Unreal doesn't know where this begins and ends
+
+370
+00:15:19.360 --> 00:15:22.120
+and we kinda need to tell him what's going on.
+
+371
+00:15:22.120 --> 00:15:23.980
+So let's go ahead and do that.
+
+372
+00:15:23.980 --> 00:15:26.360
+So in the ads here,
+
+373
+00:15:26.360 --> 00:15:32.289
+push them, all of them inside of our coordinates here.
+
+374
+00:15:35.120 --> 00:15:36.600
+Now, actually I messed up here.
+
+375
+00:15:36.600 --> 00:15:38.799
+I connected all my coordinates to all these.
+
+376
+00:15:38.799 --> 00:15:40.519
+He really just needs to go to the first one.
+
+377
+00:15:40.519 --> 00:15:41.620
+I should have followed my own advice
+
+378
+00:15:41.620 --> 00:15:43.679
+cause that's what I meant the first time.
+
+379
+00:15:43.679 --> 00:15:44.519
+I said it needs to go here
+
+380
+00:15:44.519 --> 00:15:46.200
+and then I connected all of them to here.
+
+381
+00:15:46.200 --> 00:15:48.000
+I was kind of in a flow, I apologize.
+
+382
+00:15:48.000 --> 00:15:49.860
+So let's disconnect all those
+
+383
+00:15:49.860 --> 00:15:52.379
+because now the ads need to go in there.
+
+384
+00:15:52.379 --> 00:15:54.840
+So the ad goes in the coordinate here.
+
+385
+00:15:54.840 --> 00:15:57.419
+The ad goes in the coordinate here.
+
+386
+00:15:57.419 --> 00:16:02.419
+And finally, we have one that goes in the coordinate here.
+
+387
+00:16:03.059 --> 00:16:05.940
+There we go for all three of these, perfect.
+
+388
+00:16:05.940 --> 00:16:07.580
+Now again, if you connected all these
+
+389
+00:16:07.580 --> 00:16:09.659
+and you're following along with what I was doing,
+
+390
+00:16:09.659 --> 00:16:10.940
+don't do that.
+
+391
+00:16:10.940 --> 00:16:12.820
+I was in a flow on a roll
+
+392
+00:16:12.820 --> 00:16:14.220
+and I just kept going with it.
+
+393
+00:16:14.220 --> 00:16:17.700
+We really just need this guy plugged in the top one.
+
+394
+00:16:17.700 --> 00:16:20.860
+And then all the other ads find their homes here.
+
+395
+00:16:20.860 --> 00:16:24.179
+I'll pulsate these so you can see what to do.
+
+396
+00:16:24.179 --> 00:16:26.450
+Sorry about that.
+
+397
+00:16:26.450 --> 00:16:29.100
+There we go, fantastic.
+
+398
+00:16:29.100 --> 00:16:32.279
+So now we need to go in here and plug the multiply
+
+399
+00:16:32.279 --> 00:16:36.220
+into this input speed into each one of the times.
+
+400
+00:16:36.220 --> 00:16:37.580
+So let's go and pull these strings
+
+401
+00:16:37.580 --> 00:16:40.409
+to each one of these times here.
+
+402
+00:16:40.409 --> 00:16:41.809
+Fantastic, look at that.
+
+403
+00:16:41.809 --> 00:16:45.659
+Smooth as butter, there we go.
+
+404
+00:16:45.659 --> 00:16:47.820
+Now we don't want to neglect the one we just made.
+
+405
+00:16:47.820 --> 00:16:50.320
+That's our texture 2D and we named it.
+
+406
+00:16:50.320 --> 00:16:53.429
+So make sure we also turn on the preview for that.
+
+407
+00:16:53.429 --> 00:16:56.389
+Now again, you don't necessarily have to do that
+
+408
+00:16:56.389 --> 00:16:57.830
+but I get in the habit of doing that
+
+409
+00:16:58.070 --> 00:17:00.409
+because well, I just want it to,
+
+410
+00:17:02.029 --> 00:17:03.990
+it's just a force to happen.
+
+411
+00:17:03.990 --> 00:17:07.890
+Just trying to keep things clean and unreal smart enough
+
+412
+00:17:07.890 --> 00:17:09.630
+that you don't necessarily have to do that all the time.
+
+413
+00:17:09.630 --> 00:17:11.089
+So we're good.
+
+414
+00:17:11.089 --> 00:17:13.390
+All right, so we're going to need some texture information
+
+415
+00:17:13.390 --> 00:17:14.789
+to go in here.
+
+416
+00:17:14.789 --> 00:17:16.349
+Let me show you how that works.
+
+417
+00:17:16.349 --> 00:17:17.269
+And again, if you want to,
+
+418
+00:17:17.269 --> 00:17:18.829
+you can change the sorting priority.
+
+419
+00:17:18.829 --> 00:17:22.369
+I'm going to set this one to one, that's fine.
+
+420
+00:17:22.369 --> 00:17:26.019
+So let me go and create a thing called a texture object.
+
+421
+00:17:26.019 --> 00:17:27.579
+Now people many times ask me,
+
+422
+00:17:27.579 --> 00:17:32.710
+Sean, what is a texture object versus a texture sample?
+
+423
+00:17:32.710 --> 00:17:35.710
+The texture object is a bare bones texture
+
+424
+00:17:35.710 --> 00:17:38.269
+with no RGB values in here.
+
+425
+00:17:38.269 --> 00:17:41.950
+He is pretty straight up, just texture information.
+
+426
+00:17:41.950 --> 00:17:44.349
+And you can see it here when you hit Control Alt
+
+427
+00:17:44.349 --> 00:17:47.589
+Unreal gives you a breakdown.
+
+428
+00:17:47.589 --> 00:17:50.029
+So let's go ahead and populate that
+
+429
+00:17:50.029 --> 00:17:51.960
+with a particular texture.
+
+430
+00:17:51.960 --> 00:17:57.349
+So we've provided for you a texture called T underscore base
+
+431
+00:17:57.950 --> 00:18:05.569
+and make sure we get the right one base underscore tile
+
+432
+00:18:07.049 --> 00:18:14.900
+because it has a nice tile for it, underscore normal.
+
+433
+00:18:15.039 --> 00:18:16.019
+There it is.
+
+434
+00:18:16.019 --> 00:18:16.980
+Let's grab that.
+
+435
+00:18:16.980 --> 00:18:19.500
+Now, if anytime you can't see what I'm doing,
+
+436
+00:18:19.500 --> 00:18:21.660
+like, you know, Sean, I can't get that texture.
+
+437
+00:18:21.660 --> 00:18:23.579
+What do you can do is actually go into your settings
+
+438
+00:18:23.579 --> 00:18:25.220
+and this goes for anything you maybe pull off
+
+439
+00:18:25.220 --> 00:18:26.500
+from the marketplace.
+
+440
+00:18:26.500 --> 00:18:29.779
+Just make sure that you look at your engine content.
+
+441
+00:18:29.779 --> 00:18:31.180
+You should be able to grab it.
+
+442
+00:18:31.619 --> 00:18:35.019
+If it's nested in a plugin, turn on your plugins.
+
+443
+00:18:35.019 --> 00:18:37.400
+So keep those things in mind.
+
+444
+00:18:37.400 --> 00:18:40.480
+I'm gonna pull the string over to the preview.
+
+445
+00:18:40.480 --> 00:18:42.779
+And then now what I wanna do is pull that
+
+446
+00:18:42.779 --> 00:18:47.880
+into the text slot here of some texture samples
+
+447
+00:18:48.039 --> 00:18:49.750
+that we're gonna make.
+
+448
+00:18:49.750 --> 00:18:51.750
+So the reason why we did this is
+
+449
+00:18:51.750 --> 00:18:54.509
+so that we can actually quickly change everything
+
+450
+00:18:54.509 --> 00:18:56.099
+all at one time.
+
+451
+00:18:56.099 --> 00:18:57.359
+If we want the texture to change,
+
+452
+00:18:57.359 --> 00:18:58.319
+all of them are gonna change.
+
+453
+00:18:58.319 --> 00:18:59.859
+And let me show you what I mean.
+
+454
+00:18:59.859 --> 00:19:01.539
+So now I'm gonna keep my finger on the T key
+
+455
+00:19:01.579 --> 00:19:07.700
+and create one, move it up, two, three, and four.
+
+456
+00:19:10.720 --> 00:19:13.289
+We have four texture samples.
+
+457
+00:19:13.289 --> 00:19:17.069
+Now we're not gonna load them with any specific texture.
+
+458
+00:19:17.069 --> 00:19:19.150
+We're going to use the one down here.
+
+459
+00:19:19.150 --> 00:19:21.430
+And this function input allows us to change them
+
+460
+00:19:21.430 --> 00:19:22.869
+all at one time if we need to,
+
+461
+00:19:22.869 --> 00:19:24.710
+which is ideal because we're doing caustics.
+
+462
+00:19:24.710 --> 00:19:26.710
+We're not doing anything super fancy.
+
+463
+00:19:26.710 --> 00:19:27.690
+We can always change this
+
+464
+00:19:27.690 --> 00:19:29.910
+if you did wanna do something super fancy.
+
+465
+00:19:29.910 --> 00:19:33.640
+So I'm gonna go and pull this texture into each one.
+
+466
+00:19:34.200 --> 00:19:38.670
+There we go, boom, excellent.
+
+467
+00:19:38.670 --> 00:19:41.670
+And then now we're going to pull in
+
+468
+00:19:41.670 --> 00:19:46.269
+and we're going to grab the panner that we created
+
+469
+00:19:46.269 --> 00:19:49.000
+and we're gonna move those into the UVs.
+
+470
+00:19:49.000 --> 00:19:51.910
+So move this into the UV, the first one,
+
+471
+00:19:51.910 --> 00:19:57.130
+the second one, the third one, and then the fourth one.
+
+472
+00:19:58.039 --> 00:20:01.299
+All those in there, excellent, excellent.
+
+473
+00:20:01.299 --> 00:20:07.579
+So what we can do now is let's move this back.
+
+474
+00:20:07.660 --> 00:20:09.480
+And oh, I forgot the texture on the top.
+
+475
+00:20:09.480 --> 00:20:11.140
+So let's go and pull that in there.
+
+476
+00:20:11.140 --> 00:20:13.339
+It's because I didn't scroll high enough.
+
+477
+00:20:13.339 --> 00:20:14.539
+There you go.
+
+478
+00:20:14.539 --> 00:20:16.740
+Didn't want him to feel left out.
+
+479
+00:20:16.740 --> 00:20:18.259
+So now let's go ahead and stack these.
+
+480
+00:20:18.259 --> 00:20:20.420
+And we're gonna stack these in such a way
+
+481
+00:20:20.420 --> 00:20:21.940
+that we can use them
+
+482
+00:20:21.940 --> 00:20:24.980
+and make it so that they overlay each other.
+
+483
+00:20:24.980 --> 00:20:26.559
+Let me show you what I mean.
+
+484
+00:20:26.559 --> 00:20:28.200
+Let me keep my finger on the A key.
+
+485
+00:20:28.200 --> 00:20:31.779
+I'm gonna add, we'll do another add.
+
+486
+00:20:31.779 --> 00:20:36.299
+We can do these in twos and then do one more add.
+
+487
+00:20:36.299 --> 00:20:39.900
+Now, if I wanted to, I could do a multiply
+
+488
+00:20:39.900 --> 00:20:41.819
+and I'll show you what I mean by that in just a second
+
+489
+00:20:41.819 --> 00:20:43.960
+and allow us to actually use a scaler
+
+490
+00:20:43.960 --> 00:20:48.460
+to dampen the effect.
+
+491
+00:20:48.460 --> 00:20:51.230
+I'm gonna grab this here, RGB,
+
+492
+00:20:51.230 --> 00:20:54.029
+put it into the A channel.
+
+493
+00:20:54.029 --> 00:20:56.849
+I'm gonna grab this RGB, put it to the B.
+
+494
+00:20:56.849 --> 00:21:01.470
+Same thing down here, A, B.
+
+495
+00:21:01.470 --> 00:21:02.430
+And then I'm gonna grab this add,
+
+496
+00:21:02.430 --> 00:21:03.589
+put it into the B channel,
+
+497
+00:21:03.589 --> 00:21:06.690
+grab this add and put it into A channel.
+
+498
+00:21:06.690 --> 00:21:10.000
+Now, if we wanted to, we can go straight to the output.
+
+499
+00:21:10.000 --> 00:21:13.079
+But if you wanted the ability to maybe dampen the effect,
+
+500
+00:21:13.079 --> 00:21:15.119
+we can put this into the A channel
+
+501
+00:21:15.119 --> 00:21:22.319
+and then create an input, function input.
+
+502
+00:21:22.319 --> 00:21:27.640
+In this function input, we would make a scaler.
+
+503
+00:21:27.640 --> 00:21:29.660
+In this particular function input,
+
+504
+00:21:29.660 --> 00:21:33.299
+we can set the default to 0.25,
+
+505
+00:21:33.299 --> 00:21:35.180
+kind of mutes things a bit.
+
+506
+00:21:35.180 --> 00:21:39.289
+And we can put that right into the B channel here
+
+507
+00:21:39.289 --> 00:21:45.410
+and then move that right into the output right there.
+
+508
+00:21:45.410 --> 00:21:48.170
+Now, you won't see anything like my demo
+
+509
+00:21:48.170 --> 00:21:50.109
+until you go and right click here
+
+510
+00:21:50.109 --> 00:21:53.450
+and say start preview node.
+
+511
+00:21:53.450 --> 00:21:58.450
+And you will see the effect that my sample one has.
+
+512
+00:21:58.609 --> 00:21:59.450
+There you go.
+
+513
+00:21:59.450 --> 00:22:01.710
+That proves that it's working for us.
+
+514
+00:22:01.710 --> 00:22:03.660
+Pretty great.
+
+515
+00:22:03.660 --> 00:22:06.240
+And again, you can choose the sorting priority.
+
+516
+00:22:06.240 --> 00:22:07.440
+Now, we're not done yet
+
+517
+00:22:07.440 --> 00:22:09.039
+because once you make a material function,
+
+518
+00:22:09.039 --> 00:22:11.079
+you have to expose it to library.
+
+519
+00:22:11.079 --> 00:22:13.980
+Click on the grid and you'll see exposed to library.
+
+520
+00:22:13.980 --> 00:22:15.380
+And you wanna click on that.
+
+521
+00:22:15.380 --> 00:22:16.380
+And I'm just gonna hit apply.
+
+522
+00:22:16.380 --> 00:22:17.579
+I'm not gonna hit save in this case
+
+523
+00:22:17.579 --> 00:22:20.539
+cause I use this class all the time for clients
+
+524
+00:22:20.539 --> 00:22:22.619
+and I don't need to save it.
+
+525
+00:22:22.619 --> 00:22:24.900
+So let's go ahead and go to that parent material
+
+526
+00:22:24.900 --> 00:22:27.380
+that we created.
+
+527
+00:22:27.380 --> 00:22:32.589
+Let's click on new caustics, call that up.
+
+528
+00:22:32.589 --> 00:22:37.339
+And let's go ahead and build this material.
+
+529
+00:22:37.339 --> 00:22:39.140
+So I'm gonna right click in here
+
+530
+00:22:39.140 --> 00:22:41.740
+and I'm gonna type in MF.
+
+531
+00:22:41.740 --> 00:22:42.579
+And what was the name?
+
+532
+00:22:42.579 --> 00:22:47.390
+Waves, underscore, waves.
+
+533
+00:22:47.390 --> 00:22:48.509
+There it goes.
+
+534
+00:22:48.509 --> 00:22:50.440
+And that's the one we made.
+
+535
+00:22:50.440 --> 00:22:52.240
+Pretty awesome.
+
+536
+00:22:52.240 --> 00:22:53.720
+Now we have one that's unnamed.
+
+537
+00:22:53.720 --> 00:22:56.079
+Oh no, that's okay.
+
+538
+00:22:56.079 --> 00:22:59.430
+Go into waves here and let's give it a name.
+
+539
+00:22:59.430 --> 00:23:01.059
+It's this guy.
+
+540
+00:23:01.059 --> 00:23:07.039
+So we'll call this dampening.
+
+541
+00:23:07.039 --> 00:23:09.460
+Not sampling, what does that mean?
+
+542
+00:23:09.460 --> 00:23:11.819
+So dampening, I think I spelled that correctly.
+
+543
+00:23:11.819 --> 00:23:13.240
+It is today.
+
+544
+00:23:13.240 --> 00:23:14.910
+All right.
+
+545
+00:23:14.910 --> 00:23:16.750
+And we got this here.
+
+546
+00:23:16.750 --> 00:23:21.750
+So now what we can do is one, put in some coordinates.
+
+547
+00:23:22.269 --> 00:23:23.750
+So we can refer to the U key
+
+548
+00:23:23.750 --> 00:23:26.109
+and we can still use the coordinates node here
+
+549
+00:23:26.109 --> 00:23:28.400
+and do a multiply.
+
+550
+00:23:28.400 --> 00:23:30.920
+And then, and that's why this coordinates node
+
+551
+00:23:30.920 --> 00:23:34.369
+is available so we can do such things.
+
+552
+00:23:34.369 --> 00:23:36.609
+And up there's wave coordinates right there.
+
+553
+00:23:36.609 --> 00:23:38.650
+He's just not on the top, that's fine.
+
+554
+00:23:38.650 --> 00:23:40.750
+And then we're gonna keep my finger on the S key,
+
+555
+00:23:40.750 --> 00:23:46.640
+left click and we'll do a UV amount
+
+556
+00:23:48.400 --> 00:23:53.799
+or just say tiling, that works.
+
+557
+00:23:53.799 --> 00:23:57.099
+And we'll set that to one.
+
+558
+00:23:57.099 --> 00:24:00.779
+Put that into the A channel, put this into the B channel
+
+559
+00:24:00.779 --> 00:24:04.220
+and put that right into wave coordinates.
+
+560
+00:24:04.220 --> 00:24:05.619
+Now we wanna make this material,
+
+561
+00:24:05.619 --> 00:24:08.380
+we wanna set up to be able to be a light function.
+
+562
+00:24:08.380 --> 00:24:09.940
+So we're gonna have to go in here
+
+563
+00:24:09.940 --> 00:24:13.220
+and we're gonna have to change that under material domain.
+
+564
+00:24:13.220 --> 00:24:15.380
+So let's set that with the material domain
+
+565
+00:24:15.380 --> 00:24:19.500
+in the details, go down to light function.
+
+566
+00:24:19.500 --> 00:24:21.299
+And notice all we have now is an emissive.
+
+567
+00:24:21.299 --> 00:24:22.900
+Let's put that emissive in there.
+
+568
+00:24:22.900 --> 00:24:24.380
+Now we're gonna get an error at first
+
+569
+00:24:24.380 --> 00:24:27.900
+because it still needs some more input.
+
+570
+00:24:28.279 --> 00:24:32.230
+Let me actually apply this last one we did, apply
+
+571
+00:24:32.230 --> 00:24:37.460
+and then we'll actually apply this.
+
+572
+00:24:37.460 --> 00:24:39.549
+We'll just abort that.
+
+573
+00:24:39.549 --> 00:24:42.289
+And you do, when you do get this error, just abort,
+
+574
+00:24:42.289 --> 00:24:43.670
+just wait until you get everything connected.
+
+575
+00:24:43.670 --> 00:24:45.670
+It's still waiting for some dependencies.
+
+576
+00:24:45.670 --> 00:24:47.190
+And it's like, Sean, I don't,
+
+577
+00:24:47.190 --> 00:24:48.630
+this doesn't make sense to me.
+
+578
+00:24:48.630 --> 00:24:50.150
+That's okay, we'll help you out.
+
+579
+00:24:50.150 --> 00:24:52.269
+So let's go and put a texture object in here.
+
+580
+00:24:52.269 --> 00:24:55.420
+This is gonna help to write greatly
+
+581
+00:24:55.420 --> 00:24:56.500
+because you can't do the effect
+
+582
+00:24:56.500 --> 00:24:59.950
+without actually visually seeing what it looks like.
+
+583
+00:24:59.990 --> 00:25:01.630
+So let's do a texture object.
+
+584
+00:25:04.769 --> 00:25:06.950
+There we go.
+
+585
+00:25:06.950 --> 00:25:09.470
+This texture object can be anything in our case.
+
+586
+00:25:09.470 --> 00:25:13.599
+It's like a caustic softener.
+
+587
+00:25:13.599 --> 00:25:17.599
+So T underscore caustics softener,
+
+588
+00:25:20.230 --> 00:25:23.519
+plug that right into texture.
+
+589
+00:25:23.519 --> 00:25:28.190
+And then we need to go into here
+
+590
+00:25:28.190 --> 00:25:32.970
+and looks like dampening still not quite loading
+
+591
+00:25:32.970 --> 00:25:33.809
+like I want.
+
+592
+00:25:33.809 --> 00:25:34.630
+So let's go in here.
+
+593
+00:25:34.630 --> 00:25:40.220
+And in this case, we'll hit save.
+
+594
+00:25:40.220 --> 00:25:42.420
+So let's add the node in there
+
+595
+00:25:42.420 --> 00:25:44.339
+or the information is what it's waiting for.
+
+596
+00:25:44.339 --> 00:25:45.180
+It's why we're getting the error.
+
+597
+00:25:45.180 --> 00:25:47.619
+And you don't really have to do dampening, but you can.
+
+598
+00:25:47.619 --> 00:25:52.130
+Come through the S key and we'll call this dampening.
+
+599
+00:25:52.130 --> 00:25:52.970
+Here we go.
+
+600
+00:25:52.970 --> 00:25:54.069
+It's really weird that it says dampening,
+
+601
+00:25:54.069 --> 00:25:55.369
+but it isn't updating dampening.
+
+602
+00:25:55.369 --> 00:25:59.230
+I think it's very odd.
+
+603
+00:25:59.230 --> 00:26:01.690
+And then we can control speed.
+
+604
+00:26:01.690 --> 00:26:03.809
+So let's actually do speed.
+
+605
+00:26:03.809 --> 00:26:06.569
+Now dampening, I'm gonna set that to what it was before
+
+606
+00:26:06.569 --> 00:26:08.329
+0.25.
+
+607
+00:26:08.329 --> 00:26:09.170
+There you go.
+
+608
+00:26:09.170 --> 00:26:10.569
+And that works out just great.
+
+609
+00:26:10.569 --> 00:26:12.369
+And speed again, can be a scaler
+
+610
+00:26:12.369 --> 00:26:14.130
+if you want it to be a scaler.
+
+611
+00:26:14.130 --> 00:26:17.130
+So we can promote that to a parameter again.
+
+612
+00:26:17.130 --> 00:26:19.250
+And hey, look, we got speed in here
+
+613
+00:26:19.250 --> 00:26:20.470
+and now it isn't moving.
+
+614
+00:26:20.470 --> 00:26:23.099
+So we can set that to one.
+
+615
+00:26:23.099 --> 00:26:23.920
+There you go.
+
+616
+00:26:23.920 --> 00:26:25.140
+There's the effect.
+
+617
+00:26:25.140 --> 00:26:26.259
+Pretty cool.
+
+618
+00:26:26.259 --> 00:26:29.059
+And let's see if we can apply it to our light.
+
+619
+00:26:29.059 --> 00:26:30.940
+I'm gonna move this over just for a second.
+
+620
+00:26:30.940 --> 00:26:32.880
+So again, don't let that error freak you out.
+
+621
+00:26:32.880 --> 00:26:34.700
+It's just Unreal wants that information
+
+622
+00:26:34.700 --> 00:26:36.059
+because you created it.
+
+623
+00:26:36.059 --> 00:26:38.579
+It needs those inputs.
+
+624
+00:26:38.579 --> 00:26:42.500
+So let's find this material.
+
+625
+00:26:42.500 --> 00:26:43.539
+There it is.
+
+626
+00:26:43.539 --> 00:26:44.779
+Let's hit apply.
+
+627
+00:26:45.259 --> 00:26:46.660
+So it updates.
+
+628
+00:26:46.660 --> 00:26:47.500
+Go to content drawer.
+
+629
+00:26:47.500 --> 00:26:48.460
+There he is.
+
+630
+00:26:48.460 --> 00:26:49.779
+And we're gonna go to the light
+
+631
+00:26:49.779 --> 00:26:52.539
+that doesn't have a light function.
+
+632
+00:26:52.539 --> 00:26:57.390
+Go to our content drawer and drag that right in there.
+
+633
+00:26:57.390 --> 00:27:00.349
+Hey, and if for some reason it doesn't show up at first
+
+634
+00:27:00.349 --> 00:27:02.490
+and this does happen sometimes,
+
+635
+00:27:02.490 --> 00:27:06.130
+what you can do is just delete the light,
+
+636
+00:27:06.130 --> 00:27:07.630
+recreate it and redrag it
+
+637
+00:27:07.630 --> 00:27:10.259
+into the light function of that light.
+
+638
+00:27:10.259 --> 00:27:11.299
+Pretty cool.
+
+639
+00:27:11.299 --> 00:27:14.220
+Here's some additional resources that you can use
+
+640
+00:27:14.220 --> 00:27:16.099
+and link to, to find more information
+
+641
+00:27:16.099 --> 00:27:18.259
+about the topics we talked about today.
+
+642
+00:27:18.259 --> 00:27:20.180
+Well, that's it for this class.
+
+643
+00:27:20.180 --> 00:27:22.140
+In the next video, we'll just do a quick recap
+
+644
+00:27:22.140 --> 00:27:23.380
+of what we talked about.

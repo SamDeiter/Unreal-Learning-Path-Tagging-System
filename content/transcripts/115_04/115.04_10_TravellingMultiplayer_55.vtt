@@ -1,0 +1,381 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:04.830
+So traveling, traveling is basically the concept
+
+2
+00:00:04.830 --> 00:00:07.230
+of either moving from server to server
+
+3
+00:00:07.230 --> 00:00:09.750
+or connecting to a server in the first place,
+
+4
+00:00:09.750 --> 00:00:14.080
+or indeed our server moving to a new map.
+
+5
+00:00:14.080 --> 00:00:17.519
+So two notions that are instantly worth kind of highlighting
+
+6
+00:00:17.519 --> 00:00:21.640
+is the idea of seamless and non seamless travel.
+
+7
+00:00:21.640 --> 00:00:23.559
+These are kind of slightly more meaningful
+
+8
+00:00:23.559 --> 00:00:25.039
+from the client's perspective.
+
+9
+00:00:25.039 --> 00:00:28.839
+Seamless travel means that there will be a non-blocking,
+
+10
+00:00:29.199 --> 00:00:34.200
+i.e. asynchronous operation when traveling to the new server.
+
+11
+00:00:35.240 --> 00:00:38.560
+On the other hand, in contrast, non seamless travel
+
+12
+00:00:38.560 --> 00:00:40.079
+is gonna cause a blocking load.
+
+13
+00:00:40.079 --> 00:00:42.039
+So this is a little bit like when you load a texture
+
+14
+00:00:42.039 --> 00:00:44.960
+or a sound, if you do a synchronous or a blocking load,
+
+15
+00:00:44.960 --> 00:00:46.719
+it's basically going to,
+
+16
+00:00:48.840 --> 00:00:51.920
+a blocking call is gonna force,
+
+17
+00:00:51.920 --> 00:00:53.600
+disconnect the client from the server.
+
+18
+00:00:53.600 --> 00:00:54.840
+And then once that's done,
+
+19
+00:00:54.840 --> 00:00:56.840
+it will reconnect the client to the same server,
+
+20
+00:00:56.840 --> 00:01:00.409
+which will now have the new map loaded.
+
+21
+00:01:00.409 --> 00:01:03.210
+So there are three scenarios in which non seamless,
+
+22
+00:01:03.210 --> 00:01:04.969
+i.e. the kind of blocking load
+
+23
+00:01:04.969 --> 00:01:07.569
+where they disconnect and reconnect must occur.
+
+24
+00:01:07.569 --> 00:01:10.489
+When loading a map for the first time,
+
+25
+00:01:10.489 --> 00:01:12.930
+either we don't have this map kind of cached,
+
+26
+00:01:12.930 --> 00:01:15.650
+when connecting to a new server for the first time,
+
+27
+00:01:15.650 --> 00:01:19.390
+and when ending a multiplayer game and starting a new one.
+
+28
+00:01:19.390 --> 00:01:21.510
+And then there are kind of three core functions
+
+29
+00:01:21.510 --> 00:01:25.150
+that drive and utilize these different forms of travel.
+
+30
+00:01:25.150 --> 00:01:27.670
+So we'll kind of quickly look at those.
+
+31
+00:01:27.670 --> 00:01:30.349
+So first we have the browse function.
+
+32
+00:01:30.349 --> 00:01:33.430
+Essentially, this is a hard reset when loading a new map,
+
+33
+00:01:33.430 --> 00:01:35.950
+and it will always result in non seamless travel,
+
+34
+00:01:35.950 --> 00:01:38.189
+as we kind of said about the disconnecting, reconnecting.
+
+35
+00:01:38.189 --> 00:01:41.430
+This causes the server to disconnect all current clients
+
+36
+00:01:41.430 --> 00:01:43.790
+before traveling to the new map.
+
+37
+00:01:43.790 --> 00:01:48.790
+And the dedicated servers can't travel to other servers.
+
+38
+00:01:49.750 --> 00:01:54.629
+So when we're talking about traveling,
+
+39
+00:01:54.629 --> 00:01:56.670
+we can travel via a URL.
+
+40
+00:01:56.670 --> 00:01:59.430
+That URL can either be a server IP,
+
+41
+00:01:59.430 --> 00:02:03.510
+or it can be a kind of a local map content location.
+
+42
+00:02:03.510 --> 00:02:06.269
+This has to be a map location, a server.
+
+43
+00:02:06.269 --> 00:02:07.349
+In the context of server,
+
+44
+00:02:07.349 --> 00:02:08.870
+it cannot travel to another server
+
+45
+00:02:08.870 --> 00:02:10.949
+because servers can't connect to servers.
+
+46
+00:02:10.949 --> 00:02:14.300
+So it has to be a local map URL.
+
+47
+00:02:14.300 --> 00:02:16.900
+And then we have server travel and client travel.
+
+48
+00:02:18.139 --> 00:02:23.139
+So server travel is held in UWorld,
+
+49
+00:02:23.379 --> 00:02:25.539
+client travel is held inside the player controller,
+
+50
+00:02:25.580 --> 00:02:27.500
+and this kind of occurs in order.
+
+51
+00:02:27.500 --> 00:02:29.900
+So server travel is for the server only,
+
+52
+00:02:29.900 --> 00:02:32.020
+and it will jump the server to a new level.
+
+53
+00:02:32.020 --> 00:02:34.460
+All connected clients are gonna follow that server,
+
+54
+00:02:34.460 --> 00:02:37.500
+and the server is in charge of calling that function.
+
+55
+00:02:37.500 --> 00:02:41.460
+And it's the server itself that will then call
+
+56
+00:02:41.460 --> 00:02:44.419
+client travel to the connected clients,
+
+57
+00:02:44.419 --> 00:02:46.219
+to each of the clients that are connected.
+
+58
+00:02:46.219 --> 00:02:48.460
+So at that point, client travel would get called,
+
+59
+00:02:48.460 --> 00:02:53.180
+and well, okay, the server can call client travel.
+
+60
+00:02:53.219 --> 00:02:56.620
+If client travel is called from a client,
+
+61
+00:02:56.620 --> 00:02:58.979
+then it's about traveling to a new server.
+
+62
+00:02:58.979 --> 00:03:00.620
+If client is called from the server,
+
+63
+00:03:00.620 --> 00:03:01.900
+then it's generally gonna be an instruction
+
+64
+00:03:01.900 --> 00:03:03.539
+to transition to a new map.
+
+65
+00:03:03.539 --> 00:03:05.419
+And this is gonna be that seamless travel
+
+66
+00:03:05.419 --> 00:03:07.939
+where we're going to maintain that connection to the server
+
+67
+00:03:07.939 --> 00:03:09.620
+and just move to a new map.
+
+68
+00:03:09.620 --> 00:03:11.900
+But obviously we already talked about the various situations
+
+69
+00:03:11.900 --> 00:03:13.139
+where this is impossible,
+
+70
+00:03:13.139 --> 00:03:15.300
+i.e. we don't have this map loaded before,
+
+71
+00:03:15.300 --> 00:03:18.300
+we've never connected to the server before,
+
+72
+00:03:18.300 --> 00:03:23.280
+or we're ending a multiplayer game.
+
+73
+00:03:23.280 --> 00:03:25.159
+So the other kind of thing that's worth mentioning
+
+74
+00:03:25.159 --> 00:03:26.680
+when we're talking about traveling
+
+75
+00:03:26.680 --> 00:03:31.560
+or transitioning between servers, or more importantly, maps,
+
+76
+00:03:31.560 --> 00:03:34.039
+it's worth bearing in mind that the game mode
+
+77
+00:03:34.039 --> 00:03:37.719
+is one of these things that will persist by default,
+
+78
+00:03:37.719 --> 00:03:40.159
+but also the game mode has this function,
+
+79
+00:03:40.159 --> 00:03:43.159
+getSeamlessLevel, a travel actors list,
+
+80
+00:03:43.159 --> 00:03:45.280
+that basically gives you the ability to specify
+
+81
+00:03:45.280 --> 00:03:47.120
+a list of actors that will travel
+
+82
+00:03:47.120 --> 00:03:50.240
+between levels seamlessly.
+
+83
+00:03:50.240 --> 00:03:52.360
+So anything that you need to kind of persist
+
+84
+00:03:52.759 --> 00:03:54.479
+to kind of keep your game up and running,
+
+85
+00:03:54.479 --> 00:03:56.520
+the things that you only expected to get spawned once,
+
+86
+00:03:56.520 --> 00:03:58.479
+that might be things that you put
+
+87
+00:03:58.479 --> 00:04:00.719
+in this SeamlessTravel actor list.
+
+88
+00:04:02.539 --> 00:04:05.219
+All player control, all controllers for players
+
+89
+00:04:05.219 --> 00:04:08.340
+with valid player states as part of the,
+
+90
+00:04:08.340 --> 00:04:13.340
+players from the server's perspective will persist.
+
+91
+00:04:13.419 --> 00:04:16.459
+All player controllers from the server's perspective
+
+92
+00:04:16.459 --> 00:04:17.500
+will persist.
+
+93
+00:04:17.500 --> 00:04:20.139
+And all local player controllers,
+
+94
+00:04:21.139 --> 00:04:24.220
+so if you're the connected client,
+
+95
+00:04:24.220 --> 00:04:28.100
+your player controller will persist between travel.

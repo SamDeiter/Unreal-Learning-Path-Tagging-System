@@ -1,0 +1,705 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:02.229
+Hi, everyone.
+
+2
+00:00:02.229 --> 00:00:06.110
+In this lesson, we're going to look at some basic lighting and shadow concepts when it
+
+3
+00:00:06.110 --> 00:00:09.289
+comes to building your worlds in Unreal.
+
+4
+00:00:09.289 --> 00:00:11.390
+So let's get started.
+
+5
+00:00:11.390 --> 00:00:15.449
+So in the scene that we were messing with and just throwing things together and building
+
+6
+00:00:15.449 --> 00:00:19.910
+a quick simple scene, I'm going to actually gut the lighting here, and I'm going to show
+
+7
+00:00:19.910 --> 00:00:21.230
+you how this works.
+
+8
+00:00:21.230 --> 00:00:25.649
+But one thing I do want to point out before I do that, you'll notice my clouds are very
+
+9
+00:00:25.649 --> 00:00:26.649
+unique.
+
+10
+00:00:26.690 --> 00:00:34.009
+Well, that happened because I edited them in such a way so that I could use and create a
+
+11
+00:00:34.009 --> 00:00:37.210
+little bit more stylized volumetric clouds.
+
+12
+00:00:37.210 --> 00:00:38.729
+This is a pretty easy procedure.
+
+13
+00:00:38.729 --> 00:00:40.770
+This is a little bit out of the box.
+
+14
+00:00:40.770 --> 00:00:47.030
+I went and grabbed a soft profile, and I made an instance of that particular material.
+
+15
+00:00:47.030 --> 00:00:51.149
+In that material, I wouldn't mess with the settings involved.
+
+16
+00:00:51.149 --> 00:00:55.609
+So you can see here that I messed with the density, I messed with the detail, and
+
+17
+00:00:55.609 --> 00:00:58.170
+I messed with detail too.
+
+18
+00:00:58.170 --> 00:01:03.549
+And down below, you'll see that pretty much everything's kind of standard par, but you
+
+19
+00:01:03.549 --> 00:01:06.129
+definitely can go in here and play with these a little bit more.
+
+20
+00:01:06.129 --> 00:01:09.980
+But this gave me more of the fluffy cloud look in here.
+
+21
+00:01:09.980 --> 00:01:12.420
+Oh, unfortunately, we're going to have to gut everything.
+
+22
+00:01:12.420 --> 00:01:16.680
+So let's go to our directional light first.
+
+23
+00:01:16.680 --> 00:01:19.120
+Let's get rid of that.
+
+24
+00:01:19.120 --> 00:01:25.040
+We want to get rid of our skylights and our sky atmosphere.
+
+25
+00:01:25.040 --> 00:01:26.840
+Let's get rid of those.
+
+26
+00:01:26.920 --> 00:01:32.390
+And we also want to get rid of our cloud.
+
+27
+00:01:32.390 --> 00:01:34.349
+And finally, we want to get rid of our fog.
+
+28
+00:01:34.349 --> 00:01:39.760
+There we go.
+
+29
+00:01:39.760 --> 00:01:42.159
+So all three of those are gone.
+
+30
+00:01:42.159 --> 00:01:45.959
+Now the reason why I'm doing this is I want to show you a quick way to get spun
+
+31
+00:01:45.959 --> 00:01:49.280
+up that a lot, not a lot of people are aware of.
+
+32
+00:01:49.280 --> 00:01:54.079
+You want to go to Windows environment light and mixer, the environment light mixer gets
+
+33
+00:01:54.079 --> 00:01:57.390
+you up and running in your lighting really quickly.
+
+34
+00:01:57.390 --> 00:02:00.750
+We can set it to minimal, normal or normal advanced.
+
+35
+00:02:00.750 --> 00:02:06.099
+This just gives us some more options, as in the details for control.
+
+36
+00:02:06.099 --> 00:02:09.229
+So I'm going to click on create skylight.
+
+37
+00:02:09.229 --> 00:02:11.909
+I'm going to create a click on create directional light.
+
+38
+00:02:11.909 --> 00:02:15.590
+Now you'll see a warning at first, because it needs the sky atmosphere for the skylight.
+
+39
+00:02:15.590 --> 00:02:22.129
+So I'm going to create directional light, I'm going to create sky atmosphere.
+
+40
+00:02:22.129 --> 00:02:26.689
+And then finally, I'm going to create these last two, which is create volumetric cloud,
+
+41
+00:02:26.689 --> 00:02:30.099
+and then volumetric height fog.
+
+42
+00:02:30.099 --> 00:02:31.099
+There you go.
+
+43
+00:02:31.099 --> 00:02:32.099
+You're up and running.
+
+44
+00:02:32.099 --> 00:02:36.020
+Now, even though we have the light mixer, we can do some editing, you can also do it
+
+45
+00:02:36.020 --> 00:02:40.560
+here by selecting the outliner and be able to edit your light the way that you want.
+
+46
+00:02:40.560 --> 00:02:45.120
+I'm going to be breaking these classes up in a couple of sections, more than likely
+
+47
+00:02:45.120 --> 00:02:46.120
+going to be three.
+
+48
+00:02:46.120 --> 00:02:50.319
+And the reason why is because there's a lot to cover with lighting in some very important
+
+49
+00:02:50.319 --> 00:02:52.460
+factors involved.
+
+50
+00:02:52.460 --> 00:02:56.900
+One of the first things you want to make sure we have is a post process volume.
+
+51
+00:02:56.900 --> 00:02:57.900
+Let's go and put one in.
+
+52
+00:02:58.930 --> 00:03:04.050
+I'm just going to type in post process volume, I can simply look up volumes, and place that
+
+53
+00:03:04.050 --> 00:03:06.129
+in the scene.
+
+54
+00:03:06.129 --> 00:03:10.449
+This post process volume is allowing me to control my exposure, as well as my overall
+
+55
+00:03:10.449 --> 00:03:13.629
+sweeping elements when it comes to Lumen.
+
+56
+00:03:13.629 --> 00:03:16.580
+We'll get back to that in just a second.
+
+57
+00:03:16.580 --> 00:03:20.020
+One of the first things we do want to make sure we do is we want to go to our
+
+58
+00:03:20.020 --> 00:03:21.020
+project settings.
+
+59
+00:03:21.020 --> 00:03:27.219
+Now, if you're using Lumen by default, if you're using Unreal by default, Lumen should
+
+60
+00:03:27.219 --> 00:03:29.439
+already be on.
+
+61
+00:03:29.439 --> 00:03:33.080
+But there are some things you need to keep in mind when you're getting things spun up.
+
+62
+00:03:33.080 --> 00:03:37.090
+So let's go to the rendering section here.
+
+63
+00:03:37.090 --> 00:03:39.610
+Under rendering, we want to go ahead and scroll down a bit.
+
+64
+00:03:39.610 --> 00:03:44.129
+And we want to look at our global illumination and what we are running for that.
+
+65
+00:03:44.129 --> 00:03:48.060
+In our particular case, we're using Lumen.
+
+66
+00:03:48.060 --> 00:03:52.139
+And in there, we also have a reflection method of Lumen.
+
+67
+00:03:52.139 --> 00:03:57.659
+You'll see underneath the Lumen surface catch, I have it as a basic surface catch here,
+
+68
+00:03:57.659 --> 00:04:00.939
+but that can change from our ray light mode.
+
+69
+00:04:00.939 --> 00:04:05.939
+I can change that to hit reflections for more accuracy if I need.
+
+70
+00:04:05.939 --> 00:04:09.689
+Those can be changed also via the post process volume.
+
+71
+00:04:09.689 --> 00:04:14.330
+You'll notice my software ray tracing mode is global tracing, that's basic, but I can
+
+72
+00:04:14.330 --> 00:04:18.220
+go into detail if I need more realism and more accuracy.
+
+73
+00:04:18.220 --> 00:04:22.620
+I'm keeping things pretty much for this screen tracing source, this scene color, and
+
+74
+00:04:22.620 --> 00:04:24.870
+that works just fine.
+
+75
+00:04:24.870 --> 00:04:29.750
+But you want to make sure that you are using hardware ray tracing when available,
+
+76
+00:04:29.790 --> 00:04:32.600
+and you support hardware ray tracing.
+
+77
+00:04:32.600 --> 00:04:36.920
+This will help with your geometry, especially if you're making them modulated and punching
+
+78
+00:04:36.920 --> 00:04:41.160
+them into each other for interiors and for exteriors to make sure you don't have
+
+79
+00:04:41.160 --> 00:04:44.720
+any light leaking or blotchy shadows.
+
+80
+00:04:44.720 --> 00:04:48.740
+This helps a lot when doing this.
+
+81
+00:04:48.740 --> 00:04:53.300
+If you're grabbing something from the marketplace, you want to make sure if it's an older scene
+
+82
+00:04:53.300 --> 00:04:58.639
+that has distance, mesh distance fields active.
+
+83
+00:04:58.639 --> 00:05:02.800
+And Unreal will give you, will do its best to remind you of those things that need to
+
+84
+00:05:02.800 --> 00:05:05.000
+be active if you're activating Lumen.
+
+85
+00:05:05.000 --> 00:05:10.800
+We also want to make sure that we have our SM6 active also, and you'll see that
+
+86
+00:05:10.800 --> 00:05:11.800
+mine is active.
+
+87
+00:05:11.800 --> 00:05:18.139
+You don't necessarily have to have Vulkan unless you plan on going in that direction.
+
+88
+00:05:18.139 --> 00:05:21.980
+But for the most part, we want to keep it here because the overhead, if you don't
+
+89
+00:05:21.980 --> 00:05:24.500
+need it, don't turn it on.
+
+90
+00:05:24.500 --> 00:05:26.740
+It's just not necessary.
+
+91
+00:05:26.740 --> 00:05:29.560
+Now I have a post process volume in place.
+
+92
+00:05:29.560 --> 00:05:34.319
+We want to go ahead and look at the overall sweeping control of this post process volume.
+
+93
+00:05:34.319 --> 00:05:38.360
+We want to make sure that's influencing as much of the world as we need.
+
+94
+00:05:38.360 --> 00:05:39.560
+Now this can be isolated.
+
+95
+00:05:39.560 --> 00:05:41.360
+I can isolate it based on shape.
+
+96
+00:05:41.360 --> 00:05:45.339
+Heck, I can even edit this if I wanted to.
+
+97
+00:05:45.339 --> 00:05:47.279
+And you can do so use brush editing.
+
+98
+00:05:47.279 --> 00:05:52.500
+You can control the shape on a point level on even a face type of level or edge.
+
+99
+00:05:52.500 --> 00:05:58.100
+But I simply just want it to be encompassing our whole world.
+
+100
+00:05:58.100 --> 00:06:02.680
+So I'm going to go to my post process volume settings, and I'm going to click on infinite
+
+101
+00:06:02.680 --> 00:06:03.680
+extend unbound.
+
+102
+00:06:03.680 --> 00:06:07.319
+That's going to make it so everything is in control.
+
+103
+00:06:07.319 --> 00:06:11.759
+Now when it comes to exposure, there are multiple ways to skin this cat is you can
+
+104
+00:06:11.759 --> 00:06:14.600
+turn on auto exposure histogram.
+
+105
+00:06:14.600 --> 00:06:19.120
+And you can have it so it's underneath a particular range.
+
+106
+00:06:19.120 --> 00:06:22.480
+And it auto changes based on where you are in the world.
+
+107
+00:06:22.480 --> 00:06:25.680
+So if I was moving around in dark areas, you'll see it lighten up.
+
+108
+00:06:25.680 --> 00:06:28.720
+I get in here, it lightens up, I go inside the cave.
+
+109
+00:06:28.720 --> 00:06:35.379
+And when I get out, it darkens enough to simulate what happens with the eye.
+
+110
+00:06:35.379 --> 00:06:37.699
+That happens a lot with a lot of games.
+
+111
+00:06:37.699 --> 00:06:42.819
+I personally sometimes like to have control if I'm not doing a first person type of
+
+112
+00:06:42.819 --> 00:06:43.819
+environment.
+
+113
+00:06:43.819 --> 00:06:52.660
+And to do so I could lock this down to one and lock this expose EV also to one.
+
+114
+00:06:52.660 --> 00:06:57.600
+And then I can simply turn on a comp comp exposure compensation.
+
+115
+00:06:57.600 --> 00:06:59.899
+Sometimes it's hard to say.
+
+116
+00:06:59.899 --> 00:07:05.120
+And then I can brighten this or darken this according to what I need.
+
+117
+00:07:05.120 --> 00:07:07.459
+Now we want to control the direction for sure.
+
+118
+00:07:07.459 --> 00:07:09.740
+Say this is a top down game.
+
+119
+00:07:09.740 --> 00:07:13.360
+And we want to make sure that we're we're getting the best lighting that we possibly
+
+120
+00:07:13.360 --> 00:07:17.939
+can get dramatic shadows pretty great.
+
+121
+00:07:17.939 --> 00:07:22.800
+Now I can keep it on this angle if I wanted to and that's actually kind of nice.
+
+122
+00:07:22.800 --> 00:07:27.560
+The only thing is do I want to soften my shadows or make them strong and sharp.
+
+123
+00:07:27.560 --> 00:07:31.139
+That's really up to you and how you want to convey your world.
+
+124
+00:07:31.139 --> 00:07:35.339
+And sometimes depending on the distance of the camera you may want to sharpen shadows
+
+125
+00:07:35.339 --> 00:07:39.060
+so that things may be a little bit clearer if you're doing like a third person or
+
+126
+00:07:39.060 --> 00:07:40.139
+a top down.
+
+127
+00:07:40.139 --> 00:07:45.220
+But that's really up to you and how you came and the mood that you want to set.
+
+128
+00:07:45.220 --> 00:07:49.660
+In this particular case if I wanted to do that underneath my directional light I can
+
+129
+00:07:49.660 --> 00:07:56.490
+go here and control my angle here called a source angle.
+
+130
+00:07:56.490 --> 00:08:00.689
+This will soften or sharpen my shadows.
+
+131
+00:08:00.689 --> 00:08:04.230
+Now because it's reflecting on water you're not going to see it as much but if we look
+
+132
+00:08:04.230 --> 00:08:09.329
+at the terrain you will see it a bit more in its changes.
+
+133
+00:08:09.329 --> 00:08:16.769
+We can really bump this up to get an overcast view or we can sharpen it and put it all
+
+134
+00:08:16.769 --> 00:08:20.170
+the way down to zero to get more of a harder shadow.
+
+135
+00:08:20.170 --> 00:08:21.170
+That's up to you.
+
+136
+00:08:21.170 --> 00:08:26.790
+The defaults kind of a little bit nice in between but you can play with that.
+
+137
+00:08:26.790 --> 00:08:31.310
+Now if you ever want to eliminate or actually hide some of your lighting we go over this
+
+138
+00:08:31.310 --> 00:08:35.889
+in basic lighting and what I mean by that is only affects certain sources.
+
+139
+00:08:35.889 --> 00:08:41.559
+Underneath advanced you'll see that there's a channel option where you can choose light
+
+140
+00:08:41.559 --> 00:08:43.139
+channels.
+
+141
+00:08:43.139 --> 00:08:47.399
+Every object has a light channel and every light has a light channel and you can just
+
+142
+00:08:47.399 --> 00:08:49.360
+make them correspond.
+
+143
+00:08:49.360 --> 00:08:53.399
+So I don't want to go off too much on that but let's go to the slides and let's take
+
+144
+00:08:53.399 --> 00:08:59.200
+a look at some of the settings that we have when it comes to working with Lumen.
+
+145
+00:08:59.200 --> 00:09:07.980
+So you should know this a bit from our introduction classes but Lumen likes to use Nanite in
+
+146
+00:09:07.980 --> 00:09:09.799
+virtual shadow maps.
+
+147
+00:09:09.799 --> 00:09:12.120
+This works great with this system.
+
+148
+00:09:12.120 --> 00:09:17.159
+I like to think of it as a three musketeers Lumen Nanite in virtual shadow maps and
+
+149
+00:09:17.159 --> 00:09:22.860
+the reason why is it actually is a efficient system that calls upon the visual fidelity
+
+150
+00:09:22.860 --> 00:09:28.139
+of the object and the shadow based on positioning in the world making things cheaper.
+
+151
+00:09:28.139 --> 00:09:33.500
+So Lumen achieves full resolution shading while computing indirect lighting cheaper
+
+152
+00:09:33.500 --> 00:09:37.500
+than before and it's getting better stronger faster.
+
+153
+00:09:37.500 --> 00:09:42.980
+Sky lighting is solved as part of Lumen's final gather process and includes sky shadowing
+
+154
+00:09:42.980 --> 00:09:49.500
+allows indoor space to be much darker than outdoor lighting much more natural effect.
+
+155
+00:09:49.500 --> 00:09:52.970
+So it actually works really really well.
+
+156
+00:09:52.970 --> 00:09:58.549
+And you'll see Lumen also provides a lower quality global illumination for lit, translucency
+
+157
+00:09:58.549 --> 00:10:01.730
+and volumetric fog.
+
+158
+00:10:01.730 --> 00:10:07.809
+So we can also manage a few things using the light mixer but we mainly were using
+
+159
+00:10:07.809 --> 00:10:12.539
+the environment light mixer to be able to call things up and get them into play.
+
+160
+00:10:12.539 --> 00:10:16.320
+Now you can choose between GPU and CPU based on your game.
+
+161
+00:10:16.320 --> 00:10:22.659
+I recommend GPU baking and CPU baking when it comes to mobile devices.
+
+162
+00:10:22.659 --> 00:10:27.980
+But if you're going to go for console or PC you may want to choose Lumen.
+
+163
+00:10:27.980 --> 00:10:34.669
+Again this really depends on your game and how realistic you want it to be in its environment.
+
+164
+00:10:34.669 --> 00:10:40.379
+Now the difference between them the main difference is these are baked shadows.
+
+165
+00:10:40.379 --> 00:10:45.340
+These are shadow maps and Lumen uses virtual shadow maps.
+
+166
+00:10:45.340 --> 00:10:50.259
+So GPU and CPU baking is baked shadow maps Lumen is virtual shadow maps and virtual shadow
+
+167
+00:10:50.259 --> 00:10:58.200
+maps are required that each light be movable and the shadow will update automatically.
+
+168
+00:10:58.200 --> 00:11:01.240
+You'll see a few of what I mentioned before in here.
+
+169
+00:11:01.240 --> 00:11:06.200
+We'll talk a bit about mega lights later on as that is experimental but that can allow
+
+170
+00:11:06.200 --> 00:11:10.389
+you to manage lots of lights in your scene.
+
+171
+00:11:10.389 --> 00:11:15.230
+So we talked about a bit of light mixer which allows to help you for management.
+
+172
+00:11:15.230 --> 00:11:19.990
+I also showed you an environment light mixer to be able to get up and running into your
+
+173
+00:11:19.990 --> 00:11:23.750
+lighting really quickly.
+
+174
+00:11:23.750 --> 00:11:27.190
+So in the next video we're going to talk about a bit of the control and we're going
+
+175
+00:11:27.190 --> 00:11:30.509
+to take an interior scene and we're going to light it.
+
+176
+00:11:30.509 --> 00:11:31.070
+Thanks again.

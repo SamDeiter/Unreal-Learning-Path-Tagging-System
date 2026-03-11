@@ -1,0 +1,513 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:31.320
+Hi, everyone. In this lesson, we're going to take a look at subsurface materials using subsurface profile data, as well as materials using parallax occlusion material functions. So let's get started. So one of the things I first want to point out is the subsurface scattering profile data is an asset that can be created in the content browser. And the data is intended to be authored by artists and controls the distance the light in the subsurface should scatter the color of the subsurface
+
+2
+00:00:31.359 --> 00:01:00.960
+and the falloff color of the light once it has exited the object. Data can then be applied to a subsurface material, and can also be tweaked interactively. Now some people might be confused, like, well, Sean, you said subsurface doesn't really pass through the object? Well, it does. But what my point was being that translucency is true translucent effect. So we're imitating that, but on a controlled way, so that we're blanketing most of the other information out, we're only getting the light
+
+3
+00:01:00.960 --> 00:01:30.799
+information. And that's kind of how these work. This particular one, the subsurface scattering profile data can be created, then loaded in the material. It also can be migrated, has a separate menu, updates without compiling and still not as visually robust, versus customization with parent materials on first creation. So this really does need a good amount of work out the door. Because by default, you'll notice you're like, well, it doesn't look quite as good as a metahumans
+
+4
+00:01:30.799 --> 00:02:02.519
+Well, if we're going to peel back the metahumans and look at them, and see that that material is done really well. And it is does take some time, and there's quite a bit of nodes involved. So you're more than welcome to peel back what I have, we're going to take a look at that as an overall view of it. And then you're more than welcome to use the ones that I give you and customize your own. Let's go ahead and jump into Unreal and take a look at that up close. In Unreal, you'll see that we have several different versions here, it's down on the bottom, out of all the different nodes that I have set up here.
+
+5
+00:02:02.719 --> 00:02:32.560
+And you'll see that we have a mega scans blend, we have a regular subsurface, which we just talked about in the previous videos. And we also have the subsurface profile. And the main difference between these is you get a lot more robust visual control, as well as the material doing exactly what you intended, when it comes to the subsurface. In general, changing that information, and using the subsurface profile, I'll show you how to craft a subsurface profile. And then we're going to peel back the mega scans, or I should
+
+6
+00:02:32.560 --> 00:03:02.400
+say, the metahumans versions. Now, if we look at the mega scans, one, you're going to notice it is pretty lackluster. This is me selecting like flesh, or meat inside of our mega scan inside of our Quixel mega scans and exporting that out. Now, that's what I did with this one, if we double click on it, you'll notice it has a lot of options and even even has an area where it says enable subsurface parameters. Unfortunately, the subsurface parameters don't work really well. Because if you peel back
+
+7
+00:03:02.400 --> 00:03:07.360
+the actual material, and we go into the parent material, you'll notice if we click on the grid,
+
+8
+00:03:07.360 --> 00:03:12.000
+that there is no subsurface option set in here. And we would actually have to turn those things
+
+9
+00:03:12.000 --> 00:03:17.439
+on. So again, you can turn them on underneath our default here, or we can choose either a
+
+10
+00:03:17.439 --> 00:03:23.520
+subsurface, I should say under shading model, we could choose subsurface, or we can choose subsurface
+
+11
+00:03:23.520 --> 00:03:29.599
+profile. Now, the profile will require a profile to be loaded. And I'll build that in just a second
+
+12
+00:03:29.599 --> 00:03:34.240
+and show you what that means. But for the most part, we would have to switch this to subsurface.
+
+13
+00:03:34.240 --> 00:03:38.960
+And when we do, we would then have to actually plug in the appropriate nodes. Now you'll notice
+
+14
+00:03:38.960 --> 00:03:43.840
+this one's highly customized. And the fact that we have a material function map adjustment.
+
+15
+00:03:43.840 --> 00:03:48.800
+And in here, we want to make sure that we go in here. And in the subsurface, we're actually
+
+16
+00:03:48.800 --> 00:03:53.919
+using it to its full extent, you'll notice it has a subsurface slot that is active, but is
+
+17
+00:03:53.919 --> 00:03:58.639
+not overriding the overall materials and tensions, where that's where it kind of breaks down. So
+
+18
+00:03:58.639 --> 00:04:03.680
+you will have to peel this back and edit this accordingly if you get it from Quixel Megascans.
+
+19
+00:04:05.250 --> 00:04:08.050
+Now, if we go back in here and take a look at the
+
+20
+00:04:09.569 --> 00:04:14.210
+many human ones, you'll notice they are very lovely at first, and they work really, really
+
+21
+00:04:14.210 --> 00:04:20.769
+well. Now what I mean by at first, this is with lots of editing done, because by default,
+
+22
+00:04:20.769 --> 00:04:26.050
+what you initially will do is create if we go to our class, and we go to demo, you want to
+
+23
+00:04:26.050 --> 00:04:33.600
+right click and create a subsurface profile. Now you want to do that underneath our materials,
+
+24
+00:04:33.600 --> 00:04:40.560
+you'll see it on the bottom subsurface profile. And I'll call this a subsurface profile demo.
+
+25
+00:04:41.629 --> 00:04:46.990
+And in here, I double click, and I can choose the colors that I want for the subsurface albedo,
+
+26
+00:04:46.990 --> 00:04:54.269
+the mean free path color, what I want to choose here is how my color is going to be digested
+
+27
+00:04:54.350 --> 00:04:59.470
+with a light, we have a tint control, all these things are in here. And it works like an NPC,
+
+28
+00:04:59.470 --> 00:05:04.350
+which we talked about previously, this will all update on the fly once we load this into our
+
+29
+00:05:04.350 --> 00:05:11.629
+material, and get it set up with a material instance. Now, in our material, say we just make
+
+30
+00:05:11.629 --> 00:05:17.170
+a generic one real quick. And I'm going to right click in here, and we'll call this material,
+
+31
+00:05:17.170 --> 00:05:21.889
+and we'll just actually just go up here, it's faster. And we'll call this one m underscore
+
+32
+00:05:21.889 --> 00:05:30.560
+demo, subsurface profile. And I go ahead and open this up. You'll notice we need to change this.
+
+33
+00:05:30.560 --> 00:05:36.399
+So we'll see our shading model, we need to make this. Now we open this, let's go and do full
+
+34
+00:05:36.399 --> 00:05:43.279
+screen. So we need to change this into our subsurface underneath our shading model,
+
+35
+00:05:43.920 --> 00:05:48.079
+subsurface profile. Otherwise, we can't bring in that new thing that we just made
+
+36
+00:05:48.800 --> 00:05:55.490
+that subsurface profile node. So let's go ahead and open that up. And minimize this down just
+
+37
+00:05:55.490 --> 00:06:02.899
+a bit our drawer, giving us enough room to be able to grab it and drag it right in there.
+
+38
+00:06:04.100 --> 00:06:12.300
+Well, let's try that again. And we can grab the one that we have, my drag isn't working,
+
+39
+00:06:12.300 --> 00:06:18.129
+but that's okay. We'll just grab the one that we got. There we go. Whenever drag fails,
+
+40
+00:06:18.129 --> 00:06:23.329
+just look for it. And then now we have this in our scene. Now make sure when you do make
+
+41
+00:06:23.329 --> 00:06:28.129
+them, you save them. So any changes that you made will populate accordingly. But you'll notice
+
+42
+00:06:28.129 --> 00:06:33.490
+with the subsurface profile, we really have not changed anything, we need to build things out,
+
+43
+00:06:33.490 --> 00:06:38.529
+we need to decide what kind of spec or rough we want to be using, or if we're going to do a
+
+44
+00:06:38.529 --> 00:06:44.529
+make attributes with material function combo. Now, if we look at the ones that were made,
+
+45
+00:06:45.089 --> 00:06:49.490
+in here, let's pick on this one. And we take a look at the parent material.
+
+46
+00:06:51.019 --> 00:06:57.790
+Let's open this up, you're gonna see quite a bit in here. And some of this does cater to grooming,
+
+47
+00:06:57.790 --> 00:07:03.310
+as you'll see like facial hair and other things. It's a really all purpose type of material,
+
+48
+00:07:03.310 --> 00:07:07.310
+but you can really see the power of the material as you move around. And you see the
+
+49
+00:07:07.310 --> 00:07:12.829
+light if I hit the L key and left mouse click, you can see the light reacting to all different
+
+50
+00:07:12.829 --> 00:07:17.790
+types of aspects of this material. And it's pretty solid overall, there's a there's a texture
+
+51
+00:07:17.790 --> 00:07:23.149
+that's in place, you'll see that we have hair redness, you'll see all these different things
+
+52
+00:07:23.149 --> 00:07:27.790
+that may not really work with what we want as the groom sets. So let's close that groom set
+
+53
+00:07:27.790 --> 00:07:31.550
+because we're not dealing with a groom set. But if we move up, you'll be able to control some
+
+54
+00:07:31.550 --> 00:07:37.870
+of the things such as blush, and I look and feel for the color of the object here.
+
+55
+00:07:38.670 --> 00:07:44.750
+And there's a lot of cool under the hood type of stuff we have we can do. There's a beard.
+
+56
+00:07:44.750 --> 00:07:49.310
+And again, some of this stuff relates to groom, but not all of it. And you can change the color,
+
+57
+00:07:49.310 --> 00:07:53.949
+you can change the highlights, and the masking that's going on. And all these things are
+
+58
+00:07:53.949 --> 00:08:00.509
+available for you. And you're more than welcome to reverse engineer some of this because it's
+
+59
+00:08:00.509 --> 00:08:05.709
+pretty complicated. But then again, you may even find yourself only using or needing the
+
+60
+00:08:05.709 --> 00:08:11.629
+subsurface material that we built in the beginning with the ice and the Jade, that's
+
+61
+00:08:11.629 --> 00:08:16.350
+really up to you. I many times if I have a stylized character, we'll stick with this.
+
+62
+00:08:16.350 --> 00:08:21.629
+And everything works out just fine. But it really just depends on what kind of realism and what you
+
+63
+00:08:21.629 --> 00:08:27.149
+want to bring to the table. Now, if we peel this back even more, I'm going to go to this
+
+64
+00:08:27.149 --> 00:08:32.830
+baked synthesized head area or material, I should say, you'll see there's a bunch of
+
+65
+00:08:32.830 --> 00:08:37.389
+options in here, which are marrying what we just had. So that means you're connected to the
+
+66
+00:08:37.389 --> 00:08:42.110
+parent material. So if we really want to do heavy handed changes, we want to go to the parent
+
+67
+00:08:42.110 --> 00:08:48.289
+material. And in the parent material, you can really see how much is crafted here. Now,
+
+68
+00:08:48.289 --> 00:08:53.169
+this definitely could use for a few reroute nodes. But overall, you could see this is pretty
+
+69
+00:08:53.169 --> 00:09:01.330
+complicated. So it has a bake groom texture information, hair information for sure. We also
+
+70
+00:09:01.330 --> 00:09:07.250
+have if we move around here, areas such as our normal control, which is a whole bunch.
+
+71
+00:09:08.289 --> 00:09:14.669
+And you'll see roughness and spec many layers of things in here that help. If we go up here,
+
+72
+00:09:14.669 --> 00:09:20.190
+we can see where the blush and concealer and foundation. If you want to edit that for your
+
+73
+00:09:20.190 --> 00:09:25.950
+character, you can, there's so much control here that we have. And if we click on the grid,
+
+74
+00:09:25.950 --> 00:09:31.309
+you definitely will see where the subsurface profile head is at. And if I double click on this,
+
+75
+00:09:31.309 --> 00:09:35.870
+you could actually start with some of the settings and control things the way that you need.
+
+76
+00:09:38.610 --> 00:09:44.000
+All right. So let's go and move over here and take a brief look at the parallax occlusion
+
+77
+00:09:44.000 --> 00:09:50.159
+shader. Now the parallax occlusion shader is very much like the bump offset, but is
+
+78
+00:09:50.159 --> 00:09:55.360
+a lot more powerful. You can think of it as a bump offset on steroids. You see the bump
+
+79
+00:09:55.360 --> 00:10:00.960
+offset here off to the right, you'll notice when we bring in a simple light here. So let's
+
+80
+00:10:00.960 --> 00:10:09.059
+go and bring in a light, we'll just bring in a simple point light. And we'll move this point
+
+81
+00:10:09.059 --> 00:10:14.500
+line around, you'll notice that the parallax occlusion reacts to the light really nicely
+
+82
+00:10:14.500 --> 00:10:20.820
+and can almost sell that 3d look for your environment. Now you'll know that's where the
+
+83
+00:10:20.820 --> 00:10:25.779
+bump offset seems to fall flat, it doesn't have that three dimensional quality to it,
+
+84
+00:10:25.779 --> 00:10:33.220
+which is unfortunate. But the occlusion here, this parallax occlusion is an expensive effect.
+
+85
+00:10:33.700 --> 00:10:39.139
+It is not cheap. And you can see that I've applied it to this particular piece of geometry also.
+
+86
+00:10:39.139 --> 00:10:45.620
+And you can see it has a three dimensional lifted look to it. But honestly, it is not three
+
+87
+00:10:45.620 --> 00:10:51.220
+dimensional. You'll also see it here. When I move my camera, it looks like it's three dimensional
+
+88
+00:10:51.220 --> 00:10:58.029
+here. But in reality, it is not. This also is one of our demo examples of a parallax occlusion
+
+89
+00:10:58.029 --> 00:11:04.029
+up close, it looks three dimensional, and it may save you some geometry. But with nanite,
+
+90
+00:11:04.029 --> 00:11:10.350
+you may or may not need this, this is up to you. But it does do a really amazing effect.
+
+91
+00:11:10.350 --> 00:11:14.509
+There are some things in the marketplace actually, that they sell, and I can't remember them off
+
+92
+00:11:14.509 --> 00:11:24.399
+hand, sci fi, all sorts of like splat maps, and gizmos, and, and all sorts of different
+
+93
+00:11:24.399 --> 00:11:29.200
+ones in there that actually you could use using this effect. But it really just depends
+
+94
+00:11:29.200 --> 00:11:34.960
+how complicated the scene is versus your material, everything has to be calculated
+
+95
+00:11:34.960 --> 00:11:40.580
+in your environment if it's interact interactive in any way. So those are things to keep in mind
+
+96
+00:11:40.580 --> 00:11:44.500
+when using this material. But let's actually take a look at what's going on under the hood.
+
+97
+00:11:44.500 --> 00:11:48.740
+So I'm going to click on this guy here. And I'm going to go ahead and double click on the
+
+98
+00:11:48.740 --> 00:11:54.340
+parent material. Inside, you'll see that I have the parallax occlusion mapping.
+
+99
+00:11:54.340 --> 00:12:00.179
+Now it is deceiving when you try to look for shader complexity. If we go to lit,
+
+100
+00:12:00.179 --> 00:12:04.340
+and we go to optimization view modes, and we say, Hey, let's take a look at shader complexity,
+
+101
+00:12:04.340 --> 00:12:10.100
+you're really not going to get the information you need. This is actually highly complex,
+
+102
+00:12:10.100 --> 00:12:16.580
+and should be more in the red and pink area. But it is not at this time. So don't let that
+
+103
+00:12:16.580 --> 00:12:21.059
+deceive you. It is kind of kind of complicated, but doesn't mean you can't use it. You just need
+
+104
+00:12:21.059 --> 00:12:27.379
+to watch your frame rates when you introduce this into a scene. And does it help geometry wise,
+
+105
+00:12:27.379 --> 00:12:33.059
+basically, it's a give or take situation? Is it like tremendous amounts of geometry that you
+
+106
+00:12:33.059 --> 00:12:37.940
+have to deal with? Is your nanite going to be able to handle it? Are you sending it to the
+
+107
+00:12:37.940 --> 00:12:42.980
+iPhone or you send it to the iPad? Is this just the final pixel type of situation where you
+
+108
+00:12:42.980 --> 00:12:47.940
+don't care how much use it is, as long as you get a good final render, it's really up to you.
+
+109
+00:12:47.940 --> 00:12:51.779
+And that's something you have to consider. As I move my camera around, you can definitely see
+
+110
+00:12:51.779 --> 00:12:55.460
+where it's trying to create that three dimensional quality to everything. And we can
+
+111
+00:12:55.460 --> 00:12:59.620
+change shapes just to see what we get. You can see here with the square, it actually looks
+
+112
+00:12:59.620 --> 00:13:04.580
+like it's lifted off the ground or off the surface, but it isn't. So it's really kind of a
+
+113
+00:13:05.820 --> 00:13:10.460
+kind of a faking there with optical illusion. You'll notice what we have in here,
+
+114
+00:13:10.460 --> 00:13:15.740
+we have a height map texture, this is helpful to get that look, we have a height ratio,
+
+115
+00:13:15.740 --> 00:13:21.580
+kind of gives us our kind of amount in relation to the width in here, and how deep it is,
+
+116
+00:13:21.580 --> 00:13:26.940
+we have minimum steps, maximum steps, we also have height channels, there's a lot of values I
+
+117
+00:13:26.940 --> 00:13:30.860
+don't have in here, and we're still getting the look that we need. So you don't necessarily
+
+118
+00:13:30.860 --> 00:13:34.379
+have to use all of these, but you're more than welcome to play with them. They just give
+
+119
+00:13:34.460 --> 00:13:41.980
+you more depth and give you more surface richness to the look and feel they do after you add more
+
+120
+00:13:41.980 --> 00:13:45.259
+and more anytime you do this with any material function or any material, the more you add,
+
+121
+00:13:45.259 --> 00:13:48.860
+the more complex it's going to be. So just keep those things in mind because you're
+
+122
+00:13:48.860 --> 00:13:54.299
+introducing new textures, new variables. And it's just really up to you what you're doing
+
+123
+00:13:54.299 --> 00:13:58.460
+and what you're building. And you see the output here we have we have a texture sample
+
+124
+00:13:58.460 --> 00:14:05.419
+for UVs. I have a texture sample here. Notice that each node in the UVs gets the parallax info.
+
+125
+00:14:05.419 --> 00:14:09.500
+So we're pulling that parallax info and putting it in there so that things build and
+
+126
+00:14:09.500 --> 00:14:15.500
+draw correctly on screen. Cool. Well, that's it with this one. Hope you enjoyed these sets
+
+127
+00:14:15.500 --> 00:14:20.320
+of videos and you found them very informative. And in the next video, we're going to start
+
+128
+00:14:20.320 --> 00:14:26.320
+wrapping things up.

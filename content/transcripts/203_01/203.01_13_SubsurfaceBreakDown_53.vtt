@@ -1,0 +1,1977 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:03.310
+Hi everyone, in this lesson,
+
+2
+00:00:03.310 --> 00:00:05.710
+we're gonna talk about subsurface materials
+
+3
+00:00:05.710 --> 00:00:07.790
+and parallax control and how to edit
+
+4
+00:00:07.790 --> 00:00:10.710
+and use these inside the material editor.
+
+5
+00:00:10.710 --> 00:00:13.500
+So let's get started.
+
+6
+00:00:13.500 --> 00:00:15.580
+So inside the material editor,
+
+7
+00:00:15.580 --> 00:00:17.960
+we can actually control a few nodes
+
+8
+00:00:17.960 --> 00:00:20.780
+to be able to make materials look and function
+
+9
+00:00:20.780 --> 00:00:23.820
+differently than they actually are doing.
+
+10
+00:00:23.820 --> 00:00:26.460
+And what I mean by that is we can actually make
+
+11
+00:00:26.460 --> 00:00:31.460
+a translucent feel and look for an object such as ice
+
+12
+00:00:31.500 --> 00:00:34.899
+or even jade by simply using the Fernal Index
+
+13
+00:00:34.899 --> 00:00:37.780
+and plugging it in to the appropriate areas
+
+14
+00:00:37.780 --> 00:00:39.659
+and controlling those values.
+
+15
+00:00:39.659 --> 00:00:41.700
+But the object will not be translucent.
+
+16
+00:00:41.700 --> 00:00:43.899
+So we're basically using that Fernal Index
+
+17
+00:00:43.899 --> 00:00:46.539
+we described in previous classes
+
+18
+00:00:46.539 --> 00:00:49.619
+in which we're actually almost like bending the light
+
+19
+00:00:49.619 --> 00:00:52.380
+and making it look like that subsurface effect
+
+20
+00:00:52.380 --> 00:00:54.140
+is actually happening.
+
+21
+00:00:54.140 --> 00:00:56.299
+So we can use it to our advantage.
+
+22
+00:00:56.299 --> 00:00:58.060
+Now we'll have to control that
+
+23
+00:00:58.060 --> 00:00:59.219
+within the material initially
+
+24
+00:00:59.259 --> 00:01:02.259
+to turn on the subsurface options.
+
+25
+00:01:02.259 --> 00:01:03.759
+But when we do have that on,
+
+26
+00:01:03.759 --> 00:01:06.459
+the Fernal Index can push those values
+
+27
+00:01:06.459 --> 00:01:08.260
+and those looks even farther
+
+28
+00:01:08.260 --> 00:01:12.219
+to get a unique looking type of ice or even jade,
+
+29
+00:01:12.219 --> 00:01:14.819
+which we're going to look at in just a bit.
+
+30
+00:01:14.819 --> 00:01:17.620
+Feel free to follow along in the slides
+
+31
+00:01:17.620 --> 00:01:19.480
+as we go through an Unreal
+
+32
+00:01:19.480 --> 00:01:21.959
+and you'll be able to build these materials
+
+33
+00:01:21.959 --> 00:01:26.400
+the way that they're described and shown in this lesson.
+
+34
+00:01:26.400 --> 00:01:28.859
+So let's go and jump into Unreal.
+
+35
+00:01:29.299 --> 00:01:30.420
+So I'm in Unreal right now
+
+36
+00:01:30.420 --> 00:01:33.060
+and I'm using the map that's called MatSub.
+
+37
+00:01:33.060 --> 00:01:35.420
+You'll find that underneath our class folder
+
+38
+00:01:35.420 --> 00:01:37.420
+and you'll see a folder called maps
+
+39
+00:01:37.420 --> 00:01:42.219
+and you'll see MatSub right there.
+
+40
+00:01:42.219 --> 00:01:46.140
+Inside here, you can see that we have a jade material,
+
+41
+00:01:46.140 --> 00:01:51.140
+an ice material and a more complicated jade
+
+42
+00:01:51.620 --> 00:01:56.010
+using a parallax control,
+
+43
+00:01:56.010 --> 00:01:58.269
+or I should say a parallax effect,
+
+44
+00:01:58.269 --> 00:02:00.709
+which you see down below here.
+
+45
+00:02:01.629 --> 00:02:04.340
+And this is using that parallax occlusion shader.
+
+46
+00:02:04.340 --> 00:02:06.879
+And we're mainly going to focus on this one first,
+
+47
+00:02:06.879 --> 00:02:08.939
+and then we'll come over and take a look at ice
+
+48
+00:02:08.939 --> 00:02:11.009
+and its complexity.
+
+49
+00:02:11.009 --> 00:02:13.889
+From there, we'll look at the parallax control
+
+50
+00:02:13.889 --> 00:02:16.370
+and how to use that parallax occlusion shader
+
+51
+00:02:16.370 --> 00:02:18.689
+and compare it to a bump offset,
+
+52
+00:02:18.689 --> 00:02:20.889
+which we talked about in other classes.
+
+53
+00:02:20.889 --> 00:02:22.229
+And then finally, from there,
+
+54
+00:02:22.229 --> 00:02:24.610
+we'll take a look at our subsurface profile
+
+55
+00:02:24.610 --> 00:02:25.930
+and how that stacks up,
+
+56
+00:02:25.930 --> 00:02:27.810
+as well as the Megascans blend
+
+57
+00:02:27.810 --> 00:02:30.930
+and the regular subsurface we're dealing with now.
+
+58
+00:02:30.949 --> 00:02:34.830
+Let's go ahead and take a look over here in our scene
+
+59
+00:02:34.830 --> 00:02:37.310
+and see the light of being affected,
+
+60
+00:02:37.310 --> 00:02:40.870
+or I should say, affecting the object,
+
+61
+00:02:40.870 --> 00:02:42.930
+object's material in the scene.
+
+62
+00:02:42.930 --> 00:02:46.129
+So I've moved this light down and it is behind the object.
+
+63
+00:02:46.129 --> 00:02:48.210
+You'll see that it appears to be having light
+
+64
+00:02:48.210 --> 00:02:51.770
+pass through it as if we're controlling how thin it is.
+
+65
+00:02:51.770 --> 00:02:53.789
+Now this is kind of an optical illusion,
+
+66
+00:02:53.789 --> 00:02:55.770
+you can think, in Unreal.
+
+67
+00:02:55.770 --> 00:02:57.870
+And we're using our subsurface profile,
+
+68
+00:02:57.870 --> 00:03:00.610
+which already has a few things built in in the material.
+
+69
+00:03:01.129 --> 00:03:01.969
+I shouldn't say profile,
+
+70
+00:03:01.969 --> 00:03:06.129
+but the options to turn on that mode in our material.
+
+71
+00:03:06.129 --> 00:03:09.610
+And with that, we're also plugging in our Fernal Index.
+
+72
+00:03:09.610 --> 00:03:12.689
+And that Fernal Index pushes that subsurface look
+
+73
+00:03:12.689 --> 00:03:15.289
+and feel a bit farther.
+
+74
+00:03:15.289 --> 00:03:16.729
+Let me show you what I mean.
+
+75
+00:03:16.729 --> 00:03:19.009
+So I'm going to click on this particular object
+
+76
+00:03:19.009 --> 00:03:21.610
+and I'm going to double click on its parent material.
+
+77
+00:03:21.610 --> 00:03:23.050
+We'll see its parent material here,
+
+78
+00:03:23.050 --> 00:03:25.050
+or I should say, instance material.
+
+79
+00:03:25.050 --> 00:03:27.650
+We'll see the instance material here broken down,
+
+80
+00:03:27.650 --> 00:03:30.449
+where I've sectioned off different types and pieces
+
+81
+00:03:31.289 --> 00:03:33.650
+that we can actually add to compliment this object.
+
+82
+00:03:33.650 --> 00:03:36.189
+You'll notice we have a color for masking,
+
+83
+00:03:36.189 --> 00:03:39.810
+a color for noise and a color for noise too.
+
+84
+00:03:39.810 --> 00:03:41.729
+Now this is just to be able to get this thing
+
+85
+00:03:41.729 --> 00:03:44.009
+to look a little bit more robust
+
+86
+00:03:44.009 --> 00:03:46.689
+and to be able to control some of the values.
+
+87
+00:03:46.689 --> 00:03:49.169
+And what I mean by that, if I go in here,
+
+88
+00:03:49.169 --> 00:03:51.449
+I can add color that can compliment
+
+89
+00:03:51.449 --> 00:03:53.289
+and make this look very unique.
+
+90
+00:03:53.289 --> 00:03:55.849
+You can even make this look like it's from another planet
+
+91
+00:03:55.849 --> 00:03:58.969
+or even a material that doesn't necessarily exist on earth.
+
+92
+00:03:58.990 --> 00:04:00.389
+And you can control that simply
+
+93
+00:04:00.389 --> 00:04:01.990
+by playing with those colors.
+
+94
+00:04:01.990 --> 00:04:04.090
+So I wanted to give those opportunities in there.
+
+95
+00:04:04.090 --> 00:04:06.770
+I'll show you in the parent material,
+
+96
+00:04:06.770 --> 00:04:08.250
+what those look like.
+
+97
+00:04:08.250 --> 00:04:10.689
+Then we also have these simple material conditions here.
+
+98
+00:04:10.689 --> 00:04:12.569
+We have metallic, roughness and spec,
+
+99
+00:04:12.569 --> 00:04:15.169
+and down below we have normal and normal intensity.
+
+100
+00:04:15.169 --> 00:04:17.370
+But over here we have opacity edits.
+
+101
+00:04:17.370 --> 00:04:20.209
+We're controlling the fall off of the frontal index effect
+
+102
+00:04:20.209 --> 00:04:22.329
+from the center on this object,
+
+103
+00:04:22.329 --> 00:04:25.860
+plugged into the appropriate areas in the opacity.
+
+104
+00:04:25.860 --> 00:04:28.759
+We also see here opacity subsurface amount.
+
+105
+00:04:28.959 --> 00:04:31.639
+So we actually can control a bit of that in our scene.
+
+106
+00:04:31.639 --> 00:04:34.339
+Again, I will show you and break that down some more.
+
+107
+00:04:34.339 --> 00:04:36.699
+You'll see here we have subsurface control,
+
+108
+00:04:36.699 --> 00:04:39.220
+edge control, spec reflection,
+
+109
+00:04:39.220 --> 00:04:42.050
+and subsurface color overall.
+
+110
+00:04:42.050 --> 00:04:46.050
+All right, so the arrestor is your standard of values
+
+111
+00:04:46.050 --> 00:04:47.610
+that you can see in here,
+
+112
+00:04:47.610 --> 00:04:52.610
+such as our light settings and material property overrides.
+
+113
+00:04:52.810 --> 00:04:53.930
+Down below you'll see there's a little bit
+
+114
+00:04:53.930 --> 00:04:55.529
+of texture noise that I added
+
+115
+00:04:55.529 --> 00:04:57.290
+if we wanted to add some more noise.
+
+116
+00:04:57.290 --> 00:04:59.209
+It works okay in here, it's not too bad,
+
+117
+00:04:59.209 --> 00:05:01.329
+but unfortunately what we have here
+
+118
+00:05:01.329 --> 00:05:06.129
+is these textures don't have the same UVs in mind.
+
+119
+00:05:06.129 --> 00:05:07.790
+It's just stuff I plugged in here.
+
+120
+00:05:07.790 --> 00:05:10.290
+So you may see seams show up
+
+121
+00:05:10.290 --> 00:05:12.329
+based on where the shells begin and end,
+
+122
+00:05:12.329 --> 00:05:15.250
+because these are just simple texture,
+
+123
+00:05:15.250 --> 00:05:16.730
+texture slapped into the scene.
+
+124
+00:05:16.730 --> 00:05:18.209
+So just keep that in mind.
+
+125
+00:05:18.209 --> 00:05:19.990
+They may not do anything,
+
+126
+00:05:19.990 --> 00:05:22.209
+but I wanted to show you this in theory,
+
+127
+00:05:22.209 --> 00:05:25.329
+what you can do to maybe enhance the look and feel
+
+128
+00:05:25.370 --> 00:05:26.209
+for an object,
+
+129
+00:05:26.209 --> 00:05:28.970
+simply by getting some texture information in there.
+
+130
+00:05:28.970 --> 00:05:31.329
+All right, so if we go into the parent material here,
+
+131
+00:05:31.329 --> 00:05:32.170
+and again, to get to it,
+
+132
+00:05:32.170 --> 00:05:34.569
+you can double click on the parent material below.
+
+133
+00:05:34.569 --> 00:05:36.250
+I already have my tab open.
+
+134
+00:05:36.250 --> 00:05:38.490
+Let's actually open this up to go full screen
+
+135
+00:05:38.490 --> 00:05:41.060
+and you can see what I have set up.
+
+136
+00:05:41.060 --> 00:05:43.800
+And we'll create a pretty simplistic one
+
+137
+00:05:43.800 --> 00:05:45.699
+where I can break down the theory here
+
+138
+00:05:45.699 --> 00:05:47.339
+when it comes to the subsurface
+
+139
+00:05:47.339 --> 00:05:49.019
+and a bit of the color information.
+
+140
+00:05:49.019 --> 00:05:51.620
+But I won't make it quite as complex as this
+
+141
+00:05:51.620 --> 00:05:53.379
+because I think you have the example
+
+142
+00:05:53.379 --> 00:05:56.500
+and you kind of get the idea of where things are going.
+
+143
+00:05:56.500 --> 00:05:58.759
+But I'm going to point out real quick what I have.
+
+144
+00:05:58.759 --> 00:06:01.100
+So I'm using the linear interpret node here,
+
+145
+00:06:01.100 --> 00:06:03.060
+and I'm using the A channel and the B channel.
+
+146
+00:06:03.060 --> 00:06:06.060
+And we're getting 50% of those values.
+
+147
+00:06:06.060 --> 00:06:08.399
+In here, we have a texture noise put into the alpha.
+
+148
+00:06:08.399 --> 00:06:10.620
+So we can actually blend things
+
+149
+00:06:10.620 --> 00:06:13.639
+and use that alpha to our advantage.
+
+150
+00:06:13.639 --> 00:06:16.319
+You'll see here, we have the amount of texture noise
+
+151
+00:06:16.319 --> 00:06:17.959
+and I'm pumping the green channel,
+
+152
+00:06:17.959 --> 00:06:21.759
+basically just some more black and white information.
+
+153
+00:06:21.800 --> 00:06:24.660
+And you can choose which channel has the most
+
+154
+00:06:24.660 --> 00:06:26.720
+or the strongest values in there.
+
+155
+00:06:26.720 --> 00:06:29.120
+And I'm putting it into the A channel of that multiply.
+
+156
+00:06:29.120 --> 00:06:31.079
+And then again, put it into another multiply
+
+157
+00:06:31.079 --> 00:06:33.620
+where the ERP, where the front of the ERP.
+
+158
+00:06:33.620 --> 00:06:36.750
+The ERP is a node we haven't developed yet.
+
+159
+00:06:36.750 --> 00:06:41.529
+So you'll see here, we have a ERP here on the other side
+
+160
+00:06:41.529 --> 00:06:45.110
+and this ERP is taking those color values
+
+161
+00:06:45.110 --> 00:06:46.709
+and making it so that if we wanted to,
+
+162
+00:06:46.709 --> 00:06:48.990
+we can even add more texture values
+
+163
+00:06:48.990 --> 00:06:51.310
+on top of what we've produced with the color.
+
+164
+00:06:51.829 --> 00:06:54.149
+It can, you can do it any way you want,
+
+165
+00:06:54.149 --> 00:06:55.389
+but I built it this way.
+
+166
+00:06:55.389 --> 00:06:57.430
+So you can get an idea of some of the cool stuff
+
+167
+00:06:57.430 --> 00:07:00.399
+that you can do to blend things together.
+
+168
+00:07:00.399 --> 00:07:03.560
+This isn't really necessary to be built for our class.
+
+169
+00:07:03.560 --> 00:07:05.939
+But again, I wanted to show you that in theory,
+
+170
+00:07:05.939 --> 00:07:07.100
+what you can do.
+
+171
+00:07:07.100 --> 00:07:09.279
+So down below here, this is where the things
+
+172
+00:07:09.279 --> 00:07:12.600
+get really important and being able to control
+
+173
+00:07:12.600 --> 00:07:13.920
+the look and feel of things.
+
+174
+00:07:13.920 --> 00:07:15.879
+You'll see I have a Fernal Index here.
+
+175
+00:07:15.879 --> 00:07:18.319
+And then in here, I have Opacity Surface Amount
+
+176
+00:07:18.319 --> 00:07:20.639
+as well as a Falloff Fernal Index.
+
+177
+00:07:20.639 --> 00:07:22.040
+Now this is the opacity.
+
+178
+00:07:22.040 --> 00:07:25.000
+This isn't the subsurface area, which is down below.
+
+179
+00:07:25.000 --> 00:07:27.759
+So if I wanted to, I could punch in a few things,
+
+180
+00:07:27.759 --> 00:07:31.000
+but remember this is controlling and mirroring
+
+181
+00:07:31.000 --> 00:07:33.800
+what could be happening with our object.
+
+182
+00:07:33.800 --> 00:07:35.319
+Now you're like wondering, well, Sean,
+
+183
+00:07:35.319 --> 00:07:37.379
+what is the mode of our object?
+
+184
+00:07:37.379 --> 00:07:39.720
+Well, if I click in the grid space,
+
+185
+00:07:39.720 --> 00:07:43.060
+you'll see that we have an opaque blend mode
+
+186
+00:07:43.060 --> 00:07:46.279
+as well as a subsurface for the shading model.
+
+187
+00:07:46.279 --> 00:07:49.519
+If I didn't have subsurface and move this back to default,
+
+188
+00:07:49.519 --> 00:07:51.639
+you'll see that the opacity goes away.
+
+189
+00:07:51.639 --> 00:07:56.220
+So the opacity is in here so that we can actually choose
+
+190
+00:07:57.399 --> 00:08:00.040
+when we choose our subsurface here on the top,
+
+191
+00:08:00.040 --> 00:08:02.439
+not profile, that's profile, it's different.
+
+192
+00:08:02.439 --> 00:08:04.939
+When we choose subsurface, it allows us to have
+
+193
+00:08:04.939 --> 00:08:07.959
+an opacity to be able to actually have light
+
+194
+00:08:07.959 --> 00:08:09.720
+kind of pass through it.
+
+195
+00:08:09.720 --> 00:08:13.120
+But what I mean by it bending and changing,
+
+196
+00:08:13.120 --> 00:08:14.939
+cause it isn't translucent,
+
+197
+00:08:14.939 --> 00:08:18.139
+is this Fernal Index pushes out a bit farther.
+
+198
+00:08:18.139 --> 00:08:22.139
+So we're able to have light go through it in such a way,
+
+199
+00:08:22.139 --> 00:08:24.420
+but it isn't quite translucent.
+
+200
+00:08:24.420 --> 00:08:27.379
+So it isn't like fully going through this.
+
+201
+00:08:27.379 --> 00:08:30.160
+We're controlling the amounts,
+
+202
+00:08:30.160 --> 00:08:32.379
+not necessarily how you can see through it,
+
+203
+00:08:32.379 --> 00:08:36.220
+but how the light imitates how it's passing
+
+204
+00:08:36.220 --> 00:08:37.120
+through an object.
+
+205
+00:08:37.120 --> 00:08:39.500
+So we're really not thinning it out.
+
+206
+00:08:39.500 --> 00:08:42.740
+We're actually just controlling how much of the intensity
+
+207
+00:08:42.740 --> 00:08:43.899
+of the light going through.
+
+208
+00:08:43.899 --> 00:08:45.340
+So it's a little bit of smoke and mirrors
+
+209
+00:08:45.340 --> 00:08:47.480
+when you think about it with Unreal.
+
+210
+00:08:47.840 --> 00:08:51.320
+Translucency will give you the true light passing through,
+
+211
+00:08:51.320 --> 00:08:52.700
+and you would control the roughness,
+
+212
+00:08:52.700 --> 00:08:54.139
+you control the opacity amount,
+
+213
+00:08:54.139 --> 00:08:56.600
+and then you can cloud it out or make it clear.
+
+214
+00:08:56.600 --> 00:08:58.159
+And this is not the case here.
+
+215
+00:08:58.159 --> 00:09:00.740
+We're actually controlling how much of the opacity
+
+216
+00:09:00.740 --> 00:09:02.460
+of the light coming through,
+
+217
+00:09:02.460 --> 00:09:04.919
+but we're not really making it translucent.
+
+218
+00:09:04.919 --> 00:09:06.620
+So hopefully that makes sense to you.
+
+219
+00:09:06.620 --> 00:09:08.500
+We're playing with those values.
+
+220
+00:09:08.500 --> 00:09:11.720
+And in here, the Fernal Index allows us to complement
+
+221
+00:09:11.720 --> 00:09:13.860
+that to be able to help with that illusion
+
+222
+00:09:13.860 --> 00:09:16.620
+and bend light a bit more in our scene
+
+223
+00:09:16.620 --> 00:09:20.179
+to be able to actually make it even look more extreme.
+
+224
+00:09:20.179 --> 00:09:21.940
+Now, if you go down below,
+
+225
+00:09:21.940 --> 00:09:23.639
+might press the wrong thing there.
+
+226
+00:09:23.639 --> 00:09:25.379
+We go down below to the subsurface.
+
+227
+00:09:25.379 --> 00:09:27.740
+We are using that Fernal Index to our advantage.
+
+228
+00:09:27.740 --> 00:09:30.289
+We're using an exponent here
+
+229
+00:09:30.289 --> 00:09:33.330
+and a base reflection refraction.
+
+230
+00:09:33.330 --> 00:09:35.409
+And each one of these have a different effect.
+
+231
+00:09:35.409 --> 00:09:40.049
+So the exponent, the edge subsurface Fernal Control
+
+232
+00:09:40.049 --> 00:09:42.169
+allows us to control how much of that edge
+
+233
+00:09:42.169 --> 00:09:44.730
+is being handled with the light.
+
+234
+00:09:44.730 --> 00:09:45.809
+And I'll show you what I mean.
+
+235
+00:09:45.850 --> 00:09:47.990
+Now, by default, I set it to 10.
+
+236
+00:09:47.990 --> 00:09:49.129
+Down below, you'll also see
+
+237
+00:09:49.129 --> 00:09:51.370
+there's a spec reflection thickness.
+
+238
+00:09:51.370 --> 00:09:53.559
+So let me show you what I mean.
+
+239
+00:09:53.559 --> 00:09:55.440
+So if we go down here and we go back
+
+240
+00:09:55.440 --> 00:09:56.919
+to our instance here,
+
+241
+00:09:56.919 --> 00:09:59.360
+you're gonna see the effect in real time.
+
+242
+00:09:59.360 --> 00:10:02.509
+So I'm gonna go to that subsurface area.
+
+243
+00:10:02.509 --> 00:10:06.149
+I'm going to increase this subsurface Fernal Control
+
+244
+00:10:06.149 --> 00:10:07.710
+so the edge here,
+
+245
+00:10:07.710 --> 00:10:11.250
+we can control how much this value is coming from the edge
+
+246
+00:10:11.250 --> 00:10:15.460
+of how that light is resting on that object.
+
+247
+00:10:15.460 --> 00:10:16.639
+Pretty cool.
+
+248
+00:10:16.639 --> 00:10:19.299
+Now the spec reflection thickness,
+
+249
+00:10:19.299 --> 00:10:20.899
+if I increase this,
+
+250
+00:10:20.899 --> 00:10:23.220
+you'll see that we're actually making it
+
+251
+00:10:23.220 --> 00:10:25.080
+so that it's kind of doled out.
+
+252
+00:10:25.080 --> 00:10:26.139
+But if we lower it,
+
+253
+00:10:26.139 --> 00:10:28.720
+we can actually make it so that we're getting,
+
+254
+00:10:28.720 --> 00:10:30.620
+it's almost like we're thickening the object.
+
+255
+00:10:30.620 --> 00:10:33.340
+So we're lessening the amount of light coming through.
+
+256
+00:10:33.340 --> 00:10:34.700
+But again, this is subsurface.
+
+257
+00:10:34.700 --> 00:10:36.980
+This isn't opacity,
+
+258
+00:10:36.980 --> 00:10:40.179
+but the Fernal Index is allowing us to fold the eye
+
+259
+00:10:40.179 --> 00:10:41.220
+and making you think
+
+260
+00:10:41.220 --> 00:10:43.700
+that we're controlling the thickness,
+
+261
+00:10:43.700 --> 00:10:45.320
+but we're really not.
+
+262
+00:10:46.039 --> 00:10:48.580
+We're really just using the Fernal Index to our advantage.
+
+263
+00:10:48.580 --> 00:10:51.840
+And that's the nice thing about plugging in a Fernal Index
+
+264
+00:10:51.840 --> 00:10:54.559
+into the subsurface node here.
+
+265
+00:10:54.559 --> 00:10:58.039
+It actually helps us push this look and feel.
+
+266
+00:10:58.039 --> 00:10:59.600
+Now, if I move my light around,
+
+267
+00:10:59.600 --> 00:11:02.279
+you'll actually see that effect a bit more
+
+268
+00:11:02.279 --> 00:11:03.600
+like I showed you earlier.
+
+269
+00:11:03.600 --> 00:11:07.039
+And you can see it kind of glow a bit here.
+
+270
+00:11:07.039 --> 00:11:08.860
+And again, we're fully in the eye
+
+271
+00:11:08.860 --> 00:11:12.840
+that Fernal Index is helping us not only in the opacity,
+
+272
+00:11:12.840 --> 00:11:16.629
+but it's also helping us when it comes to the subsurface.
+
+273
+00:11:16.629 --> 00:11:17.789
+All right, so let's go ahead
+
+274
+00:11:17.789 --> 00:11:19.909
+and build a simple one for ourselves here.
+
+275
+00:11:19.909 --> 00:11:21.269
+So you can get an idea
+
+276
+00:11:21.269 --> 00:11:24.230
+and I'll break things out a little bit more as we do so.
+
+277
+00:11:24.230 --> 00:11:30.340
+So let me go ahead and go into my Content Drawer.
+
+278
+00:11:30.340 --> 00:11:32.379
+And we're gonna go ahead and go to our class folder.
+
+279
+00:11:32.379 --> 00:11:34.899
+I'm gonna go to a demo folder.
+
+280
+00:11:34.899 --> 00:11:38.100
+And this is one we use off and on in this class series.
+
+281
+00:11:38.100 --> 00:11:40.659
+You can make your own demo folder if you wish.
+
+282
+00:11:40.659 --> 00:11:42.899
+And I'm gonna right click
+
+283
+00:11:42.899 --> 00:11:43.820
+and I'm gonna go into here
+
+284
+00:11:43.820 --> 00:11:46.440
+and just make it a brand new material.
+
+285
+00:11:46.440 --> 00:11:51.440
+This is going to be M underscore new subsurface SS demo.
+
+286
+00:11:54.740 --> 00:11:55.799
+There we go.
+
+287
+00:11:55.799 --> 00:11:57.919
+And I'm gonna double click on this.
+
+288
+00:11:57.919 --> 00:11:58.740
+He's off screen.
+
+289
+00:11:58.740 --> 00:12:01.600
+Let me go and pull this one over for a second here.
+
+290
+00:12:01.600 --> 00:12:03.440
+And let's actually open this up.
+
+291
+00:12:03.440 --> 00:12:05.320
+And we don't necessarily have to have a texture
+
+292
+00:12:05.320 --> 00:12:06.720
+in this one, but we might pick
+
+293
+00:12:06.720 --> 00:12:09.720
+on the ice materials textures
+
+294
+00:12:09.720 --> 00:12:12.649
+because they work really well.
+
+295
+00:12:12.649 --> 00:12:14.710
+So in here, let me go full screen
+
+296
+00:12:14.710 --> 00:12:17.000
+so you can see what I'm doing.
+
+297
+00:12:17.000 --> 00:12:18.580
+In here, we wanna make sure
+
+298
+00:12:18.580 --> 00:12:23.580
+that we're changing our shading model to a subsurface.
+
+299
+00:12:24.039 --> 00:12:28.360
+And again, when we do so, we have that opacity firing on.
+
+300
+00:12:28.360 --> 00:12:31.320
+Next, we wanna go in here and add a few things.
+
+301
+00:12:31.320 --> 00:12:33.799
+So we can keep things fairly simple
+
+302
+00:12:33.799 --> 00:12:36.679
+in the material department or texture department.
+
+303
+00:12:36.679 --> 00:12:40.659
+And we'll just choose a random blue, I guess you can do.
+
+304
+00:12:40.659 --> 00:12:43.100
+So I'm gonna keep my finger to three key left click
+
+305
+00:12:43.100 --> 00:12:45.940
+and we'll just make this a blue color.
+
+306
+00:12:46.820 --> 00:12:50.980
+Almost like a aqua blue and a navy blue mix.
+
+307
+00:12:50.980 --> 00:12:55.200
+And we can control that value and I'll hit okay.
+
+308
+00:12:55.200 --> 00:12:57.320
+I'm gonna pull that right into the color for now.
+
+309
+00:12:57.320 --> 00:12:59.399
+I'm gonna keep that pretty simple.
+
+310
+00:12:59.399 --> 00:13:02.129
+Not gonna worry about that too much.
+
+311
+00:13:02.129 --> 00:13:03.490
+Now, because it's subsurface,
+
+312
+00:13:03.490 --> 00:13:07.009
+it's pulling most of its color information from here
+
+313
+00:13:07.009 --> 00:13:08.570
+because it's imitating how light
+
+314
+00:13:08.570 --> 00:13:09.850
+is passing through an object.
+
+315
+00:13:09.850 --> 00:13:11.250
+So a lot of people get confused with that,
+
+316
+00:13:11.250 --> 00:13:13.009
+but that's kind of how that works.
+
+317
+00:13:13.009 --> 00:13:13.889
+And that's why it's white.
+
+318
+00:13:13.889 --> 00:13:16.990
+So don't let it mess with your noodle.
+
+319
+00:13:16.990 --> 00:13:19.110
+All right, so we have our base color.
+
+320
+00:13:19.110 --> 00:13:22.070
+And again, if I wanted to, I could build you intensity
+
+321
+00:13:22.070 --> 00:13:23.250
+and I can control the tint,
+
+322
+00:13:23.250 --> 00:13:25.070
+but you guys know that from other classes.
+
+323
+00:13:25.070 --> 00:13:28.460
+So I actually really don't need to waste time doing that.
+
+324
+00:13:28.460 --> 00:13:30.000
+What we can for fun though,
+
+325
+00:13:30.000 --> 00:13:31.700
+is promote some of these two variables,
+
+326
+00:13:31.700 --> 00:13:35.820
+such as metallic, promote to variable.
+
+327
+00:13:35.820 --> 00:13:39.649
+We'll do specular, move that over
+
+328
+00:13:39.649 --> 00:13:43.960
+and we'll promote roughness to variable, there we go.
+
+329
+00:13:43.960 --> 00:13:46.690
+And you can actually adjust those accordingly.
+
+330
+00:13:46.690 --> 00:13:47.529
+So if we wanted to,
+
+331
+00:13:47.529 --> 00:13:49.850
+we can mainly just stay in spec land
+
+332
+00:13:49.850 --> 00:13:53.080
+and set that to its default, which is 0.5.
+
+333
+00:13:53.080 --> 00:13:55.240
+Just a little tiny bit of shininess
+
+334
+00:13:55.240 --> 00:13:57.279
+and the rest we could set to zero or one,
+
+335
+00:13:57.279 --> 00:13:58.639
+depending what you need.
+
+336
+00:13:58.639 --> 00:14:00.840
+All right, so let's just move this over.
+
+337
+00:14:00.840 --> 00:14:01.679
+There we go.
+
+338
+00:14:01.679 --> 00:14:04.080
+I'm gonna move the color over here.
+
+339
+00:14:04.080 --> 00:14:06.480
+So now that we have that opacity to play with,
+
+340
+00:14:06.480 --> 00:14:08.259
+we can actually build kind of the same structure
+
+341
+00:14:08.259 --> 00:14:11.970
+that I had before for the jade.
+
+342
+00:14:11.970 --> 00:14:14.049
+So I'm gonna go in here and one,
+
+343
+00:14:14.049 --> 00:14:16.090
+I'm gonna create a couple of scalars.
+
+344
+00:14:16.110 --> 00:14:19.009
+So I keep my finger on the S key and left click
+
+345
+00:14:19.009 --> 00:14:22.289
+and this will be our first scalar.
+
+346
+00:14:22.289 --> 00:14:26.899
+And we'll call this opacity.
+
+347
+00:14:26.899 --> 00:14:29.980
+And I call it subsurface amount.
+
+348
+00:14:29.980 --> 00:14:32.460
+It's really not subsurface amount
+
+349
+00:14:32.460 --> 00:14:34.120
+when it comes to the opacity here.
+
+350
+00:14:34.120 --> 00:14:36.480
+This is more like opacity.
+
+351
+00:14:38.759 --> 00:14:47.019
+We could just say amount of light passing through
+
+352
+00:14:47.220 --> 00:14:50.919
+if it's helpful for you.
+
+353
+00:14:50.919 --> 00:14:51.899
+There we go.
+
+354
+00:14:51.899 --> 00:14:53.360
+That's kind of my intentions on that one.
+
+355
+00:14:53.399 --> 00:14:55.600
+So sorry if that was confusing.
+
+356
+00:14:55.600 --> 00:15:01.610
+And we're gonna say 0.95.
+
+357
+00:15:01.610 --> 00:15:04.970
+So the next thing we wanna do is create a Fernal index.
+
+358
+00:15:04.970 --> 00:15:08.870
+So let's go to that Fernal index.
+
+359
+00:15:08.870 --> 00:15:14.250
+Fresnel some people might say.
+
+360
+00:15:14.250 --> 00:15:15.169
+There we go.
+
+361
+00:15:15.169 --> 00:15:16.649
+Now you do have a Fresnel function.
+
+362
+00:15:16.649 --> 00:15:18.049
+We went over this in another class,
+
+363
+00:15:18.049 --> 00:15:19.929
+which it basically is a Fernal index
+
+364
+00:15:19.929 --> 00:15:24.929
+with a bit more control and stylization if you need it.
+
+365
+00:15:25.850 --> 00:15:27.850
+We just need to keep this simple one for now.
+
+366
+00:15:28.409 --> 00:15:30.009
+You're more than welcome to play with those if you want to.
+
+367
+00:15:30.009 --> 00:15:31.309
+In the end, if you plug those in
+
+368
+00:15:31.309 --> 00:15:32.450
+and adjust those accordingly,
+
+369
+00:15:32.450 --> 00:15:34.330
+it'll do the same thing that this one will do.
+
+370
+00:15:34.330 --> 00:15:36.049
+Just gives you a few more values.
+
+371
+00:15:37.070 --> 00:15:38.789
+All right, so the next one we need to do
+
+372
+00:15:38.789 --> 00:15:39.850
+is keep a finger of the S key.
+
+373
+00:15:39.850 --> 00:15:41.870
+I'm gonna create another, oops.
+
+374
+00:15:41.870 --> 00:15:45.720
+New control Z for a second.
+
+375
+00:15:45.720 --> 00:15:46.559
+There we go.
+
+376
+00:15:46.559 --> 00:15:49.659
+Keep a finger of the S key and left click.
+
+377
+00:15:49.659 --> 00:15:50.500
+There we go.
+
+378
+00:15:50.500 --> 00:15:52.580
+That's what I wanted to do.
+
+379
+00:15:52.580 --> 00:15:58.029
+I'm gonna call this one our falloff Fernal effect.
+
+380
+00:15:58.230 --> 00:16:06.309
+So falloff effect.
+
+381
+00:16:06.909 --> 00:16:08.490
+There we go, falloff Fresnel effect.
+
+382
+00:16:08.490 --> 00:16:12.210
+And we'll set that to, I think my default is four.
+
+383
+00:16:12.210 --> 00:16:13.330
+There we go.
+
+384
+00:16:13.330 --> 00:16:16.470
+And we're gonna pull that string into that Fernal index.
+
+385
+00:16:16.470 --> 00:16:17.809
+We're gonna keep a finger of the M key
+
+386
+00:16:17.809 --> 00:16:20.529
+and make a multiply, pull that up.
+
+387
+00:16:20.529 --> 00:16:22.929
+And then we're gonna grab the one that we created here
+
+388
+00:16:22.929 --> 00:16:24.809
+and pull that into the A channel
+
+389
+00:16:24.809 --> 00:16:26.049
+and grab our Fernal index
+
+390
+00:16:26.049 --> 00:16:28.639
+and pull it into the B channel here.
+
+391
+00:16:28.639 --> 00:16:31.620
+And finally, we can keep a finger of the L key
+
+392
+00:16:31.620 --> 00:16:33.659
+and do a lerp.
+
+393
+00:16:33.659 --> 00:16:38.659
+So this lerp is now gonna have the B channel populated
+
+394
+00:16:39.700 --> 00:16:41.419
+by that multiply.
+
+395
+00:16:41.419 --> 00:16:43.240
+The original opacity control
+
+396
+00:16:43.240 --> 00:16:45.639
+cause you really do wanna control that
+
+397
+00:16:45.639 --> 00:16:48.340
+directly into the A channel.
+
+398
+00:16:48.340 --> 00:16:50.220
+But we wanna bring in that Fernal index
+
+399
+00:16:50.220 --> 00:16:52.980
+and we want it to compliment our environment.
+
+400
+00:16:52.980 --> 00:16:57.179
+So I did plug in my Fernal index into the B channel.
+
+401
+00:16:57.179 --> 00:16:58.659
+You don't really have to do that.
+
+402
+00:16:58.659 --> 00:17:00.000
+And my example doesn't have it.
+
+403
+00:17:00.000 --> 00:17:02.740
+So we can actually make it so that status for that
+
+404
+00:17:02.779 --> 00:17:06.460
+is just a one if you wanted to.
+
+405
+00:17:06.460 --> 00:17:08.740
+And we can bring this right into the alpha.
+
+406
+00:17:08.740 --> 00:17:11.900
+Now you can play with these values if you want to more
+
+407
+00:17:11.900 --> 00:17:14.940
+and you can play with different types of combos.
+
+408
+00:17:14.940 --> 00:17:16.339
+If we wanted to,
+
+409
+00:17:16.339 --> 00:17:19.539
+we could actually punch in another value in here
+
+410
+00:17:19.539 --> 00:17:22.099
+that would make, unfortunately it may compete
+
+411
+00:17:22.099 --> 00:17:25.240
+with what our intentions are for opacity.
+
+412
+00:17:25.240 --> 00:17:27.980
+Or if you wanted to, you could switch these up
+
+413
+00:17:27.980 --> 00:17:31.599
+and even have different types of nodes
+
+414
+00:17:31.599 --> 00:17:33.319
+that you wanna be able to play with
+
+415
+00:17:33.319 --> 00:17:34.440
+to be able to mess with this.
+
+416
+00:17:34.440 --> 00:17:37.839
+Like you could choose a material function if you wanted to.
+
+417
+00:17:39.359 --> 00:17:41.119
+And you can even make it pretty complicated.
+
+418
+00:17:41.119 --> 00:17:43.539
+There's even like a blur material function
+
+419
+00:17:43.539 --> 00:17:44.519
+that you wanted to play with.
+
+420
+00:17:44.519 --> 00:17:46.440
+You could just be careful with that one.
+
+421
+00:17:46.440 --> 00:17:47.380
+That's kind of expensive.
+
+422
+00:17:47.380 --> 00:17:49.099
+And we went over that in other classes.
+
+423
+00:17:49.099 --> 00:17:51.900
+But this is kind of what I have generally in our scene.
+
+424
+00:17:51.900 --> 00:17:53.519
+It actually works pretty well.
+
+425
+00:17:53.519 --> 00:17:54.680
+So I'm gonna grab this lerp here
+
+426
+00:17:54.680 --> 00:17:57.750
+and bring it into my opacity.
+
+427
+00:17:57.750 --> 00:17:59.039
+Cool.
+
+428
+00:17:59.039 --> 00:18:02.000
+Now again, we can choose how strong that's going to be.
+
+429
+00:18:02.119 --> 00:18:03.960
+But right now our color's pretty raw, right?
+
+430
+00:18:03.960 --> 00:18:06.079
+We don't have much of a color value in here.
+
+431
+00:18:06.079 --> 00:18:09.640
+So let's actually make a quick color value in here.
+
+432
+00:18:09.640 --> 00:18:11.519
+So I'm gonna go ahead and we'll begin
+
+433
+00:18:11.519 --> 00:18:12.819
+to wrap this up here.
+
+434
+00:18:12.819 --> 00:18:17.190
+I'm gonna go ahead and hit my finger on the S key.
+
+435
+00:18:17.190 --> 00:18:22.960
+This is going to be our edge subsurface color.
+
+436
+00:18:26.740 --> 00:18:30.740
+And we can say this is a Fresnel color.
+
+437
+00:18:30.740 --> 00:18:36.349
+Fresnel, Fresnel, Fresnel, for now people.
+
+438
+00:18:38.480 --> 00:18:42.000
+That's the Fresno pronunciation is called Fresnel.
+
+439
+00:18:43.490 --> 00:18:46.920
+And I'm gonna go ahead and keep my finger on the three key.
+
+440
+00:18:46.920 --> 00:18:48.079
+And this is gonna be our color.
+
+441
+00:18:48.079 --> 00:18:49.640
+And we're gonna actually try to imitate
+
+442
+00:18:49.640 --> 00:18:53.289
+what we had originally.
+
+443
+00:18:53.289 --> 00:18:57.759
+And let's go ahead and make that Fresnel index.
+
+444
+00:18:57.759 --> 00:18:59.279
+Here we go.
+
+445
+00:18:59.279 --> 00:19:00.960
+This Fresnel index is going to have
+
+446
+00:19:00.960 --> 00:19:03.720
+that edge subsurface in here.
+
+447
+00:19:03.720 --> 00:19:05.240
+We can do another S key.
+
+448
+00:19:05.240 --> 00:19:08.839
+And this will be our spec reflection thickness.
+
+449
+00:19:10.509 --> 00:19:11.789
+We can call this,
+
+450
+00:19:11.789 --> 00:19:14.950
+it's really not spec reflection thickness.
+
+451
+00:19:14.950 --> 00:19:18.069
+We can call it just overall thickness if we wanted to.
+
+452
+00:19:19.750 --> 00:19:23.910
+Spec and spec,
+
+453
+00:19:23.910 --> 00:19:36.490
+we can say imitated reflection thickness.
+
+454
+00:19:37.279 --> 00:19:40.869
+That's how you can think on that one.
+
+455
+00:19:40.869 --> 00:19:41.950
+And then we can go in here
+
+456
+00:19:41.950 --> 00:19:46.950
+and set that particular one to a 0.1 I think is my original.
+
+457
+00:19:49.000 --> 00:19:49.960
+Here we go.
+
+458
+00:19:49.960 --> 00:19:52.319
+And we can punch that into that base here.
+
+459
+00:19:53.259 --> 00:19:55.339
+And I forgot the number here needs to be on.
+
+460
+00:19:55.339 --> 00:19:59.259
+So we need to fire this on for thickness for the color.
+
+461
+00:19:59.259 --> 00:20:01.619
+And then finally we can grab the M key
+
+462
+00:20:01.619 --> 00:20:05.039
+and left click and we'll multiply.
+
+463
+00:20:05.039 --> 00:20:09.119
+And we can grab this here, color into the A channel
+
+464
+00:20:09.119 --> 00:20:12.920
+and pull this Fresnel index into the B channel.
+
+465
+00:20:12.920 --> 00:20:14.559
+And then from there we can go right
+
+466
+00:20:14.559 --> 00:20:17.299
+into our subsurface color.
+
+467
+00:20:17.299 --> 00:20:18.259
+Cool.
+
+468
+00:20:18.259 --> 00:20:20.859
+So we can get some really cool stuff on this one.
+
+469
+00:20:20.859 --> 00:20:22.299
+And let's go and apply it really quickly
+
+470
+00:20:22.299 --> 00:20:23.539
+to something simple.
+
+471
+00:20:23.539 --> 00:20:25.900
+So we're gonna go and just copy this guy.
+
+472
+00:20:25.900 --> 00:20:29.980
+So I'm gonna hit my alt key and move this one over.
+
+473
+00:20:29.980 --> 00:20:32.380
+And we're gonna find, I hit apply.
+
+474
+00:20:32.380 --> 00:20:34.500
+We're gonna find our material
+
+475
+00:20:34.500 --> 00:20:37.200
+and just drag it on this sphere.
+
+476
+00:20:37.200 --> 00:20:38.119
+Ooh, cool.
+
+477
+00:20:38.119 --> 00:20:40.619
+And we're getting some really cool effects on this.
+
+478
+00:20:40.619 --> 00:20:43.000
+And if you feel free, if you want to,
+
+479
+00:20:43.000 --> 00:20:46.839
+to move the light around and change the values
+
+480
+00:20:46.839 --> 00:20:49.160
+on an object to see what you get.
+
+481
+00:20:49.160 --> 00:20:52.640
+And you can actually get some really cool stuff.
+
+482
+00:20:52.640 --> 00:20:56.819
+And if you want it anytime, you can change the colors too.
+
+483
+00:20:56.819 --> 00:20:59.240
+So our original color was like blue.
+
+484
+00:20:59.240 --> 00:21:01.880
+If you want to, we can make it like kind of a pink
+
+485
+00:21:01.880 --> 00:21:03.640
+if we wanted to.
+
+486
+00:21:03.640 --> 00:21:06.680
+And you can get a combo of a really funky type
+
+487
+00:21:06.680 --> 00:21:10.240
+of look here where you got pink and we got blue
+
+488
+00:21:10.240 --> 00:21:13.859
+and you can make it look other worldly if you need to.
+
+489
+00:21:13.859 --> 00:21:15.220
+Well, that's it with this video.
+
+490
+00:21:15.220 --> 00:21:16.900
+In the next video, we're gonna go ahead
+
+491
+00:21:16.900 --> 00:21:19.259
+and take a look at ice up close
+
+492
+00:21:19.259 --> 00:21:21.900
+and different examples that we have for complexity
+
+493
+00:21:21.900 --> 00:21:23.980
+when it comes to subsurface materials.
+
+494
+00:21:23.980 --> 00:21:24.819
+Thanks again.

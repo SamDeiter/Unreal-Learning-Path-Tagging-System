@@ -1,0 +1,249 @@
+WEBVTT
+
+1
+00:00:01.439 --> 00:00:05.679
+Hello and welcome to the final video in our series
+
+2
+00:00:05.679 --> 00:00:08.640
+and this is just finishing off exercise four.
+
+3
+00:00:09.519 --> 00:00:14.320
+For this we are going to be generating some custom points.
+
+4
+00:00:16.000 --> 00:00:20.640
+So what we've been working with up to this point is the grid setting.
+
+5
+00:00:21.199 --> 00:00:28.960
+Now the problem that this gives us is that sometimes it's going to select bad or select in
+
+6
+00:00:28.960 --> 00:00:34.719
+this corner because we have no concept of being next to a wall.
+
+7
+00:00:35.729 --> 00:00:42.210
+Now there are some things that we could do inside of the query itself.
+
+8
+00:00:43.009 --> 00:00:49.810
+However it's difficult to know the facing direction of the walls.
+
+9
+00:00:50.609 --> 00:00:58.130
+What I'm going to do in this is you can see that I have an ETQ hiding spots and this is
+
+10
+00:00:58.130 --> 00:01:04.290
+of the glass environment query generator. So if I wanted to create one of these
+
+11
+00:01:04.290 --> 00:01:14.900
+I'd come under blueprints and or we type in generator and you'd see that there is an
+
+12
+00:01:14.900 --> 00:01:21.379
+environmental query generator blueprint base. You could use this to create your own.
+
+13
+00:01:22.620 --> 00:01:25.739
+But let's have a look at the one that I've already created.
+
+14
+00:01:27.939 --> 00:01:33.299
+Now this is relatively complicated as far as it comes from the code.
+
+15
+00:01:34.000 --> 00:01:40.879
+But what's important is we are overriding the function doItemGeneration
+
+16
+00:01:41.810 --> 00:01:48.370
+and on the return node there is no output pin but it is the add generated vectors.
+
+17
+00:01:49.170 --> 00:01:53.489
+These are going to be the generated points that we want to check.
+
+18
+00:01:55.420 --> 00:02:02.459
+Now this does mean a number of things but fundamentally what it's doing is it is doing
+
+19
+00:02:02.459 --> 00:02:08.860
+a line trace in a large circle from outside of the character pointing inwards.
+
+20
+00:02:09.659 --> 00:02:16.300
+Meaning that we are going to hit any wall which is facing the character.
+
+21
+00:02:17.300 --> 00:02:21.379
+Now you can go through this if you want but it is a little bit complicated.
+
+22
+00:02:21.379 --> 00:02:27.860
+So I'm not going to go through it here. The main point is we are filtering out
+
+23
+00:02:27.860 --> 00:02:38.930
+we're finding vectors that meet our criteria. So let's save that and let's use that inside
+
+24
+00:02:38.930 --> 00:02:46.780
+of the engine. So I'm going to come back down to our find hiding spot.
+
+25
+00:02:47.900 --> 00:02:52.530
+I'm going to move our hiding spot thing to the right here and disconnect it.
+
+26
+00:02:53.250 --> 00:02:57.490
+I'm going to drag down and I'm going to select generator again.
+
+27
+00:02:58.210 --> 00:03:02.050
+But this time I'm going to use the ETQ hiding spots.
+
+28
+00:03:03.979 --> 00:03:09.020
+I hit save. We can look at this and you can see that what this is doing
+
+29
+00:03:09.740 --> 00:03:16.539
+is this is generating spots around the character on the outside of the walls.
+
+30
+00:03:18.539 --> 00:03:22.219
+So it's trying to figure out the good hiding spots that we have.
+
+31
+00:03:25.139 --> 00:03:30.740
+Now I exposed some variables and they can be used as the controls.
+
+32
+00:03:31.460 --> 00:03:38.099
+On the controls, on the elements. But I'm all right with the defaults at this point.
+
+33
+00:03:38.819 --> 00:03:44.580
+However, I do need some tests. So I'm going to drag them across.
+
+34
+00:03:45.219 --> 00:03:52.180
+I want past exists. And I'm not so worried about the context,
+
+35
+00:03:52.180 --> 00:03:57.219
+the trace on visibility because this is done in the generation of the points.
+
+36
+00:03:59.539 --> 00:04:10.060
+However, I am going to use the dot product and I am going to use the distance to crew.
+
+37
+00:04:11.650 --> 00:04:18.740
+If I say and have a look at these points, you can now see that we have filtered out
+
+38
+00:04:18.740 --> 00:04:25.120
+the points here and we have maintained the points around these sides here.
+
+39
+00:04:28.829 --> 00:04:31.230
+So you can see this is quite a good hiding spots here.
+
+40
+00:04:31.949 --> 00:04:36.430
+And those are going to be the ones that are selected because they are away from the player.
+
+41
+00:04:38.589 --> 00:04:40.990
+I'm 100% sure I like these ones on the edge.
+
+42
+00:04:41.870 --> 00:04:45.709
+Might be able to get rid of them by playing around with some of the settings.
+
+43
+00:04:46.589 --> 00:04:49.949
+So I am going to distance to check from the left to right.
+
+44
+00:04:49.949 --> 00:04:53.300
+I'm going to change that to A2. Save.
+
+45
+00:04:54.180 --> 00:04:58.259
+And see if that changes our settings a little bit.
+
+46
+00:04:58.819 --> 00:05:04.980
+It's pushing them back a little bit so that we are not having ones right at the edge.
+
+47
+00:05:06.300 --> 00:05:09.500
+I'm going to even push it out a little bit further and see how that works.
+
+48
+00:05:10.139 --> 00:05:13.920
+Let's go 200.
+
+49
+00:05:16.720 --> 00:05:18.000
+Yep, that's better.
+
+50
+00:05:18.000 --> 00:05:19.920
+That's killed the ones at the sides.
+
+51
+00:05:20.480 --> 00:05:24.480
+But it's also killed the ones up here because it's quite large.
+
+52
+00:05:24.480 --> 00:05:26.720
+But let's go with that for the top view.
+
+53
+00:05:28.720 --> 00:05:29.040
+Okay.
+
+54
+00:05:29.040 --> 00:05:37.230
+So if I press play at this point, you can see that they run off and find a hiding spot.
+
+55
+00:05:44.300 --> 00:05:49.819
+And they're only ever hiding behind something that can see it.
+
+56
+00:05:49.899 --> 00:05:54.459
+So if I run up here, you can see that they go and find the nearest
+
+57
+00:05:54.459 --> 00:05:56.060
+hiding spot just around the corner.
+
+58
+00:05:57.230 --> 00:06:00.029
+As soon as they can see me, they're running away and hiding again.
+
+59
+00:06:03.310 --> 00:06:12.860
+So this just programmatically finds spots and hides from the player.
+
+60
+00:06:14.980 --> 00:06:18.500
+And with that, it brings us to the end of this course.
+
+61
+00:06:19.220 --> 00:06:27.779
+Hopefully you found that useful and can fully utilize the Perception and EQS system.
+
+62
+00:06:27.779 --> 00:06:29.540
+Thank you very much.

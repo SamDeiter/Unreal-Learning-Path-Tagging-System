@@ -1,0 +1,449 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:06.540
+In this next section, I want to do a quick overview of the ICD-FX camera and frustrum.
+
+2
+00:00:06.540 --> 00:00:11.660
+Now, we set this up already in our end display configuration, but we need to talk a little
+
+3
+00:00:11.660 --> 00:00:17.140
+bit about the ICD-FX camera and frustrum if you're not familiar with these terms.
+
+4
+00:00:17.140 --> 00:00:20.379
+So understanding the way the inner frustrum and outer frustrum work on your end display
+
+5
+00:00:20.379 --> 00:00:23.719
+configuration is really going to be important.
+
+6
+00:00:23.719 --> 00:00:26.899
+The inner frustrum is the region of your LED wall that is actually going to show
+
+7
+00:00:26.899 --> 00:00:30.280
+up on screen and in camera.
+
+8
+00:00:30.280 --> 00:00:31.280
+That's what your camera sees.
+
+9
+00:00:31.280 --> 00:00:35.960
+It's the actual field of view, the focal length, the zoom of your real camera.
+
+10
+00:00:35.960 --> 00:00:40.439
+This is enabled by creating your ICD-FX camera, as we did before, and connecting it to the
+
+11
+00:00:40.439 --> 00:00:43.539
+live-length tracked camera, just as we did.
+
+12
+00:00:43.539 --> 00:00:46.380
+Now the outer frustrum is everything else.
+
+13
+00:00:46.380 --> 00:00:51.420
+It's used for reflections, dynamic lighting, and it remains static while your camera moves
+
+14
+00:00:51.420 --> 00:00:52.579
+around.
+
+15
+00:00:52.579 --> 00:00:58.579
+Now the engine does support multiple frustrums, but to set up your frustrum, I just want
+
+16
+00:00:58.579 --> 00:01:04.480
+to review the steps to create your ICD-FX camera and create your tracked object.
+
+17
+00:01:04.480 --> 00:01:08.680
+So we're going to start out in the engine here inside our end display configuration.
+
+18
+00:01:08.680 --> 00:01:12.319
+So first thing I'm going to do is I'm going to edit my NDC asset, and I'm going
+
+19
+00:01:12.319 --> 00:01:17.519
+to take a look here and point out that I've got my ICD-FX camera.
+
+20
+00:01:17.519 --> 00:01:20.579
+Now I want to make sure that this matches, so I'm just going to go ahead and change
+
+21
+00:01:20.579 --> 00:01:21.640
+the name here.
+
+22
+00:01:21.640 --> 00:01:25.980
+I'm going to use ICD-FX as the naming on this, and I'm going to change this to
+
+23
+00:01:25.980 --> 00:01:27.819
+match the camera we're actually using.
+
+24
+00:01:27.859 --> 00:01:33.540
+So on stage, this is my Blackmagic ZEISS camera.
+
+25
+00:01:33.540 --> 00:01:35.579
+This way, I know what I'm actually connecting to.
+
+26
+00:01:35.579 --> 00:01:39.579
+I'm going to go ahead and hit compile and save this.
+
+27
+00:01:39.579 --> 00:01:43.299
+Now if I select this, you can see I've got to send a camera actor that's in here,
+
+28
+00:01:43.299 --> 00:01:47.319
+and I've got several options that are available to me once that's ready.
+
+29
+00:01:47.319 --> 00:01:49.760
+Now I'm going to hide this and come back to that, because they're going to see
+
+30
+00:01:49.760 --> 00:01:51.920
+some changes here.
+
+31
+00:01:51.920 --> 00:01:54.159
+Now this is my ICD-FX camera.
+
+32
+00:01:54.159 --> 00:01:59.200
+With my end display configuration selected, if I select my ICD-FX camera underneath
+
+33
+00:01:59.239 --> 00:02:04.010
+my NDC asset, you can see that this is the selected camera.
+
+34
+00:02:04.010 --> 00:02:09.330
+Now I need something here to add to it, so I'm going to create some objects here.
+
+35
+00:02:09.330 --> 00:02:12.409
+I'm going to move up to my Place Actors panel, and I'm going to move into my
+
+36
+00:02:12.409 --> 00:02:15.969
+basic section, and I'm going to add in an empty actor.
+
+37
+00:02:15.969 --> 00:02:20.729
+Now this empty actor, I'm going to really quickly rename to Tracking Offset.
+
+38
+00:02:20.729 --> 00:02:25.370
+Then I'm going to move this underneath my NDC asset.
+
+39
+00:02:25.370 --> 00:02:29.330
+Now if yours doesn't connect, it's because you're not actually in your end display
+
+40
+00:02:29.370 --> 00:02:30.930
+config level.
+
+41
+00:02:30.930 --> 00:02:34.969
+Remember, we are in the NDC level, not the persistent level, in order to add in our
+
+42
+00:02:34.969 --> 00:02:39.449
+tracked offset in order to parent that underneath our NDC asset.
+
+43
+00:02:39.449 --> 00:02:44.009
+Next, let's just zero out our location and our rotation information.
+
+44
+00:02:44.009 --> 00:02:51.259
+This way, we're at our origin position that matches our offset inside motive.
+
+45
+00:02:51.259 --> 00:02:53.099
+Now, I do need a camera here.
+
+46
+00:02:53.099 --> 00:02:56.259
+That camera is going to take over for our NDC asset.
+
+47
+00:02:56.259 --> 00:03:00.219
+If I zoom in really quickly, you can see this little pop here.
+
+48
+00:03:00.219 --> 00:03:05.110
+This little pop-up where we've got some sky, that's our inner frustrum.
+
+49
+00:03:05.110 --> 00:03:10.110
+If I select my NDC asset and I select my ICVFX camera that's listed in here,
+
+50
+00:03:10.110 --> 00:03:13.909
+you can see I've got an Enable Inner Frostrum option checked on.
+
+51
+00:03:13.909 --> 00:03:18.750
+If I turn that off, turn it back on, this section pops in and out.
+
+52
+00:03:18.750 --> 00:03:22.710
+Now I'm going to zoom back out a little bit, switch over in my Place Actors
+
+53
+00:03:22.710 --> 00:03:24.770
+to the Cinematic tab.
+
+54
+00:03:24.810 --> 00:03:28.569
+I'm going to grab my Cine Camera Actor and just drag this into place,
+
+55
+00:03:28.569 --> 00:03:29.849
+so it's in the level.
+
+56
+00:03:29.849 --> 00:03:41.050
+Now, I'm going to rename this one to my NDC Blackmagic Zeiss Camera.
+
+57
+00:03:41.050 --> 00:03:44.169
+And the reason I'm going to call it that is that this is the NDC's
+
+58
+00:03:44.169 --> 00:03:46.770
+version of that camera.
+
+59
+00:03:46.770 --> 00:03:51.689
+Now, I'm going to go ahead and parent this underneath my tracking offset so
+
+60
+00:03:51.689 --> 00:03:56.830
+that this takes all that information for calibration later.
+
+61
+00:03:56.870 --> 00:03:59.210
+Now, I'm going to go ahead and zero this out.
+
+62
+00:03:59.210 --> 00:04:02.930
+And then with my tracked object in here, I need to add a component
+
+63
+00:04:02.930 --> 00:04:04.650
+to this camera.
+
+64
+00:04:04.650 --> 00:04:08.449
+That camera component that I'm going to add is with my Zeiss camera selected,
+
+65
+00:04:08.449 --> 00:04:13.680
+hit Add Component, and add another Live Link Component Controller.
+
+66
+00:04:13.680 --> 00:04:18.160
+I'm going to change the name of this one to Live Link CC, so LLCC,
+
+67
+00:04:18.160 --> 00:04:19.920
+Live Link Component Controller.
+
+68
+00:04:19.920 --> 00:04:26.379
+I'm going to call this one Blackmagic Zeiss Track.
+
+69
+00:04:26.379 --> 00:04:27.860
+It's for tracking the camera.
+
+70
+00:04:27.899 --> 00:04:29.779
+That's what we're going to use this for.
+
+71
+00:04:29.779 --> 00:04:31.500
+It's going to use my scene component.
+
+72
+00:04:31.500 --> 00:04:36.139
+I'm going to use my subject representation and choose my Blackmagic Active
+
+73
+00:04:36.139 --> 00:04:38.939
+because I'm using my active tracking object.
+
+74
+00:04:38.939 --> 00:04:40.939
+That's going to pop this into place.
+
+75
+00:04:40.939 --> 00:04:45.100
+And once this is ready to go, I can move back up to my NDC asset
+
+76
+00:04:45.100 --> 00:04:50.259
+in my Outliner, choose my ICVFX Camera, and right under here where I've got
+
+77
+00:04:50.259 --> 00:04:55.779
+my Cine Camera Actor, I can select my Blackmagic Zeiss Camera so that my
+
+78
+00:04:55.819 --> 00:05:00.939
+inner frustum is now being run through this camera and not the ICVFX Camera,
+
+79
+00:05:00.939 --> 00:05:03.370
+which you'll note disappears.
+
+80
+00:05:03.370 --> 00:05:09.350
+Now, I can also enable an inner frustum border, which if I change to 0.1,
+
+81
+00:05:09.350 --> 00:05:11.110
+you can start to see show up.
+
+82
+00:05:11.110 --> 00:05:15.029
+0.5 makes it thick enough so that it actually shows up on screen.
+
+83
+00:05:15.029 --> 00:05:17.470
+But I'm going to settle it at 0.25.
+
+84
+00:05:17.470 --> 00:05:20.819
+It's just enough to see but not enough to be in the way.
+
+85
+00:05:20.819 --> 00:05:23.300
+Now, I can also change my border color.
+
+86
+00:05:23.300 --> 00:05:26.379
+So, as I know, Sean is a little partial to green.
+
+87
+00:05:26.379 --> 00:05:29.279
+Let's go ahead and make a nice little green there.
+
+88
+00:05:29.279 --> 00:05:31.399
+And that's our outline.
+
+89
+00:05:31.399 --> 00:05:34.720
+Now, there is also some overscan options.
+
+90
+00:05:34.720 --> 00:05:38.839
+If I enable overscan for my frustum, I can also make sure that this
+
+91
+00:05:38.839 --> 00:05:40.240
+shows up on screen.
+
+92
+00:05:40.240 --> 00:05:43.720
+And if I change that to 1.2, my frustum gets bigger.
+
+93
+00:05:43.720 --> 00:05:47.319
+This way, if my subject is in front of my camera, I can make sure that my
+
+94
+00:05:47.319 --> 00:05:52.870
+frustum aligns to outside of my camera's view and there is no tearing.
+
+95
+00:05:52.910 --> 00:05:55.430
+That way, if I have any kind of move or anything like that,
+
+96
+00:05:55.430 --> 00:05:59.189
+this will actually give me a bit of a buffer so that as my camera moves,
+
+97
+00:05:59.189 --> 00:06:02.470
+it kind of goes through and follows along.
+
+98
+00:06:02.470 --> 00:06:07.949
+Now, let's jump back to our slides and let's talk about your ICD-FX camera
+
+99
+00:06:07.949 --> 00:06:10.100
+and inner frustums.
+
+100
+00:06:10.100 --> 00:06:14.220
+Now, the ICD-FX camera does support multiple frustums.
+
+101
+00:06:14.220 --> 00:06:17.779
+You just add in, the same as we did before, another camera,
+
+102
+00:06:17.779 --> 00:06:21.660
+you iterate that or give it the same name of a new camera that you're using,
+
+103
+00:06:21.660 --> 00:06:24.860
+and then track that camera in there as well.
+
+104
+00:06:24.860 --> 00:06:30.779
+You can also use the Live Link V-Cam with a Pixel streaming server to
+
+105
+00:06:30.779 --> 00:06:35.980
+generate a second camera and use that as well for more virtual camera work.
+
+106
+00:06:35.980 --> 00:06:40.860
+Note, as you move through your NDC camera with the two inner frustums,
+
+107
+00:06:40.860 --> 00:06:45.779
+it is recommended that you limit yourself to just two frustums.
+
+108
+00:06:45.779 --> 00:06:49.899
+You can also set the priority of your frustum so that the main frustum for
+
+109
+00:06:49.939 --> 00:06:52.779
+your camera is the one that overlaps.
+
+110
+00:06:52.779 --> 00:06:57.949
+That way, your secondary camera doesn't necessarily override that as well.
+
+111
+00:06:57.949 --> 00:07:01.149
+So that finishes up our discussion on cameras,
+
+112
+00:07:01.149 --> 00:07:03.470
+and we are ready to move on to our next section.

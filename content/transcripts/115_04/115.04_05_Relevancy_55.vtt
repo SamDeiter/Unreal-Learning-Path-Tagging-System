@@ -1,0 +1,365 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:04.370
+We've mentioned a little bit about relevancy already.
+
+2
+00:00:04.370 --> 00:00:08.669
+I think you've seen some cursor terms coming up a couple of times.
+
+3
+00:00:08.669 --> 00:00:14.169
+Again, this might be a term or something like this term might exist in other engines,
+
+4
+00:00:14.169 --> 00:00:20.170
+but I believe we're getting more into the domain now of terminology that might be unique to Unreal.
+
+5
+00:00:20.170 --> 00:00:24.170
+So you might not be familiar with this exact term, but you probably tackled something like it.
+
+6
+00:00:24.170 --> 00:00:31.030
+Relevancy is essentially the umbrella term used to describe how
+
+7
+00:00:31.030 --> 00:00:33.030
+and when data is sent to clients.
+
+8
+00:00:33.030 --> 00:00:40.030
+There are essentially rules that we can define whether or not certain data even should make its way to a particular client.
+
+9
+00:00:40.030 --> 00:00:46.030
+For example, if we're in a game like Player Unknown Battlegrounds or any of these kind of large,
+
+10
+00:00:46.030 --> 00:00:50.030
+I suppose to be kind of more on brand, I should be saying Fortnite.
+
+11
+00:00:50.030 --> 00:00:59.030
+If we're in a huge world and one client fires a bullet on my 5k by 5k island,
+
+12
+00:00:59.030 --> 00:01:08.030
+if they're on two opposite sides of the island, does client A need to know about client B's bullet being fired?
+
+13
+00:01:08.030 --> 00:01:14.030
+If they're too far away for the sound ever to make their way to that client,
+
+14
+00:01:14.030 --> 00:01:17.030
+if they're too far away for that bullet ever to possibly hit them,
+
+15
+00:01:17.030 --> 00:01:21.030
+then it's a fair assumption that it would be irrelevant.
+
+16
+00:01:21.030 --> 00:01:26.060
+And therefore, that's where we can take relevancy into account.
+
+17
+00:01:26.060 --> 00:01:33.060
+And by doing that, by not having to ever replicate any information about that bullet from client B to client A,
+
+18
+00:01:33.060 --> 00:01:36.060
+then we can obviously reduce our kind of bandwidth consumption.
+
+19
+00:01:36.060 --> 00:01:39.159
+That's a big win.
+
+20
+00:01:39.159 --> 00:01:43.159
+And also, not just about bandwidth, but it's also about our CPU, right?
+
+21
+00:01:43.159 --> 00:01:47.159
+Our server then doesn't have to perform certain calculations.
+
+22
+00:01:47.159 --> 00:01:52.120
+It's not having to maintain that object on the other client.
+
+23
+00:01:52.120 --> 00:01:58.120
+If an object is relevant, but then spends a long time out of relevancy, it will be destroyed.
+
+24
+00:01:58.120 --> 00:02:02.120
+And that's following the same destruction logic that we saw in our second session
+
+25
+00:02:02.120 --> 00:02:04.120
+when we talked about actors getting destroyed.
+
+26
+00:02:04.120 --> 00:02:12.120
+So that means that when it enters relevancy or re-enters relevancy, it will have its begin play called.
+
+27
+00:02:12.120 --> 00:02:16.120
+And when it leaves relevancy, it will have its destroy called.
+
+28
+00:02:16.120 --> 00:02:19.120
+And therefore, in the context of a multiplayer game,
+
+29
+00:02:19.120 --> 00:02:27.120
+actors can have their technically the same conceptual actor could have its begin play and destroy
+
+30
+00:02:27.120 --> 00:02:31.120
+called multiple times due to entering and leaving relevancy.
+
+31
+00:02:31.120 --> 00:02:37.819
+As I said kind of before, a lot of these concepts are stitched in the actor.
+
+32
+00:02:37.819 --> 00:02:43.819
+Actor is our kind of primary in point for a lot of the way that we replicate information over the server.
+
+33
+00:02:43.819 --> 00:02:46.819
+So relevancy is primarily an actor level thing.
+
+34
+00:02:46.819 --> 00:02:53.819
+If we have components on an actor, they don't really have a concept of relevancy.
+
+35
+00:02:53.819 --> 00:02:57.819
+Those components are automatically relevant if the actor that they are attached to is relevant.
+
+36
+00:02:57.819 --> 00:03:00.819
+And the same thing is going to be true for a lot of this functionality.
+
+37
+00:03:00.819 --> 00:03:06.590
+So when we talk about managing relevancy and how we actually do that,
+
+38
+00:03:06.590 --> 00:03:13.590
+the default implementation, so the primary way that Unreal assumes you would do relevancy is going to be distance.
+
+39
+00:03:13.590 --> 00:03:17.590
+Simply put, if something is too far away, do we care about it?
+
+40
+00:03:17.590 --> 00:03:21.590
+So with the example we gave as a bullet being fired, right, that's a kind of easy example.
+
+41
+00:03:21.590 --> 00:03:26.590
+If you're too far away to ever hear this, see it or get hit by it, then we can assume it's too far.
+
+42
+00:03:26.590 --> 00:03:33.590
+So by default, Unreal would consider one and a half kilometers to be too far away to be relevant.
+
+43
+00:03:33.590 --> 00:03:41.590
+But that is configurable on a, that particular distance functionality is configurable by a value.
+
+44
+00:03:41.590 --> 00:03:44.590
+It's called net cull distance squared.
+
+45
+00:03:44.590 --> 00:03:46.590
+So we can actually just quickly go and see that.
+
+46
+00:03:46.590 --> 00:03:48.590
+As we said, most of this stuff is done on actor.
+
+47
+00:03:48.590 --> 00:03:52.590
+If I go to net cull, you can see this is the value.
+
+48
+00:03:52.590 --> 00:03:56.590
+This is a squared distance, obviously for mathematical optimization sake.
+
+49
+00:03:56.590 --> 00:04:04.590
+So obviously this doesn't look anything like 1.5K, but if you take 1,500 centimeters and times it by 1,500 centimeters,
+
+50
+00:04:04.590 --> 00:04:06.590
+you would arrive at this value.
+
+51
+00:04:06.590 --> 00:04:13.590
+So just be aware that this is a squared value and therefore square root your value to get in centimeters,
+
+52
+00:04:13.590 --> 00:04:19.589
+how many, or unreal units, which essentially match the map to centimeters, how many units this is going to be.
+
+53
+00:04:19.589 --> 00:04:30.230
+And yeah, there's a couple of instances where we would actually want to entirely forgo this check.
+
+54
+00:04:30.230 --> 00:04:35.230
+And that's going to be very global actors that might be kind of game systems.
+
+55
+00:04:35.230 --> 00:04:41.230
+There's certain actors that would typically want to do this on things like the game state would be obvious examples where it's like,
+
+56
+00:04:41.230 --> 00:04:44.230
+at what point would the game state not always be relevant to you?
+
+57
+00:04:44.230 --> 00:04:48.230
+Like everyone should need to know the kind of global information about the game, right?
+
+58
+00:04:48.230 --> 00:04:52.230
+So the game state is going to be a typical example of something that is going to be always relevant.
+
+59
+00:04:52.230 --> 00:04:58.230
+And that means that we're not going to do any of these distance based relevancy checks or any kind of overrides that we can do.
+
+60
+00:04:58.230 --> 00:05:01.230
+It's just we're just going to say, oh, rather than doing relevancy checks,
+
+61
+00:05:01.230 --> 00:05:06.000
+this thing is always relevant and therefore not even going to check that.
+
+62
+00:05:06.000 --> 00:05:10.000
+Similarly, we can also, there's kind of additional filtering we can do.
+
+63
+00:05:10.000 --> 00:05:15.000
+We can say that this thing is always relevant to the person who owns it.
+
+64
+00:05:15.000 --> 00:05:21.000
+So that may, you know, it's regardless of how far away from it, it's a little bit like always relevant,
+
+65
+00:05:21.000 --> 00:05:24.000
+but it's only relevant to a particular client connection.
+
+66
+00:05:24.000 --> 00:05:28.000
+So this is only going to be relevant to a particular player controller or whatever.
+
+67
+00:05:28.000 --> 00:05:32.000
+And then in some circumstances, you know, maybe distance isn't what we need.
+
+68
+00:05:32.000 --> 00:05:36.000
+Maybe we've broken our game up into some kind of like partitioning logic.
+
+69
+00:05:36.000 --> 00:05:40.000
+Maybe we have, based off some kind of clever game logic,
+
+70
+00:05:40.000 --> 00:05:43.000
+we know that this thing is only going to be relevant when we're looking at it.
+
+71
+00:05:43.000 --> 00:05:47.000
+So, you know, distance is not going to be the metric that we want to use.
+
+72
+00:05:47.000 --> 00:05:54.000
+If we want to utilize that, we can actually override this distance based functionality with a function called isNetRelevantFor.
+
+73
+00:05:55.000 --> 00:06:00.000
+And what that essentially says is we kind of establish a relationship between actor A and actor B.
+
+74
+00:06:00.000 --> 00:06:04.000
+We say, is this actor A relevant for actor B?
+
+75
+00:06:04.000 --> 00:06:08.000
+And then we can do whatever functionality we kind of need to do there.
+
+76
+00:06:11.220 --> 00:06:16.220
+Yeah, for example, maybe an actor is only relevant to actors of the same team.
+
+77
+00:06:16.220 --> 00:06:23.220
+If we're on a red versus blue and we've got an actor that is, I don't know, our teams,
+
+78
+00:06:23.220 --> 00:06:28.220
+something that manages UI for notifying our teammates when our flag has been captured
+
+79
+00:06:28.220 --> 00:06:31.220
+or a flag has been picked up by an enemy team member.
+
+80
+00:06:31.220 --> 00:06:35.220
+Obviously, the enemy team doesn't actually need to know about that actor.
+
+81
+00:06:35.220 --> 00:06:39.220
+That might be a case that you want to override isNetRelevantFor,
+
+82
+00:06:39.220 --> 00:06:42.220
+and therefore it's not owned by a single one of those connections.
+
+83
+00:06:42.220 --> 00:06:46.220
+So we can't rely on only relevant to owner, but we can say,
+
+84
+00:06:46.220 --> 00:06:53.220
+oh, this team manager actor is always relevant for anyone who's on the same team.
+
+85
+00:06:55.949 --> 00:07:03.949
+And also whilst that's the primary example of when we would be relevant or irrelevant is based off distance,
+
+86
+00:07:03.949 --> 00:07:07.949
+there is also a kind of shortcut that Unreal would make that it's worth bearing in mind
+
+87
+00:07:07.949 --> 00:07:13.949
+that if an actor is hidden, which is an Unreal concept of being hidden,
+
+88
+00:07:13.949 --> 00:07:16.949
+and if an actor is hidden and has its collision turned off,
+
+89
+00:07:16.949 --> 00:07:20.949
+then it will also be kind of perceived as standard as irrelevant.
+
+90
+00:07:20.949 --> 00:07:24.949
+So just worth bearing that in mind if you're hiding your actors and turning their collision off
+
+91
+00:07:24.949 --> 00:07:28.949
+that your network will by default perceive that as irrelevant.

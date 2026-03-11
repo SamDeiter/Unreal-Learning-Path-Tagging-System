@@ -1,0 +1,357 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:03.189
+So far, the UI that we've looked at
+
+2
+00:00:03.189 --> 00:00:06.030
+has been pretty boring and also pretty static.
+
+3
+00:00:06.030 --> 00:00:08.349
+We can introduce a lot of dynamism to our UI
+
+4
+00:00:08.349 --> 00:00:10.070
+extremely easily by taking advantage
+
+5
+00:00:10.070 --> 00:00:14.380
+of UMG's inbuilt animation authoring tools.
+
+6
+00:00:14.380 --> 00:00:15.980
+A widget animation is essentially
+
+7
+00:00:15.980 --> 00:00:18.480
+a named property of a user widget.
+
+8
+00:00:18.480 --> 00:00:21.539
+Unlike skeletal animations, which are a separate asset,
+
+9
+00:00:21.539 --> 00:00:23.500
+a widget's animations are baked directly
+
+10
+00:00:23.500 --> 00:00:27.059
+into the user widget and can be accessed as a property.
+
+11
+00:00:27.059 --> 00:00:30.879
+As such, they're given unique names upon creation.
+
+12
+00:00:30.879 --> 00:00:33.539
+Each animation is composed of several tracks
+
+13
+00:00:33.539 --> 00:00:37.380
+mirroring the pipeline used in Sequencer or Matinee.
+
+14
+00:00:37.380 --> 00:00:39.579
+Each track is typically linked to a widget,
+
+15
+00:00:39.579 --> 00:00:41.539
+and from there we can add additional subtracks
+
+16
+00:00:41.539 --> 00:00:44.250
+under that first widget-based track.
+
+17
+00:00:44.250 --> 00:00:46.229
+These subtracks are responsible for manipulating
+
+18
+00:00:46.229 --> 00:00:49.829
+some property of its associated widget.
+
+19
+00:00:49.829 --> 00:00:51.350
+So in this exact instance,
+
+20
+00:00:51.350 --> 00:00:53.750
+we have an animation called move.
+
+21
+00:00:53.750 --> 00:00:55.750
+Inside the move animation, we have tracks
+
+22
+00:00:55.750 --> 00:00:59.509
+all linked to an image, a border, and a spacer.
+
+23
+00:00:59.509 --> 00:01:01.509
+Each of these subtracks have got their properties
+
+24
+00:01:01.549 --> 00:01:03.549
+keyframed independently of each other,
+
+25
+00:01:03.549 --> 00:01:05.590
+making quite complex animations possible
+
+26
+00:01:05.590 --> 00:01:07.969
+with very simple modifications.
+
+27
+00:01:07.969 --> 00:01:10.750
+Here, we're manipulating the transform, pivots,
+
+28
+00:01:10.750 --> 00:01:13.129
+and opacities, but any value that we can change
+
+29
+00:01:13.129 --> 00:01:14.810
+over time from a gameplay point of view
+
+30
+00:01:14.810 --> 00:01:18.439
+can realistically be manipulated through a keyframe track.
+
+31
+00:01:18.439 --> 00:01:21.159
+It's worth noting that the values of particular keyframes
+
+32
+00:01:21.159 --> 00:01:23.040
+can't be changed at runtime.
+
+33
+00:01:23.040 --> 00:01:24.120
+We'll see this more in depth
+
+34
+00:01:24.120 --> 00:01:25.680
+with the live example at the end of the talk,
+
+35
+00:01:25.680 --> 00:01:27.400
+but the long and short of it is
+
+36
+00:01:27.400 --> 00:01:30.239
+widget animations are for static changes.
+
+37
+00:01:30.239 --> 00:01:32.000
+For example, we can't have an animation blend
+
+38
+00:01:32.000 --> 00:01:33.640
+from one color to another
+
+39
+00:01:33.640 --> 00:01:35.760
+where that color is chosen at runtime.
+
+40
+00:01:35.760 --> 00:01:38.480
+We'll need to bake this animation into the widget
+
+41
+00:01:38.480 --> 00:01:40.750
+during the authoring phase.
+
+42
+00:01:40.750 --> 00:01:42.810
+So let's talk through creating a very simple animation
+
+43
+00:01:42.810 --> 00:01:45.329
+using the star image from the previous slide.
+
+44
+00:01:45.329 --> 00:01:46.689
+As you can see, it's nothing fancy.
+
+45
+00:01:46.689 --> 00:01:47.810
+We're just going to be
+
+46
+00:01:47.810 --> 00:01:49.930
+manipulating its transform property.
+
+47
+00:01:49.930 --> 00:01:52.349
+However, the principles here can apply more universally
+
+48
+00:01:52.349 --> 00:01:56.310
+to create a much more complex animation down the line.
+
+49
+00:01:56.310 --> 00:01:57.310
+First things first,
+
+50
+00:01:57.310 --> 00:01:59.049
+we need to come down to the animation section
+
+51
+00:01:59.049 --> 00:02:00.670
+at the bottom of the UMG editor
+
+52
+00:02:00.670 --> 00:02:02.549
+and hit the green animation button.
+
+53
+00:02:02.549 --> 00:02:04.469
+This will create a new widget animation
+
+54
+00:02:04.469 --> 00:02:06.430
+embedding it in this user widget.
+
+55
+00:02:06.430 --> 00:02:09.719
+We'll name it move as an example.
+
+56
+00:02:09.719 --> 00:02:11.639
+Next, with the animation that we want to work with
+
+57
+00:02:11.639 --> 00:02:13.319
+selected, we'll select the widget
+
+58
+00:02:13.319 --> 00:02:15.039
+we want to add a track for.
+
+59
+00:02:15.039 --> 00:02:17.780
+In this case, we want to animate our star image.
+
+60
+00:02:17.780 --> 00:02:19.680
+Once that's selected, we can hit the track button
+
+61
+00:02:19.680 --> 00:02:21.439
+and select a track that handles the property
+
+62
+00:02:21.439 --> 00:02:22.759
+we want to animate.
+
+63
+00:02:22.759 --> 00:02:25.199
+In this instance, we'll just hit the transform button.
+
+64
+00:02:25.199 --> 00:02:26.900
+From here, we can keyframe any properties
+
+65
+00:02:26.900 --> 00:02:29.240
+within the transform that we might want to manipulate.
+
+66
+00:02:29.240 --> 00:02:31.080
+For this example, we're adding a keyframe
+
+67
+00:02:31.240 --> 00:02:32.860
+to its translation at zero,
+
+68
+00:02:32.860 --> 00:02:35.560
+moving its X value by just over a thousand pixels
+
+69
+00:02:35.560 --> 00:02:37.000
+at the one second mark,
+
+70
+00:02:37.000 --> 00:02:39.000
+and then moving it back to zero a second later,
+
+71
+00:02:39.000 --> 00:02:41.500
+creating the example on the opening slide.
+
+72
+00:02:41.500 --> 00:02:42.340
+And that's it.
+
+73
+00:02:42.340 --> 00:02:43.620
+We can now bind this animation
+
+74
+00:02:43.620 --> 00:02:45.979
+using the bind widget anim U property specifier
+
+75
+00:02:45.979 --> 00:02:47.780
+that we'll be touching on in just a second.
+
+76
+00:02:47.780 --> 00:02:50.000
+We'll play it outright in the blueprint graph.
+
+77
+00:02:50.000 --> 00:02:51.139
+This animation is now a member
+
+78
+00:02:51.139 --> 00:02:52.300
+of the user widget after all,
+
+79
+00:02:52.300 --> 00:02:53.620
+so there's nothing stopping us
+
+80
+00:02:53.620 --> 00:02:55.060
+from grabbing it in the blueprint backend
+
+81
+00:02:55.060 --> 00:02:56.939
+and simply calling play.
+
+82
+00:02:56.939 --> 00:02:58.099
+Now all the visual stuff's out of the way,
+
+83
+00:02:58.099 --> 00:03:00.800
+let's take a look at some of the code that drives it.
+
+84
+00:03:01.319 --> 00:03:03.719
+We won't be covering the under the hood slate magic.
+
+85
+00:03:03.719 --> 00:03:05.159
+We'll be touching on how we can leverage
+
+86
+00:03:05.159 --> 00:03:06.719
+the existing tool set Unreal offers
+
+87
+00:03:06.719 --> 00:03:08.560
+to author smart UI elements,
+
+88
+00:03:08.560 --> 00:03:09.580
+and how we could integrate them
+
+89
+00:03:09.580 --> 00:03:11.719
+with our gameplay systems on a code level.

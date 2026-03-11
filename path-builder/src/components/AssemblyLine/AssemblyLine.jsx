@@ -94,7 +94,7 @@ function TagLegend() {
 }
 
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats, learningIntent } =
+  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats, learningIntent, workflowStage } =
     usePath();
 
   // Dynamic title: use the learning intent query, fallback to generic
@@ -346,12 +346,12 @@ function AssemblyLine() {
                           {/* Course Node */}
                           <div
                             className={getNodeClasses(course)}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, globalIndex)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, globalIndex)}
+                            draggable={workflowStage === "arrange"}
+                            onDragStart={workflowStage === "arrange" ? (e) => handleDragStart(e, globalIndex) : undefined}
+                            onDragEnd={workflowStage === "arrange" ? handleDragEnd : undefined}
+                            onDragOver={workflowStage === "arrange" ? handleDragOver : undefined}
+                            onDragLeave={workflowStage === "arrange" ? handleDragLeave : undefined}
+                            onDrop={workflowStage === "arrange" ? (e) => handleDrop(e, globalIndex) : undefined}
                           >
                             <div className="node-header">
                               <div className="node-number">{globalIndex + 1}</div>
@@ -363,15 +363,17 @@ function AssemblyLine() {
                                   </span>
                                 );
                               })()}
-                              <button
-                                className="node-remove-mini"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeCourse(course.code);
-                                }}
-                              >
-                                ×
-                              </button>
+                              {(workflowStage === "curate" || workflowStage === "arrange") && (
+                                <button
+                                  className="node-remove-mini"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeCourse(course.code);
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              )}
                             </div>
 
                             {/* Node Content */}
@@ -386,47 +388,57 @@ function AssemblyLine() {
                               {renderAugBadge(course)}
                             </div>
 
-                            {/* Node Controls — hover-reveal */}
-                            <div
-                              className="node-controls"
-                              onClick={(e) => e.stopPropagation()}
-                              onMouseDown={(e) => e.stopPropagation()}
-                            >
-                              <select
-                                className="node-select role"
-                                value={course.role || "Core"}
-                                onChange={(e) => {
-                                  const newRole = e.target.value;
-                                  let newWeight = "Medium";
-                                  if (newRole === "Prerequisite") newWeight = "High";
-                                  if (newRole === "Supplemental") newWeight = "Low";
-                                  if (newRole === "Next Step") newWeight = "Low";
+                            {/* Node Controls — hover-reveal, arrange stage only */}
+                            {workflowStage === "arrange" && (
+                              <div
+                                className="node-controls"
+                                onClick={(e) => e.stopPropagation()}
+                                onMouseDown={(e) => e.stopPropagation()}
+                              >
+                                <select
+                                  className="node-select role"
+                                  value={course.role || "Core"}
+                                  onChange={(e) => {
+                                    const newRole = e.target.value;
+                                    let newWeight = "Medium";
+                                    if (newRole === "Prerequisite") newWeight = "High";
+                                    if (newRole === "Supplemental") newWeight = "Low";
+                                    if (newRole === "Next Step") newWeight = "Low";
 
-                                  updateCourseMeta(course.code, {
-                                    role: newRole,
-                                    weight: newWeight,
-                                  });
-                                }}
-                                title="Role"
-                              >
-                                <option value="Core">Core</option>
-                                <option value="Prerequisite">Pre-req</option>
-                                <option value="Supplemental">Supp</option>
-                                <option value="Next Step">Next Step</option>
-                              </select>
-                              <select
-                                className="node-select weight"
-                                value={course.weight || "Medium"}
-                                onChange={(e) =>
-                                  updateCourseMeta(course.code, { weight: e.target.value })
-                                }
-                                title="Priority/Importance"
-                              >
-                                <option value="Low">Low</option>
-                                <option value="Medium">Med</option>
-                                <option value="High">High</option>
-                              </select>
-                            </div>
+                                    updateCourseMeta(course.code, {
+                                      role: newRole,
+                                      weight: newWeight,
+                                    });
+                                  }}
+                                  title="Role"
+                                >
+                                  <option value="Core">Core</option>
+                                  <option value="Prerequisite">Pre-req</option>
+                                  <option value="Supplemental">Supp</option>
+                                  <option value="Next Step">Next Step</option>
+                                </select>
+                                <select
+                                  className="node-select weight"
+                                  value={course.weight || "Medium"}
+                                  onChange={(e) =>
+                                    updateCourseMeta(course.code, { weight: e.target.value })
+                                  }
+                                  title="Priority/Importance"
+                                >
+                                  <option value="Low">Low</option>
+                                  <option value="Medium">Med</option>
+                                  <option value="High">High</option>
+                                </select>
+                              </div>
+                            )}
+
+                            {/* Bloom badge — review & export stages */}
+                            {(workflowStage === "review" || workflowStage === "export") && (
+                              <div className="node-review-badges">
+                                {renderBloomBadge(course)}
+                                {renderLoadDot(course)}
+                              </div>
+                            )}
                           </div>
                         </div>
                       );

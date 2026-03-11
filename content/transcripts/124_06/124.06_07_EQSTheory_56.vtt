@@ -1,0 +1,257 @@
+WEBVTT
+
+1
+00:00:01.389 --> 00:00:07.389
+Hello and welcome to this video on the Environmental Query System.
+
+2
+00:00:08.740 --> 00:00:14.740
+In this we're going to be doing a little bit of theory about the system and then we are going to
+
+3
+00:00:14.740 --> 00:00:22.690
+be jumping in and building one inside the project. So to start off with, what is the
+
+4
+00:00:22.690 --> 00:00:31.649
+Environmental Query System? Well, this is a system much like the Perception System, but
+
+5
+00:00:31.730 --> 00:00:38.049
+where the Perception System is reactive to what is going on around it in the world,
+
+6
+00:00:38.609 --> 00:00:46.130
+the Environmental Query System is proactive and it allows us to make more complicated
+
+7
+00:00:46.130 --> 00:00:57.299
+assessments of the environment. For example, if you wanted to find a hiding spot or maybe a spot
+
+8
+00:00:57.299 --> 00:01:03.780
+where you had a sniper or something that wanted a bit of cover so that it could have a good view
+
+9
+00:01:03.780 --> 00:01:09.620
+of shooting of things, then the Environmental Query System is what you would use. You would go
+
+10
+00:01:09.620 --> 00:01:18.420
+away and analyze the environment and then score it and filter them based on your tests and return
+
+11
+00:01:18.420 --> 00:01:29.420
+you some places which are of use to you. Now each Environmental Query goes through four stages.
+
+12
+00:01:29.420 --> 00:01:35.099
+So the first stage it goes through is it generates. Now you start off by generating a
+
+13
+00:01:35.099 --> 00:01:40.459
+number of points that you want to check out. There's a number of different ways to generate
+
+14
+00:01:40.459 --> 00:01:46.219
+these starting points. Do them in a grid, a circle, you can just grab specific actors.
+
+15
+00:01:46.859 --> 00:01:52.939
+So there's a ton of different ways to generate these points. And then after that, what we do is
+
+16
+00:01:52.939 --> 00:01:58.109
+we have a number of different tests that you can set up. And you can set up a whole load of
+
+17
+00:01:58.109 --> 00:02:04.829
+tests and the tests will be automatically in the back end of the system. They'll be
+
+18
+00:02:04.829 --> 00:02:12.509
+arranged into a sensible order. First of all, it will do any filtering that is required.
+
+19
+00:02:13.069 --> 00:02:21.310
+So this is where once we've generated the points, we can eliminate points entirely based on what you
+
+20
+00:02:21.310 --> 00:02:28.349
+want for your test. So for example, you could eliminate any points that were too far away or
+
+21
+00:02:28.349 --> 00:02:35.789
+that had line of sight from a specific area. And after you've filtered out all of those spots,
+
+22
+00:02:35.789 --> 00:02:41.629
+it will then go on to scoring the different spots. And this is where based on your tests,
+
+23
+00:02:42.110 --> 00:02:51.919
+you assign a value to each spot. Now be positive or negative. But once you've done that,
+
+24
+00:02:51.919 --> 00:02:59.460
+you're then going to go away and select either one spot or multiple spots. Usually,
+
+25
+00:02:59.460 --> 00:03:04.639
+and in our test, we're just going to be returning one spot. So for example,
+
+26
+00:03:04.639 --> 00:03:10.849
+you might be returning the best hiding spot under your restrictions. And then you can either
+
+27
+00:03:10.849 --> 00:03:20.400
+move to it or you can do some action based off of that. There are two core classes,
+
+28
+00:03:21.120 --> 00:03:27.280
+which I would like to cover. Now we have the Environmental Query itself.
+
+29
+00:03:28.319 --> 00:03:35.680
+This is the group of tests that we're looking at doing. So the generation of points and the
+
+30
+00:03:35.680 --> 00:03:41.199
+group of tests. In our case, we're going to be finding good hiding spots, but it could be
+
+31
+00:03:41.199 --> 00:03:48.689
+anything where you want to query the environment. The next one is the Environment Query Context.
+
+32
+00:03:50.560 --> 00:03:57.919
+Now, in order for us to do tests, we need to provide them with context for what the
+
+33
+00:03:57.919 --> 00:04:04.340
+test will be around. And there are a couple of pre-made contexts which are in the system.
+
+34
+00:04:04.900 --> 00:04:12.099
+For example, the AI itself can be a context, the point itself. So if you want to test if you
+
+35
+00:04:12.099 --> 00:04:18.100
+can see the point from the AI, those are the main two which are built into the system.
+
+36
+00:04:18.100 --> 00:04:23.139
+If you want different contexts from this, you're going to need to write a small bit of code to
+
+37
+00:04:23.139 --> 00:04:32.019
+create those contexts. Another class that we haven't touched on, and this isn't actually used
+
+38
+00:04:32.019 --> 00:04:37.220
+in the game, but it's fantastic for setting up your tests and checking that they're working
+
+39
+00:04:37.220 --> 00:04:45.339
+correctly, is the EQS testing war. Now this is a class that you can place into the level
+
+40
+00:04:45.980 --> 00:04:54.860
+and this will, while it is selected, it will visualize all of the points that we have created
+
+41
+00:04:55.579 --> 00:05:03.040
+and the results of their tests. You'll see here that they have different colours and they have
+
+42
+00:05:03.040 --> 00:05:09.680
+different numbers attached to them. So first we'll talk about the blue points. Now the blue
+
+43
+00:05:09.680 --> 00:05:17.199
+points are eliminated. So these are ones that are filtered out so that no tests are continually
+
+44
+00:05:17.199 --> 00:05:27.540
+done on. Now you'll notice that next to each of them they have the name and a happy number.
+
+45
+00:05:27.540 --> 00:05:36.980
+So you can see at this point we have distance and it's zero. So this means that these have been
+
+46
+00:05:36.980 --> 00:05:46.990
+eliminated by a distance test and it was zero in the execution channel. Execution chain order
+
+47
+00:05:47.709 --> 00:05:54.110
+isn't going to be the same as the order that you place the tests in because the system under
+
+48
+00:05:54.110 --> 00:06:01.629
+the hood will start off with the cheaper tests. For example you could eliminate using a trace
+
+49
+00:06:01.629 --> 00:06:12.110
+or a distance. However distance is considerably cheaper than trace. Therefore we will first
+
+50
+00:06:12.110 --> 00:06:19.310
+run the distance check even if it is the last in the order and we will filter out those
+
+51
+00:06:19.310 --> 00:06:26.529
+so we don't need to do the expensive trace test. You can cycle through this. You can change
+
+52
+00:06:26.529 --> 00:06:34.769
+the number on the EQS horn so that you can see just tests one through to whatever number it is.
+
+53
+00:06:35.329 --> 00:06:41.410
+I think we'll demonstrate that in the engine. However we can also see that there are a number
+
+54
+00:06:41.410 --> 00:06:51.170
+of points that just have a value. Now the value will be some value it's usually between zero and
+
+55
+00:06:51.170 --> 00:06:56.560
+one but it can go higher and lower depending on how you set them up. But what these are going to
+
+56
+00:06:56.560 --> 00:07:04.879
+be doing is they are a scoring value. So the results of the test they will get a value from
+
+57
+00:07:04.879 --> 00:07:12.000
+them. Red will indicate that you are at the low end of the gradient of the score.
+
+58
+00:07:12.720 --> 00:07:21.199
+Green will be at the higher end of the score. So in this case again this is looking at distance
+
+59
+00:07:21.199 --> 00:07:30.399
+so the spots that are closer to the EQS testing horn will be in green and the ones that are
+
+60
+00:07:30.399 --> 00:07:37.600
+further away will be red. And this is useful because when we ask for it to select us a point
+
+61
+00:07:37.600 --> 00:07:43.759
+we'll either select the best point so that has the highest value or in the top five percent
+
+62
+00:07:43.759 --> 00:07:50.829
+if we want to add the level of randomness to it. So those are how these points are displayed.
+
+63
+00:07:51.470 --> 00:07:58.529
+The values are the total value of the entire test. Now that brings us to the end of the
+
+64
+00:07:58.529 --> 00:08:06.079
+theory for EQS. After this we will be setting one up in the project in Maxercise.

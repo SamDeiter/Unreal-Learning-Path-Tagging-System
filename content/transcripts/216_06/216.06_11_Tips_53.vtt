@@ -1,0 +1,305 @@
+WEBVTT
+
+1
+00:00:01.100 --> 00:00:05.540
+This last section will wrap up the Source Control and Collaboration course with a few
+
+2
+00:00:05.540 --> 00:00:10.419
+more final recommendations, providing some tips and resources for you to use as you
+
+3
+00:00:10.419 --> 00:00:14.189
+work in your collaborative production pipeline.
+
+4
+00:00:14.189 --> 00:00:16.230
+Starting out, a big one.
+
+5
+00:00:16.230 --> 00:00:21.010
+Changing file folder names, or as we like to call it, breaking Perforce.
+
+6
+00:00:21.010 --> 00:00:26.829
+When working with Unreal Engine and Perforce, absolutely avoid renaming whenever possible.
+
+7
+00:00:26.829 --> 00:00:31.829
+Raining can cause duplication of folders or synchronization disconnect with your data.
+
+8
+00:00:31.829 --> 00:00:36.750
+Similar issues may arise if you disconnect from version control, rename, and then try
+
+9
+00:00:36.750 --> 00:00:39.189
+reconnecting your files to Perforce.
+
+10
+00:00:39.189 --> 00:00:45.729
+Next, we talked about adding files in previous sections of this course, but I want to reiterate,
+
+11
+00:00:45.729 --> 00:00:50.869
+when marking your files or folders for add, make sure that you select the nested subfolders
+
+12
+00:00:50.869 --> 00:00:52.829
+for good measure.
+
+13
+00:00:52.829 --> 00:00:57.789
+This will help Perforce isolate your files and only selecting the parent folder can run
+
+14
+00:00:57.789 --> 00:01:00.509
+the risk of generating fractured data.
+
+15
+00:01:00.509 --> 00:01:05.590
+With that said, Perforce has gotten better at the marking for add function in newer
+
+16
+00:01:05.590 --> 00:01:09.629
+versions, so if you forget to do this, don't worry too much about it.
+
+17
+00:01:09.629 --> 00:01:13.590
+Just try and make a habit of doing it before marking for add and submitting.
+
+18
+00:01:13.590 --> 00:01:18.579
+Now, if your data is not syncing, one of the things we recommend is creating a fresh
+
+19
+00:01:18.579 --> 00:01:22.079
+pull of information that should correct this problem.
+
+20
+00:01:22.079 --> 00:01:26.760
+To do that, simply right-click on the file or folder in Perforce that is causing you
+
+21
+00:01:26.760 --> 00:01:28.420
+problems.
+
+22
+00:01:28.420 --> 00:01:34.260
+Select the Get Revision option to open the Get Revision pop-up menu.
+
+23
+00:01:34.260 --> 00:01:40.099
+Once open, choose the Force Operation option and click Get Revision.
+
+24
+00:01:40.099 --> 00:01:44.799
+That will force a fresh pull of all selected data, but be aware that this process will
+
+25
+00:01:44.799 --> 00:01:49.640
+take some time to replace all those files, so make sure to take a short coffee break
+
+26
+00:01:49.640 --> 00:01:51.670
+once you start the pull.
+
+27
+00:01:51.750 --> 00:01:57.700
+Now, let's talk about Perforce and World Partition, and this first recommendation
+
+28
+00:01:57.700 --> 00:02:01.819
+is to employ data layers when using World Partition.
+
+29
+00:02:01.819 --> 00:02:06.060
+Spotable actors may also be an option when working with data layers that become
+
+30
+00:02:06.060 --> 00:02:09.300
+difficult to manage early on in your production.
+
+31
+00:02:09.300 --> 00:02:12.349
+Keep an eye out for when that happens.
+
+32
+00:02:12.349 --> 00:02:16.770
+It is also highly recommended that you implement one file per actor, and the reason for
+
+33
+00:02:16.770 --> 00:02:21.669
+that is because one file per actor will provide you with a hash code that is searchable
+
+34
+00:02:21.669 --> 00:02:23.469
+in Perforce.
+
+35
+00:02:23.469 --> 00:02:28.349
+That way, assets created for World Partition in Unreal Engine can then be searched for
+
+36
+00:02:28.349 --> 00:02:31.509
+in Perforce with that code.
+
+37
+00:02:31.509 --> 00:02:35.189
+Continuing the discussion about Perforce and World Partition, let's focus a little
+
+38
+00:02:35.189 --> 00:02:40.189
+more on one file per actor, which can help ensure a file is checked out when adding
+
+39
+00:02:40.189 --> 00:02:42.539
+it to the World Partition.
+
+40
+00:02:42.539 --> 00:02:47.159
+Do not leave the World Partition checked out for too long, as this may cause problems
+
+41
+00:02:47.159 --> 00:02:48.819
+for other users.
+
+42
+00:02:48.819 --> 00:02:52.050
+Be sure to check in the World Partition when you are finished.
+
+43
+00:02:52.330 --> 00:02:57.650
+Now, there are two items that are needed for tracking with one file per actor.
+
+44
+00:02:57.650 --> 00:03:01.469
+As we just mentioned, the package short name, which is the searchable actor hash
+
+45
+00:03:01.469 --> 00:03:06.340
+code for Perforce, and then the revision control icon.
+
+46
+00:03:06.340 --> 00:03:11.240
+As you can see in this image, the revision control displays your asset status, and in
+
+47
+00:03:11.240 --> 00:03:15.780
+this example, that's the question mark, which means that the World Partition asset
+
+48
+00:03:15.780 --> 00:03:17.740
+is not checked in.
+
+49
+00:03:17.740 --> 00:03:23.060
+One thing to note here is that the revision control icon is vital when working on a team,
+
+50
+00:03:23.060 --> 00:03:27.780
+and if it's not active, other users may not see what is checked out, and that can
+
+51
+00:03:27.780 --> 00:03:32.879
+prevent project validations, which is why Epic Games permanently enables this option
+
+52
+00:03:32.879 --> 00:03:34.020
+in production.
+
+53
+00:03:34.020 --> 00:03:39.060
+Now, if you do run into validation errors, open up a blank level and run the validation
+
+54
+00:03:39.060 --> 00:03:40.620
+process again.
+
+55
+00:03:40.620 --> 00:03:45.060
+This usually restores the validation due to a dirty save that's being done by Unreal
+
+56
+00:03:45.060 --> 00:03:46.500
+Engine.
+
+57
+00:03:46.500 --> 00:03:51.180
+Doing this by closing the World Partition level is currently the only workaround for
+
+58
+00:03:51.180 --> 00:03:52.800
+this problem.
+
+59
+00:03:52.800 --> 00:03:54.759
+And one final thing to note here.
+
+60
+00:03:54.759 --> 00:03:59.759
+One file per actor is enabled by default within the World Partition, and currently
+
+61
+00:03:59.759 --> 00:04:03.680
+experimental when being used outside of the World Partition.
+
+62
+00:04:03.680 --> 00:04:08.460
+Now, this course really covered a lot of material, but don't worry, there's more
+
+63
+00:04:08.460 --> 00:04:10.139
+help out there.
+
+64
+00:04:10.139 --> 00:04:13.439
+The video links here are amazing resources.
+
+65
+00:04:13.439 --> 00:04:18.360
+The first YouTube link is a two-hour live stream covering source control in depth, looking
+
+66
+00:04:18.360 --> 00:04:24.279
+well beyond the initial commits and looking at scaling source control for a project.
+
+67
+00:04:24.279 --> 00:04:28.519
+The next YouTube link is a source control webinar, looking at each of the source control
+
+68
+00:04:28.519 --> 00:04:33.459
+options one by one and reviewing some of their technical and usability concerns in
+
+69
+00:04:33.459 --> 00:04:35.329
+greater detail.
+
+70
+00:04:35.329 --> 00:04:40.050
+Of course, we have our own documentation from Epic Games that are specific to using
+
+71
+00:04:40.050 --> 00:04:43.209
+Perforce and source control with Unreal Engine.
+
+72
+00:04:43.209 --> 00:04:47.889
+And if you're looking for a more Perforce specific document, then Perforce also has
+
+73
+00:04:47.889 --> 00:04:52.290
+a curated page with all their collected Unreal Engine resources.
+
+74
+00:04:52.290 --> 00:04:55.689
+A shout out to Sean Spitzer and Ryan Manning for their support in this course
+
+75
+00:04:55.689 --> 00:05:00.250
+development, and this concludes the Source Control and Collaboration course.
+
+76
+00:05:00.250 --> 00:05:03.889
+I want to thank you for spending your time working through this course material.

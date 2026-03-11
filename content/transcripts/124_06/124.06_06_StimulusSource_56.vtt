@@ -1,0 +1,229 @@
+WEBVTT
+
+1
+00:00:01.419 --> 00:00:07.179
+Hello and welcome to this video. In this we will be going over exercise three
+
+2
+00:00:07.179 --> 00:00:11.099
+where we will be looking at using the stimuli sources.
+
+3
+00:00:13.140 --> 00:00:18.019
+So we're back in the engine now and I have just come over to the fourth slide
+
+4
+00:00:18.019 --> 00:00:22.260
+which is exercise three, stimulus sources using the teaching aid.
+
+5
+00:00:23.600 --> 00:00:29.440
+And you can see what we have here is a setup with another AI
+
+6
+00:00:30.079 --> 00:00:32.880
+and a number of these coin pickups.
+
+7
+00:00:33.659 --> 00:00:38.619
+So if I was to simulate you can see that the carriage all wanders around
+
+8
+00:00:39.810 --> 00:00:44.530
+and can pick them up but not necessarily on purpose.
+
+9
+00:00:46.590 --> 00:00:52.590
+What we want to change here is we want to create it so that using the perception component
+
+10
+00:00:53.310 --> 00:00:59.630
+when the AI sees a pickup it will go to the nearest one and pick that up
+
+11
+00:01:00.270 --> 00:01:01.549
+until they're all picked up.
+
+12
+00:01:06.030 --> 00:01:12.290
+Okay so let's have a look at our ST stimulus state tree.
+
+13
+00:01:14.159 --> 00:01:20.239
+Again very simple we have a wanderer about until we see a pickup.
+
+14
+00:01:20.239 --> 00:01:22.719
+At that point we move to the pickup.
+
+15
+00:01:25.790 --> 00:01:30.269
+And you'll see in the left hand side here we have the location to move to
+
+16
+00:01:30.829 --> 00:01:33.310
+and go to pickup balloon.
+
+17
+00:01:33.310 --> 00:01:40.590
+Again we're using this evaluator setup to get the information from the AI.
+
+18
+00:01:42.909 --> 00:01:44.349
+Now let's have a look at the AI.
+
+19
+00:01:47.060 --> 00:01:54.099
+Okay so you can see it's happening here.
+
+20
+00:01:54.099 --> 00:01:58.340
+Again we are using the on target perception updated
+
+21
+00:01:59.469 --> 00:02:03.950
+and we are doing our standard check to see which one's using it.
+
+22
+00:02:03.950 --> 00:02:10.099
+In this case we're using AI site and we are looking at the scene item
+
+23
+00:02:10.099 --> 00:02:14.340
+and we are checking to see if it is tagged with the tag pickup.
+
+24
+00:02:15.659 --> 00:02:23.310
+If it is then we are going to what we're going to be doing because there are multiple pickups
+
+25
+00:02:23.310 --> 00:02:26.349
+and we only really want to go to the one that's closest to us.
+
+26
+00:02:26.349 --> 00:02:30.270
+We've written a piece of code here but what this will ultimately do
+
+27
+00:02:30.270 --> 00:02:36.189
+is add the scene item to the array actors to pick up.
+
+28
+00:02:37.120 --> 00:02:42.800
+And what this is going to do is it's just going to check that it's either not already in the array
+
+29
+00:02:42.800 --> 00:02:47.599
+because if we see something multiple times we might add it to our array multiple times.
+
+30
+00:02:48.159 --> 00:02:51.039
+And also that it's not set as our next pickup.
+
+31
+00:02:53.060 --> 00:02:59.009
+Then we are firing off an event update pickups and if you look at update pickups
+
+32
+00:02:59.810 --> 00:03:03.969
+basically what it's doing is finding the closest pickup to the actor
+
+33
+00:03:04.909 --> 00:03:12.659
+and setting that as the next pickup.
+
+34
+00:03:12.659 --> 00:03:18.340
+We'll also see we have an event that when it's picked up it will fully add the pickup
+
+35
+00:03:19.229 --> 00:03:24.750
+it will turn it off and it will then update to see if we have another pickup in the cycle.
+
+36
+00:03:26.900 --> 00:03:28.979
+So all the coding is already done.
+
+37
+00:03:30.460 --> 00:03:36.060
+To get this to work all we need to do is to jump in to our BP pickup.
+
+38
+00:03:38.960 --> 00:03:44.159
+And we already have the component overlap which gets rid of it that says it's been picked up.
+
+39
+00:03:46.129 --> 00:03:50.530
+The only thing that we don't have is any way for this to be registered
+
+40
+00:03:50.530 --> 00:03:53.810
+within the perception component.
+
+41
+00:03:54.370 --> 00:04:00.370
+Because we are not a child of the Pawn class, we are a child of the Actor class,
+
+42
+00:04:00.370 --> 00:04:02.449
+it will not automatically pick us up.
+
+43
+00:04:03.569 --> 00:04:07.810
+So in order to do this what I'm going to do is come up to the components,
+
+44
+00:04:07.810 --> 00:04:14.210
+push add and I am looking for the AI perception stimuli source.
+
+45
+00:04:16.339 --> 00:04:23.540
+When we grab that we do need to choose what source we are registering for.
+
+46
+00:04:24.100 --> 00:04:36.269
+So in this case I am going to register or cite and the other thing is we want to
+
+47
+00:04:37.230 --> 00:04:40.110
+also register as a source have that set on
+
+48
+00:04:41.790 --> 00:04:46.029
+and this will mean that it should be able to pick us up as we're going along.
+
+49
+00:04:47.180 --> 00:04:51.259
+Okay so I now press compile and save.
+
+50
+00:04:52.579 --> 00:04:58.079
+And if I jump in I'll run it and see we get a very different behavior.
+
+51
+00:05:00.050 --> 00:05:05.329
+Everything is just going to go through all the pickups until there is none left.
+
+52
+00:05:10.689 --> 00:05:14.209
+So that brings us to the end of the stimuli source video.
+
+53
+00:05:14.930 --> 00:05:18.850
+And this is just we are going to be able to add in a component
+
+54
+00:05:18.850 --> 00:05:23.009
+that will allow an actor that is not a child of the Pawn class
+
+55
+00:05:23.649 --> 00:05:26.930
+to register as a source.
+
+56
+00:05:26.930 --> 00:05:28.689
+I've never used for our site.
+
+57
+00:05:30.050 --> 00:05:33.490
+Thank you very much.

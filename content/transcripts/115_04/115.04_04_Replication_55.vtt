@@ -1,0 +1,2733 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:07.519
+So replication, this is a concept that isn't particularly unique to Unreal.
+
+2
+00:00:07.519 --> 00:00:14.679
+Obviously every online engine, every online game would have some kind of concept
+
+3
+00:00:14.679 --> 00:00:19.839
+for data going from the server to the client,
+
+4
+00:00:19.839 --> 00:00:23.679
+but replication in Unreal is kind of worth talking about
+
+5
+00:00:23.679 --> 00:00:29.300
+because it's got a lot of unique components that are kind of like probably more Unreal only.
+
+6
+00:00:29.300 --> 00:00:31.500
+So what actually is replication?
+
+7
+00:00:31.539 --> 00:00:35.179
+The term might be interchangeable, might be called other things,
+
+8
+00:00:35.179 --> 00:00:43.939
+but replication is basically the process of data going from the server to the client.
+
+9
+00:00:43.939 --> 00:00:47.899
+It gives server authority over client-side variables.
+
+10
+00:00:47.899 --> 00:00:56.060
+And essentially what the server will do is frequently check for whether or not
+
+11
+00:00:56.060 --> 00:01:00.979
+the information that the client has matches what's on the server.
+
+12
+00:01:02.469 --> 00:01:06.189
+So networked actors have a kind of a net update frequency,
+
+13
+00:01:06.189 --> 00:01:09.829
+and this is used to determine how often an actor replicates,
+
+14
+00:01:09.829 --> 00:01:12.150
+so how often we make these checks,
+
+15
+00:01:12.150 --> 00:01:14.829
+and the server will keep a kind of shadow set of data.
+
+16
+00:01:14.829 --> 00:01:21.989
+So that's the server, as well as the server having the actual data for what the value actually is,
+
+17
+00:01:21.989 --> 00:01:27.390
+it will keep a kind of copy for what the last thing it sent to each client was.
+
+18
+00:01:27.870 --> 00:01:31.750
+And the server is going to compare that shadow data against its current set of values.
+
+19
+00:01:31.750 --> 00:01:33.829
+And if there's a kind of mismatch, so if it's to say,
+
+20
+00:01:33.829 --> 00:01:38.230
+oh, this data is clearly changed from what I last sent to the client,
+
+21
+00:01:38.230 --> 00:01:41.670
+then it knows that it's going to need to kind of like send some information down to the client
+
+22
+00:01:41.670 --> 00:01:45.859
+to bring them kind of back up to date with what the server's current idea of everything is.
+
+23
+00:01:45.859 --> 00:01:50.980
+Obviously, this check comes with an inherent kind of network cost.
+
+24
+00:01:50.980 --> 00:01:54.579
+So there are things we can definitely do to kind of reduce that cost
+
+25
+00:01:54.579 --> 00:01:57.819
+and maybe not be making that check quite as often.
+
+26
+00:01:57.819 --> 00:02:01.980
+The cheapest one to do is updating our net update frequency,
+
+27
+00:02:01.980 --> 00:02:04.900
+which is essentially a little bit like reducing your tick time almost.
+
+28
+00:02:04.900 --> 00:02:08.020
+We've talked about doing that before as a way to kind of optimize your tick.
+
+29
+00:02:08.020 --> 00:02:11.580
+You can basically just check for replication, less frequency,
+
+30
+00:02:11.580 --> 00:02:17.430
+and that's through our net update frequency on a per-actor basis.
+
+31
+00:02:17.430 --> 00:02:19.750
+I think we may get into this a little bit later,
+
+32
+00:02:19.750 --> 00:02:21.669
+but it's something we've talked about before as well,
+
+33
+00:02:21.669 --> 00:02:26.629
+is that actor is our kind of like main point for dealing with replication.
+
+34
+00:02:26.629 --> 00:02:31.069
+Whilst components can be replicated to, actor is our kind of central entry point.
+
+35
+00:02:31.069 --> 00:02:35.830
+So a lot of this stuff is stuff that a lot of these networked concepts that we talk about
+
+36
+00:02:35.830 --> 00:02:38.909
+would be stuff that we do handle on the actor itself.
+
+37
+00:02:38.909 --> 00:02:41.590
+Net update frequency is actually an example of that.
+
+38
+00:02:41.590 --> 00:02:44.150
+In fact, you can just quickly jump into the engine.
+
+39
+00:02:44.150 --> 00:02:46.990
+I'm in the level blueprint here, but level blueprint is actually an actor,
+
+40
+00:02:46.990 --> 00:02:49.110
+so this should be here.
+
+41
+00:02:49.110 --> 00:02:51.590
+Update frequency, yeah.
+
+42
+00:02:51.590 --> 00:02:53.550
+Net update frequency, you can see it's there.
+
+43
+00:02:53.550 --> 00:02:57.889
+This would be available in any actor.
+
+44
+00:02:57.889 --> 00:03:02.090
+So, yeah, that's one of the quickest ways to kind of update this.
+
+45
+00:03:02.090 --> 00:03:10.009
+The quickest ways to kind of like make your game more net performant
+
+46
+00:03:10.009 --> 00:03:14.169
+is looking at your net update frequency.
+
+47
+00:03:14.169 --> 00:03:16.210
+It's one of the lowest hanging fruits.
+
+48
+00:03:16.210 --> 00:03:21.169
+It just comes back to that kind of, and a lot of this kind of network logic
+
+49
+00:03:21.210 --> 00:03:22.210
+is really just about that.
+
+50
+00:03:22.210 --> 00:03:26.849
+It's that kind of same core tenet of really all code optimization
+
+51
+00:03:26.849 --> 00:03:29.689
+is that doing something less is better.
+
+52
+00:03:29.689 --> 00:03:33.520
+The less you can do something, the better.
+
+53
+00:03:33.520 --> 00:03:36.039
+One of the kind of important things to bear in mind
+
+54
+00:03:36.039 --> 00:03:37.360
+when we're talking about replication,
+
+55
+00:03:37.360 --> 00:03:41.199
+one of the things that's often forgotten is that people can enjoin,
+
+56
+00:03:41.199 --> 00:03:43.240
+depending on your game setup obviously,
+
+57
+00:03:43.240 --> 00:03:45.400
+it's often a problem you hit up against
+
+58
+00:03:45.400 --> 00:03:47.560
+that people can join your game mid-session.
+
+59
+00:03:47.560 --> 00:03:53.159
+And so it's worth considering how you are passing data around
+
+60
+00:03:53.159 --> 00:03:57.560
+such that you maintain some kind of...
+
+61
+00:03:57.560 --> 00:04:00.960
+All the information that is stateful
+
+62
+00:04:00.960 --> 00:04:03.439
+isn't purely replicated through like function calls,
+
+63
+00:04:03.439 --> 00:04:05.560
+isn't just, oh, this information has changed
+
+64
+00:04:05.560 --> 00:04:08.759
+and therefore I'll just let everyone who's currently connected know
+
+65
+00:04:08.759 --> 00:04:11.240
+that you maintain some kind of persistent state
+
+66
+00:04:11.240 --> 00:04:13.680
+for all of the bits of information you care about.
+
+67
+00:04:13.680 --> 00:04:17.399
+And therefore, when a new player possibly joins 10 minutes
+
+68
+00:04:17.399 --> 00:04:20.480
+into your game, they get all the bits of information
+
+69
+00:04:20.480 --> 00:04:23.720
+they actually need and they don't get some kind of smaller subset
+
+70
+00:04:23.720 --> 00:04:26.519
+where you've got a mismatch between players that were here
+
+71
+00:04:26.519 --> 00:04:29.360
+for this initial bit of information getting broadcast out
+
+72
+00:04:29.360 --> 00:04:34.740
+and then the players who join afterwards who kind of missed that.
+
+73
+00:04:34.740 --> 00:04:37.100
+So what can be replicated?
+
+74
+00:04:37.100 --> 00:04:42.540
+Essentially, Unreal provides a lot of data types
+
+75
+00:04:42.540 --> 00:04:44.980
+that can be replicated out of the box.
+
+76
+00:04:44.980 --> 00:04:47.459
+The vast majority of data types are replicated,
+
+77
+00:04:47.459 --> 00:04:49.220
+but some are completely not.
+
+78
+00:04:49.220 --> 00:04:50.860
+And others require a little bit of nuance
+
+79
+00:04:50.860 --> 00:04:53.699
+and kind of understanding about how they actually work.
+
+80
+00:04:53.699 --> 00:04:56.259
+So straight off the bat, our atomic types,
+
+81
+00:04:56.259 --> 00:04:59.459
+our kind of fundamental types, bools, ints, floats,
+
+82
+00:04:59.459 --> 00:05:02.019
+all of these are going to be replicated.
+
+83
+00:05:02.019 --> 00:05:05.699
+Unreal also supports struct replication,
+
+84
+00:05:05.699 --> 00:05:08.180
+as long as the information in those structs
+
+85
+00:05:08.180 --> 00:05:11.019
+are one of these types that are already replicated.
+
+86
+00:05:11.019 --> 00:05:15.019
+It's worth mentioning that when we're dealing with structs,
+
+87
+00:05:15.899 --> 00:05:17.660
+as a kind of efficiency thing,
+
+88
+00:05:17.660 --> 00:05:20.779
+if you are changing information in a struct,
+
+89
+00:05:20.779 --> 00:05:23.300
+you don't need to change the overall struct.
+
+90
+00:05:23.300 --> 00:05:25.620
+We'll get into this a little bit, and then I've got an example
+
+91
+00:05:25.620 --> 00:05:27.779
+that shows this right at the end of the presentation.
+
+92
+00:05:27.779 --> 00:05:31.899
+But you can change individual bits of information in a struct,
+
+93
+00:05:31.899 --> 00:05:34.860
+and Unreal will understand that it's only that bit of information
+
+94
+00:05:34.860 --> 00:05:38.980
+that has changed and therefore only send that unique bit of information
+
+95
+00:05:38.980 --> 00:05:42.939
+within the struct over to the client.
+
+96
+00:05:42.939 --> 00:05:46.699
+Or if you're communicating that data back to the server
+
+97
+00:05:46.699 --> 00:05:49.300
+somehow the same way.
+
+98
+00:05:49.300 --> 00:05:52.699
+So you don't have to make a change to the whole struct
+
+99
+00:05:52.699 --> 00:05:54.660
+to say, oh, this will get replicated.
+
+100
+00:05:54.660 --> 00:05:57.459
+If a struct is replicated and you only change one member
+
+101
+00:05:57.459 --> 00:05:59.699
+within that struct, it is only that member
+
+102
+00:05:59.699 --> 00:06:03.139
+that will get passed over to the other clients.
+
+103
+00:06:03.139 --> 00:06:07.019
+Enums, obviously, even though they are kind of specialized types,
+
+104
+00:06:07.019 --> 00:06:10.860
+they are, under the surface, they are really a UN8,
+
+105
+00:06:10.860 --> 00:06:14.540
+and so they will be sent over the network
+
+106
+00:06:14.540 --> 00:06:16.740
+just as an atomic type, really.
+
+107
+00:06:16.740 --> 00:06:19.420
+Arrays are also supported,
+
+108
+00:06:19.420 --> 00:06:22.019
+and they're kind of smart things done about arrays
+
+109
+00:06:22.019 --> 00:06:27.699
+where if you make an overall change to an array,
+
+110
+00:06:27.699 --> 00:06:29.899
+then it's your first time,
+
+111
+00:06:29.899 --> 00:06:31.660
+then the whole array will be copied over.
+
+112
+00:06:31.660 --> 00:06:34.939
+But if you make changes to elements within an array
+
+113
+00:06:34.939 --> 00:06:36.459
+or you add a single element,
+
+114
+00:06:36.459 --> 00:06:38.379
+it's only those individual changes
+
+115
+00:06:38.379 --> 00:06:41.540
+that will get replicated over to the clients.
+
+116
+00:06:41.540 --> 00:06:44.100
+So, again, that is kind of an efficiency
+
+117
+00:06:44.100 --> 00:06:45.300
+that is already being done for you,
+
+118
+00:06:45.300 --> 00:06:47.740
+so you don't need to be super clever with these things.
+
+119
+00:06:47.740 --> 00:06:49.660
+It's worth mentioning, though, that when you are doing,
+
+120
+00:06:49.660 --> 00:06:51.420
+we've not talked about RPCs yet,
+
+121
+00:06:51.420 --> 00:06:52.819
+but when you are doing RPCs
+
+122
+00:06:52.819 --> 00:06:54.779
+and you're passing RPCs with arrays
+
+123
+00:06:54.779 --> 00:06:58.500
+and you're passing an array in as a parameter of that RPC,
+
+124
+00:06:58.500 --> 00:07:01.220
+the whole array will be copied over,
+
+125
+00:07:01.220 --> 00:07:02.139
+and you can't avoid that.
+
+126
+00:07:02.139 --> 00:07:05.100
+So just kind of a kind of anti-optimization
+
+127
+00:07:05.100 --> 00:07:07.939
+that's worth bearing in mind.
+
+128
+00:07:08.339 --> 00:07:10.579
+As with a lot of Tmaps,
+
+129
+00:07:10.579 --> 00:07:12.779
+they're unfortunately a little bit underrepresented
+
+130
+00:07:12.779 --> 00:07:14.899
+in lots of different aspects,
+
+131
+00:07:14.899 --> 00:07:16.740
+and replication is one of those.
+
+132
+00:07:16.740 --> 00:07:20.980
+So if you kind of want Tmap functionality,
+
+133
+00:07:20.980 --> 00:07:23.740
+one of the easy things that you can do,
+
+134
+00:07:23.740 --> 00:07:26.019
+for anyone who's not familiar with the term map,
+
+135
+00:07:26.019 --> 00:07:28.620
+there might be other terms that you've used for this,
+
+136
+00:07:28.620 --> 00:07:32.779
+but this is essentially the idea that you have a container,
+
+137
+00:07:32.779 --> 00:07:36.500
+you know, a type that contains multiple entries,
+
+138
+00:07:36.500 --> 00:07:38.459
+but rather than being represented by an index,
+
+139
+00:07:38.459 --> 00:07:41.259
+like an array, it's represented by a key type.
+
+140
+00:07:41.259 --> 00:07:42.620
+So you give it some kind of type
+
+141
+00:07:42.620 --> 00:07:44.980
+that represents a unique value,
+
+142
+00:07:44.980 --> 00:07:47.180
+and then it maps to a value.
+
+143
+00:07:47.180 --> 00:07:50.300
+So it's otherwise called key value pairs.
+
+144
+00:07:50.300 --> 00:07:53.699
+And if you need that kind of map-like functionality,
+
+145
+00:07:53.699 --> 00:07:55.939
+but you want it to be replicated,
+
+146
+00:07:55.939 --> 00:07:57.139
+you can do it via an array,
+
+147
+00:07:57.139 --> 00:08:01.339
+and if you override your,
+
+148
+00:08:01.339 --> 00:08:03.220
+in C++ at least,
+
+149
+00:08:03.220 --> 00:08:04.939
+if you override your functionality
+
+150
+00:08:04.939 --> 00:08:08.060
+to have an equality operator check,
+
+151
+00:08:08.060 --> 00:08:11.420
+then you can easily kind of find within that array.
+
+152
+00:08:11.420 --> 00:08:14.259
+It's not, there are performance differences, obviously,
+
+153
+00:08:14.259 --> 00:08:16.060
+but you get a lot of that same functionality.
+
+154
+00:08:16.060 --> 00:08:19.779
+And you can also use index of by key or find by key,
+
+155
+00:08:19.779 --> 00:08:22.540
+even if you don't want to do a direct
+
+156
+00:08:22.540 --> 00:08:25.459
+struct to struct comparison or value to value comparison,
+
+157
+00:08:25.459 --> 00:08:27.540
+you can use key types.
+
+158
+00:08:27.540 --> 00:08:29.860
+So just be aware that there are kind of like
+
+159
+00:08:29.860 --> 00:08:32.779
+ways around that for usage purposes,
+
+160
+00:08:32.779 --> 00:08:35.700
+but obviously there is a kind of meaningful
+
+161
+00:08:35.700 --> 00:08:38.899
+performance differences between a map and an array.
+
+162
+00:08:38.899 --> 00:08:42.659
+So, you know, it's not a perfect,
+
+163
+00:08:42.659 --> 00:08:44.620
+replication is not the right word to use there,
+
+164
+00:08:44.620 --> 00:08:47.100
+but it's not a one-to-one relationship,
+
+165
+00:08:47.100 --> 00:08:50.139
+but you can get a lot of the way there.
+
+166
+00:08:50.139 --> 00:08:52.100
+To all intents and purposes,
+
+167
+00:08:52.100 --> 00:08:57.700
+pointers are supported for replication in a sense,
+
+168
+00:08:57.700 --> 00:08:59.500
+but the things that are,
+
+169
+00:08:59.500 --> 00:09:02.820
+the pointers that are replicated are only pointers
+
+170
+00:09:02.820 --> 00:09:06.620
+to objects that are themselves replicated.
+
+171
+00:09:06.620 --> 00:09:08.340
+So you kind of need to have a knowledge of,
+
+172
+00:09:08.340 --> 00:09:10.659
+you know, all the data in your game that is replicated
+
+173
+00:09:10.659 --> 00:09:13.259
+to be know whether or not the object
+
+174
+00:09:13.259 --> 00:09:15.700
+that you're talking about is going to be kind of valid
+
+175
+00:09:15.700 --> 00:09:17.779
+to be replicated itself.
+
+176
+00:09:17.779 --> 00:09:21.500
+Essentially, when objects are replicated,
+
+177
+00:09:21.500 --> 00:09:23.379
+they are kind of given a unique ID
+
+178
+00:09:23.379 --> 00:09:26.659
+and that unique ID is itself replicated from server to client.
+
+179
+00:09:26.659 --> 00:09:28.860
+So it is consistent between the two.
+
+180
+00:09:28.860 --> 00:09:31.620
+And therefore, when you're passing a pointer around,
+
+181
+00:09:31.659 --> 00:09:34.179
+actually what gets replicated over the server
+
+182
+00:09:34.179 --> 00:09:38.460
+is that unique ID, and therefore it's easy for your client
+
+183
+00:09:38.460 --> 00:09:40.179
+to then rebuild that same connection and be like,
+
+184
+00:09:40.179 --> 00:09:41.700
+oh, they've passed in this unique ID,
+
+185
+00:09:41.700 --> 00:09:44.820
+I know what object has that unique ID
+
+186
+00:09:44.820 --> 00:09:48.139
+and therefore I'll hook that up on my local side.
+
+187
+00:09:48.139 --> 00:09:49.100
+So that that's how it works
+
+188
+00:09:49.100 --> 00:09:52.019
+and therefore pointers do work, they can be replicated,
+
+189
+00:09:52.019 --> 00:09:54.299
+but only pointers to objects
+
+190
+00:09:54.299 --> 00:09:57.179
+that are themselves replicated.
+
+191
+00:09:57.179 --> 00:09:59.620
+So how do we even make something replicated?
+
+192
+00:09:59.620 --> 00:10:02.860
+We've talked about kind of what replication itself means,
+
+193
+00:10:02.860 --> 00:10:04.740
+but how do we actually do this?
+
+194
+00:10:04.740 --> 00:10:09.340
+So there is essentially just a variable inside actors.
+
+195
+00:10:09.340 --> 00:10:11.980
+Like I said, actors are our kind of key entry point
+
+196
+00:10:11.980 --> 00:10:15.059
+for all of our kind of replication logic.
+
+197
+00:10:15.059 --> 00:10:18.500
+And there's essentially just a bool that represents
+
+198
+00:10:18.500 --> 00:10:20.059
+whether or not an actor is replicated.
+
+199
+00:10:20.059 --> 00:10:21.899
+If you just go to your actor,
+
+200
+00:10:22.740 --> 00:10:26.539
+there is a replicates, I think it's called.
+
+201
+00:10:28.720 --> 00:10:29.960
+Yeah, replicates.
+
+202
+00:10:29.960 --> 00:10:32.360
+And this can be true or false by default.
+
+203
+00:10:32.360 --> 00:10:34.600
+You can also set it at runtime
+
+204
+00:10:34.600 --> 00:10:36.840
+through a function called set replicates.
+
+205
+00:10:37.759 --> 00:10:40.799
+There are gonna be certain consequences to that.
+
+206
+00:10:40.799 --> 00:10:43.320
+It's not necessarily advisable
+
+207
+00:10:43.320 --> 00:10:45.360
+that you update these things at runtime
+
+208
+00:10:46.600 --> 00:10:47.799
+because there's probably gonna be
+
+209
+00:10:47.799 --> 00:10:50.879
+a lot of kind of weird consequences of that.
+
+210
+00:10:50.879 --> 00:10:52.480
+So the vast majority of the time,
+
+211
+00:10:52.480 --> 00:10:55.480
+you should be doing it within the body of the,
+
+212
+00:10:55.480 --> 00:10:58.320
+if you are gonna be doing set replicates true,
+
+213
+00:10:58.320 --> 00:10:59.559
+if you are gonna be calling that function,
+
+214
+00:11:00.159 --> 00:11:02.759
+you should probably be doing that inside your constructor.
+
+215
+00:11:02.759 --> 00:11:06.159
+But there probably are kind of workarounds
+
+216
+00:11:06.159 --> 00:11:07.840
+where you could hypothetically hack into that
+
+217
+00:11:07.840 --> 00:11:11.039
+and replicate that replicatedness over the server,
+
+218
+00:11:11.039 --> 00:11:12.639
+but that would be a little bit weird.
+
+219
+00:11:12.639 --> 00:11:13.799
+The vast majority of the time,
+
+220
+00:11:13.799 --> 00:11:15.480
+an actor should, this should be true
+
+221
+00:11:15.480 --> 00:11:18.759
+if an actor ever replicates and false if not.
+
+222
+00:11:18.759 --> 00:11:20.759
+And that's basically our starting point
+
+223
+00:11:20.759 --> 00:11:22.720
+for whether or not this thing can,
+
+224
+00:11:22.720 --> 00:11:24.519
+none of the rest of this is relevant
+
+225
+00:11:24.519 --> 00:11:27.039
+if the actor is not itself relevant.
+
+226
+00:11:27.039 --> 00:11:29.440
+And also with a component,
+
+227
+00:11:29.519 --> 00:11:31.320
+we have a similar variable.
+
+228
+00:11:31.320 --> 00:11:33.639
+And similarly, we've got that function
+
+229
+00:11:33.639 --> 00:11:35.720
+should be used done within the constructor.
+
+230
+00:11:35.720 --> 00:11:38.440
+If a component replicates
+
+231
+00:11:38.440 --> 00:11:40.240
+is not on an actor that replicates,
+
+232
+00:11:40.240 --> 00:11:41.639
+then it's completely irrelevant.
+
+233
+00:11:41.639 --> 00:11:43.559
+Components can only be replicated
+
+234
+00:11:43.559 --> 00:11:46.659
+when they are on an actor that replicates.
+
+235
+00:11:46.659 --> 00:11:49.940
+And then once something is replicated,
+
+236
+00:11:49.940 --> 00:11:51.500
+then that just means that this thing
+
+237
+00:11:51.500 --> 00:11:53.980
+can make use of replication functionality,
+
+238
+00:11:53.980 --> 00:11:56.580
+but there are additional steps that we have to take
+
+239
+00:11:56.580 --> 00:11:59.740
+whenever we actually want to mark something as replicatable.
+
+240
+00:11:59.740 --> 00:12:03.220
+So first off, if it's data,
+
+241
+00:12:04.259 --> 00:12:06.019
+you know, typically when we're talking about replication
+
+242
+00:12:06.019 --> 00:12:08.779
+that we're talking about like actual variable replication.
+
+243
+00:12:08.779 --> 00:12:12.500
+And that is, we would do,
+
+244
+00:12:12.500 --> 00:12:13.700
+we would have to have types
+
+245
+00:12:13.700 --> 00:12:15.860
+that can be marked up with a U property.
+
+246
+00:12:15.860 --> 00:12:18.659
+So we know what this means from previous sessions
+
+247
+00:12:18.659 --> 00:12:19.620
+that, you know, you really,
+
+248
+00:12:19.620 --> 00:12:22.019
+you can only mark something up as a U property
+
+249
+00:12:22.019 --> 00:12:24.500
+if it's inside either a U struct or a U class
+
+250
+00:12:24.500 --> 00:12:26.340
+as we've spoken about.
+
+251
+00:12:26.340 --> 00:12:28.059
+So all of this is only applies
+
+252
+00:12:28.100 --> 00:12:29.379
+to anything that inherits
+
+253
+00:12:29.379 --> 00:12:34.539
+is part of the U object hierarchy chain.
+
+254
+00:12:34.539 --> 00:12:36.500
+And you would just add,
+
+255
+00:12:36.500 --> 00:12:38.179
+if you just want data that is replicated
+
+256
+00:12:38.179 --> 00:12:39.820
+from server to client,
+
+257
+00:12:39.820 --> 00:12:43.940
+you would just put the replicated markup above it.
+
+258
+00:12:43.940 --> 00:12:46.539
+And the other option is replicated using,
+
+259
+00:12:46.539 --> 00:12:48.700
+which basically gives us replication,
+
+260
+00:12:48.700 --> 00:12:50.299
+but with additional callbacks.
+
+261
+00:12:51.179 --> 00:12:53.100
+So with replicated using,
+
+262
+00:12:53.100 --> 00:12:55.019
+what you do is you, this is essentially saying
+
+263
+00:12:55.019 --> 00:12:57.779
+this data does get replicated from server to client,
+
+264
+00:12:57.779 --> 00:12:59.419
+but additionally to that,
+
+265
+00:13:01.059 --> 00:13:03.539
+there is a function that will be called
+
+266
+00:13:03.539 --> 00:13:05.259
+and here is what that function is called.
+
+267
+00:13:05.259 --> 00:13:06.580
+The name does matter.
+
+268
+00:13:06.580 --> 00:13:07.779
+I'll go into this in a little bit,
+
+269
+00:13:07.779 --> 00:13:08.620
+but it does need,
+
+270
+00:13:08.620 --> 00:13:12.220
+this onRep underscore is a kind of requirement,
+
+271
+00:13:12.220 --> 00:13:14.220
+but then what you call the function after that
+
+272
+00:13:14.220 --> 00:13:15.340
+is kind of completely up to you.
+
+273
+00:13:15.340 --> 00:13:17.460
+It doesn't have to have any correlation
+
+274
+00:13:17.460 --> 00:13:20.379
+with the actual data that you are replicating.
+
+275
+00:13:20.379 --> 00:13:25.379
+It's worth noting that data won't be replicated
+
+276
+00:13:25.940 --> 00:13:27.820
+if it's the same, if it's already,
+
+277
+00:13:28.419 --> 00:13:29.259
+if you make a change on the server
+
+278
+00:13:29.259 --> 00:13:31.980
+and it's not changed from what the client thinks,
+
+279
+00:13:31.980 --> 00:13:35.179
+then that information is not going to get replicated over.
+
+280
+00:13:36.059 --> 00:13:38.100
+So it's worth bearing that in mind
+
+281
+00:13:38.100 --> 00:13:39.779
+in the context of onRep,
+
+282
+00:13:39.779 --> 00:13:43.460
+if you're relying on your onRep function to get called,
+
+283
+00:13:43.460 --> 00:13:46.019
+but you haven't actually changed the data,
+
+284
+00:13:46.019 --> 00:13:50.059
+that's not going to change anything.
+
+285
+00:13:50.059 --> 00:13:53.340
+It's also worth mentioning that if you are relying
+
+286
+00:13:53.340 --> 00:13:55.700
+on your onRep functions getting called,
+
+287
+00:13:55.740 --> 00:13:58.299
+if you are in single-player,
+
+288
+00:13:59.419 --> 00:14:03.340
+and I believe also on your Listen server,
+
+289
+00:14:03.340 --> 00:14:05.779
+then your onRep functions won't necessarily get called.
+
+290
+00:14:05.779 --> 00:14:07.980
+So you kind of need to account for that.
+
+291
+00:14:07.980 --> 00:14:10.460
+On replication is only really for when data
+
+292
+00:14:10.460 --> 00:14:13.539
+is getting passed from the server to a client.
+
+293
+00:14:13.539 --> 00:14:14.659
+So when you're in standalone,
+
+294
+00:14:14.659 --> 00:14:16.139
+that relationship kind of isn't there
+
+295
+00:14:16.139 --> 00:14:18.019
+and therefore your onRep functions
+
+296
+00:14:18.019 --> 00:14:19.019
+won't be getting called.
+
+297
+00:14:19.019 --> 00:14:20.620
+So you need to account for that
+
+298
+00:14:20.620 --> 00:14:23.379
+and possibly develop alternative avenues
+
+299
+00:14:23.379 --> 00:14:24.980
+if your game is a game that can be played
+
+300
+00:14:24.980 --> 00:14:26.460
+both single-player and multiplayer,
+
+301
+00:14:26.460 --> 00:14:30.639
+and you're relying on this onRep functionality.
+
+302
+00:14:30.639 --> 00:14:32.440
+The other thing that you will need to do
+
+303
+00:14:32.440 --> 00:14:35.320
+is put any variables.
+
+304
+00:14:35.320 --> 00:14:37.320
+So replicated and replicated using
+
+305
+00:14:37.320 --> 00:14:38.960
+are not enough on their own.
+
+306
+00:14:38.960 --> 00:14:43.080
+You also have this function,
+
+307
+00:14:43.080 --> 00:14:46.200
+which is get lifetime replicated properties,
+
+308
+00:14:46.200 --> 00:14:49.519
+and you basically need to pass in some macros
+
+309
+00:14:49.519 --> 00:14:50.879
+to essentially say,
+
+310
+00:14:50.879 --> 00:14:53.960
+this is data that will get replicated.
+
+311
+00:14:54.000 --> 00:14:56.480
+And you're essentially going to be passing in
+
+312
+00:14:56.480 --> 00:14:59.240
+the same variables that you've put replication markup above.
+
+313
+00:14:59.240 --> 00:15:01.759
+You're going to pass in the name of the class
+
+314
+00:15:01.759 --> 00:15:03.039
+that this is within,
+
+315
+00:15:03.039 --> 00:15:05.200
+and then the name of the variable itself.
+
+316
+00:15:05.200 --> 00:15:06.879
+I've not actually spent a huge amount of time
+
+317
+00:15:06.879 --> 00:15:07.960
+looking into the macro itself,
+
+318
+00:15:07.960 --> 00:15:10.000
+but I suspect what this is doing,
+
+319
+00:15:10.000 --> 00:15:11.759
+there are other parts of the engine that do this,
+
+320
+00:15:11.759 --> 00:15:14.480
+is I suspect that this is doing a compile time checking
+
+321
+00:15:14.480 --> 00:15:17.039
+just to make sure that you've spelled this name correctly.
+
+322
+00:15:17.039 --> 00:15:20.320
+And therefore, if you're, you know,
+
+323
+00:15:20.320 --> 00:15:21.840
+this is called sumVar,
+
+324
+00:15:21.840 --> 00:15:23.799
+and then you just make a editor change
+
+325
+00:15:23.799 --> 00:15:26.679
+and you change that to sumVar2,
+
+326
+00:15:26.679 --> 00:15:29.240
+I suspect it's going to be a compile time check
+
+327
+00:15:29.240 --> 00:15:31.080
+so that the compiler will complain at you to say,
+
+328
+00:15:31.080 --> 00:15:34.559
+hey, you've not correctly renamed this.
+
+329
+00:15:34.559 --> 00:15:37.799
+There's no variable called sumVar anymore.
+
+330
+00:15:37.799 --> 00:15:40.940
+So, you know, you need to update that.
+
+331
+00:15:40.940 --> 00:15:43.500
+There are alternative options as well.
+
+332
+00:15:43.500 --> 00:15:46.539
+It's not just the do rep lifetime macro.
+
+333
+00:15:46.539 --> 00:15:49.100
+There is an additional one called do rep,
+
+334
+00:15:49.100 --> 00:15:50.539
+there are a couple of actually,
+
+335
+00:15:50.539 --> 00:15:52.460
+but the other kind of one that's worth bearing in mind
+
+336
+00:15:52.460 --> 00:15:55.419
+is the do rep lifetime condition,
+
+337
+00:15:55.419 --> 00:15:58.659
+which lets us specify some kind of additional parameters
+
+338
+00:15:58.659 --> 00:16:01.620
+where this should only replicate across the client
+
+339
+00:16:01.620 --> 00:16:03.419
+in certain situations.
+
+340
+00:16:03.419 --> 00:16:04.620
+We've actually got an example,
+
+341
+00:16:04.620 --> 00:16:06.980
+so we'll come to kind of,
+
+342
+00:16:06.980 --> 00:16:08.659
+the reason I've actually made this
+
+343
+00:16:08.659 --> 00:16:11.659
+is for demoing a couple of other,
+
+344
+00:16:11.659 --> 00:16:14.100
+I'm sorry, jumping to the wrong actor there,
+
+345
+00:16:14.100 --> 00:16:16.340
+demoing this for a couple of different reasons,
+
+346
+00:16:16.340 --> 00:16:17.580
+and we'll kind of get towards this
+
+347
+00:16:17.580 --> 00:16:19.539
+at the very end of the session,
+
+348
+00:16:19.539 --> 00:16:22.620
+but just to kind of show some of this in situ,
+
+349
+00:16:22.620 --> 00:16:25.019
+as you can see, we've got a float here.
+
+350
+00:16:25.019 --> 00:16:26.580
+This is inside a U class.
+
+351
+00:16:26.580 --> 00:16:28.700
+Obviously, again, we can't have U properties
+
+352
+00:16:28.700 --> 00:16:32.220
+if it's not inside either a U struct or a U class.
+
+353
+00:16:32.220 --> 00:16:35.019
+So we have an actor here.
+
+354
+00:16:35.019 --> 00:16:36.620
+I'll actually demo this actor,
+
+355
+00:16:36.620 --> 00:16:38.659
+like I said, at the end of the session,
+
+356
+00:16:38.659 --> 00:16:40.659
+but we've got a variable here.
+
+357
+00:16:40.659 --> 00:16:42.259
+I wanted to replicate this variable.
+
+358
+00:16:42.259 --> 00:16:44.740
+Therefore, I have to do a U property markup above it.
+
+359
+00:16:44.740 --> 00:16:46.860
+I have to say it's replicated,
+
+360
+00:16:46.860 --> 00:16:48.899
+and then that alone is not enough.
+
+361
+00:16:48.899 --> 00:16:52.259
+I have to make sure that that is inside an actor
+
+362
+00:16:52.259 --> 00:16:55.059
+that is replicated or a component that is replicated
+
+363
+00:16:55.059 --> 00:16:56.700
+on an actor that is replicated.
+
+364
+00:16:57.820 --> 00:16:59.500
+And so you can see,
+
+365
+00:16:59.500 --> 00:17:03.889
+if I jump to my constructor for my actor,
+
+366
+00:17:03.889 --> 00:17:05.609
+you can see I've done all the relevant things.
+
+367
+00:17:05.609 --> 00:17:07.890
+We'll talk about relevancy in a moment,
+
+368
+00:17:07.890 --> 00:17:09.609
+but you can see that in the constructor,
+
+369
+00:17:09.609 --> 00:17:11.809
+we've said this actor replicates.
+
+370
+00:17:11.809 --> 00:17:14.730
+And the other thing we've done is added,
+
+371
+00:17:14.730 --> 00:17:17.490
+saying I do rep lifetime.
+
+372
+00:17:17.490 --> 00:17:19.250
+We've passed in our actor class,
+
+373
+00:17:19.250 --> 00:17:21.130
+and we've passed in the variable name,
+
+374
+00:17:21.130 --> 00:17:22.809
+so sum replicated float.
+
+375
+00:17:22.809 --> 00:17:25.490
+All of that are the things that you need to do
+
+376
+00:17:25.490 --> 00:17:26.809
+to make sure that this variable
+
+377
+00:17:26.809 --> 00:17:29.049
+will actually get replicated.
+
+378
+00:17:29.049 --> 00:17:30.329
+And then here we have,
+
+379
+00:17:30.329 --> 00:17:33.930
+we're making use of this on rep, this rep using.
+
+380
+00:17:33.930 --> 00:17:36.569
+So you don't need to say replicated and rep using.
+
+381
+00:17:36.569 --> 00:17:37.609
+Rep using can be done.
+
+382
+00:17:37.609 --> 00:17:40.210
+It inherently implies that this value is replicated.
+
+383
+00:17:40.210 --> 00:17:41.609
+And then you pass in the function
+
+384
+00:17:41.609 --> 00:17:43.569
+that will actually get called
+
+385
+00:17:43.569 --> 00:17:45.490
+when this value gets replicated to.
+
+386
+00:17:46.410 --> 00:17:51.410
+So this, again, the name here doesn't have any bearing
+
+387
+00:17:51.849 --> 00:17:53.329
+on the actual data that's replicated.
+
+388
+00:17:53.329 --> 00:17:55.009
+You're just saying this function will get called
+
+389
+00:17:55.009 --> 00:17:57.210
+when this value gets replicated into.
+
+390
+00:17:58.849 --> 00:18:00.849
+But the on rep is important.
+
+391
+00:18:00.849 --> 00:18:03.490
+So this function is just down here.
+
+392
+00:18:04.450 --> 00:18:07.250
+It is important that this function is a U function.
+
+393
+00:18:07.250 --> 00:18:10.329
+If it isn't a U function, it won't get properly found.
+
+394
+00:18:10.329 --> 00:18:13.250
+This is all using the Unreal Reflection system.
+
+395
+00:18:13.250 --> 00:18:16.049
+So this function has to be a U function.
+
+396
+00:18:18.109 --> 00:18:20.069
+And similarly, you can see that,
+
+397
+00:18:20.069 --> 00:18:21.430
+when inside that function,
+
+398
+00:18:21.430 --> 00:18:23.430
+we don't need to go into great detail about this,
+
+399
+00:18:23.430 --> 00:18:24.990
+but we're just basically printing a string.
+
+400
+00:18:24.990 --> 00:18:26.950
+So when this value gets updated
+
+401
+00:18:26.950 --> 00:18:28.829
+and replicated onto the client,
+
+402
+00:18:28.829 --> 00:18:31.069
+that value, we're gonna do some printing.
+
+403
+00:18:31.069 --> 00:18:35.910
+And similarly, we have to do for replicated using values
+
+404
+00:18:35.910 --> 00:18:36.950
+as well as replicated values,
+
+405
+00:18:36.950 --> 00:18:38.470
+we have to add them to this
+
+406
+00:18:38.470 --> 00:18:40.349
+get lifetime replicated props.
+
+407
+00:18:41.269 --> 00:18:43.910
+You also wanna be sure that you call your super function
+
+408
+00:18:43.910 --> 00:18:45.990
+here because there's gonna be data further down the chain
+
+409
+00:18:45.990 --> 00:18:46.950
+that is also replicated.
+
+410
+00:18:46.950 --> 00:18:48.869
+So you don't want to forget to call that
+
+411
+00:18:48.869 --> 00:18:52.230
+so that the parent class functions are getting called.
+
+412
+00:18:52.230 --> 00:18:54.309
+And then here, we've got this example
+
+413
+00:18:54.309 --> 00:18:56.829
+of the do rep lifetime condition.
+
+414
+00:18:56.829 --> 00:19:00.230
+This condition, there's a whole suite of these
+
+415
+00:19:00.230 --> 00:19:02.430
+that you can kind of look at,
+
+416
+00:19:02.430 --> 00:19:05.789
+but so you can kind of jump into cornet types.h
+
+417
+00:19:05.789 --> 00:19:07.150
+and look at those.
+
+418
+00:19:07.150 --> 00:19:08.910
+But the example that I've given
+
+419
+00:19:08.950 --> 00:19:11.549
+is this particular type,
+
+420
+00:19:11.549 --> 00:19:14.230
+the sum replicated struct variable,
+
+421
+00:19:14.230 --> 00:19:16.869
+we've marked it to only get replicated
+
+422
+00:19:17.910 --> 00:19:19.509
+for simulated actors.
+
+423
+00:19:19.509 --> 00:19:21.549
+We'll talk about what that kind of meaning is,
+
+424
+00:19:21.549 --> 00:19:24.670
+but it essentially means that on the owning,
+
+425
+00:19:24.670 --> 00:19:26.990
+on the person, on the connection on the client
+
+426
+00:19:26.990 --> 00:19:29.190
+that actually owns this actor,
+
+427
+00:19:29.190 --> 00:19:31.309
+i.e. for the case of a pawn,
+
+428
+00:19:31.309 --> 00:19:34.549
+that the client that is actually controlling this pawn,
+
+429
+00:19:34.549 --> 00:19:36.470
+this data won't get replicated to them.
+
+430
+00:19:36.470 --> 00:19:38.029
+So this particular condition is one
+
+431
+00:19:38.029 --> 00:19:39.910
+that you might use if it's data
+
+432
+00:19:39.910 --> 00:19:42.990
+that you know will actually kind of come from the client.
+
+433
+00:19:42.990 --> 00:19:45.109
+So say, for example,
+
+434
+00:19:45.109 --> 00:19:47.390
+your client is making local changes
+
+435
+00:19:47.390 --> 00:19:48.470
+to their customization.
+
+436
+00:19:48.470 --> 00:19:50.109
+So they've changed what hat they're wearing
+
+437
+00:19:50.109 --> 00:19:52.750
+and they make that change locally on their client
+
+438
+00:19:52.750 --> 00:19:54.990
+and then replicate that data to the server.
+
+439
+00:19:56.390 --> 00:19:57.829
+Therefore, that might be data
+
+440
+00:19:57.829 --> 00:19:59.670
+that the server doesn't need to replicate back
+
+441
+00:19:59.670 --> 00:20:02.349
+to the client because they know the client
+
+442
+00:20:02.349 --> 00:20:04.309
+through other alternative means
+
+443
+00:20:04.309 --> 00:20:07.190
+will have the most up-to-date idea of that information.
+
+444
+00:20:07.230 --> 00:20:09.150
+And therefore, they only need to replicate it
+
+445
+00:20:09.150 --> 00:20:12.710
+to the clients that aren't owning this actor itself.
+
+446
+00:20:12.710 --> 00:20:15.029
+That's just an example of the kind of condition
+
+447
+00:20:15.029 --> 00:20:17.029
+you might want to place on your variables
+
+448
+00:20:17.029 --> 00:20:18.150
+when they get replicated.
+
+449
+00:20:18.150 --> 00:20:19.869
+Otherwise, this is basically saying,
+
+450
+00:20:19.869 --> 00:20:22.269
+replicate this data to all clients
+
+451
+00:20:22.269 --> 00:20:24.190
+whenever they pass other checks
+
+452
+00:20:24.190 --> 00:20:30.150
+that we'll get to in a little bit.
+
+453
+00:20:30.150 --> 00:20:34.390
+The other thing to bear in mind with any passing data
+
+454
+00:20:34.390 --> 00:20:37.509
+from the server to the client is it takes time.
+
+455
+00:20:37.509 --> 00:20:39.549
+Obviously, these things aren't instantaneous.
+
+456
+00:20:39.549 --> 00:20:42.630
+When testing, sometimes it can feel that way,
+
+457
+00:20:42.630 --> 00:20:46.069
+but depending on how far away your server is
+
+458
+00:20:46.069 --> 00:20:48.390
+from your client and depending on their internet speed,
+
+459
+00:20:48.390 --> 00:20:51.549
+you could be talking fractional seconds,
+
+460
+00:20:51.549 --> 00:20:53.230
+you could be talking multiple seconds.
+
+461
+00:20:53.230 --> 00:20:54.789
+So do bear that in mind.
+
+462
+00:20:54.789 --> 00:20:57.069
+Don't rely on things being instantaneous
+
+463
+00:20:57.069 --> 00:20:58.150
+because they are not.
+
+464
+00:20:59.529 --> 00:21:01.210
+So when we're talking about function calls,
+
+465
+00:21:01.210 --> 00:21:03.250
+we've talked about the idea of passing data
+
+466
+00:21:03.250 --> 00:21:06.289
+over replicated data, but we also have RPCs.
+
+467
+00:21:07.289 --> 00:21:11.450
+RPCs are a term that is not necessarily unique to Unreal.
+
+468
+00:21:11.450 --> 00:21:15.450
+This is something that exists in other engines.
+
+469
+00:21:15.450 --> 00:21:17.569
+I think it's a kind of general term,
+
+470
+00:21:17.569 --> 00:21:18.970
+but if you're not familiar with it,
+
+471
+00:21:18.970 --> 00:21:20.890
+RPC stands for remote procedural.
+
+472
+00:21:20.890 --> 00:21:24.289
+It's essentially a little bit like a function
+
+473
+00:21:24.289 --> 00:21:25.930
+that you send over the network.
+
+474
+00:21:28.359 --> 00:21:31.480
+So we can, there's a couple of different,
+
+475
+00:21:31.480 --> 00:21:32.960
+RPCs aren't one thing.
+
+476
+00:21:32.960 --> 00:21:35.799
+It's kind of a whole subset of things.
+
+477
+00:21:35.799 --> 00:21:38.440
+We can send, we can do a function call
+
+478
+00:21:38.440 --> 00:21:41.680
+from, we can go from a client to a server.
+
+479
+00:21:41.680 --> 00:21:45.359
+We can go from the server to a specific client,
+
+480
+00:21:45.359 --> 00:21:48.200
+as long as we are calling that function on an object
+
+481
+00:21:48.200 --> 00:21:50.640
+that's ultimately owned by a particular client.
+
+482
+00:21:52.589 --> 00:21:55.349
+Each player controller, as we kind of all the way back here,
+
+483
+00:21:55.349 --> 00:21:56.910
+we kind of said, we've got this relationship
+
+484
+00:21:56.910 --> 00:21:58.990
+where the server has every player controller
+
+485
+00:21:58.990 --> 00:22:01.829
+and then every client has their own player controller
+
+486
+00:22:01.829 --> 00:22:02.950
+and no one else's.
+
+487
+00:22:02.950 --> 00:22:04.109
+So that's, as I said,
+
+488
+00:22:04.109 --> 00:22:06.509
+this kind of one-to-one unique connection
+
+489
+00:22:06.509 --> 00:22:08.470
+that each client has with the server.
+
+490
+00:22:09.349 --> 00:22:12.309
+So that's where this kind of comes in here,
+
+491
+00:22:12.309 --> 00:22:15.029
+is that when we're doing kind of client function calls,
+
+492
+00:22:15.029 --> 00:22:18.750
+that is, those are to be done on objects
+
+493
+00:22:18.750 --> 00:22:19.950
+that they are only gonna get called
+
+494
+00:22:19.950 --> 00:22:23.150
+on that unique player controller.
+
+495
+00:22:23.150 --> 00:22:26.859
+So each player controller kind of represents
+
+496
+00:22:26.859 --> 00:22:29.579
+that unique connection between the client
+
+497
+00:22:29.579 --> 00:22:31.700
+and the controlling server.
+
+498
+00:22:31.700 --> 00:22:34.019
+So when a client is communicating information
+
+499
+00:22:34.019 --> 00:22:35.460
+back to the server,
+
+500
+00:22:35.460 --> 00:22:37.500
+they can only do it through their player controller
+
+501
+00:22:37.500 --> 00:22:38.980
+and obviously they can only do it
+
+502
+00:22:38.980 --> 00:22:42.579
+about objects that they are the owner for.
+
+503
+00:22:42.579 --> 00:22:45.019
+And then we have this kind of third type.
+
+504
+00:22:45.019 --> 00:22:47.700
+So we have, you know, client to server,
+
+505
+00:22:47.700 --> 00:22:49.099
+obviously that can only be done
+
+506
+00:22:49.099 --> 00:22:51.420
+on objects that the client owns.
+
+507
+00:22:51.420 --> 00:22:53.339
+Server to client, that's with the intention
+
+508
+00:22:53.339 --> 00:22:55.220
+that we're kind of communicating that information
+
+509
+00:22:55.220 --> 00:22:56.700
+to an individual client,
+
+510
+00:22:56.700 --> 00:22:58.579
+also through their player controller.
+
+511
+00:22:58.579 --> 00:23:00.700
+And then we have this kind of net multicast.
+
+512
+00:23:00.700 --> 00:23:01.539
+This is a little bit,
+
+513
+00:23:01.539 --> 00:23:06.470
+we talked about delegates, I believe in our second session,
+
+514
+00:23:06.470 --> 00:23:08.269
+we have the idea of multicast delegates.
+
+515
+00:23:08.269 --> 00:23:10.430
+So that's the kind of information
+
+516
+00:23:10.430 --> 00:23:12.309
+that is just broadcast everywhere.
+
+517
+00:23:12.309 --> 00:23:14.309
+It's the same kind of concept here.
+
+518
+00:23:14.309 --> 00:23:16.269
+And this is basically a function
+
+519
+00:23:16.269 --> 00:23:18.869
+where it's not from client to server,
+
+520
+00:23:18.869 --> 00:23:20.789
+it's only of a server to client.
+
+521
+00:23:20.789 --> 00:23:24.069
+And this is a kind of shotgun function
+
+522
+00:23:24.069 --> 00:23:26.349
+that broadcasts to every single client
+
+523
+00:23:26.349 --> 00:23:28.990
+and therefore require no player controller
+
+524
+00:23:28.990 --> 00:23:33.289
+because they're just gonna let every client know about this.
+
+525
+00:23:33.289 --> 00:23:34.730
+So the way that we would do this
+
+526
+00:23:34.730 --> 00:23:37.650
+is similar to how we had to do U property markup
+
+527
+00:23:37.650 --> 00:23:39.809
+with replication.
+
+528
+00:23:39.809 --> 00:23:43.450
+For RPCs, we have U function markup.
+
+529
+00:23:43.450 --> 00:23:46.049
+So this implies certain things, right?
+
+530
+00:23:46.049 --> 00:23:48.569
+For a function to be an RPC,
+
+531
+00:23:48.569 --> 00:23:50.210
+it has to be a U function.
+
+532
+00:23:50.210 --> 00:23:51.569
+And for U functions to exist,
+
+533
+00:23:51.569 --> 00:23:55.730
+they have to exist within a U struct or a U class.
+
+534
+00:23:55.730 --> 00:23:59.009
+So all of that logic all kind of bubbles down.
+
+535
+00:24:00.819 --> 00:24:04.180
+And yeah, we can specify one of those three configurations.
+
+536
+00:24:04.180 --> 00:24:09.940
+We can specify if it's a client, a server, or a net multicast.
+
+537
+00:24:09.940 --> 00:24:11.819
+The other thing that we can mark up
+
+538
+00:24:11.819 --> 00:24:16.099
+is whether or not a function is reliable or unreliable.
+
+539
+00:24:16.099 --> 00:24:21.380
+So yeah, in the context of this,
+
+540
+00:24:21.380 --> 00:24:28.380
+again, is not necessarily unique to Unreal,
+
+541
+00:24:28.380 --> 00:24:30.539
+but reliable functions are essentially functions
+
+542
+00:24:30.579 --> 00:24:35.019
+that you can trust will always make their way to the client.
+
+543
+00:24:35.019 --> 00:24:36.900
+They may not necessarily get there instantaneously.
+
+544
+00:24:36.900 --> 00:24:38.180
+They may take time.
+
+545
+00:24:38.180 --> 00:24:40.619
+If the client has some kind of package loss
+
+546
+00:24:40.619 --> 00:24:42.700
+or if their connection gets disrupted,
+
+547
+00:24:42.700 --> 00:24:46.140
+it might take quite a bit of time.
+
+548
+00:24:46.140 --> 00:24:48.339
+And unreliable functions are essentially functions
+
+549
+00:24:48.339 --> 00:24:50.339
+that, you know, due to packet loss,
+
+550
+00:24:50.339 --> 00:24:55.500
+due to connection problems, there may be a kind of like,
+
+551
+00:24:55.500 --> 00:24:58.339
+essentially this function might get lost.
+
+552
+00:24:58.339 --> 00:25:00.059
+So you need to kind of bear that in mind
+
+553
+00:25:00.059 --> 00:25:03.420
+when you're marking functions as reliable or unreliable.
+
+554
+00:25:03.420 --> 00:25:06.700
+Reliable functions aren't just magically, you know,
+
+555
+00:25:06.700 --> 00:25:10.180
+the temptation can just be to mark every function as reliable.
+
+556
+00:25:10.180 --> 00:25:12.500
+But actually, the general advice
+
+557
+00:25:12.500 --> 00:25:15.259
+is to make as many things unreliable as possible,
+
+558
+00:25:15.259 --> 00:25:18.660
+only the absolute most key functions to make reliable.
+
+559
+00:25:18.660 --> 00:25:21.779
+And that's because reliable kind of has extra cost.
+
+560
+00:25:21.779 --> 00:25:24.339
+When functions are marked as reliable,
+
+561
+00:25:24.339 --> 00:25:25.619
+they kind of enter a queue
+
+562
+00:25:25.619 --> 00:25:27.660
+and they kind of maintain both on the server
+
+563
+00:25:27.660 --> 00:25:29.700
+and, you know, it's almost like it maintains
+
+564
+00:25:29.700 --> 00:25:31.500
+that shadow set of data to make sure
+
+565
+00:25:31.500 --> 00:25:34.420
+that this data does actually make its way to the client.
+
+566
+00:25:34.420 --> 00:25:40.259
+So they are more expensive to both call and maintain.
+
+567
+00:25:40.259 --> 00:25:43.339
+So therefore, if a function can be unreliable,
+
+568
+00:25:43.339 --> 00:25:44.859
+it should be unreliable.
+
+569
+00:25:44.859 --> 00:25:47.140
+But you just have to kind of understand that,
+
+570
+00:25:47.140 --> 00:25:49.619
+you know, there is a world where that function
+
+571
+00:25:49.619 --> 00:25:53.700
+never makes its way to the kind of receiving client
+
+572
+00:25:53.700 --> 00:25:57.730
+if there are connection problems or anything like that.
+
+573
+00:25:57.730 --> 00:26:02.130
+The other thing that to kind of bear in mind
+
+574
+00:26:02.130 --> 00:26:06.210
+is that we've also got this capability for validation.
+
+575
+00:26:06.210 --> 00:26:08.849
+So validation is additional markup
+
+576
+00:26:08.849 --> 00:26:14.009
+that we can do on the RPC.
+
+577
+00:26:14.009 --> 00:26:17.130
+And essentially, it lets us specify
+
+578
+00:26:17.130 --> 00:26:18.690
+kind of an additional set of data.
+
+579
+00:26:18.690 --> 00:26:25.869
+So with validation, as when we specified on rep,
+
+580
+00:26:25.910 --> 00:26:30.589
+what that means is we can kind of add some additional function
+
+581
+00:26:30.589 --> 00:26:32.869
+that will return either true or false.
+
+582
+00:26:32.869 --> 00:26:36.509
+And this is basically a way of primarily
+
+583
+00:26:36.509 --> 00:26:38.859
+for things like cheat detection.
+
+584
+00:26:38.859 --> 00:26:43.619
+And if we return true, then it was validated.
+
+585
+00:26:43.619 --> 00:26:47.099
+If we return false, then essentially the server
+
+586
+00:26:47.099 --> 00:26:49.299
+will instantly kick this connection.
+
+587
+00:26:49.299 --> 00:26:53.099
+So typically, you know, you want to be returning true.
+
+588
+00:26:53.099 --> 00:26:56.140
+You don't want to be kicking everyone off your connection.
+
+589
+00:26:56.140 --> 00:27:00.420
+But it's there for if we imagine we have an RPC
+
+590
+00:27:00.420 --> 00:27:04.539
+that the client can tell the server
+
+591
+00:27:04.539 --> 00:27:06.299
+they've reloaded their clip
+
+592
+00:27:06.299 --> 00:27:08.420
+and this is the amount of ammo they reloaded.
+
+593
+00:27:08.420 --> 00:27:11.059
+You could do some kind of simple check
+
+594
+00:27:11.059 --> 00:27:15.960
+for whether or not the amount
+
+595
+00:27:15.960 --> 00:27:17.279
+that they're trying to reload by
+
+596
+00:27:17.279 --> 00:27:20.599
+is even a sane amount that could ever possibly be reloaded.
+
+597
+00:27:20.640 --> 00:27:24.200
+And if not, maybe you can only ever reload one bullet at a time
+
+598
+00:27:24.200 --> 00:27:28.920
+or you know what the maximum clip size is for their gun.
+
+599
+00:27:28.920 --> 00:27:31.759
+If they're trying to reload some kind of bogus amount,
+
+600
+00:27:31.759 --> 00:27:34.400
+then that's an example of how you could,
+
+601
+00:27:34.400 --> 00:27:36.839
+you know, use some kind of gameplay data to validate against
+
+602
+00:27:36.839 --> 00:27:39.119
+and therefore, you can assume that they're cheating,
+
+603
+00:27:39.119 --> 00:27:42.160
+if not, and then they'll get kicked off.
+
+604
+00:27:42.160 --> 00:27:45.559
+So that validation, unlike our RPC,
+
+605
+00:27:45.559 --> 00:27:48.799
+when we do with validation,
+
+606
+00:27:48.799 --> 00:27:51.839
+that we don't specify a unique function name,
+
+607
+00:27:51.839 --> 00:27:56.880
+we simply have our existing function name
+
+608
+00:27:56.880 --> 00:28:01.960
+and we will basically have additional markup.
+
+609
+00:28:01.960 --> 00:28:04.759
+So for anyone who's used to doing delegates,
+
+610
+00:28:04.759 --> 00:28:06.079
+it would look the same way.
+
+611
+00:28:06.079 --> 00:28:08.039
+You have the function that you actually say,
+
+612
+00:28:08.039 --> 00:28:13.039
+hey, this function is, you know, is an RPC
+
+613
+00:28:13.039 --> 00:28:14.319
+and it would look like this.
+
+614
+00:28:14.319 --> 00:28:16.480
+Here's its kind of signature, here's its name,
+
+615
+00:28:16.480 --> 00:28:18.079
+here's the parameters it takes in.
+
+616
+00:28:18.079 --> 00:28:21.279
+Then when you actually do the implementation for that
+
+617
+00:28:21.279 --> 00:28:24.079
+in your C++, it would look like this.
+
+618
+00:28:24.079 --> 00:28:27.200
+So you don't necessarily have to declare this in the header,
+
+619
+00:28:27.200 --> 00:28:29.960
+but in your body, it would look like this.
+
+620
+00:28:29.960 --> 00:28:32.640
+Your, the kind of actual header element of this
+
+621
+00:28:32.640 --> 00:28:35.720
+should kind of get automatically generated for you.
+
+622
+00:28:35.720 --> 00:28:38.680
+If for some reason you wanted that to be a virtual function,
+
+623
+00:28:38.680 --> 00:28:40.519
+you would probably need to declare that in your header
+
+624
+00:28:40.519 --> 00:28:42.759
+as a virtual version of the same function.
+
+625
+00:28:42.759 --> 00:28:44.599
+But otherwise, the kind of,
+
+626
+00:28:44.599 --> 00:28:46.039
+in the header that will already exist,
+
+627
+00:28:46.039 --> 00:28:46.880
+but it's only in the body,
+
+628
+00:28:46.920 --> 00:28:48.279
+you would need to do your function name,
+
+629
+00:28:48.279 --> 00:28:49.799
+underscore implementation.
+
+630
+00:28:49.799 --> 00:28:51.960
+And this is the thing that would actually get called
+
+631
+00:28:51.960 --> 00:28:54.559
+when the RPC kind of filters through to the client.
+
+632
+00:28:56.250 --> 00:28:58.210
+And then you would just do whatever you wanted
+
+633
+00:28:58.210 --> 00:28:59.809
+your game logic to do in here.
+
+634
+00:28:59.809 --> 00:29:01.769
+And then last of all, we have the validate
+
+635
+00:29:01.769 --> 00:29:02.609
+and the same thing,
+
+636
+00:29:02.609 --> 00:29:07.130
+it's whatever your function is called, underscore validate.
+
+637
+00:29:07.130 --> 00:29:08.450
+And then this would be,
+
+638
+00:29:08.450 --> 00:29:10.490
+have to be a bool function
+
+639
+00:29:10.490 --> 00:29:11.970
+that returns either true or false.
+
+640
+00:29:11.970 --> 00:29:13.410
+And again, if this returns true,
+
+641
+00:29:13.410 --> 00:29:14.730
+then it's pass validation.
+
+642
+00:29:14.730 --> 00:29:15.849
+If it returns false,
+
+643
+00:29:15.849 --> 00:29:17.289
+then that connection is gonna get kicked.
+
+644
+00:29:17.289 --> 00:29:19.690
+So be very careful when you're returning false.
+
+645
+00:29:22.049 --> 00:29:23.450
+Yeah, I think that's everything to kind of say
+
+646
+00:29:23.450 --> 00:29:25.289
+about our kind of core markup.
+
+647
+00:29:25.289 --> 00:29:27.089
+So as we said already,
+
+648
+00:29:27.089 --> 00:29:29.769
+we have kind of three ways of marking a function up.
+
+649
+00:29:29.769 --> 00:29:33.130
+We can mark it up as server, client or multicast.
+
+650
+00:29:33.130 --> 00:29:34.490
+When it's a server,
+
+651
+00:29:34.490 --> 00:29:37.609
+that means it's called from the client to the server.
+
+652
+00:29:37.609 --> 00:29:41.289
+So this is the client communicating data to the server.
+
+653
+00:29:41.289 --> 00:29:44.650
+This should only be called on objects.
+
+654
+00:29:44.650 --> 00:29:46.170
+This is essentially all through the,
+
+655
+00:29:46.170 --> 00:29:49.490
+these first two are all through the player controller.
+
+656
+00:29:49.490 --> 00:29:52.529
+So this should only be called on objects
+
+657
+00:29:52.529 --> 00:29:55.890
+that are owned by a particular player controller.
+
+658
+00:29:55.890 --> 00:29:58.329
+So, you know, an example would be your,
+
+659
+00:29:58.329 --> 00:30:00.410
+the pawn that player is currently controlling.
+
+660
+00:30:00.410 --> 00:30:02.009
+They are owned by that player controller
+
+661
+00:30:02.009 --> 00:30:04.529
+and therefore they are owned by that connection.
+
+662
+00:30:05.809 --> 00:30:08.250
+So that's the client communication information to the server
+
+663
+00:30:08.250 --> 00:30:11.730
+that might, an example might be passing input along.
+
+664
+00:30:11.730 --> 00:30:14.130
+I just gave an example that a player might
+
+665
+00:30:14.130 --> 00:30:17.089
+on their local machine, do their customizations
+
+666
+00:30:17.089 --> 00:30:20.250
+as in when they've kind of locked those customizations in
+
+667
+00:30:20.250 --> 00:30:21.970
+that that might then be a server call
+
+668
+00:30:21.970 --> 00:30:23.690
+to kind of communicate that information to the server
+
+669
+00:30:23.690 --> 00:30:26.250
+to say, hey, server, I've updated all my customizations
+
+670
+00:30:26.250 --> 00:30:28.450
+and now let the other clients know
+
+671
+00:30:28.450 --> 00:30:31.049
+that my hat should look different or something like that.
+
+672
+00:30:32.289 --> 00:30:33.970
+Then we have client functions.
+
+673
+00:30:33.970 --> 00:30:37.410
+This is functions called on the,
+
+674
+00:30:37.410 --> 00:30:40.369
+from the server to individual clients.
+
+675
+00:30:40.369 --> 00:30:42.730
+Again, this is through a player controller.
+
+676
+00:30:42.730 --> 00:30:45.490
+So this is about a particular owned connection.
+
+677
+00:30:45.490 --> 00:30:47.930
+And then we have multicast that we already talked about.
+
+678
+00:30:47.930 --> 00:30:49.210
+This is a kind of shotgun.
+
+679
+00:30:49.210 --> 00:30:51.170
+This is our function that is just called everywhere.
+
+680
+00:30:51.170 --> 00:30:54.130
+So this might be any data that is kind of like everyone.
+
+681
+00:30:54.130 --> 00:30:56.210
+I know for a fact that every connected client
+
+682
+00:30:56.210 --> 00:30:57.609
+will need to know about this.
+
+683
+00:30:57.609 --> 00:30:59.529
+That might be a case for a multicast.

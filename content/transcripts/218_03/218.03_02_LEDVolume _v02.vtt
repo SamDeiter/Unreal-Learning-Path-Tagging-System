@@ -1,0 +1,2281 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:03.509
+All right, in this section, we're gonna be talking
+
+2
+00:00:03.509 --> 00:00:07.740
+about the LED volume, its hardware, and its processing.
+
+3
+00:00:07.740 --> 00:00:10.519
+All right, here at the latte stage in Culver City,
+
+4
+00:00:10.519 --> 00:00:13.099
+the wall that we utilize implements
+
+5
+00:00:13.099 --> 00:00:16.300
+Black Pearl II panels from Rho,
+
+6
+00:00:16.300 --> 00:00:21.300
+and these panels are 176 pixels by 176 pixels,
+
+7
+00:00:22.420 --> 00:00:25.780
+and they have a pixel pitch of 2.8 millimeters.
+
+8
+00:00:25.780 --> 00:00:27.260
+We have two walls.
+
+9
+00:00:27.260 --> 00:00:31.500
+We have our main wall and a side right-angled wall here.
+
+10
+00:00:31.500 --> 00:00:35.700
+The main wall is 10 panels across by five panels down,
+
+11
+00:00:35.700 --> 00:00:40.700
+which give us a resolution of 1,076 pixels by 880 pixels,
+
+12
+00:00:41.000 --> 00:00:45.500
+while the right-angled wall is a five-by-five panel wall.
+
+13
+00:00:45.500 --> 00:00:49.359
+It's 880 pixels by 880 pixels.
+
+14
+00:00:49.359 --> 00:00:50.780
+We also have a wild wall,
+
+15
+00:00:50.780 --> 00:00:54.920
+which is an 85-inch 4K Sony television.
+
+16
+00:00:54.920 --> 00:00:59.840
+The resolution for it is 3,840 by 2,160,
+
+17
+00:00:59.840 --> 00:01:03.159
+but we have our television rotated vertically,
+
+18
+00:01:03.159 --> 00:01:06.659
+so it would be 2,160 by 3,840.
+
+19
+00:01:06.659 --> 00:01:08.579
+This particular configuration
+
+20
+00:01:08.579 --> 00:01:11.620
+is a great small stage configuration.
+
+21
+00:01:11.620 --> 00:01:14.140
+It works well for simple purposes,
+
+22
+00:01:14.140 --> 00:01:16.260
+and the panel configuration
+
+23
+00:01:16.260 --> 00:01:18.760
+with a 2.8-millimeter pixel pitch
+
+24
+00:01:18.760 --> 00:01:20.859
+is pretty good for a small environment,
+
+25
+00:01:20.859 --> 00:01:24.659
+though an even tighter pixel pitch
+
+26
+00:01:24.659 --> 00:01:27.590
+would probably be a little bit better.
+
+27
+00:01:27.590 --> 00:01:30.730
+All right, for this particular stage,
+
+28
+00:01:30.730 --> 00:01:33.909
+I'm showing a simple wired diagram
+
+29
+00:01:33.909 --> 00:01:36.189
+of how the signal flow is.
+
+30
+00:01:36.189 --> 00:01:39.950
+You have house time code and house genlock,
+
+31
+00:01:39.950 --> 00:01:44.370
+which are feeding specific signals to the mocap network,
+
+32
+00:01:44.370 --> 00:01:47.730
+the camera that's filming the LED wall,
+
+33
+00:01:47.730 --> 00:01:50.170
+any type of recording or capture material,
+
+34
+00:01:50.170 --> 00:01:54.950
+like the Q-Take at the LA R&D stage,
+
+35
+00:01:54.950 --> 00:01:57.489
+or our simple little Kona field recorder
+
+36
+00:01:57.489 --> 00:01:59.250
+and Kona capture card
+
+37
+00:01:59.250 --> 00:02:02.370
+in our facility here in our control machine.
+
+38
+00:02:02.370 --> 00:02:03.909
+Time code and genlock signals
+
+39
+00:02:03.909 --> 00:02:07.010
+are also sent to each control computer
+
+40
+00:02:07.010 --> 00:02:09.889
+and also to each render computer.
+
+41
+00:02:09.889 --> 00:02:14.810
+The render computers are equipped with the A6000 GPUs.
+
+42
+00:02:14.810 --> 00:02:16.370
+They need to be genlocked
+
+43
+00:02:16.370 --> 00:02:19.090
+to make sure that they are drawing pixels
+
+44
+00:02:19.090 --> 00:02:21.990
+in synchronization to the actual wall.
+
+45
+00:02:22.930 --> 00:02:25.370
+The video signals from the render computer,
+
+46
+00:02:25.370 --> 00:02:27.689
+along with the time code and genlock
+
+47
+00:02:27.689 --> 00:02:29.770
+that's being transmitted,
+
+48
+00:02:29.770 --> 00:02:31.849
+will leave those computers
+
+49
+00:02:31.849 --> 00:02:36.009
+and be routed over to the LED processors.
+
+50
+00:02:36.009 --> 00:02:39.250
+And the LED processors in this particular facility,
+
+51
+00:02:39.250 --> 00:02:40.870
+the Latte Stage,
+
+52
+00:02:40.870 --> 00:02:45.129
+this is being driven by the Brompton Tesra SX40.
+
+53
+00:02:45.129 --> 00:02:48.449
+So it receives a video signal in via HDMI
+
+54
+00:02:48.490 --> 00:02:50.310
+in this particular case,
+
+55
+00:02:50.310 --> 00:02:54.650
+and it also receives time code in and genlock in.
+
+56
+00:02:54.650 --> 00:02:57.090
+The Tesra will then take that video signal
+
+57
+00:02:57.090 --> 00:02:58.330
+and it'll convert it
+
+58
+00:02:58.330 --> 00:03:02.930
+to a 10 gigabit fiber video over IP signal
+
+59
+00:03:02.930 --> 00:03:06.169
+and send it to the distribution units.
+
+60
+00:03:06.169 --> 00:03:08.650
+So they're the Brompton distribution units.
+
+61
+00:03:08.650 --> 00:03:11.849
+They'll take that 10 gigabits video over IP signal
+
+62
+00:03:11.849 --> 00:03:16.849
+and break it into smaller one gigabit over video IP signals
+
+63
+00:03:17.169 --> 00:03:20.370
+and route that signal and daisy chain it
+
+64
+00:03:20.370 --> 00:03:22.530
+to each individual panel.
+
+65
+00:03:22.530 --> 00:03:24.930
+Now, the way that that is configured
+
+66
+00:03:24.930 --> 00:03:28.039
+is handled through the Tesra software.
+
+67
+00:03:28.039 --> 00:03:30.180
+So if we look at that software,
+
+68
+00:03:30.180 --> 00:03:31.759
+Brompton will give you the way
+
+69
+00:03:31.759 --> 00:03:34.719
+to specifically configure how the panels
+
+70
+00:03:34.719 --> 00:03:37.199
+will draw and handle that signal.
+
+71
+00:03:37.199 --> 00:03:38.719
+So if you look on the slide here,
+
+72
+00:03:38.719 --> 00:03:43.719
+you see that we have A1, A2, A3, 4, 5, 6, 7, and 8.
+
+73
+00:03:44.000 --> 00:03:47.280
+These each have the specific signal flow
+
+74
+00:03:47.280 --> 00:03:49.759
+as to which panels are hooked up
+
+75
+00:03:49.759 --> 00:03:51.379
+and handled by the processor.
+
+76
+00:03:51.379 --> 00:03:54.319
+And if we look with my camera here,
+
+77
+00:03:54.319 --> 00:03:58.560
+you can see that we have those individual regions
+
+78
+00:03:58.560 --> 00:03:59.599
+on the screen.
+
+79
+00:03:59.599 --> 00:04:04.599
+One will handle between panels E01 through A01,
+
+80
+00:04:05.860 --> 00:04:10.860
+where two will handle E02 all the way up and over
+
+81
+00:04:11.340 --> 00:04:16.370
+and down, and then you have 3, 4, 5, 6, 7, and 8.
+
+82
+00:04:17.529 --> 00:04:20.370
+And each one of these are gonna be controlling
+
+83
+00:04:21.449 --> 00:04:23.649
+the way the video signal is handled
+
+84
+00:04:23.649 --> 00:04:26.129
+and processed by the wall.
+
+85
+00:04:26.129 --> 00:04:29.089
+Now for cameras within side of this facility,
+
+86
+00:04:29.089 --> 00:04:31.230
+there's an array of different choices.
+
+87
+00:04:31.230 --> 00:04:34.370
+We normally like to kind of categorize our high end camera
+
+88
+00:04:34.370 --> 00:04:37.850
+versus our mid range camera and a low end camera.
+
+89
+00:04:37.889 --> 00:04:41.930
+So for the NAND stage and the LA R&D stage,
+
+90
+00:04:41.930 --> 00:04:46.129
+we're running with an Arri Alexa Mini LF camera.
+
+91
+00:04:46.129 --> 00:04:49.529
+This is a large format sensor, full frame.
+
+92
+00:04:49.529 --> 00:04:54.529
+It has no crop factor, essentially 0.98 or 1X crop factor.
+
+93
+00:04:54.649 --> 00:04:57.009
+It is a rolling shutter sensor
+
+94
+00:04:57.009 --> 00:05:02.009
+and the body price comes clocking in at around $60,000.
+
+95
+00:05:03.009 --> 00:05:05.209
+So it is a fairly high end camera.
+
+96
+00:05:05.209 --> 00:05:08.329
+Once you finally get it all decked out with lenses
+
+97
+00:05:08.329 --> 00:05:10.970
+and video assist and your tripod
+
+98
+00:05:10.970 --> 00:05:14.050
+and any other additional accessories you might want,
+
+99
+00:05:14.050 --> 00:05:16.310
+like a follow focus and so forth,
+
+100
+00:05:16.310 --> 00:05:20.569
+this particular high end camera can hit six figures
+
+101
+00:05:20.569 --> 00:05:21.790
+at times.
+
+102
+00:05:21.790 --> 00:05:25.009
+The mid range that we're using here at the Latte stage,
+
+103
+00:05:25.009 --> 00:05:30.009
+this is a Blackmagic Ursa Mini camera, 4.6K generation II.
+
+104
+00:05:30.410 --> 00:05:34.529
+It's a super 35 millimeter sensor, a little bit smaller,
+
+105
+00:05:34.689 --> 00:05:38.490
+but it does have a crop factor of 1.5X
+
+106
+00:05:38.490 --> 00:05:42.209
+and it also is a rolling shutter based camera.
+
+107
+00:05:42.209 --> 00:05:45.290
+Finally, for more independent or low entry level
+
+108
+00:05:45.290 --> 00:05:48.889
+or broadcast solution cameras that you might wanna use
+
+109
+00:05:48.889 --> 00:05:51.649
+for indie production or for broadcast production,
+
+110
+00:05:51.649 --> 00:05:53.850
+we've got like the Panasonic BGH1,
+
+111
+00:05:53.850 --> 00:05:55.750
+which I have sitting here on my desk.
+
+112
+00:05:55.750 --> 00:05:58.250
+This is a micro four thirds sensor.
+
+113
+00:05:58.250 --> 00:06:00.410
+It has a crop factor of 2X
+
+114
+00:06:00.410 --> 00:06:02.970
+and a body price of about two grand.
+
+115
+00:06:02.970 --> 00:06:07.009
+This system fully decked out right around $5,000
+
+116
+00:06:07.009 --> 00:06:10.769
+with your individual video monitor,
+
+117
+00:06:10.769 --> 00:06:12.449
+lenses, the camera body,
+
+118
+00:06:12.449 --> 00:06:15.329
+and any other extras that you might want.
+
+119
+00:06:15.329 --> 00:06:18.430
+Now, when we talk about cameras,
+
+120
+00:06:18.430 --> 00:06:21.029
+there's something that you should really be aware of.
+
+121
+00:06:21.029 --> 00:06:23.069
+There are basically two output signals
+
+122
+00:06:23.069 --> 00:06:24.550
+that you can have from a camera,
+
+123
+00:06:24.550 --> 00:06:28.060
+whether it's SDI or HDMI.
+
+124
+00:06:28.060 --> 00:06:29.819
+There is a general preference
+
+125
+00:06:29.819 --> 00:06:32.379
+that you'll find at most studios.
+
+126
+00:06:32.379 --> 00:06:35.300
+Most studios will rather work with SDI,
+
+127
+00:06:35.300 --> 00:06:38.819
+serial digital interface, versus HDMI,
+
+128
+00:06:38.819 --> 00:06:42.939
+which is high definition multimedia interface.
+
+129
+00:06:42.939 --> 00:06:46.579
+Now, SDI has a big advantage
+
+130
+00:06:46.579 --> 00:06:50.220
+in the sense that it can run longer cable lengths
+
+131
+00:06:50.220 --> 00:06:51.899
+than HDMI.
+
+132
+00:06:51.899 --> 00:06:53.060
+After a certain point,
+
+133
+00:06:53.060 --> 00:06:55.899
+HDMIs might require repeaters
+
+134
+00:06:55.899 --> 00:06:59.860
+in order to potentially run a longer cable.
+
+135
+00:06:59.860 --> 00:07:03.779
+And anytime that you're adding in additional repeaters
+
+136
+00:07:03.779 --> 00:07:05.420
+or signal enhancers,
+
+137
+00:07:05.420 --> 00:07:08.579
+there's a chance that you might introduce some latency.
+
+138
+00:07:08.579 --> 00:07:12.060
+But SDI comes in a number of different flavors as well.
+
+139
+00:07:12.060 --> 00:07:16.800
+There's HD SDI, which is a 720p signal
+
+140
+00:07:16.800 --> 00:07:19.339
+running at 1.48 gigabits per second
+
+141
+00:07:19.339 --> 00:07:21.259
+worth of data and information,
+
+142
+00:07:21.259 --> 00:07:23.779
+all the way up to 12G SDI,
+
+143
+00:07:23.779 --> 00:07:28.079
+which will handle a 2160p 60 frames per second signal.
+
+144
+00:07:28.079 --> 00:07:31.639
+And it's running at 12 gigabits per second
+
+145
+00:07:31.639 --> 00:07:33.759
+worth of data and information.
+
+146
+00:07:33.759 --> 00:07:36.839
+So the thing to remember about this,
+
+147
+00:07:36.839 --> 00:07:41.839
+the faster your SDI speed gets, like the 12G SDI,
+
+148
+00:07:42.139 --> 00:07:46.439
+the more sensitive these particular cables
+
+149
+00:07:46.439 --> 00:07:49.800
+and circuitry can be to voltage issues and problems.
+
+150
+00:07:49.800 --> 00:07:52.319
+So you're always wanting to remember
+
+151
+00:07:52.319 --> 00:07:53.600
+to make sure that you're dealing
+
+152
+00:07:53.600 --> 00:07:56.279
+with grounded components and equipment,
+
+153
+00:07:56.279 --> 00:07:57.800
+that your power is hooked up
+
+154
+00:07:57.800 --> 00:08:01.279
+before you start hooking up your BNC cables.
+
+155
+00:08:01.279 --> 00:08:02.899
+If you don't have a grounded source
+
+156
+00:08:02.899 --> 00:08:05.079
+and you plug in an SDI cable,
+
+157
+00:08:05.079 --> 00:08:07.040
+there's a chance that you might short out
+
+158
+00:08:07.040 --> 00:08:10.720
+the SDI circuitry and completely destroy your camera.
+
+159
+00:08:10.720 --> 00:08:13.040
+And that's not something that you wanna do.
+
+160
+00:08:13.040 --> 00:08:14.980
+Talking about timecode.
+
+161
+00:08:14.980 --> 00:08:17.620
+Timecode, in essence, it's a signal
+
+162
+00:08:17.620 --> 00:08:22.620
+and a way to divide the measurement of time across frames.
+
+163
+00:08:23.139 --> 00:08:27.660
+So timecode generators will synchronize the first frame
+
+164
+00:08:27.660 --> 00:08:30.680
+across all common devices that are hooked up
+
+165
+00:08:30.680 --> 00:08:32.779
+to a timecode generator.
+
+166
+00:08:32.779 --> 00:08:36.620
+Normally you'll have one in your machine room
+
+167
+00:08:36.620 --> 00:08:40.179
+along with a genlock generator as well.
+
+168
+00:08:40.179 --> 00:08:42.919
+There are two flavors of timecode.
+
+169
+00:08:42.919 --> 00:08:45.659
+You have linear timecode or LTC,
+
+170
+00:08:45.659 --> 00:08:49.940
+which is basically a signal that will be written
+
+171
+00:08:49.940 --> 00:08:51.759
+onto the audio track.
+
+172
+00:08:51.759 --> 00:08:55.860
+Whereas there is a vertical interval timecode
+
+173
+00:08:55.860 --> 00:08:59.000
+or VITC timecode that can actually be written
+
+174
+00:08:59.000 --> 00:09:00.679
+into the video track.
+
+175
+00:09:00.679 --> 00:09:04.080
+So the big difference between the two,
+
+176
+00:09:04.080 --> 00:09:08.399
+VITC timecode will allow you to scrub your playback
+
+177
+00:09:08.399 --> 00:09:10.960
+or slow down or speed up your playback
+
+178
+00:09:10.960 --> 00:09:13.799
+and it'll maintain timecode effectively.
+
+179
+00:09:13.799 --> 00:09:17.399
+Whereas linear timecode doesn't have that option.
+
+180
+00:09:17.399 --> 00:09:21.039
+Like I said, it's being written onto your audio track
+
+181
+00:09:21.159 --> 00:09:24.799
+and you cannot deploy any kind of slowing down
+
+182
+00:09:24.799 --> 00:09:28.480
+or speeding up of playback speed, recording speed,
+
+183
+00:09:28.480 --> 00:09:29.759
+or scrubbing that at all.
+
+184
+00:09:29.759 --> 00:09:32.639
+So there is a limitation with LTC.
+
+185
+00:09:32.639 --> 00:09:37.220
+The big advantage of LTC is it's pretty much more common.
+
+186
+00:09:37.220 --> 00:09:41.320
+And there's a number of ways that you can use LTC
+
+187
+00:09:41.320 --> 00:09:44.200
+and take that recorded material and synchronize it
+
+188
+00:09:44.200 --> 00:09:45.600
+in your software.
+
+189
+00:09:45.600 --> 00:09:48.240
+Like whether you're using some form
+
+190
+00:09:48.240 --> 00:09:53.179
+of nonlinear editing tools to put this all together.
+
+191
+00:09:53.179 --> 00:09:58.019
+There is a process that we commonly call jamming timecode.
+
+192
+00:09:58.019 --> 00:10:02.860
+Now on some cameras, the Blackmagic Ursa in particular,
+
+193
+00:10:02.860 --> 00:10:07.179
+it only has one BNC port to actually handle
+
+194
+00:10:07.179 --> 00:10:09.980
+either timecode or genlock.
+
+195
+00:10:09.980 --> 00:10:11.980
+And I'm gonna pick up my camera here.
+
+196
+00:10:11.980 --> 00:10:13.639
+I'm gonna show you what that looks like
+
+197
+00:10:13.639 --> 00:10:15.580
+on the Blackmagic.
+
+198
+00:10:15.580 --> 00:10:18.820
+So if we look at the Blackmagic camera,
+
+199
+00:10:18.820 --> 00:10:22.419
+you're gonna see that there are three ports here.
+
+200
+00:10:22.419 --> 00:10:24.879
+I'm gonna move this out of the way so you can see.
+
+201
+00:10:24.879 --> 00:10:27.320
+You can see that we have an SDI out,
+
+202
+00:10:27.320 --> 00:10:29.139
+we have an SDI in,
+
+203
+00:10:29.139 --> 00:10:32.100
+and we have reference in and timecode in.
+
+204
+00:10:32.100 --> 00:10:34.179
+It's this bottom port down here
+
+205
+00:10:34.179 --> 00:10:36.740
+that handles both timecode and genlock
+
+206
+00:10:36.740 --> 00:10:39.179
+for this particular camera.
+
+207
+00:10:39.179 --> 00:10:42.399
+There is one more SDI port up here in the front,
+
+208
+00:10:42.399 --> 00:10:45.799
+but this basically will lead to your field monitor
+
+209
+00:10:45.799 --> 00:10:46.940
+that we have attached here.
+
+210
+00:10:46.940 --> 00:10:49.080
+This is the Atomos Shogun.
+
+211
+00:10:49.080 --> 00:10:54.080
+But getting back to jamming timecode,
+
+212
+00:10:54.279 --> 00:10:56.779
+the nice thing about most professional cameras
+
+213
+00:10:56.779 --> 00:11:00.759
+is that they have their own timecode clock inside of it.
+
+214
+00:11:00.759 --> 00:11:03.200
+And that clock is very accurate.
+
+215
+00:11:03.200 --> 00:11:06.360
+And when you jam timecode,
+
+216
+00:11:06.360 --> 00:11:09.360
+you're basically taking the timecode cable,
+
+217
+00:11:09.360 --> 00:11:11.100
+in this case, it's this one.
+
+218
+00:11:11.980 --> 00:11:12.820
+Where is it?
+
+219
+00:11:12.820 --> 00:11:14.320
+There, timecode in.
+
+220
+00:11:14.320 --> 00:11:17.340
+You would plug this into this port
+
+221
+00:11:17.340 --> 00:11:20.860
+and it would synchronize your camera's clock
+
+222
+00:11:20.860 --> 00:11:24.259
+to the house clock in your machine room.
+
+223
+00:11:24.259 --> 00:11:26.539
+Once that process takes place,
+
+224
+00:11:26.539 --> 00:11:30.419
+you can unplug timecode and plug in genlock
+
+225
+00:11:30.419 --> 00:11:32.700
+and it will then genlock the camera
+
+226
+00:11:32.700 --> 00:11:35.419
+to your genlock generator in your machine room.
+
+227
+00:11:35.419 --> 00:11:37.620
+So the only time that you need
+
+228
+00:11:37.659 --> 00:11:39.659
+to continue jamming timecode
+
+229
+00:11:39.659 --> 00:11:42.740
+is probably a couple times a day
+
+230
+00:11:42.740 --> 00:11:44.899
+because there is the possibility
+
+231
+00:11:44.899 --> 00:11:47.960
+for your camera's clock to drift over time.
+
+232
+00:11:47.960 --> 00:11:51.519
+And a simple jamming will take care of that.
+
+233
+00:11:51.519 --> 00:11:53.940
+So I would recommend that you jam timecode
+
+234
+00:11:53.940 --> 00:11:56.899
+when you first come in during the day,
+
+235
+00:11:56.899 --> 00:12:00.450
+probably over lunch and then later in the afternoon.
+
+236
+00:12:00.450 --> 00:12:01.870
+I mentioned genlock.
+
+237
+00:12:01.870 --> 00:12:03.230
+Well, what is genlock?
+
+238
+00:12:03.230 --> 00:12:06.710
+Genlock is another type of syncing signal
+
+239
+00:12:06.710 --> 00:12:09.909
+that helps with making sure that everything
+
+240
+00:12:09.909 --> 00:12:14.210
+is drawing your pixels and scan line information
+
+241
+00:12:14.210 --> 00:12:15.629
+at the same time.
+
+242
+00:12:15.629 --> 00:12:20.820
+So genlock, your machine room will likely have
+
+243
+00:12:20.899 --> 00:12:25.899
+a genlock generator rack-mounted in your systems there.
+
+244
+00:12:26.279 --> 00:12:30.679
+That genlock will then be transmitted via wires
+
+245
+00:12:30.679 --> 00:12:32.820
+to all of your various devices
+
+246
+00:12:32.820 --> 00:12:35.059
+within your ICVFX facility.
+
+247
+00:12:35.059 --> 00:12:36.820
+It will go to your control machines,
+
+248
+00:12:37.700 --> 00:12:40.419
+your render machines, your cameras, your field recorders,
+
+249
+00:12:40.419 --> 00:12:45.419
+anything that relies on making sure things are synchronized.
+
+250
+00:12:45.700 --> 00:12:50.860
+So in your render machines in particular,
+
+251
+00:12:51.980 --> 00:12:54.299
+this is extremely essential
+
+252
+00:12:54.299 --> 00:12:56.779
+because when you have an LED volume,
+
+253
+00:12:56.779 --> 00:12:59.200
+especially a large LED volume,
+
+254
+00:12:59.200 --> 00:13:01.580
+that volume is probably being divided up
+
+255
+00:13:01.580 --> 00:13:03.539
+amongst a number of different nodes
+
+256
+00:13:03.539 --> 00:13:06.940
+that are handling specific portions of the screen.
+
+257
+00:13:07.860 --> 00:13:10.960
+Those nodes, which are handled by end display,
+
+258
+00:13:11.899 --> 00:13:14.940
+are all being rendered on different computers.
+
+259
+00:13:14.940 --> 00:13:17.340
+And each computer needs to make sure
+
+260
+00:13:17.340 --> 00:13:20.539
+that they are rendering the graphics together
+
+261
+00:13:20.539 --> 00:13:22.340
+at the same time.
+
+262
+00:13:22.340 --> 00:13:24.179
+If you don't have that happen,
+
+263
+00:13:24.179 --> 00:13:26.019
+as you see in this particular example
+
+264
+00:13:26.019 --> 00:13:28.019
+of the bouncing ball here on the screen,
+
+265
+00:13:28.019 --> 00:13:31.460
+you see how it tears like that on the screen?
+
+266
+00:13:31.460 --> 00:13:34.220
+That means that the two nodes
+
+267
+00:13:34.220 --> 00:13:37.740
+that are rendering that information are not in sync.
+
+268
+00:13:37.740 --> 00:13:40.460
+So in order to put them in sync,
+
+269
+00:13:40.460 --> 00:13:41.779
+there's an extra card
+
+270
+00:13:41.779 --> 00:13:43.620
+that you're gonna have to have installed
+
+271
+00:13:43.620 --> 00:13:45.279
+in each one of these render machines.
+
+272
+00:13:45.279 --> 00:13:47.820
+It's the Quadro Sync 2 card.
+
+273
+00:13:47.820 --> 00:13:50.659
+And this card basically resides in a slot.
+
+274
+00:13:50.659 --> 00:13:53.059
+It actually doesn't have to use that slot
+
+275
+00:13:53.059 --> 00:13:56.179
+for anything to communicate with the computer.
+
+276
+00:13:56.179 --> 00:13:58.019
+It just resides in that slot.
+
+277
+00:13:58.019 --> 00:13:58.860
+You have to hook it up
+
+278
+00:13:58.860 --> 00:14:01.980
+to your power supply inside of the computer.
+
+279
+00:14:01.980 --> 00:14:04.960
+And then using the BNC connector
+
+280
+00:14:04.960 --> 00:14:06.500
+on the backside of the card,
+
+281
+00:14:06.500 --> 00:14:09.259
+you hook up time code there,
+
+282
+00:14:09.259 --> 00:14:13.740
+and there will be one machine that will act as a master.
+
+283
+00:14:13.740 --> 00:14:18.460
+And then that genlock signal can then be passed through
+
+284
+00:14:18.460 --> 00:14:21.559
+to other render nodes in your machine room
+
+285
+00:14:21.559 --> 00:14:24.100
+via an internet cable.
+
+286
+00:14:24.100 --> 00:14:26.580
+And you can see that there are internet connection ports
+
+287
+00:14:26.580 --> 00:14:28.320
+on the back of that.
+
+288
+00:14:28.320 --> 00:14:33.120
+This Quadro Sync 2 card basically hooks up
+
+289
+00:14:33.120 --> 00:14:36.500
+to your your Quadro A6000.
+
+290
+00:14:36.500 --> 00:14:38.840
+There's ports on top of this card.
+
+291
+00:14:38.840 --> 00:14:40.620
+You can see that there are four,
+
+292
+00:14:40.620 --> 00:14:42.460
+actually five ports upon the top.
+
+293
+00:14:42.460 --> 00:14:44.480
+I think four of them are active
+
+294
+00:14:44.480 --> 00:14:47.860
+to be able to hook into up to four graphics cards
+
+295
+00:14:47.860 --> 00:14:50.870
+inside of a single computer.
+
+296
+00:14:50.870 --> 00:14:55.389
+So you'll basically want to wire connect them
+
+297
+00:14:55.389 --> 00:14:59.429
+to a connection port on top of the A6000 cards,
+
+298
+00:14:59.429 --> 00:15:01.990
+along with each A6000 cards
+
+299
+00:15:01.990 --> 00:15:07.009
+being linked together via SDI, or excuse me, SLI.
+
+300
+00:15:07.009 --> 00:15:11.289
+Okay, so genlock basically keeps everything
+
+301
+00:15:11.289 --> 00:15:14.769
+drawing together and in sync.
+
+302
+00:15:14.769 --> 00:15:17.509
+For tracking systems inside of your facility,
+
+303
+00:15:17.509 --> 00:15:19.129
+there are a number of different ways
+
+304
+00:15:19.129 --> 00:15:21.049
+to go about doing this.
+
+305
+00:15:21.049 --> 00:15:24.809
+There is the OptiTrack system that we have at Latte
+
+306
+00:15:24.809 --> 00:15:27.350
+and also at the LA R&D stage.
+
+307
+00:15:27.350 --> 00:15:29.210
+It's running the Motive software,
+
+308
+00:15:29.210 --> 00:15:32.090
+but you can also use Vicon and Shogun,
+
+309
+00:15:32.090 --> 00:15:33.889
+also a great alternative.
+
+310
+00:15:33.889 --> 00:15:38.330
+And for more independent style productions,
+
+311
+00:15:38.330 --> 00:15:40.090
+and you don't have a very large budget,
+
+312
+00:15:40.090 --> 00:15:44.129
+you could possibly use the Vive trackers.
+
+313
+00:15:44.129 --> 00:15:47.690
+And they also have now the Vive Mars system,
+
+314
+00:15:47.690 --> 00:15:50.610
+which is a very good low cost alternative
+
+315
+00:15:50.610 --> 00:15:54.200
+for tracking your camera and devices.
+
+316
+00:15:54.200 --> 00:15:55.759
+All right, in this next section,
+
+317
+00:15:55.759 --> 00:15:58.360
+we're gonna review the components of the camera
+
+318
+00:15:58.360 --> 00:16:00.700
+and assemble a camera.
+
+319
+00:16:00.700 --> 00:16:02.639
+We have a number of particular parts
+
+320
+00:16:02.639 --> 00:16:04.399
+that you should be taking a look at.
+
+321
+00:16:04.399 --> 00:16:06.879
+Let's first, we'll go over the table here,
+
+322
+00:16:06.879 --> 00:16:07.879
+what we've got on the table.
+
+323
+00:16:07.879 --> 00:16:11.139
+So we've got the Blackmagic Ursa Mini G2.
+
+324
+00:16:11.139 --> 00:16:13.159
+This is the camera's body.
+
+325
+00:16:13.159 --> 00:16:16.600
+On top of it, we do have what's called a cheese plate.
+
+326
+00:16:16.600 --> 00:16:19.240
+This cheese plate can hold various accessories,
+
+327
+00:16:19.240 --> 00:16:20.600
+a lot of number of different places
+
+328
+00:16:20.600 --> 00:16:22.580
+where you can screw things into.
+
+329
+00:16:22.580 --> 00:16:24.700
+In this case, we've got a little arm here
+
+330
+00:16:24.700 --> 00:16:27.399
+which you can hold our Atomos monitor,
+
+331
+00:16:27.399 --> 00:16:29.700
+and a place, a connection point
+
+332
+00:16:29.700 --> 00:16:31.659
+where we'll put on our tracking line.
+
+333
+00:16:33.169 --> 00:16:37.009
+Over here, this is the camera cage that we have.
+
+334
+00:16:37.009 --> 00:16:39.529
+It's not a complete full encompassing cage,
+
+335
+00:16:39.529 --> 00:16:43.129
+but this particular setup here is,
+
+336
+00:16:43.129 --> 00:16:45.230
+it has a number of additional rails
+
+337
+00:16:45.230 --> 00:16:48.110
+where we can mount something on the back here
+
+338
+00:16:48.110 --> 00:16:49.970
+for like a shoulder support,
+
+339
+00:16:49.970 --> 00:16:52.289
+so it can rest on one's shoulders.
+
+340
+00:16:52.850 --> 00:16:55.289
+We also have front forward grips
+
+341
+00:16:55.289 --> 00:16:58.850
+so that when you bring this, you can take this up.
+
+342
+00:16:58.850 --> 00:17:02.190
+Basically, it mounts like this and so forth.
+
+343
+00:17:03.129 --> 00:17:06.339
+Usually, it's pretty comfortable.
+
+344
+00:17:06.339 --> 00:17:08.900
+These are, like I said, these are parts and components
+
+345
+00:17:08.900 --> 00:17:12.940
+that you can buy at various stores and camera shops
+
+346
+00:17:12.940 --> 00:17:14.579
+in order to assemble something like this
+
+347
+00:17:14.579 --> 00:17:15.859
+that you might need.
+
+348
+00:17:15.859 --> 00:17:18.980
+We have a battery pack, again, gold plate.
+
+349
+00:17:18.980 --> 00:17:22.700
+Instead of V plate, gold plate, as you can see, gold.
+
+350
+00:17:23.960 --> 00:17:25.440
+We have a lens.
+
+351
+00:17:25.440 --> 00:17:30.400
+This is the Zeiss Compact Prime, 25 millimeter lens.
+
+352
+00:17:31.440 --> 00:17:34.539
+You have the extended data port up on the top,
+
+353
+00:17:34.539 --> 00:17:36.720
+and you can see that it's a prime.
+
+354
+00:17:36.720 --> 00:17:40.690
+It's rated at a 25 millimeter.
+
+355
+00:17:40.690 --> 00:17:42.089
+We've got the tracking mine.
+
+356
+00:17:42.089 --> 00:17:44.289
+This is the active tracking mine.
+
+357
+00:17:44.289 --> 00:17:47.529
+This is basically active markers here
+
+358
+00:17:47.529 --> 00:17:52.390
+along with an inertial measurement unit inside.
+
+359
+00:17:52.390 --> 00:17:56.349
+You've got the USB and cable connection
+
+360
+00:17:56.349 --> 00:18:00.150
+that hooks into and powers this particular mine.
+
+361
+00:18:00.150 --> 00:18:05.150
+The USB port plug-in will plug into the USB port
+
+362
+00:18:05.190 --> 00:18:09.150
+on the actual camera itself, or excuse me,
+
+363
+00:18:09.150 --> 00:18:10.029
+the battery itself.
+
+364
+00:18:10.029 --> 00:18:17.250
+There it is right there, USB connection here.
+
+365
+00:18:17.250 --> 00:18:21.619
+All right, just for an example,
+
+366
+00:18:21.619 --> 00:18:26.039
+we do have a passive tracking marker set up here.
+
+367
+00:18:26.039 --> 00:18:29.359
+This is what we utilized before we got our active tracker.
+
+368
+00:18:30.240 --> 00:18:34.480
+It's just simply IR reflective little balls here
+
+369
+00:18:34.480 --> 00:18:38.079
+that are on top of these mounted positions.
+
+370
+00:18:38.079 --> 00:18:41.440
+This was a 3D printed little connection point,
+
+371
+00:18:42.319 --> 00:18:44.880
+but in a pinch, this works just in case
+
+372
+00:18:44.880 --> 00:18:47.640
+we ever have a problem with our active mine.
+
+373
+00:18:49.109 --> 00:18:52.470
+We also have the Atomos field recorder.
+
+374
+00:18:52.470 --> 00:18:54.309
+This one's a Shogun model.
+
+375
+00:18:54.309 --> 00:18:58.950
+This particular field recorder is nice in the fact
+
+376
+00:18:58.950 --> 00:19:00.750
+that it has a number of connections
+
+377
+00:19:00.750 --> 00:19:03.990
+on the back for SDI inputs.
+
+378
+00:19:03.990 --> 00:19:07.970
+It also is really nice in that it comes equipped
+
+379
+00:19:07.970 --> 00:19:09.529
+with a hard drive.
+
+380
+00:19:09.529 --> 00:19:14.529
+So this is a four terabyte SSD that simply plugs in.
+
+381
+00:19:15.150 --> 00:19:18.160
+Soon as we get this on here,
+
+382
+00:19:18.160 --> 00:19:20.890
+I say simply, there we go,
+
+383
+00:19:20.890 --> 00:19:23.009
+and slides in and it's connected.
+
+384
+00:19:23.049 --> 00:19:26.890
+And now you can record anything that the camera sees.
+
+385
+00:19:26.890 --> 00:19:29.329
+It also has two connections for batteries
+
+386
+00:19:29.329 --> 00:19:30.569
+that you can plug in here
+
+387
+00:19:30.569 --> 00:19:32.609
+so that can be battery powered.
+
+388
+00:19:32.609 --> 00:19:35.410
+It has HDMI in and out as well.
+
+389
+00:19:35.410 --> 00:19:38.809
+And our connection port point here on the top,
+
+390
+00:19:38.809 --> 00:19:41.809
+which connects to this connection port here
+
+391
+00:19:41.809 --> 00:19:43.869
+on your cheese plate.
+
+392
+00:19:43.869 --> 00:19:46.589
+We do have an extra SDI cable
+
+393
+00:19:46.589 --> 00:19:49.109
+to hook up the camera to the Atomos
+
+394
+00:19:49.109 --> 00:19:51.529
+and that's the power supply for the Atomos.
+
+395
+00:19:51.529 --> 00:19:53.130
+We also have a tripod.
+
+396
+00:19:53.970 --> 00:19:56.089
+We'll just go over here, just look at this really quick.
+
+397
+00:19:56.089 --> 00:19:57.250
+You have your tripod,
+
+398
+00:19:57.250 --> 00:19:59.930
+you have the power supply for the camera,
+
+399
+00:19:59.930 --> 00:20:04.930
+which is, this is your AC power connector port there.
+
+400
+00:20:06.289 --> 00:20:07.569
+We also have,
+
+401
+00:20:10.710 --> 00:20:13.289
+we've hooked up a power strip at the bottom here
+
+402
+00:20:13.289 --> 00:20:16.410
+to make sure that we are doing our best
+
+403
+00:20:16.410 --> 00:20:18.829
+to make sure that power is grounded
+
+404
+00:20:18.829 --> 00:20:21.130
+and that power is protected.
+
+405
+00:20:21.130 --> 00:20:24.269
+And then we have our series of cables here.
+
+406
+00:20:24.269 --> 00:20:27.490
+We have SDI out.
+
+407
+00:20:27.490 --> 00:20:33.420
+We have, if it can be red, Genlock here.
+
+408
+00:20:33.640 --> 00:20:35.579
+And then we have timecode in
+
+409
+00:20:35.579 --> 00:20:37.140
+and each one of these are gonna be hooking up
+
+410
+00:20:37.140 --> 00:20:40.660
+to the ports on the camera.
+
+411
+00:20:40.660 --> 00:20:43.420
+All right.
+
+412
+00:20:43.420 --> 00:20:45.460
+So first and foremost,
+
+413
+00:20:45.460 --> 00:20:49.940
+we need to put our camera onto our mount here.
+
+414
+00:20:49.940 --> 00:20:51.759
+You can see that there's been a plate
+
+415
+00:20:51.759 --> 00:20:54.019
+that's been attached to the bottom of the camera
+
+416
+00:20:54.019 --> 00:20:55.220
+and screwed in.
+
+417
+00:20:55.220 --> 00:21:04.740
+This plate will effectively mount inside here.
+
+418
+00:21:05.099 --> 00:21:06.759
+And then on the back,
+
+419
+00:21:06.759 --> 00:21:07.920
+there's a little connection
+
+420
+00:21:07.920 --> 00:21:11.609
+that will hold the camera in place.
+
+421
+00:21:11.609 --> 00:21:22.569
+So we're just gonna basically put this on here.
+
+422
+00:21:22.569 --> 00:21:24.289
+And of course, it's not gonna be
+
+423
+00:21:24.289 --> 00:21:29.160
+the easiest thing at times.
+
+424
+00:21:29.160 --> 00:21:50.539
+Make sure to screw this portion back here in.
+
+425
+00:21:50.539 --> 00:21:51.740
+The main concern is,
+
+426
+00:21:51.740 --> 00:21:52.839
+is that you wanna make sure
+
+427
+00:21:52.839 --> 00:21:55.039
+that the camera is fully locked down,
+
+428
+00:21:55.039 --> 00:22:08.859
+which as you can see, it's not quite yet.
+
+429
+00:22:08.859 --> 00:22:21.779
+Of course, it happens all the time.
+
+430
+00:22:21.779 --> 00:22:28.279
+Don't give up if it does happen this way.
+
+431
+00:22:28.279 --> 00:22:32.420
+There we go.
+
+432
+00:22:32.420 --> 00:22:44.019
+It can be fickle.
+
+433
+00:22:44.019 --> 00:23:08.799
+Tightening it down can be a challenge.
+
+434
+00:23:08.799 --> 00:23:10.940
+There we go.
+
+435
+00:23:10.940 --> 00:23:13.140
+The main concern is, is you want it tight.
+
+436
+00:23:13.140 --> 00:23:15.099
+You don't want the camera to fall off,
+
+437
+00:23:17.019 --> 00:23:19.259
+obviously for all particular reasons.
+
+438
+00:23:21.380 --> 00:23:22.799
+All right, we're good.
+
+439
+00:23:22.799 --> 00:23:26.400
+So the camera is now on its rail system.
+
+440
+00:23:26.400 --> 00:23:33.910
+We need to mount this onto the tripod.
+
+441
+00:23:33.910 --> 00:23:35.970
+Now, as you notice here underneath
+
+442
+00:23:35.970 --> 00:23:39.609
+that there is a specific mounting bracket here,
+
+443
+00:23:39.609 --> 00:23:43.650
+which slides into on the top of the tripod
+
+444
+00:23:43.650 --> 00:23:45.049
+on the fluid head.
+
+445
+00:23:45.049 --> 00:23:47.789
+There is this particular button
+
+446
+00:23:47.789 --> 00:23:50.869
+that will help to release the camera
+
+447
+00:23:50.869 --> 00:23:54.730
+when it's being slid onto.
+
+448
+00:23:54.730 --> 00:24:02.720
+So we're gonna basically mount this here.
+
+449
+00:24:02.720 --> 00:24:07.869
+It can be challenging.
+
+450
+00:24:07.869 --> 00:24:10.670
+You see how it slides forward like that?
+
+451
+00:24:10.670 --> 00:24:13.009
+You might alert you for a moment,
+
+452
+00:24:13.009 --> 00:24:14.849
+but it won't slide off.
+
+453
+00:24:14.849 --> 00:24:17.190
+It will go out to this specific point.
+
+454
+00:24:17.190 --> 00:24:19.529
+And now with this detent button here,
+
+455
+00:24:19.529 --> 00:24:22.430
+if I slide it back, it will never fall off back.
+
+456
+00:24:22.430 --> 00:24:23.450
+So that's what's really nice
+
+457
+00:24:23.450 --> 00:24:25.809
+about these types of systems.
+
+458
+00:24:25.809 --> 00:24:27.930
+And you can center the camera on it
+
+459
+00:24:27.930 --> 00:24:31.680
+and lock it into place.
+
+460
+00:24:31.680 --> 00:24:32.500
+Here we go.
+
+461
+00:24:32.500 --> 00:24:35.420
+It's all locked in place.
+
+462
+00:24:35.420 --> 00:24:39.829
+Next, I'll go ahead and take our lens.
+
+463
+00:24:39.829 --> 00:24:43.190
+We can make sure that with the compact primes,
+
+464
+00:24:43.190 --> 00:24:44.970
+you've got the extended data port.
+
+465
+00:24:44.970 --> 00:24:48.269
+You're gonna want to have this facing top side up.
+
+466
+00:24:48.269 --> 00:24:50.779
+And it's just simply gonna go in
+
+467
+00:24:50.779 --> 00:24:53.529
+and you're gonna rotate this.
+
+468
+00:24:53.529 --> 00:24:59.779
+Sorry, there we go.
+
+469
+00:24:59.779 --> 00:25:02.660
+As such, it's a little bit tricky at times.
+
+470
+00:25:02.660 --> 00:25:05.299
+You wanna make sure that it gets fully tight
+
+471
+00:25:05.299 --> 00:25:06.980
+and that the lens is on good.
+
+472
+00:25:06.980 --> 00:25:09.640
+And then if you want, you can leave the lens cap on
+
+473
+00:25:09.640 --> 00:25:12.779
+or take it off whenever you're ready.
+
+474
+00:25:12.779 --> 00:25:18.509
+Okay, let's go ahead and take the Atomos monitor.
+
+475
+00:25:18.509 --> 00:25:21.880
+And we'll just simply bring it over here
+
+476
+00:25:21.880 --> 00:25:31.319
+and we will slide it into place.
+
+477
+00:25:31.319 --> 00:25:34.180
+These are designed to just simply slide and lock.
+
+478
+00:25:34.180 --> 00:25:36.960
+Once they're on, it won't move anywhere.
+
+479
+00:25:36.960 --> 00:25:40.119
+And you can position and change this arm here
+
+480
+00:25:40.119 --> 00:25:44.180
+and have it where you want the most,
+
+481
+00:25:44.180 --> 00:25:46.019
+depending upon what you need.
+
+482
+00:25:46.019 --> 00:25:47.460
+I'm gonna just hold it up for a second
+
+483
+00:25:47.460 --> 00:25:52.279
+cause we'll put the battery on.
+
+484
+00:25:52.279 --> 00:25:57.240
+The battery, like I said, being gold plate connection,
+
+485
+00:25:57.240 --> 00:26:01.700
+you've got your mounting points here, here and here.
+
+486
+00:26:01.700 --> 00:26:06.589
+You're gonna want to align those up as such.
+
+487
+00:26:06.589 --> 00:26:09.769
+So you slide them on and slide to the right.
+
+488
+00:26:09.769 --> 00:26:13.069
+Now this battery is connected and can power the camera.
+
+489
+00:26:13.069 --> 00:26:17.190
+And then at this point, I can kind of re-associate this
+
+490
+00:26:17.190 --> 00:26:26.230
+so that this is in place.
+
+491
+00:26:26.230 --> 00:26:31.799
+All right, we'll also go ahead and hook up the mine
+
+492
+00:26:31.799 --> 00:26:35.349
+just so that we have it on.
+
+493
+00:26:35.670 --> 00:26:37.789
+Mine is in place.
+
+494
+00:26:37.789 --> 00:26:43.920
+We have our power connector is over here.
+
+495
+00:26:43.920 --> 00:26:46.420
+We'll get to hooking up power in just a moment.
+
+496
+00:26:46.420 --> 00:26:49.880
+Now, before we hook up any kind of SDI cables,
+
+497
+00:26:49.880 --> 00:26:52.460
+we got to always remember that our accessories
+
+498
+00:26:52.460 --> 00:26:55.160
+and our camera, everything else needs to be hooked up
+
+499
+00:26:55.160 --> 00:26:56.160
+with their power first
+
+500
+00:26:56.160 --> 00:26:58.200
+so that they can be grounded properly.
+
+501
+00:26:58.200 --> 00:27:03.609
+So on the Atomos, I'll plug in its power supply.
+
+502
+00:27:09.549 --> 00:27:12.799
+Make sure it's in the grounded strip here.
+
+503
+00:27:13.240 --> 00:27:16.839
+Our camera also, we want to make sure
+
+504
+00:27:16.839 --> 00:27:20.799
+its AC power is hooked up.
+
+505
+00:27:20.799 --> 00:27:26.200
+All right, so now we have camera,
+
+506
+00:27:26.200 --> 00:27:30.299
+camera power is applied, the Atomos power is applied.
+
+507
+00:27:30.299 --> 00:27:32.440
+These are two are grounded source,
+
+508
+00:27:32.440 --> 00:27:39.920
+so that makes me much more comfortable.
+
+509
+00:27:39.920 --> 00:27:45.160
+Next, we can take the SDI output from the camera
+
+510
+00:27:45.160 --> 00:27:48.359
+and we can hook it into the Atomos here on the back.
+
+511
+00:27:48.359 --> 00:27:49.640
+So in this particular case,
+
+512
+00:27:49.640 --> 00:27:58.519
+I'm going to put it into the 12G in, there we go.
+
+513
+00:27:58.519 --> 00:28:03.509
+And this should be about ready to go for this.
+
+514
+00:28:03.509 --> 00:28:06.190
+We need to supply power to the mine.
+
+515
+00:28:06.190 --> 00:28:10.380
+So if you want to move Sean over to this side,
+
+516
+00:28:10.380 --> 00:28:17.779
+we need to plug this in here as such.
+
+517
+00:28:17.779 --> 00:28:22.240
+And then the USB power has to be plugged into the battery
+
+518
+00:28:22.240 --> 00:28:24.480
+and that is actually over on the other side.
+
+519
+00:28:24.480 --> 00:28:29.480
+Sorry, Sean.
+
+520
+00:28:29.480 --> 00:28:37.170
+We have a USB power down here, there we go.
+
+521
+00:28:39.079 --> 00:28:44.700
+All right, at this particular stage,
+
+522
+00:28:44.700 --> 00:28:49.700
+now that we have the camera grounded and hooked into power,
+
+523
+00:28:50.599 --> 00:28:53.819
+we can go ahead and connect our SDI cables.
+
+524
+00:28:54.779 --> 00:28:57.380
+So we have SDI out, which is going to be
+
+525
+00:28:57.380 --> 00:29:05.380
+from the SDI port on the camera here.
+
+526
+00:29:05.380 --> 00:29:10.380
+And then we have a time code in and gen lock in.
+
+527
+00:29:10.460 --> 00:29:12.680
+So if this is the first time
+
+528
+00:29:12.680 --> 00:29:14.420
+you are hooking up your camera,
+
+529
+00:29:15.299 --> 00:29:16.539
+put the time code in first
+
+530
+00:29:16.539 --> 00:29:21.940
+so that we can jam the time code to the camera.
+
+531
+00:29:21.940 --> 00:29:27.890
+So we'll go ahead and put time code in, there we go.
+
+532
+00:29:27.890 --> 00:29:30.690
+All right, so this camera is assembled.
+
+533
+00:29:30.690 --> 00:29:34.680
+So what we'll do is we'll turn everything on.
+
+534
+00:29:34.680 --> 00:29:39.900
+We'll turn on the Shogun first.
+
+535
+00:29:39.900 --> 00:29:43.920
+You'll get a small red dot over here
+
+536
+00:29:43.920 --> 00:29:45.400
+and the Shogun should power up.
+
+537
+00:29:45.400 --> 00:29:47.869
+It'll be sitting there waiting.
+
+538
+00:29:47.869 --> 00:29:53.619
+And then on the Black Magic,
+
+539
+00:29:53.619 --> 00:29:55.339
+you'll have to come over again over to this side.
+
+540
+00:29:55.339 --> 00:29:56.220
+Sorry, Sean.
+
+541
+00:29:57.619 --> 00:30:03.920
+You do have an on-off switch here, which you can turn on.
+
+542
+00:30:03.920 --> 00:30:08.700
+And we should see here in just a few seconds.
+
+543
+00:30:08.700 --> 00:30:11.180
+There we go, we're now getting a signal.
+
+544
+00:30:11.180 --> 00:30:12.579
+And you can see that the time code
+
+545
+00:30:12.579 --> 00:30:14.900
+has been jammed to the proper time code.
+
+546
+00:30:14.900 --> 00:30:16.660
+You'll see it here on this side display,
+
+547
+00:30:16.660 --> 00:30:20.039
+or you can see it here on the Atomos up here at the top.
+
+548
+00:30:20.039 --> 00:30:21.099
+This one's an hour off
+
+549
+00:30:21.099 --> 00:30:25.900
+because of daylight savings times.
+
+550
+00:30:25.900 --> 00:30:27.539
+Once the time code's been jammed,
+
+551
+00:30:27.539 --> 00:30:32.539
+it's okay then to basically disconnect.
+
+552
+00:30:33.940 --> 00:30:36.420
+We'll just do it over here.
+
+553
+00:30:36.420 --> 00:30:42.450
+You can then disconnect the time code cable
+
+554
+00:30:42.450 --> 00:30:47.660
+and you can now put in the genlock cable.
+
+555
+00:30:47.660 --> 00:30:51.900
+Before I press that in, just take a look over here.
+
+556
+00:30:51.900 --> 00:30:53.339
+You'll notice on here,
+
+557
+00:30:53.339 --> 00:30:56.269
+you see where there's time code across here?
+
+558
+00:30:56.269 --> 00:30:59.349
+It's missing a specific icon,
+
+559
+00:30:59.349 --> 00:31:01.809
+which we'll show you when I genlock the camera.
+
+560
+00:31:01.809 --> 00:31:06.150
+So I'm gonna put in the cable for genlock.
+
+561
+00:31:06.150 --> 00:31:07.309
+It'll take a few seconds
+
+562
+00:31:07.309 --> 00:31:10.630
+and you're gonna see things flash for a second.
+
+563
+00:31:10.630 --> 00:31:12.349
+At least it did on the Atomos monitor,
+
+564
+00:31:12.349 --> 00:31:13.829
+not on this internal monitor,
+
+565
+00:31:13.829 --> 00:31:16.549
+but you can see that now there's a small little icon
+
+566
+00:31:16.549 --> 00:31:18.569
+there that's in a white box.
+
+567
+00:31:18.569 --> 00:31:21.109
+It says R-E-F or ref.
+
+568
+00:31:21.109 --> 00:31:24.069
+That means it's now receiving a reference signal
+
+569
+00:31:24.069 --> 00:31:29.299
+from the genlock of the house genlock generator.
+
+570
+00:31:29.299 --> 00:31:32.180
+And that completes the assembly of the camera.

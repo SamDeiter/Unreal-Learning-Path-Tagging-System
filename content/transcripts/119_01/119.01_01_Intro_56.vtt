@@ -1,0 +1,309 @@
+WEBVTT
+
+1
+00:00:01.419 --> 00:00:10.300
+Hello and welcome to Course 119.01 Introduction to Procedural Content Generation.
+
+2
+00:00:11.099 --> 00:00:17.179
+And this course and all of the included project files are going to be based in Unreal Engine
+
+3
+00:00:17.179 --> 00:00:26.050
+version 5.6. So what are our goals for this course? At the end of this, what we would like
+
+4
+00:00:26.050 --> 00:00:33.649
+you to do is have a good understanding of how the PCG or procedurally generated content
+
+5
+00:00:34.770 --> 00:00:42.689
+system within Unreal works. And so you've got a good foundation for creating your own
+
+6
+00:00:42.689 --> 00:00:50.590
+but your own procedural laid out levels. So for that, we hope that you understand
+
+7
+00:00:50.590 --> 00:00:58.189
+the concept of programming in a procedural manner. It's slightly different to the standard sequential
+
+8
+00:00:58.189 --> 00:01:03.710
+programming that most people think of where a lot of stuff is going to be happening at the same
+
+9
+00:01:03.710 --> 00:01:08.530
+time. We're going to be working with things called points a lot. Now what we're going to
+
+10
+00:01:08.530 --> 00:01:14.530
+do is we're going to do a reasonably long exercise where we're going to populate an
+
+11
+00:01:14.530 --> 00:01:22.269
+environment based on a PCG logic. Then what we're going to do is we're going to add a spline in,
+
+12
+00:01:22.269 --> 00:01:28.829
+and that's going to allow us some level of control over how we want things laid out,
+
+13
+00:01:28.829 --> 00:01:35.409
+but having everything populated around it automatically. Finally, we hope you get a good
+
+14
+00:01:35.409 --> 00:01:44.450
+idea of the limitations of the PCG system. And so you've got a good idea where you can use it
+
+15
+00:01:44.450 --> 00:01:53.069
+and where it's probably not appropriate. Now, in order to use the procedural content generation,
+
+16
+00:01:53.069 --> 00:02:00.510
+we're going to need one plugin, really, and that is the procedural content generation
+
+17
+00:02:00.510 --> 00:02:05.150
+framework. Now, if you don't have this switched on within the plugin settings,
+
+18
+00:02:05.150 --> 00:02:08.909
+you're not going to see any of the classes or the graphs, so you're not going to be able
+
+19
+00:02:08.909 --> 00:02:15.949
+to use it at all. On the project that we've provided, it's automatically turned on,
+
+20
+00:02:15.949 --> 00:02:19.310
+so you don't need to turn it on. Just be aware of it for future projects.
+
+21
+00:02:20.240 --> 00:02:26.800
+We are also turning on one more plugin, and that's the procedural content generation framework
+
+22
+00:02:27.520 --> 00:02:35.360
+geometry script interrupts. Now, this is not essential, but what it allows us to do
+
+23
+00:02:35.360 --> 00:02:41.599
+is it allows the PCG graphs to communicate with our geometry scripting system, which is
+
+24
+00:02:41.599 --> 00:02:48.000
+a bunch of functions and tools which will allow us to edit, manipulate, and
+
+25
+00:02:48.000 --> 00:02:55.199
+create meshes within the engine. So it is useful as a go-between between these two systems.
+
+26
+00:02:58.000 --> 00:03:04.400
+Before we start, I'd like to talk about two different concepts, which are sort of
+
+27
+00:03:04.400 --> 00:03:13.139
+important as we're going forward. And these two concepts are points and point density.
+
+28
+00:03:14.509 --> 00:03:25.550
+Now, when we're working with the PCG, we start off first by sampling the world. We can be looking
+
+29
+00:03:25.550 --> 00:03:30.750
+at the world around us, and off the back of that, we are going to be generating a number of
+
+30
+00:03:30.750 --> 00:03:36.990
+different points. Then a lot of the work that we're going to be doing is going to be about
+
+31
+00:03:37.069 --> 00:03:44.270
+manipulating these points, changing their size, space, filtering out some, moving some around.
+
+32
+00:03:45.069 --> 00:03:48.750
+And then finally, we're going to do something with these points.
+
+33
+00:03:49.469 --> 00:03:58.750
+In this example, we're mostly going to be creating a static mesh instance, which are
+
+34
+00:03:58.750 --> 00:04:04.669
+optimized versions of static meshes so that they can sort of appear in the world and not weigh
+
+35
+00:04:04.669 --> 00:04:10.539
+down the system too much. So 90% of the time, what we're going to be doing is we're going to
+
+36
+00:04:10.539 --> 00:04:17.660
+be changing the data on points based on some kind of logic. Now, all of these points can
+
+37
+00:04:17.660 --> 00:04:24.060
+contain something that's called attributes. And so attributes are just data which is on the points.
+
+38
+00:04:24.060 --> 00:04:29.339
+And these data can be anything for the obvious that's the transform of the point, so where it
+
+39
+00:04:29.339 --> 00:04:37.019
+is in space, location, rotation, and scale. But then it can be other elements, things like
+
+40
+00:04:37.019 --> 00:04:45.100
+its color, density, steepness, and we can also find a lot of user-specific attributes.
+
+41
+00:04:45.660 --> 00:04:52.300
+So it's important to understand that we have points and that attached to these points are
+
+42
+00:04:52.300 --> 00:04:56.620
+a number of different attributes that we are going to be playing around with or using.
+
+43
+00:04:57.579 --> 00:05:03.180
+And then at the end, we use the final points in order to
+
+44
+00:05:04.139 --> 00:05:09.420
+spawn and create things within the world. But we have points. And as you can see here,
+
+45
+00:05:10.139 --> 00:05:14.379
+you can see these cubes on the image that we have in front of us.
+
+46
+00:05:14.379 --> 00:05:21.180
+These are visual representations of the points that we have. So that's useful.
+
+47
+00:05:21.180 --> 00:05:29.500
+Now, the second point that I want to get across is point density. Now, if you look at all the
+
+48
+00:05:29.500 --> 00:05:35.339
+little cubes that we have in the world, they all have a different shade of gray going from
+
+49
+00:05:35.339 --> 00:05:44.319
+white to black. This is a visual representation of the value of point density. Now, what point
+
+50
+00:05:44.319 --> 00:05:54.000
+density is is this is going to be a value that we can use to do things like filter.
+
+51
+00:05:55.360 --> 00:06:02.480
+But by passing it in and out of the point density value, so for example,
+
+52
+00:06:03.120 --> 00:06:11.839
+we will pass the steepness of the points into it. By passing a value into it, we're going
+
+53
+00:06:11.839 --> 00:06:17.680
+to be able to visually see it on the debug screen here. So we'll have a good idea of what
+
+54
+00:06:17.680 --> 00:06:22.639
+it will look like. Secondly, we're going to be able to pass it into other nodes.
+
+55
+00:06:22.639 --> 00:06:27.759
+So we've got a lot of nodes that work with density to allow us to do things like filter.
+
+56
+00:06:28.660 --> 00:06:35.459
+So this is a value which we're going to be passing into the point density on specific points.
+
+57
+00:06:35.459 --> 00:06:39.139
+We're then going to be able to see what it looks like. And we're then going to be able to
+
+58
+00:06:39.139 --> 00:06:46.420
+use that in future calculations. So it's just a catch-all attribute we'll be passing values
+
+59
+00:06:46.420 --> 00:06:55.069
+in and out of. So next up, if you fire up a project, you should see something that looks
+
+60
+00:06:55.069 --> 00:07:07.310
+a little bit like this. Now, we have a specific little node that hopefully will pop up when the
+
+61
+00:07:07.310 --> 00:07:12.290
+project loads up. Now, what this is going to allow us to do is this is going to allow us to
+
+62
+00:07:12.290 --> 00:07:18.370
+move through the project, and it's going to help us to move to the correct
+
+63
+00:07:19.970 --> 00:07:25.250
+nodes that we have, the correct assets that we have inside the asset browser.
+
+64
+00:07:25.250 --> 00:07:29.649
+So for example, here, if I push to the beginning, it's going to take us back
+
+65
+00:07:29.649 --> 00:07:38.959
+to this beginning point here. Now, what I usually do with this is I'll drag this up
+
+66
+00:07:38.959 --> 00:07:45.060
+and drop it at the top here and move up the thing. So we can just see the top of it.
+
+67
+00:07:45.060 --> 00:07:49.060
+And we've still got a vision of the World Outliner. And it will allow us to move
+
+68
+00:07:49.060 --> 00:07:56.060
+back and forth through the project as we are working. The other thing that's worth noting
+
+69
+00:07:56.060 --> 00:08:02.939
+is we have a finished directory. Within that finished directory, you're going to find that
+
+70
+00:08:02.939 --> 00:08:08.699
+we have the finished assets that you are at any point you can come in and just have a look at.
+
+71
+00:08:08.699 --> 00:08:14.459
+So if you get stuck, you can come in and look at what we're ultimately building up.
+
+72
+00:08:14.459 --> 00:08:18.060
+And it's commented, we should have a good idea of what we're working with.
+
+73
+00:08:19.360 --> 00:08:23.040
+Okay. So if you got stuck in the finished directory, you should be able to find a
+
+74
+00:08:23.040 --> 00:08:30.350
+finished version of the exercise. Okay. So that should be everything for the first video.
+
+75
+00:08:30.350 --> 00:08:35.549
+Now we'll be able to jump into the project and start on the first exercise,
+
+76
+00:08:35.549 --> 00:08:45.389
+where we will be using a PCG to create a forest and then playing around with editing it.
+
+77
+00:08:45.389 --> 00:08:57.230
+So thanks a lot. I'll catch you in the next video.

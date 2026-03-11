@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:01.100 --> 00:00:06.000
+We're now going to take a look at some ways to optimize our materials. And the first optimization
+
+2
+00:00:06.000 --> 00:00:11.400
+we're going to talk about isn't an optimization for performance, but it is an optimization for your workflow.
+
+3
+00:00:11.400 --> 00:00:14.300
+And that's the concept of parent materials. Now,
+
+4
+00:00:15.099 --> 00:00:19.739
+for those of you who are not aware, parent materials are a way to have
+
+5
+00:00:20.420 --> 00:00:26.519
+something pass traits on down to their children. Kind of like how in a biological family
+
+6
+00:00:26.980 --> 00:00:29.539
+parents pass traits on down to the children.
+
+7
+00:00:29.539 --> 00:00:34.479
+So here we have the squares, and they have the ability to be blue, red, or green.
+
+8
+00:00:34.479 --> 00:00:39.859
+And we can see here that the squares have some children, and the children have the ability to be red, green, or blue.
+
+9
+00:00:40.460 --> 00:00:47.000
+Now again, very, very simplistic look at how parents pass traits on down to their children.
+
+10
+00:00:47.000 --> 00:00:52.200
+But if we take that and we kind of apply it to our material system, we can get something like this.
+
+11
+00:00:52.200 --> 00:00:57.500
+We have this mat ENVy building parent, and then from that we have these children that were made that were
+
+12
+00:00:57.679 --> 00:01:04.060
+adjusted, and we have one that looks exactly the same, one that looks slightly different, and one that looks completely different.
+
+13
+00:01:04.560 --> 00:01:09.989
+We also have this mat ENVy glass parent, and similar, we have one that looks
+
+14
+00:01:11.340 --> 00:01:12.980
+totally different.
+
+15
+00:01:12.980 --> 00:01:18.680
+Throughout all of these, actually all the glass ones look completely different than their parent material, and that's okay.
+
+16
+00:01:18.680 --> 00:01:21.459
+A couple of the reasons why we have it set up like this. One,
+
+17
+00:01:22.450 --> 00:01:27.230
+since glass is a special material that we're going to be using in special instances,
+
+18
+00:01:27.269 --> 00:01:34.689
+and it also can be very expensive to render, we want to make sure that we have a parent material that's dedicated for that,
+
+19
+00:01:35.500 --> 00:01:39.120
+so that we only use that in those limited areas.
+
+20
+00:01:39.459 --> 00:01:45.900
+This mat ENVy building parent, we're going to use that probably all over, so we want to make sure that
+
+21
+00:01:47.540 --> 00:01:54.859
+this material that we create is as optimized as possible because it's going to be used all over the place.
+
+22
+00:01:55.719 --> 00:02:00.280
+Now, a couple of things to note here.
+
+23
+00:02:01.329 --> 00:02:05.489
+When you are creating materials, you should, or I
+
+24
+00:02:06.010 --> 00:02:10.610
+recommend that you disable the automatically set usage flags in the editor option.
+
+25
+00:02:10.969 --> 00:02:18.729
+The reason for this is it will help save on compile times should somebody accidentally put a material on something that it wasn't
+
+26
+00:02:18.969 --> 00:02:21.550
+necessarily intended for. For example,
+
+27
+00:02:22.169 --> 00:02:27.370
+sometimes you might find that the landscape material has use with Niagara mesh on it.
+
+28
+00:02:27.729 --> 00:02:35.379
+The other thing is that we want to keep our materials as modular as possible to minimize
+
+29
+00:02:36.340 --> 00:02:43.199
+permutations, and we want to optimize for usage, not convenience. So we want to make sure that our materials
+
+30
+00:02:44.199 --> 00:02:47.639
+only contain things that we intend to use with them and
+
+31
+00:02:48.539 --> 00:02:54.060
+not contain things that maybe we might possibly turn on, we're not really sure.
+
+32
+00:02:56.060 --> 00:03:00.139
+The feature quality switch expression nodes
+
+33
+00:03:01.060 --> 00:03:03.060
+allow you to
+
+34
+00:03:04.620 --> 00:03:12.300
+ensure that whatever materials you're creating will behave correctly on a platform that might not necessarily
+
+35
+00:03:13.500 --> 00:03:15.500
+support a certain feature.
+
+36
+00:03:15.759 --> 00:03:20.500
+For these nodes, we have a shading path, feature level, and quality level.
+
+37
+00:03:20.500 --> 00:03:28.340
+And basically what we do is we add these to whatever inputs such as base color or normal or roughness or metallic,
+
+38
+00:03:28.340 --> 00:03:30.340
+and then we feed in
+
+39
+00:03:30.659 --> 00:03:36.659
+what will happen when this material is, say, viewed on the default, deferred,
+
+40
+00:03:37.419 --> 00:03:44.099
+forward, or mobile shading paths, or if it detects that the feature level is default
+
+41
+00:03:44.599 --> 00:03:48.520
+ES2, ES3, SM5, or SM6, or
+
+42
+00:03:49.479 --> 00:03:55.340
+the quality of the project has been changed from default, low, high, medium, and epic.
+
+43
+00:03:56.789 --> 00:03:58.789
+Some important notes about these,
+
+44
+00:03:59.270 --> 00:04:07.449
+just like with other static switches, these generate additional shader permutations for every possible combination of settings. For example, if we have
+
+45
+00:04:08.560 --> 00:04:11.740
+two static switch parameters, or I should say
+
+46
+00:04:12.439 --> 00:04:17.040
+two quality switches, it's going to create a possible combination of
+
+47
+00:04:18.040 --> 00:04:19.439
+four,
+
+48
+00:04:19.439 --> 00:04:24.620
+but it's only going to use the combinations that are used in our materials. So just keep that in mind.
+
+49
+00:04:24.740 --> 00:04:32.180
+We want to make sure that we are using these in situations where we know some type of effect or some type of advanced
+
+50
+00:04:32.459 --> 00:04:35.939
+material logic is not going to work on one of our target platforms,
+
+51
+00:04:35.939 --> 00:04:41.860
+so it is okay for us to pay that additional cost to make sure that the material compiles correctly.
+
+52
+00:04:43.420 --> 00:04:50.920
+So to wrap things up, we want to use shader path switches for render path specific logic. We want to use feature level
+
+53
+00:04:51.620 --> 00:04:54.060
+switches for cross-platform materials and
+
+54
+00:04:54.660 --> 00:05:02.259
+quality switches for scalable performance. We always want to make sure that to monitor permutation counts as every combination of
+
+55
+00:05:02.740 --> 00:05:05.220
+these nodes will have some type of cost.

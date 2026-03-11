@@ -1,0 +1,229 @@
+WEBVTT
+
+1
+00:00:01.389 --> 00:00:06.750
+Hello and welcome to this course, Perception and Environment Query System.
+
+2
+00:00:07.820 --> 00:00:16.620
+This course will be for Unreal Engine 5.6, but the content is valid all the way through version 5.
+
+3
+00:00:18.019 --> 00:00:23.059
+Now to start with, there are a few things that we would like you to come out of this course
+
+4
+00:00:23.059 --> 00:00:29.460
+knowing. The first one being having a good understanding of how the AI perception system
+
+5
+00:00:29.460 --> 00:00:36.640
+works and also to be able to set it up from scratch and get it working with.
+
+6
+00:00:36.640 --> 00:00:41.280
+We're going to be using state trees but this would work with behavior trees as well.
+
+7
+00:00:43.020 --> 00:00:48.780
+We also are going to go over the theory and get up and working an example of an
+
+8
+00:00:48.780 --> 00:00:56.780
+environmental query system which is used for the more complicated AI decision making.
+
+9
+00:00:57.570 --> 00:01:03.840
+So we're going to run through both of these systems and they do a similar thing in just
+
+10
+00:01:03.840 --> 00:01:09.629
+a slightly different way. What we will be doing though is we will be working with a project
+
+11
+00:01:09.629 --> 00:01:15.950
+file that will have a number of different examples and exercises in it. So I really do
+
+12
+00:01:15.950 --> 00:01:20.510
+recommend that you download the project file. We'll have a quick look at that as part of this
+
+13
+00:01:20.510 --> 00:01:25.950
+video at the end, but it will make the course make a lot more sense and you'll get a lot more
+
+14
+00:01:25.950 --> 00:01:32.980
+out of it. So let's talk about theory of the AI perception component. So what is the AI
+
+15
+00:01:32.980 --> 00:01:42.000
+perception system? Well this is built to mimic human perception. So it is a component
+
+16
+00:01:42.000 --> 00:01:49.599
+that you can add to your actor which will go away and it will have a different setup
+
+17
+00:01:49.599 --> 00:01:56.640
+for each different perception such as sight, hearing, touch and more. They all require
+
+18
+00:01:56.640 --> 00:02:00.879
+a little bit of a different tweaking but we're going to go through some of the most common
+
+19
+00:02:00.879 --> 00:02:07.060
+ones and go through how to set them. Now this has two different classes that we're going
+
+20
+00:02:07.060 --> 00:02:13.300
+to use and need to know about. The first one is the AI perception component. Now this
+
+21
+00:02:13.300 --> 00:02:22.099
+is what you would attach to your player or your pawn or your character and this is going
+
+22
+00:02:22.099 --> 00:02:29.250
+to be what does the work. It is a actor component. It needs to be attached to usually
+
+23
+00:02:29.250 --> 00:02:37.360
+a child of the pawn class. Then we have the AI perception stimulus source component.
+
+24
+00:02:37.360 --> 00:02:42.960
+Again another actor component but this doesn't do as much as the other one. It primarily
+
+25
+00:02:42.960 --> 00:02:50.639
+allows you to register a actor as a stimulus source. We're going over that in detail.
+
+26
+00:02:52.030 --> 00:02:58.270
+Now when we're working with AI perception most of the work is going to be done by overriding
+
+27
+00:02:58.270 --> 00:03:06.300
+a number of events attached to the AI perception component. Now this has about four or five
+
+28
+00:03:06.300 --> 00:03:13.259
+events however a lot of them will fire at the same time because they will just provide
+
+29
+00:03:13.259 --> 00:03:19.180
+a different subset of the data. So they will provide different amounts of data depending on
+
+30
+00:03:19.180 --> 00:03:27.310
+which one they are. For our needs we are going to be using but one of these and that is the
+
+31
+00:03:27.310 --> 00:03:35.939
+on target perception updated. The second class is the AI perception stimuli source.
+
+32
+00:03:37.250 --> 00:03:43.169
+The AI perception component registers things in slightly different ways but
+
+33
+00:03:43.729 --> 00:03:46.770
+when we're talking about sight which is one of the most common ones
+
+34
+00:03:47.789 --> 00:03:54.909
+it will automatically register anything that inherits from the pawn class.
+
+35
+00:03:55.939 --> 00:04:00.900
+Now if you've got something that does not inherit from the pawn class yet you want it
+
+36
+00:04:00.900 --> 00:04:07.259
+to be seen and register with sight all you need to use is this component. We will be doing this
+
+37
+00:04:07.259 --> 00:04:14.860
+too in an exercise where we will be setting up a pickup so that it can be seen and the AI can
+
+38
+00:04:14.860 --> 00:04:21.420
+and interact with it. Now the other thing that's worth noting is some of the stimuli are not
+
+39
+00:04:21.420 --> 00:04:28.139
+really registered in the same way by either being a pawn or having the source connected to it
+
+40
+00:04:28.779 --> 00:04:41.019
+but by manually reporting an event. So in this case if you want to report a noise touch or
+
+41
+00:04:41.019 --> 00:04:48.139
+damage event you're best off using one of these nodes. The perception event is talking about sight
+
+42
+00:04:48.139 --> 00:04:56.620
+in this case which can sort of manually force the perception rather than adding a component.
+
+43
+00:04:59.170 --> 00:05:03.810
+Now hopefully if you've downloaded the project you should get something that looks a little bit
+
+44
+00:05:03.810 --> 00:05:08.290
+like this. Now one of the oddities with this project is we've got something that's called
+
+45
+00:05:08.290 --> 00:05:17.250
+the train gate. Now you may see this when you fire up the engine as a free-floating box.
+
+46
+00:05:18.129 --> 00:05:24.610
+What I suggest you do is drag this up and place it in the top right hand corner here
+
+47
+00:05:24.610 --> 00:05:28.850
+and shrink it down so that you can just see the forwards and backwards buttons.
+
+48
+00:05:30.449 --> 00:05:33.649
+The other thing that we're going to need to have is the content drawer.
+
+49
+00:05:34.370 --> 00:05:39.649
+Now I am going to dock this in the layout so that it is easy for you to see
+
+50
+00:05:42.269 --> 00:05:46.829
+and this allows us to have a look at the trading aid. You'll see as we move through this
+
+51
+00:05:47.389 --> 00:05:53.550
+it will allow us to move through the different exercises and examples and it will also
+
+52
+00:05:54.029 --> 00:06:00.430
+pass to the required files that we'll need to use. This really does make it slightly easier
+
+53
+00:06:00.430 --> 00:06:05.459
+to navigate the project. If you've closed it down or it didn't open for some reason
+
+54
+00:06:06.100 --> 00:06:10.660
+in this links at the top here you'll see there is a button to training aid
+
+55
+00:06:10.660 --> 00:06:16.720
+for which I close that down should just open it up again give you access to it.
+
+56
+00:06:17.699 --> 00:06:22.500
+And that brings us to the end of our first video. In the next video we're going to be
+
+57
+00:06:22.500 --> 00:06:37.300
+jumping straight into an exercise where we will set up the Perception component.

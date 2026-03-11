@@ -1,0 +1,1117 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:04.450
+Hey there, how are you doing today?
+
+2
+00:00:04.450 --> 00:00:07.849
+In this class, we'll leave glass and translucent effects
+
+3
+00:00:07.849 --> 00:00:10.730
+to the side, and we'll learn about something completely
+
+4
+00:00:10.730 --> 00:00:12.140
+new.
+
+5
+00:00:12.140 --> 00:00:15.980
+We'll be introducing a brand new shading model,
+
+6
+00:00:15.980 --> 00:00:19.370
+and that is the two-sided foliage,
+
+7
+00:00:19.370 --> 00:00:24.329
+which is used to texture foliage like trees or grass.
+
+8
+00:00:24.329 --> 00:00:26.250
+This one is going to be pretty interesting,
+
+9
+00:00:26.250 --> 00:00:28.739
+so let's get started.
+
+10
+00:00:28.739 --> 00:00:30.980
+Two-sided foliage is a particular one
+
+11
+00:00:30.980 --> 00:00:34.280
+because it really focuses on giving to our vegetation
+
+12
+00:00:34.280 --> 00:00:39.380
+a realistic and consistent feel when it's hit by the light.
+
+13
+00:00:39.380 --> 00:00:42.219
+Now, whenever we talk about the specifics of a shader
+
+14
+00:00:42.219 --> 00:00:44.219
+when hit by a light, we really
+
+15
+00:00:44.219 --> 00:00:47.020
+start referring to the subsurface scattering
+
+16
+00:00:47.020 --> 00:00:49.460
+of a material, which is also typically
+
+17
+00:00:49.460 --> 00:00:52.979
+responsible to create the effect of our skin
+
+18
+00:00:52.979 --> 00:00:55.179
+when it's close to the light.
+
+19
+00:00:55.179 --> 00:00:57.520
+They know when it gets actually redder,
+
+20
+00:00:57.520 --> 00:00:59.619
+that's subsurface scattering.
+
+21
+00:00:59.659 --> 00:01:02.060
+The two-sided foliage shading model
+
+22
+00:01:02.060 --> 00:01:05.299
+enables us to customize the subsurface scattering
+
+23
+00:01:05.299 --> 00:01:10.260
+of a surface and set how light transmission is simulated.
+
+24
+00:01:10.260 --> 00:01:13.099
+We need to be careful, though, because when using Nomen,
+
+25
+00:01:13.099 --> 00:01:16.140
+there are a couple of things we need to take care of first.
+
+26
+00:01:16.140 --> 00:01:18.180
+We need to first make sure that the mobility
+
+27
+00:01:18.180 --> 00:01:21.780
+setting of our vegetation is set to movable,
+
+28
+00:01:21.780 --> 00:01:24.859
+and therefore contributing to our dynamic lighting.
+
+29
+00:01:24.859 --> 00:01:26.739
+And also, we'll have another checkbox
+
+30
+00:01:26.739 --> 00:01:28.659
+to take care of in the Details panel,
+
+31
+00:01:28.659 --> 00:01:31.540
+where we'll need to make sure Evaluate World Position
+
+32
+00:01:31.540 --> 00:01:33.700
+Offset is enabled as well.
+
+33
+00:01:33.700 --> 00:01:36.620
+But I'll show you in just a second how to do that.
+
+34
+00:01:36.620 --> 00:01:39.519
+Now, as usual, I'll be jumping directly into the engine
+
+35
+00:01:39.519 --> 00:01:40.739
+and close the slides.
+
+36
+00:01:40.739 --> 00:01:44.620
+But remember that each step that I will be taking in Unreal
+
+37
+00:01:44.620 --> 00:01:48.180
+will also be displayed through screenshots and instructions
+
+38
+00:01:48.180 --> 00:01:51.180
+here in the PowerPoint file that is at your disposal,
+
+39
+00:01:51.180 --> 00:01:53.299
+so you can easily follow along.
+
+40
+00:01:53.299 --> 00:01:55.260
+Together with the sample material
+
+41
+00:01:55.260 --> 00:01:57.420
+that we will check out in just a moment,
+
+42
+00:01:57.459 --> 00:01:59.620
+you should be able to walk in the right direction
+
+43
+00:01:59.620 --> 00:02:01.939
+as we draft a new material out.
+
+44
+00:02:01.939 --> 00:02:03.900
+But this one is going to be pretty simple,
+
+45
+00:02:03.900 --> 00:02:06.689
+so I don't think you'll have any issues.
+
+46
+00:02:06.689 --> 00:02:10.050
+Our goal for today is to create a three shader
+
+47
+00:02:10.050 --> 00:02:12.889
+using the two-sided foliage shading model.
+
+48
+00:02:12.889 --> 00:02:14.289
+And this three is also going to have
+
+49
+00:02:14.289 --> 00:02:16.969
+some nice animated leaves.
+
+50
+00:02:16.969 --> 00:02:21.490
+So let's fire up the engine and see how to achieve that.
+
+51
+00:02:21.490 --> 00:02:24.409
+All right, we're in the Plant Movement section
+
+52
+00:02:24.409 --> 00:02:26.250
+of our default map.
+
+53
+00:02:26.289 --> 00:02:29.930
+And here displayed, we can see two examples of trees
+
+54
+00:02:29.930 --> 00:02:33.479
+using the two-sided foliage shading model.
+
+55
+00:02:33.479 --> 00:02:35.039
+Now let's click on the first one
+
+56
+00:02:35.039 --> 00:02:37.840
+and make sure that the mobility of this mesh
+
+57
+00:02:37.840 --> 00:02:40.340
+is set to movable.
+
+58
+00:02:40.340 --> 00:02:45.099
+And then we want to enable the evaluation
+
+59
+00:02:45.099 --> 00:02:47.780
+of the world position offset
+
+60
+00:02:47.780 --> 00:02:50.939
+in the ray tracing advanced settings.
+
+61
+00:02:50.939 --> 00:02:56.530
+So make sure that this checkbox is set to true.
+
+62
+00:02:56.530 --> 00:02:58.870
+Okay, perhaps the leaves on this tree
+
+63
+00:02:59.750 --> 00:03:01.069
+might be moving a little bit too fast,
+
+64
+00:03:01.069 --> 00:03:02.669
+but we'll see in just a moment
+
+65
+00:03:02.669 --> 00:03:04.629
+that these settings are really easy to adjust
+
+66
+00:03:04.629 --> 00:03:06.189
+with the correct parameters
+
+67
+00:03:06.189 --> 00:03:09.800
+exposed to a material instance.
+
+68
+00:03:09.800 --> 00:03:11.560
+Now the animation of the leaves
+
+69
+00:03:11.560 --> 00:03:14.139
+and the branches on these palm trees
+
+70
+00:03:14.139 --> 00:03:16.199
+are simulated by a material function
+
+71
+00:03:16.199 --> 00:03:18.400
+that is called simple wind
+
+72
+00:03:18.400 --> 00:03:20.919
+and connected to the world position offset pin
+
+73
+00:03:20.919 --> 00:03:22.919
+of their materials.
+
+74
+00:03:22.919 --> 00:03:26.639
+Now the world position offset lets us use our materials
+
+75
+00:03:26.639 --> 00:03:29.560
+to move or deform parts of our 3D models,
+
+76
+00:03:29.560 --> 00:03:31.960
+like in this case, these trees,
+
+77
+00:03:31.960 --> 00:03:36.449
+by changing where their vertices appear in the world.
+
+78
+00:03:36.449 --> 00:03:41.449
+So we can make grass sway, flags wave, object wobble,
+
+79
+00:03:41.770 --> 00:03:45.039
+or a variety of other effects really.
+
+80
+00:03:45.039 --> 00:03:46.639
+Now, if we click on the first tree,
+
+81
+00:03:46.639 --> 00:03:48.439
+we can see in the details
+
+82
+00:03:48.439 --> 00:03:53.020
+that it has two different materials assigned to it.
+
+83
+00:03:53.020 --> 00:03:56.860
+We have the leaves material, which is animated,
+
+84
+00:03:57.379 --> 00:03:59.780
+and then we have a different material for the trunk,
+
+85
+00:03:59.780 --> 00:04:02.539
+which is stiff.
+
+86
+00:04:02.539 --> 00:04:04.759
+Now, if we hit on the palm tree,
+
+87
+00:04:04.759 --> 00:04:07.180
+we can see that it was set up differently.
+
+88
+00:04:07.180 --> 00:04:10.620
+In fact, it has only one material,
+
+89
+00:04:10.620 --> 00:04:14.539
+but the branches are moving a little bit
+
+90
+00:04:14.539 --> 00:04:17.329
+and the trunk isn't.
+
+91
+00:04:17.329 --> 00:04:21.250
+This was achieved by using a vertex painting technique
+
+92
+00:04:21.250 --> 00:04:24.699
+to mask out the trunk manually.
+
+93
+00:04:24.699 --> 00:04:28.439
+If we switch from selection mode to mesh paint,
+
+94
+00:04:28.920 --> 00:04:32.160
+we get access to a few options to assign different colors
+
+95
+00:04:32.160 --> 00:04:36.339
+or ways to our vertices.
+
+96
+00:04:36.339 --> 00:04:39.720
+And down here, if we change the color view mode
+
+97
+00:04:39.720 --> 00:04:43.740
+from off to RGB channels or alpha,
+
+98
+00:04:43.740 --> 00:04:46.439
+we can really see that these palm trees branches
+
+99
+00:04:46.439 --> 00:04:51.439
+were hand painted to have full weight on their vertices
+
+100
+00:04:51.560 --> 00:04:54.100
+and that's why they're moving.
+
+101
+00:04:54.100 --> 00:04:57.339
+Since this learning path focuses on materials,
+
+102
+00:04:57.339 --> 00:04:58.980
+in this class, unfortunately,
+
+103
+00:04:59.540 --> 00:05:02.220
+we won't be focusing on mesh painting,
+
+104
+00:05:02.220 --> 00:05:03.740
+but only on the creation
+
+105
+00:05:03.740 --> 00:05:07.029
+of the two-sided foliage materials.
+
+106
+00:05:07.029 --> 00:05:09.029
+But you can learn more about vertex painting
+
+107
+00:05:09.029 --> 00:05:10.829
+in the landscape course,
+
+108
+00:05:10.829 --> 00:05:14.240
+which is available on our learning platform.
+
+109
+00:05:14.240 --> 00:05:15.579
+Okay, now let's go on
+
+110
+00:05:15.579 --> 00:05:18.680
+and start creating our foliage material.
+
+111
+00:05:18.680 --> 00:05:21.379
+So I'm gonna right-click in the content browser
+
+112
+00:05:21.379 --> 00:05:23.300
+and then create a new material
+
+113
+00:05:23.300 --> 00:05:28.300
+that I'm gonna be calling M underscore simple three.
+
+114
+00:05:28.339 --> 00:05:32.029
+And then I'm gonna double-click on it to open it up.
+
+115
+00:05:32.029 --> 00:05:35.389
+Okay, let's dock this up here.
+
+116
+00:05:35.389 --> 00:05:36.730
+And the first one we wanna do
+
+117
+00:05:36.730 --> 00:05:39.870
+is click in an empty area of the graph
+
+118
+00:05:39.870 --> 00:05:41.990
+and then switch the shading model
+
+119
+00:05:41.990 --> 00:05:46.620
+from default lit to two-sided foliage.
+
+120
+00:05:46.620 --> 00:05:48.360
+Okay, most of this material
+
+121
+00:05:48.360 --> 00:05:51.259
+will actually be set up through textures,
+
+122
+00:05:51.259 --> 00:05:53.399
+so let's import them into our graph.
+
+123
+00:05:53.399 --> 00:05:55.160
+I'll be Control-Spacebar
+
+124
+00:05:55.160 --> 00:05:58.740
+and then navigate to the Megascans folder,
+
+125
+00:05:59.259 --> 00:06:01.560
+Atlases, Oak Branches,
+
+126
+00:06:01.560 --> 00:06:04.680
+and I'm gonna be selecting the Albedo,
+
+127
+00:06:04.680 --> 00:06:08.360
+the AO, which is the ambient occlusion,
+
+128
+00:06:08.360 --> 00:06:11.259
+the normal, the opacity, the roughness,
+
+129
+00:06:11.259 --> 00:06:13.240
+and the translucency maps.
+
+130
+00:06:13.240 --> 00:06:16.300
+Then I'm gonna drag them here into the graph.
+
+131
+00:06:16.300 --> 00:06:26.259
+All right, let's just shift these nodes a bit around
+
+132
+00:06:26.259 --> 00:06:28.220
+and let's start by connecting
+
+133
+00:06:28.220 --> 00:06:32.699
+the Albedo RGB output to the base color.
+
+134
+00:06:32.699 --> 00:06:36.199
+And we can already see that the two foliage shaders
+
+135
+00:06:36.199 --> 00:06:38.439
+react differently to the base colors
+
+136
+00:06:38.439 --> 00:06:40.160
+compared to the other materials
+
+137
+00:06:40.160 --> 00:06:42.319
+we've been dealing with so far.
+
+138
+00:06:42.319 --> 00:06:46.019
+Now, let's take care of the subsurface color.
+
+139
+00:06:46.019 --> 00:06:48.920
+So let's drag out of the RGB output pin
+
+140
+00:06:48.920 --> 00:06:52.560
+and then connect it to a blend overlay node.
+
+141
+00:06:52.560 --> 00:06:54.240
+Now, we checked out this node in the past,
+
+142
+00:06:54.240 --> 00:06:57.360
+so I'm not gonna give you a thorough explanation on it,
+
+143
+00:06:57.360 --> 00:06:58.720
+but just so you know,
+
+144
+00:06:58.720 --> 00:07:01.040
+the blend overlay really just simulates
+
+145
+00:07:01.060 --> 00:07:03.540
+the overlay blend mode effect
+
+146
+00:07:03.540 --> 00:07:06.980
+from any image editing software that it's out there.
+
+147
+00:07:06.980 --> 00:07:09.660
+Okay, now I'm gonna be pressing three on my keyboard
+
+148
+00:07:09.660 --> 00:07:11.379
+and left click on the graph
+
+149
+00:07:11.379 --> 00:07:14.509
+to create a constant three vector.
+
+150
+00:07:14.509 --> 00:07:17.269
+And then I'm gonna color it green.
+
+151
+00:07:17.269 --> 00:07:20.269
+This is basically the color that is gonna shine through
+
+152
+00:07:20.269 --> 00:07:25.240
+whenever the light hits our lives.
+
+153
+00:07:25.240 --> 00:07:27.899
+And I'm gonna connect it to the blend input
+
+154
+00:07:27.899 --> 00:07:29.769
+of the blend overlay
+
+155
+00:07:29.769 --> 00:07:31.769
+and then connect the blend overlay results
+
+156
+00:07:31.790 --> 00:07:33.670
+to the subsurface color.
+
+157
+00:07:33.670 --> 00:07:35.430
+Now I'm gonna switch the preview mesh
+
+158
+00:07:35.430 --> 00:07:38.829
+from the sphere to the plane,
+
+159
+00:07:38.829 --> 00:07:41.959
+get a better view on what I'm doing.
+
+160
+00:07:41.959 --> 00:07:45.459
+Okay, now let's connect the roughness map
+
+161
+00:07:45.459 --> 00:07:48.970
+to the roughness
+
+162
+00:07:48.970 --> 00:07:53.680
+and then the translucency map to the opacity.
+
+163
+00:07:53.680 --> 00:07:56.279
+Now we want to be able to render out
+
+164
+00:07:56.279 --> 00:07:59.519
+these green areas outside the lifts,
+
+165
+00:07:59.519 --> 00:08:00.560
+but in order to do that,
+
+166
+00:08:00.579 --> 00:08:04.699
+we need a way to enable these opacity mask pin
+
+167
+00:08:04.699 --> 00:08:08.439
+in order for us to plug our opacity mask into it.
+
+168
+00:08:08.439 --> 00:08:09.779
+And in order to do that,
+
+169
+00:08:09.779 --> 00:08:12.839
+we really need to click to an empty area of the graph
+
+170
+00:08:12.839 --> 00:08:15.500
+and then change the blend mode of our material
+
+171
+00:08:15.500 --> 00:08:19.319
+from opaque to masked.
+
+172
+00:08:19.319 --> 00:08:22.060
+This way we'll get access to our opacity mask
+
+173
+00:08:22.060 --> 00:08:24.860
+and then we'll be able to connect the RGB node
+
+174
+00:08:24.860 --> 00:08:28.750
+of our texture sample into it.
+
+175
+00:08:28.750 --> 00:08:29.750
+Okay, now as you can see,
+
+176
+00:08:29.769 --> 00:08:33.169
+that green empty area is now completely transparent,
+
+177
+00:08:33.169 --> 00:08:35.909
+but if we rotate the camera around,
+
+178
+00:08:35.909 --> 00:08:37.549
+the other side of this plane
+
+179
+00:08:37.549 --> 00:08:40.029
+is completely transparent as well.
+
+180
+00:08:40.029 --> 00:08:40.929
+And we don't want that
+
+181
+00:08:40.929 --> 00:08:43.789
+because we want to be able to see both the upper side
+
+182
+00:08:43.789 --> 00:08:46.490
+and the bottom side of our lifts.
+
+183
+00:08:46.490 --> 00:08:47.610
+And in order to do that,
+
+184
+00:08:47.610 --> 00:08:53.440
+we need to enable the two-sided option of our material.
+
+185
+00:08:53.480 --> 00:08:55.389
+And here we have it.
+
+186
+00:08:55.389 --> 00:08:58.659
+Now the lifts are being displayed on both sides.
+
+187
+00:08:58.659 --> 00:09:00.419
+Okay, now let's move on
+
+188
+00:09:00.419 --> 00:09:04.919
+and connect the normal map to the normal
+
+189
+00:09:04.919 --> 00:09:10.480
+and then the ambient occlusion to the ambient occlusion.
+
+190
+00:09:10.480 --> 00:09:14.320
+Okay, now we need to take care of animating our lifts
+
+191
+00:09:14.320 --> 00:09:16.480
+through the world position offset.
+
+192
+00:09:16.480 --> 00:09:18.580
+There are just a handful of material functions
+
+193
+00:09:18.580 --> 00:09:21.039
+that work with the world position offset.
+
+194
+00:09:21.039 --> 00:09:25.029
+And the one we're gonna be using today is one of them.
+
+195
+00:09:25.029 --> 00:09:28.230
+So let's right click in an empty area of the graph
+
+196
+00:09:28.230 --> 00:09:33.230
+and add a simple grass wind material function.
+
+197
+00:09:33.809 --> 00:09:35.990
+Now, again, since this is a material function,
+
+198
+00:09:35.990 --> 00:09:38.730
+you can easily double click on it and open it up
+
+199
+00:09:38.730 --> 00:09:42.190
+if you wanna learn how this was originally developed,
+
+200
+00:09:42.190 --> 00:09:44.649
+but make sure that you don't apply any changes
+
+201
+00:09:44.649 --> 00:09:48.220
+to this engine material function.
+
+202
+00:09:48.220 --> 00:09:50.740
+Now, if we want to expose the parameters,
+
+203
+00:09:50.740 --> 00:09:52.659
+all these four settings,
+
+204
+00:09:52.659 --> 00:09:56.460
+so I'm just gonna go on and right click on the first one
+
+205
+00:09:56.460 --> 00:10:01.899
+promote to parameter, second one, and so on and so forth.
+
+206
+00:10:03.289 --> 00:10:08.990
+Let's promote all of them to parameters.
+
+207
+00:10:08.990 --> 00:10:12.669
+Okay, now I'm gonna be setting the wind intensity
+
+208
+00:10:12.669 --> 00:10:18.210
+to something small, like 0.3, the wind weight to 0.2
+
+209
+00:10:19.610 --> 00:10:23.049
+and the wind speed to 0.5.
+
+210
+00:10:23.049 --> 00:10:26.309
+Now the additional WPO allows us
+
+211
+00:10:26.309 --> 00:10:29.029
+to add additional offset to our lifts.
+
+212
+00:10:29.049 --> 00:10:30.450
+Because if you remember,
+
+213
+00:10:30.450 --> 00:10:33.950
+the RGB values of a constant tree vector
+
+214
+00:10:33.950 --> 00:10:36.730
+can be translated to the X, Y, and Z position values
+
+215
+00:10:36.730 --> 00:10:40.210
+of the vertices of our tree mesh.
+
+216
+00:10:40.210 --> 00:10:44.330
+Now let's connect the simple grass wind result
+
+217
+00:10:44.330 --> 00:10:47.779
+to the world position offset.
+
+218
+00:10:47.779 --> 00:10:50.580
+And we should start seeing the lifts moving,
+
+219
+00:10:50.580 --> 00:10:52.980
+but they're actually completely still.
+
+220
+00:10:52.980 --> 00:10:54.799
+Why is that?
+
+221
+00:10:54.799 --> 00:10:56.340
+So you can see up here
+
+222
+00:10:56.340 --> 00:10:59.940
+that we have these yellow button enabled.
+
+223
+00:11:00.759 --> 00:11:02.000
+This just really means that real time
+
+224
+00:11:02.000 --> 00:11:04.519
+is disabled on our viewport.
+
+225
+00:11:04.519 --> 00:11:05.879
+So if we click on it,
+
+226
+00:11:05.879 --> 00:11:08.519
+we will enable real time on a viewport.
+
+227
+00:11:08.519 --> 00:11:12.149
+And now you can see that our lifts are correctly moving.
+
+228
+00:11:12.149 --> 00:11:15.490
+So as you can see, this simple grass wind function
+
+229
+00:11:15.490 --> 00:11:19.769
+basically adds a very general move to our foliage.
+
+230
+00:11:19.769 --> 00:11:22.049
+Now when instancing our material,
+
+231
+00:11:22.049 --> 00:11:24.210
+we'll get all these parameters exposed
+
+232
+00:11:24.210 --> 00:11:26.090
+and we'll really be able to customize
+
+233
+00:11:26.090 --> 00:11:28.490
+the intensity of our wind.
+
+234
+00:11:28.509 --> 00:11:31.509
+We'll be able to turn it from this soft breeze
+
+235
+00:11:31.509 --> 00:11:34.149
+into a storm if we want to.
+
+236
+00:11:34.149 --> 00:11:36.029
+So let's go ahead and test this out.
+
+237
+00:11:36.029 --> 00:11:40.210
+I'm just gonna hit save to apply my changes.
+
+238
+00:11:40.210 --> 00:11:44.080
+And then I'm gonna go to my math.
+
+239
+00:11:44.080 --> 00:11:46.279
+Let's right click on our simple tree material
+
+240
+00:11:46.279 --> 00:11:47.799
+in the content browser
+
+241
+00:11:47.799 --> 00:11:50.360
+and then make an instance out of it.
+
+242
+00:11:50.360 --> 00:11:52.139
+Remember that the naming conventions
+
+243
+00:11:52.139 --> 00:11:56.840
+for material instances is MI underscore
+
+244
+00:11:56.840 --> 00:11:59.379
+name of your material instance.
+
+245
+00:11:59.399 --> 00:12:04.509
+And then I'm gonna control shift S to save all my changes.
+
+246
+00:12:04.509 --> 00:12:08.549
+Now we have this preview mesh here at our disposal.
+
+247
+00:12:08.549 --> 00:12:11.110
+So I'm just gonna drag the material instance
+
+248
+00:12:11.110 --> 00:12:12.870
+into the head of the tree
+
+249
+00:12:12.870 --> 00:12:15.480
+and it's going to be applied automatically.
+
+250
+00:12:15.480 --> 00:12:16.519
+So now, first of all,
+
+251
+00:12:16.519 --> 00:12:17.799
+I really just wanna show you
+
+252
+00:12:17.799 --> 00:12:20.840
+the subsurface scattering on this tree
+
+253
+00:12:20.840 --> 00:12:25.200
+and how the leaves are tinted into this bright green color
+
+254
+00:12:25.200 --> 00:12:28.759
+that we chose before in our blend overlay node.
+
+255
+00:12:28.759 --> 00:12:30.480
+The one over here.
+
+256
+00:12:33.200 --> 00:12:38.259
+And it's really adding a lot of realism to our foliage.
+
+257
+00:12:38.259 --> 00:12:39.919
+Okay, now let's play around a little bit
+
+258
+00:12:39.919 --> 00:12:43.559
+with our material instance parameters.
+
+259
+00:12:43.559 --> 00:12:46.279
+So I'm gonna be opening my material instance
+
+260
+00:12:46.279 --> 00:12:49.570
+and undock it.
+
+261
+00:12:49.570 --> 00:12:54.570
+And here, if I expose the wind intensity, speed, and weight
+
+262
+00:12:54.610 --> 00:12:57.370
+and then increase the wind intensity,
+
+263
+00:12:57.370 --> 00:13:00.769
+you can see that it will start deforming my tree a lot.
+
+264
+00:13:00.769 --> 00:13:03.809
+So I'm gonna reduce it down to 0.2.
+
+265
+00:13:03.809 --> 00:13:05.649
+Then I'm gonna increase the wind speed
+
+266
+00:13:06.590 --> 00:13:09.539
+to make it look as if the wind was a little stronger today.
+
+267
+00:13:09.539 --> 00:13:12.299
+Weight is a bit too much, so I'm gonna set it to three.
+
+268
+00:13:12.299 --> 00:13:14.320
+And you can replay around with all these values
+
+269
+00:13:14.320 --> 00:13:16.179
+and have fun.
+
+270
+00:13:16.179 --> 00:13:17.879
+So that was it for our material
+
+271
+00:13:17.879 --> 00:13:20.980
+and we can switch back to our slides now.
+
+272
+00:13:20.980 --> 00:13:23.460
+All right, you can find additional documentation
+
+273
+00:13:23.460 --> 00:13:25.379
+at this link if you're interested
+
+274
+00:13:25.379 --> 00:13:29.799
+in further expanding your knowledge in material properties.
+
+275
+00:13:29.799 --> 00:13:32.179
+Thanks for sticking around and in the next course
+
+276
+00:13:32.179 --> 00:13:35.659
+we'll be developing a dissolve effect transition
+
+277
+00:13:35.679 --> 00:13:38.580
+using an advanced material function.
+
+278
+00:13:38.580 --> 00:13:39.759
+I'll see you there.
+
+279
+00:13:39.759 --> 00:13:40.600
+Bye.

@@ -1,0 +1,285 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.610
+In this section, we'll be adding code to our Blueprint actor within the Blueprint's
+
+2
+00:00:05.610 --> 00:00:06.730
+Event Graph.
+
+3
+00:00:06.730 --> 00:00:11.250
+The Event Graph executes commands at runtime during gameplay.
+
+4
+00:00:11.250 --> 00:00:16.410
+So back on our project, I have the BP Sequence Trigger Box example open, and I'm under
+
+5
+00:00:16.410 --> 00:00:19.859
+the Event Graph tab.
+
+6
+00:00:19.859 --> 00:00:23.980
+So the first thing we need to do is ensure that the BP Bot, which is our main
+
+7
+00:00:23.980 --> 00:00:27.980
+character, is the only actor that can trigger the sequence.
+
+8
+00:00:27.980 --> 00:00:33.859
+We'll do this by adding a Cast To node after the actor Begin Overlap.
+
+9
+00:00:33.859 --> 00:00:38.700
+So to do that, I'm going to drag off of the Event Actor Begin Overlap, and just start
+
+10
+00:00:38.700 --> 00:00:42.700
+typing Cast To BP Bot.
+
+11
+00:00:42.700 --> 00:00:46.189
+There we have our Cast To BP Bot.
+
+12
+00:00:46.189 --> 00:00:50.189
+Next we're going to drag off this other actor and select the object.
+
+13
+00:00:50.189 --> 00:00:51.770
+Compile and Save.
+
+14
+00:00:51.770 --> 00:00:54.719
+We should be good to go.
+
+15
+00:00:54.719 --> 00:01:01.240
+Now next, from the Cast To BP Bot, we'll need to add a Set Actor Enable Collision node and
+
+16
+00:01:01.240 --> 00:01:02.240
+set it to false.
+
+17
+00:01:02.240 --> 00:01:10.989
+So to do that, we can just drag off of this, and we'll do Set Actor Collision.
+
+18
+00:01:10.989 --> 00:01:15.060
+So there's our Set Actor Enable Collision, drag off of this, and we'll see that our
+
+19
+00:01:15.060 --> 00:01:17.939
+new Actor Enable Collision is set to false.
+
+20
+00:01:17.939 --> 00:01:20.109
+This is what we want.
+
+21
+00:01:20.109 --> 00:01:24.989
+This will ensure that the BP Bot actor won't retrigger the event again once it's been
+
+22
+00:01:24.989 --> 00:01:25.989
+activated.
+
+23
+00:01:26.150 --> 00:01:32.510
+A quick note here is as you're dragging off, if you don't see the Set Actor, you can
+
+24
+00:01:32.510 --> 00:01:37.709
+uncheck Context Sensitive to see all of the nodes that are available.
+
+25
+00:01:37.709 --> 00:01:42.189
+Context Sensitive is just a nice way of the engine filtering out results that typically
+
+26
+00:01:42.189 --> 00:01:46.230
+work with this actor, but sometimes it gets it right, sometimes it doesn't.
+
+27
+00:01:46.230 --> 00:01:50.120
+Go ahead and hit Compile.
+
+28
+00:01:50.120 --> 00:01:54.079
+Now the next thing we're going to do is create a new Level Sequence Actor object
+
+29
+00:01:54.079 --> 00:01:57.159
+reference variable called Main Sequence.
+
+30
+00:01:57.159 --> 00:02:00.959
+So underneath the variables, let's click our plus, a new variable, and let's just
+
+31
+00:02:00.959 --> 00:02:06.480
+call this Main Sequence.
+
+32
+00:02:06.480 --> 00:02:10.199
+Now in my case, you can see that it did select it, but if your shows as, say, for
+
+33
+00:02:10.199 --> 00:02:15.159
+example, a Boolean, all we need to do is just go up to Variable Type in the Details
+
+34
+00:02:15.159 --> 00:02:23.240
+panel, select the dropdown, and then search for Level Sequence Actor, and you see
+
+35
+00:02:23.240 --> 00:02:27.819
+we have Level Sequence Actor, and we're going to select Object Reference.
+
+36
+00:02:27.819 --> 00:02:32.620
+And the next thing we'll do in our Details panel is ensure that our blueprint is
+
+37
+00:02:32.620 --> 00:02:34.259
+instanced editable.
+
+38
+00:02:34.259 --> 00:02:38.300
+So what this means is this variable that we've created will be exposed on our
+
+39
+00:02:38.300 --> 00:02:42.699
+blueprint when it's added to the level, meaning that we can change whatever this
+
+40
+00:02:42.699 --> 00:02:44.819
+is referencing per instance.
+
+41
+00:02:44.819 --> 00:02:48.289
+Let's go ahead and hit Compile.
+
+42
+00:02:48.289 --> 00:02:53.349
+And now what we're going to do is after our Set Actor Enable Collision, we are going
+
+43
+00:02:53.349 --> 00:02:58.189
+to create a new variable called, I'm sorry, not new variable, we're going to create
+
+44
+00:02:58.189 --> 00:03:00.990
+a new node called Play.
+
+45
+00:03:00.990 --> 00:03:09.300
+So if I do Play, uncheck Context Sensitive, and what I'm going to do is Play Sequence.
+
+46
+00:03:09.300 --> 00:03:14.460
+And what we're looking for is the Play, not Play Sequence, but Play.
+
+47
+00:03:14.460 --> 00:03:18.020
+And it should say Target is Movie Scene Sequence Player.
+
+48
+00:03:18.020 --> 00:03:20.419
+There we go.
+
+49
+00:03:20.419 --> 00:03:25.300
+And then I'm going to drag my Main Sequence off onto our Target, and you'll see that
+
+50
+00:03:25.300 --> 00:03:29.569
+it automatically creates our translator here.
+
+51
+00:03:29.569 --> 00:03:34.330
+So it's going to take our Main Sequence variable and plug it into the target of our
+
+52
+00:03:34.330 --> 00:03:35.330
+Play.
+
+53
+00:03:35.330 --> 00:03:36.330
+Perfect.
+
+54
+00:03:36.330 --> 00:03:38.319
+Let's go ahead and hit Compile.
+
+55
+00:03:38.319 --> 00:03:43.479
+And then the last thing that we need to do is create a Boolean variable called IsPlaying.
+
+56
+00:03:43.479 --> 00:03:47.039
+Now this variable is going to be used to check that the sequence is playing.
+
+57
+00:03:47.039 --> 00:03:52.719
+And we'll also be able to use this logic to pause gameplay or trigger other events
+
+58
+00:03:52.719 --> 00:03:53.719
+or logic.
+
+59
+00:03:53.719 --> 00:03:55.560
+Let's go back down to our variables.
+
+60
+00:03:55.560 --> 00:03:56.560
+Click our Plus.
+
+61
+00:03:56.560 --> 00:04:01.259
+I'm going to call this IsPlaying.
+
+62
+00:04:01.259 --> 00:04:05.219
+And we're going to change our Level Sequence Actor to a Boolean.
+
+63
+00:04:05.219 --> 00:04:06.219
+There we go.
+
+64
+00:04:06.219 --> 00:04:09.000
+We'll hit Compile and Save.
+
+65
+00:04:09.000 --> 00:04:13.740
+Now that our IsPlaying Boolean variable is created, we're going to drag and drop this
+
+66
+00:04:13.740 --> 00:04:15.620
+into the Event Graph.
+
+67
+00:04:15.620 --> 00:04:19.339
+And we're going to do the SetIsPlaying.
+
+68
+00:04:19.339 --> 00:04:22.699
+We'll go ahead and drag off of our Play, connect it, and then we're going to check
+
+69
+00:04:22.699 --> 00:04:24.620
+this that it is playing.
+
+70
+00:04:24.620 --> 00:04:28.879
+We're going to hit Compile and Save.
+
+71
+00:04:28.879 --> 00:04:32.040
+Now in the next section, we'll focus on pausing the actual sequence.

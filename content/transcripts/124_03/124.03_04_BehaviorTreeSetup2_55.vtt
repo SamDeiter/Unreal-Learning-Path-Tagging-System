@@ -1,0 +1,457 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:05.419
+Right, now we're going to do a little bit more work setting up this behavior tree.
+
+2
+00:00:06.990 --> 00:00:11.710
+So I'm going to delete everything that I've created. Now I've also got a nice
+
+3
+00:00:11.710 --> 00:00:17.100
+clean starting point and I'm going to jump over to our blackboard.
+
+4
+00:00:17.100 --> 00:00:21.179
+Let's set up our different keys that we're going to need.
+
+5
+00:00:21.820 --> 00:00:24.539
+So you can see here on the top here we have a new key.
+
+6
+00:00:25.179 --> 00:00:29.100
+I'm going to do a drop down and the first one I'm going to search for is the vector.
+
+7
+00:00:30.190 --> 00:00:36.109
+Okay, that gives us a yellow key and I am going to name this location.
+
+8
+00:00:37.710 --> 00:00:42.750
+Okay, so this is just going to be a x, y and z float.
+
+9
+00:00:43.549 --> 00:00:46.429
+We're going to use to denote a location in space.
+
+10
+00:00:47.500 --> 00:00:53.899
+Okay, and one more that we're going to add in and that is going to be a object
+
+11
+00:00:54.880 --> 00:00:59.520
+and the object key we're going to type in and we're going to call this player.
+
+12
+00:01:01.439 --> 00:01:09.760
+Now the object itself is we're going to want to reduce the base class.
+
+13
+00:01:10.319 --> 00:01:15.359
+The reason is an object doesn't necessarily have a location in space.
+
+14
+00:01:15.359 --> 00:01:19.120
+So we're going to have trouble placing stuff into it.
+
+15
+00:01:19.120 --> 00:01:22.480
+So what I'm going to do is you can see that we have a base class here.
+
+16
+00:01:22.480 --> 00:01:26.079
+I'm going to select that. I'm going to change that to actor.
+
+17
+00:01:26.959 --> 00:01:32.319
+So that means we're not going to need to do a cast to get things like location.
+
+18
+00:01:33.069 --> 00:01:36.189
+So we're only going to be able to save references to things
+
+19
+00:01:36.829 --> 00:01:40.590
+which have a parent class somewhere of actor.
+
+20
+00:01:41.780 --> 00:01:46.659
+Okay, with that I'm going to save and jump back into our behavior tree.
+
+21
+00:01:47.700 --> 00:01:51.299
+So let's set up our first state.
+
+22
+00:01:52.000 --> 00:01:58.560
+So I'm going to drag off of the route and I'm going to select a selector.
+
+23
+00:02:00.430 --> 00:02:02.670
+So this is going to be our first state.
+
+24
+00:02:03.569 --> 00:02:08.210
+Then I'm going to drag off and I'm going to select a sequence.
+
+25
+00:02:09.310 --> 00:02:19.009
+And this sequence I am going to rename wonder around space in there as well.
+
+26
+00:02:21.090 --> 00:02:24.210
+So the first thing we're going to do is we're going to just get these characters to
+
+27
+00:02:24.210 --> 00:02:29.330
+wander around and this will be the default activity because it's on the left hand side here.
+
+28
+00:02:30.349 --> 00:02:37.069
+Now at the moment it's all right we've got a sort of flow nodes in here
+
+29
+00:02:37.069 --> 00:02:40.189
+but we're not actually asking it to do anything at all.
+
+30
+00:02:40.189 --> 00:02:43.629
+So what we're going to do in order to do that is we're going to
+
+31
+00:02:43.629 --> 00:02:46.990
+to get it to do something we need to add in tasks.
+
+32
+00:02:46.990 --> 00:02:51.469
+Now there are actually a whole load of pre-made tasks here
+
+33
+00:02:51.469 --> 00:02:54.030
+but we're going to create one from scratch.
+
+34
+00:02:54.669 --> 00:02:58.990
+So if we come up to the top here you can see we have an option for new task.
+
+35
+00:02:59.840 --> 00:03:07.120
+I'm going to do a drop down and I'm going to select BT task underscore blueprint base.
+
+36
+00:03:08.849 --> 00:03:22.270
+And I'm going to create a task I'm going to call it BT underscore find random location.
+
+37
+00:03:23.419 --> 00:03:30.620
+Okay so this is going to this is going to be a task where we're going to find a random location.
+
+38
+00:03:31.259 --> 00:03:35.740
+When we start off to make them wander about we want to find a random location and wander to it.
+
+39
+00:03:37.340 --> 00:03:42.460
+So once you've created your task you're going to get a screen that looks like this.
+
+40
+00:03:42.460 --> 00:03:48.460
+So we've got the blueprint functionality element here but we have no viewport
+
+41
+00:03:48.460 --> 00:03:54.139
+and that's because a task has no components has no visible aspects to it.
+
+42
+00:03:54.139 --> 00:04:00.379
+It's just a function just we're just going to be telling it sending it some instructions to do
+
+43
+00:04:00.379 --> 00:04:07.789
+something. Okay so one thing you might also have noticed is we have no red starting pin
+
+44
+00:04:08.500 --> 00:04:14.580
+and that's because we need to start by overriding one of the base functions.
+
+45
+00:04:15.219 --> 00:04:19.620
+So you can see here we have functions and there is six overrideable.
+
+46
+00:04:19.620 --> 00:04:27.230
+And we do a drop down we have a number of options you can see we have receive abort
+
+47
+00:04:27.949 --> 00:04:34.189
+so any code that is connected to this will be triggered if the task is aborted.
+
+48
+00:04:35.009 --> 00:04:39.970
+I'm not going to worry too much about that receive execute now this is what we are going
+
+49
+00:04:39.970 --> 00:04:47.089
+to use because this is the when the task is first run any of the code that is connected to that
+
+50
+00:04:47.089 --> 00:04:55.279
+is going to be run from the receive execute. Finally we have receive tick now what receive
+
+51
+00:04:55.279 --> 00:05:02.480
+tick will do is this will any of the functions that are any of the code that is connected to
+
+52
+00:05:02.480 --> 00:05:12.240
+this will run every frame whilst the task is running. Now you'll also have noticed that we've
+
+53
+00:05:12.240 --> 00:05:17.759
+got other options here so we've got the receiver bought AI we've got an equivalent with AI.
+
+54
+00:05:17.759 --> 00:05:25.439
+Let me show you all the difference is here if I go receive execute and receive execute AI
+
+55
+00:05:26.319 --> 00:05:35.860
+they're very similar except for we have some different input pins so for the receive execute
+
+56
+00:05:35.860 --> 00:05:44.339
+AI we are guessing the owner controller and the controlled pawn where from the receive execute
+
+57
+00:05:44.339 --> 00:05:51.939
+we're guessing a actor so it's just what output you want at this point. Now we are just
+
+58
+00:05:51.939 --> 00:05:56.339
+going to use for this example we're going to use the receive execute because we're going to
+
+59
+00:05:56.339 --> 00:06:03.779
+need to do a cast anyway so I'm going to delete the event receive execute AI and we're going to use
+
+60
+00:06:03.779 --> 00:06:12.480
+this one now we have the owned actor and all we're looking to do is get a random location
+
+61
+00:06:13.860 --> 00:06:20.819
+however I am going to want to pass out the data that we are calculating here and that's where
+
+62
+00:06:20.819 --> 00:06:28.899
+we are going to have to use a variable and a specific variable so if I push plus on the
+
+63
+00:06:28.899 --> 00:06:40.379
+variables and I am going to call this location and rather than a boolean what I'm looking for
+
+64
+00:06:40.379 --> 00:06:51.470
+is a blackboard key selector blackboard key selector here and I am going to add another
+
+65
+00:06:51.470 --> 00:06:57.629
+variable and this time I'm going to use it as a float I'm going to rename this and I'm going
+
+66
+00:06:57.629 --> 00:07:09.019
+to call this radius and each of these I am going to make instance editable so that we can see them
+
+67
+00:07:09.019 --> 00:07:17.259
+externally okay so I've created two variables location which is a blackboard key selector
+
+68
+00:07:17.259 --> 00:07:25.439
+and a radius now let's write some code so the first thing I'm going to do is I'm going to
+
+69
+00:07:25.439 --> 00:07:35.649
+drag off the owned actor and I'm going to get actor location so this I'm just getting
+
+70
+00:07:35.649 --> 00:07:45.500
+finding out where the actor is and I'm going to drag off of this get random like reachable
+
+71
+00:07:45.500 --> 00:07:54.259
+point in get random reachable point in radius okay so that's the node that we want and what
+
+72
+00:07:54.259 --> 00:08:01.939
+this is going to do is this is going to just return a location which we will be able to walk to
+
+73
+00:08:03.250 --> 00:08:10.370
+now I'm going to drag in the radius if I place that over the radius I get this green tick
+
+74
+00:08:10.930 --> 00:08:18.180
+I drop that on it's going to use that as an input and that should be enough code that we've
+
+75
+00:08:18.180 --> 00:08:24.819
+got here now I'm going to do one more thing I'm going to drag in the location and get it
+
+76
+00:08:26.480 --> 00:08:35.570
+and I'm going to type set all that board value now this is interesting because in order for us
+
+77
+00:08:35.570 --> 00:08:44.129
+to pass data into the blackboard we are going to have to use we don't have to set a blackboard
+
+78
+00:08:44.129 --> 00:08:51.759
+key and in this case we're setting a location so we're going to set this blackboard value as
+
+79
+00:08:51.759 --> 00:09:00.240
+a vector so again a vector is just three floats denoting x y and z which can which can
+
+80
+00:09:00.240 --> 00:09:07.889
+be used to represent a location in the world so we're grabbing our vector I'm going to plug
+
+81
+00:09:07.889 --> 00:09:17.200
+that in and I'm going to connect up the random location now that's great so far this code is
+
+82
+00:09:17.200 --> 00:09:23.279
+good what this is going to do is it's going to find out where the actor is find the location
+
+83
+00:09:23.279 --> 00:09:29.740
+and then save it to a blackboard variant now there is one final thing that we we need to do
+
+84
+00:09:29.740 --> 00:09:37.100
+and I want to stress this because if you are making a task and you forget to do this
+
+85
+00:09:38.700 --> 00:09:41.740
+you're never going to leave that task you're never going to go back
+
+86
+00:09:41.740 --> 00:09:49.139
+to the behavior tree and move on to the next one and that is finish execute
+
+87
+00:09:52.259 --> 00:10:01.279
+so you have a finish execute here now this is where we go back and tell the code if it was a
+
+88
+00:10:01.279 --> 00:10:07.019
+success or a failure so we can either finish execute with success ticked on that means it's
+
+89
+00:10:07.019 --> 00:10:14.620
+a success or unticked and it's a failure and I'm going to connect up the output pin from the
+
+90
+00:10:14.620 --> 00:10:23.019
+get random reachable point in radius so that way we can succeed if we can find a location to go to
+
+91
+00:10:23.019 --> 00:10:29.570
+otherwise we're going to fail and this is important because this is going to denote how
+
+92
+00:10:29.570 --> 00:10:37.649
+we move through the behavior tree okay so that is the entire code that we need for this
+
+93
+00:10:37.649 --> 00:10:46.860
+I'm going to hit compile and save right now I am going to jump back to the behavior tree
+
+94
+00:10:47.500 --> 00:10:55.419
+and under our wonder about I'm going to drag out and I can I am going to type in
+
+95
+00:10:57.149 --> 00:11:04.750
+find random location and you can see here it's at the top here if you want to check if you
+
+96
+00:11:04.750 --> 00:11:12.029
+run it correctly there's a finished version but bt find random location now
+
+97
+00:11:13.500 --> 00:11:21.419
+if you see here by default what we have is two default values we have location and radius
+
+98
+00:11:22.059 --> 00:11:27.899
+and as you can see that's the same as our two variables which we have made instance editable
+
+99
+00:11:29.139 --> 00:11:32.899
+so our first thing that we're going to want to do is we're going to want to set the radius
+
+100
+00:11:32.899 --> 00:11:39.460
+because zero is not going to to fight go very far so let's change the radius to a thousand
+
+101
+00:11:39.460 --> 00:11:45.620
+and that allows us to change how the task functions the second thing is we are getting
+
+102
+00:11:45.620 --> 00:11:53.059
+a location and this gives us a drop down of what blackboard actor we want to save this to
+
+103
+00:11:54.110 --> 00:12:00.429
+now the self actor is not what we want to save this to we want to save this to
+
+104
+00:12:00.429 --> 00:12:10.399
+location so that has found a found a random area and it has saved it into the blackboard
+
+105
+00:12:10.399 --> 00:12:19.580
+the blackboard key has good location now if i drag off you can see that there are a whole
+
+106
+00:12:19.580 --> 00:12:29.919
+made a whole load of pre-made tasks and we're going to use the move to here and as the input
+
+107
+00:12:30.399 --> 00:12:38.940
+move to i am going to ask this to move to the location so again what we've done here
+
+108
+00:12:38.940 --> 00:12:44.620
+is we found a random location and then we've told it to move to it i'm also going to drag
+
+109
+00:12:44.620 --> 00:12:51.470
+off and then once we've hit the location i'm just going to ask it to wait and five seconds
+
+110
+00:12:51.470 --> 00:13:00.240
+is too long so i'm just going to make it wait for one second and i'm going to save that
+
+111
+00:13:01.889 --> 00:13:10.419
+now let's test so if i jump back into our behavior tree and i push play you can now see
+
+112
+00:13:10.419 --> 00:13:18.179
+that all of our npc's are finding a random location they're moving directly towards it and
+
+113
+00:13:18.179 --> 00:13:26.580
+then they are stopping for one second okay so we've successfully implemented a behavior tree
+
+114
+00:13:26.580 --> 00:13:33.220
+and now we can make it a little bit more complicated in the next video

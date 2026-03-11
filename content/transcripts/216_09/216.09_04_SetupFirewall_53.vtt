@@ -1,0 +1,681 @@
+WEBVTT
+
+1
+00:00:01.330 --> 00:00:04.769
+In this video, we'll look at how to set up your firewall and
+
+2
+00:00:04.769 --> 00:00:08.710
+configure port forwarding to ensure that OSC works as expected.
+
+3
+00:00:08.710 --> 00:00:13.449
+To start, let's look into our Windows Defender firewall settings.
+
+4
+00:00:13.449 --> 00:00:15.869
+You will be able to find it in settings,
+
+5
+00:00:15.869 --> 00:00:20.109
+and I'm also going to try to do it on my computer as well.
+
+6
+00:00:20.109 --> 00:00:22.489
+First, I will go to settings,
+
+7
+00:00:22.489 --> 00:00:26.829
+and it's already looking different because I'm now at Windows 11.
+
+8
+00:00:26.870 --> 00:00:31.850
+Let me try to go to Windows Firewall.
+
+9
+00:00:31.850 --> 00:00:37.649
+Windows Defender Firewall is the one we want to look into,
+
+10
+00:00:37.649 --> 00:00:39.509
+so now let's go to here,
+
+11
+00:00:39.509 --> 00:00:41.310
+and let's check two places.
+
+12
+00:00:41.310 --> 00:00:44.270
+First, let's go to advanced settings here,
+
+13
+00:00:44.270 --> 00:00:51.130
+and the place we want to see is the inbound and outbound rules.
+
+14
+00:00:51.130 --> 00:00:53.609
+So for the inbound rules,
+
+15
+00:00:53.609 --> 00:00:56.929
+I'm not going to specify any application,
+
+16
+00:00:56.929 --> 00:01:00.210
+I'm just going to create a new one,
+
+17
+00:01:00.210 --> 00:01:05.430
+new rule here, and I want to specify a port.
+
+18
+00:01:05.430 --> 00:01:09.230
+I want to make sure the port is not blocked on this computer.
+
+19
+00:01:09.230 --> 00:01:12.560
+So let's say I want to use,
+
+20
+00:01:12.560 --> 00:01:16.799
+and another reminder is that OSC usually
+
+21
+00:01:16.799 --> 00:01:20.280
+is going through UDP because it's a real-time protocol.
+
+22
+00:01:20.280 --> 00:01:22.439
+So usually we will specify UDP,
+
+23
+00:01:22.439 --> 00:01:26.959
+but there's no harm to also add one more rule for TCP.
+
+24
+00:01:26.959 --> 00:01:29.480
+The port we're going to use today,
+
+25
+00:01:29.480 --> 00:01:32.760
+and we're going to say it's just for example,
+
+26
+00:01:32.760 --> 00:01:35.560
+I'm going to say it's 22222,
+
+27
+00:01:35.560 --> 00:01:39.849
+the same as on the screenshot on the slide,
+
+28
+00:01:39.849 --> 00:01:47.310
+and we want to use allow the connection.
+
+29
+00:01:47.310 --> 00:01:52.989
+Next, and we will apply it to a domain and private and public.
+
+30
+00:01:52.989 --> 00:01:55.430
+Next, and we'll give it a name,
+
+31
+00:01:55.430 --> 00:01:59.409
+but because I already have this inbound and outbound rule set,
+
+32
+00:01:59.409 --> 00:02:01.890
+I'm not going to finish the final part,
+
+33
+00:02:01.890 --> 00:02:07.730
+but you can just name it something like 22222 for OSC,
+
+34
+00:02:09.650 --> 00:02:14.240
+inbound, something like that.
+
+35
+00:02:14.240 --> 00:02:17.199
+You can hit Finish to add the rule,
+
+36
+00:02:17.199 --> 00:02:20.409
+and same thing goes to album rules.
+
+37
+00:02:20.409 --> 00:02:22.250
+You can create a new rule,
+
+38
+00:02:22.250 --> 00:02:27.650
+specify if you just want it to be open on a specific program,
+
+39
+00:02:27.650 --> 00:02:29.289
+we can do it like this,
+
+40
+00:02:29.289 --> 00:02:31.289
+and then we will specify the program,
+
+41
+00:02:31.289 --> 00:02:32.669
+but in our use case,
+
+42
+00:02:32.669 --> 00:02:35.169
+I'm going to specify the port.
+
+43
+00:02:35.169 --> 00:02:38.129
+I want it for UDP,
+
+44
+00:02:38.129 --> 00:02:41.090
+and I'll do it again for 22222,
+
+45
+00:02:41.090 --> 00:02:46.560
+because I'm going to send message out from 22222 as well.
+
+46
+00:02:46.560 --> 00:02:50.520
+Next, and I'll do allow the connection.
+
+47
+00:02:50.520 --> 00:02:54.810
+Next, allow it on all three domains,
+
+48
+00:02:54.810 --> 00:02:58.689
+and finally, I'll give it a name and finish it.
+
+49
+00:02:58.729 --> 00:03:02.449
+Noting that if you're in a traditional local area network setup,
+
+50
+00:03:02.449 --> 00:03:06.129
+you likely won't actually need to open the ports that you're using,
+
+51
+00:03:06.129 --> 00:03:08.009
+but almost certainly you will if you're
+
+52
+00:03:08.009 --> 00:03:11.729
+going across subnets or over the Internet.
+
+53
+00:03:11.729 --> 00:03:14.930
+Now we make sure that this computer is not
+
+54
+00:03:14.930 --> 00:03:19.389
+blocking the connection at our port 22222.
+
+55
+00:03:19.389 --> 00:03:23.569
+Now we want to make sure when a message comes into the network,
+
+56
+00:03:23.569 --> 00:03:27.250
+that message coming from 22222 is being forwarded
+
+57
+00:03:27.250 --> 00:03:31.000
+to this computer that we just configured.
+
+58
+00:03:31.000 --> 00:03:33.840
+Let's go to our default gateway.
+
+59
+00:03:33.840 --> 00:03:36.560
+The way to find our default gateway will be,
+
+60
+00:03:36.560 --> 00:03:39.080
+let's press the Windows button,
+
+61
+00:03:39.080 --> 00:03:43.000
+and let's type CMD for command prompt.
+
+62
+00:03:43.000 --> 00:03:46.759
+Now we open this command prompt,
+
+63
+00:03:46.759 --> 00:03:50.719
+let's type in ipconfig.
+
+64
+00:03:50.719 --> 00:03:54.129
+Now we have all these IPs here,
+
+65
+00:03:54.129 --> 00:03:57.849
+and the one we want to look for is the default gateway.
+
+66
+00:03:57.969 --> 00:04:01.969
+For me, it will be 192.168.1.1.
+
+67
+00:04:01.969 --> 00:04:05.169
+Also a reminder that if you're looking for your local IP,
+
+68
+00:04:05.169 --> 00:04:07.490
+it will be the IPv4 address here.
+
+69
+00:04:07.490 --> 00:04:11.569
+For me, 192.168.1.245.
+
+70
+00:04:11.569 --> 00:04:12.810
+So if you want to do
+
+71
+00:04:12.810 --> 00:04:17.970
+a LAN communication with other device under the same network,
+
+72
+00:04:17.970 --> 00:04:22.769
+this is the IP that represents my current computer.
+
+73
+00:04:22.769 --> 00:04:28.639
+So I'm going to use my default gateway IP,
+
+74
+00:04:28.639 --> 00:04:31.399
+and we will move on to the next part,
+
+75
+00:04:31.399 --> 00:04:35.560
+to go to our router and set the port forwarding rules.
+
+76
+00:04:35.560 --> 00:04:38.329
+Now let's move on to create
+
+77
+00:04:38.329 --> 00:04:42.529
+a new port forwarding rule on the router.
+
+78
+00:04:42.529 --> 00:04:44.769
+So this part is going to look very
+
+79
+00:04:44.769 --> 00:04:47.110
+different from provider to provider,
+
+80
+00:04:47.110 --> 00:04:48.930
+and for me, I'm using Optimum.
+
+81
+00:04:48.930 --> 00:04:51.569
+So for Optimum users,
+
+82
+00:04:51.569 --> 00:04:53.610
+this is the page you're going to see.
+
+83
+00:04:53.610 --> 00:04:56.329
+First, we need to type in our Optimum ID and
+
+84
+00:04:56.329 --> 00:04:59.449
+password to login and start creating new rules.
+
+85
+00:04:59.449 --> 00:05:05.410
+For different users, you might open into a router setting page,
+
+86
+00:05:05.410 --> 00:05:08.209
+you might need to put in passwords,
+
+87
+00:05:08.209 --> 00:05:09.889
+it might be on your router.
+
+88
+00:05:09.889 --> 00:05:14.050
+So please check your router and
+
+89
+00:05:14.050 --> 00:05:19.329
+your Internet provider for how to access this setting page.
+
+90
+00:05:19.329 --> 00:05:23.009
+So for all the Optimum users,
+
+91
+00:05:23.050 --> 00:05:26.769
+let's look at my page for example.
+
+92
+00:05:26.769 --> 00:05:31.959
+So here, I already logged into my Optimum account.
+
+93
+00:05:31.959 --> 00:05:34.040
+I can see that I have
+
+94
+00:05:34.040 --> 00:05:37.800
+one wired device and I have no Wi-Fi device,
+
+95
+00:05:37.800 --> 00:05:39.879
+which is probably not true.
+
+96
+00:05:39.879 --> 00:05:42.600
+So a reminder for Optimum users,
+
+97
+00:05:42.600 --> 00:05:44.959
+you can always hit this refresh
+
+98
+00:05:44.959 --> 00:05:47.199
+to get a new list of results here.
+
+99
+00:05:47.199 --> 00:05:49.199
+A lot of time, it's not very sensitive.
+
+100
+00:05:49.199 --> 00:05:53.439
+We have to refresh multiple times to have the correct result.
+
+101
+00:05:53.439 --> 00:05:56.879
+But I'm only going to deal with the wired one here,
+
+102
+00:05:56.879 --> 00:05:59.779
+so I'm going to leave it as is.
+
+103
+00:05:59.779 --> 00:06:03.639
+We will scroll down to the port forwarding part,
+
+104
+00:06:03.639 --> 00:06:07.529
+and I will hit Manage.
+
+105
+00:06:07.529 --> 00:06:11.389
+So here, we can see that I already have several rules here,
+
+106
+00:06:11.389 --> 00:06:14.730
+and including the rule 2222 here,
+
+107
+00:06:14.730 --> 00:06:21.850
+I'm just going to delete it and I will do it again.
+
+108
+00:06:22.649 --> 00:06:25.730
+So we deleted the port,
+
+109
+00:06:25.730 --> 00:06:27.689
+and now we can use
+
+110
+00:06:27.689 --> 00:06:31.620
+Add Port Forwarding Rule to create a new one.
+
+111
+00:06:31.620 --> 00:06:34.139
+The process is very straightforward.
+
+112
+00:06:34.139 --> 00:06:36.300
+Just select the device you want to use.
+
+113
+00:06:36.300 --> 00:06:40.379
+Usually, it will show you the name of your computer.
+
+114
+00:06:40.379 --> 00:06:41.899
+But if you don't see it,
+
+115
+00:06:41.899 --> 00:06:46.459
+you can also come back to our command prompt and make sure
+
+116
+00:06:46.459 --> 00:06:49.980
+the IPv4 address is matching the IPv4 address
+
+117
+00:06:49.980 --> 00:06:53.019
+here to make sure they are the same device.
+
+118
+00:06:53.019 --> 00:06:56.000
+I will collect my desktop,
+
+119
+00:06:56.000 --> 00:06:59.660
+and the port I want to use is 2222.
+
+120
+00:06:59.660 --> 00:07:05.000
+So now any messages coming from this port 2222 going
+
+121
+00:07:05.000 --> 00:07:10.720
+to this Internet is going to be forwarded to my desktop here.
+
+122
+00:07:10.720 --> 00:07:13.480
+The protocol is both TCP and UDP,
+
+123
+00:07:13.480 --> 00:07:18.079
+but we can also specify it to be just TCP or just UDP.
+
+124
+00:07:18.079 --> 00:07:21.360
+I'll leave it as is and save.
+
+125
+00:07:21.360 --> 00:07:24.680
+Now, it is creating a new port forwarding rule.
+
+126
+00:07:24.680 --> 00:07:26.959
+It might take a couple of seconds.
+
+127
+00:07:26.959 --> 00:07:29.959
+Just let it run.
+
+128
+00:07:29.959 --> 00:07:33.379
+After a couple of seconds,
+
+129
+00:07:33.379 --> 00:07:36.800
+you should see a green thing shows
+
+130
+00:07:36.800 --> 00:07:41.600
+that the port forwarding rule has successfully added.
+
+131
+00:07:41.600 --> 00:07:49.160
+Now, you can see this new rule called 2222 for TCP and UDP.
+
+132
+00:07:49.480 --> 00:07:52.009
+That's it.
+
+133
+00:07:52.009 --> 00:07:56.259
+If you're not using your ISP as a router
+
+134
+00:07:56.259 --> 00:08:01.019
+or otherwise don't have the ISP in control of your port forwarding,
+
+135
+00:08:01.019 --> 00:08:03.259
+you might want to do it through an individual router.
+
+136
+00:08:03.259 --> 00:08:07.100
+So I'll show you briefly here an example with a Netgear router.
+
+137
+00:08:07.100 --> 00:08:09.980
+So in this case, I go to router login.net,
+
+138
+00:08:09.980 --> 00:08:11.360
+which essentially takes me to
+
+139
+00:08:11.360 --> 00:08:14.500
+the gateway that June already specified before.
+
+140
+00:08:14.500 --> 00:08:18.699
+I can go over to advanced here and advanced setup.
+
+141
+00:08:18.699 --> 00:08:19.980
+Again, like June mentioned,
+
+142
+00:08:19.980 --> 00:08:22.459
+this will be different from router to router.
+
+143
+00:08:22.459 --> 00:08:24.779
+We're just trying to show a couple of examples here.
+
+144
+00:08:24.779 --> 00:08:26.939
+But if I go down to port forwarding,
+
+145
+00:08:26.939 --> 00:08:29.420
+port triggering in this particular example,
+
+146
+00:08:29.420 --> 00:08:31.259
+very similar to what we just saw,
+
+147
+00:08:31.259 --> 00:08:34.019
+I can go ahead and add a new service.
+
+148
+00:08:34.019 --> 00:08:37.940
+I've got to drop down here to specify what exactly it's for,
+
+149
+00:08:37.940 --> 00:08:41.940
+or I can just type it in here as add custom service.
+
+150
+00:08:41.970 --> 00:08:45.850
+So I can say that I want to open up port 2222,
+
+151
+00:08:46.009 --> 00:08:48.850
+and I'll do the same thing for both internal and external,
+
+152
+00:08:48.850 --> 00:08:50.450
+or if I hit that checkbox,
+
+153
+00:08:50.450 --> 00:08:56.690
+it happens automatically, and I'll just call this OSC testing.
+
+154
+00:08:56.690 --> 00:08:58.850
+Then I just need to make sure that I am
+
+155
+00:08:58.850 --> 00:09:02.169
+specifying the correct internal IP address.
+
+156
+00:09:02.169 --> 00:09:04.419
+Now, it's not clear from here
+
+157
+00:09:04.419 --> 00:09:06.899
+which of these IP addresses is my device.
+
+158
+00:09:06.899 --> 00:09:09.539
+I happen to know that it's 0.3
+
+159
+00:09:09.539 --> 00:09:13.480
+because of using IP config and looking at the IPv4 address.
+
+160
+00:09:13.480 --> 00:09:15.700
+So I would then just click apply,
+
+161
+00:09:16.139 --> 00:09:19.799
+and now we have this new port forwarding rule
+
+162
+00:09:19.799 --> 00:09:22.460
+ready to go through my separate router.
+
+163
+00:09:22.460 --> 00:09:24.940
+Do note that sometimes you have to tell your ISP
+
+164
+00:09:24.940 --> 00:09:28.779
+to specifically disable the router configuration on it.
+
+165
+00:09:28.779 --> 00:09:31.259
+I actually was not able to use this port forwarding
+
+166
+00:09:31.259 --> 00:09:34.740
+correctly until my ISP specifically disabled
+
+167
+00:09:34.740 --> 00:09:39.700
+the router that was built into my modem.
+
+168
+00:09:39.700 --> 00:09:40.539
+In the next video,
+
+169
+00:09:40.539 --> 00:09:43.259
+we'll begin exploring the Unreal Engine sample project
+
+170
+00:09:43.259 --> 00:09:45.340
+that we've put together for this course.

@@ -1,0 +1,853 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.429
+Next up, let's have a look at Overlaying Materials.
+
+2
+00:00:05.429 --> 00:00:09.070
+Now, this is new in Unreal Engine version 5,
+
+3
+00:00:09.070 --> 00:00:11.349
+so you might not have seen this before,
+
+4
+00:00:11.349 --> 00:00:15.710
+but it really is a great way of doing a lot of things,
+
+5
+00:00:15.710 --> 00:00:18.149
+which originally was quite hard to do.
+
+6
+00:00:18.149 --> 00:00:20.829
+You've seen how we needed to create
+
+7
+00:00:20.829 --> 00:00:25.429
+dynamic material instances in order to create effects,
+
+8
+00:00:25.429 --> 00:00:27.910
+or we could use the Post-Process Volume.
+
+9
+00:00:27.910 --> 00:00:30.230
+In this, we created
+
+10
+00:00:30.289 --> 00:00:32.369
+these effects that you can see here,
+
+11
+00:00:32.369 --> 00:00:36.170
+which is like a track and checker pattern.
+
+12
+00:00:36.170 --> 00:00:39.250
+It works on skeletal meshes, standard meshes,
+
+13
+00:00:39.250 --> 00:00:42.049
+can even function as an X-ray material.
+
+14
+00:00:42.049 --> 00:00:44.969
+I'll show you how to do that in a little bit.
+
+15
+00:00:44.969 --> 00:00:47.969
+But the great thing about this is it's the same material
+
+16
+00:00:47.969 --> 00:00:52.090
+and you can see that the material below it
+
+17
+00:00:52.090 --> 00:00:53.950
+is not interfered with.
+
+18
+00:00:53.950 --> 00:00:58.950
+So this can be applied on any specific mesh
+
+19
+00:00:59.609 --> 00:01:03.210
+and you'll still be able to see the material below.
+
+20
+00:01:03.210 --> 00:01:06.569
+Now, this is useful because if you were to program
+
+21
+00:01:06.569 --> 00:01:10.189
+all of your effects into a material,
+
+22
+00:01:10.189 --> 00:01:14.010
+you'd have to write it into the master material
+
+23
+00:01:14.010 --> 00:01:15.930
+and the material that it came with.
+
+24
+00:01:15.930 --> 00:01:19.290
+And this could make it, firstly, very, very complicated.
+
+25
+00:01:19.290 --> 00:01:20.969
+It means that a lot of people
+
+26
+00:01:20.969 --> 00:01:22.930
+need to work on one material
+
+27
+00:01:22.930 --> 00:01:25.950
+and there might be a bunch of efficiency concerns.
+
+28
+00:01:25.950 --> 00:01:28.090
+So achieving something like this,
+
+29
+00:01:28.150 --> 00:01:32.189
+especially if you have some areas of transparency and stuff,
+
+30
+00:01:32.189 --> 00:01:37.109
+this is a lot easier by using these overlay materials.
+
+31
+00:01:37.109 --> 00:01:39.870
+Now, they can be simpler to use.
+
+32
+00:01:41.349 --> 00:01:43.109
+If you look at a mesh,
+
+33
+00:01:43.109 --> 00:01:46.950
+you'll see that we have our standard material slot,
+
+34
+00:01:46.950 --> 00:01:51.189
+but we also have a overlay materials slot.
+
+35
+00:01:51.189 --> 00:01:54.170
+Let me just search for it here.
+
+36
+00:01:54.170 --> 00:01:55.650
+Overlay materials.
+
+37
+00:01:55.650 --> 00:01:57.430
+And if I was to remove this,
+
+38
+00:01:57.450 --> 00:02:00.569
+it would just go back to being a normal overlay material.
+
+39
+00:02:00.569 --> 00:02:04.489
+And if I place the material in, it will affect it.
+
+40
+00:02:04.489 --> 00:02:07.189
+Even with this skeletal mesh,
+
+41
+00:02:07.189 --> 00:02:09.210
+even though this has two material slots,
+
+42
+00:02:09.210 --> 00:02:12.770
+it still only has one material slot for the overlay.
+
+43
+00:02:12.770 --> 00:02:16.449
+And that's really quick and straightforward to use.
+
+44
+00:02:16.449 --> 00:02:18.889
+So another thing that's usefully built in here,
+
+45
+00:02:18.889 --> 00:02:23.330
+we can set the overlay material max draw distance.
+
+46
+00:02:23.330 --> 00:02:25.370
+So we can have this material turn off.
+
+47
+00:02:25.389 --> 00:02:30.300
+So if I was to set this to just, let's say 1,000,
+
+48
+00:02:30.300 --> 00:02:35.009
+and as I move further away,
+
+49
+00:02:35.009 --> 00:02:37.530
+we should see that that stops displaying.
+
+50
+00:02:37.530 --> 00:02:39.330
+And you can only do that when you're in game mode.
+
+51
+00:02:39.330 --> 00:02:42.710
+So you have to push G in order to see this,
+
+52
+00:02:42.710 --> 00:02:44.250
+and see the material just switches off
+
+53
+00:02:44.250 --> 00:02:45.689
+at a certain distance.
+
+54
+00:02:45.689 --> 00:02:47.969
+And that's really useful as an optimization,
+
+55
+00:02:47.969 --> 00:02:50.710
+especially if one of something like this is very complicated
+
+56
+00:02:50.710 --> 00:02:51.969
+and you don't want to calculate it
+
+57
+00:02:51.969 --> 00:02:56.969
+when it's a small three sprites tall in the distance.
+
+58
+00:02:57.310 --> 00:03:01.689
+So that's how you would add an overlay material on.
+
+59
+00:03:02.689 --> 00:03:04.650
+Let's look at the creation of one.
+
+60
+00:03:04.650 --> 00:03:08.349
+So next up, I'm going to go into exercise four here.
+
+61
+00:03:08.349 --> 00:03:11.030
+And we can see that it will highlight a material
+
+62
+00:03:11.030 --> 00:03:14.680
+that's called M underscore overlay.
+
+63
+00:03:14.680 --> 00:03:17.580
+So what I'd like you to do is to open this up
+
+64
+00:03:17.580 --> 00:03:21.340
+and you should get a material which looks like this.
+
+65
+00:03:21.340 --> 00:03:25.580
+Now we're going to recreate that checkered pattern one
+
+66
+00:03:25.580 --> 00:03:26.960
+quite quickly.
+
+67
+00:03:26.960 --> 00:03:31.500
+So what we've got here is we can use the surface.
+
+68
+00:03:31.500 --> 00:03:33.139
+We could use other methods as well,
+
+69
+00:03:33.139 --> 00:03:35.379
+but we're going to go with surface for this one.
+
+70
+00:03:35.379 --> 00:03:37.620
+And first thing that I want to do
+
+71
+00:03:37.620 --> 00:03:39.099
+is set an emissive color.
+
+72
+00:03:39.099 --> 00:03:40.620
+So I want this to go up.
+
+73
+00:03:40.620 --> 00:03:42.840
+So I'm going to hold down three,
+
+74
+00:03:42.840 --> 00:03:47.400
+plug this in, and I'll make this one red.
+
+75
+00:03:47.400 --> 00:03:52.449
+So I'll make the color that we're doing this in red.
+
+76
+00:03:52.449 --> 00:03:56.960
+Now, next up, I'm going to use a texture top.
+
+77
+00:03:57.419 --> 00:03:59.539
+So if I hold down T and left-click,
+
+78
+00:03:59.539 --> 00:04:01.860
+that will give me a texture sample.
+
+79
+00:04:01.860 --> 00:04:05.500
+And in the dropdown at the bottom here,
+
+80
+00:04:05.500 --> 00:04:08.650
+I'm going to search for checkers.
+
+81
+00:04:08.650 --> 00:04:12.810
+You can see that we have a checkered noise pattern here
+
+82
+00:04:12.810 --> 00:04:15.009
+and I'll use that.
+
+83
+00:04:15.009 --> 00:04:19.930
+And I know, I think we can use green in this instance
+
+84
+00:04:19.930 --> 00:04:24.180
+and plug that into the opacity mask.
+
+85
+00:04:24.180 --> 00:04:28.519
+You can see that suddenly our sphere or cube
+
+86
+00:04:28.519 --> 00:04:32.519
+is now a lot of it is opaque.
+
+87
+00:04:32.519 --> 00:04:35.579
+Now that works fine, but I want to do some extra stuff
+
+88
+00:04:35.579 --> 00:04:37.540
+to make this look better.
+
+89
+00:04:37.540 --> 00:04:39.660
+So the first thing I'm going to do
+
+90
+00:04:39.660 --> 00:04:41.629
+is I'm going to use a pan.
+
+91
+00:04:41.629 --> 00:04:43.550
+So if I hold down P and left-click,
+
+92
+00:04:43.550 --> 00:04:45.170
+that's going to give me a panino.
+
+93
+00:04:45.170 --> 00:04:48.490
+I'll plug that into the UVs.
+
+94
+00:04:48.490 --> 00:04:53.490
+Now, this is going to move the texture across the UVs.
+
+95
+00:04:53.990 --> 00:04:58.829
+What I've opted for is to just put one in both the U,
+
+96
+00:04:58.829 --> 00:05:00.829
+the X and the Y axis.
+
+97
+00:05:00.829 --> 00:05:05.829
+You can now see that it is moving here up and to the left.
+
+98
+00:05:07.860 --> 00:05:09.839
+Now this is too large for me.
+
+99
+00:05:09.839 --> 00:05:15.089
+So I'm going to want to shrink this texture down.
+
+100
+00:05:15.449 --> 00:05:17.569
+And the way that we would do that is,
+
+101
+00:05:17.569 --> 00:05:20.230
+the first thing is we would need the texture UVs
+
+102
+00:05:20.230 --> 00:05:21.069
+for the model.
+
+103
+00:05:21.069 --> 00:05:23.970
+So if you hold down the U key and left-click,
+
+104
+00:05:24.269 --> 00:05:26.579
+that's going to give you the texture coordinates.
+
+105
+00:05:26.579 --> 00:05:29.420
+And then if I hold down M and left-click,
+
+106
+00:05:29.420 --> 00:05:31.680
+that's going to give us a multiply.
+
+107
+00:05:31.680 --> 00:05:38.279
+If I plug these in, we'll just multiply this by 10.
+
+108
+00:05:38.399 --> 00:05:40.519
+That will make this 10 times smaller
+
+109
+00:05:40.519 --> 00:05:42.740
+and it'll move a lot slower.
+
+110
+00:05:42.740 --> 00:05:45.230
+So that works quite well.
+
+111
+00:05:45.230 --> 00:05:49.060
+Okay, so this is the okay material.
+
+112
+00:05:49.060 --> 00:05:50.620
+There's one more thing that I'd like to do
+
+113
+00:05:50.620 --> 00:05:51.740
+before we leave this,
+
+114
+00:05:51.740 --> 00:05:54.810
+and that's the world position offset.
+
+115
+00:05:54.829 --> 00:05:57.750
+Now, one of the problems that you might get
+
+116
+00:05:57.750 --> 00:06:00.430
+when you're working with overlay materials
+
+117
+00:06:00.430 --> 00:06:03.910
+is that it would clash with the model
+
+118
+00:06:03.910 --> 00:06:05.790
+that's already there.
+
+119
+00:06:05.790 --> 00:06:09.990
+So because it might be fighting for the same location,
+
+120
+00:06:09.990 --> 00:06:13.750
+there might be a little bit of sort of cutting in and out
+
+121
+00:06:13.750 --> 00:06:16.339
+and it wouldn't look how you want it to look.
+
+122
+00:06:16.339 --> 00:06:19.560
+Now, what I would suggest is if you want to,
+
+123
+00:06:20.519 --> 00:06:23.319
+is to just push the UVs out a little bit
+
+124
+00:06:23.339 --> 00:06:26.889
+by using the world position offset.
+
+125
+00:06:26.889 --> 00:06:30.149
+So in order to do this, what I would do is right-click
+
+126
+00:06:30.149 --> 00:06:35.149
+and I would search for Vertex Normals World Space, WS.
+
+127
+00:06:38.079 --> 00:06:42.420
+And then hold down M for a multiply.
+
+128
+00:06:42.420 --> 00:06:47.589
+I'm going to multiply it just by about 0.3
+
+129
+00:06:47.589 --> 00:06:49.750
+and plug that into the world position offset.
+
+130
+00:06:49.750 --> 00:06:50.709
+So all that's going to do
+
+131
+00:06:50.709 --> 00:06:53.189
+is it's going to push all of the vertices out
+
+132
+00:06:53.209 --> 00:06:58.209
+just a small amount on the normals of the vertices,
+
+133
+00:06:58.290 --> 00:07:02.600
+just so we make sure we don't get a clash.
+
+134
+00:07:02.600 --> 00:07:06.899
+I'll apply and save.
+
+135
+00:07:06.899 --> 00:07:10.100
+And now if I jump back into the level,
+
+136
+00:07:10.100 --> 00:07:17.139
+if I search for these, I'm typing overlay,
+
+137
+00:07:17.180 --> 00:07:20.560
+I'm going to just drag my overlay material in.
+
+138
+00:07:20.560 --> 00:07:24.339
+And you can see that on all of these meshes,
+
+139
+00:07:24.360 --> 00:07:28.639
+it will show through, it will automatically be updated.
+
+140
+00:07:28.639 --> 00:07:29.759
+Now there's a couple of other things
+
+141
+00:07:29.759 --> 00:07:31.839
+you might want to do at this point.
+
+142
+00:07:31.839 --> 00:07:35.759
+You can hype up, we can multiply up the emissive possibly
+
+143
+00:07:35.759 --> 00:07:40.819
+so that it is a lot brighter.
+
+144
+00:07:42.079 --> 00:07:45.579
+Can change the shading model so that it is,
+
+145
+00:07:46.740 --> 00:07:50.899
+change the shading model so that it is additive
+
+146
+00:07:50.899 --> 00:07:52.579
+under the blend mode.
+
+147
+00:07:52.600 --> 00:07:54.339
+It's because we're now not plugged in
+
+148
+00:07:54.339 --> 00:07:57.120
+the opacity correctly here.
+
+149
+00:07:57.120 --> 00:08:00.879
+And that just gives us a bit of a more of a glowing effect
+
+150
+00:08:00.879 --> 00:08:07.899
+and it's not terribly expensive.
+
+151
+00:08:08.259 --> 00:08:12.319
+And so that's one option that we have there.
+
+152
+00:08:12.319 --> 00:08:15.709
+Now, how do we get this to show through?
+
+153
+00:08:15.709 --> 00:08:19.149
+Like with an X-ray before,
+
+154
+00:08:19.149 --> 00:08:22.310
+we can get this to show through what's in front of it.
+
+155
+00:08:22.329 --> 00:08:26.129
+And how we would do that is if we've actually come
+
+156
+00:08:26.129 --> 00:08:28.170
+into the material again,
+
+157
+00:08:28.170 --> 00:08:33.429
+I'm going to change the blending mode to translucent.
+
+158
+00:08:33.429 --> 00:08:37.090
+And as soon as we're in translucent,
+
+159
+00:08:37.090 --> 00:08:39.789
+there is, if we type in depth,
+
+160
+00:08:39.789 --> 00:08:44.840
+we have an option to disable the depth test.
+
+161
+00:08:44.840 --> 00:08:49.340
+And what that is, is we have occlusion culling,
+
+162
+00:08:49.340 --> 00:08:51.259
+which is built into the engine.
+
+163
+00:08:51.259 --> 00:08:53.059
+And that means it won't draw a pixel
+
+164
+00:08:53.080 --> 00:08:55.519
+when there's something else in front of it.
+
+165
+00:08:55.519 --> 00:08:58.059
+Now, if we disable this depth test,
+
+166
+00:08:58.059 --> 00:09:00.159
+it's never gonna know if it's in front
+
+167
+00:09:00.159 --> 00:09:01.000
+or behind something.
+
+168
+00:09:01.000 --> 00:09:02.879
+So we will draw it regardless.
+
+169
+00:09:02.879 --> 00:09:05.039
+It needs to be translucent.
+
+170
+00:09:05.039 --> 00:09:07.159
+You'll now see that all of these models
+
+171
+00:09:07.159 --> 00:09:10.190
+now show through the background.
+
+172
+00:09:10.190 --> 00:09:12.590
+So that's just a short exercise showing you
+
+173
+00:09:12.590 --> 00:09:17.590
+how you can create an overlay material and apply it.
+
+174
+00:09:18.669 --> 00:09:22.539
+I'm just going to undisable that simply because
+
+175
+00:09:22.559 --> 00:09:24.139
+I don't want to be seeing that in the corner
+
+176
+00:09:24.139 --> 00:09:26.649
+every time I move around the world.
+
+177
+00:09:27.570 --> 00:09:29.809
+But let's have a look at some examples.
+
+178
+00:09:29.809 --> 00:09:33.129
+So I'm now going to come on to slide 13.
+
+179
+00:09:33.129 --> 00:09:35.250
+Let's have a look at how you might use
+
+180
+00:09:35.250 --> 00:09:38.250
+or implement this within the game.
+
+181
+00:09:38.250 --> 00:09:40.789
+So now we've seen these before,
+
+182
+00:09:40.789 --> 00:09:43.889
+these simple sort of balls on a pedestal.
+
+183
+00:09:43.889 --> 00:09:48.649
+And what they do is when you get close enough to them,
+
+184
+00:09:48.649 --> 00:09:52.750
+they cast to the third person character
+
+185
+00:09:52.750 --> 00:09:54.809
+or check it's a third person character.
+
+186
+00:09:54.809 --> 00:09:58.129
+And if it is, it will set the overlay material
+
+187
+00:09:58.129 --> 00:10:01.450
+on the target, on the skeleton mesh.
+
+188
+00:10:01.450 --> 00:10:04.490
+So it's as straightforward as this.
+
+189
+00:10:04.490 --> 00:10:08.730
+All you need to do is set a new overlay material
+
+190
+00:10:08.730 --> 00:10:11.529
+or remove the overlay material.
+
+191
+00:10:11.529 --> 00:10:16.750
+So if you wanted to unmesh, you could set overlay,
+
+192
+00:10:18.700 --> 00:10:22.580
+set the overlay material to nothing and it would go away.
+
+193
+00:10:22.580 --> 00:10:26.440
+So this will allow you to turn on and off the materials
+
+194
+00:10:26.440 --> 00:10:27.799
+or apply it to anything.
+
+195
+00:10:27.799 --> 00:10:29.559
+It's the same method regardless.
+
+196
+00:10:29.559 --> 00:10:32.080
+It just has to be onto the mesh.
+
+197
+00:10:32.080 --> 00:10:35.139
+So let's demonstrate this.
+
+198
+00:10:35.139 --> 00:10:37.799
+So all there are is just a couple of different effects
+
+199
+00:10:37.799 --> 00:10:39.799
+that you can check out.
+
+200
+00:10:39.799 --> 00:10:42.700
+So the first one is an overlay,
+
+201
+00:10:42.700 --> 00:10:47.700
+which is demonstrating the outline.
+
+202
+00:10:47.840 --> 00:10:51.059
+Now this is done by pushing it backwards
+
+203
+00:10:51.059 --> 00:10:53.559
+and using custom depth.
+
+204
+00:10:53.559 --> 00:10:55.240
+It's a bit jittery as you move,
+
+205
+00:10:55.240 --> 00:10:59.360
+but when you're still, it looks very good.
+
+206
+00:10:59.360 --> 00:11:04.480
+Next one up is a kind of a sort of force field,
+
+207
+00:11:06.549 --> 00:11:24.440
+some electrical bolts, fire, ice, and some tar.
+
+208
+00:11:26.250 --> 00:11:28.289
+So you can see how these kinds of things can be applied
+
+209
+00:11:28.289 --> 00:11:29.789
+and they can be applied to any meshes.
+
+210
+00:11:29.789 --> 00:11:32.250
+They can be guns, skeletal meshes, anything.
+
+211
+00:11:32.250 --> 00:11:34.330
+But it's very, very quick to get them on
+
+212
+00:11:34.389 --> 00:11:36.730
+and very easy to remove.
+
+213
+00:11:36.730 --> 00:11:39.269
+Only one can ever be applied at one time.

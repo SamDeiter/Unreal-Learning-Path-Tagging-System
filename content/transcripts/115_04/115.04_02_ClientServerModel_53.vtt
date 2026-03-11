@@ -1,0 +1,213 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:05.599
+So let's begin with the server-client model, and then the high-level concepts that Unreal
+
+2
+00:00:05.599 --> 00:00:09.980
+introduces when it comes to networked games. We're all familiar with the networking concepts
+
+3
+00:00:09.980 --> 00:00:14.679
+of server and client, so with these in mind, let's take a look at how Unreal structures
+
+4
+00:00:14.679 --> 00:00:17.309
+its networked games.
+
+5
+00:00:17.309 --> 00:00:22.050
+In networking terms, a game made in Unreal can take either or both of these shapes,
+
+6
+00:00:22.050 --> 00:00:26.269
+that being a single player or local multiplayer shape, and the other being a fully networked
+
+7
+00:00:26.269 --> 00:00:32.159
+multiplayer game. In a single player or local multiplayer game, the game is run locally
+
+8
+00:00:32.159 --> 00:00:37.219
+as a standalone executable. Players will supply the input to a single computer and
+
+9
+00:00:37.219 --> 00:00:41.060
+control everything directly, and this means that everything in the game including actors,
+
+10
+00:00:41.060 --> 00:00:44.560
+the world and even the user interface for each of those players will exist on that
+
+11
+00:00:44.560 --> 00:00:50.530
+local machine. Whereas in a networked game, the server will hold the one true and authoritative
+
+12
+00:00:50.530 --> 00:00:55.429
+state of the game. In this case, a player will connect to the server, which is more
+
+13
+00:00:55.429 --> 00:01:00.030
+than likely a different machine, as a client. They will then each remotely control a
+
+14
+00:01:00.030 --> 00:01:04.950
+pawn that the server provides and that they will own. This pawn and the controller that
+
+15
+00:01:04.950 --> 00:01:08.750
+possesses the pawn will act as a bridge that allows the player to send remote procedure
+
+16
+00:01:08.750 --> 00:01:14.170
+calls to the server in order for them to perform any given gameplay action. However,
+
+17
+00:01:14.170 --> 00:01:18.439
+it is key to note that the server will not stream any sort of visuals to the client.
+
+18
+00:01:18.439 --> 00:01:22.760
+Instead, the server will simply replicate information about the game to each of those
+
+19
+00:01:22.760 --> 00:01:27.239
+connected clients. So for example, the server will replicate actors so that the client
+
+20
+00:01:27.239 --> 00:01:31.719
+will know what actors they need to be able to see as well as replicating any data that will
+
+21
+00:01:31.719 --> 00:01:36.790
+tell the clients how those actors should behave. Each client in turn will take this data and
+
+22
+00:01:36.790 --> 00:01:42.609
+simulate a very close approximation of what is happening on the server. So now we can see
+
+23
+00:01:42.609 --> 00:01:46.450
+that in network games, we suddenly have to deal with a lot more nuance in terms of where
+
+24
+00:01:46.450 --> 00:01:52.129
+data is stored and what has got authority over it. We essentially have two running processes
+
+25
+00:01:52.129 --> 00:01:56.290
+and a lot of our time is spent dealing with and managing what process has access to what
+
+26
+00:01:56.290 --> 00:02:01.280
+information. For instance, the game mode only exists server side whilst all VFX is
+
+27
+00:02:01.280 --> 00:02:07.219
+likely to exist client side. When it comes to servers, Unreal provides two types of
+
+28
+00:02:07.219 --> 00:02:11.939
+server that we can run. The first is a dedicated server and this runs as a separate
+
+29
+00:02:11.939 --> 00:02:17.599
+process and it's likely on a remote machine. It does not render any visuals and no clients
+
+30
+00:02:17.599 --> 00:02:23.210
+are playing locally. It also focuses on maintaining the authoritative state of the game and
+
+31
+00:02:23.210 --> 00:02:28.840
+it will receive information from clients to verify. The alternative is a listen server
+
+32
+00:02:28.840 --> 00:02:33.159
+and this is going to run on the same machine as the client that is hosting it. The hosting
+
+33
+00:02:33.159 --> 00:02:37.639
+player's client will still run the visuals and these are typically acceptable for small-scale
+
+34
+00:02:37.639 --> 00:02:43.270
+casual multiplayer or cooperative games. So now that we know how Unreal structures
+
+35
+00:02:43.270 --> 00:02:46.550
+our networked and single-player games as well as what types of server that we can
+
+36
+00:02:46.550 --> 00:02:50.909
+deploy, we should take a look at what the connection process to Unreal is like. After
+
+37
+00:02:50.909 --> 00:02:55.969
+all, a server without any clients isn't actually a networked game. Here we can see a high-level
+
+38
+00:02:55.969 --> 00:03:01.099
+flow of how we get our client into that game. The first step is to have our client
+
+39
+00:03:01.099 --> 00:03:05.300
+request a connection to the server. At this point, our server can decide whether
+
+40
+00:03:05.300 --> 00:03:09.719
+or not to accept that connection at all. Once the connection is accepted, the server
+
+41
+00:03:09.719 --> 00:03:14.169
+will send information to that client for them to proceed. At this point, the server
+
+42
+00:03:14.169 --> 00:03:17.289
+will tell the client what map to load and then proceed to wait for that client
+
+43
+00:03:17.289 --> 00:03:22.379
+to load into that map. Once the server receives this callback, the pre-login function
+
+44
+00:03:22.379 --> 00:03:26.180
+is called in the game mode and this is a critical step as it allows the game mode
+
+45
+00:03:26.180 --> 00:03:31.919
+to either accept or reject the connection itself. So carrying on from there, if
+
+46
+00:03:31.919 --> 00:03:35.120
+accepted, the server will then call the login function in the game mode
+
+47
+00:03:35.120 --> 00:03:37.960
+and this will create the player's controller on the server which will
+
+48
+00:03:37.960 --> 00:03:41.789
+then be replicated down to that connecting client. It's also really
+
+49
+00:03:41.789 --> 00:03:44.629
+important to note that the begin play will happen here for that newly
+
+50
+00:03:44.629 --> 00:03:49.560
+created player controller. Lastly, the server will call the post login
+
+51
+00:03:49.560 --> 00:03:53.240
+function in the game mode and so at this point it's safe to call any RPC
+
+52
+00:03:53.280 --> 00:03:55.879
+functions on that player controller. It's fully initialised and we now
+
+53
+00:03:55.879 --> 00:03:58.039
+have access to any networked functionality.

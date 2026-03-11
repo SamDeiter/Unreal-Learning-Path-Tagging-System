@@ -1,0 +1,801 @@
+WEBVTT
+
+1
+00:00:01.710 --> 00:00:02.890
+Hi, everyone.
+
+2
+00:00:02.890 --> 00:00:04.530
+In this lesson, we're gonna take a look
+
+3
+00:00:04.530 --> 00:00:08.250
+at the World Partition tool that we have for Unreal.
+
+4
+00:00:08.250 --> 00:00:10.349
+Now, again, this is gonna be a bit of an overview
+
+5
+00:00:10.349 --> 00:00:12.189
+and not a full deep dive
+
+6
+00:00:12.189 --> 00:00:15.570
+as we do have classes covering this in more detail.
+
+7
+00:00:15.570 --> 00:00:18.929
+So let's get started.
+
+8
+00:00:18.929 --> 00:00:21.129
+So how it works.
+
+9
+00:00:21.129 --> 00:00:22.609
+So we're gonna be opening up
+
+10
+00:00:22.609 --> 00:00:26.010
+the World Partition EXE project.
+
+11
+00:00:26.010 --> 00:00:27.429
+I'm giving you two projects
+
+12
+00:00:27.429 --> 00:00:29.289
+in this particular group of classes.
+
+13
+00:00:29.289 --> 00:00:31.449
+One of them was in the world that we were building
+
+14
+00:00:31.469 --> 00:00:34.670
+and then this one takes a bit of our mini dark ruins
+
+15
+00:00:34.670 --> 00:00:38.429
+and puts it into a world with a World Partition set up.
+
+16
+00:00:38.429 --> 00:00:43.429
+So the World Partition divides your world to a grid
+
+17
+00:00:43.530 --> 00:00:45.810
+and you can adjust the settings to that grid
+
+18
+00:00:45.810 --> 00:00:47.729
+to when and how they load.
+
+19
+00:00:47.729 --> 00:00:49.770
+And you can think of it as virtual texturing
+
+20
+00:00:49.770 --> 00:00:51.770
+but this is virtual level building
+
+21
+00:00:51.770 --> 00:00:55.490
+so that the most important parts of your world
+
+22
+00:00:55.490 --> 00:00:58.009
+are loading where your player is at
+
+23
+00:00:58.009 --> 00:01:00.049
+and that's kind of what you can do
+
+24
+00:01:00.070 --> 00:01:03.109
+and you can manage that controlling your cell side
+
+25
+00:01:03.109 --> 00:01:04.909
+to load the level in smaller sections
+
+26
+00:01:04.909 --> 00:01:07.230
+for interactive flow and customization.
+
+27
+00:01:07.230 --> 00:01:08.629
+So it's really great.
+
+28
+00:01:08.629 --> 00:01:11.549
+It's easier to make larger worlds with it
+
+29
+00:01:11.549 --> 00:01:12.670
+as it handles the data,
+
+30
+00:01:12.670 --> 00:01:15.750
+keeping things compartmentalized and loaded
+
+31
+00:01:15.750 --> 00:01:17.870
+as needed with the grid system.
+
+32
+00:01:17.870 --> 00:01:20.390
+So this grid system is very beneficial
+
+33
+00:01:20.390 --> 00:01:23.469
+and makes it so you can control via sections
+
+34
+00:01:23.469 --> 00:01:25.430
+and how things are to be loaded.
+
+35
+00:01:25.430 --> 00:01:27.459
+It's pretty awesome.
+
+36
+00:01:27.459 --> 00:01:32.879
+So how it works also is the open world default map type
+
+37
+00:01:32.879 --> 00:01:34.780
+is designed to be a starting point
+
+38
+00:01:34.780 --> 00:01:36.780
+for creating large open world maps
+
+39
+00:01:36.780 --> 00:01:40.159
+and comes with the following features enabled by default.
+
+40
+00:01:40.159 --> 00:01:45.019
+You have World Partition,
+
+41
+00:01:45.019 --> 00:01:46.980
+you have the one file per actor
+
+42
+00:01:46.980 --> 00:01:49.459
+to streamline saving assets
+
+43
+00:01:49.459 --> 00:01:54.120
+so there's no waiting for checking with version control
+
+44
+00:01:54.120 --> 00:01:55.640
+and you also have data layers
+
+45
+00:01:55.640 --> 00:01:58.359
+and you can dynamically load and unload layers
+
+46
+00:01:58.359 --> 00:02:01.219
+in the editor to help manage complex worlds.
+
+47
+00:02:02.000 --> 00:02:03.640
+So not only are you working with World Partition,
+
+48
+00:02:03.640 --> 00:02:05.000
+you can have data layers
+
+49
+00:02:05.000 --> 00:02:08.680
+as well as hierarchical levels of detail.
+
+50
+00:02:08.680 --> 00:02:10.960
+Kind of what we've talked about HLODs before
+
+51
+00:02:10.960 --> 00:02:13.419
+but these are HLODs specifically catered
+
+52
+00:02:13.419 --> 00:02:17.909
+to the world building World Partition tool.
+
+53
+00:02:17.909 --> 00:02:20.669
+It's used to control the calculation of assets
+
+54
+00:02:20.669 --> 00:02:23.509
+so you can bundle assets for quicker calculations.
+
+55
+00:02:23.509 --> 00:02:26.349
+All of these are set up to help streamlining production
+
+56
+00:02:26.349 --> 00:02:27.830
+for larger worlds.
+
+57
+00:02:27.830 --> 00:02:29.870
+So let's go and see how that works
+
+58
+00:02:29.889 --> 00:02:32.629
+and we're going to punch in a couple of CVars
+
+59
+00:02:32.629 --> 00:02:37.520
+to see that in real time.
+
+60
+00:02:37.520 --> 00:02:39.599
+So you can see right now we're in the world
+
+61
+00:02:39.599 --> 00:02:40.599
+and we're looking around
+
+62
+00:02:40.599 --> 00:02:42.580
+in the environment that I've given you.
+
+63
+00:02:42.580 --> 00:02:44.919
+You want to make sure when you do start out
+
+64
+00:02:44.919 --> 00:02:46.879
+or grab any kind of level,
+
+65
+00:02:46.879 --> 00:02:49.439
+double check to make sure you have enabled streaming.
+
+66
+00:02:49.439 --> 00:02:50.599
+This is really important
+
+67
+00:02:50.599 --> 00:02:53.759
+if you're grabbing a set of levels from the marketplace
+
+68
+00:02:53.759 --> 00:02:55.860
+and you want to use World Partition,
+
+69
+00:02:55.860 --> 00:02:58.319
+enable streaming is going to be very important.
+
+70
+00:02:58.319 --> 00:03:00.520
+You'll notice there's a runtime hash class
+
+71
+00:03:00.520 --> 00:03:01.639
+that we can choose.
+
+72
+00:03:01.659 --> 00:03:03.900
+The default that I have on this particular map
+
+73
+00:03:03.900 --> 00:03:06.259
+that I've given you has the hash set
+
+74
+00:03:06.259 --> 00:03:10.379
+but the newer one or the newer set of data calculation
+
+75
+00:03:10.379 --> 00:03:13.659
+that we have is a World Partition runtime spatial hash.
+
+76
+00:03:13.659 --> 00:03:16.099
+So I do recommend using that one when possible.
+
+77
+00:03:16.099 --> 00:03:19.500
+For purposes of just us working in class
+
+78
+00:03:19.500 --> 00:03:21.180
+I'm going to leave it as hash set
+
+79
+00:03:21.180 --> 00:03:23.819
+but again this one is a little bit more streamlined
+
+80
+00:03:23.819 --> 00:03:27.159
+and a little bit more up to date and is a better value
+
+81
+00:03:27.159 --> 00:03:29.740
+because it is a latest and greatest
+
+82
+00:03:29.740 --> 00:03:31.060
+but it's really up to you
+
+83
+00:03:31.520 --> 00:03:32.560
+and both do work great
+
+84
+00:03:32.560 --> 00:03:36.629
+but this one is the newest kid on the block.
+
+85
+00:03:36.629 --> 00:03:40.030
+So another thing we can do to see how this looks like
+
+86
+00:03:40.030 --> 00:03:43.750
+in our scene, there are a couple of ways to view
+
+87
+00:03:43.750 --> 00:03:45.509
+what is being calculated.
+
+88
+00:03:45.509 --> 00:03:48.389
+One of them in the outliner, I can go in here
+
+89
+00:03:48.389 --> 00:03:50.789
+and let me delete what I have and do the up arrow.
+
+90
+00:03:50.789 --> 00:03:53.710
+You'll see that we have as in my documentation says
+
+91
+00:03:53.710 --> 00:03:58.710
+a WTP runtime toggle draw runtime hash 2D
+
+92
+00:03:58.729 --> 00:04:01.629
+and when I enter this, hit enter
+
+93
+00:04:02.169 --> 00:04:03.629
+and I hit play in my scene
+
+94
+00:04:03.629 --> 00:04:06.210
+you're going to see the calculations active
+
+95
+00:04:06.210 --> 00:04:09.129
+in my environment and you'll see that each grid
+
+96
+00:04:09.129 --> 00:04:12.389
+in sections being loaded as I move around
+
+97
+00:04:12.389 --> 00:04:14.969
+and you'll see that almost like a radar system
+
+98
+00:04:14.969 --> 00:04:19.870
+in the very middle that we have our focal area
+
+99
+00:04:19.870 --> 00:04:23.209
+basically where that line is showing my directional point
+
+100
+00:04:23.209 --> 00:04:27.399
+on the very end of that is where I am in the world
+
+101
+00:04:27.399 --> 00:04:30.240
+and I mean the end is in towards the middle
+
+102
+00:04:30.240 --> 00:04:31.720
+and you can see where I'm looking
+
+103
+00:04:32.579 --> 00:04:37.579
+where I am viewing the data areas in the scene.
+
+104
+00:04:37.819 --> 00:04:42.990
+As you can see the hand moving as I turn my head around.
+
+105
+00:04:42.990 --> 00:04:44.629
+I'm going to hit escape
+
+106
+00:04:44.629 --> 00:04:46.629
+and we're going to go and turn that off for now.
+
+107
+00:04:46.629 --> 00:04:50.149
+So let's go back in that line or output.
+
+108
+00:04:50.149 --> 00:04:52.730
+I mean the up arrow, I'm going to select that again
+
+109
+00:04:52.730 --> 00:04:54.230
+and I'm just going to hit enter
+
+110
+00:04:54.230 --> 00:04:56.050
+and I've turned it off now.
+
+111
+00:04:56.050 --> 00:04:58.209
+We can also preview this in real time.
+
+112
+00:04:58.209 --> 00:05:00.189
+So if I want to go in my editor
+
+113
+00:05:00.209 --> 00:05:01.769
+so if I want to preview
+
+114
+00:05:01.769 --> 00:05:04.730
+I can show grid preview here in my main layer
+
+115
+00:05:04.730 --> 00:05:05.649
+and I can turn that on
+
+116
+00:05:05.649 --> 00:05:08.170
+and I can do that for each one if I wanted to.
+
+117
+00:05:08.170 --> 00:05:10.529
+So now when I move around in the world
+
+118
+00:05:10.529 --> 00:05:13.769
+you're going to see the grid draw and build
+
+119
+00:05:13.769 --> 00:05:18.730
+as I circumvent or move around in this environment.
+
+120
+00:05:18.730 --> 00:05:21.209
+Let's go and move up in the world there.
+
+121
+00:05:21.209 --> 00:05:23.290
+We're going to pass through the wall.
+
+122
+00:05:23.290 --> 00:05:30.399
+We're going to go back to the beach area.
+
+123
+00:05:30.660 --> 00:05:32.420
+There we go.
+
+124
+00:05:32.420 --> 00:05:35.060
+Passing through all the rock
+
+125
+00:05:35.060 --> 00:05:38.399
+and we'll find ourselves back on the beach.
+
+126
+00:05:38.399 --> 00:05:43.399
+And you can see our grid region that we're calculating.
+
+127
+00:05:43.399 --> 00:05:45.360
+Now notice this one isn't very big
+
+128
+00:05:45.360 --> 00:05:48.720
+but you can again can see how this works.
+
+129
+00:05:48.720 --> 00:05:50.319
+I'm going to hit escape out of here
+
+130
+00:05:50.319 --> 00:05:52.550
+or actually I should turn this off.
+
+131
+00:05:52.550 --> 00:05:54.829
+We're not really in play mode.
+
+132
+00:05:54.829 --> 00:05:57.790
+I'll just grab a piece of geometry, hit the F key
+
+133
+00:05:57.790 --> 00:06:04.720
+and we can be a little bit closer to where we were before.
+
+134
+00:06:04.740 --> 00:06:07.540
+Again, we are in full control
+
+135
+00:06:07.540 --> 00:06:10.100
+of how the data is being digested.
+
+136
+00:06:10.100 --> 00:06:14.379
+Again, underneath windows, you will see console variables
+
+137
+00:06:14.379 --> 00:06:17.500
+or we can control and run some of those that we just ran
+
+138
+00:06:17.500 --> 00:06:19.779
+but we also have world partition here
+
+139
+00:06:19.779 --> 00:06:21.300
+and we can look at the content puddles
+
+140
+00:06:21.300 --> 00:06:22.899
+as well as the data layers.
+
+141
+00:06:22.899 --> 00:06:25.100
+So if I click on the data layer outliner
+
+142
+00:06:25.100 --> 00:06:27.459
+you'll see that we have these in place
+
+143
+00:06:27.459 --> 00:06:30.100
+and at any time I can turn them off if I need to
+
+144
+00:06:30.100 --> 00:06:32.060
+but it helps with really quick management
+
+145
+00:06:32.060 --> 00:06:33.600
+of my environment.
+
+146
+00:06:33.620 --> 00:06:35.220
+You can see as I click on them
+
+147
+00:06:35.220 --> 00:06:37.180
+I can get the details of what I need
+
+148
+00:06:37.180 --> 00:06:38.699
+to be able to open this up
+
+149
+00:06:38.699 --> 00:06:41.980
+and make sure that everything's running accordingly
+
+150
+00:06:41.980 --> 00:06:43.569
+in my scene.
+
+151
+00:06:43.569 --> 00:06:47.410
+Now, when we look at our world details here
+
+152
+00:06:47.410 --> 00:06:49.410
+let's go to our world settings.
+
+153
+00:06:49.410 --> 00:06:52.329
+You'll notice as I scroll down a bit
+
+154
+00:06:52.329 --> 00:06:54.970
+that we are using HLODs for our environment.
+
+155
+00:06:54.970 --> 00:06:57.449
+Here's a default HLOD layer.
+
+156
+00:06:57.449 --> 00:06:59.769
+Now it's up to you if you build these
+
+157
+00:06:59.769 --> 00:07:01.509
+how you want to load them
+
+158
+00:07:01.529 --> 00:07:04.170
+and exactly how you want to manage everything
+
+159
+00:07:04.170 --> 00:07:06.610
+but it's pretty simple to be able to do so
+
+160
+00:07:06.610 --> 00:07:08.410
+as you can right click again
+
+161
+00:07:08.410 --> 00:07:11.069
+and choose data layer or HLOD
+
+162
+00:07:11.069 --> 00:07:17.009
+to be able to compartmentalize the data as needed.
+
+163
+00:07:17.009 --> 00:07:18.129
+If we go back to our slides
+
+164
+00:07:18.129 --> 00:07:20.329
+you'll see that how this works
+
+165
+00:07:20.329 --> 00:07:23.889
+is it reduces complexity and provides a scalable solution
+
+166
+00:07:23.889 --> 00:07:25.769
+when creating new projects.
+
+167
+00:07:25.769 --> 00:07:28.569
+RID cell streaming can be enabled
+
+168
+00:07:28.569 --> 00:07:31.850
+and disabled using the enable streaming option
+
+169
+00:07:31.850 --> 00:07:33.329
+in the world settings.
+
+170
+00:07:34.149 --> 00:07:35.990
+The following templates use a world partition
+
+171
+00:07:35.990 --> 00:07:39.790
+but have enabled streaming disabled by default.
+
+172
+00:07:39.790 --> 00:07:41.629
+So you can turn that on if you need to.
+
+173
+00:07:41.629 --> 00:07:42.709
+So when editing your world
+
+174
+00:07:42.709 --> 00:07:44.990
+actors can be added anywhere
+
+175
+00:07:44.990 --> 00:07:47.470
+and are automatically assigned to a grid cell
+
+176
+00:07:47.470 --> 00:07:49.910
+based on their spatially loaded setting
+
+177
+00:07:49.910 --> 00:07:52.189
+found in their detail panels
+
+178
+00:07:52.189 --> 00:07:54.310
+of the world partition section.
+
+179
+00:07:54.310 --> 00:07:57.709
+So you can manage all of this as you need
+
+180
+00:07:57.709 --> 00:07:59.230
+and you can adjust things.
+
+181
+00:07:59.230 --> 00:08:01.029
+Now, again, it's worthy.
+
+182
+00:08:01.029 --> 00:08:02.949
+You have to test this out.
+
+183
+00:08:03.490 --> 00:08:07.009
+Because you need to decide once you get your layout
+
+184
+00:08:07.009 --> 00:08:09.589
+once you know exactly what your player is going to be
+
+185
+00:08:09.589 --> 00:08:12.649
+you can determine how the cells are being digested
+
+186
+00:08:12.649 --> 00:08:13.889
+where you need to put them
+
+187
+00:08:13.889 --> 00:08:15.810
+and where the concentration of
+
+188
+00:08:15.810 --> 00:08:17.769
+as you working through your scene
+
+189
+00:08:17.769 --> 00:08:19.790
+where you need to optimize things
+
+190
+00:08:19.790 --> 00:08:21.970
+and where things need to run smoother
+
+191
+00:08:21.970 --> 00:08:25.110
+and where these tools can help you manage that
+
+192
+00:08:25.110 --> 00:08:26.730
+when necessary.
+
+193
+00:08:26.730 --> 00:08:28.290
+Well, that's it with this one.
+
+194
+00:08:28.290 --> 00:08:31.350
+Here's some more links to give you some detail
+
+195
+00:08:31.370 --> 00:08:33.610
+and deeper dives into these topics.
+
+196
+00:08:33.610 --> 00:08:34.450
+And don't forget,
+
+197
+00:08:34.450 --> 00:08:37.409
+we have a class that dives into this pretty deep
+
+198
+00:08:37.409 --> 00:08:39.370
+and it will definitely help you out
+
+199
+00:08:39.370 --> 00:08:41.909
+if you decide to take this route for your game.
+
+200
+00:08:41.909 --> 00:08:42.750
+Thanks again.

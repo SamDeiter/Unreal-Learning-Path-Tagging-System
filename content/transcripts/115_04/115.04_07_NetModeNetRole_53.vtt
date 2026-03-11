@@ -1,0 +1,169 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:05.469
+A critical thing we need to keep in mind when building network games is detecting the environment
+
+2
+00:00:05.469 --> 00:00:10.630
+that we're running in. For that we have the net modes enum. Frankly, the net mode is the
+
+3
+00:00:10.630 --> 00:00:14.589
+most watertight way of querying whether or not the current environment is a client
+
+4
+00:00:14.589 --> 00:00:19.899
+or a server one, a fact that often impacts our implementations. Let's take a look at
+
+5
+00:00:19.899 --> 00:00:25.109
+what net modes come with Unreal and where we might use them. First up we have the
+
+6
+00:00:25.109 --> 00:00:30.109
+standalone net mode. This executable is running in total isolation and is in no way
+
+7
+00:00:30.149 --> 00:00:33.990
+subject to a server's authority. We can pretty much surmise that we're running a
+
+8
+00:00:33.990 --> 00:00:39.200
+single-player game at this point. The dedicated server net mode however is exactly as you'd
+
+9
+00:00:39.200 --> 00:00:43.320
+expect. It's a dedicated server with no local controllers, only connecting
+
+10
+00:00:43.320 --> 00:00:48.969
+clients. The listen server net mode is a bit of a blend. This executable is acting
+
+11
+00:00:48.969 --> 00:00:53.149
+as both client and a server. Other controllers are connecting to this
+
+12
+00:00:53.149 --> 00:00:58.899
+client with this local client being the host. The client net mode is the
+
+13
+00:00:58.899 --> 00:01:02.780
+opposite of the dedicated server as you'd expect. This executable is connecting to a
+
+14
+00:01:02.780 --> 00:01:07.930
+remote authoritative server. Net mode checks often come into play when building
+
+15
+00:01:07.930 --> 00:01:11.530
+out features that have both front and back ends. So let's take a health
+
+16
+00:01:11.530 --> 00:01:14.849
+component for instance. We'd want to check that we're currently under the
+
+17
+00:01:14.849 --> 00:01:18.730
+dedicated server net mode when actually applying damage, but we'd want to check
+
+18
+00:01:18.730 --> 00:01:21.810
+if we're under the client net mode when playing any on-screen effects or
+
+19
+00:01:21.810 --> 00:01:26.290
+updating any UI elements. A net mode check is the safest way of checking
+
+20
+00:01:26.290 --> 00:01:30.950
+you're currently under the appropriate environment. Although thematically
+
+21
+00:01:30.989 --> 00:01:35.590
+similar to net mode, net role deals more specifically with the authority of the
+
+22
+00:01:35.590 --> 00:01:39.750
+given circumstance. It won't directly tell us if we're on a server or not but
+
+23
+00:01:39.750 --> 00:01:43.349
+it will let us know if the current environment is authoritative or an actor.
+
+24
+00:01:43.349 --> 00:01:49.560
+When we call get local role on an actor we return one of three roles.
+
+25
+00:01:49.560 --> 00:01:54.430
+Authority lets us know that this actor was spawned locally, this environment
+
+26
+00:01:54.430 --> 00:01:58.430
+spawned it and can refer to both clients and servers. Should we change
+
+27
+00:01:58.469 --> 00:02:02.430
+anything about this actor under the authority role we know that A, a server
+
+28
+00:02:02.430 --> 00:02:05.950
+isn't going to correct it back to another value and B, if we're currently
+
+29
+00:02:05.950 --> 00:02:09.750
+on a server and this actor is replicated the change may be propagated
+
+30
+00:02:09.750 --> 00:02:14.240
+down through replication. It really is critical to note that authority
+
+31
+00:02:14.240 --> 00:02:18.560
+absolutely does not mean server. It expressly means that the actor in
+
+32
+00:02:18.560 --> 00:02:22.400
+question was spawned locally and is seen as the single source of truth in
+
+33
+00:02:22.400 --> 00:02:26.599
+regards to how this actor is altered. Case in point, a client responding to
+
+34
+00:02:26.599 --> 00:02:30.439
+damage locally by spawning VFX would be spawning authoritative particle
+
+35
+00:02:30.439 --> 00:02:36.189
+systems. Simulated proxy however means the actor was spawned on the server
+
+36
+00:02:36.189 --> 00:02:40.430
+and replicated down to the local client. It's owned by another client
+
+37
+00:02:40.430 --> 00:02:43.830
+but requires representation locally. A perfect example of this would be
+
+38
+00:02:43.830 --> 00:02:48.210
+another player in your world. Some other client owns it but the server
+
+39
+00:02:48.210 --> 00:02:52.080
+is still authoritative. It has been sent to the local machine because it
+
+40
+00:02:52.080 --> 00:02:56.870
+requires some kind of representation. Conversely autonomous proxy is the
+
+41
+00:02:56.870 --> 00:03:00.110
+other side of the coin. The actor was spawned on the server but the
+
+42
+00:03:00.110 --> 00:03:03.750
+local machine owns it so that would be your player character in this context.

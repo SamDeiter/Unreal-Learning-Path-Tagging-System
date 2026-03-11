@@ -1,0 +1,625 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:06.419
+Another new feature in Unreal Engine 5 is mass entity.
+
+2
+00:00:06.419 --> 00:00:09.580
+This is a framework for data oriented calculations.
+
+3
+00:00:09.580 --> 00:00:13.259
+A mass entity's primary data structure is the fragment.
+
+4
+00:00:13.259 --> 00:00:15.179
+A fragment is a data only element
+
+5
+00:00:15.179 --> 00:00:16.899
+and it represents an atomic piece of data
+
+6
+00:00:16.899 --> 00:00:19.420
+that can be used in calculations.
+
+7
+00:00:19.420 --> 00:00:20.859
+Examples of fragments are things
+
+8
+00:00:20.859 --> 00:00:23.379
+such as transforms and velocity.
+
+9
+00:00:23.379 --> 00:00:25.859
+It's important to note that fragments cannot be created
+
+10
+00:00:25.859 --> 00:00:27.690
+in blueprint at present.
+
+11
+00:00:27.690 --> 00:00:29.690
+Fragments can be grouped into collections
+
+12
+00:00:29.690 --> 00:00:31.329
+and these collections can then be associated
+
+13
+00:00:31.329 --> 00:00:32.689
+with an ID.
+
+14
+00:00:32.689 --> 00:00:36.460
+This collection of fragments is then what we call an entity.
+
+15
+00:00:36.460 --> 00:00:38.060
+The idea associated with the entity
+
+16
+00:00:38.060 --> 00:00:40.060
+can be used for quick lookups
+
+17
+00:00:40.060 --> 00:00:42.659
+and creating an entity is similar to class instance
+
+18
+00:00:42.659 --> 00:00:44.880
+in object orientated programming.
+
+19
+00:00:44.880 --> 00:00:47.200
+However, instead of directly declaring a class
+
+20
+00:00:47.200 --> 00:00:48.420
+and its functionality,
+
+21
+00:00:48.420 --> 00:00:52.500
+entities are built up by fragment composition.
+
+22
+00:00:52.500 --> 00:00:53.659
+An example of an entity,
+
+23
+00:00:53.659 --> 00:00:56.939
+we can take two fragments such as transform and velocity.
+
+24
+00:00:56.939 --> 00:00:58.780
+These two fragments now form our entity
+
+25
+00:00:58.780 --> 00:01:01.950
+which would then give a unique ID.
+
+26
+00:01:01.950 --> 00:01:03.109
+Again, it's important to note
+
+27
+00:01:03.109 --> 00:01:05.349
+that entities are data only elements
+
+28
+00:01:05.349 --> 00:01:09.450
+so they have no internal logic within them.
+
+29
+00:01:09.450 --> 00:01:12.489
+Moving one step further, we have archetypes.
+
+30
+00:01:12.489 --> 00:01:14.430
+Archetypes are a collection of entities
+
+31
+00:01:14.430 --> 00:01:16.930
+of an identical composition.
+
+32
+00:01:16.930 --> 00:01:19.650
+Archetypes are composed of different types of fragments
+
+33
+00:01:19.650 --> 00:01:21.689
+in a specific configuration.
+
+34
+00:01:21.689 --> 00:01:23.329
+Taking our previous example of an entity
+
+35
+00:01:23.329 --> 00:01:25.409
+made up of a transform and a velocity,
+
+36
+00:01:25.409 --> 00:01:26.890
+we can build a collection of entities
+
+37
+00:01:26.890 --> 00:01:28.670
+that hold the same configuration,
+
+38
+00:01:28.670 --> 00:01:31.030
+giving us our archetype.
+
+39
+00:01:31.030 --> 00:01:33.049
+So let's take a look at a visualization
+
+40
+00:01:33.730 --> 00:01:34.569
+of an archetype.
+
+41
+00:01:34.569 --> 00:01:36.129
+We can see that we have an archetype
+
+42
+00:01:36.129 --> 00:01:38.189
+that holds an entity made up of transforms
+
+43
+00:01:38.189 --> 00:01:40.480
+and velocities as per our example.
+
+44
+00:01:40.480 --> 00:01:41.879
+Now let's have a look at how that archetype
+
+45
+00:01:41.879 --> 00:01:44.200
+is organized internally.
+
+46
+00:01:44.200 --> 00:01:47.959
+Entities of an archetype are organized in memory chunks.
+
+47
+00:01:47.959 --> 00:01:49.519
+Arranging data in chunks like this
+
+48
+00:01:49.519 --> 00:01:51.620
+ensures best performance when retrieving fragments
+
+49
+00:01:51.620 --> 00:01:53.079
+associated with entities
+
+50
+00:01:53.079 --> 00:01:55.909
+of the same archetype from memory.
+
+51
+00:01:55.909 --> 00:01:57.590
+Processes are stateless classes
+
+52
+00:01:57.590 --> 00:02:00.629
+that supply the processing logic for fragments.
+
+53
+00:02:00.629 --> 00:02:02.150
+It makes use of entity queries
+
+54
+00:02:02.189 --> 00:02:03.909
+to specify which types of fragments
+
+55
+00:02:03.909 --> 00:02:07.140
+they need to perform their operations on.
+
+56
+00:02:07.140 --> 00:02:08.620
+A good example of a processor
+
+57
+00:02:08.620 --> 00:02:10.699
+is the mass apply movement processor,
+
+58
+00:02:10.699 --> 00:02:13.020
+which is already present in the latest version
+
+59
+00:02:13.020 --> 00:02:14.580
+of Unreal Engine 5.
+
+60
+00:02:14.580 --> 00:02:17.039
+Entity queries provide batches of fragments
+
+61
+00:02:17.039 --> 00:02:18.419
+to the processes with their regard
+
+62
+00:02:18.419 --> 00:02:21.770
+to individual entity identifiers.
+
+63
+00:02:21.770 --> 00:02:22.789
+As we can see here,
+
+64
+00:02:22.789 --> 00:02:25.229
+we have an entity query that will return our processor
+
+65
+00:02:25.229 --> 00:02:27.849
+to arrays of transforms and velocities,
+
+66
+00:02:27.849 --> 00:02:31.039
+the exact makeup of our example entity.
+
+67
+00:02:31.039 --> 00:02:34.919
+A tag is a trivial fragment that contains no data.
+
+68
+00:02:34.919 --> 00:02:37.000
+The existence or absence of a tag
+
+69
+00:02:37.000 --> 00:02:39.680
+is used as data in its own right.
+
+70
+00:02:39.680 --> 00:02:43.560
+Tags are part of the entity's composition.
+
+71
+00:02:43.560 --> 00:02:45.120
+A chunk fragment is a fragment
+
+72
+00:02:45.120 --> 00:02:49.300
+associated with a chunk instead of an entity.
+
+73
+00:02:49.300 --> 00:02:51.860
+Chunk fragments are used to store per chunk data,
+
+74
+00:02:51.860 --> 00:02:54.159
+which are used in managerial processing
+
+75
+00:02:54.159 --> 00:02:57.340
+like calculating levels of detail.
+
+76
+00:02:57.340 --> 00:02:59.740
+They're also used as part of the entity composition
+
+77
+00:02:59.740 --> 00:03:01.900
+system much like tags.
+
+78
+00:03:02.419 --> 00:03:03.460
+Moving on to the last major addition
+
+79
+00:03:03.460 --> 00:03:05.900
+to Unreal Engine 5's AI suite of tools,
+
+80
+00:03:05.900 --> 00:03:07.419
+we have the zone graph.
+
+81
+00:03:07.419 --> 00:03:08.719
+The zone graph was envisioned
+
+82
+00:03:08.719 --> 00:03:10.500
+to be a lightweight navigation system
+
+83
+00:03:10.500 --> 00:03:11.699
+that allowed for pathfinding
+
+84
+00:03:11.699 --> 00:03:14.020
+even with non-stream portions of the world,
+
+85
+00:03:14.020 --> 00:03:18.159
+and for general control of direction and navigation.
+
+86
+00:03:18.159 --> 00:03:19.680
+The zone graph uses metadata
+
+87
+00:03:19.680 --> 00:03:21.800
+to represent specific navigation flows
+
+88
+00:03:21.800 --> 00:03:26.250
+such as traffic lanes, sidewalks, or wood trails.
+
+89
+00:03:26.250 --> 00:03:27.710
+This metadata is represented
+
+90
+00:03:27.710 --> 00:03:29.750
+as a point-to-point corridor structure
+
+91
+00:03:29.750 --> 00:03:31.870
+connected by segments.
+
+92
+00:03:31.870 --> 00:03:32.710
+In the next few slides,
+
+93
+00:03:33.550 --> 00:03:34.370
+we're gonna take a look how we can define
+
+94
+00:03:34.370 --> 00:03:36.389
+our own corridor structures.
+
+95
+00:03:36.389 --> 00:03:37.509
+There's a few critical classes
+
+96
+00:03:37.509 --> 00:03:41.599
+we need to take a look at when defining a zone graph.
+
+97
+00:03:41.599 --> 00:03:43.800
+Firstly, we have the zone shape.
+
+98
+00:03:43.800 --> 00:03:46.099
+Zone shapes define the area and shape
+
+99
+00:03:46.099 --> 00:03:48.199
+of the zone graph lanes.
+
+100
+00:03:48.199 --> 00:03:49.539
+Zone shapes need to be configured
+
+101
+00:03:49.539 --> 00:03:51.280
+with a lane profile which determines
+
+102
+00:03:51.280 --> 00:03:53.340
+the number of lanes, tags, direction,
+
+103
+00:03:53.340 --> 00:03:55.780
+and width of the lane.
+
+104
+00:03:55.780 --> 00:03:58.439
+Next, we have the zone graph data.
+
+105
+00:03:58.439 --> 00:04:00.960
+The zone graph data is the built navigation data
+
+106
+00:04:00.960 --> 00:04:02.340
+for the zone graph,
+
+107
+00:04:02.340 --> 00:04:04.659
+and it's very similar to the Raycast actor
+
+108
+00:04:04.659 --> 00:04:07.590
+that is present when using nav mesh.
+
+109
+00:04:07.590 --> 00:04:09.650
+Zone graph data is not built automatically
+
+110
+00:04:09.650 --> 00:04:11.310
+whilst the user is editing.
+
+111
+00:04:11.310 --> 00:04:12.729
+It's instead built on demand
+
+112
+00:04:12.729 --> 00:04:17.189
+via the build zone graph tool from the menu bar.
+
+113
+00:04:17.189 --> 00:04:19.629
+However, we can enable automatic zone graph building
+
+114
+00:04:19.629 --> 00:04:21.470
+by enabling the build zone graph
+
+115
+00:04:21.470 --> 00:04:25.050
+whilst editing flag in the project settings.
+
+116
+00:04:25.050 --> 00:04:27.529
+Next, we have the zone graph testing actor,
+
+117
+00:04:27.529 --> 00:04:29.410
+which is used for testing if navigation is possible
+
+118
+00:04:29.410 --> 00:04:31.089
+between two testing actors,
+
+119
+00:04:31.089 --> 00:04:33.569
+similar to the traditional navigation testing actor
+
+120
+00:04:33.569 --> 00:04:36.779
+used with the Raycast nav mesh.
+
+121
+00:04:36.779 --> 00:04:39.740
+These testing actors can be configured with a query filter,
+
+122
+00:04:39.740 --> 00:04:42.220
+another actor to test the navigation between,
+
+123
+00:04:42.220 --> 00:04:46.060
+and optional tests to be run when attempting to navigate.
+
+124
+00:04:46.060 --> 00:04:47.740
+The testing actor can also show
+
+125
+00:04:47.740 --> 00:04:50.019
+other debug information related to pathfinding,
+
+126
+00:04:50.019 --> 00:04:52.740
+such as its path lane, its linked lanes,
+
+127
+00:04:52.740 --> 00:04:56.420
+smoothing, and the BV tree query.
+
+128
+00:04:56.420 --> 00:05:00.420
+Finally, we have the zone graph annotation testing actor.
+
+129
+00:05:00.420 --> 00:05:03.040
+This actor allows for any number of tests to be run
+
+130
+00:05:03.040 --> 00:05:06.180
+to simulate annotations at a specific point.
+
+131
+00:05:06.180 --> 00:05:07.639
+Custom tests can also be created
+
+132
+00:05:07.639 --> 00:05:10.910
+to match a project's specific needs.
+
+133
+00:05:10.910 --> 00:05:13.589
+Let's take a look at how we create a lane profile.
+
+134
+00:05:13.589 --> 00:05:15.709
+To create a lane profile, you simply do the following.
+
+135
+00:05:15.709 --> 00:05:17.850
+Go to project settings, zone graph,
+
+136
+00:05:17.850 --> 00:05:21.819
+and press the plus button to create a new lane profile.
+
+137
+00:05:21.819 --> 00:05:22.980
+In the example we see above,
+
+138
+00:05:22.980 --> 00:05:26.550
+we define a new profile that we've named two-way traffic.
+
+139
+00:05:26.550 --> 00:05:28.269
+We then add two lanes to this profile,
+
+140
+00:05:28.269 --> 00:05:30.129
+both with a width of 150,
+
+141
+00:05:30.129 --> 00:05:32.250
+and we define the direction of both of these lanes,
+
+142
+00:05:32.250 --> 00:05:35.750
+one being forwards and one being backwards.
+
+143
+00:05:35.750 --> 00:05:39.610
+And that concludes Introduction to AI in Unreal Engine 5.
+
+144
+00:05:39.610 --> 00:05:41.449
+Today we learned about AI controllers
+
+145
+00:05:41.449 --> 00:05:42.370
+and how to control them,
+
+146
+00:05:42.370 --> 00:05:44.689
+either through behavior trees or state trees,
+
+147
+00:05:44.689 --> 00:05:46.170
+as well as how to store information
+
+148
+00:05:46.170 --> 00:05:49.120
+for use in them on the blackboard.
+
+149
+00:05:49.120 --> 00:05:50.579
+We've looked at the navigation mesh
+
+150
+00:05:50.579 --> 00:05:54.519
+and how we can query information about the world with EQS.
+
+151
+00:05:54.519 --> 00:05:56.459
+We've learned what forms of Perception AI
+
+152
+00:05:56.459 --> 00:05:58.459
+can use straight out of the box.
+
+153
+00:05:58.459 --> 00:06:00.740
+We've also taken a look at some of the brand new features
+
+154
+00:06:01.180 --> 00:06:03.259
+in Unreal's toolset, the smart objects,
+
+155
+00:06:03.259 --> 00:06:06.459
+mass entity, and zone graph systems.
+
+156
+00:06:06.459 --> 00:06:09.360
+Thank you so much for watching, and have a fantastic day.

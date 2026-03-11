@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:01.389 --> 00:00:06.790
+As much as we have concerns over GPU and CPU bottlenecks, bandwidth is also a considerable
+
+2
+00:00:06.790 --> 00:00:14.310
+concern in larger multiplayer games. One vital tool at our disposal is managing relevancy.
+
+3
+00:00:14.310 --> 00:00:17.949
+Relevancy is the umbrella term used to describe how we determine what data is sent
+
+4
+00:00:17.949 --> 00:00:23.219
+to what clients, so what governs whether or not their data is relevant.
+
+5
+00:00:23.219 --> 00:00:26.379
+For instance if a bullet is fired on the other side of the world, does my local
+
+6
+00:00:26.379 --> 00:00:29.780
+client need to know about it? I'm too far away for it to hit me, and I'm too far
+
+7
+00:00:29.820 --> 00:00:34.619
+away to hear it, and I'm definitely too far away to see its visual effects. In this regard
+
+8
+00:00:34.619 --> 00:00:37.960
+we can manage the bullet's relevancy in such a way that we can skip sending the bullet
+
+9
+00:00:37.960 --> 00:00:43.140
+over the network entirely, avoiding the needless bandwidth consumption.
+
+10
+00:00:43.140 --> 00:00:46.840
+If an actor spends too long out of relevancy it will be destroyed, following the same
+
+11
+00:00:46.840 --> 00:00:51.880
+destruction logic we'd experience if we called destroy directly. When it re-enters
+
+12
+00:00:51.880 --> 00:00:55.320
+relevancy, it'll have its begin play called, as if it's been respawned back into
+
+13
+00:00:55.320 --> 00:01:00.899
+the game. It's worth noting that relevancy works on an actor level, so we can't
+
+14
+00:01:00.899 --> 00:01:05.700
+set a single component to have independent relevancy rules.
+
+15
+00:01:05.700 --> 00:01:09.260
+Relevancy is primarily distance based, so simply put, it's something too far away
+
+16
+00:01:09.260 --> 00:01:13.469
+from my local client to care. By default, Unreal considers one and a half
+
+17
+00:01:13.469 --> 00:01:18.010
+kilometres too far to be relevant, but that's entirely configurable inside the
+
+18
+00:01:18.010 --> 00:01:22.129
+actor class defaults under the net call distance squared parameter.
+
+19
+00:01:22.129 --> 00:01:27.000
+There's a few instances where we might want to disable relevancy checks entirely,
+
+20
+00:01:27.000 --> 00:01:31.000
+and set is always relevant to true in the class defaults. Typically we'll use this
+
+21
+00:01:31.040 --> 00:01:34.200
+when developing networked services that should always be accessible to every
+
+22
+00:01:34.200 --> 00:01:38.760
+client, but this is of course down to your particular project specifications.
+
+23
+00:01:38.760 --> 00:01:42.200
+An example of an always relevant actor in vanilla Unreal, however, would be the
+
+24
+00:01:42.200 --> 00:01:45.799
+game state. It's just a replicated actor that every client needs to know
+
+25
+00:01:45.799 --> 00:01:50.620
+about, regardless of their current circumstances. Similarly, we might want to
+
+26
+00:01:50.620 --> 00:01:55.579
+enable be always relevant to owner. In this scenario, if we take ownership of
+
+27
+00:01:55.579 --> 00:02:00.079
+something that's too far away, it'll send its data over the network to us.
+
+28
+00:02:00.079 --> 00:02:03.840
+In some circumstances, distance is too broad of a metric to define whether or
+
+29
+00:02:03.840 --> 00:02:08.439
+not something is relevant to the client. We can override the isNetRelevantFor
+
+30
+00:02:08.439 --> 00:02:12.439
+function in the actor to create a custom implementation. So for instance,
+
+31
+00:02:12.439 --> 00:02:15.759
+we may want to say that our actor is only relevant to players assigned to
+
+32
+00:02:15.759 --> 00:02:20.520
+certain teams. If we override the isNetRelevantFor function to only
+
+33
+00:02:20.520 --> 00:02:24.560
+return true when we have a team ID match, we will only send data to that
+
+34
+00:02:24.560 --> 00:02:29.060
+particular player. Whilst distance is a primary means of detecting relevancy
+
+35
+00:02:29.060 --> 00:02:33.419
+for actors, Unreal will also make an actor irrelevant if the root scene component of an
+
+36
+00:02:33.419 --> 00:02:38.860
+actor is hidden and its collision is turned off. While relevancy decides
+
+37
+00:02:38.860 --> 00:02:42.139
+whether or not we should send the data, dormancy controls whether or not we
+
+38
+00:02:42.139 --> 00:02:46.419
+should even try and send the data. So let's give ourselves a practical
+
+39
+00:02:46.419 --> 00:02:50.139
+example and see how dormant and awake dormancy settings would actually
+
+40
+00:02:50.139 --> 00:02:53.800
+play out. So let's say we've got a cube in the viewport and it's always
+
+41
+00:02:53.800 --> 00:02:59.479
+relevant. Let's also say that the server is changing its color once a second.
+
+42
+00:02:59.479 --> 00:03:02.479
+Given what we already know, we'd expect there to be hundreds of net updates
+
+43
+00:03:02.479 --> 00:03:05.360
+constantly checking to see if the value on the client matches what the server
+
+44
+00:03:05.360 --> 00:03:10.020
+thinks. So in this case, is the server's color the same as the client's color?
+
+45
+00:03:10.020 --> 00:03:12.539
+When we have a mismatch, the new color is sent over the network,
+
+46
+00:03:12.539 --> 00:03:16.969
+triggering an on rep, hooking into our color change logic. That's a lot of
+
+47
+00:03:16.969 --> 00:03:21.879
+work for something we know is only going to change once a second. If we change
+
+48
+00:03:21.879 --> 00:03:25.680
+our actor's dormancy setting to dormant, we can all but eliminate those
+
+49
+00:03:25.680 --> 00:03:29.319
+needless net updates by telling the engine directly, hey, I've changed
+
+50
+00:03:29.319 --> 00:03:33.699
+something, please propagate it down to the client for me. All we need to do is
+
+51
+00:03:33.699 --> 00:03:37.460
+call flush net dormancy once we've made a change that we expect to replicate.
+
+52
+00:03:37.460 --> 00:03:41.060
+For this single update, we'll treat this actor as if it's totally active
+
+53
+00:03:41.060 --> 00:03:45.180
+and liable to all the usual relevancy checks. Once we've propagated everything
+
+54
+00:03:45.180 --> 00:03:48.740
+down, the actor will return to its dormant state and await another flush
+
+55
+00:03:48.740 --> 00:03:53.039
+to be triggered by the developer. You should really consider dormancy when
+
+56
+00:03:53.039 --> 00:03:55.719
+implementing network features that only need to replicate their properties
+
+57
+00:03:55.719 --> 00:03:59.719
+when specifically told to do so. So for instance, say we've got a door that
+
+58
+00:03:59.719 --> 00:04:04.500
+can be opened or locked. Once it's unlocked, we can set the B is open
+
+59
+00:04:04.500 --> 00:04:07.939
+bool to true and call flush net dormancy. So we don't need to keep
+
+60
+00:04:07.939 --> 00:04:11.780
+checking the state of B is open on the client. As engineers, we know
+
+61
+00:04:11.780 --> 00:04:14.379
+it's only going to change when we specifically tell it to.

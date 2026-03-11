@@ -1,0 +1,1877 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.400
+Now that we've covered those concepts, let's actually jump into the engine.
+
+2
+00:00:05.400 --> 00:00:09.000
+Let's figure out how to use these concepts in a practical way.
+
+3
+00:00:09.000 --> 00:00:13.679
+And the best way to demonstrate this is by creating a light switch interaction between
+
+4
+00:00:13.679 --> 00:00:16.320
+a player and multiple blueprints.
+
+5
+00:00:16.320 --> 00:00:20.160
+So what we'll do is we will open a new project.
+
+6
+00:00:20.160 --> 00:00:25.559
+We'll use the third person template here, which is in the game setting.
+
+7
+00:00:25.559 --> 00:00:29.120
+Project name doesn't matter so much, but for this instance, we've called it the course
+
+8
+00:00:29.640 --> 00:00:36.229
+And then you just want to create a project location of where these files will be stored.
+
+9
+00:00:36.229 --> 00:00:40.469
+Once we have the editor open, I'm going to show you quickly what we're making today,
+
+10
+00:00:40.469 --> 00:00:41.829
+just so you have context.
+
+11
+00:00:41.829 --> 00:00:46.469
+So I'm just going to jump in to play an editor by hitting Alt P, alternatively you
+
+12
+00:00:46.469 --> 00:00:47.829
+can just press play.
+
+13
+00:00:47.829 --> 00:00:53.270
+We spawn as a player, we run over to this blue box, we press the input E and it turns
+
+14
+00:00:53.270 --> 00:00:58.710
+a light off and then we can toggle that indefinitely by hitting E on the keyboard
+
+15
+00:00:58.710 --> 00:01:01.229
+to make sure the light turns on and off.
+
+16
+00:01:01.229 --> 00:01:05.750
+So let's figure out how we do this using the concepts that we've just learned.
+
+17
+00:01:05.750 --> 00:01:11.189
+The first thing you want to do when you have a project open is to add a specific
+
+18
+00:01:11.189 --> 00:01:17.510
+input mode or input binding, shall we say, that allows you to press E on the keyboard,
+
+19
+00:01:17.510 --> 00:01:19.909
+for example, to create some kind of input.
+
+20
+00:01:19.909 --> 00:01:24.939
+So to do that, we'll go to edit, we'll go to project settings.
+
+21
+00:01:24.939 --> 00:01:30.420
+When project settings loads, we'll scroll down to input in the engine section.
+
+22
+00:01:30.420 --> 00:01:35.260
+So when we go to input here, some of these boxes may be condensed here, but we're looking
+
+23
+00:01:35.260 --> 00:01:40.400
+for these two action and axis mapping options.
+
+24
+00:01:40.400 --> 00:01:46.319
+What we'll do is we'll add a new action mapping, so add action mapping, we'll type
+
+25
+00:01:46.319 --> 00:01:51.650
+use action or whatever kind of input you would like.
+
+26
+00:01:51.650 --> 00:01:54.530
+And then on the keyboard, we're going to input E.
+
+27
+00:01:54.530 --> 00:01:58.930
+So I'm just going to press E and try and find E on the action mappings.
+
+28
+00:01:58.930 --> 00:01:59.969
+So E can be there.
+
+29
+00:01:59.969 --> 00:02:05.810
+And if you want to add gamepad functionality, you can maybe add game face button left
+
+30
+00:02:05.810 --> 00:02:08.050
+if you want it to work with controller.
+
+31
+00:02:08.050 --> 00:02:12.289
+And that's how you'll add input into your game.
+
+32
+00:02:12.289 --> 00:02:18.610
+So on the axis mapping, the move forward and backwards, you'll already have all these
+
+33
+00:02:18.610 --> 00:02:24.289
+as defaults with the project, but just in case, I'll expand these out if you wanted
+
+34
+00:02:24.289 --> 00:02:28.050
+to see what was going on here.
+
+35
+00:02:28.050 --> 00:02:33.050
+All default functionality, but if your project isn't set up in a certain way, again, if
+
+36
+00:02:33.050 --> 00:02:37.169
+you've used a third person template, everything should be working there.
+
+37
+00:02:37.169 --> 00:02:43.169
+But they're the input mappings that we have, and that will allow us to create an input
+
+38
+00:02:43.169 --> 00:02:45.490
+inside of our blueprint.
+
+39
+00:02:45.490 --> 00:02:47.610
+So we can shut the project settings now.
+
+40
+00:02:47.610 --> 00:02:51.050
+They automatically save as you edit them.
+
+41
+00:02:51.050 --> 00:02:55.449
+And then, so we've already got all of our blueprints here, but what I'm going to do
+
+42
+00:02:55.449 --> 00:03:01.009
+is I'm going to create a second folder just so we can follow along one to one.
+
+43
+00:03:01.009 --> 00:03:05.849
+So I'm just going to in the third person, I'm going to add a new folder and I'll call
+
+44
+00:03:05.849 --> 00:03:11.770
+this tutorial.
+
+45
+00:03:11.770 --> 00:03:16.409
+And so the first thing we want to do is create a blueprint interface.
+
+46
+00:03:16.409 --> 00:03:18.449
+These are the things that we've been talking about.
+
+47
+00:03:18.449 --> 00:03:23.650
+A good naming convention for blueprint interface is BPI.
+
+48
+00:03:23.650 --> 00:03:28.370
+So I'm going to right click and then it'll be under blueprints and then you've got
+
+49
+00:03:28.370 --> 00:03:30.169
+a blueprint interface.
+
+50
+00:03:30.169 --> 00:03:32.289
+So I'm going to add a blueprint interface.
+
+51
+00:03:32.289 --> 00:03:37.449
+I'm going to call that BP lowercase I for blueprint interface.
+
+52
+00:03:37.449 --> 00:03:40.050
+And then you can name this whatever you would want.
+
+53
+00:03:40.050 --> 00:03:45.060
+I'm going to call this a usable actor.
+
+54
+00:03:45.060 --> 00:03:50.060
+So usable actor, and we've got a blueprint interface.
+
+55
+00:03:50.060 --> 00:03:52.819
+So then we can load this blueprint interface.
+
+56
+00:03:52.819 --> 00:03:56.419
+I like to pin my tabs alongside the map.
+
+57
+00:03:56.419 --> 00:03:58.840
+So it's easy to go back and forth.
+
+58
+00:03:58.840 --> 00:03:59.979
+You can do that however you want.
+
+59
+00:03:59.979 --> 00:04:04.419
+I'm just going to compile and save just to make sure everything is saving correctly.
+
+60
+00:04:04.419 --> 00:04:11.909
+And then in the class settings, we want to make sure that the interfaces section is
+
+61
+00:04:11.909 --> 00:04:14.590
+all set up okay.
+
+62
+00:04:14.590 --> 00:04:17.709
+And to do that, we'll create an empty blueprint for now.
+
+63
+00:04:17.709 --> 00:04:20.949
+So we'll then go back into our content browser.
+
+64
+00:04:20.949 --> 00:04:25.889
+We'll right click, go to blueprints and this time we'll create a blueprint class.
+
+65
+00:04:25.889 --> 00:04:32.470
+So you can just create it from an actor class, which is the most basic version of
+
+66
+00:04:32.470 --> 00:04:39.389
+a blueprint and we'll call this BP underscore and again, usable actor.
+
+67
+00:04:39.389 --> 00:04:42.589
+So this will be inheriting the interface.
+
+68
+00:04:42.589 --> 00:04:48.110
+So I'll just add that and we're going to double click or you can press enter if it's
+
+69
+00:04:48.110 --> 00:04:51.490
+selected on the keyboard to open it up.
+
+70
+00:04:51.490 --> 00:04:57.110
+Again we have our class settings here and the difference between this blueprint
+
+71
+00:04:57.110 --> 00:05:00.689
+and this blueprint interface, you can see it just holds options here.
+
+72
+00:05:00.689 --> 00:05:07.819
+Whereas the actor actually has this interface section in the class settings.
+
+73
+00:05:07.819 --> 00:05:09.579
+So we can add this now.
+
+74
+00:05:09.579 --> 00:05:15.579
+So we can add an interface and because of our naming convention, our BPI underscore naming
+
+75
+00:05:15.579 --> 00:05:21.060
+convention, we'll see that we can now inherit an interface from here, which is
+
+76
+00:05:21.060 --> 00:05:25.939
+because we've used our naming convention, it makes it really easy to find.
+
+77
+00:05:25.939 --> 00:05:31.379
+Once you've added it, you need to make sure you compile and save and then that allows
+
+78
+00:05:31.379 --> 00:05:37.180
+you to communicate with this blueprint from this blueprint interface.
+
+79
+00:05:37.180 --> 00:05:42.500
+So let's create a second interface now from the tutorial deck, we mentioned that we needed
+
+80
+00:05:42.500 --> 00:05:44.240
+two interfaces.
+
+81
+00:05:44.240 --> 00:05:49.879
+So again, we're going to right click, blueprints, blueprint interface, and again, I'll call
+
+82
+00:05:49.879 --> 00:05:57.699
+this BPI and I'll call this activatable interface.
+
+83
+00:05:57.699 --> 00:06:00.459
+So we'll just call it activatable interface.
+
+84
+00:06:00.459 --> 00:06:10.220
+We'll add that and now we want to create something that is activatable by this interface.
+
+85
+00:06:10.220 --> 00:06:13.019
+So again, we're going to create an empty blueprint class.
+
+86
+00:06:13.019 --> 00:06:17.759
+So there's a little bit of setup here, but once you've got these actors set up,
+
+87
+00:06:17.759 --> 00:06:22.220
+that's where the power comes in with our parent and child classes as we were talking
+
+88
+00:06:22.220 --> 00:06:23.220
+about before.
+
+89
+00:06:23.220 --> 00:06:28.680
+So hopefully they're all straightforward steps, but we'll just go ahead and create another
+
+90
+00:06:28.680 --> 00:06:29.680
+blueprint class.
+
+91
+00:06:29.720 --> 00:06:35.370
+So we'll right click blueprints, blueprint class, we're going to select actor again,
+
+92
+00:06:35.370 --> 00:06:43.220
+I'm going to call this BP underscore, and then we'll call it activatable actor.
+
+93
+00:06:43.220 --> 00:06:46.660
+And again, we want to make sure it has the correct interface.
+
+94
+00:06:46.660 --> 00:06:48.379
+So we want to double click it.
+
+95
+00:06:48.379 --> 00:06:55.379
+We'll go to class settings, we'll go to add, go to BPI again, and now we've got
+
+96
+00:06:55.379 --> 00:06:57.779
+the activatable interface.
+
+97
+00:06:57.779 --> 00:07:02.449
+And since we've got, we should really keep these naming conventions similar as well,
+
+98
+00:07:02.449 --> 00:07:07.160
+just to make sure, you know, just the flow of communication is correct.
+
+99
+00:07:07.160 --> 00:07:11.360
+So I'm going to select activatable interface here, but I think what I'm going to do,
+
+100
+00:07:11.360 --> 00:07:16.430
+I'm going to rename that BPI usable actor.
+
+101
+00:07:16.430 --> 00:07:17.829
+I'm just going to select it.
+
+102
+00:07:17.829 --> 00:07:22.829
+You can either right click and go to rename, you can press F2 to rename, or you can
+
+103
+00:07:22.829 --> 00:07:27.410
+just select it once and then select it twice and then it'll go to renaming.
+
+104
+00:07:27.410 --> 00:07:31.720
+So I'm going to call this interface.
+
+105
+00:07:31.720 --> 00:07:36.480
+Let's just file, save all, and I'm just going to open up my usable actor just to
+
+106
+00:07:36.480 --> 00:07:41.480
+make sure the interface is the correct one.
+
+107
+00:07:41.480 --> 00:07:45.160
+I'm not necessarily happy that that's still there.
+
+108
+00:07:45.160 --> 00:07:48.959
+I want to make sure there's no communication issues down the line.
+
+109
+00:07:48.959 --> 00:07:51.560
+So I'm just going to clear that out.
+
+110
+00:07:51.560 --> 00:07:53.680
+So yes, and there we go.
+
+111
+00:07:53.680 --> 00:07:57.120
+We've got the usable interface.
+
+112
+00:07:57.120 --> 00:08:02.490
+Okay, so let's go to BPI underscore, and there we go.
+
+113
+00:08:02.490 --> 00:08:04.370
+We've got the usable interface.
+
+114
+00:08:04.370 --> 00:08:06.850
+I think that would be a cleaner way of working.
+
+115
+00:08:06.850 --> 00:08:09.910
+We just want to compile and save that.
+
+116
+00:08:09.910 --> 00:08:15.230
+Activatable actor has the activatable interface, the usable actor has the usable interface.
+
+117
+00:08:15.230 --> 00:08:17.829
+That'll just make things cleaner.
+
+118
+00:08:17.829 --> 00:08:20.110
+The communication flow is just going to be much better.
+
+119
+00:08:20.110 --> 00:08:25.350
+Just going to make sure I've saved everything and then we'll move on to the next step.
+
+120
+00:08:25.350 --> 00:08:29.829
+If we look at how we want to interact with our light switch now, we have this
+
+121
+00:08:29.829 --> 00:08:35.309
+interaction controller at the top and an interaction controller can then possess one of these
+
+122
+00:08:35.309 --> 00:08:39.669
+avatars as we were talking about before, whether that's a humanoid character, we've
+
+123
+00:08:39.669 --> 00:08:44.509
+got a car, a spaceship, a ball, we can create some kind of interaction controller
+
+124
+00:08:44.509 --> 00:08:46.110
+that communicates with these.
+
+125
+00:08:46.110 --> 00:08:48.929
+So let's go ahead and do that now.
+
+126
+00:08:48.929 --> 00:08:51.309
+So we'll create an interaction controller.
+
+127
+00:08:51.309 --> 00:08:57.049
+So we'll right click, we'll go to a new blueprint class.
+
+128
+00:08:57.049 --> 00:09:02.330
+We'll create a now player controller because now we want something that we're controlling
+
+129
+00:09:02.330 --> 00:09:03.389
+a palm with.
+
+130
+00:09:03.389 --> 00:09:12.259
+So we'll select player controller there and we'll call this interaction controller.
+
+131
+00:09:12.259 --> 00:09:14.740
+Then we'll hit enter to open it up.
+
+132
+00:09:14.740 --> 00:09:18.179
+We'll go to the blueprint graph here, sorry.
+
+133
+00:09:18.179 --> 00:09:21.379
+You want to make sure that parent class is player controller at the top.
+
+134
+00:09:21.379 --> 00:09:24.820
+So if it's not, just make sure you have that there.
+
+135
+00:09:24.820 --> 00:09:27.700
+I'm just going to select these and delete them.
+
+136
+00:09:27.700 --> 00:09:31.539
+Just hit and delete on the keyboard just to make sure we have everything that we need.
+
+137
+00:09:31.539 --> 00:09:34.139
+I'll make that details panel a bit smaller.
+
+138
+00:09:34.139 --> 00:09:38.700
+So the first input we want to add here is the thing that we added at the start.
+
+139
+00:09:38.700 --> 00:09:40.419
+So that'll be the use action.
+
+140
+00:09:40.419 --> 00:09:45.360
+Now use action, if you remember, so I'll select that, but use action, you don't have
+
+141
+00:09:45.360 --> 00:09:52.730
+to go here, but I'm going to go to edit project settings, go back to input.
+
+142
+00:09:52.730 --> 00:09:55.450
+So you'll see that we got, we have use action here.
+
+143
+00:09:55.450 --> 00:10:01.730
+So whatever we call this here, that's what we're looking for in this controller.
+
+144
+00:10:01.730 --> 00:10:05.529
+So wherever our controller is, let's open it up again.
+
+145
+00:10:05.529 --> 00:10:07.929
+I must have closed it.
+
+146
+00:10:07.929 --> 00:10:10.289
+That's what this use action is here.
+
+147
+00:10:10.289 --> 00:10:16.629
+So the concept of interacting with objects in the world inside of unreal engine is to
+
+148
+00:10:16.629 --> 00:10:18.610
+create a line trace.
+
+149
+00:10:18.610 --> 00:10:21.850
+Now go over the theory of line trace in a second.
+
+150
+00:10:21.850 --> 00:10:27.629
+Let's go ahead and start creating a line trace just so you see what is happening blueprint-wise.
+
+151
+00:10:27.629 --> 00:10:32.539
+So we want to create a line trace by channel.
+
+152
+00:10:32.539 --> 00:10:38.179
+So that will be the top one here and a line trace by channel essentially needs
+
+153
+00:10:38.179 --> 00:10:41.019
+a start and an end point.
+
+154
+00:10:41.019 --> 00:10:47.539
+So the start point is going to be the controlled pawn who we are currently controlling.
+
+155
+00:10:47.539 --> 00:10:51.960
+So we'll get the controlled pawn and you'll, you'll generally set up a line trace once
+
+156
+00:10:51.980 --> 00:10:54.620
+and then not need to do it again for your projects.
+
+157
+00:10:54.620 --> 00:10:57.240
+You may get into the habit of making these.
+
+158
+00:10:57.240 --> 00:11:05.200
+There are documentations online about creating a basic line trace for a player on the unreal
+
+159
+00:11:05.200 --> 00:11:06.639
+engine documentation page.
+
+160
+00:11:06.639 --> 00:11:13.419
+If you ever just want to reference that, this can just be made into a copy and paste
+
+161
+00:11:13.419 --> 00:11:14.419
+option as well.
+
+162
+00:11:14.419 --> 00:11:16.379
+So you can use it in various projects.
+
+163
+00:11:16.379 --> 00:11:21.500
+So from the controlled pawn, we want to get the actor location.
+
+164
+00:11:21.500 --> 00:11:26.240
+So get actor location, and we also want to get the forward vector.
+
+165
+00:11:26.240 --> 00:11:31.759
+So we'll get the forward vector and that's basically the direction that we're currently
+
+166
+00:11:31.759 --> 00:11:34.019
+looking in.
+
+167
+00:11:34.019 --> 00:11:38.779
+What we'll do then is we'll add these two properties together.
+
+168
+00:11:38.779 --> 00:11:41.419
+So we want to add one vector to another.
+
+169
+00:11:41.419 --> 00:11:45.539
+So I'm just going to use my plus icon here and we'll add one to the other.
+
+170
+00:11:45.539 --> 00:11:51.740
+Now if I just add both of these two directly, it's going to give me a location
+
+171
+00:11:51.779 --> 00:11:56.080
+directly in front of the player's current cursor view.
+
+172
+00:11:56.080 --> 00:12:00.019
+What I want to do is I actually want to multiply this vector.
+
+173
+00:12:00.019 --> 00:12:01.759
+So I'm just going to go to multiply.
+
+174
+00:12:01.759 --> 00:12:04.919
+You can either type in multiply or use the star for multiply.
+
+175
+00:12:04.919 --> 00:12:08.480
+And actually I want to multiply by a float.
+
+176
+00:12:08.480 --> 00:12:18.679
+So I want to, what is the multiply?
+
+177
+00:12:18.679 --> 00:12:22.929
+Let's try float.
+
+178
+00:12:22.929 --> 00:12:27.929
+So yeah, I want to right click on the pin, convert pin into a float.
+
+179
+00:12:28.610 --> 00:12:30.490
+So that creates a float there.
+
+180
+00:12:30.490 --> 00:12:33.149
+And now what I want to do is I want to set some kind of units.
+
+181
+00:12:33.149 --> 00:12:35.830
+Now I'm just going to put 2000 by default.
+
+182
+00:12:35.830 --> 00:12:38.710
+2000 is just a good interact distance.
+
+183
+00:12:38.710 --> 00:12:43.110
+We could even promote this to a variable and change the interact distance based on
+
+184
+00:12:43.110 --> 00:12:47.340
+certain functionality, but we'll leave it simple for now.
+
+185
+00:12:47.340 --> 00:12:51.440
+We'll just project 2000 units into the world.
+
+186
+00:12:51.440 --> 00:12:53.779
+Then I'll add these two vectors together.
+
+187
+00:12:53.779 --> 00:12:55.399
+So I'll add them.
+
+188
+00:12:55.399 --> 00:12:58.960
+And so the start location is going to be the player.
+
+189
+00:12:58.960 --> 00:13:01.120
+So I can just go directly into the star.
+
+190
+00:13:01.120 --> 00:13:05.399
+And the end location is this location that we've projected out into this world based
+
+191
+00:13:05.399 --> 00:13:06.720
+on the float.
+
+192
+00:13:06.720 --> 00:13:10.950
+Now an actor that we want to ignore here.
+
+193
+00:13:10.950 --> 00:13:13.470
+So these properties are all the same.
+
+194
+00:13:13.470 --> 00:13:18.870
+We do have ignore self here, but just to make sure that we are definitely ignoring
+
+195
+00:13:18.870 --> 00:13:20.990
+all components of our self.
+
+196
+00:13:20.990 --> 00:13:24.679
+What we'll do is we'll get the controlled pawn, which is here.
+
+197
+00:13:24.679 --> 00:13:28.740
+We'll make an array and hit enter.
+
+198
+00:13:28.740 --> 00:13:31.379
+And then we can also just drag that into that.
+
+199
+00:13:31.379 --> 00:13:37.559
+I'll double click here on the line just to make a reroute node, but essentially that's
+
+200
+00:13:37.559 --> 00:13:41.340
+going to be our line trace if I bring it in to a view here.
+
+201
+00:13:41.340 --> 00:13:47.250
+So we've got our input action, we've got a line trace, and then we've got our functions
+
+202
+00:13:47.250 --> 00:13:48.570
+that make up the line trace.
+
+203
+00:13:49.070 --> 00:13:55.419
+And I'll just highlight all this and call this basic line trace.
+
+204
+00:13:55.419 --> 00:13:58.779
+You can add some flavor to your comment boxes if you want.
+
+205
+00:13:58.779 --> 00:14:01.970
+I'll drop the alpha.
+
+206
+00:14:01.970 --> 00:14:03.769
+Maybe you make the text bigger.
+
+207
+00:14:03.769 --> 00:14:06.730
+This is like a core piece of scripting inside of your controller.
+
+208
+00:14:06.730 --> 00:14:09.570
+So maybe you want to add some kind of flavor to that.
+
+209
+00:14:09.570 --> 00:14:14.529
+So just highlight where it is in your level, but that's the basic line trace.
+
+210
+00:14:14.529 --> 00:14:18.490
+So now what do we want to do after we've traced into the world?
+
+211
+00:14:18.490 --> 00:14:22.159
+Now we essentially want to know what have we hit.
+
+212
+00:14:22.159 --> 00:14:27.480
+Before I explain that cliffhanger, I'll compile and save as well, just to make sure we don't
+
+213
+00:14:27.480 --> 00:14:29.100
+lose any code.
+
+214
+00:14:29.100 --> 00:14:33.799
+So on our out hit result, you want to use something called a break hit result.
+
+215
+00:14:33.799 --> 00:14:36.740
+And this essentially just gives you lots of options.
+
+216
+00:14:36.740 --> 00:14:39.820
+If you click the little dropdown arrow, it gives you all the things that you could
+
+217
+00:14:39.820 --> 00:14:42.899
+possibly have hit with the trace.
+
+218
+00:14:42.899 --> 00:14:45.700
+Now all we really care about is the hit actor.
+
+219
+00:14:45.700 --> 00:14:49.620
+We care about have we hit an actor that we can interact with?
+
+220
+00:14:49.620 --> 00:14:51.100
+If yes, what do we want to do?
+
+221
+00:14:51.100 --> 00:14:56.299
+Well, we can use this concept called does implement interface that we used before.
+
+222
+00:14:56.299 --> 00:14:58.639
+So yes, we want to use that.
+
+223
+00:14:58.639 --> 00:15:04.659
+And then we also want to type in BPI and we want to know what interface to use here.
+
+224
+00:15:04.659 --> 00:15:10.940
+Now it's going to be the usable interface in this instance, the one that we used.
+
+225
+00:15:10.940 --> 00:15:12.179
+I'll branch here.
+
+226
+00:15:12.179 --> 00:15:20.929
+So I'll drag off the red pin and type branch and add that here, dragging out there.
+
+227
+00:15:20.929 --> 00:15:27.690
+And then from the hit actor, we want to call the interface that we hit.
+
+228
+00:15:27.690 --> 00:15:31.289
+So again, I'm going to compile and save just to make sure we have all the correct
+
+229
+00:15:31.289 --> 00:15:32.610
+logic up to date.
+
+230
+00:15:32.610 --> 00:15:39.210
+I'm going to drag out of hit actor and type use object, which is going to be a message.
+
+231
+00:15:39.210 --> 00:15:43.330
+So it's going to be a message for anyone that wants to listen and it's going to be
+
+232
+00:15:43.330 --> 00:15:47.889
+able to listen because we know it can listen because it's got the interface assigned to
+
+233
+00:15:47.889 --> 00:15:48.889
+it.
+
+234
+00:15:48.889 --> 00:15:53.889
+If, if this had returned false, well, we'd know that whatever actor we hit in the world
+
+235
+00:15:53.889 --> 00:15:57.129
+didn't have this interface, therefore we can't use the object.
+
+236
+00:15:57.129 --> 00:16:03.210
+So it's a good kind of prevention system because technically we could have just, you
+
+237
+00:16:03.210 --> 00:16:06.210
+don't have to do this, but we could have just gone directly into that.
+
+238
+00:16:06.210 --> 00:16:08.330
+I'm going to hold alt to break that pin.
+
+239
+00:16:08.330 --> 00:16:12.009
+We could have just said, use object, whatever you're trying to do, just use objects on
+
+240
+00:16:12.009 --> 00:16:13.629
+everything you hit.
+
+241
+00:16:13.629 --> 00:16:17.889
+That wouldn't have been as good because we don't know that half of these objects have
+
+242
+00:16:17.889 --> 00:16:19.289
+these interfaces.
+
+243
+00:16:19.289 --> 00:16:24.080
+So you could be trying to click on stuff that doesn't implement a certain interface
+
+244
+00:16:24.080 --> 00:16:28.500
+and crashes and bugs and just many issues could happen.
+
+245
+00:16:28.500 --> 00:16:33.980
+So with this security check here, does implement interface, it allows us to ensure that we're
+
+246
+00:16:33.980 --> 00:16:35.100
+speaking to the right object.
+
+247
+00:16:35.100 --> 00:16:39.440
+So I'm just going to hit undo a few times, make sure all that's there.
+
+248
+00:16:39.480 --> 00:16:45.659
+And that's essentially our, our basic trace that we want in, in our player controller.
+
+249
+00:16:45.659 --> 00:16:49.330
+So again, I'm going to compile, save, and then I'm just going to close that.
+
+250
+00:16:49.330 --> 00:16:53.629
+So we don't have too many windows open and I go back to the map and you just want
+
+251
+00:16:53.629 --> 00:16:57.149
+to make sure you save and we'll go to the next step.
+
+252
+00:16:57.149 --> 00:17:02.549
+The next thing we want to do is just to make sure our game mode is set correctly.
+
+253
+00:17:02.549 --> 00:17:08.529
+So in the blueprints, again, if you had been doing your new scripting inside of this
+
+254
+00:17:08.529 --> 00:17:13.700
+original blueprints folder, which comes with the project, you'll see the character here,
+
+255
+00:17:13.700 --> 00:17:15.920
+the third person game mode.
+
+256
+00:17:15.920 --> 00:17:21.819
+And so if we actually open up this game mode, you'll see that the player controller
+
+257
+00:17:21.819 --> 00:17:24.940
+class is set to interaction controller.
+
+258
+00:17:24.940 --> 00:17:28.579
+So I have two here just because I made a new one.
+
+259
+00:17:28.579 --> 00:17:31.420
+So you, you, you will only have one in this instance.
+
+260
+00:17:31.420 --> 00:17:35.299
+So just make sure interaction controller is selected there.
+
+261
+00:17:35.339 --> 00:17:41.819
+That means that the game mode, so it runs what kind of hood you should have,
+
+262
+00:17:41.819 --> 00:17:47.059
+what kind of porn you are currently possessing, which in our instance is a third person character.
+
+263
+00:17:47.059 --> 00:17:51.519
+This essentially gives you all your game set up properties.
+
+264
+00:17:51.519 --> 00:17:57.279
+So you just want to make sure that that controller class is selected there before you continue.
+
+265
+00:17:57.279 --> 00:18:03.779
+And then you can close it, go back to our map, save all, and then we can continue.
+
+266
+00:18:03.859 --> 00:18:07.980
+So next, I'm going to go back into my tutorial folder here.
+
+267
+00:18:07.980 --> 00:18:10.779
+If you're in your blueprints folder, definitely stay there.
+
+268
+00:18:10.779 --> 00:18:16.779
+And so now we want to create a light switch to interact with inside of our level.
+
+269
+00:18:16.779 --> 00:18:20.339
+And we want to do this from the activatable actor.
+
+270
+00:18:20.339 --> 00:18:24.099
+Now when we're talking about the concepts of parent and child classes before,
+
+271
+00:18:24.099 --> 00:18:28.220
+we're going to create a child class based on this parent class.
+
+272
+00:18:28.220 --> 00:18:30.059
+So this is our parent class.
+
+273
+00:18:30.059 --> 00:18:34.380
+So I'm going to right click on our parent class and go to at the top of the page here,
+
+274
+00:18:34.380 --> 00:18:37.460
+create child blueprint class.
+
+275
+00:18:37.460 --> 00:18:40.299
+You want to create a child class.
+
+276
+00:18:40.299 --> 00:18:44.940
+I'm going to call this BP underscore light.
+
+277
+00:18:44.940 --> 00:18:49.299
+You could have some kind of naming convention that says child at the end.
+
+278
+00:18:49.299 --> 00:18:52.940
+I'm going to call it that just so you can see exactly what's going on.
+
+279
+00:18:52.940 --> 00:18:54.420
+You don't need to add child.
+
+280
+00:18:54.420 --> 00:18:58.579
+If you have your own naming convention of how to do parent classes and child classes,
+
+281
+00:18:58.579 --> 00:18:59.980
+that's also okay.
+
+282
+00:18:59.980 --> 00:19:01.980
+I'm just going to make sure our file save.
+
+283
+00:19:01.980 --> 00:19:07.950
+You'll see that saving often is always a good way to prevent any issues here.
+
+284
+00:19:07.950 --> 00:19:12.589
+So we want to open up this light child.
+
+285
+00:19:12.589 --> 00:19:15.589
+We want to add a component.
+
+286
+00:19:15.589 --> 00:19:19.190
+So again, we were talking about components before in the tutorial.
+
+287
+00:19:19.190 --> 00:19:23.789
+So we want to add component and this instance will add a point light.
+
+288
+00:19:23.789 --> 00:19:26.750
+I'm just going to leave it named as point light.
+
+289
+00:19:26.750 --> 00:19:28.390
+I might change the color of it.
+
+290
+00:19:28.390 --> 00:19:31.289
+Let's just stay in our pink theme.
+
+291
+00:19:31.289 --> 00:19:33.289
+The radius will be fine.
+
+292
+00:19:33.289 --> 00:19:35.289
+You can change any properties here if you want.
+
+293
+00:19:35.289 --> 00:19:38.910
+Maybe I'll draw up the intensity just so you can really see it.
+
+294
+00:19:38.910 --> 00:19:40.650
+You can make whatever kind of light you want.
+
+295
+00:19:40.650 --> 00:19:43.569
+You could add a little fixture or setting or something like that.
+
+296
+00:19:43.569 --> 00:19:44.569
+I'm just going to save that.
+
+297
+00:19:44.569 --> 00:19:48.809
+And then the main thing we want to actually do in this blueprint is to go to the event
+
+298
+00:19:48.809 --> 00:19:53.779
+graph here and you'll see interestingly, it's not part of this tutorial, but you'll
+
+299
+00:19:53.779 --> 00:19:58.859
+see that we've got a parent begin play and our begin play.
+
+300
+00:19:58.859 --> 00:20:04.599
+So everything always fires off the parent before we are firing into the child class.
+
+301
+00:20:04.599 --> 00:20:13.109
+So that's really useful to know, but we're going to go to event activate object.
+
+302
+00:20:13.109 --> 00:20:17.750
+So we just want to make sure our interface is set.
+
+303
+00:20:17.750 --> 00:20:23.619
+So we've got an inherited interface here, which is a activatable interface.
+
+304
+00:20:23.619 --> 00:20:27.980
+So let's make sure we have our interface.
+
+305
+00:20:27.980 --> 00:20:31.960
+So activate, activate object there.
+
+306
+00:20:31.960 --> 00:20:36.799
+We actually want the activate object.
+
+307
+00:20:36.799 --> 00:20:42.829
+We want to make sure it's not the message.
+
+308
+00:20:42.829 --> 00:20:46.990
+So before we can add any code here, we want to go to our third person map again.
+
+309
+00:20:46.990 --> 00:20:51.930
+We want to go to the activatable interface and then we just need a function here.
+
+310
+00:20:51.930 --> 00:20:59.750
+So we need to create a new function and we'll just call this activate object.
+
+311
+00:20:59.750 --> 00:21:04.509
+So I'll give it a capital letter on the O and that'll make sure that it puts a space
+
+312
+00:21:04.509 --> 00:21:06.069
+between activate and object.
+
+313
+00:21:06.069 --> 00:21:10.710
+So whenever you capitalize functions like that, so there's no space in the actual function,
+
+314
+00:21:10.710 --> 00:21:15.609
+but you can see a space there, which is for visual purposes, which is quite a nice
+
+315
+00:21:15.609 --> 00:21:17.750
+little touch inside of unreal.
+
+316
+00:21:17.750 --> 00:21:22.490
+It means that you can name things correctly in the function, but obviously it makes things
+
+317
+00:21:22.490 --> 00:21:25.769
+a bit more visual on the front end here.
+
+318
+00:21:25.769 --> 00:21:27.490
+So I'm just going to compile and save that.
+
+319
+00:21:27.490 --> 00:21:29.490
+And then we want to go to our light.
+
+320
+00:21:29.490 --> 00:21:35.650
+We want to compile and save our light, and then hopefully we have an event activate
+
+321
+00:21:35.650 --> 00:21:36.650
+objects here.
+
+322
+00:21:36.650 --> 00:21:40.660
+So you'll find activate objects there.
+
+323
+00:21:40.660 --> 00:21:44.779
+If you don't have that, you just want to make sure you compile and save that'll
+
+324
+00:21:44.779 --> 00:21:46.420
+refresh the code.
+
+325
+00:21:46.420 --> 00:21:48.339
+And now we just want to do something.
+
+326
+00:21:48.339 --> 00:21:49.660
+How do we activate this light?
+
+327
+00:21:49.660 --> 00:21:55.940
+Well, maybe we want to add the point light and we want to toggle the visibility, which
+
+328
+00:21:55.940 --> 00:21:59.099
+is just some basic default unreal engine functionality.
+
+329
+00:21:59.140 --> 00:22:02.420
+Again, I just dragged and dropped the point light in there.
+
+330
+00:22:02.420 --> 00:22:03.700
+That's how I get the point light.
+
+331
+00:22:03.700 --> 00:22:09.579
+I drag off the blue pin, type in toggle visibility, and you can just hook that in there.
+
+332
+00:22:09.579 --> 00:22:15.039
+Something basic, we'll compile and save, and that allows us to toggle the visibility
+
+333
+00:22:15.039 --> 00:22:19.400
+of the point light when we receive this message from the blueprint interface.
+
+334
+00:22:19.400 --> 00:22:21.720
+So this message, again, it's just a wrapper.
+
+335
+00:22:21.720 --> 00:22:26.119
+It's just essentially just saying, here's a message I want you to do something.
+
+336
+00:22:26.119 --> 00:22:30.589
+And the actual functionality is inside this light blueprint.
+
+337
+00:22:30.589 --> 00:22:33.670
+Now we need some kind of switch in our level.
+
+338
+00:22:33.670 --> 00:22:37.589
+We've got our lights, so I'm just going to find a part of the map over here.
+
+339
+00:22:37.589 --> 00:22:40.150
+I'm going to add my lights to it.
+
+340
+00:22:40.150 --> 00:22:43.829
+So I'll add my pink light so you can see the difference between the white light over
+
+341
+00:22:43.829 --> 00:22:45.250
+there and the pink light.
+
+342
+00:22:45.250 --> 00:22:49.349
+Now I will create some kind of light switch blueprint.
+
+343
+00:22:49.349 --> 00:22:55.420
+So again, we want to create a child based on the usable actor this time.
+
+344
+00:22:55.500 --> 00:22:59.180
+So we created an activatable actor, now we want to go to usable actor.
+
+345
+00:22:59.180 --> 00:23:02.740
+So on the usable actor, create a child blueprint.
+
+346
+00:23:02.740 --> 00:23:06.380
+We'll call this BP underscore switch.
+
+347
+00:23:06.380 --> 00:23:09.819
+And again, I'll name it child so you can see exactly what's going on there.
+
+348
+00:23:09.819 --> 00:23:14.460
+And then I will open up this switch child.
+
+349
+00:23:14.460 --> 00:23:21.420
+So again, we just want to make sure we have some kind of function inside of our first
+
+350
+00:23:21.420 --> 00:23:23.420
+usable interface.
+
+351
+00:23:23.420 --> 00:23:27.500
+So BPI underscore usable interface, it created a new function here.
+
+352
+00:23:27.500 --> 00:23:33.019
+We'll just rename this to use objects, for example.
+
+353
+00:23:33.019 --> 00:23:35.140
+Now you can see use objects is there.
+
+354
+00:23:35.140 --> 00:23:39.859
+We'll make sure we compile, save, and I'm going to start closing these windows.
+
+355
+00:23:39.859 --> 00:23:44.619
+I'll close that one and I'll close that one just so we can see exactly what's going
+
+356
+00:23:44.619 --> 00:23:45.619
+on.
+
+357
+00:23:45.619 --> 00:23:46.619
+I'll probably also close these.
+
+358
+00:23:46.619 --> 00:23:51.099
+I'm just middle mousing to close them because we only really care about the two child blueprints
+
+359
+00:23:51.099 --> 00:23:52.910
+at the moment.
+
+360
+00:23:52.990 --> 00:23:58.710
+So when I go back into this switch, I'm going to compile and save to make sure that I have
+
+361
+00:23:58.710 --> 00:24:01.930
+the required code, it's updated it.
+
+362
+00:24:01.930 --> 00:24:04.609
+And then we just need some kind of static mesh in here.
+
+363
+00:24:04.609 --> 00:24:11.089
+So I will add a cube, for example, I'm not sure how big that scale of cube is, so I'm
+
+364
+00:24:11.089 --> 00:24:12.089
+going to scale it.
+
+365
+00:24:12.089 --> 00:24:16.930
+I'm going to go into the map, I'm going to drag out the switch.
+
+366
+00:24:16.930 --> 00:24:20.910
+And so you can see that this cube is a little bit big.
+
+367
+00:24:20.910 --> 00:24:26.309
+So maybe I'll go back into the blueprint and scale it maybe by a 0.5, something like
+
+368
+00:24:26.309 --> 00:24:27.309
+that.
+
+369
+00:24:27.309 --> 00:24:28.309
+Well, that's 0.6.
+
+370
+00:24:28.309 --> 00:24:29.309
+Actually, let's leave it at that.
+
+371
+00:24:29.309 --> 00:24:31.660
+That's kind of a nice switch shape.
+
+372
+00:24:31.660 --> 00:24:34.740
+So that'll be our switch in the map.
+
+373
+00:24:34.740 --> 00:24:39.579
+Whatever you want it to look like, aesthetic doesn't matter so much in this instance,
+
+374
+00:24:39.579 --> 00:24:42.269
+but that's going to be my light switch.
+
+375
+00:24:42.269 --> 00:24:44.690
+So let's go to the switch.
+
+376
+00:24:44.690 --> 00:24:47.930
+Let's go again back to the event graph.
+
+377
+00:24:47.930 --> 00:24:52.730
+And then we want to right click and type use object.
+
+378
+00:24:52.730 --> 00:24:55.930
+Now you want to make sure that we select the event here.
+
+379
+00:24:55.930 --> 00:24:58.529
+Well, I just selected the wrong one, sorry.
+
+380
+00:24:58.529 --> 00:25:04.180
+So event use object at the top, that's the one that you want.
+
+381
+00:25:04.180 --> 00:25:11.059
+And we want to, first of all, get the light variable.
+
+382
+00:25:11.059 --> 00:25:15.279
+So we want to create a light.
+
+383
+00:25:15.279 --> 00:25:24.079
+So to do that, we'll create a new variable and we'll call this light actor or something
+
+384
+00:25:24.079 --> 00:25:25.200
+similar to that.
+
+385
+00:25:25.200 --> 00:25:29.079
+So we're actually looking for this, this light that we've placed in our map.
+
+386
+00:25:29.079 --> 00:25:34.240
+So we want to make sure we change the variable type here from Boolean to whatever
+
+387
+00:25:34.240 --> 00:25:36.339
+we named our light child at the top.
+
+388
+00:25:36.339 --> 00:25:42.119
+So we called it BP underscore light underscore child, and you'll see that here and we'll
+
+389
+00:25:42.119 --> 00:25:44.480
+create an object reference.
+
+390
+00:25:44.480 --> 00:25:47.960
+So now we'll have a variable, which is light child.
+
+391
+00:25:47.960 --> 00:25:48.960
+So I'm going to drag that out.
+
+392
+00:25:48.960 --> 00:25:52.759
+I'm going to hold down control and left mouse drag to get.
+
+393
+00:25:52.759 --> 00:25:56.799
+If you don't hold down control, you get a get on a set.
+
+394
+00:25:56.799 --> 00:25:59.119
+So you can just click get in that instance.
+
+395
+00:25:59.119 --> 00:26:01.980
+Alternatively, you can hold down alt for a set.
+
+396
+00:26:01.980 --> 00:26:03.279
+We just don't need set.
+
+397
+00:26:03.279 --> 00:26:07.119
+So control and alt are shortcuts there.
+
+398
+00:26:07.119 --> 00:26:12.000
+Just for good practice, as your blueprints get bigger as well, I'm going to change
+
+399
+00:26:12.000 --> 00:26:18.519
+the category here to a light properties and it gives us its own little category.
+
+400
+00:26:18.519 --> 00:26:24.279
+I'm also going to expose it with that little, uh, I, I, uh, variable that I'm going to
+
+401
+00:26:24.279 --> 00:26:26.400
+compile and save.
+
+402
+00:26:26.400 --> 00:26:28.559
+Now we want to do that is valid.
+
+403
+00:26:28.559 --> 00:26:32.660
+Like we said before, we want to do that is valid.
+
+404
+00:26:32.660 --> 00:26:38.640
+Alternatively, if you would like, you can drag this out and you can right click on
+
+405
+00:26:38.640 --> 00:26:45.130
+the blue pin and convert to a valid get, and we could use that option.
+
+406
+00:26:45.130 --> 00:26:47.809
+Whichever option, both are exactly the same.
+
+407
+00:26:47.809 --> 00:26:50.970
+I'll just delete this one cause this one's already in place.
+
+408
+00:26:50.970 --> 00:26:52.130
+So we want to get is valid.
+
+409
+00:26:52.130 --> 00:26:59.299
+And then from the light actor, we want to go to activate object.
+
+410
+00:26:59.299 --> 00:27:01.630
+We want to select that there.
+
+411
+00:27:01.630 --> 00:27:06.269
+Now there were multiple activate objects, um, let's just see here.
+
+412
+00:27:06.269 --> 00:27:11.109
+You can have the, it says available interface, which is a message.
+
+413
+00:27:11.109 --> 00:27:15.190
+So that one is also because it was in the available interfaces.
+
+414
+00:27:15.190 --> 00:27:19.529
+That one's more solid connection is the object reference there.
+
+415
+00:27:19.529 --> 00:27:23.670
+Whereas that's the activatable interface reference.
+
+416
+00:27:23.670 --> 00:27:28.339
+Both should work, but I'm going to go with the most secure option right now.
+
+417
+00:27:28.339 --> 00:27:32.079
+So I'll just drag that in there and I'll compile and save.
+
+418
+00:27:32.079 --> 00:27:35.279
+And so, yeah, we just want to make sure these actors are in the level and then we
+
+419
+00:27:35.279 --> 00:27:37.759
+just want to make sure this light is referenced.
+
+420
+00:27:37.759 --> 00:27:40.259
+So let's go back into our map.
+
+421
+00:27:40.259 --> 00:27:44.920
+If we click on our switch now, you'll see this light actor variable here, which was
+
+422
+00:27:44.920 --> 00:27:46.420
+in our light properties.
+
+423
+00:27:46.420 --> 00:27:50.559
+So you notice that we gave it a category heading, which is what that is.
+
+424
+00:27:50.559 --> 00:27:52.559
+So I've got back into my switch.
+
+425
+00:27:52.559 --> 00:27:55.759
+So light properties is what I called this category here.
+
+426
+00:27:55.759 --> 00:27:58.670
+I also exposed the variable.
+
+427
+00:27:58.670 --> 00:28:00.630
+So that's why we can see it here.
+
+428
+00:28:00.630 --> 00:28:06.089
+And then we just want to make sure that we select the BP underscore light child in there.
+
+429
+00:28:06.089 --> 00:28:10.609
+If there's multiple actors, you can, I drop it and select it from there, but let's just
+
+430
+00:28:10.609 --> 00:28:11.609
+give it a test.
+
+431
+00:28:11.609 --> 00:28:15.710
+Let's see if our functionality is working and if not, hopefully we'll figure out how
+
+432
+00:28:15.710 --> 00:28:16.710
+to debug it.
+
+433
+00:28:16.710 --> 00:28:19.789
+So let's, let's go over to the switch.
+
+434
+00:28:19.789 --> 00:28:23.230
+I'll press E and it's not working in this instance.
+
+435
+00:28:23.230 --> 00:28:24.589
+So let's just see what's going on.
+
+436
+00:28:24.589 --> 00:28:27.470
+So I'm going to open my third person game mode.
+
+437
+00:28:27.509 --> 00:28:32.440
+I'm going to make sure my interaction controller is set correctly.
+
+438
+00:28:32.440 --> 00:28:36.160
+I'm going to find that that interaction controller is not right.
+
+439
+00:28:36.160 --> 00:28:41.170
+So let me just change that interaction controller and that's in my tutorial folder now.
+
+440
+00:28:41.170 --> 00:28:43.089
+So that's good.
+
+441
+00:28:43.089 --> 00:28:48.099
+Once I have the interaction controller open so I can shut my game mode, I'm going to
+
+442
+00:28:48.099 --> 00:28:51.940
+go into my basic trace and I just want to see what's going on in my trace.
+
+443
+00:28:51.940 --> 00:28:55.940
+So the real estate on the window is going to be a little weird here, but I just want
+
+444
+00:28:55.940 --> 00:28:59.819
+to make sure that this trace is actually hitting something and going through.
+
+445
+00:28:59.819 --> 00:29:03.059
+So let's just make sure our input is working first of all.
+
+446
+00:29:03.059 --> 00:29:13.049
+So you'll see if I use this dropdown here, no debug options selected, interaction controller.
+
+447
+00:29:13.049 --> 00:29:17.950
+So when I'm pressing E you see that firing out there, you see that line.
+
+448
+00:29:17.950 --> 00:29:23.319
+So you'll see that the code is actually firing through to the use object.
+
+449
+00:29:23.319 --> 00:29:25.359
+So that's good.
+
+450
+00:29:25.359 --> 00:29:26.759
+So use object is firing.
+
+451
+00:29:26.759 --> 00:29:29.980
+So we know that the interaction is actually working.
+
+452
+00:29:29.980 --> 00:29:33.920
+So now let's see if it's breaking at the switch.
+
+453
+00:29:33.920 --> 00:29:37.079
+So I'll shut the interaction controller now.
+
+454
+00:29:37.079 --> 00:29:39.279
+And now we just want to make sure the switch is working.
+
+455
+00:29:39.279 --> 00:29:46.160
+So I just want to make sure activate object is the actual BPI version of the activatable
+
+456
+00:29:46.160 --> 00:29:47.200
+object.
+
+457
+00:29:47.200 --> 00:29:55.710
+And therefore when I delete that, connect it up, control that, alt P to play.
+
+458
+00:29:55.710 --> 00:30:01.569
+Let's try and just make sure we go in there, press E and therefore the tutorial is working.
+
+459
+00:30:01.569 --> 00:30:08.190
+So that is how to set up a basic switch inside of unreal engine using blueprint interfaces.
+
+460
+00:30:08.190 --> 00:30:11.549
+So it's definitely worth having to play around inside of unreal engine, getting used
+
+461
+00:30:11.549 --> 00:30:17.509
+to your blueprint interfaces and creating basic switches and things like this.
+
+462
+00:30:17.509 --> 00:30:21.150
+Sometimes it can be trial and error, but it's good to just debug through your work,
+
+463
+00:30:21.150 --> 00:30:24.609
+figure out what's not working and you'll learn a lot more that way.
+
+464
+00:30:24.650 --> 00:30:29.410
+So also consider making the target an array and a for each loop.
+
+465
+00:30:29.410 --> 00:30:32.369
+So that might be interesting to control multiple lights.
+
+466
+00:30:32.369 --> 00:30:36.609
+You could even open a door where they use, you can control lights and doors and other
+
+467
+00:30:36.609 --> 00:30:38.210
+blueprints by activating the switch.
+
+468
+00:30:38.210 --> 00:30:42.009
+So just have a play around in the projects and think about the different functionality
+
+469
+00:30:42.009 --> 00:30:43.930
+you have from these tutorials.

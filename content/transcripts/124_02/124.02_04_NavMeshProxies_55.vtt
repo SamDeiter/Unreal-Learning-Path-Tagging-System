@@ -1,0 +1,1045 @@
+WEBVTT
+
+1
+00:00:01.389 --> 00:00:06.790
+Hello and welcome to this video on Nav Link Proxies.
+
+2
+00:00:06.790 --> 00:00:15.250
+So a Nav Link proxy is where we manually add in a actor to the level,
+
+3
+00:00:15.250 --> 00:00:24.449
+which will allow us to connect up different sections of a navigation mesh.
+
+4
+00:00:24.649 --> 00:00:31.850
+Therefore, it'll allow us to connect up different islands from different ones.
+
+5
+00:00:31.850 --> 00:00:42.600
+And we can therefore define logic of how you're going to move between those two different places.
+
+6
+00:00:42.600 --> 00:00:44.600
+Right, so we're back in the engine now.
+
+7
+00:00:44.600 --> 00:00:52.600
+I have expanded the navmesh bounce volume to cover the entire area.
+
+8
+00:00:52.600 --> 00:00:59.600
+I have also turned off the costs because we're not going to need that for this example.
+
+9
+00:00:59.600 --> 00:01:04.079
+So we're talking about Nav Link Proxies.
+
+10
+00:01:04.079 --> 00:01:11.079
+What these do is they manually connect areas in the navmesh that have not been automatically connected during generation,
+
+11
+00:01:11.079 --> 00:01:16.079
+or for you to create different ways of moving through them.
+
+12
+00:01:16.079 --> 00:01:20.180
+So let's have a look here.
+
+13
+00:01:20.180 --> 00:01:27.180
+Now, if you remember from the setup, we actually deleted a Nav Link proxy.
+
+14
+00:01:27.180 --> 00:01:33.180
+It was one that allowed you to jump down off of the edge here to the floor.
+
+15
+00:01:33.180 --> 00:01:36.180
+So let's start off by adding that back in.
+
+16
+00:01:36.180 --> 00:01:46.180
+Now, I am going to do a drop down on here and search for Nav again.
+
+17
+00:01:46.180 --> 00:01:52.909
+And you see that we have an option for a Nav Link proxy, and it's going to generate this element here.
+
+18
+00:01:52.909 --> 00:01:57.909
+Now, Nav Link Proxies are often a little bit difficult to work with,
+
+19
+00:01:57.909 --> 00:02:02.099
+a little bit confusing if you haven't worked with something like this before.
+
+20
+00:02:02.099 --> 00:02:06.099
+Because what they have is they have the main point of the actor.
+
+21
+00:02:06.099 --> 00:02:09.099
+So you can see that we're moving this around.
+
+22
+00:02:09.099 --> 00:02:11.099
+And then we also have two diamonds.
+
+23
+00:02:11.099 --> 00:02:19.900
+Now, what these diamonds do, if I can get a good angle, is I can move these diamonds around,
+
+24
+00:02:19.900 --> 00:02:24.900
+and it's going to update how the elements move.
+
+25
+00:02:24.900 --> 00:02:31.479
+Now, you can see here we've got the point link left and we've got the point link right.
+
+26
+00:02:31.479 --> 00:02:35.479
+So we're denoting the areas that we're moving between.
+
+27
+00:02:35.479 --> 00:02:40.860
+But you can move this quite far away from the root.
+
+28
+00:02:40.860 --> 00:02:46.729
+And this is confusing because it's actually the root that things are in reference to.
+
+29
+00:02:46.729 --> 00:02:50.729
+So these are children of the root of the actor.
+
+30
+00:02:50.729 --> 00:02:56.729
+Because you may end up duplicating these a lot to give people a lot of different options.
+
+31
+00:02:56.729 --> 00:03:00.729
+And it can get confusing if you don't realize that once you've got this.
+
+32
+00:03:00.729 --> 00:03:05.729
+Say I was to duplicate this and drag it off to the side.
+
+33
+00:03:05.729 --> 00:03:12.729
+If I rotated it, it's not going to rotate around the center here or rotate around this element.
+
+34
+00:03:12.729 --> 00:03:16.729
+So just be aware of that to start with.
+
+35
+00:03:16.729 --> 00:03:22.240
+So let's start off by making it so that the character can fall off this edge here.
+
+36
+00:03:22.240 --> 00:03:28.750
+So I'm going to get my root and I'm going to place this kind of in the middle here so it's workable.
+
+37
+00:03:28.750 --> 00:03:41.979
+Then I'm going to select the diamond for left and drag that so that this dome here interconnects with the green nav mesh.
+
+38
+00:03:41.979 --> 00:03:45.039
+So it knows there's a connection there.
+
+39
+00:03:45.039 --> 00:03:51.490
+Then I'm going to drag the second one, drag that down and connect that there.
+
+40
+00:03:51.490 --> 00:03:58.490
+So you can see at this point what we have is we have left to right.
+
+41
+00:03:58.490 --> 00:04:05.490
+We have a transition that tells us that you can walk.
+
+42
+00:04:05.490 --> 00:04:12.310
+This is a connection. So this allows you to walk off here.
+
+43
+00:04:12.310 --> 00:04:15.310
+Now there are some more settings that we're going to need to look at.
+
+44
+00:04:15.310 --> 00:04:22.310
+So with this selected, what I'm going to do is right-hand click and have a look at the details panel.
+
+45
+00:04:22.310 --> 00:04:26.310
+Now there are two sections to this. We have a smart link and a point link.
+
+46
+00:04:26.310 --> 00:04:31.310
+I want to just look at the point link to start with. We'll come to the smart link.
+
+47
+00:04:31.310 --> 00:04:41.439
+Now we have a number of different settings, so we can manually set the offset on the locations.
+
+48
+00:04:41.439 --> 00:04:48.439
+But the one that I care about is the direction.
+
+49
+00:04:48.439 --> 00:04:52.439
+So here you can say this is set to both ways.
+
+50
+00:04:52.439 --> 00:04:58.439
+Now if we're going from left to right, that's fine. The agent can just walk off and fall down to the right hand side.
+
+51
+00:04:58.439 --> 00:05:03.439
+However, if we do it from right to left, we're going to get this problem.
+
+52
+00:05:03.439 --> 00:05:09.439
+Let's have a quick look. When it gets to the nav mesh, if we left click,
+
+53
+00:05:09.439 --> 00:05:18.439
+it's going to try and enter that nav mesh because we told it that it can climb up here.
+
+54
+00:05:18.439 --> 00:05:22.439
+But the pawn does not have access to do that.
+
+55
+00:05:22.439 --> 00:05:26.439
+So it's given the path, but it cannot cross that path.
+
+56
+00:05:26.439 --> 00:05:32.439
+And you see it's going back to the edge here because that's where it knows the connection is.
+
+57
+00:05:32.439 --> 00:05:37.439
+So let's fix that. OK, so come back in here, select our workstation.
+
+58
+00:05:37.439 --> 00:05:43.470
+And what we're going to do is we're going to change it so that this is only from left to right.
+
+59
+00:05:43.470 --> 00:05:47.759
+So rather than both ways, we're just going to do left to right.
+
+60
+00:05:47.759 --> 00:05:51.759
+And now if I push play, I can bring my character up here.
+
+61
+00:05:51.759 --> 00:05:55.759
+And if I tell them to get up to the top, they're going to walk around.
+
+62
+00:05:55.759 --> 00:05:59.860
+However, if I tell them to come down, they're going to follow the nav link.
+
+63
+00:05:59.860 --> 00:06:15.860
+So it's a quite straightforward method of determining the directions that can be travelled.
+
+64
+00:06:15.860 --> 00:06:19.860
+And that's great. However, what if we have this situation?
+
+65
+00:06:19.860 --> 00:06:27.889
+So I'm going to grab one of these pillars, hold down alt and copy it and drag it over here.
+
+66
+00:06:27.889 --> 00:06:39.100
+And I am going to increase the size of the pillar and shrink it down.
+
+67
+00:06:39.100 --> 00:06:51.990
+So what we have now is, I'm going to increase that a little bit, I think, a platform.
+
+68
+00:06:51.990 --> 00:06:56.920
+And our character should be able to jump up onto that platform.
+
+69
+00:06:59.459 --> 00:07:04.459
+And this is where our smart link proxy comes in.
+
+70
+00:07:04.459 --> 00:07:07.459
+So we got our standard one that allows you to walk off.
+
+71
+00:07:07.459 --> 00:07:10.459
+However, let's add in a new one.
+
+72
+00:07:10.459 --> 00:07:18.269
+So now for this, unfortunately, we're going to have to do a little bit of coding,
+
+73
+00:07:18.269 --> 00:07:28.269
+because the functionality in order to make a character jump is actually slightly more difficult to do.
+
+74
+00:07:28.269 --> 00:07:34.269
+And it may well be different depending on how your game is set up.
+
+75
+00:07:34.269 --> 00:07:41.269
+So I'm going to demonstrate one way of doing it, which I often use.
+
+76
+00:07:41.269 --> 00:07:45.269
+But let's go through the basics. So the first thing is we need a new class.
+
+77
+00:07:45.269 --> 00:07:50.339
+So I'm going to right-hand click and I'm going to come up to a blueprint class.
+
+78
+00:07:50.339 --> 00:07:56.339
+And I am going to search for nav link proxy.
+
+79
+00:07:56.339 --> 00:08:06.100
+I'm going to select that and I will call this, I'm just going to call this my nav link.
+
+80
+00:08:06.100 --> 00:08:11.680
+OK, and I'm going to double click on that.
+
+81
+00:08:11.680 --> 00:08:20.019
+So we have our nav link here and we have a smart link component.
+
+82
+00:08:20.019 --> 00:08:28.060
+In order to get this to work, we are going to have to override one of the functions.
+
+83
+00:08:28.060 --> 00:08:32.059
+So you should hopefully have done some blueprinting by this point.
+
+84
+00:08:32.059 --> 00:08:34.059
+We have a number of different elements here.
+
+85
+00:08:34.059 --> 00:08:40.759
+We have the event graph, construction script, viewport, but we want to override a different function.
+
+86
+00:08:40.759 --> 00:08:47.759
+So we can see here on the left-hand side, we have a function with 20 overrideable functions.
+
+87
+00:08:47.759 --> 00:08:56.759
+You can do a dropdown and you can see there are a whole load of different functions that are available to us.
+
+88
+00:08:56.759 --> 00:09:08.840
+I'm going to use the event receive smart link reached.
+
+89
+00:09:08.840 --> 00:09:11.940
+OK, and that's going to create us a new event.
+
+90
+00:09:11.940 --> 00:09:16.940
+And we're going to have a concept of the agent and the destination.
+
+91
+00:09:16.940 --> 00:09:36.549
+Now let us drag out from now what we're going to want to do is launch the character into the air when they reach the smart link.
+
+92
+00:09:36.549 --> 00:09:43.549
+Now, the reason why this we're launching is that's the equivalent of jumping.
+
+93
+00:09:43.549 --> 00:09:53.549
+So in your standard character, using the character movement, when you push jump, you're actually launching the character into the air.
+
+94
+00:09:53.549 --> 00:09:58.549
+So that will effectively do exactly the same thing as we're looking here.
+
+95
+00:09:58.549 --> 00:10:13.100
+However, what is important in order to move the character across is actually being able to calculate how much you're going to need to launch the character into the air so that they land on the correct spot.
+
+96
+00:10:13.100 --> 00:10:19.190
+And we're going to write a little bit of code to do that.
+
+97
+00:10:19.190 --> 00:10:25.379
+So to start with, we'll make a function called calculate velocity.
+
+98
+00:10:25.379 --> 00:10:31.379
+So I'm going to hit the I'm going to come on to the function section here and push plus.
+
+99
+00:10:31.379 --> 00:10:36.860
+And I'm going to call this calculate velocity.
+
+100
+00:10:36.860 --> 00:10:42.710
+OK, I was going to create a new function.
+
+101
+00:10:42.710 --> 00:10:45.710
+We're going to need two input pins for this.
+
+102
+00:10:45.710 --> 00:10:54.059
+They're both going to be vectors. The first one I'm going to call destination location.
+
+103
+00:10:54.059 --> 00:11:00.059
+And the second one, I'm going to call it the starting location.
+
+104
+00:11:00.059 --> 00:11:08.299
+Now for the output, all we want to know is the velocity that we're going to launch this character at.
+
+105
+00:11:08.299 --> 00:11:16.340
+So again, we're having another vector and I'm going to call this velocity.
+
+106
+00:11:16.340 --> 00:11:23.340
+There's a simple script, a little bit complicated, but I'll talk through it,
+
+107
+00:11:23.340 --> 00:11:29.340
+where we're going to take these two and we're going to calculate what we need to launch it at.
+
+108
+00:11:29.340 --> 00:11:33.460
+Now, this is just a small script that I've written.
+
+109
+00:11:33.460 --> 00:11:39.460
+We are using the launch function because that's part of the character and the character movement.
+
+110
+00:11:39.460 --> 00:11:42.460
+So that's the same as you would be pushing jump.
+
+111
+00:11:42.460 --> 00:11:48.500
+The question is how much you jump. Now, this is just a script that I found that works well for me.
+
+112
+00:11:48.500 --> 00:11:58.500
+The whole reason that it isn't built into the engine is because you're expected to define your own logic.
+
+113
+00:11:58.500 --> 00:12:00.500
+But this works for me.
+
+114
+00:12:00.500 --> 00:12:06.500
+So the first thing I'm going to do is take the destination location, and this is going to be in world space.
+
+115
+00:12:06.500 --> 00:12:09.500
+I'm going to subtract the starting location.
+
+116
+00:12:09.500 --> 00:12:17.500
+So what that's going to do is that's going to give me just a vector of the direction that we want to head in.
+
+117
+00:12:17.500 --> 00:12:24.980
+Now, that in itself isn't going to do anything. I need to add something to the Z coordinate.
+
+118
+00:12:24.980 --> 00:12:30.980
+So I need to have some momentum going up or otherwise it's just going to do nothing.
+
+119
+00:12:30.980 --> 00:12:39.980
+So I'm going to drag off and I am going to add to this.
+
+120
+00:12:39.980 --> 00:12:44.419
+Now, I only want to add to the Z coordinates.
+
+121
+00:12:44.419 --> 00:12:48.419
+So I'm going to split the struct pen and I'm going to play with the Z.
+
+122
+00:12:48.419 --> 00:12:52.419
+Now, I'll plug the output here into the velocity.
+
+123
+00:12:52.419 --> 00:13:00.029
+But I want to work out how much on the Z coordinates do I want to launch this character.
+
+124
+00:13:00.029 --> 00:13:08.029
+And in order to make this work, I really want to know how long this path is,
+
+125
+00:13:08.029 --> 00:13:14.029
+because that way the launch is going to change dependent on how long a path.
+
+126
+00:13:14.029 --> 00:13:20.059
+So what I'm going to do is drag out of here and I'm going to type in length.
+
+127
+00:13:20.059 --> 00:13:24.059
+And that's going to give me the option of vector length.
+
+128
+00:13:24.059 --> 00:13:30.480
+So I'm going to select the vector length and I'm just going to multiply it.
+
+129
+00:13:30.480 --> 00:13:34.480
+I found that three tends to work pretty well.
+
+130
+00:13:34.480 --> 00:13:39.480
+You could make this a variable you expose to give you a bit more control.
+
+131
+00:13:39.480 --> 00:13:43.580
+But for this example, we'll just times it by three.
+
+132
+00:13:43.580 --> 00:13:48.669
+And so this is our calculation of velocity.
+
+133
+00:13:49.669 --> 00:13:52.669
+We'll jump back to our event graph.
+
+134
+00:13:52.669 --> 00:13:54.669
+So now we need to use this code.
+
+135
+00:13:54.669 --> 00:14:02.919
+Now, the agent or whatever is moving across this could be anything.
+
+136
+00:14:02.919 --> 00:14:07.919
+So I want to cast it because I want to make sure that we're using the character.
+
+137
+00:14:07.919 --> 00:14:12.919
+So I am going to cast to the character.
+
+138
+00:14:12.919 --> 00:14:20.299
+This is the highest up class, which will by default have the movement component on it.
+
+139
+00:14:20.299 --> 00:14:28.299
+So it should theoretically work with most NPCs or anything that is a child of that class.
+
+140
+00:14:28.299 --> 00:14:36.529
+And then I'm going to drag in the calculate velocity and I'll plug that into the top pin here.
+
+141
+00:14:36.529 --> 00:14:44.139
+And I am going to use the destination for the destination location.
+
+142
+00:14:44.139 --> 00:14:53.740
+And for the start location, I'm going to drag off of the character and go get actor a location.
+
+143
+00:14:53.740 --> 00:15:01.460
+So that will give me the actor's location. That's going to be our starting location.
+
+144
+00:15:01.460 --> 00:15:07.850
+Now, as we've calculated the velocity, I'm just going to launch the character.
+
+145
+00:15:07.850 --> 00:15:13.850
+Now I need to drag off of the character pin, the blue pin here to get this,
+
+146
+00:15:13.850 --> 00:15:23.230
+because it is a function of the character, not of the nav link.
+
+147
+00:15:23.230 --> 00:15:27.490
+Plug that in and I'll plug in the velocity.
+
+148
+00:15:27.490 --> 00:15:32.490
+Now, I also want to override the X and Y and the Z.
+
+149
+00:15:32.490 --> 00:15:36.740
+That's going to make it a lot more consistent.
+
+150
+00:15:36.740 --> 00:15:45.659
+OK, so that I'll just try and fit this all in the screen at once.
+
+151
+00:15:45.659 --> 00:15:49.659
+That's all the code that you need for the launching of the character.
+
+152
+00:15:49.659 --> 00:15:59.230
+Now I'm going to double check. That is the code that we need for the function to calculate the velocity.
+
+153
+00:15:59.230 --> 00:16:05.159
+A little bit of coding on top of that, but this is our basics to start with.
+
+154
+00:16:05.159 --> 00:16:12.330
+OK, so that is nice.
+
+155
+00:16:12.330 --> 00:16:19.100
+Let's jump into the level and set this up correctly.
+
+156
+00:16:19.100 --> 00:16:24.100
+OK, so now we've finished our class, we jump back into the level,
+
+157
+00:16:24.100 --> 00:16:30.289
+and I'm going to take the my nav link, drag that into the level here,
+
+158
+00:16:30.289 --> 00:16:35.289
+and I'm going to connect this up just like we did with the simple link.
+
+159
+00:16:35.289 --> 00:16:40.289
+So I can take the, I'll rotate this round.
+
+160
+00:16:40.289 --> 00:16:47.500
+I'm going to take the left, drag this up,
+
+161
+00:16:47.500 --> 00:16:55.460
+connect that so that we make sure it's connected to the other green island here,
+
+162
+00:16:55.460 --> 00:16:59.460
+and the other one I can leave about round here somewhere.
+
+163
+00:16:59.460 --> 00:17:03.580
+Now that's fine, but we need to change some of the settings.
+
+164
+00:17:03.580 --> 00:17:09.579
+So the first thing is it's worth double looking at the details.
+
+165
+00:17:09.579 --> 00:17:13.579
+We have got the point link here and we have got the smart link.
+
+166
+00:17:13.579 --> 00:17:20.579
+So the point to link is our standard one, and that's just going to connect up the panels
+
+167
+00:17:20.579 --> 00:17:22.579
+and tell them that he can move between them.
+
+168
+00:17:22.579 --> 00:17:27.579
+It's not going to have any of the smart functionality that we are using.
+
+169
+00:17:27.579 --> 00:17:31.740
+So the point link, the simple link is fine.
+
+170
+00:17:31.740 --> 00:17:35.740
+That's all right. However, let's look at the smart link.
+
+171
+00:17:35.740 --> 00:17:39.740
+Now we have a whole load of different settings.
+
+172
+00:17:39.740 --> 00:17:43.740
+Again, what I would do is I would keep this as both ways.
+
+173
+00:17:43.740 --> 00:17:47.740
+We will probably play around with how to change that afterwards.
+
+174
+00:17:47.740 --> 00:17:52.740
+And it has troubles otherwise.
+
+175
+00:17:52.740 --> 00:17:57.990
+I'm going to push the copy end points from the simple link.
+
+176
+00:17:57.990 --> 00:18:03.119
+Now, before we do that, you can see under this, we have smart link is relevant.
+
+177
+00:18:03.119 --> 00:18:09.119
+If I push smart link is relevant, you're going to see that we have a second load of nodes.
+
+178
+00:18:09.119 --> 00:18:12.119
+And those are going to be the ones that are for the smart link.
+
+179
+00:18:12.119 --> 00:18:17.250
+Now, if you push copy end points from simple link,
+
+180
+00:18:17.250 --> 00:18:22.250
+it will move those so they mimic the link that we've already got.
+
+181
+00:18:22.250 --> 00:18:26.250
+So again, smart link is relevant. That is important.
+
+182
+00:18:26.250 --> 00:18:30.250
+And the copy end points from simple link are going to move them
+
+183
+00:18:30.250 --> 00:18:34.569
+so that they match the points that we have before.
+
+184
+00:18:34.569 --> 00:18:37.569
+Before this, we're going to be doing this both ways.
+
+185
+00:18:37.569 --> 00:18:41.569
+At the time being, we will play around with the context before.
+
+186
+00:18:41.569 --> 00:18:44.569
+So let's try this out.
+
+187
+00:18:44.569 --> 00:18:48.759
+So I am grabbing the character here,
+
+188
+00:18:48.759 --> 00:18:51.759
+and you can see that the character can now jump off.
+
+189
+00:18:51.759 --> 00:18:57.009
+And if I jump down, it will also jump down as well.
+
+190
+00:18:57.009 --> 00:19:02.059
+So we've got the character jump off and jump down.
+
+191
+00:19:02.059 --> 00:19:08.049
+Right. So that looks like it's working.
+
+192
+00:19:08.049 --> 00:19:13.339
+Let's add in a second one that is slightly higher.
+
+193
+00:19:13.339 --> 00:19:17.339
+So if I drag this off to the right hand side,
+
+194
+00:19:17.339 --> 00:19:26.299
+and I'm going to increase the height,
+
+195
+00:19:26.299 --> 00:19:29.299
+and I'm going to get our smart link proxy,
+
+196
+00:19:29.299 --> 00:19:36.140
+and I'm going to hold down alt to drag it out.
+
+197
+00:19:36.140 --> 00:19:39.140
+And I'm going to get the left hand side,
+
+198
+00:19:39.140 --> 00:19:41.140
+drag that up and connect that up.
+
+199
+00:19:41.140 --> 00:19:45.140
+So you can see here that the smart link is not moved over.
+
+200
+00:19:45.140 --> 00:19:49.140
+So that's why you've got to use this copy end points
+
+201
+00:19:49.140 --> 00:19:50.140
+from simple link.
+
+202
+00:19:50.140 --> 00:19:52.299
+And that will move that over.
+
+203
+00:19:52.299 --> 00:19:55.299
+Okay. So let's test this out.
+
+204
+00:19:55.299 --> 00:19:58.299
+And if we press play.
+
+205
+00:19:58.299 --> 00:20:04.930
+Now, if I jump up here, it works.
+
+206
+00:20:04.930 --> 00:20:08.859
+So either of these now,
+
+207
+00:20:08.859 --> 00:20:12.859
+the character is going to change the length of jumps
+
+208
+00:20:12.859 --> 00:20:14.859
+dependent on the height.
+
+209
+00:20:14.859 --> 00:20:15.859
+Doesn't always work.
+
+210
+00:20:15.859 --> 00:20:25.700
+All right. So we have all our code working.
+
+211
+00:20:25.700 --> 00:20:28.700
+I would like to demonstrate one final thing.
+
+212
+00:20:28.700 --> 00:20:32.700
+And that is setting it so that it doesn't jump
+
+213
+00:20:32.700 --> 00:20:34.700
+when you fall back down.
+
+214
+00:20:34.700 --> 00:20:37.700
+So this is quite straightforward.
+
+215
+00:20:37.700 --> 00:20:45.980
+If I jump back into our event graph here,
+
+216
+00:20:45.980 --> 00:20:51.009
+what I'm going to do is we are doing the launching
+
+217
+00:20:51.009 --> 00:20:52.009
+of the character here.
+
+218
+00:20:52.009 --> 00:20:57.009
+Now we can add a check in beforehand.
+
+219
+00:20:57.009 --> 00:20:58.009
+So that's what I'm going to do.
+
+220
+00:20:58.009 --> 00:21:00.009
+I'm going to hold on the letter B
+
+221
+00:21:00.009 --> 00:21:03.009
+and that's going to allow me to bring up a branch.
+
+222
+00:21:03.009 --> 00:21:06.460
+And I'm only going to want to do the jump
+
+223
+00:21:06.460 --> 00:21:08.460
+if something is true.
+
+224
+00:21:08.460 --> 00:21:11.460
+So what I want is
+
+225
+00:21:11.460 --> 00:21:13.490
+I want the Z.
+
+226
+00:21:13.490 --> 00:21:16.490
+I want to do a comparison of the Z.
+
+227
+00:21:16.490 --> 00:21:19.490
+So I'm going to first off start with a break.
+
+228
+00:21:19.490 --> 00:21:22.490
+I'm going to break this vector here
+
+229
+00:21:22.490 --> 00:21:25.490
+and I'll break the actor's location as well.
+
+230
+00:21:25.490 --> 00:21:31.480
+And that means that we can access the floats from here.
+
+231
+00:21:31.480 --> 00:21:35.640
+Now what I want to check is if the destination
+
+232
+00:21:35.640 --> 00:21:41.640
+is lower than the Z
+
+233
+00:21:41.640 --> 00:21:45.640
+of the actor's location, then we're not going to do the jump.
+
+234
+00:21:45.640 --> 00:21:48.019
+So if I drag this out,
+
+235
+00:21:48.019 --> 00:21:56.059
+so if I go the destination is less than the,
+
+236
+00:21:56.059 --> 00:21:58.339
+and the destination is less than Z,
+
+237
+00:21:58.339 --> 00:22:03.630
+I'm going to use a more than greater than Z,
+
+238
+00:22:03.630 --> 00:22:05.630
+then do the jump.
+
+239
+00:22:05.630 --> 00:22:09.950
+Okay, so very simple just to check before
+
+240
+00:22:09.950 --> 00:22:13.950
+to see if it is higher and we need to jump.
+
+241
+00:22:13.950 --> 00:22:15.950
+Let's try that out.
+
+242
+00:22:15.950 --> 00:22:18.240
+I push play.
+
+243
+00:22:18.240 --> 00:22:22.779
+And press F11.
+
+244
+00:22:22.779 --> 00:22:28.400
+So if I get my character to jump up there now,
+
+245
+00:22:28.400 --> 00:22:30.400
+jumps up on the way up,
+
+246
+00:22:30.400 --> 00:22:32.400
+but on the way down just walks off.
+
+247
+00:22:32.400 --> 00:22:34.529
+So he jumps up on the way up
+
+248
+00:22:34.529 --> 00:22:37.529
+and on the way down just walks off.
+
+249
+00:22:37.529 --> 00:22:41.170
+Okay, so that gives us
+
+250
+00:22:41.170 --> 00:22:43.170
+a good piece of code that will
+
+251
+00:22:43.170 --> 00:22:47.170
+a good universally usable piece of code
+
+252
+00:22:47.170 --> 00:22:52.359
+that will allow us to jump up and down things.
+
+253
+00:22:52.359 --> 00:22:55.359
+Now, you probably want to do a more complicated one,
+
+254
+00:22:55.359 --> 00:22:57.359
+but the main point that I'm getting to here is
+
+255
+00:22:57.359 --> 00:23:02.359
+you're writing the logic for how the character jumps.
+
+256
+00:23:02.359 --> 00:23:07.359
+So we have the kickoff events that will enable it.
+
+257
+00:23:07.359 --> 00:23:09.359
+However, it's going to be your responsibility
+
+258
+00:23:09.359 --> 00:23:13.359
+to decide how you actually get that done.
+
+259
+00:23:13.359 --> 00:23:15.710
+Thank you very much.
+
+260
+00:23:15.710 --> 00:23:17.710
+That's the end of the video
+
+261
+00:23:17.710 --> 00:23:20.710
+on setting up NavLink proxies.

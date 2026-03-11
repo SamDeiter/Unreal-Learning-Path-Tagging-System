@@ -1,0 +1,249 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:08.500
+Hello and welcome to this video on automatic asset prefixes, our fourth example.
+
+2
+00:00:08.500 --> 00:00:14.820
+Now, just before we jump into the editor, there is a warning which is worth taking
+
+3
+00:00:14.820 --> 00:00:18.420
+note of when it comes to working with assets.
+
+4
+00:00:18.420 --> 00:00:27.000
+When you are manipulating assets within Unreal Engine, always opt for the Unreal
+
+5
+00:00:27.000 --> 00:00:33.439
+editor asset library or on the API or the Unreal asset tools functions.
+
+6
+00:00:33.439 --> 00:00:39.060
+We want to make sure that we are using the tools provided by the Unreal library, because
+
+7
+00:00:39.060 --> 00:00:46.329
+if we were to use something like operating system rename or shtil.mov for example, these
+
+8
+00:00:46.329 --> 00:00:49.609
+would break all of the references.
+
+9
+00:00:49.609 --> 00:00:53.969
+Unreal functions by having a lot of references to different things.
+
+10
+00:00:53.969 --> 00:00:57.810
+So if you have something like a material, it might have references to textures or the
+
+11
+00:00:57.810 --> 00:00:59.829
+actors that it's part of.
+
+12
+00:00:59.829 --> 00:01:07.469
+By changing the name without using the Unreal library functionality, you're going to break
+
+13
+00:01:07.469 --> 00:01:14.579
+this and it's going to take a long time to go around cleaning up.
+
+14
+00:01:14.579 --> 00:01:21.739
+Now in our previous example, we ran a script on startup and that script had a reference
+
+15
+00:01:21.739 --> 00:01:26.340
+to a number of different tools and functionality in it.
+
+16
+00:01:26.340 --> 00:01:30.859
+One of the bits that we didn't look at was we had a reference to prefixer.
+
+17
+00:01:30.859 --> 00:01:32.980
+I'm going to demonstrate this in engine.
+
+18
+00:01:32.980 --> 00:01:40.420
+But on the startup script, we added an entry into the tools menu script.
+
+19
+00:01:40.420 --> 00:01:47.019
+And this is going to be a call to a program called prefixer.py, which would be in the
+
+20
+00:01:47.019 --> 00:01:48.780
+Python folder.
+
+21
+00:01:48.780 --> 00:01:53.540
+So it means that we can create the function and the trigger where we need it.
+
+22
+00:01:53.540 --> 00:01:58.719
+So let's have a look at that in the engine.
+
+23
+00:01:58.719 --> 00:02:06.019
+So here we are back in the engine and we are on slide 10, example four.
+
+24
+00:02:06.019 --> 00:02:11.939
+Now hopefully this should open up the directory so that you can see the content slides example
+
+25
+00:02:11.939 --> 00:02:12.939
+four.
+
+26
+00:02:12.939 --> 00:02:19.460
+And this has got a whole load of materials and static measures.
+
+27
+00:02:19.460 --> 00:02:25.180
+So if I was to take this torus, for example, and right hand click, you'll now see at the
+
+28
+00:02:25.180 --> 00:02:30.219
+bottom of this list, we have the Python task section and we have add prefixer.
+
+29
+00:02:30.219 --> 00:02:36.099
+So if I was to hit that, it's going to go away and you can now see that we have
+
+30
+00:02:36.099 --> 00:02:39.060
+sm underscore torus.
+
+31
+00:02:39.060 --> 00:02:46.120
+So this has added a prefix of sm underscore four static mesh.
+
+32
+00:02:46.120 --> 00:02:51.879
+Now this actually works through, it's not actually the one that I click on, which is
+
+33
+00:02:51.879 --> 00:02:54.500
+being handed to the prefix.
+
+34
+00:02:54.500 --> 00:02:59.699
+Actually within the code of the prefix, I am getting selected assets.
+
+35
+00:02:59.699 --> 00:03:08.650
+So if I was to grab all of these, for example, right hand click and run the add prefixer,
+
+36
+00:03:08.650 --> 00:03:12.509
+you will see that now it has done this for everything.
+
+37
+00:03:12.550 --> 00:03:17.949
+So we've got all of the static meshes has sm before them and all the materials have
+
+38
+00:03:17.949 --> 00:03:20.830
+n for material.
+
+39
+00:03:20.830 --> 00:03:26.830
+So the code itself doesn't actually matter where it runs from.
+
+40
+00:03:26.830 --> 00:03:30.229
+You could have it as an editor utility widget or other places.
+
+41
+00:03:30.229 --> 00:03:36.229
+At any one point, it's getting what you have selected within the browser.
+
+42
+00:03:36.229 --> 00:03:43.270
+It just makes sense for it to be triggered from a menu option here, because it's a lot
+
+43
+00:03:43.270 --> 00:03:48.430
+of it is about making sure that the options are where you would expect them to be, where
+
+44
+00:03:48.430 --> 00:03:49.789
+are the elements.
+
+45
+00:03:49.789 --> 00:03:56.569
+So you could have an equivalent on here for an asset, which is in the level.
+
+46
+00:03:56.569 --> 00:04:01.389
+We could create a menu setting from here and we would just use the selected actor
+
+47
+00:04:01.389 --> 00:04:04.810
+in that case.
+
+48
+00:04:04.810 --> 00:04:10.069
+Okay, so let's have a quick look at the code.
+
+49
+00:04:10.069 --> 00:04:16.750
+So here we have the prefixer code and if we look through it, it functions similar
+
+50
+00:04:16.750 --> 00:04:20.449
+to the other ones that we've worked with.
+
+51
+00:04:20.449 --> 00:04:25.949
+In this case, we have the system library unreal and we got all of our prefix mappings
+
+52
+00:04:25.949 --> 00:04:27.470
+in this case.
+
+53
+00:04:27.470 --> 00:04:33.629
+So what I've done is I've just made the list of all the different classes that you
+
+54
+00:04:33.629 --> 00:04:34.629
+can have.
+
+55
+00:04:34.629 --> 00:04:40.839
+It's not extensive, but you can always add extra ones in and it will cycle through.
+
+56
+00:04:40.839 --> 00:04:42.759
+So it gets the selected assets.
+
+57
+00:04:42.759 --> 00:04:48.259
+You can see here, get selected assets from the other two utilities and it will cycle
+
+58
+00:04:48.259 --> 00:04:56.319
+through all of the different selected assets and rename it and save it so that we've
+
+59
+00:04:56.319 --> 00:04:59.139
+got what we need.
+
+60
+00:04:59.139 --> 00:05:04.860
+Okay, relatively straightforward, but a very useful script.
+
+61
+00:05:04.860 --> 00:05:11.100
+And that brings us to the end of our video, automatic asset prefixes example number four.
+
+62
+00:05:11.100 --> 00:05:14.939
+And in the next video, we will be jumping into our last example.

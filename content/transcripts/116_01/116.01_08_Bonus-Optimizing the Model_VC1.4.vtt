@@ -1,0 +1,185 @@
+WEBVTT
+
+1
+00:00:01.070 --> 00:00:09.070
+Good as RealityCapture's generated models are, sometimes you may want to fine-tune them in a DCT application.
+
+2
+00:00:09.070 --> 00:00:16.570
+This may be because you want to adjust geometry in a certain way, or because you want to rework the UV mapping more efficiently.
+
+3
+00:00:16.570 --> 00:00:23.550
+This video will show you some of that process, and I'll use the dyno head we generated earlier in this course as an example.
+
+4
+00:00:23.550 --> 00:00:29.100
+You have a version of this dyno head in the downloadable file that has been provided to you.
+
+5
+00:00:29.100 --> 00:00:38.159
+As a side note, if your PC cannot find the associated images when you open a project, you need to point to the folder where they reside.
+
+6
+00:00:38.159 --> 00:00:45.619
+If the model is displaying vertices only, you can switch to Suite mode in the View menu.
+
+7
+00:00:45.619 --> 00:00:55.759
+Here, I'll export the dyno head as an FBX file and save it to a temp folder.
+
+8
+00:00:55.759 --> 00:01:05.909
+I'll be using 3ds Max as an example of a DCC application, but you can achieve similar results with other 3D applications as well.
+
+9
+00:01:05.909 --> 00:01:09.829
+I'll go ahead and import the FBX file in an empty scene.
+
+10
+00:01:09.829 --> 00:01:24.250
+The model looks good here, but it is also quite dense.
+
+11
+00:01:24.250 --> 00:01:29.250
+It would be hard to manipulate, for example to rework the UVs.
+
+12
+00:01:29.250 --> 00:01:34.730
+It's also uneven in those areas that lack photo data.
+
+13
+00:01:34.730 --> 00:01:51.799
+Currently, the UVs created in RealityCapture are neatly organized, but you may opt for your own solution.
+
+14
+00:01:51.799 --> 00:02:01.329
+I think I will simplify the model first by using 3ds Max's Retopology modifier.
+
+15
+00:02:01.329 --> 00:02:06.829
+I'll set the target poly count to 50,000 to simplify the geometry even further.
+
+16
+00:02:06.829 --> 00:02:17.770
+After computing, I should end up with a topology that is easier to work with.
+
+17
+00:02:17.770 --> 00:02:24.719
+Now, this process messes up the original UVs, but that's okay as I'm about to recreate them.
+
+18
+00:02:24.719 --> 00:02:29.419
+At this stage, I need to apply an Unwrap UV modifier.
+
+19
+00:02:29.419 --> 00:02:36.919
+Here, I can save time by using some of the automated unwrapping tools or take a moment and rework things manually.
+
+20
+00:02:36.919 --> 00:03:21.129
+If I opt for the latter option, I would typically use the Point-to-Point Seam function to cut my texture seams exactly where I want them.
+
+21
+00:03:21.129 --> 00:03:31.979
+After that, I can use the Expand Polygon to Seams function to select individual clusters, which I can then quick peel into the UV space.
+
+22
+00:03:31.979 --> 00:03:52.020
+But in this case, and to save time, I will simply use the Flatten Mapping method to decompose the model.
+
+23
+00:03:52.020 --> 00:03:58.020
+This is by no means the best optimized method for UVs, but it will illustrate the point.
+
+24
+00:03:58.020 --> 00:04:06.849
+Once you have manipulated the model in the DCC app, you are ready to take it back into RealityCapture for further processing.
+
+25
+00:04:06.849 --> 00:04:13.520
+At the very least, you need to do this to reproject the textures onto the new UVs.
+
+26
+00:04:13.520 --> 00:04:28.350
+You do this by re-exporting the model, either as a new file or by overwriting the old file you created.
+
+27
+00:04:28.350 --> 00:04:42.740
+Back in RealityCapture, you want to use the Import Model feature under Mesh Model to import the new model.
+
+28
+00:04:42.740 --> 00:04:48.240
+It will look weird at first because of the messed up or rather reassigned UVs.
+
+29
+00:04:48.240 --> 00:04:57.870
+Under Tools, you can use the Texture Reprojection feature and specify which models are to be used as a source and as a target.
+
+30
+00:04:57.870 --> 00:05:05.100
+The target, or result model in this case, is the latest model I just imported, Model 5.
+
+31
+00:05:05.100 --> 00:05:17.240
+As a source model to get information from, I'll use Model 4 which I cleaned up earlier before exporting the FBX file.
+
+32
+00:05:17.240 --> 00:05:26.670
+The default values for reprojection work well, but you may elect to export normal and displacement maps in addition to the texture map.
+
+33
+00:05:26.670 --> 00:05:32.740
+I'll use normals, but won't be generating any displacement maps for this example.
+
+34
+00:05:32.740 --> 00:05:44.160
+By re-projecting the textures, I get a nicely textured model yet again, but this time based on the UVs that I created.
+
+35
+00:05:44.160 --> 00:05:52.860
+In fact, you can view that information inside the Model 5 hierarchy where you can display the original texture,
+
+36
+00:05:52.860 --> 00:05:58.860
+but also the newly generated ones for diffuse and normal maps.
+
+37
+00:05:58.860 --> 00:06:12.990
+You'll also note that the new model has 100,000 triangles derived from the 50,000 polygons I set up as a target count in 3ds Max.
+
+38
+00:06:12.990 --> 00:06:29.329
+This means I'm now ready to export the final model, which I can then import into Unreal Engine.
+
+39
+00:06:29.329 --> 00:06:52.600
+The original, now unwanted texture may be picked up by default, but you can easily import the newly generated diffuse map as well.
+
+40
+00:06:52.600 --> 00:07:02.100
+From there, it is easy to make the switch at the material level.
+
+41
+00:07:11.310 --> 00:07:15.310
+Here, I can place and scale the model up to see it better.
+
+42
+00:07:15.310 --> 00:07:31.089
+The material will inevitably need a bit of tweaking with a few adjustments to the specular and roughness channels.
+
+43
+00:07:31.089 --> 00:07:47.279
+You could also consider creating a roughness map derived from the diffuse texture in Photoshop.
+
+44
+00:07:47.279 --> 00:08:40.019
+You may also opt to control the normal strength with the help of a flatten normals node and a scalar parameter.
+
+45
+00:08:40.019 --> 00:09:03.440
+Here are a few other scans I did using Reality Capture and Reality Scan.
+
+46
+00:09:03.440 --> 00:09:07.440
+This brings us to the end of this class. I hope you have enjoyed it.

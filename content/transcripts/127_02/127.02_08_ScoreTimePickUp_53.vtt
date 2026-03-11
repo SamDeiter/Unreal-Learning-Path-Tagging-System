@@ -1,0 +1,697 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.929
+All right, so now that we have our player pawn set up
+
+2
+00:00:05.929 --> 00:00:09.429
+to actually receive a score and a time pickup,
+
+3
+00:00:09.429 --> 00:00:11.609
+it's now actually time to create that pickup.
+
+4
+00:00:11.609 --> 00:00:13.410
+And we're gonna be doing this
+
+5
+00:00:13.410 --> 00:00:16.710
+by first creating a new blueprint
+
+6
+00:00:16.710 --> 00:00:19.469
+and using actor as the parent class.
+
+7
+00:00:19.469 --> 00:00:21.730
+Let's just pop over into the editor,
+
+8
+00:00:21.730 --> 00:00:25.129
+hit control space to bring up my content browser.
+
+9
+00:00:25.129 --> 00:00:27.649
+And then I'm gonna come again up to my content folder,
+
+10
+00:00:27.649 --> 00:00:30.570
+just gonna right click in here, blueprint class,
+
+11
+00:00:30.570 --> 00:00:32.850
+and then base this off of actor.
+
+12
+00:00:32.850 --> 00:00:39.929
+I'm gonna call this BP underscore pickup.
+
+13
+00:00:40.090 --> 00:00:41.869
+Once we have done that,
+
+14
+00:00:41.869 --> 00:00:44.130
+the next thing that we're going to do
+
+15
+00:00:44.130 --> 00:00:47.090
+is we are going to open up our blueprint
+
+16
+00:00:47.090 --> 00:00:50.570
+and add a sphere collision in a static mesh.
+
+17
+00:00:50.570 --> 00:00:53.530
+And we're gonna set the static mesh shape to Taurus.
+
+18
+00:00:53.530 --> 00:00:55.649
+So let's go ahead and do that now.
+
+19
+00:00:55.649 --> 00:00:56.869
+So again, we're gonna come here,
+
+20
+00:00:56.869 --> 00:00:59.439
+we're gonna open up our BP pickup.
+
+21
+00:00:59.439 --> 00:01:00.960
+And then on the components,
+
+22
+00:01:00.960 --> 00:01:02.439
+we're gonna click on this add
+
+23
+00:01:03.079 --> 00:01:07.349
+and we're gonna look for a sphere collision, okay?
+
+24
+00:01:07.349 --> 00:01:10.069
+And then we're gonna click on add again,
+
+25
+00:01:10.069 --> 00:01:15.489
+and we're gonna look for a static mesh, there we go.
+
+26
+00:01:15.890 --> 00:01:18.530
+Then for our static mesh, I'm gonna come over here
+
+27
+00:01:18.530 --> 00:01:22.010
+and we're gonna look for a, I don't know,
+
+28
+00:01:22.010 --> 00:01:24.650
+let's just use this arcade sphere right here.
+
+29
+00:01:24.650 --> 00:01:26.549
+And I think that's actually a little bit too big.
+
+30
+00:01:26.549 --> 00:01:30.090
+So what we're gonna do is I come here to the scale
+
+31
+00:01:30.090 --> 00:01:35.730
+and I'm just gonna 0.25, maybe 0.1.
+
+32
+00:01:35.730 --> 00:01:36.650
+Yeah, there we go, that works.
+
+33
+00:01:36.650 --> 00:01:39.209
+So 0.1, scale that down a little bit.
+
+34
+00:01:39.209 --> 00:01:41.129
+So that is perfect.
+
+35
+00:01:41.129 --> 00:01:43.799
+Now, the next thing that we need to do
+
+36
+00:01:43.799 --> 00:01:47.040
+is we are going to select our sphere
+
+37
+00:01:47.040 --> 00:01:48.980
+and then we're going to go to the events
+
+38
+00:01:48.980 --> 00:01:52.519
+and we're gonna press the on component begin overlap.
+
+39
+00:01:52.519 --> 00:01:54.159
+What this is gonna do is this is going
+
+40
+00:01:54.159 --> 00:01:56.939
+to automatically create an event for us
+
+41
+00:01:56.939 --> 00:01:58.599
+that is going to fire off
+
+42
+00:01:58.599 --> 00:02:02.799
+once something has begin to overlap this component.
+
+43
+00:02:02.799 --> 00:02:06.760
+So very simply, we're gonna grab this sphere right here,
+
+44
+00:02:06.760 --> 00:02:09.360
+our sphere collision, I'm gonna scroll down
+
+45
+00:02:09.360 --> 00:02:11.960
+and keep on going right here to our events.
+
+46
+00:02:11.960 --> 00:02:14.159
+I'm gonna say this on component begin overlap.
+
+47
+00:02:14.159 --> 00:02:16.280
+I'm gonna press this plus sign right here,
+
+48
+00:02:16.280 --> 00:02:18.659
+which is gonna kick us over to the event graph,
+
+49
+00:02:18.659 --> 00:02:19.639
+adding to that node
+
+50
+00:02:19.639 --> 00:02:23.530
+and then focusing us right there on that node.
+
+51
+00:02:23.530 --> 00:02:25.009
+Now with that node added,
+
+52
+00:02:25.009 --> 00:02:27.449
+the next thing that we need to do
+
+53
+00:02:27.449 --> 00:02:30.490
+is we're gonna do a check to make sure
+
+54
+00:02:30.490 --> 00:02:32.770
+that the item that we're running over
+
+55
+00:02:32.770 --> 00:02:34.930
+does implement our interface.
+
+56
+00:02:34.930 --> 00:02:39.129
+And then if we do, we are going to basically make a call
+
+57
+00:02:39.129 --> 00:02:41.449
+and then set our score and our time.
+
+58
+00:02:41.449 --> 00:02:44.090
+Now, the reason that we're making sure
+
+59
+00:02:44.090 --> 00:02:47.169
+that when we overlap this particular actor
+
+60
+00:02:47.169 --> 00:02:49.289
+that it implements our interface,
+
+61
+00:02:49.289 --> 00:02:51.610
+it could be very easy
+
+62
+00:02:51.610 --> 00:02:55.030
+that you have a player pawn or an AI pawn
+
+63
+00:02:55.030 --> 00:02:58.229
+and you don't want the AI pawn to interact with this,
+
+64
+00:02:58.229 --> 00:03:00.310
+you only want the player or maybe you don't.
+
+65
+00:03:00.310 --> 00:03:01.990
+In our case, we only want the player.
+
+66
+00:03:01.990 --> 00:03:03.469
+So we do wanna make sure
+
+67
+00:03:03.469 --> 00:03:06.509
+that whatever interacts with this pickup object,
+
+68
+00:03:06.509 --> 00:03:08.990
+that it does have our interface in it.
+
+69
+00:03:08.990 --> 00:03:12.030
+So to do this, we're gonna come here
+
+70
+00:03:12.030 --> 00:03:15.750
+and we are going to first off of our other actors,
+
+71
+00:03:15.750 --> 00:03:17.960
+we're gonna look for does
+
+72
+00:03:17.960 --> 00:03:20.520
+and then right there does implement interface.
+
+73
+00:03:20.520 --> 00:03:23.039
+And the interface that we're gonna be checking for
+
+74
+00:03:23.039 --> 00:03:25.520
+is our, if I just type in BPI,
+
+75
+00:03:25.520 --> 00:03:28.960
+we're gonna find it right there, a BPI stats interface.
+
+76
+00:03:28.960 --> 00:03:30.319
+Then what we're gonna do
+
+77
+00:03:30.319 --> 00:03:33.280
+is this is returning a Boolean values.
+
+78
+00:03:33.280 --> 00:03:35.280
+Remember Booleans are true or false.
+
+79
+00:03:35.280 --> 00:03:38.370
+So we're gonna look for a branch
+
+80
+00:03:38.370 --> 00:03:40.490
+and then under utilities flow control,
+
+81
+00:03:40.490 --> 00:03:41.629
+we're gonna add a branch.
+
+82
+00:03:41.629 --> 00:03:42.889
+You can also add a branch quickly
+
+83
+00:03:42.889 --> 00:03:45.770
+by pressing the B key on the keyboard and left clicking
+
+84
+00:03:45.770 --> 00:03:47.889
+that will add the branch node as well.
+
+85
+00:03:47.889 --> 00:03:49.650
+And with our branch added,
+
+86
+00:03:49.650 --> 00:03:52.650
+what I'm gonna do is I'm gonna connect the execution
+
+87
+00:03:52.689 --> 00:03:55.409
+of our on component begin overlap
+
+88
+00:03:55.409 --> 00:03:56.930
+to the input on our branch.
+
+89
+00:03:56.930 --> 00:03:59.090
+Oops, missed that input, there we go.
+
+90
+00:03:59.090 --> 00:04:02.530
+And again, I only want this to fire off
+
+91
+00:04:02.530 --> 00:04:04.569
+if we do implement that interface.
+
+92
+00:04:04.569 --> 00:04:06.490
+So I'm gonna take the return value
+
+93
+00:04:06.490 --> 00:04:08.090
+from our does implement interface
+
+94
+00:04:08.090 --> 00:04:09.650
+and plug that into our condition.
+
+95
+00:04:09.650 --> 00:04:12.650
+And this is gonna make us a check.
+
+96
+00:04:12.650 --> 00:04:14.069
+Next, what we're gonna do
+
+97
+00:04:14.069 --> 00:04:16.170
+is we're gonna pull off of the true here
+
+98
+00:04:16.170 --> 00:04:18.730
+because we want to make sure that when this is true,
+
+99
+00:04:18.730 --> 00:04:20.290
+we actually do something
+
+100
+00:04:20.290 --> 00:04:23.860
+and we're gonna go pick up object
+
+101
+00:04:23.860 --> 00:04:25.600
+and we want this message.
+
+102
+00:04:25.600 --> 00:04:28.779
+So the message is going to allow us to basically say,
+
+103
+00:04:28.779 --> 00:04:30.800
+hey, I have received this,
+
+104
+00:04:30.800 --> 00:04:32.480
+what do you want me to do with it?
+
+105
+00:04:32.480 --> 00:04:34.860
+And for us, what we're gonna do here
+
+106
+00:04:34.860 --> 00:04:35.860
+is first things first,
+
+107
+00:04:35.860 --> 00:04:37.699
+we're gonna take this other actor
+
+108
+00:04:37.699 --> 00:04:39.860
+and we're gonna plug this into target.
+
+109
+00:04:39.860 --> 00:04:43.019
+This is just ensuring that we are actually working
+
+110
+00:04:43.019 --> 00:04:46.180
+on the correct and with the correct interface,
+
+111
+00:04:46.180 --> 00:04:48.300
+I'm also adding to reroute nodes
+
+112
+00:04:48.339 --> 00:04:51.459
+to make it a little bit easier just to read this graph.
+
+113
+00:04:51.459 --> 00:04:53.720
+Now, this score and time pickup
+
+114
+00:04:53.720 --> 00:04:55.839
+is gonna be something that is placeable
+
+115
+00:04:55.839 --> 00:04:58.500
+by a level designer or level artist.
+
+116
+00:04:58.500 --> 00:05:01.319
+So next thing that we're gonna do
+
+117
+00:05:01.319 --> 00:05:05.300
+is we are going to expose some parameters,
+
+118
+00:05:05.300 --> 00:05:08.040
+more specifically for our score and time,
+
+119
+00:05:08.040 --> 00:05:11.100
+we are gonna make these both instance edible.
+
+120
+00:05:11.100 --> 00:05:13.839
+So to do that, this is really, really simple.
+
+121
+00:05:13.839 --> 00:05:15.860
+What we're gonna do is we're just gonna right click
+
+122
+00:05:15.860 --> 00:05:17.939
+on the score and promote to variable
+
+123
+00:05:18.420 --> 00:05:19.920
+and then I'm gonna pull this down like so,
+
+124
+00:05:19.920 --> 00:05:21.540
+and then do the same thing for the time,
+
+125
+00:05:21.540 --> 00:05:22.980
+promote to variable,
+
+126
+00:05:22.980 --> 00:05:25.060
+and I'm gonna pull this one down as well.
+
+127
+00:05:25.060 --> 00:05:27.720
+So I'm gonna just stack these right over here.
+
+128
+00:05:27.720 --> 00:05:31.199
+Now I do need to compile and save this, there we go.
+
+129
+00:05:31.199 --> 00:05:33.480
+And last but not least, again,
+
+130
+00:05:33.480 --> 00:05:34.959
+I want these to be editable
+
+131
+00:05:34.959 --> 00:05:37.139
+when this is placed inside of a level.
+
+132
+00:05:37.139 --> 00:05:38.540
+So to do that, we're gonna come here
+
+133
+00:05:38.540 --> 00:05:41.139
+and we're gonna make these variables public
+
+134
+00:05:41.139 --> 00:05:43.579
+by pressing this little I right here,
+
+135
+00:05:43.579 --> 00:05:45.000
+it will now be editable
+
+136
+00:05:45.000 --> 00:05:48.480
+once we have placed it inside of our level.
+
+137
+00:05:48.480 --> 00:05:50.079
+So we're gonna go ahead and save.
+
+138
+00:05:50.079 --> 00:05:52.420
+And the last thing that we need to do with this
+
+139
+00:05:52.420 --> 00:05:55.199
+is we're gonna add this destroy actor.
+
+140
+00:05:55.199 --> 00:05:58.319
+Now what this will do is this will destroy this actor
+
+141
+00:05:58.319 --> 00:06:01.040
+or remove it from the gameplay level
+
+142
+00:06:01.040 --> 00:06:03.000
+once we have finished.
+
+143
+00:06:03.000 --> 00:06:04.560
+So let's go ahead and do that now.
+
+144
+00:06:04.560 --> 00:06:05.959
+So we're gonna come here
+
+145
+00:06:05.959 --> 00:06:08.680
+and we are going to just drag off of this
+
+146
+00:06:08.680 --> 00:06:12.980
+and look for destroy and there's our destroy actor.
+
+147
+00:06:12.980 --> 00:06:15.269
+So again, just to recap,
+
+148
+00:06:15.269 --> 00:06:20.269
+we first added our sphere and our sphere collision, okay?
+
+149
+00:06:20.589 --> 00:06:24.550
+And then we shrunk our sphere down to a point one
+
+150
+00:06:24.550 --> 00:06:25.889
+because it's a little bit small.
+
+151
+00:06:25.889 --> 00:06:27.689
+We then grabbed our sphere right here
+
+152
+00:06:27.689 --> 00:06:29.110
+and then in our details panel,
+
+153
+00:06:29.110 --> 00:06:32.459
+we came over and on component begin overlap
+
+154
+00:06:32.459 --> 00:06:34.420
+was added to our event graph.
+
+155
+00:06:34.420 --> 00:06:36.180
+We then check to see if the component
+
+156
+00:06:36.180 --> 00:06:38.379
+or the object that we're overlapping
+
+157
+00:06:38.379 --> 00:06:40.879
+has our interface and if it does,
+
+158
+00:06:40.879 --> 00:06:44.680
+we are then gonna make a call to give a default score
+
+159
+00:06:44.680 --> 00:06:47.079
+and a default amount of time.
+
+160
+00:06:47.079 --> 00:06:48.800
+And then we're gonna destroy this.
+
+161
+00:06:48.800 --> 00:06:50.879
+The last thing that we need to do here
+
+162
+00:06:50.879 --> 00:06:54.459
+for our integer and our time, our score and our time,
+
+163
+00:06:54.459 --> 00:06:58.139
+I'm just gonna set the default values of these to five.
+
+164
+00:06:58.139 --> 00:06:59.959
+We don't necessarily need to do this
+
+165
+00:06:59.959 --> 00:07:03.040
+but with everything that we have going on at one time,
+
+166
+00:07:03.040 --> 00:07:05.240
+this will make sure that once we go to test this,
+
+167
+00:07:05.240 --> 00:07:07.759
+things will work and then we're not sitting there stuck
+
+168
+00:07:07.800 --> 00:07:10.920
+scratching our heads wondering why something isn't working.
+
+169
+00:07:10.920 --> 00:07:13.959
+So this does it for this particular section
+
+170
+00:07:13.959 --> 00:07:16.120
+of our video tutorial series.
+
+171
+00:07:16.120 --> 00:07:18.360
+Up next, we're gonna be taking a more in-depth look
+
+172
+00:07:18.360 --> 00:07:20.639
+at setting up Unreal Motion Graphics
+
+173
+00:07:20.639 --> 00:07:23.040
+and then how we're gonna wire all of this together
+
+174
+00:07:23.040 --> 00:07:24.339
+to our Blueprints.

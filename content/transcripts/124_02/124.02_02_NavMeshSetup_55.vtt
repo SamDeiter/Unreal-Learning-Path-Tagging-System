@@ -1,0 +1,461 @@
+WEBVTT
+
+1
+00:00:01.520 --> 00:00:06.240
+Hello and welcome to this second video and what we're going to be doing here is we're going to be
+
+2
+00:00:06.240 --> 00:00:13.619
+setting up the project and creating a nav mesh so if you fired up the top down template you
+
+3
+00:00:13.619 --> 00:00:18.500
+should have a screen that looks something like this now i'm going to do a couple of things the
+
+4
+00:00:18.500 --> 00:00:25.300
+first thing i'm going to do is come into the content drawer and i am going to hit this
+
+5
+00:00:25.300 --> 00:00:35.090
+dock in layout that's just so that we can see the content browser at all times now if we hit play on
+
+6
+00:00:35.090 --> 00:00:41.490
+the game you're going to see that we've got we've got Manny here who if you click on the screen
+
+7
+00:00:41.490 --> 00:00:47.810
+he'll be able to follow and go to that location so this is what we'll be using to test out the
+
+8
+00:00:47.810 --> 00:00:57.219
+nav mesh now in order to help us see what's going on i'm actually going to make one change to our
+
+9
+00:00:57.219 --> 00:01:04.739
+character so if you go into world settings on the left here and do the drop down on the game
+
+10
+00:01:04.739 --> 00:01:12.659
+override you'll see that the default pawn class is BP top down character i'm going to browse to
+
+11
+00:01:12.659 --> 00:01:18.420
+that by hitting this magnifying glass i'm going to double click on the character there's only
+
+12
+00:01:18.500 --> 00:01:24.659
+one change that i want to do and that's in the spring arm component so if you come up to the
+
+13
+00:01:24.659 --> 00:01:35.620
+spring arm component i'm going to change the target arm length to three thousand and all it's
+
+14
+00:01:35.620 --> 00:01:41.700
+going to do is that's just going to mean that the camera is slightly further away so we can see
+
+15
+00:01:41.700 --> 00:01:51.659
+what's going on a bit better okay now you'll also find in the level if in the outliner you add
+
+16
+00:01:51.659 --> 00:01:59.739
+nav in as a restrict as a filter you'll see that we already have a nav mesh setup i'd like
+
+17
+00:01:59.739 --> 00:02:04.140
+you to delete this because i'm going to go through it piece by piece so you know what
+
+18
+00:02:04.140 --> 00:02:11.979
+each parts are now we want to delete three things a nav link proxy nav mesh bounds volume
+
+19
+00:02:11.979 --> 00:02:21.379
+and the recast nav mesh default might need to delete the recast twice because it doesn't like
+
+20
+00:02:22.500 --> 00:02:31.039
+that not existing if you have a nav mesh pounds for okay so now if i was to press play you'll
+
+21
+00:02:31.039 --> 00:02:38.560
+see our character can no longer walk anywhere that's because our nav mesh is gone so let's add
+
+22
+00:02:38.560 --> 00:02:44.319
+one in so to do that i'm going to come up to the top here and go quickly add to your project
+
+23
+00:02:45.250 --> 00:02:51.409
+and i'm going to go down to volumes and it's going to be the top one and this is a nav mesh
+
+24
+00:02:51.409 --> 00:03:00.030
+bounds volume when i create that you're going to see that there is now a cube there is not a cube
+
+25
+00:03:00.030 --> 00:03:07.330
+that appears in the world i'm going to drag that down and i'm going to expand it so that it
+
+26
+00:03:07.330 --> 00:03:17.439
+covers some of our area now if i were to press the p cut button the p button you'll see that
+
+27
+00:03:18.000 --> 00:03:25.039
+where the nav mesh volume overlaps you'll see that there is a green area and this is where our
+
+28
+00:03:25.039 --> 00:03:33.520
+nav mesh is so if i was to hit play now carrot can now run around unless i click outside and
+
+29
+00:03:33.520 --> 00:03:38.479
+then it's it's not going to be able to run around now you might find it useful to be able
+
+30
+00:03:38.479 --> 00:03:44.560
+to see the nav mesh at runtime and if you want to do that all you need to do is hit tilde
+
+31
+00:03:44.560 --> 00:03:54.139
+or come down to the console commands and type in show navigation press enter and now you can see
+
+32
+00:03:54.139 --> 00:03:59.889
+the nav mesh at runtime then you'll see as soon as i click off of it the character doesn't know
+
+33
+00:03:59.889 --> 00:04:06.430
+where to go but as soon as i click on it the character can go to that point so this is our
+
+34
+00:04:06.430 --> 00:04:15.629
+nav mesh bounds volume functioning okay so i'm going to turn this off quickly now that we
+
+35
+00:04:15.629 --> 00:04:23.470
+created our nav mesh balance volume you can see here that we have a recast nav mesh default
+
+36
+00:04:24.420 --> 00:04:33.540
+now this is automatically spawned into the world at the point the nav mesh bounds volume is
+
+37
+00:04:33.540 --> 00:04:39.230
+created that's because this is the actor which is actually doing any of the work
+
+38
+00:04:40.129 --> 00:04:47.569
+now um the nav mesh balance volume its function is just to denote the area that you want to
+
+39
+00:04:47.569 --> 00:04:55.970
+build your nav mesh in now you're perfectly fine at having multiple of these so you can see
+
+40
+00:04:55.970 --> 00:05:03.490
+here that we could create a specific area just based by by adding the nav mesh bounds volumes
+
+41
+00:05:03.490 --> 00:05:21.420
+there i now hit play and type tilde show navigation tilde navigation um you can see
+
+42
+00:05:21.420 --> 00:05:29.180
+that it creates a a one interconnected on because they're connected up but if i was to
+
+43
+00:05:30.850 --> 00:05:35.170
+tell them to go to the other side from here it's going to walk all the way around because
+
+44
+00:05:35.170 --> 00:05:40.899
+there is no map now mesh volume there so you can have multiple nav mesh volumes
+
+45
+00:05:41.540 --> 00:05:52.899
+and what's required is just a singular recast nav mesh default okay now um i'm gonna i'm gonna
+
+46
+00:05:52.899 --> 00:05:58.939
+delete a couple of these and i'm just gonna create one volume and i'm gonna make it cover
+
+47
+00:05:58.939 --> 00:06:15.009
+the entire space let's have a quick look at the recast the recast nav mesh if i was to go
+
+48
+00:06:15.009 --> 00:06:20.000
+into the details panel you're going to see that we have a number of different
+
+49
+00:06:21.759 --> 00:06:28.000
+tick boxes under the display option now there's quite a few of these which are of interest
+
+50
+00:06:29.310 --> 00:06:35.149
+this one is probably the draw poly edges so all that's going to do is it's going to show you
+
+51
+00:06:35.790 --> 00:06:43.230
+that it the nav mesh itself is broken down into sections and these sections are divided up
+
+52
+00:06:44.350 --> 00:06:50.910
+by the faces so that we can go away and do the calculation of which sections need to be moved
+
+53
+00:06:50.910 --> 00:06:59.329
+through in in order to find your way to to the placement another thing that's worth noting
+
+54
+00:06:59.329 --> 00:07:06.370
+is draw tile bounce if you look at that you can see that it's actually drawing sort of
+
+55
+00:07:07.410 --> 00:07:13.860
+yellow squares around each of these different tiles and that's interesting because especially
+
+56
+00:07:13.860 --> 00:07:18.899
+when we're going to look at it for being dynamic is these are the tiles that would be
+
+57
+00:07:18.899 --> 00:07:24.819
+redrawn at any one time so if you needed to recalculate it it's not going to recalculate the
+
+58
+00:07:24.819 --> 00:07:31.060
+entire nav mesh it's only going to recalculate these singular bounds and you can play around
+
+59
+00:07:31.060 --> 00:07:36.819
+with them in order to optimize it but the defaults are pretty good by my experience
+
+60
+00:07:38.019 --> 00:07:44.339
+the other things that you might want to look at is there is the draw tile build types
+
+61
+00:07:44.899 --> 00:07:49.939
+i click on that it's going to tell you how many milliseconds and computations it takes to
+
+62
+00:07:49.939 --> 00:07:58.100
+actually compile this map they're all relatively similar you can actually see this also has a
+
+63
+00:07:58.100 --> 00:08:03.379
+heat map so you can see that the generation time varies by how many things are are
+
+64
+00:08:03.379 --> 00:08:11.540
+interconnecting here in the in the map so that's useful for optimization um you can also
+
+65
+00:08:11.540 --> 00:08:21.540
+see the leaves another thing is the polygon draw polygon costs which is useful a lot of this is
+
+66
+00:08:22.259 --> 00:08:29.379
+based on um we're going to see this change based on the modifiers but we'll get into that
+
+67
+00:08:29.379 --> 00:08:37.730
+in a minute right so there are there's a lot of stuff a lot of stuff in there that you might
+
+68
+00:08:37.730 --> 00:08:44.159
+want to to have a look at there's one more thing i'd like to go over before we
+
+69
+00:08:44.159 --> 00:08:49.600
+and before we move on to the next section of the course and that is setting up multiple
+
+70
+00:08:49.600 --> 00:08:55.039
+nav meshes for different size characters so we can see at the moment what we've got
+
+71
+00:08:55.039 --> 00:09:02.080
+is a singular nav mesh and this works well for our our character at the moment
+
+72
+00:09:02.639 --> 00:09:09.519
+he can move between here and here however let's say that we had a secondary character which was
+
+73
+00:09:09.519 --> 00:09:16.720
+wider um they might not be able to fit between these two different these these these different
+
+74
+00:09:16.720 --> 00:09:25.200
+posts and it would be good if the nav mesh reflected that um now we can do that quite
+
+75
+00:09:25.200 --> 00:09:30.460
+straightforwardly actually i'll just demonstrate it once so the first thing that we need to do
+
+76
+00:09:30.460 --> 00:09:37.259
+is go into the project settings now if we were to search through the project settings
+
+77
+00:09:37.259 --> 00:09:42.379
+i usually just type in agent but this sits within the navigation system side
+
+78
+00:09:43.549 --> 00:09:52.029
+um we can actually um add numerous agents in so if i was to come in here i push add that's
+
+79
+00:09:52.029 --> 00:09:58.509
+going to give me my default agent and i want to keep that because that's the default setup
+
+80
+00:09:58.509 --> 00:10:07.600
+as it is but i'm going to add a second one in here and i am going to make this red and i will
+
+81
+00:10:07.600 --> 00:10:16.100
+uh i am going to i'm going to times the radius by four and it's going to give me this message
+
+82
+00:10:16.100 --> 00:10:23.200
+that it needs to play around with the world partition maps that's okay just push okay and
+
+83
+00:10:23.200 --> 00:10:29.940
+um then i'm going to jump back into the level now nothing has changed at this point
+
+84
+00:10:30.909 --> 00:10:37.389
+in order to implement this we're going to have to come up to build and just on the navigation if
+
+85
+00:10:37.389 --> 00:10:46.830
+you push build paths you'll see that it's created a secondary red map at this point if i move
+
+86
+00:10:46.830 --> 00:10:54.980
+this together so that these are are close enough together now if we were to run with the
+
+87
+00:10:54.980 --> 00:11:04.340
+character we should see that we can no not the moment okay so um this is all driven
+
+88
+00:11:04.340 --> 00:11:14.210
+off of the capsule size actually so i'm just going to provide that by the capsule radius
+
+89
+00:11:14.210 --> 00:11:22.740
+i'm just going to make that about 32 i think and if we were to watch this so that should be
+
+90
+00:11:22.740 --> 00:11:28.500
+around the default it's going to be able to walk through this gap because the capsule size
+
+91
+00:11:29.460 --> 00:11:37.809
+means that it is using the green path now if i was to come in here and set the capsule size
+
+92
+00:11:37.809 --> 00:11:47.169
+to over i don't need to go far over i just need to go over the value if i take it to 50
+
+93
+00:11:48.220 --> 00:11:56.139
+now if i now come back in here and build the paths again you shouldn't see anything
+
+94
+00:11:56.139 --> 00:12:03.100
+update but it should register the agent's size and it should apply this pawn to a different
+
+95
+00:12:04.299 --> 00:12:13.360
+cast so if i come in here and so let's go down you should see that it'll be running
+
+96
+00:12:13.360 --> 00:12:31.389
+around the long way and if i show the navigation you'll see that the character is now
+
+97
+00:12:32.429 --> 00:12:40.110
+using the larger nav mesh so it's avoiding the entire area where if i was to drag them down
+
+98
+00:12:40.110 --> 00:12:49.820
+again hey got the capsule and take that back down to 32 i think compile save and
+
+99
+00:12:51.500 --> 00:13:08.190
+build paths and now push play show the navigation again and you'll see that the character can move
+
+100
+00:13:08.190 --> 00:13:17.019
+through anywhere where the green is is set up now i can come into the project settings
+
+101
+00:13:17.019 --> 00:13:27.230
+and i can actually name these so and jump back and then when i build the paths again
+
+102
+00:13:29.009 --> 00:13:33.809
+hasn't changed it but if you if you rebuild if i just try to leasing these and see if it
+
+103
+00:13:33.809 --> 00:13:43.090
+can rebuild it build paths yeah you'll see one of them is referred to as wide so we have wide
+
+104
+00:13:43.090 --> 00:13:50.450
+and we have default so again this is running off of the capsule components and all it needs
+
+105
+00:13:50.450 --> 00:13:59.409
+to be is you'll see even though i have the agent radius set to 140 as soon as i exceed the 35
+
+106
+00:13:59.409 --> 00:14:06.529
+i will be bumped up into this next category because only things that are smaller than 35
+
+107
+00:14:06.529 --> 00:14:14.370
+are going to be able to pass through this hole so since this is over 45 it goes into the
+
+108
+00:14:14.370 --> 00:14:21.730
+agent radius of 140 this also works for height so i haven't done it in this case but if you have
+
+109
+00:14:21.730 --> 00:14:26.370
+a large giant you're going to want to make sure that they're not bumping their head on things
+
+110
+00:14:26.929 --> 00:14:34.769
+so height is also built into this system so yeah just multiple agents of course this will have
+
+111
+00:14:34.769 --> 00:14:42.769
+an optimization hit because we need to generate two nav meshes basically every single time so
+
+112
+00:14:42.769 --> 00:14:50.129
+there is an optimization hit to it but it works very well you'll see under the character
+
+113
+00:14:50.129 --> 00:15:01.570
+movement we have some options for agents um this does not affect uh what the what agent what what
+
+114
+00:15:01.570 --> 00:15:07.169
+nav message is picked up from you're really looking for the the capsule size well thank
+
+115
+00:15:07.169 --> 00:15:11.970
+you very much for joining us for that and see you in the next video

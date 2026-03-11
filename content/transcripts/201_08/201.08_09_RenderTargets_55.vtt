@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:01.520 --> 00:00:08.880
+Next up let's have a look at render targets. So what is a render target? Well a render target
+
+2
+00:00:08.880 --> 00:00:16.000
+is a material which you can find and create from within the textures panel here.
+
+3
+00:00:16.000 --> 00:00:21.789
+I've got something that's called a render target and what it is is it will allow you to
+
+4
+00:00:21.789 --> 00:00:29.949
+write to this material at runtime. So usually we would do this from a camera
+
+5
+00:00:30.589 --> 00:00:35.549
+and I'll demonstrate how we do that in a second but let's first see the kind of effect that we've got.
+
+6
+00:00:35.549 --> 00:00:44.030
+So here you go we've got this TV here and as I move around this actor with the camera
+
+7
+00:00:44.030 --> 00:00:49.149
+on the right-hand side here you can see that the the TV is changing. So
+
+8
+00:00:51.859 --> 00:00:58.179
+I'll just demonstrate that a bit further so you can see at runtime as the camera moves
+
+9
+00:00:58.259 --> 00:01:08.099
+the texture is updating on the television set. So what we have is this actor here if I open this up
+
+10
+00:01:08.930 --> 00:01:17.840
+and see how this is set up and it's quite straightforward. There is no actual code which
+
+11
+00:01:17.840 --> 00:01:23.200
+is required at this point. It's all done through a component and the component is the
+
+12
+00:01:23.200 --> 00:01:30.450
+scene capture component 2d and once we've got that we've got a number of different settings.
+
+13
+00:01:30.450 --> 00:01:36.819
+So I could just add that by going add scene capture, scene capture component 2d, add it to
+
+14
+00:01:36.819 --> 00:01:42.260
+the components. It's got a couple of different settings on here and the main ones that you'll
+
+15
+00:01:42.260 --> 00:01:48.900
+be worried about is the texture target. So this is the render target so what it's going to be saving to
+
+16
+00:01:49.900 --> 00:01:56.379
+and what we have next to it as well one of the other bits that's really really useful
+
+17
+00:01:57.019 --> 00:02:05.260
+is capture every frame. Now these can be costly because if they are taking a photo every single
+
+18
+00:02:05.260 --> 00:02:13.180
+frame then you're basically rendering the whole scene twice so you can be like almost doubling
+
+19
+00:02:13.180 --> 00:02:18.300
+the the cost of rendering your scene so you have a camera miles away it's gonna have to
+
+20
+00:02:18.300 --> 00:02:23.819
+render everything that that camera can see. So there are other options you can either do it
+
+21
+00:02:23.819 --> 00:02:28.300
+programmatically so you tell it when you want to update or you can just capture on movement by
+
+22
+00:02:28.300 --> 00:02:33.580
+turning that off. Capture on movement I think is what I'm using throughout here to keep the cost
+
+23
+00:02:33.580 --> 00:02:41.379
+down. So we have the render target and you don't even think we need the camera and here
+
+24
+00:02:41.379 --> 00:02:48.979
+we can see it in the material setup. So I am just using the render target as a texture sample
+
+25
+00:02:49.699 --> 00:02:57.460
+and I'm plugging it through the emissive colour. Now the render target here if I was to open this
+
+26
+00:02:57.460 --> 00:03:04.400
+up you'll see that we have some options one of the main ones is the size because this is
+
+27
+00:03:04.400 --> 00:03:08.639
+going to be the size of your texture so in this I've kept it quite small so that it all
+
+28
+00:03:08.639 --> 00:03:15.280
+runs pretty fast but they can get bigger if you make them too big they will give you a warning.
+
+29
+00:03:16.479 --> 00:03:24.000
+The other thing that's worth noting back up to the render target is at the moment I'm capturing
+
+30
+00:03:24.000 --> 00:03:29.599
+the scene colour but you do have a number of different options so I'll demonstrate those
+
+31
+00:03:29.599 --> 00:03:35.280
+I'll demonstrate one in a minute you've got things like normals the base colour final colour
+
+32
+00:03:35.280 --> 00:03:40.960
+much like when we're working with scene textures but it's got quite a limited number.
+
+33
+00:03:42.159 --> 00:03:47.520
+Right so this is one example where you'd be able to show TV screens or something as you're
+
+34
+00:03:47.520 --> 00:03:56.129
+going around let's have a look at a more common example and that is a mini map so if I was to
+
+35
+00:03:59.840 --> 00:04:08.780
+fire this up and press play you can now see in the bottom corner here I have a mini map
+
+36
+00:04:09.740 --> 00:04:18.300
+as I run through the level it will update accordingly depending on where my character is
+
+37
+00:04:18.939 --> 00:04:31.540
+situated so now how this is done is again we're doing it very similar to our last example
+
+38
+00:04:31.540 --> 00:04:41.009
+we have a mini map camera here which has a all it has is the scene capture component 2d
+
+39
+00:04:41.889 --> 00:04:48.899
+I'm then using event tick in order to make sure that the camera is moving with the character but
+
+40
+00:04:48.899 --> 00:04:55.379
+the main thing that's of interest is the capture source I'm using is the scene depth
+
+41
+00:04:55.379 --> 00:05:04.259
+in r so that will give me in the red column it's just going to give me the scene depth so
+
+42
+00:05:04.259 --> 00:05:09.060
+we've worked with scene depth before and this is in centimeters so when I would look at this
+
+43
+00:05:09.060 --> 00:05:14.019
+you would see that it just looks like it's solid red because everything that it's logging back
+
+44
+00:05:14.019 --> 00:05:21.810
+is in very high values but only in the red only in the red channel now you can see here
+
+45
+00:05:22.449 --> 00:05:27.490
+we have the minim so if I jump in to see the mini map here all we're doing is taking the
+
+46
+00:05:27.490 --> 00:05:33.970
+texture sample and again we're dividing it so that we've got some kind of useful value
+
+47
+00:05:33.970 --> 00:05:41.089
+and I'm using a cut off just so that we can get an either a zero or a one so that we can get that
+
+48
+00:05:41.089 --> 00:05:48.220
+nice clean that now you don't have to use the depth you could easily use just a screenshot
+
+49
+00:05:48.220 --> 00:05:53.259
+from above if you wanted a more realistic type but that's what I've decided to use in this
+
+50
+00:05:53.259 --> 00:06:03.579
+instance and again we so we're using a UMG to display this and I'm just using the material
+
+51
+00:06:04.220 --> 00:06:12.050
+on a image and in front of it as well I've got another image which I'm updating the rotation
+
+52
+00:06:13.089 --> 00:06:17.730
+of it based on the rotation of the player character just so that we have that arrow which
+
+53
+00:06:17.730 --> 00:06:25.139
+is alternating as we move so I'm just demonstrating this I'm not going to ask
+
+54
+00:06:25.139 --> 00:06:30.899
+you to put it together but but that's how you might approach making a mini map
+
+55
+00:06:30.899 --> 00:06:37.699
+so that's render targets very useful as a source of something to write to as we're going along

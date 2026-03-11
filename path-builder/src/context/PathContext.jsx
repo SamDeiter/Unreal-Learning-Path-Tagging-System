@@ -11,6 +11,9 @@ import { getCourseDurationMinutes } from "../utils/courseDuration";
 
 const PathContext = createContext(null);
 
+// Workflow stages
+const WORKFLOW_STAGES = ["curate", "arrange", "review", "export"];
+
 // Action types
 const ACTIONS = {
   ADD_COURSE: "ADD_COURSE",
@@ -20,6 +23,7 @@ const ACTIONS = {
   SET_LEARNING_INTENT: "SET_LEARNING_INTENT",
   CLEAR_PATH: "CLEAR_PATH",
   LOAD_PATH: "LOAD_PATH",
+  SET_WORKFLOW_STAGE: "SET_WORKFLOW_STAGE",
 };
 
 // Reducer for path state management
@@ -90,6 +94,12 @@ function pathReducer(state, action) {
         courses: action.payload,
       };
 
+    case ACTIONS.SET_WORKFLOW_STAGE:
+      return {
+        ...state,
+        workflowStage: action.payload,
+      };
+
     default:
       return state;
   }
@@ -103,6 +113,7 @@ const initialState = {
     skillLevel: "",
     timeBudget: "",
   },
+  workflowStage: "curate",
 };
 
 const DRAFT_KEY = "ue5-path-draft";
@@ -116,6 +127,7 @@ function loadDraft() {
       return {
         courses: Array.isArray(draft.courses) ? draft.courses : [],
         learningIntent: draft.learningIntent || initialState.learningIntent,
+        workflowStage: draft.workflowStage || "curate",
       };
     }
   } catch {
@@ -143,6 +155,7 @@ export function PathProvider({ children }) {
         JSON.stringify({
           courses: state.courses,
           learningIntent: state.learningIntent,
+          workflowStage: state.workflowStage,
         })
       );
 
@@ -260,6 +273,7 @@ export function PathProvider({ children }) {
 
   const clearPath = () => {
     dispatch({ type: ACTIONS.CLEAR_PATH });
+    dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: "curate" });
     setActivePathId(null);
     localStorage.removeItem("ue5_active_path_id");
     localStorage.removeItem(DRAFT_KEY);
@@ -267,6 +281,12 @@ export function PathProvider({ children }) {
 
   const loadPath = (courses) => {
     dispatch({ type: ACTIONS.LOAD_PATH, payload: courses });
+  };
+
+  const setWorkflowStage = (stage) => {
+    if (WORKFLOW_STAGES.includes(stage)) {
+      dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: stage });
+    }
   };
 
   // --- localStorage Persistence ---
@@ -342,6 +362,10 @@ export function PathProvider({ children }) {
     // Active path tracking
     activePathId,
     setActivePathId,
+    // Workflow
+    workflowStage: state.workflowStage,
+    setWorkflowStage,
+    WORKFLOW_STAGES,
   };
 
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;

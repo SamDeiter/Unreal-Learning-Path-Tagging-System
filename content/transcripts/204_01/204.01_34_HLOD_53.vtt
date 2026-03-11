@@ -1,0 +1,905 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:05.030
+Now that we know a little bit about what the Merge Actor tool does,
+
+2
+00:00:05.030 --> 00:00:09.230
+I'd like to talk about the Hierarchical Level of Detail tool, or HLOD.
+
+3
+00:00:09.230 --> 00:00:17.760
+HLOD is a way to replace lots of individual static mesh actors with one single static mesh actor that has one material,
+
+4
+00:00:17.760 --> 00:00:21.199
+and because of this, it's going to be cheaper to render.
+
+5
+00:00:21.199 --> 00:00:25.589
+This tool works by going through all of the static meshes placed in your level,
+
+6
+00:00:25.589 --> 00:00:29.420
+and it will group them based on their distance from one another.
+
+7
+00:00:29.420 --> 00:00:36.420
+It will then create new mesh and materials to replace the static meshes in those groups,
+
+8
+00:00:36.420 --> 00:00:43.109
+so that as the user progresses through the world, distance detail will be cheaper to render,
+
+9
+00:00:43.109 --> 00:00:52.320
+and as the user gets closer and closer to that detail, it will then be replaced with the original static meshes.
+
+10
+00:00:52.320 --> 00:01:02.320
+Again, the main reason to use these tools are to help lessen the rendering cost of your level's objects and distance.
+
+11
+00:01:02.320 --> 00:01:12.739
+Now to access the HLOD tools, or the Hierarchical Level of Detail Outliner,
+
+12
+00:01:12.739 --> 00:01:18.739
+you need to go to Window, and then select Hierarchical LOD Outliner from the menu.
+
+13
+00:01:18.739 --> 00:01:23.739
+If this option is grayed out, that means you are using a level that works with World Partition,
+
+14
+00:01:23.739 --> 00:01:31.060
+and we will cover how to set up HLOD with World Partition later on in this video tutorial.
+
+15
+00:01:31.060 --> 00:01:35.060
+Let's go ahead and pop over to the editor now and have a look at how this works.
+
+16
+00:01:35.060 --> 00:01:41.060
+Now inside of the Unreal Engine 5 editor, let's look at how we can utilize HLOD.
+
+17
+00:01:41.060 --> 00:01:46.280
+So our example here, what we're going to try and do is we're going to try to make different HLOD groups
+
+18
+00:01:46.280 --> 00:01:52.280
+that include this table, the chairs, and the statue, as well as the little platform underneath them,
+
+19
+00:01:52.280 --> 00:01:59.540
+and then make another group that contains these two over here, as well as these two over here,
+
+20
+00:01:59.540 --> 00:02:04.540
+and then make one final group that actually includes everything together.
+
+21
+00:02:04.540 --> 00:02:07.540
+And to do this, there's a couple of things we need to do first.
+
+22
+00:02:07.540 --> 00:02:12.639
+First off, we're going to need to open up the tool by coming up here to Window,
+
+23
+00:02:12.639 --> 00:02:16.639
+and then Hierarchical LOD Outliner, and this is going to open up our tool for us.
+
+24
+00:02:16.639 --> 00:02:20.639
+Now, if we try to do regenerate or build, nothing is going to happen,
+
+25
+00:02:20.639 --> 00:02:26.639
+and that's because under our HLOD system, notice we have no HLOD setup asset.
+
+26
+00:02:26.639 --> 00:02:32.639
+Now, a setup asset allows us to actually share this setup among different levels.
+
+27
+00:02:32.639 --> 00:02:37.639
+If we're just working in a single level and we don't need to have additional levels,
+
+28
+00:02:37.639 --> 00:02:43.639
+if we come over here to World Settings under HLOD System, under the Hierarchical LOD Setup,
+
+29
+00:02:43.639 --> 00:02:49.639
+if we press this plus, what we're going to do is we are going to add our different levels here.
+
+30
+00:02:49.639 --> 00:02:56.639
+So we can, again, set this up using a Blueprint asset, and we can do that by coming here to our Content Browser.
+
+31
+00:02:56.639 --> 00:02:59.639
+We can right-click, come to our Blueprint class.
+
+32
+00:02:59.639 --> 00:03:07.050
+We want to come down to our All Classes, and we're going to look for our, not our Blueprint, I'm sorry, our HLOD,
+
+33
+00:03:07.050 --> 00:03:12.050
+and then we can select our Hierarchical LOD Setup and click Select,
+
+34
+00:03:12.050 --> 00:03:19.599
+and let's just double-click on this to open it up.
+
+35
+00:03:19.599 --> 00:03:25.009
+So one of the things else that we can do is we don't need to use the Blueprint Graph,
+
+36
+00:03:25.009 --> 00:03:29.009
+so if we close this and we come here and we actually open this again,
+
+37
+00:03:29.009 --> 00:03:33.009
+we're going to get this without the full Blueprint Graph as a data-only Blueprint.
+
+38
+00:03:33.009 --> 00:03:40.939
+Now, before I go further, depending on which one we use, the settings are going to be the same,
+
+39
+00:03:40.939 --> 00:03:43.939
+whether we set this up in the level or set this up as an asset.
+
+40
+00:03:43.939 --> 00:03:45.939
+So let's take a look at the settings really quick.
+
+41
+00:03:45.939 --> 00:03:47.939
+First off, we have Cluster Generation.
+
+42
+00:03:47.939 --> 00:03:55.939
+Cluster Generation allows us to control the size at which static meshes should be considered to be in this cluster.
+
+43
+00:03:55.939 --> 00:04:02.939
+So if I have two static meshes sitting next to one another and a desired bounds of 2,000,
+
+44
+00:04:02.939 --> 00:04:09.939
+if those meshes are within 2,000 Unreal units of one another, they will be inside of this cluster.
+
+45
+00:04:09.939 --> 00:04:18.040
+The other settings that I have here control things like how much of this asset needs to be inside of this cluster
+
+46
+00:04:18.040 --> 00:04:23.040
+to be considered part of this cluster so we can make things more aggressive or less aggressive.
+
+47
+00:04:23.040 --> 00:04:27.040
+Underneath Cluster Generation Settings, we have our Mesh Generation Settings.
+
+48
+00:04:27.040 --> 00:04:33.040
+What this allows us to do is actually generate brand new geometry and materials
+
+49
+00:04:33.040 --> 00:04:36.040
+based on the settings that we need for our individual project.
+
+50
+00:04:36.040 --> 00:04:41.040
+We can either merge things down so that they require one mesh and one material,
+
+51
+00:04:41.040 --> 00:04:48.230
+or if that doesn't work, we can actually generate brand new meshes and materials
+
+52
+00:04:48.230 --> 00:04:55.410
+that completely replace the objects we have selected for using HLOD.
+
+53
+00:04:55.410 --> 00:05:00.860
+For our system here, what I'm going to do is I'm going to hit this HLOD level 0.
+
+54
+00:05:00.860 --> 00:05:03.860
+I'm going to hit once, and then I'm going to hit it again.
+
+55
+00:05:03.860 --> 00:05:10.860
+Under our Cluster Generation Settings, I'm going to set this first value to something really low, like 225.
+
+56
+00:05:10.860 --> 00:05:18.860
+I'm going to come here to our HLOD level 1, and I'm going to set this one to something like, I don't know, like 1800.
+
+57
+00:05:18.860 --> 00:05:26.860
+Then I'm going to set this very last one to something like, we'll say 2,000 would be good.
+
+58
+00:05:26.860 --> 00:05:29.860
+Let's go ahead and compile and save that.
+
+59
+00:05:29.860 --> 00:05:34.860
+What we can do here is if I hit CTRL space, make sure I have that selected,
+
+60
+00:05:34.860 --> 00:05:39.860
+I can come here and add that and regenerate my clusters.
+
+61
+00:05:39.860 --> 00:05:48.689
+Once I've done that, what's going to happen is, you can see here I have my LOD actor 0, which is right here.
+
+62
+00:05:48.689 --> 00:05:54.689
+I have my second one, which is going to be over there, and then my third one, which is over there, and then my fourth one.
+
+63
+00:05:54.689 --> 00:05:58.689
+Then my second level is going to contain actually the LOD actor.
+
+64
+00:05:58.689 --> 00:06:04.689
+It contains these three and the floor, and then this one contains those two and the floor there.
+
+65
+00:06:04.689 --> 00:06:09.689
+Not exactly what I wanted, but we could adjust the values a little bit, but it's close enough.
+
+66
+00:06:09.689 --> 00:06:12.689
+We did want them split into two actors.
+
+67
+00:06:12.689 --> 00:06:19.949
+Last but not least, we have this last LOD level that's actually going to be the floor over here,
+
+68
+00:06:19.949 --> 00:06:23.949
+and everything pretty much combined together.
+
+69
+00:06:23.949 --> 00:06:25.949
+This is good. This is exactly what we want.
+
+70
+00:06:25.949 --> 00:06:28.949
+Now that we know that everything is working, I'm going to hit this Build All.
+
+71
+00:06:28.949 --> 00:06:35.089
+We'll be right back once this builds to show you what it's actually doing.
+
+72
+00:06:35.089 --> 00:06:40.889
+Now that that's built, what we've done is a couple of really, really cool things here.
+
+73
+00:06:40.889 --> 00:06:44.889
+This will automatically switch the level of detail levels.
+
+74
+00:06:44.889 --> 00:06:50.889
+You can see here as I start to move away, the statue makes a very obvious switch right there.
+
+75
+00:06:50.889 --> 00:06:55.889
+One of the things that it's also doing is it's also actually reducing the number of triangles
+
+76
+00:06:55.889 --> 00:06:57.889
+versus what I'm seeing here up close.
+
+77
+00:06:57.889 --> 00:07:05.889
+Up close, each one of these little bits of chairs, tables, and statues
+
+78
+00:07:05.889 --> 00:07:08.889
+are going to consume about 10,000 triangles.
+
+79
+00:07:08.889 --> 00:07:13.889
+Now, using the HLOD system, when it combines all of this together
+
+80
+00:07:13.889 --> 00:07:17.889
+and we see the statue is something like this,
+
+81
+00:07:17.889 --> 00:07:27.889
+that's actually only 2,400 triangles, or about a 75% reduction in triangles.
+
+82
+00:07:27.889 --> 00:07:31.889
+Now, this gets further reduced as we start to go down the LOD levels.
+
+83
+00:07:31.889 --> 00:07:36.889
+If I come here and I go to my LOD level 1, which is this right here.
+
+84
+00:07:36.889 --> 00:07:41.889
+Check this out. This would be 30,000, and that gets reduced to about 7,500.
+
+85
+00:07:41.889 --> 00:07:48.889
+Again, down here, this one would be 10,000, and that gets reduced to 2,600.
+
+86
+00:07:48.889 --> 00:07:52.889
+Finally, if we go to our very last LOD level, we're going to see here that
+
+87
+00:07:52.889 --> 00:07:56.889
+it would come in at about 40,000, and it's been reduced to 10,000,
+
+88
+00:07:56.889 --> 00:08:01.889
+retaining again about 25%, 26% across the board.
+
+89
+00:08:01.889 --> 00:08:07.889
+This is a really, really, really amazing thing that we can do in terms of performance.
+
+90
+00:08:07.889 --> 00:08:11.889
+The other cool thing about this is check this out.
+
+91
+00:08:11.889 --> 00:08:19.720
+I'm just going to come here. I'm going to hit CTRL-H to unhide everything.
+
+92
+00:08:19.720 --> 00:08:23.720
+I'm not sure why it's decided to not show up.
+
+93
+00:08:23.720 --> 00:08:26.720
+Let's just regenerate clusters real quick.
+
+94
+00:08:26.720 --> 00:08:27.720
+There we go.
+
+95
+00:08:27.720 --> 00:08:31.720
+I wanted to do this because the system, once we have it set up,
+
+96
+00:08:31.720 --> 00:08:34.720
+if I come here and I move something like this,
+
+97
+00:08:34.720 --> 00:08:37.720
+oops, I didn't want to actually do that.
+
+98
+00:08:37.720 --> 00:08:39.720
+I want to disable that. There we go.
+
+99
+00:08:39.720 --> 00:08:46.299
+I wanted to do something like this, and then maybe I'll come over here,
+
+100
+00:08:46.299 --> 00:08:51.779
+and I'll even do something like add a cube here.
+
+101
+00:08:51.779 --> 00:08:56.159
+It's a cube.
+
+102
+00:08:56.159 --> 00:08:58.159
+We'll even make it a little more fancy.
+
+103
+00:08:58.159 --> 00:09:02.190
+We'll come here to our, got some starter content,
+
+104
+00:09:02.190 --> 00:09:06.190
+and we'll come to our materials, and we'll just add this concrete tile,
+
+105
+00:09:06.190 --> 00:09:09.220
+and we'll add this brick here.
+
+106
+00:09:09.220 --> 00:09:11.220
+Maybe we'll do something else.
+
+107
+00:09:11.220 --> 00:09:13.220
+We'll add a metal or something like that.
+
+108
+00:09:13.220 --> 00:09:25.480
+Let's go ahead and build all, and we'll be right back to check this out.
+
+109
+00:09:25.480 --> 00:09:28.480
+All right, now that we have everything built,
+
+110
+00:09:28.480 --> 00:09:30.480
+let's go ahead and see what's going on.
+
+111
+00:09:30.480 --> 00:09:32.480
+We have our LOD set to auto.
+
+112
+00:09:32.480 --> 00:09:34.480
+As I start to move around the scene, what's going to happen is
+
+113
+00:09:34.480 --> 00:09:36.480
+it's going to automatically change.
+
+114
+00:09:36.480 --> 00:09:38.480
+We can see here there's a change back there.
+
+115
+00:09:38.480 --> 00:09:40.480
+If we were to select some different things,
+
+116
+00:09:40.480 --> 00:09:44.480
+we would see this is going to be our big LOD actor back there.
+
+117
+00:09:44.480 --> 00:09:47.480
+Let's take a closer look at what's going on by just coming here
+
+118
+00:09:47.480 --> 00:09:49.480
+and doing our LOD one.
+
+119
+00:09:49.480 --> 00:09:51.480
+There's our LOD one.
+
+120
+00:09:51.480 --> 00:09:53.480
+I should say LOD one.
+
+121
+00:09:53.480 --> 00:09:55.480
+That's what I wanted to click on.
+
+122
+00:09:55.480 --> 00:09:57.480
+Then we can come down to our LOD two.
+
+123
+00:09:57.480 --> 00:10:00.480
+You can see here it's actually changing everything for us,
+
+124
+00:10:00.480 --> 00:10:03.480
+and we have the ability to control all of these settings.
+
+125
+00:10:03.480 --> 00:10:06.480
+Again, if we come back to our,
+
+126
+00:10:06.480 --> 00:10:09.480
+I'm going to come up here and I'm going to browse to this
+
+127
+00:10:09.480 --> 00:10:12.480
+inside of our content browser and open it up real quick.
+
+128
+00:10:12.480 --> 00:10:13.480
+There we go.
+
+129
+00:10:13.480 --> 00:10:15.480
+If we come down to this mesh generation,
+
+130
+00:10:15.480 --> 00:10:17.480
+you can see here under our merge settings,
+
+131
+00:10:17.480 --> 00:10:20.480
+we have all types of different settings that we can adjust
+
+132
+00:10:20.480 --> 00:10:23.480
+that will affect how this is merged down.
+
+133
+00:10:23.480 --> 00:10:26.480
+We also can change the simplification method
+
+134
+00:10:26.480 --> 00:10:29.480
+from merged to simplified,
+
+135
+00:10:29.480 --> 00:10:34.480
+which will give us a new proxy geometry or approximate.
+
+136
+00:10:34.480 --> 00:10:37.480
+The difference between approximate and simplify
+
+137
+00:10:37.480 --> 00:10:40.480
+have to deal with if you're using Nanite or not.
+
+138
+00:10:40.480 --> 00:10:44.480
+If you're using non-Nanite meshes, you'll want to use simplify.
+
+139
+00:10:44.480 --> 00:10:51.879
+If you're using approximate, you'll want to use that for any Nanite meshes.
+
+140
+00:10:51.879 --> 00:10:57.879
+The hierarchical level of detail tool works great for single levels.
+
+141
+00:10:57.879 --> 00:10:59.879
+In the next part of this video,
+
+142
+00:10:59.879 --> 00:11:03.879
+we're going to show you how you can work with the hierarchical level of detail tool
+
+143
+00:11:03.879 --> 00:11:11.330
+when it comes to world partition or massive open world style levels.
+
+144
+00:11:11.330 --> 00:11:15.330
+Now that we understand how the HLOD system works,
+
+145
+00:11:15.330 --> 00:11:20.330
+let's talk about HLOD when using things like world partition.
+
+146
+00:11:20.330 --> 00:11:25.330
+Now, on the screen in front of us, we have the editor using the world partition map
+
+147
+00:11:25.330 --> 00:11:28.330
+and I've set up something similar to what we had before,
+
+148
+00:11:28.330 --> 00:11:30.330
+the table and chairs and the statue.
+
+149
+00:11:30.330 --> 00:11:32.330
+And above each statue is a little bit of text
+
+150
+00:11:32.330 --> 00:11:37.330
+and this text says approximate mesh, simplified mesh, instancing and merge mesh.
+
+151
+00:11:37.330 --> 00:11:39.330
+Now, if I come up here to window,
+
+152
+00:11:39.330 --> 00:11:43.330
+I want to point out that the hierarchical LOD outliner is not here.
+
+153
+00:11:43.330 --> 00:11:47.330
+And the reason it's not here is that while this tool is still used,
+
+154
+00:11:47.330 --> 00:11:50.330
+the way we use this tool is slightly different.
+
+155
+00:11:50.330 --> 00:11:56.330
+What we do is for the type of HLOD system we wish a certain mesh to use,
+
+156
+00:11:56.330 --> 00:11:59.330
+we can assign that mesh an HLOD asset.
+
+157
+00:11:59.330 --> 00:12:03.330
+So for example, if I come over here to this approximate mesh,
+
+158
+00:12:03.330 --> 00:12:08.330
+if I come over to the details panel and I'm just going to search for HLOD,
+
+159
+00:12:08.330 --> 00:12:12.330
+we can see here under the HLOD layer, if I pull this over,
+
+160
+00:12:12.330 --> 00:12:15.330
+we're going to have the HLOD approximate merge mesh.
+
+161
+00:12:15.330 --> 00:12:18.330
+Now, if I browse to this asset and open it up,
+
+162
+00:12:18.330 --> 00:12:23.330
+you're going to see here that it is an asset that can exist inside of the content browser.
+
+163
+00:12:23.330 --> 00:12:27.330
+And then underneath here, I have my mesh approximate settings, which I can adjust.
+
+164
+00:12:27.330 --> 00:12:32.330
+And if I look at the other settings here, or the other meshes, I should say,
+
+165
+00:12:32.330 --> 00:12:36.330
+you can see here I have the simplified mesh, which is going to simplify our mesh
+
+166
+00:12:36.330 --> 00:12:40.330
+and instancing and so on and so forth all the way down to merge mesh.
+
+167
+00:12:40.330 --> 00:12:43.330
+Now again, to make these, all you do is you come in here,
+
+168
+00:12:43.330 --> 00:12:47.330
+we are going to right click and go to miscellaneous,
+
+169
+00:12:47.330 --> 00:12:50.330
+and then we select HLOD layer.
+
+170
+00:12:50.330 --> 00:12:51.330
+Once we've done that, we give it a name.
+
+171
+00:12:51.330 --> 00:12:56.330
+And then when we open it up, we just simply select the layer type we wish.
+
+172
+00:12:56.330 --> 00:13:01.330
+Up here at the top, instancing, merge mesh, simplified mesh, or approximate mesh.
+
+173
+00:13:01.330 --> 00:13:05.330
+Once we've built our level of details, we'll then see the results.
+
+174
+00:13:05.330 --> 00:13:09.330
+And one of the cool things that we can actually do here is I'm actually going to hide this.
+
+175
+00:13:09.330 --> 00:13:12.330
+I'm going to come here to this LOD and I'm going to unhide these
+
+176
+00:13:12.330 --> 00:13:15.330
+by clicking on these little pins here.
+
+177
+00:13:15.330 --> 00:13:18.330
+This will unhide this for us, might get a little error here.
+
+178
+00:13:18.330 --> 00:13:21.330
+But one of the cool things that we can do,
+
+179
+00:13:21.330 --> 00:13:24.330
+and we're going to unhide this one as well,
+
+180
+00:13:24.330 --> 00:13:29.330
+is when we select on these, if we want to rebuild this,
+
+181
+00:13:29.330 --> 00:13:32.399
+and we can see kind of the results here,
+
+182
+00:13:32.399 --> 00:13:33.399
+what we can do is we can select this.
+
+183
+00:13:33.399 --> 00:13:36.399
+We can actually not right click, but select one of these.
+
+184
+00:13:36.399 --> 00:13:40.399
+And then inside of the details panel, we can click on this build HLOD.
+
+185
+00:13:40.399 --> 00:13:44.399
+And this will actually build this one single HLOD.
+
+186
+00:13:44.399 --> 00:13:48.399
+So anything that we have done to it will be built.
+
+187
+00:13:48.399 --> 00:13:51.399
+So let's just give this a second to finish up
+
+188
+00:13:51.399 --> 00:13:54.399
+and we'll make a change and we'll come right back.
+
+189
+00:13:54.399 --> 00:13:59.250
+All right, and thanks to a little bit of movie magic,
+
+190
+00:13:59.250 --> 00:14:02.250
+we have now finished rebuilding that one.
+
+191
+00:14:02.250 --> 00:14:04.250
+So it took a little bit longer than I expected,
+
+192
+00:14:04.250 --> 00:14:08.250
+but the results are still what we're seeing right here in front of us.
+
+193
+00:14:08.250 --> 00:14:10.250
+We get this for the approximate mesh.
+
+194
+00:14:10.250 --> 00:14:11.250
+We get this for the simplified mesh.
+
+195
+00:14:11.250 --> 00:14:13.250
+One thing about simplified mesh I want to point out,
+
+196
+00:14:13.250 --> 00:14:16.250
+even though it looks bad, it's actually meant to be viewed
+
+197
+00:14:16.250 --> 00:14:18.250
+probably about from like this far away.
+
+198
+00:14:18.250 --> 00:14:19.250
+So just keep that in mind.
+
+199
+00:14:19.250 --> 00:14:21.250
+That's why it kind of breaks down so much.
+
+200
+00:14:21.250 --> 00:14:24.250
+It's not actually meant to be viewed very, very close like it is
+
+201
+00:14:24.250 --> 00:14:28.250
+because it's going to try to simplify this thing around kind of like a volume.
+
+202
+00:14:28.250 --> 00:14:33.250
+So instancing is going to allow us to have some instances.
+
+203
+00:14:33.250 --> 00:14:35.250
+Now, again, one thing I want to point about instancing
+
+204
+00:14:35.250 --> 00:14:40.250
+is we have this static mesh instant component.
+
+205
+00:14:40.250 --> 00:14:43.250
+We have another component and another one.
+
+206
+00:14:43.250 --> 00:14:48.250
+Still, we need to make sure because we see we have these static mesh
+
+207
+00:14:48.250 --> 00:14:51.250
+and the table and then the chair.
+
+208
+00:14:51.250 --> 00:14:55.250
+So this right here is two or three of them,
+
+209
+00:14:55.250 --> 00:14:57.250
+but these two are going to be unique.
+
+210
+00:14:57.250 --> 00:14:58.250
+So just keep that in mind.
+
+211
+00:14:58.250 --> 00:15:00.250
+We want to make sure that when we instance,
+
+212
+00:15:00.250 --> 00:15:03.250
+we're instancing things that are all of the same type.
+
+213
+00:15:03.250 --> 00:15:06.250
+It's not to say that you can't have multiple objects
+
+214
+00:15:06.250 --> 00:15:09.250
+that aren't of the same type make use of instancing.
+
+215
+00:15:09.250 --> 00:15:12.250
+It's just not going to be as efficient.
+
+216
+00:15:12.250 --> 00:15:14.250
+Finally, down here, we have our merged mesh.
+
+217
+00:15:14.250 --> 00:15:17.250
+This is literally going to make us a new mesh here
+
+218
+00:15:17.250 --> 00:15:21.250
+that is actually completely all merged together with everything
+
+219
+00:15:21.250 --> 00:15:23.250
+using the lowest level of detail.
+
+220
+00:15:23.250 --> 00:15:25.250
+So it's going to make things a little bit cheaper.
+
+221
+00:15:25.250 --> 00:15:28.250
+So again, the thing to take away from this is that
+
+222
+00:15:28.250 --> 00:15:32.250
+when we utilize HLOD inside of our world partition level,
+
+223
+00:15:32.250 --> 00:15:37.250
+we assign our individual actors in HLOD asset
+
+224
+00:15:37.250 --> 00:15:41.250
+that is created inside of the browser here.
+
+225
+00:15:41.250 --> 00:15:44.250
+And we can then use that asset
+
+226
+00:15:44.250 --> 00:15:47.250
+to make adjustments to groups on a whole.

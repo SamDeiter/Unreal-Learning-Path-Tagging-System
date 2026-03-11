@@ -1,0 +1,861 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:04.250
+Lastly, today we'll talk about subsurface materials
+
+2
+00:00:04.250 --> 00:00:05.929
+and parallax control.
+
+3
+00:00:05.929 --> 00:00:08.810
+So here we'll talk about creating a subsurface material,
+
+4
+00:00:08.810 --> 00:00:11.029
+which we'll use Jade in this instance.
+
+5
+00:00:11.029 --> 00:00:13.970
+We'll talk about using parallax occlusion mapping
+
+6
+00:00:13.970 --> 00:00:14.970
+with material functions.
+
+7
+00:00:14.970 --> 00:00:16.750
+We'll talk about creating some ice
+
+8
+00:00:16.750 --> 00:00:18.730
+and how you may go about doing that.
+
+9
+00:00:18.730 --> 00:00:21.809
+I will talk about the subsurface profile in Unreal
+
+10
+00:00:21.809 --> 00:00:24.949
+and then also give you some pro tips to close out here.
+
+11
+00:00:24.949 --> 00:00:26.449
+So there's a few things to consider
+
+12
+00:00:26.449 --> 00:00:29.410
+if we're thinking about creating subsurface materials
+
+13
+00:00:29.410 --> 00:00:30.969
+and this instance, like we said,
+
+14
+00:00:30.969 --> 00:00:34.399
+we're going to use the example of Jade-like material.
+
+15
+00:00:34.399 --> 00:00:39.000
+So creating something like Jade or even ice,
+
+16
+00:00:39.000 --> 00:00:40.399
+you can make some dependencies
+
+17
+00:00:40.399 --> 00:00:42.820
+to make the material rich with control.
+
+18
+00:00:42.820 --> 00:00:45.200
+So you have plenty of control for your artists
+
+19
+00:00:45.200 --> 00:00:48.399
+to really dial in the effects that they're wanting to use.
+
+20
+00:00:48.399 --> 00:00:51.560
+So we set up the material to be a subsurface
+
+21
+00:00:51.560 --> 00:00:53.200
+under the shaded model.
+
+22
+00:00:53.200 --> 00:00:55.420
+So when you have your material open,
+
+23
+00:00:55.420 --> 00:00:57.920
+you want to make sure you're not clicking on any nodes.
+
+24
+00:00:57.920 --> 00:00:59.399
+You can click on the main root node
+
+25
+00:00:59.399 --> 00:01:01.399
+that you can see in the bottom of the image here,
+
+26
+00:01:01.399 --> 00:01:04.719
+but essentially you'll see this on the details panel
+
+27
+00:01:04.719 --> 00:01:05.560
+in your material.
+
+28
+00:01:05.560 --> 00:01:07.700
+So you just want to change the shading model
+
+29
+00:01:07.700 --> 00:01:11.280
+to subsurface to texturize the effect.
+
+30
+00:01:11.280 --> 00:01:15.670
+Color can be stacked with lerps and multiplies
+
+31
+00:01:15.670 --> 00:01:16.989
+to get the desired results.
+
+32
+00:01:16.989 --> 00:01:18.909
+So that's exactly what you can see here.
+
+33
+00:01:18.909 --> 00:01:20.989
+We've got two color values.
+
+34
+00:01:20.989 --> 00:01:24.390
+We're lerping, which is the linear interpolate
+
+35
+00:01:24.390 --> 00:01:27.469
+between this noise-based texture,
+
+36
+00:01:27.469 --> 00:01:31.170
+which then multiplying based on the amount that you want.
+
+37
+00:01:31.170 --> 00:01:35.469
+And you're making parameters of all these properties
+
+38
+00:01:35.469 --> 00:01:37.250
+so that you can dial them in
+
+39
+00:01:37.250 --> 00:01:38.909
+either in your material parameter collection,
+
+40
+00:01:38.909 --> 00:01:41.650
+like you said before, that you saw before,
+
+41
+00:01:41.650 --> 00:01:43.189
+or whether you just want it
+
+42
+00:01:43.189 --> 00:01:46.359
+on a per material instance basis.
+
+43
+00:01:46.359 --> 00:01:49.260
+So the final texture output can have a scaler on it
+
+44
+00:01:49.260 --> 00:01:52.560
+to control the amount of noise filter to use.
+
+45
+00:01:52.560 --> 00:01:54.280
+So this is plugged into the lerp.
+
+46
+00:01:54.319 --> 00:01:57.840
+So you can see the amount of noise here,
+
+47
+00:01:57.840 --> 00:02:00.739
+which is the noise being multiplied.
+
+48
+00:02:00.739 --> 00:02:03.560
+And this is the point that we're talking about here
+
+49
+00:02:03.560 --> 00:02:06.450
+just before the end result.
+
+50
+00:02:06.450 --> 00:02:08.650
+If you want to control the opacity
+
+51
+00:02:08.650 --> 00:02:09.810
+of a subsurface material,
+
+52
+00:02:09.810 --> 00:02:11.810
+you can create a Fresnel index
+
+53
+00:02:11.810 --> 00:02:14.310
+and control the exponent there.
+
+54
+00:02:14.310 --> 00:02:17.370
+So you introduce a lerp and a scaler
+
+55
+00:02:17.370 --> 00:02:19.750
+to control the subsurface amount,
+
+56
+00:02:19.750 --> 00:02:22.689
+which is the opacity that is used
+
+57
+00:02:22.689 --> 00:02:24.189
+for the transmission here.
+
+58
+00:02:24.710 --> 00:02:27.870
+And then also you can add a multiply into this lerp B
+
+59
+00:02:27.870 --> 00:02:30.550
+to then multiply the subsurface amount effect.
+
+60
+00:02:30.550 --> 00:02:33.349
+So it can be adjusted with a new input,
+
+61
+00:02:33.349 --> 00:02:36.250
+but it can be used as a generic range control
+
+62
+00:02:36.250 --> 00:02:38.300
+in this instance.
+
+63
+00:02:38.300 --> 00:02:41.060
+To add subsurface control,
+
+64
+00:02:41.060 --> 00:02:44.379
+we create a Fresnel node as well, again,
+
+65
+00:02:44.379 --> 00:02:46.060
+and then this helps sell the idea
+
+66
+00:02:46.060 --> 00:02:48.580
+of some kind of light affecting the surface.
+
+67
+00:02:48.580 --> 00:02:50.969
+It gives it that rim light and look.
+
+68
+00:02:50.969 --> 00:02:53.330
+You could create a scaler for the exponent.
+
+69
+00:02:53.330 --> 00:02:57.810
+And in this case, it controls the edge subsurface control.
+
+70
+00:02:57.810 --> 00:03:00.090
+And then you can also create a scaler
+
+71
+00:03:00.090 --> 00:03:02.129
+for the specular reflection.
+
+72
+00:03:02.129 --> 00:03:04.689
+In this case, it'll give the illusion of thickness.
+
+73
+00:03:04.689 --> 00:03:09.150
+So plug that into the base reflection fraction in,
+
+74
+00:03:09.150 --> 00:03:11.210
+and then you can also plug in a multiplier
+
+75
+00:03:11.210 --> 00:03:15.639
+with a cons three vector to control the overall color.
+
+76
+00:03:15.639 --> 00:03:17.479
+So a few notes here
+
+77
+00:03:17.479 --> 00:03:20.560
+that when we're adding subsurface control,
+
+78
+00:03:20.759 --> 00:03:23.680
+the Fresnel that is found under the vector ops
+
+79
+00:03:23.680 --> 00:03:26.379
+is a highly customized version of the Fresnel.
+
+80
+00:03:26.379 --> 00:03:29.919
+So that allows you to affect many different aspects
+
+81
+00:03:29.919 --> 00:03:31.219
+of how the Fresnel is rendered.
+
+82
+00:03:31.219 --> 00:03:33.560
+So you can see the properties here.
+
+83
+00:03:33.560 --> 00:03:35.199
+There's great documentation on this.
+
+84
+00:03:35.199 --> 00:03:37.080
+This image is taken from the documentation.
+
+85
+00:03:37.080 --> 00:03:39.879
+So they allow you to dial in the Fresnel values
+
+86
+00:03:39.879 --> 00:03:41.479
+that you're looking for.
+
+87
+00:03:41.479 --> 00:03:43.699
+This is the Fresnel node,
+
+88
+00:03:43.699 --> 00:03:46.159
+but just to know that it can give more control,
+
+89
+00:03:46.159 --> 00:03:49.099
+but it can lead to artifacts if not set up correctly.
+
+90
+00:03:49.099 --> 00:03:54.060
+So only use Fresnel, the regular Fresnel,
+
+91
+00:03:54.060 --> 00:03:58.379
+if this version isn't getting the results that you want,
+
+92
+00:03:58.379 --> 00:04:00.159
+and also if you don't understand
+
+93
+00:04:00.159 --> 00:04:03.139
+some of the properties found there.
+
+94
+00:04:03.139 --> 00:04:05.939
+If we're looking at parallax occlusion mapping,
+
+95
+00:04:05.939 --> 00:04:09.840
+so the parallax occlusion and material function node,
+
+96
+00:04:09.840 --> 00:04:12.699
+we use it to simulate a 3D effect.
+
+97
+00:04:12.699 --> 00:04:15.819
+So it's like a bump offset, but with more visual accuracy.
+
+98
+00:04:15.819 --> 00:04:19.060
+So no real distance limitations.
+
+99
+00:04:19.100 --> 00:04:21.259
+It is expensive.
+
+100
+00:04:21.259 --> 00:04:23.220
+The visualize will not calculate correctly,
+
+101
+00:04:23.220 --> 00:04:25.220
+so it will stay green appearing to be safe.
+
+102
+00:04:25.220 --> 00:04:28.000
+So when you're looking at your view render modes
+
+103
+00:04:28.000 --> 00:04:30.139
+and you're looking at how expensive this might be,
+
+104
+00:04:30.139 --> 00:04:34.540
+it appears safe, but it does have a lot of complexity
+
+105
+00:04:34.540 --> 00:04:38.139
+to it, as you can see with the complexity of the material.
+
+106
+00:04:38.139 --> 00:04:43.180
+So material collection is the shadows
+
+107
+00:04:43.180 --> 00:04:46.319
+and the light source reaction are more realistic
+
+108
+00:04:46.319 --> 00:04:48.000
+at an angle than a bump offset.
+
+109
+00:04:48.000 --> 00:04:52.360
+So it can save on needed geometry.
+
+110
+00:04:52.360 --> 00:04:55.519
+This sample shows parallax UVs plugged into each text
+
+111
+00:04:55.519 --> 00:04:58.800
+UV for the shift effect, but you
+
+112
+00:04:58.800 --> 00:05:03.639
+can see the kind of pros and cons of each approach here.
+
+113
+00:05:03.639 --> 00:05:07.120
+Sometimes, especially with the newer features of Unreal
+
+114
+00:05:07.120 --> 00:05:09.759
+Engine, say, Nanite approach, you
+
+115
+00:05:09.759 --> 00:05:12.480
+may just want to add the geometry in there.
+
+116
+00:05:12.480 --> 00:05:15.329
+And especially if you're doing anything with virtual
+
+117
+00:05:15.329 --> 00:05:17.850
+reality, the VR will break any kind
+
+118
+00:05:17.850 --> 00:05:22.250
+of illusion of a bump offset or a parallax occlusion.
+
+119
+00:05:22.250 --> 00:05:26.040
+So again, it depends on the project outcome.
+
+120
+00:05:26.040 --> 00:05:29.600
+You want to weigh up the optimization
+
+121
+00:05:29.600 --> 00:05:33.959
+versus the end visual result for the user or the player
+
+122
+00:05:33.959 --> 00:05:37.180
+or whoever it is that you're creating this project for.
+
+123
+00:05:37.180 --> 00:05:38.860
+But hopefully, that gives you an idea
+
+124
+00:05:38.860 --> 00:05:41.860
+about how you might use parallax occlusion mapping
+
+125
+00:05:41.860 --> 00:05:43.779
+inside of your projects.
+
+126
+00:05:43.779 --> 00:05:46.379
+Continuing with the parallax occlusion mapping,
+
+127
+00:05:46.379 --> 00:05:49.259
+temporal AA can be used to jitter
+
+128
+00:05:49.259 --> 00:05:51.139
+the number of rays slightly.
+
+129
+00:05:51.139 --> 00:05:54.259
+It causes traces to be out of phase
+
+130
+00:05:54.259 --> 00:05:56.660
+and cancels out artifacts over time.
+
+131
+00:05:56.660 --> 00:05:59.899
+And shadows can be adjusted manually
+
+132
+00:05:59.899 --> 00:06:03.180
+and might need to be for accuracy.
+
+133
+00:06:03.180 --> 00:06:05.420
+And it must be activated in the function.
+
+134
+00:06:05.420 --> 00:06:10.040
+So again, just keeping in mind this performance
+
+135
+00:06:10.040 --> 00:06:13.139
+versus visual fidelity payoff.
+
+136
+00:06:13.180 --> 00:06:16.220
+This approach with the shadowing can be expensive
+
+137
+00:06:16.220 --> 00:06:18.779
+or it will be expensive, should I say.
+
+138
+00:06:18.779 --> 00:06:21.720
+So the pixel depth offset can also be added
+
+139
+00:06:21.720 --> 00:06:23.860
+for accurate intersections.
+
+140
+00:06:23.860 --> 00:06:26.220
+If other geometry is introduced,
+
+141
+00:06:26.220 --> 00:06:29.459
+the flatter the surface, the better in this instance.
+
+142
+00:06:29.459 --> 00:06:32.300
+And then just a note here before we wrap up,
+
+143
+00:06:32.300 --> 00:06:34.500
+if a height map is introduced,
+
+144
+00:06:34.500 --> 00:06:37.839
+steep maps will have noticeable stretching.
+
+145
+00:06:37.839 --> 00:06:40.639
+So to fix this, you can have a world alignment texture
+
+146
+00:06:40.680 --> 00:06:45.620
+that can be used for tiling options or troubled areas.
+
+147
+00:06:45.620 --> 00:06:49.699
+And then for creating your ice effect.
+
+148
+00:06:49.699 --> 00:06:53.100
+For ice, you can use a world alignment material function
+
+149
+00:06:53.100 --> 00:06:54.220
+that can be introduced to help
+
+150
+00:06:54.220 --> 00:06:56.579
+with subsurface, visual matching.
+
+151
+00:06:56.579 --> 00:06:59.459
+The world alignment textures help
+
+152
+00:06:59.459 --> 00:07:02.860
+for textures to be consistent and matching
+
+153
+00:07:02.860 --> 00:07:04.959
+and not based on UVs,
+
+154
+00:07:04.959 --> 00:07:07.500
+but world position for the subsurface.
+
+155
+00:07:07.500 --> 00:07:10.540
+And then with a Fresnel node and a subsurface color,
+
+156
+00:07:10.540 --> 00:07:13.899
+they can be plugged in into that subsurface node.
+
+157
+00:07:13.899 --> 00:07:15.600
+So you can see an example
+
+158
+00:07:15.600 --> 00:07:18.279
+of exactly what we're looking at there.
+
+159
+00:07:18.279 --> 00:07:20.259
+The subsurface profile,
+
+160
+00:07:20.259 --> 00:07:22.819
+which you can get through right clicking
+
+161
+00:07:22.819 --> 00:07:25.019
+in your content browser, going to materials
+
+162
+00:07:25.019 --> 00:07:27.220
+and the subsurface profile is here.
+
+163
+00:07:27.220 --> 00:07:29.819
+So the subsurface scouting profile data
+
+164
+00:07:29.819 --> 00:07:32.180
+is an asset that can be created,
+
+165
+00:07:32.180 --> 00:07:34.540
+shared because it's a data asset
+
+166
+00:07:34.540 --> 00:07:36.459
+and saved in the content browser.
+
+167
+00:07:36.459 --> 00:07:40.899
+So the data is intended to be authored by artists
+
+168
+00:07:40.899 --> 00:07:43.339
+and controls the distance,
+
+169
+00:07:43.339 --> 00:07:45.899
+the light and the subsurface should scatter.
+
+170
+00:07:45.899 --> 00:07:47.819
+It controls the color of the subsurface
+
+171
+00:07:47.819 --> 00:07:50.139
+and also the fall off color of the light
+
+172
+00:07:50.139 --> 00:07:51.939
+once it has exited the object.
+
+173
+00:07:51.939 --> 00:07:56.100
+So the data can then be applied to a subsurface material
+
+174
+00:07:56.100 --> 00:07:58.300
+and then the subsurface profile data
+
+175
+00:07:58.300 --> 00:08:00.459
+can be tweaked interactively,
+
+176
+00:08:00.459 --> 00:08:03.300
+meaning that you do not need to recompile the material
+
+177
+00:08:03.300 --> 00:08:04.379
+to see the end results.
+
+178
+00:08:04.379 --> 00:08:07.819
+So it's just a nice global way of really dialing in
+
+179
+00:08:07.819 --> 00:08:09.139
+what it is you want to do.
+
+180
+00:08:09.139 --> 00:08:11.819
+And you can add it into the details panel
+
+181
+00:08:11.819 --> 00:08:14.060
+of the material here with the shading model.
+
+182
+00:08:14.060 --> 00:08:16.180
+You can just use a subsurface profile
+
+183
+00:08:16.180 --> 00:08:19.500
+and then add that subsurface profile into here.
+
+184
+00:08:19.500 --> 00:08:22.779
+So it really gives you a nice global feel
+
+185
+00:08:22.779 --> 00:08:24.620
+to what it is you're looking for.
+
+186
+00:08:24.620 --> 00:08:27.339
+You may have them map specific, for example,
+
+187
+00:08:27.339 --> 00:08:28.879
+to really dial in that visual effects
+
+188
+00:08:28.879 --> 00:08:31.509
+of the subsurface in a given level.
+
+189
+00:08:31.509 --> 00:08:34.950
+So it can be created and loaded into the material
+
+190
+00:08:34.950 --> 00:08:38.659
+and also migrated into different projects.
+
+191
+00:08:38.659 --> 00:08:42.279
+If you want to keep reusing your subsurface profiles,
+
+192
+00:08:42.279 --> 00:08:43.480
+has a separate menu,
+
+193
+00:08:43.480 --> 00:08:45.440
+as you can see in the bottom right here,
+
+194
+00:08:45.440 --> 00:08:47.519
+updates without compiling, as we said,
+
+195
+00:08:47.519 --> 00:08:51.519
+and it's still not visually robust
+
+196
+00:08:51.519 --> 00:08:56.389
+with the customization of apparent material.
+
+197
+00:08:56.389 --> 00:08:58.190
+Few pro tips to close out then.
+
+198
+00:08:58.190 --> 00:09:00.990
+So it's best to customize your subsurface material
+
+199
+00:09:01.029 --> 00:09:04.350
+with full control of the properties, like you can see here.
+
+200
+00:09:04.350 --> 00:09:06.269
+So you really want to dial in,
+
+201
+00:09:06.269 --> 00:09:09.590
+you want to make sure everything's some kind of parameter
+
+202
+00:09:09.590 --> 00:09:12.730
+that you can really hone in the colors
+
+203
+00:09:12.730 --> 00:09:14.389
+and the values that you're aiming for,
+
+204
+00:09:14.389 --> 00:09:17.289
+as well as any maps that you want to include.
+
+205
+00:09:17.289 --> 00:09:20.250
+Mega scans export or plugin material creation.
+
+206
+00:09:20.250 --> 00:09:22.370
+A transmission effect is not as strong
+
+207
+00:09:22.370 --> 00:09:25.169
+as customizing the subsurface material.
+
+208
+00:09:25.169 --> 00:09:28.649
+And you also want to create as much customization
+
+209
+00:09:28.649 --> 00:09:30.889
+as you can for best control
+
+210
+00:09:30.889 --> 00:09:33.980
+and results for an instant material.
+
+211
+00:09:33.980 --> 00:09:37.419
+So as we usually do at the end of these sections,
+
+212
+00:09:37.419 --> 00:09:40.899
+you can find subsurface profile and documentation here,
+
+213
+00:09:40.899 --> 00:09:44.620
+and also just information about how to use subsurface
+
+214
+00:09:44.620 --> 00:09:46.500
+in your Unreal Engine materials
+
+215
+00:09:46.500 --> 00:09:48.379
+at this documentation page here.

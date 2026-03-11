@@ -1,0 +1,685 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:07.259
+Hello and welcome to this video, exercise four, setting up EQS.
+
+2
+00:00:07.259 --> 00:00:15.619
+So I'm in the engine now, and I'd like you to go to slide five, which is exercise four EQS setup.
+
+3
+00:00:15.619 --> 00:00:20.620
+And for this, we have a number of different files here, which we are going to be using to set this up.
+
+4
+00:00:20.620 --> 00:00:25.649
+Let's have a quick look. First of all, we have our three AI.
+
+5
+00:00:25.649 --> 00:00:29.059
+I'm going to hit play in this case.
+
+6
+00:00:29.059 --> 00:00:37.060
+And all I'm trying to achieve is when they see me, I want them to run away and find a hiding spot.
+
+7
+00:00:37.060 --> 00:00:46.479
+And then as I move around, if the environment changes, they will run away or find a new hiding spot where they're away from.
+
+8
+00:00:46.479 --> 00:00:53.420
+So that's what we're looking to achieve in this EQS.
+
+9
+00:00:53.420 --> 00:00:57.189
+Now let's have a quick look at our state tree.
+
+10
+00:00:57.189 --> 00:01:06.189
+Again, this isn't terribly complicated. We have a wanderer around whilst we are just in our idle state.
+
+11
+00:01:06.189 --> 00:01:11.189
+And then if they see the player, it moves into the flea player.
+
+12
+00:01:11.189 --> 00:01:14.189
+First thing it's going to do is it's going to find a hiding spot.
+
+13
+00:01:14.189 --> 00:01:20.189
+And then it's going to go to that hiding spot and then it will stay hidden.
+
+14
+00:01:20.189 --> 00:01:25.189
+Unless we are the lightest sight, we can see the player.
+
+15
+00:01:25.189 --> 00:01:31.219
+And then at that point, we'll find a new hiding spot and loop around and carry this off.
+
+16
+00:01:31.219 --> 00:01:41.219
+It's very straightforward. Again, we are using an evaluator to query the information on the AI.
+
+17
+00:01:41.219 --> 00:01:48.040
+Now, if we have a quick look at our AI character.
+
+18
+00:01:48.040 --> 00:01:50.939
+And here we are inside of our AI.
+
+19
+00:01:50.939 --> 00:02:00.939
+You'll see the main piece of code which is of interest to us is this event find new hiding spot.
+
+20
+00:02:00.939 --> 00:02:04.939
+What this will do is it will run the environmental query.
+
+21
+00:02:04.939 --> 00:02:11.479
+We will bind an event. So when it's finished, what it will do is it will get the results.
+
+22
+00:02:11.479 --> 00:02:19.180
+And from the results, it should only bring up the top 5% or something like that.
+
+23
+00:02:19.180 --> 00:02:23.180
+But only a very few. It will store one inside of the hide.
+
+24
+00:02:23.180 --> 00:02:32.689
+So there is a we have the handling, the reception site is the only other piece of code on here.
+
+25
+00:02:32.689 --> 00:02:38.120
+We've gone over that in detail.
+
+26
+00:02:38.120 --> 00:02:46.280
+So the main thing that we need to do is set up our query.
+
+27
+00:02:46.280 --> 00:02:49.280
+And you can see here we have the EQ find hiding spot.
+
+28
+00:02:49.280 --> 00:02:51.280
+And this is what they're using.
+
+29
+00:02:51.280 --> 00:02:56.539
+If you open that up, you're going to see that we get a new interface.
+
+30
+00:02:56.539 --> 00:03:03.539
+And then this interface functions and works a little bit like the old baby trees.
+
+31
+00:03:03.539 --> 00:03:11.919
+But it only really has a much more limited palette of nodes that we can use.
+
+32
+00:03:11.919 --> 00:03:18.710
+Now, the first thing that we want to do, drag off this,
+
+33
+00:03:18.710 --> 00:03:23.710
+and it's going to give us an option only for one thing, and that is the generate.
+
+34
+00:03:23.710 --> 00:03:31.710
+If you remember, the first step with the EQS is to generate points for us to test.
+
+35
+00:03:31.710 --> 00:03:34.710
+And we have a number of different options.
+
+36
+00:03:34.710 --> 00:03:39.710
+I'm not going to go through all of them, but we have factors of class, which means you can select a specific
+
+37
+00:03:39.710 --> 00:03:41.710
+factor and generate a point on those.
+
+38
+00:03:41.710 --> 00:03:49.129
+We have a composite, which will allow us to use multiple tests to generate more points.
+
+39
+00:03:49.129 --> 00:03:51.129
+Current location.
+
+40
+00:03:51.129 --> 00:03:59.129
+And the ones down here that we have are generating them in a specific pattern around the character.
+
+41
+00:03:59.129 --> 00:04:03.129
+The donut, cone, circle, path, grid.
+
+42
+00:04:03.129 --> 00:04:06.259
+I'm going to select grid.
+
+43
+00:04:08.750 --> 00:04:10.750
+And from the grid, I'm going to increase the size.
+
+44
+00:04:10.750 --> 00:04:16.750
+So in the details panel, I'm going to change the grid path size to 2000.
+
+45
+00:04:16.750 --> 00:04:19.850
+We'll leave the spaces at 100.
+
+46
+00:04:19.850 --> 00:04:26.470
+And I'm going to hit save.
+
+47
+00:04:26.470 --> 00:04:33.399
+Now, this brings me to our EQS testing port.
+
+48
+00:04:33.399 --> 00:04:40.399
+I already have one set up with a mesh here that's easy to see so that we can select it quickly.
+
+49
+00:04:40.399 --> 00:04:47.009
+However, if you want to create one, it is just a question of going into a blueprint class
+
+50
+00:04:47.009 --> 00:04:53.009
+and search for testing and you'll see that there is an EQS testing port.
+
+51
+00:04:53.009 --> 00:04:57.009
+So you just need to create a child of this class.
+
+52
+00:04:57.009 --> 00:05:10.100
+Now I'm going to drag this into the world.
+
+53
+00:05:10.100 --> 00:05:12.100
+Nice and on the floor.
+
+54
+00:05:12.100 --> 00:05:15.540
+And so we can see that we have our EQS testing.
+
+55
+00:05:15.540 --> 00:05:18.540
+Now, we cannot see anything yet.
+
+56
+00:05:18.540 --> 00:05:24.540
+In order to do that, what I'm going to do is come down into the EQS testing plan
+
+57
+00:05:24.540 --> 00:05:26.540
+and I'm going to type in EQS.
+
+58
+00:05:26.540 --> 00:05:32.540
+And this is going to give us the options that are relevant to the environmental query.
+
+59
+00:05:32.540 --> 00:05:35.540
+The first one is the template that you want to use.
+
+60
+00:05:35.540 --> 00:05:39.800
+I'll drag in the one that we're using at the moment.
+
+61
+00:05:39.800 --> 00:05:44.800
+And now we can see it visualized.
+
+62
+00:05:44.800 --> 00:05:52.939
+Now, at the moment, all of these different spots are a light blue.
+
+63
+00:05:52.939 --> 00:05:55.939
+That's because we have no tests running.
+
+64
+00:05:55.939 --> 00:06:01.579
+So all we can see are these light blue spots.
+
+65
+00:06:01.579 --> 00:06:06.579
+So next up, let's add in some tests.
+
+66
+00:06:06.579 --> 00:06:15.689
+Now, the first test I'm going to come into, I'm going to do a path finding test.
+
+67
+00:06:15.689 --> 00:06:20.689
+Because we are looking to find a place to hide,
+
+68
+00:06:20.689 --> 00:06:23.689
+it's important that we can actually reach that point.
+
+69
+00:06:23.689 --> 00:06:27.689
+So I'm going to come down and I'm going to add a test.
+
+70
+00:06:27.689 --> 00:06:31.689
+Down here you'll see that we have a path finding.
+
+71
+00:06:31.689 --> 00:06:33.939
+I'm going to select that.
+
+72
+00:06:33.939 --> 00:06:37.939
+And if we select the test, we can see the details in the right hand corner here.
+
+73
+00:06:37.939 --> 00:06:43.029
+And you can see here we have context, and that is the query.
+
+74
+00:06:43.029 --> 00:06:49.610
+So it's going to test to see if there is a path between that point and the query.
+
+75
+00:06:49.610 --> 00:06:53.250
+And I only want to eliminate on this one.
+
+76
+00:06:53.250 --> 00:07:00.339
+So rather than filter and score, I am going to filter only and I'm going to save.
+
+77
+00:07:00.339 --> 00:07:06.339
+And now if we have a look, you'll see that all of the spots have turned red.
+
+78
+00:07:06.339 --> 00:07:10.339
+That's because they're scored, but we haven't actually scored anything on them.
+
+79
+00:07:10.339 --> 00:07:13.399
+So they all start off as zero.
+
+80
+00:07:13.399 --> 00:07:17.500
+But you can see inside of this here,
+
+81
+00:07:17.500 --> 00:07:24.500
+we have blue ones, and it has pathfinding and test zero.
+
+82
+00:07:24.500 --> 00:07:30.480
+So these have been eliminated from the pathfinding test.
+
+83
+00:07:30.480 --> 00:07:36.850
+Okay, now for the next test,
+
+84
+00:07:36.850 --> 00:07:42.850
+I need a new context because we are going to be wanting to test
+
+85
+00:07:42.850 --> 00:07:45.879
+that we can hide from the play.
+
+86
+00:07:45.879 --> 00:07:50.879
+And without a context for the player, we're not going to be able to run any of those tests.
+
+87
+00:07:50.879 --> 00:07:56.879
+So you can see here, I already have a context set up, context player.
+
+88
+00:07:56.879 --> 00:08:03.360
+And if you wanted to create one of these from scratch, again, it's just blueprint class
+
+89
+00:08:03.360 --> 00:08:06.839
+and search for context.
+
+90
+00:08:06.839 --> 00:08:11.839
+And you see that there is an environmental query context and blueprint base.
+
+91
+00:08:11.839 --> 00:08:14.839
+And that's what we would use as the parent class.
+
+92
+00:08:14.839 --> 00:08:20.899
+If you open it up, what I've done to do this is I have overwritten the function
+
+93
+00:08:20.899 --> 00:08:25.990
+provide actor set. And you can see in here what we have
+
+94
+00:08:25.990 --> 00:08:30.990
+is we have the function starts and the function return node.
+
+95
+00:08:30.990 --> 00:08:34.990
+What it's expecting is an array of actors.
+
+96
+00:08:34.990 --> 00:08:41.440
+In this case, I am generating the
+
+97
+00:08:41.440 --> 00:08:45.440
+I'm grabbing the players and adding them to this array.
+
+98
+00:08:45.440 --> 00:08:50.889
+But I have also searched for
+
+99
+00:08:50.889 --> 00:08:56.889
+the BP player standard. So this is a class that I had created
+
+100
+00:08:56.889 --> 00:09:02.889
+that I've also added to the array. And this is just so that I can test it inside the editor.
+
+101
+00:09:02.889 --> 00:09:08.889
+Because the player is created at the begin play of the game,
+
+102
+00:09:08.889 --> 00:09:13.889
+we cannot see this in the editor. So I'm adding in some extra classes
+
+103
+00:09:13.889 --> 00:09:22.120
+just as a method to allow us to test. Okay, now I'm going to
+
+104
+00:09:22.120 --> 00:09:30.669
+drag in the player stand in from here.
+
+105
+00:09:30.669 --> 00:09:37.049
+Having maps standing on the ground. We can use this to see
+
+106
+00:09:37.049 --> 00:09:42.429
+how it would select points around the player. Let's
+
+107
+00:09:42.429 --> 00:09:47.429
+jump back into our environmental query. And we're going to do another filter.
+
+108
+00:09:47.429 --> 00:09:54.000
+This time we're going to do it on a trace. I'm going to select the trips
+
+109
+00:09:54.000 --> 00:10:00.220
+and I am going to filter only. Again, we just want to
+
+110
+00:10:00.220 --> 00:10:05.220
+filter because here we are removing all of the spots that the player can see.
+
+111
+00:10:05.220 --> 00:10:11.240
+And what I'm going to do is I am going to
+
+112
+00:10:11.240 --> 00:10:16.429
+change the context to the context player and press
+
+113
+00:10:16.429 --> 00:10:22.169
+save. Now you will see that this has now
+
+114
+00:10:22.169 --> 00:10:27.419
+eliminated any of the spots that can see the player.
+
+115
+00:10:27.419 --> 00:10:32.419
+So if I was to move the player behind here, for example, and we looked at it,
+
+116
+00:10:32.419 --> 00:10:37.419
+drag it to update, it is eliminating all of these spots because they can be
+
+117
+00:10:37.419 --> 00:10:45.529
+seen by the player. Now I drag this
+
+118
+00:10:45.529 --> 00:10:51.710
+and do it again. We have a slight problem.
+
+119
+00:10:51.710 --> 00:10:56.710
+The choice is going to the floor where in this
+
+120
+00:10:56.710 --> 00:11:01.710
+case we are actually wanting to be testing against eye level.
+
+121
+00:11:01.710 --> 00:11:06.710
+But in order to fix this, I'm going to come into the EQS flight hiding spot again,
+
+122
+00:11:06.710 --> 00:11:11.940
+select this and in our generation of points, you can see that there
+
+123
+00:11:11.940 --> 00:11:17.539
+is a post production vertical offset here. I'm going to change that
+
+124
+00:11:17.539 --> 00:11:24.110
+to 100 because what we're doing is we're projecting down to the floor
+
+125
+00:11:24.110 --> 00:11:29.110
+so that we are having the spots off the floor and then the vertical offset is
+
+126
+00:11:29.110 --> 00:11:34.399
+moving up from the floor. So if we now look, our points are away
+
+127
+00:11:34.399 --> 00:11:46.919
+all slightly higher. Okay, so that's giving us a trace on location.
+
+128
+00:11:46.919 --> 00:11:51.919
+So we're not going to be finding any hiding points which the character can see.
+
+129
+00:11:51.919 --> 00:11:57.590
+Next up, I want to select points which are
+
+130
+00:11:57.590 --> 00:12:02.590
+away from the player. Now, one of the problems with this is if you select
+
+131
+00:12:02.590 --> 00:12:07.590
+a point which is behind the player, you might run towards the player in order to get
+
+132
+00:12:07.590 --> 00:12:12.590
+to them. So we're going to try and select points that are only away
+
+133
+00:12:12.590 --> 00:12:17.690
+from the player. For this, I'm going to add a dot test.
+
+134
+00:12:17.690 --> 00:12:22.690
+So this is dot product based on a line. It will
+
+135
+00:12:22.690 --> 00:12:27.690
+give us an idea of if the spot is facing
+
+136
+00:12:27.690 --> 00:12:33.330
+the player or not. So with that, I'm only
+
+137
+00:12:33.330 --> 00:12:38.899
+going to score. So I'm scoring only and I'm going to
+
+138
+00:12:38.899 --> 00:12:43.899
+do two points and two points down below it. And the first one I'm doing
+
+139
+00:12:43.899 --> 00:12:49.450
+is query to item and
+
+140
+00:12:49.450 --> 00:12:55.090
+the second one that I'm doing is layer to
+
+141
+00:12:55.090 --> 00:13:01.340
+query. Now I'm going to save. Now if we jump in,
+
+142
+00:13:01.340 --> 00:13:06.340
+you'll see that the points that are
+
+143
+00:13:06.340 --> 00:13:11.590
+heading away from the player have a higher value.
+
+144
+00:13:11.590 --> 00:13:16.779
+So if I now drag this player over to here and select the
+
+145
+00:13:16.779 --> 00:13:21.779
+EQS testing porn, you can see now that the ones so the ones back here
+
+146
+00:13:21.779 --> 00:13:26.779
+that would probably require us to go towards the player in order to get there
+
+147
+00:13:26.779 --> 00:13:31.779
+are going to have a lower value than the ones that are away from the player.
+
+148
+00:13:31.779 --> 00:13:41.519
+And now for my last test, in the moment, you can see that the ones
+
+149
+00:13:41.519 --> 00:13:46.519
+that are furthest off in the distance are going to be the ones that are selected. So we're always going to be running
+
+150
+00:13:46.519 --> 00:13:51.519
+off to these far walks to avoid that. So what I will do
+
+151
+00:13:51.519 --> 00:13:56.519
+is I am going to add a final test in
+
+152
+00:13:56.519 --> 00:14:02.480
+and this test is going to be a distance test. So
+
+153
+00:14:02.480 --> 00:14:07.990
+again, this is score only and I'm going to
+
+154
+00:14:07.990 --> 00:14:13.789
+change the scoring to inverse and linear. We're going to have a look and see what that
+
+155
+00:14:13.789 --> 00:14:20.330
+does to it. So now if I move, that's going to give
+
+156
+00:14:20.330 --> 00:14:25.330
+us a slightly better one and we can change the weightings of these. So
+
+157
+00:14:25.330 --> 00:14:31.059
+the distance I might want to make the scoring factor maybe two. Save
+
+158
+00:14:31.059 --> 00:14:36.190
+and now you can see that these spots here are probably some of the higher ones
+
+159
+00:14:36.190 --> 00:14:41.190
+these spots. Those are good hiding spots, I feel. And it's eliminating
+
+160
+00:14:41.190 --> 00:14:46.190
+the ones over in this direction, which is good because these ones would require us to walk
+
+161
+00:14:46.190 --> 00:14:52.220
+towards the player. OK, so now I am going to give this
+
+162
+00:14:52.220 --> 00:14:59.330
+a test so you can see when they see us, they ran away and they find a hide
+
+163
+00:14:59.330 --> 00:15:04.330
+spot. And then after
+
+164
+00:15:04.330 --> 00:15:10.860
+I've seen them, they ran away again and again, they're going to flee to a good hiding
+
+165
+00:15:10.860 --> 00:15:15.899
+spot. Now you can see that one in the far corner.
+
+166
+00:15:15.899 --> 00:15:24.000
+I don't have a line of sight on him, but he's hiding in a very bad location. That is not a
+
+167
+00:15:24.000 --> 00:15:29.000
+good hiding spot. And that's what we're going to try and fix in the next video
+
+168
+00:15:29.000 --> 00:15:34.419
+by creating some custom generation of plots. As you can see here,
+
+169
+00:15:34.419 --> 00:15:40.279
+they will flee and find hiding spots quite effectively. Well, that brings us
+
+170
+00:15:40.279 --> 00:15:45.539
+to the end of that video of setting up our EQS.
+
+171
+00:15:45.539 --> 00:15:46.539
+Thank you very much.

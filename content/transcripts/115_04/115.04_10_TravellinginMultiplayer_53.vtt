@@ -1,0 +1,141 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:07.660
+It's time now to look how we get our clients into a server and then travel from that server to another server.
+
+2
+00:00:07.660 --> 00:00:13.460
+In Unreal, there are two ways to travel, that being the seamless and non-seamless methods.
+
+3
+00:00:13.460 --> 00:00:18.019
+What these mean is more meaningful when regarding them from the client's perspective.
+
+4
+00:00:18.019 --> 00:00:22.820
+Seamless travel means there will be no blocking operations when traveling to a new server.
+
+5
+00:00:22.820 --> 00:00:27.280
+However, on the other hand, non-seamless travel will cause a blocking call.
+
+6
+00:00:27.280 --> 00:00:31.280
+In terms of a client, the client is forced to disconnect from the server
+
+7
+00:00:31.280 --> 00:00:37.740
+and once all of that is done, it will reconnect back to the same server which will now have a new map to load into.
+
+8
+00:00:37.740 --> 00:00:41.859
+There are three scenarios in which non-seamless travel must occur.
+
+9
+00:00:41.859 --> 00:00:44.659
+Firstly, when loading a map for the first time.
+
+10
+00:00:44.659 --> 00:00:48.289
+Secondly, when connecting to a new server for the first time.
+
+11
+00:00:48.289 --> 00:00:52.799
+And thirdly, when we end a multiplayer game and start a new one.
+
+12
+00:00:52.799 --> 00:00:57.000
+There are three main functions that drive traveling in Unreal, so let's take a look at these.
+
+13
+00:00:57.000 --> 00:01:00.799
+The first function is the browse function within the UEngine.
+
+14
+00:01:01.200 --> 00:01:06.599
+It's essentially a hard reset when loading a new map and will always result in a non-seamless travel.
+
+15
+00:01:06.599 --> 00:01:11.200
+It's going to cause the server to disconnect the current clients before traveling to the new map.
+
+16
+00:01:11.200 --> 00:01:15.859
+And it's worth noting that a dedicated server cannot travel to another server.
+
+17
+00:01:15.859 --> 00:01:22.280
+In other words, we can't browse to another URL, we must browse to a local map.
+
+18
+00:01:22.280 --> 00:01:24.879
+Then we have the server travel which is held in the UWorld
+
+19
+00:01:24.879 --> 00:01:28.950
+and the client travel which is held inside the player controller.
+
+20
+00:01:28.950 --> 00:01:33.349
+The server travel is of course server only and will cause the server to jump to a new level.
+
+21
+00:01:33.349 --> 00:01:35.980
+Bringing all connected clients with it.
+
+22
+00:01:35.980 --> 00:01:39.780
+The server is in charge of calling this function so we can't call it from a client.
+
+23
+00:01:39.780 --> 00:01:44.920
+And it will call the client travel function on all its connected clients for us.
+
+24
+00:01:44.920 --> 00:01:50.719
+Following that we have client travel and if called from a client we will be traveling to a new server.
+
+25
+00:01:50.719 --> 00:01:55.120
+If called from the server it will instruct the client to travel to the new map with them.
+
+26
+00:01:55.120 --> 00:01:58.319
+And importantly it will maintain the connection to the server.
+
+27
+00:01:58.319 --> 00:02:03.900
+The client won't get disconnected and then reconnected, they will maintain their connection.
+
+28
+00:02:03.900 --> 00:02:09.099
+Actors can be recognized as persistent and will travel from the previous level to the new.
+
+29
+00:02:09.099 --> 00:02:14.099
+This is extremely useful for certain actors that you may want to persist through your server move.
+
+30
+00:02:14.099 --> 00:02:17.099
+By default these actors persist through the level, we have the game mode.
+
+31
+00:02:17.099 --> 00:02:22.979
+As well as any actors picked up from the Get Seamless Travel actor list inside the game mode.
+
+32
+00:02:22.979 --> 00:02:28.469
+As well as that we have all controllers that have valid player states on the server only.
+
+33
+00:02:28.469 --> 00:02:32.610
+Also on the server we will get any player controllers.
+
+34
+00:02:32.610 --> 00:02:36.409
+In addition we will also get all local player controllers on both the server and the client.
+
+35
+00:02:36.409 --> 00:02:41.009
+As well as any actors picked up from there Get Seamless Travel actor list too.

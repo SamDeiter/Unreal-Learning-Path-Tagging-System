@@ -1,0 +1,1001 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.389
+So we'll begin by recapping what the Unreal Engine building blocks are.
+
+2
+00:00:05.389 --> 00:00:10.550
+Unreal offers many established classes that provide core functionality out of the box,
+
+3
+00:00:10.550 --> 00:00:15.839
+and going through these will help put the rest of this talk into a better perspective.
+
+4
+00:00:15.839 --> 00:00:18.699
+We'll only briefly touch on these, as I'd highly recommend that you watch our
+
+5
+00:00:18.699 --> 00:00:22.859
+previous talk, that being an introduction to Unreal Engine 4 for programmers, into
+
+6
+00:00:22.859 --> 00:00:26.379
+which we do a deeper dive into these topics.
+
+7
+00:00:26.379 --> 00:00:31.379
+As mentioned previously, UObject is the base class for all UE4 types, including all
+
+8
+00:00:31.559 --> 00:00:33.619
+assets inside the content browser.
+
+9
+00:00:33.619 --> 00:00:37.500
+They have no physical representation in the world, and they have no built-in tick
+
+10
+00:00:37.500 --> 00:00:41.259
+functionality. As they've got no concept of the world, they have no ability to
+
+11
+00:00:41.259 --> 00:00:44.740
+update the frame. They must be given an outer.
+
+12
+00:00:44.740 --> 00:00:47.579
+This is the object that this object resides in.
+
+13
+00:00:47.579 --> 00:00:51.420
+If one is not given an outer, it's put inside the transient package, which is the
+
+14
+00:00:51.420 --> 00:00:56.280
+topmost package used for storing temporary objects, which should not be saved.
+
+15
+00:00:56.280 --> 00:01:00.079
+Objects can support networking, but they do not come with it set about the box.
+
+16
+00:01:00.079 --> 00:01:03.479
+If networking is required, perhaps reconsider whether or not UObject is the
+
+17
+00:01:03.479 --> 00:01:06.540
+right solution for your current technical requirement.
+
+18
+00:01:06.540 --> 00:01:10.459
+As an example of a UObject, we have the UExplosionData asset, which is used
+
+19
+00:01:10.459 --> 00:01:13.620
+to define properties regarding an explosion.
+
+20
+00:01:13.620 --> 00:01:17.659
+Actor extends directly off of UObject, and is usually accompanied by a scene
+
+21
+00:01:17.659 --> 00:01:21.200
+component as its route, giving it a physical representation in the scene.
+
+22
+00:01:21.200 --> 00:01:23.459
+For example, consider an exploding barrel.
+
+23
+00:01:23.459 --> 00:01:27.000
+This would be an actor, consisting of smaller discrete pieces of functionality,
+
+24
+00:01:27.000 --> 00:01:30.519
+and a physical representation through some flavor of mesh.
+
+25
+00:01:30.519 --> 00:01:34.359
+Actors do have networking support by default, giving us access to RPCs like we
+
+26
+00:01:34.359 --> 00:01:38.129
+discussed earlier, as well as standard variable replication.
+
+27
+00:01:38.129 --> 00:01:41.170
+They're exceptionally well suited to a component-based architecture,
+
+28
+00:01:41.170 --> 00:01:43.890
+as opposed to a giant monolithic class.
+
+29
+00:01:43.890 --> 00:01:45.890
+So at this time, consider the following.
+
+30
+00:01:45.890 --> 00:01:49.689
+If my current technical design requires either networking or ticking,
+
+31
+00:01:49.689 --> 00:01:51.370
+go with actors and components.
+
+32
+00:01:51.370 --> 00:01:55.280
+If you don't require either, consider using the UObject.
+
+33
+00:01:55.280 --> 00:01:59.159
+Actor components allow us to roll functionality into a single class.
+
+34
+00:01:59.159 --> 00:02:02.760
+They require an actor to exist, because they cannot simply exist in the world.
+
+35
+00:02:02.760 --> 00:02:05.319
+They're designed to be part of an actor.
+
+36
+00:02:05.319 --> 00:02:08.479
+And they're excellent when used in conjunction with Blueprint to expose their parameters
+
+37
+00:02:08.479 --> 00:02:11.250
+to design with sensible U-property use.
+
+38
+00:02:11.250 --> 00:02:15.810
+So as an example, we can add an explosion component to our exploding barrel actor,
+
+39
+00:02:15.810 --> 00:02:18.409
+and keep the actor class completely unpolluted.
+
+40
+00:02:18.409 --> 00:02:21.969
+If another actor in our game requires some kind of explosion functionality,
+
+41
+00:02:21.969 --> 00:02:24.050
+we can simply add the component to that class as well,
+
+42
+00:02:24.050 --> 00:02:26.189
+without having to duplicate anything.
+
+43
+00:02:26.189 --> 00:02:28.469
+We can also add U-properties to the explosion component,
+
+44
+00:02:28.469 --> 00:02:32.389
+to allow design to plug in an explosion data asset in as a field,
+
+45
+00:02:32.389 --> 00:02:35.409
+letting them balance and tweak the functionality separately.
+
+46
+00:02:35.409 --> 00:02:38.810
+Actor components are not particularly ideal for networked functionality,
+
+47
+00:02:38.810 --> 00:02:43.099
+as dormancy can only be set on an actor level, as opposed to a component level.
+
+48
+00:02:43.099 --> 00:02:46.099
+A dormant actor will send all of its components dormant as well,
+
+49
+00:02:46.099 --> 00:02:51.110
+so we may end up with erroneous or unacceptable behavior as the project grows.
+
+50
+00:02:51.110 --> 00:02:54.030
+A scene component extends off of actor component,
+
+51
+00:02:54.030 --> 00:02:57.870
+with the benefit of providing a physical representation in the scene.
+
+52
+00:02:57.870 --> 00:03:01.669
+They can be attached to other scene components as well as bones and sockets,
+
+53
+00:03:01.669 --> 00:03:04.870
+and they can also be used to detect collisions and overlaps.
+
+54
+00:03:04.870 --> 00:03:09.189
+It's the scene component that gives a base actor its physical representation in the scene.
+
+55
+00:03:09.189 --> 00:03:11.550
+An actor itself has got no intrinsic transform,
+
+56
+00:03:11.550 --> 00:03:13.550
+but it does have a root component,
+
+57
+00:03:13.550 --> 00:03:18.169
+which is a simple scene component giving us our scene representation.
+
+58
+00:03:18.169 --> 00:03:21.750
+With the recap over, let's take a look at the player.
+
+59
+00:03:21.750 --> 00:03:24.310
+What classes and concepts do we need to be familiar with
+
+60
+00:03:24.310 --> 00:03:27.360
+in order to get a player up and running?
+
+61
+00:03:27.360 --> 00:03:33.620
+The Pawn offers the entry point for actors that can be possessed by either a player or the AI.
+
+62
+00:03:33.620 --> 00:03:37.259
+By default, the Pawn class gives a physical representation in the scene,
+
+63
+00:03:37.259 --> 00:03:41.169
+but it's otherwise a plain canvas for us to build from.
+
+64
+00:03:41.169 --> 00:03:44.289
+Pawns have a one-to-one relationship with controllers,
+
+65
+00:03:44.289 --> 00:03:46.650
+meaning each Pawn can only have one controller,
+
+66
+00:03:46.650 --> 00:03:50.300
+and each controller can only control one Pawn.
+
+67
+00:03:50.300 --> 00:03:53.620
+It's important to note that the Pawn is not assumed to be humanoid,
+
+68
+00:03:53.620 --> 00:03:55.699
+and it does not provide any default movement,
+
+69
+00:03:55.699 --> 00:03:58.259
+skeletal mesh, or collision components.
+
+70
+00:03:58.259 --> 00:04:00.740
+It only provides a default scene component,
+
+71
+00:04:00.740 --> 00:04:03.629
+that being its root component.
+
+72
+00:04:03.629 --> 00:04:05.990
+The Pawn extends off of the actor class,
+
+73
+00:04:05.990 --> 00:04:08.509
+and as such has access to some of its core functionality,
+
+74
+00:04:08.509 --> 00:04:12.110
+such as its location and rotation manipulation.
+
+75
+00:04:12.110 --> 00:04:15.069
+In Blueprints, we can quite easily add movement to our Pawns
+
+76
+00:04:15.069 --> 00:04:19.060
+using the set actor location function like we just discussed.
+
+77
+00:04:19.060 --> 00:04:22.740
+This function allows us to either teleport the Pawn from its current location,
+
+78
+00:04:22.740 --> 00:04:26.389
+or we can perform what we call a sweeping move.
+
+79
+00:04:26.389 --> 00:04:29.870
+The sweeping move essentially slides the Pawn from point A to point B,
+
+80
+00:04:29.870 --> 00:04:33.769
+stopping as soon as they collide with any geometry.
+
+81
+00:04:33.769 --> 00:04:37.930
+Pawns spawned during gameplay are not automatically possessed by a controller.
+
+82
+00:04:37.930 --> 00:04:39.889
+However, we do have some options exposed out,
+
+83
+00:04:39.889 --> 00:04:41.889
+so we can have some semblance of control.
+
+84
+00:04:41.889 --> 00:04:45.420
+So let's take a look at those in the editor.
+
+85
+00:04:45.420 --> 00:04:48.899
+So whilst Pawn gives us a base for all controllable actors,
+
+86
+00:04:48.899 --> 00:04:52.339
+the default Pawn and spectator Pawns build on top of that
+
+87
+00:04:52.339 --> 00:04:55.360
+to provide us some out-of-the-box functionality.
+
+88
+00:04:55.360 --> 00:04:58.279
+The default Pawn provides us with the following components.
+
+89
+00:04:58.279 --> 00:05:01.160
+We're gonna get a default Pawn movement component,
+
+90
+00:05:01.160 --> 00:05:05.639
+a spherical collision component, and a mesh component.
+
+91
+00:05:05.639 --> 00:05:07.600
+It also provides built-in functionality
+
+92
+00:05:07.600 --> 00:05:10.759
+to add default movement bindings, which are on by default,
+
+93
+00:05:10.759 --> 00:05:11.680
+cutting out the need
+
+94
+00:05:11.680 --> 00:05:14.199
+for any manual adding of movement logic to your Pawn,
+
+95
+00:05:14.199 --> 00:05:17.199
+whether that be native or Blueprint.
+
+96
+00:05:17.199 --> 00:05:18.839
+The movement that it offers is as follows.
+
+97
+00:05:18.839 --> 00:05:23.120
+We get forwards, backwards, left, right, and jump.
+
+98
+00:05:23.120 --> 00:05:24.720
+The default Pawn movement component
+
+99
+00:05:24.720 --> 00:05:27.720
+offers a no-gravity, flying-style movement
+
+100
+00:05:27.720 --> 00:05:30.639
+as the Pawn is not assumed to be humanoid.
+
+101
+00:05:30.639 --> 00:05:32.360
+The default Pawn movement component
+
+102
+00:05:32.360 --> 00:05:34.920
+exposes controls over maximum speed,
+
+103
+00:05:34.920 --> 00:05:39.389
+acceleration, and deceleration to Blueprint.
+
+104
+00:05:39.389 --> 00:05:41.189
+The spectator Pawn, on the other hand,
+
+105
+00:05:41.189 --> 00:05:43.670
+is a subclass of default Pawn
+
+106
+00:05:43.670 --> 00:05:45.269
+and provides us with a simple framework
+
+107
+00:05:45.269 --> 00:05:48.740
+ideal for spectating functionality.
+
+108
+00:05:48.740 --> 00:05:51.579
+Like default Pawn, it offers much the same components,
+
+109
+00:05:51.579 --> 00:05:53.420
+but it does away with a mesh component,
+
+110
+00:05:53.420 --> 00:05:56.949
+as spectators typically don't have a mesh.
+
+111
+00:05:56.949 --> 00:05:58.589
+The spectator Pawn does, however,
+
+112
+00:05:58.589 --> 00:06:00.550
+provide its own movement component,
+
+113
+00:06:00.550 --> 00:06:03.509
+that being the spectator Pawn movement component.
+
+114
+00:06:03.509 --> 00:06:04.670
+And it's largely the same
+
+115
+00:06:04.670 --> 00:06:06.470
+as the default Pawn's movement component,
+
+116
+00:06:06.470 --> 00:06:07.949
+with added functionality of handling
+
+117
+00:06:07.949 --> 00:06:11.610
+or ignoring time dilation as necessary.
+
+118
+00:06:11.610 --> 00:06:14.170
+A character is a humanoid-style Pawn,
+
+119
+00:06:14.170 --> 00:06:18.339
+and it is assumed to be vertically orientated.
+
+120
+00:06:18.339 --> 00:06:20.740
+The character brings with it its own movement component,
+
+121
+00:06:20.740 --> 00:06:22.579
+which offers a greater range of movement
+
+122
+00:06:22.579 --> 00:06:24.379
+than the Pawn movement component,
+
+123
+00:06:24.379 --> 00:06:27.620
+allowing characters to walk, run, jump, fly, fall,
+
+124
+00:06:27.620 --> 00:06:30.259
+and swim through the world.
+
+125
+00:06:30.259 --> 00:06:32.980
+The character movement component is heavily networked,
+
+126
+00:06:32.980 --> 00:06:34.339
+making it the perfect type to use
+
+127
+00:06:34.339 --> 00:06:37.620
+when thinking about un-networked games.
+
+128
+00:06:37.620 --> 00:06:40.819
+The character is the first class along the Pawn hierarchy
+
+129
+00:06:40.819 --> 00:06:44.139
+to provide specific functions for crouching and jumping,
+
+130
+00:06:44.139 --> 00:06:47.060
+as well as overriding several variables and functions
+
+131
+00:06:47.060 --> 00:06:49.500
+to specifically facilitate replication
+
+132
+00:06:49.500 --> 00:06:52.500
+inside the character movement component.
+
+133
+00:06:52.500 --> 00:06:54.579
+Unlike Pawns, the character comes
+
+134
+00:06:54.579 --> 00:06:55.779
+with a skeletal mesh component,
+
+135
+00:06:56.100 --> 00:06:58.620
+which enables us to make use of animations.
+
+136
+00:06:58.620 --> 00:07:00.699
+The native skeletal mesh provided by the character
+
+137
+00:07:00.699 --> 00:07:02.180
+is also the main skeletal mesh
+
+138
+00:07:02.180 --> 00:07:04.019
+associated with the character,
+
+139
+00:07:04.019 --> 00:07:05.660
+but more skeletal meshes can be added
+
+140
+00:07:05.660 --> 00:07:08.899
+to the character as we see fit.
+
+141
+00:07:08.899 --> 00:07:11.420
+The character also offers some animation functionality,
+
+142
+00:07:11.420 --> 00:07:14.420
+such as allowing us to play and stop animation montages,
+
+143
+00:07:14.420 --> 00:07:18.120
+both in native and in blueprint.
+
+144
+00:07:18.120 --> 00:07:20.439
+It also provides a capsule collision component
+
+145
+00:07:20.439 --> 00:07:22.040
+straight out of the box.
+
+146
+00:07:22.040 --> 00:07:23.120
+As mentioned previously,
+
+147
+00:07:23.120 --> 00:07:26.279
+the character is assumed to be vertically orientated,
+
+148
+00:07:26.279 --> 00:07:28.040
+and this is due to the functionality provided
+
+149
+00:07:28.040 --> 00:07:30.040
+by the capsule collision component,
+
+150
+00:07:30.040 --> 00:07:32.399
+which in order to calculate complicated geometries
+
+151
+00:07:32.399 --> 00:07:34.680
+make this assumption.
+
+152
+00:07:34.680 --> 00:07:37.079
+The character movement component is a component
+
+153
+00:07:37.079 --> 00:07:40.000
+specially created to be paired with a character.
+
+154
+00:07:40.000 --> 00:07:42.079
+It provides encapsulated movement systems
+
+155
+00:07:42.079 --> 00:07:43.240
+for humanoid characters,
+
+156
+00:07:43.240 --> 00:07:47.160
+which are assumed to be vertically orientated.
+
+157
+00:07:47.160 --> 00:07:49.399
+It handles movements such as walking, running, swimming,
+
+158
+00:07:49.399 --> 00:07:50.920
+falling, or flying,
+
+159
+00:07:50.920 --> 00:07:52.839
+and it's built with networking in mind
+
+160
+00:07:52.839 --> 00:07:54.279
+with the aforementioned movement modes
+
+161
+00:07:54.279 --> 00:07:57.879
+built to replicate straight out of the box.
+
+162
+00:07:57.879 --> 00:07:58.759
+As mentioned before,
+
+163
+00:07:58.759 --> 00:08:01.240
+it is created to be paired with the character in mind,
+
+164
+00:08:01.240 --> 00:08:03.720
+as the character class overrides variables and functions
+
+165
+00:08:03.720 --> 00:08:05.279
+that facilitate the networking side
+
+166
+00:08:05.279 --> 00:08:07.860
+of the movement component.
+
+167
+00:08:07.860 --> 00:08:09.740
+Custom movement modes can be created
+
+168
+00:08:09.740 --> 00:08:10.579
+and can be handled
+
+169
+00:08:10.579 --> 00:08:12.779
+by the character movement component directly,
+
+170
+00:08:12.779 --> 00:08:14.420
+giving the developer complete control
+
+171
+00:08:14.420 --> 00:08:16.379
+over how their custom movement mode
+
+172
+00:08:16.379 --> 00:08:17.339
+is handled when it comes
+
+173
+00:08:17.339 --> 00:08:19.220
+to updating the character's position,
+
+174
+00:08:19.220 --> 00:08:22.060
+as each movement mode handles its own movement logic.
+
+175
+00:08:22.060 --> 00:08:25.740
+For example, if the movement mode is move walking,
+
+176
+00:08:25.740 --> 00:08:29.220
+then it will call the fizz walking function.
+
+177
+00:08:29.220 --> 00:08:32.100
+The character movement component isn't blueprintable,
+
+178
+00:08:32.100 --> 00:08:33.740
+so for handling custom movement modes
+
+179
+00:08:33.740 --> 00:08:35.860
+outside of native implementations,
+
+180
+00:08:35.860 --> 00:08:36.820
+it's usually recommended
+
+181
+00:08:36.820 --> 00:08:38.899
+to handle it inside the character blueprint directly
+
+182
+00:08:38.899 --> 00:08:41.700
+using the update custom movement blueprint event
+
+183
+00:08:41.700 --> 00:08:45.899
+that's fired when a custom movement mode is processed.
+
+184
+00:08:45.899 --> 00:08:48.419
+So now that we know what a pawn and character is,
+
+185
+00:08:48.419 --> 00:08:51.700
+we naturally have to discuss controllers.
+
+186
+00:08:51.700 --> 00:08:53.860
+Controllers are a non-physical actor
+
+187
+00:08:53.860 --> 00:08:57.490
+that possess pawns or a pawn derived class.
+
+188
+00:08:57.490 --> 00:09:00.169
+This is done through the possess and unpossess functions,
+
+189
+00:09:00.169 --> 00:09:04.659
+both of which are available in native and blueprint.
+
+190
+00:09:04.659 --> 00:09:08.100
+The base class for controllers is the AController class,
+
+191
+00:09:08.100 --> 00:09:10.340
+and this class defines some of the core functionality
+
+192
+00:09:10.340 --> 00:09:11.580
+of a controller,
+
+193
+00:09:11.580 --> 00:09:14.019
+and also make use of the class specifies abstract
+
+194
+00:09:14.019 --> 00:09:16.610
+and non-placeable.
+
+195
+00:09:16.610 --> 00:09:18.850
+The form of these specifies works as you'd expect,
+
+196
+00:09:18.850 --> 00:09:20.529
+it marks the class as abstract
+
+197
+00:09:20.529 --> 00:09:23.370
+and therefore cannot be instantiated directly,
+
+198
+00:09:23.370 --> 00:09:24.610
+while the latter marks the class
+
+199
+00:09:24.610 --> 00:09:29.629
+so that it cannot be clicked and dragged into the editor.
+
+200
+00:09:29.629 --> 00:09:30.629
+As discussed previously,
+
+201
+00:09:30.629 --> 00:09:33.190
+they have a one-to-one relationship with a pawn,
+
+202
+00:09:33.190 --> 00:09:35.750
+and this is usually desired by most game types,
+
+203
+00:09:35.750 --> 00:09:37.389
+but they may not meet all requirements
+
+204
+00:09:37.389 --> 00:09:42.059
+where possession of multiple pawns may be desired.
+
+205
+00:09:42.059 --> 00:09:44.620
+Controllers also receive many notifications of events
+
+206
+00:09:44.620 --> 00:09:46.059
+that occur for the pawn,
+
+207
+00:09:46.059 --> 00:09:47.419
+and this gives developers the opportunity
+
+208
+00:09:47.419 --> 00:09:49.580
+to implement functionality for the given event
+
+209
+00:09:49.580 --> 00:09:53.019
+and supersede the behaviour that the pawn may trigger.
+
+210
+00:09:53.019 --> 00:09:55.220
+It's also possible to make the controller tick
+
+211
+00:09:55.220 --> 00:09:56.580
+before the controlled pawn,
+
+212
+00:09:56.580 --> 00:09:58.100
+which can be used to minimise latency
+
+213
+00:09:58.100 --> 00:10:00.820
+between input processing and the pawn's movement,
+
+214
+00:10:00.820 --> 00:10:03.580
+an important thing when it comes to player controllers.
+
+215
+00:10:03.580 --> 00:10:06.460
+Controllers do not expose transform functions
+
+216
+00:10:06.460 --> 00:10:08.659
+to derived classes in native.
+
+217
+00:10:08.659 --> 00:10:10.220
+Controllers attach themselves to their pawn
+
+218
+00:10:10.220 --> 00:10:14.029
+when they possess and detach when they unpossess.
+
+219
+00:10:14.029 --> 00:10:15.149
+So what types of controller
+
+220
+00:10:15.149 --> 00:10:17.309
+does Unreal give us out of the box?
+
+221
+00:10:17.309 --> 00:10:18.710
+Well, as the title suggests,
+
+222
+00:10:18.710 --> 00:10:23.129
+Unreal gives us the player controller and the AI controller.
+
+223
+00:10:23.129 --> 00:10:26.799
+Player controllers represent the human player's will.
+
+224
+00:10:26.799 --> 00:10:28.159
+Player controllers are flexible
+
+225
+00:10:28.159 --> 00:10:29.600
+and a key tool for developers
+
+226
+00:10:29.600 --> 00:10:32.620
+when considering the gameplay loops of their games.
+
+227
+00:10:32.620 --> 00:10:33.580
+For instance, they can be used
+
+228
+00:10:33.580 --> 00:10:37.740
+to handle the input notifications rather than the pawn.
+
+229
+00:10:37.740 --> 00:10:39.659
+It's important to consider what functionality
+
+230
+00:10:39.659 --> 00:10:42.659
+should be placed in the player controller over the pawn.
+
+231
+00:10:42.659 --> 00:10:44.100
+So for example, if you have a game
+
+232
+00:10:44.100 --> 00:10:46.620
+in which the player can swap around many characters,
+
+233
+00:10:46.620 --> 00:10:48.019
+then it would make sense to implement
+
+234
+00:10:48.019 --> 00:10:50.019
+the input handling within the controller,
+
+235
+00:10:50.019 --> 00:10:52.179
+as the controller can simply relay those commands
+
+236
+00:10:52.179 --> 00:10:55.019
+onto the currently controlled pawn.
+
+237
+00:10:55.019 --> 00:10:57.100
+The player controller, unlike the pawn,
+
+238
+00:10:57.100 --> 00:10:59.899
+persists as only one is created for that player
+
+239
+00:10:59.899 --> 00:11:01.700
+when they're loaded into the map,
+
+240
+00:11:01.700 --> 00:11:04.559
+whereas pawns are transient.
+
+241
+00:11:04.559 --> 00:11:06.000
+If your game has a gameplay loop
+
+242
+00:11:06.000 --> 00:11:08.759
+in which the player's character dies and respawns,
+
+243
+00:11:08.759 --> 00:11:11.399
+Unreal will destroy the current pawn upon death
+
+244
+00:11:11.399 --> 00:11:13.440
+and a new one will be assigned to the player
+
+245
+00:11:13.440 --> 00:11:15.399
+when respawning, but importantly,
+
+246
+00:11:15.399 --> 00:11:16.279
+it will be controlled
+
+247
+00:11:16.279 --> 00:11:19.500
+by the player's existing player controller.
+
+248
+00:11:19.500 --> 00:11:20.899
+AI controllers, on the other hand,
+
+249
+00:11:20.899 --> 00:11:22.419
+are exactly as you'd expect.
+
+250
+00:11:22.419 --> 00:11:25.539
+They're the simulated will of an AI agent.
