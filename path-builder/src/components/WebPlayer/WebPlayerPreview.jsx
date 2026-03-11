@@ -189,6 +189,9 @@ export default function WebPlayerPreview({
         {/* Toolbar */}
         <div className="wp-toolbar">
           <div className="wp-toolbar-left">
+            <button className="wp-back-btn" onClick={onClose} title="Back to Path Builder">
+              ← Back to Builder
+            </button>
             <span className="wp-badge">🌐 Web Player</span>
             <span className="wp-breadcrumb">
               Step {activeStep + 1} of {stepData.length}
