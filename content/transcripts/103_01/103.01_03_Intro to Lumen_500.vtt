@@ -1,0 +1,785 @@
+WEBVTT
+
+1
+00:00:01.710 --> 00:00:04.929
+Okay, so now that we've had a look at some of the light types
+
+2
+00:00:04.929 --> 00:00:06.509
+and some of the basic properties of lights,
+
+3
+00:00:06.509 --> 00:00:08.250
+let's go ahead and take a look at one of the lighting systems
+
+4
+00:00:08.250 --> 00:00:10.470
+of Unreal Engine 5, which is going to be Lumen.
+
+5
+00:00:10.470 --> 00:00:13.529
+So the topics that we're going to cover in this video
+
+6
+00:00:13.529 --> 00:00:16.030
+are what is Lumen, how we set it up,
+
+7
+00:00:16.030 --> 00:00:19.070
+some quality control to make sure that we get the best out of Lumen,
+
+8
+00:00:19.070 --> 00:00:23.250
+some tips and tricks, as well as some visualizers
+
+9
+00:00:23.250 --> 00:00:25.899
+that we can take a look at to troubleshoot some of the issues
+
+10
+00:00:25.899 --> 00:00:27.640
+that we might have with Lumen.
+
+11
+00:00:27.640 --> 00:00:29.980
+So when it comes to what Lumen is,
+
+12
+00:00:29.980 --> 00:00:32.399
+it's Unreal Engine 5's fully dynamic global illumination
+
+13
+00:00:32.420 --> 00:00:36.060
+and reflection system, which is designed for the next-gen consoles
+
+14
+00:00:37.420 --> 00:00:38.920
+as well as high-end PCs.
+
+15
+00:00:38.920 --> 00:00:41.640
+Now, what's really cool about Lumen is that you're not dependent
+
+16
+00:00:41.640 --> 00:00:45.100
+on high-end ray tracing GPU
+
+17
+00:00:45.100 --> 00:00:47.100
+to get ray tracing, essentially.
+
+18
+00:00:48.100 --> 00:00:49.600
+And another thing that's really cool about Lumen
+
+19
+00:00:49.600 --> 00:00:52.479
+is that it renders diffuse into reflection with infinite bounces
+
+20
+00:00:52.479 --> 00:00:55.399
+and indirect specular reflections in loud detail environments
+
+21
+00:00:55.399 --> 00:00:57.979
+at scales ranging from millimeters to kilometers.
+
+22
+00:00:59.100 --> 00:01:01.719
+Now, the thing, and the important thing about that
+
+23
+00:01:01.740 --> 00:01:03.740
+is it provides infinite diffuse bounces,
+
+24
+00:01:03.740 --> 00:01:06.629
+which means when it comes to the light bleed in between
+
+25
+00:01:06.629 --> 00:01:10.049
+or the color bleed in between surfaces in Unreal,
+
+26
+00:01:10.049 --> 00:01:13.310
+we aren't limited to a particular number of bounces.
+
+27
+00:01:13.310 --> 00:01:16.010
+We have infinite bounces for that, which is really cool.
+
+28
+00:01:16.010 --> 00:01:18.010
+Now, another thing that's great about it
+
+29
+00:01:18.010 --> 00:01:21.849
+is that when used in combination with Nanite's virtualized geometry,
+
+30
+00:01:22.569 --> 00:01:25.849
+it allows us to have very, very, very detailed geometry
+
+31
+00:01:25.849 --> 00:01:27.849
+and also achieve full resolution shading
+
+32
+00:01:27.849 --> 00:01:31.689
+while computing that indirect lighting cheaper than ever before.
+
+33
+00:01:33.519 --> 00:01:36.780
+Skylighting is also solved as part of Lumen's final gather process,
+
+34
+00:01:36.780 --> 00:01:38.780
+and that includes sky shadowing,
+
+35
+00:01:38.780 --> 00:01:41.859
+which allows for indoor spaces to be much darker than outdoor lighting,
+
+36
+00:01:41.859 --> 00:01:46.340
+and you get much more natural-feeling effects.
+
+37
+00:01:47.340 --> 00:01:49.799
+And another thing to keep in mind is that it also provides
+
+38
+00:01:49.799 --> 00:01:52.420
+slightly lower quality, lower illumination for light translucency
+
+39
+00:01:52.420 --> 00:01:55.260
+and volumetric fog, although that's improving as we speak,
+
+40
+00:01:55.260 --> 00:02:00.680
+and we hope that future releases actually make this really, really cool.
+
+41
+00:02:02.379 --> 00:02:05.500
+Another cool feature about Unreal is that it supports emissive materials
+
+42
+00:02:05.500 --> 00:02:07.719
+at no additional performance cost.
+
+43
+00:02:07.719 --> 00:02:11.340
+There is a limit to how small and bright the objects can be
+
+44
+00:02:11.340 --> 00:02:15.599
+that emit light, so it's actually always a little bit better
+
+45
+00:02:15.599 --> 00:02:18.139
+to use actual lights than this gear is.
+
+46
+00:02:19.139 --> 00:02:21.900
+Another thing to keep in mind is troubleshooting these things
+
+47
+00:02:21.900 --> 00:02:24.740
+that can be harder to solve than manually placed lights,
+
+48
+00:02:24.740 --> 00:02:28.930
+but it is still a really cool feature to have,
+
+49
+00:02:29.370 --> 00:02:34.020
+especially for larger meshes.
+
+50
+00:02:34.020 --> 00:02:38.520
+When it comes to reflections,
+
+51
+00:02:38.520 --> 00:02:43.439
+it solves indirect specular or reflections
+
+52
+00:02:43.439 --> 00:02:46.319
+for the full range of the material's roughness value,
+
+53
+00:02:46.319 --> 00:02:48.900
+and another great thing is that the fused golden animation
+
+54
+00:02:48.900 --> 00:02:51.659
+in the shadow skylight can be seen in reflections,
+
+55
+00:02:51.659 --> 00:02:53.919
+as well as being supported in clear coat materials,
+
+56
+00:02:53.919 --> 00:02:56.819
+which is really, really cool.
+
+57
+00:02:56.819 --> 00:02:58.819
+What does it replace, then?
+
+58
+00:02:58.960 --> 00:03:02.259
+It replaces the skylight with ambient occlusion
+
+59
+00:03:02.259 --> 00:03:04.259
+or unshadowed skylights.
+
+60
+00:03:04.259 --> 00:03:06.259
+It replaces any form of screen space
+
+61
+00:03:06.259 --> 00:03:08.259
+global illumination system that we might have had.
+
+62
+00:03:08.259 --> 00:03:13.020
+It replaces full-on hardware ray tracing global illumination,
+
+63
+00:03:13.020 --> 00:03:16.849
+as well as any third-party global illumination solutions.
+
+64
+00:03:16.849 --> 00:03:19.229
+Now, how do we set this up?
+
+65
+00:03:19.229 --> 00:03:22.229
+To set Lumen up, you just need to make a few changes
+
+66
+00:03:22.229 --> 00:03:25.289
+on the project settings.
+
+67
+00:03:25.289 --> 00:03:28.050
+On the project settings, you want to go to the Rendering tab
+
+68
+00:03:28.050 --> 00:03:30.689
+and make sure that the dynamic global illumination system
+
+69
+00:03:30.689 --> 00:03:34.120
+is set to Lumen, that the reflections and their method
+
+70
+00:03:34.120 --> 00:03:35.979
+are set to Lumen as well.
+
+71
+00:03:35.979 --> 00:03:37.539
+And this should happen automatically,
+
+72
+00:03:37.539 --> 00:03:39.659
+but if it doesn't, just make sure you double-check
+
+73
+00:03:39.659 --> 00:03:42.780
+the Generate Mesh Distance fields is on.
+
+74
+00:03:42.780 --> 00:03:44.439
+And another thing that you might need to do
+
+75
+00:03:44.439 --> 00:03:47.479
+is change your default RHI to DirectX 12
+
+76
+00:03:47.479 --> 00:03:49.840
+so that you can have Shader Model 6 enabled.
+
+77
+00:03:50.840 --> 00:03:54.009
+This is required for some of the visualizers.
+
+78
+00:03:54.009 --> 00:03:56.009
+From here on, any other changes that we want to do
+
+79
+00:03:56.009 --> 00:03:58.550
+down the line for changing quality and things like that
+
+80
+00:03:58.550 --> 00:04:00.830
+will be done via the post-process volume.
+
+81
+00:04:02.360 --> 00:04:04.199
+Now, if we take a look at some of the things
+
+82
+00:04:04.199 --> 00:04:07.580
+that we can do to get a slightly better reflections,
+
+83
+00:04:07.580 --> 00:04:09.379
+if you have a good enough card,
+
+84
+00:04:09.379 --> 00:04:12.419
+is one cool thing about Lumen is that it can form
+
+85
+00:04:12.419 --> 00:04:17.139
+a little bit of a hybrid system with actual ray tracing.
+
+86
+00:04:17.139 --> 00:04:22.240
+So you can set up your reflections to be ray traced.
+
+87
+00:04:23.100 --> 00:04:27.019
+So to get better reflections,
+
+88
+00:04:27.019 --> 00:04:29.360
+and if your card can handle it, as I say,
+
+89
+00:04:29.959 --> 00:04:32.560
+you can change these settings to change the ray lighting mode
+
+90
+00:04:32.560 --> 00:04:34.860
+to hit lighting for reflections,
+
+91
+00:04:34.860 --> 00:04:42.139
+and the software ray tracing mode to detail tracing.
+
+92
+00:04:42.139 --> 00:04:43.439
+When it comes to quality control
+
+93
+00:04:43.439 --> 00:04:47.019
+and how we can change the quality for performance
+
+94
+00:04:47.019 --> 00:04:52.110
+in terms of Lumen's scene quality settings,
+
+95
+00:04:52.269 --> 00:04:53.850
+we can go to the post-process volume
+
+96
+00:04:53.850 --> 00:04:54.889
+and change the following things.
+
+97
+00:04:54.889 --> 00:04:57.889
+So if we change the Lumen scene lighting quality,
+
+98
+00:04:57.889 --> 00:05:01.490
+it scales the actual quality of Lumen.
+
+99
+00:05:01.490 --> 00:05:04.329
+So larger scales on this will mean
+
+100
+00:05:04.329 --> 00:05:08.129
+that the Lumen scene is calculated with higher fidelity,
+
+101
+00:05:08.129 --> 00:05:10.490
+which will be visible in the reflections, for example,
+
+102
+00:05:10.490 --> 00:05:13.209
+but the larger the value, the higher the GPU cost.
+
+103
+00:05:13.209 --> 00:05:14.490
+And you'll hear me say this a lot,
+
+104
+00:05:14.490 --> 00:05:16.370
+especially when we start tweaking values
+
+105
+00:05:16.370 --> 00:05:19.519
+to get better detail.
+
+106
+00:05:19.519 --> 00:05:21.759
+The Lumen scene detail controls the size of instances
+
+107
+00:05:21.759 --> 00:05:23.560
+that can be calculated in the scene.
+
+108
+00:05:23.560 --> 00:05:25.519
+So the larger the value,
+
+109
+00:05:25.519 --> 00:05:28.879
+the smaller the objects that can be calculated,
+
+110
+00:05:28.879 --> 00:05:31.860
+but again, at the cost of GPU.
+
+111
+00:05:31.899 --> 00:05:34.699
+The Lumen scene view distance,
+
+112
+00:05:34.699 --> 00:05:36.779
+so if you set the maximum view distance
+
+113
+00:05:38.310 --> 00:05:43.000
+so that the scene maintains, sorry,
+
+114
+00:05:43.000 --> 00:05:45.199
+that sets the maximum view distance of the scene
+
+115
+00:05:45.199 --> 00:05:47.120
+that Lumen maintains for ray tracing against,
+
+116
+00:05:47.120 --> 00:05:49.560
+the large values will help with sky shadowing
+
+117
+00:05:49.560 --> 00:05:52.639
+and global illumination, but again, at the cost of GPU.
+
+118
+00:05:52.639 --> 00:05:54.980
+And then we have the Lumen final gather quality
+
+119
+00:05:54.980 --> 00:05:57.860
+which scales Lumen's final gather quality,
+
+120
+00:05:57.860 --> 00:06:02.040
+and again, the larger the values, the less noise,
+
+121
+00:06:02.040 --> 00:06:06.269
+but the higher the GPU cost.
+
+122
+00:06:06.269 --> 00:06:08.470
+Now, some more advanced settings here
+
+123
+00:06:08.470 --> 00:06:12.870
+are the lighting update quality settings.
+
+124
+00:06:12.870 --> 00:06:16.149
+So if you change the Lumen quality update speed,
+
+125
+00:06:16.149 --> 00:06:21.209
+it will control how much Lumen scene is allowed to cache
+
+126
+00:06:21.810 --> 00:06:23.870
+the lighting results that help with performance.
+
+127
+00:06:23.870 --> 00:06:24.970
+So the larger the value,
+
+128
+00:06:24.970 --> 00:06:26.889
+the faster those changes are gonna propagate,
+
+129
+00:06:26.889 --> 00:06:29.050
+but the higher the GPU cost.
+
+130
+00:06:29.050 --> 00:06:31.610
+And when it comes to the final gather lighting update speed,
+
+131
+00:06:31.649 --> 00:06:33.490
+it controls how much Lumen final gather
+
+132
+00:06:33.490 --> 00:06:35.329
+is allowed to cache those lighting results,
+
+133
+00:06:35.329 --> 00:06:36.689
+just like before.
+
+134
+00:06:36.689 --> 00:06:38.889
+And again, the larger the values,
+
+135
+00:06:38.889 --> 00:06:41.610
+the faster those changes are gonna propagate,
+
+136
+00:06:41.610 --> 00:06:45.959
+but again, at the cost of your GPU.
+
+137
+00:06:45.959 --> 00:06:48.120
+When it comes to reflections,
+
+138
+00:06:48.120 --> 00:06:50.120
+to get higher quality reflections,
+
+139
+00:06:50.120 --> 00:06:53.079
+you wanna change under the Lumen reflection sections,
+
+140
+00:06:53.079 --> 00:06:56.000
+if you change the values of the quality here,
+
+141
+00:06:57.160 --> 00:06:58.959
+it will reduce the noise in the reflections,
+
+142
+00:06:58.959 --> 00:07:00.959
+however, higher GPU cost.
+
+143
+00:07:00.959 --> 00:07:03.680
+And then one tip is to change the ray lighting mode
+
+144
+00:07:03.680 --> 00:07:05.360
+to hit lighting for reflections,
+
+145
+00:07:05.360 --> 00:07:07.399
+and that'll be the highest quality,
+
+146
+00:07:07.399 --> 00:07:10.680
+but again, increase GPU cost.
+
+147
+00:07:10.680 --> 00:07:13.879
+Now, some visualizers that you might find handy
+
+148
+00:07:13.879 --> 00:07:15.399
+to troubleshoot some of the issues
+
+149
+00:07:15.399 --> 00:07:17.079
+that you might be having can be found.
+
+150
+00:07:17.079 --> 00:07:18.040
+So under the show tab,
+
+151
+00:07:18.040 --> 00:07:20.939
+you've got under the Lumen section here,
+
+152
+00:07:20.939 --> 00:07:22.560
+a lot of information that you can take
+
+153
+00:07:22.560 --> 00:07:25.740
+to actually see and visualize any of these changes.
+
+154
+00:07:25.740 --> 00:07:29.120
+And then if you go under the lit or the view mode,
+
+155
+00:07:29.120 --> 00:07:30.240
+yeah, if you go to Lumen,
+
+156
+00:07:30.240 --> 00:07:32.600
+you can also see the overall Lumen scene,
+
+157
+00:07:32.600 --> 00:07:33.879
+how the reflections are doing
+
+158
+00:07:33.879 --> 00:07:37.509
+and what the surface cast is doing.
+
+159
+00:07:37.509 --> 00:07:39.230
+Now, to get into some tips and tricks
+
+160
+00:07:39.230 --> 00:07:43.860
+that you might find handy when it comes to using Lumen.
+
+161
+00:07:43.860 --> 00:07:45.980
+So Lumen does not currently support
+
+162
+00:07:45.980 --> 00:07:48.180
+fully mirrored reflections.
+
+163
+00:07:48.180 --> 00:07:50.959
+It's on the roadmap, but currently is limited.
+
+164
+00:07:52.490 --> 00:07:54.089
+It does not support any static lights,
+
+165
+00:07:54.089 --> 00:07:55.329
+which I think would make sense
+
+166
+00:07:55.329 --> 00:07:58.810
+considering that we are using
+
+167
+00:07:58.810 --> 00:08:01.980
+a fully dynamic global illumination system.
+
+168
+00:08:01.980 --> 00:08:03.420
+Now, however, one cool thing
+
+169
+00:08:04.019 --> 00:08:06.019
+is that if you do disable a lot of static lighting,
+
+170
+00:08:06.019 --> 00:08:07.899
+it can help with some of the overhead
+
+171
+00:08:07.899 --> 00:08:09.420
+and it makes sure your Lumen AR process
+
+172
+00:08:09.420 --> 00:08:11.180
+is working with no hindrances.
+
+173
+00:08:12.550 --> 00:08:13.889
+Now, another cool thing is that Lumen
+
+174
+00:08:13.889 --> 00:08:15.709
+does support material and inclusion,
+
+175
+00:08:15.709 --> 00:08:18.540
+which is really good for characters.
+
+176
+00:08:18.540 --> 00:08:20.800
+It does not currently support world position offsets.
+
+177
+00:08:20.800 --> 00:08:23.120
+So if you have it active in a project,
+
+178
+00:08:23.120 --> 00:08:24.560
+any of those materials that are offset
+
+179
+00:08:24.560 --> 00:08:26.240
+inverts through the material
+
+180
+00:08:26.240 --> 00:08:29.699
+will become a little bit blurry in the movement.
+
+181
+00:08:29.699 --> 00:08:31.420
+It does support all physical lights,
+
+182
+00:08:31.420 --> 00:08:33.940
+but as long as the mobility of those lights
+
+183
+00:08:34.379 --> 00:08:36.950
+is set to movable.
+
+184
+00:08:36.950 --> 00:08:38.990
+And a couple of cool little tricks,
+
+185
+00:08:38.990 --> 00:08:41.250
+especially if you're trying to soften your shadows,
+
+186
+00:08:41.250 --> 00:08:43.850
+is the source angle on the main directional light
+
+187
+00:08:43.850 --> 00:08:46.269
+that will change and soften your shadows
+
+188
+00:08:46.269 --> 00:08:49.240
+for that dominant directional light.
+
+189
+00:08:49.240 --> 00:08:51.379
+And if you change the source radius,
+
+190
+00:08:51.379 --> 00:08:52.659
+the larger the source radius,
+
+191
+00:08:52.659 --> 00:08:55.149
+the softer your shadows are going to be.
+
+192
+00:08:55.149 --> 00:08:58.029
+So those are some tips and tricks that you can find
+
+193
+00:08:58.029 --> 00:09:00.509
+handy when working with Lumen.
+
+194
+00:09:00.509 --> 00:09:04.149
+Okay, so here's some additional resources if you need them.
+
+195
+00:09:04.149 --> 00:09:05.830
+After this, we'll be taking a look at Nanite
+
+196
+00:09:05.830 --> 00:09:07.490
+and its virtual shadow map.

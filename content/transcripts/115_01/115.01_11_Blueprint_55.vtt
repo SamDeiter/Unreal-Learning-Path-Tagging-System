@@ -1,0 +1,1061 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:05.799
+So last of all, we've already talked about Blueprint a little bit at the beginning of the presentation,
+
+2
+00:00:05.799 --> 00:00:08.990
+but it's worth circling back round to it to finish off.
+
+3
+00:00:08.990 --> 00:00:15.990
+I've already mentioned this, but Blueprint is an extensive suite of tools built on top of a C++ Foundation.
+
+4
+00:00:15.990 --> 00:00:21.989
+It allows developers, creatives, artists, designers to get stuck in and start creating things immediately.
+
+5
+00:00:21.989 --> 00:00:25.989
+It's built directly into the editor, meaning it can empower any member of the team,
+
+6
+00:00:25.989 --> 00:00:31.989
+and they can just start developing their ideas with significantly reduced iteration time.
+
+7
+00:00:31.989 --> 00:00:37.990
+It's great for testing out ideas and debugging them really quickly in very visual ways.
+
+8
+00:00:37.990 --> 00:00:45.990
+But something that's worth mentioning is that a well-structured Blueprint can and should be considered production-ready code.
+
+9
+00:00:45.990 --> 00:00:53.990
+Blueprint is not just for experimentation. It's not just the kind of thing that is less important than C++.
+
+10
+00:00:53.990 --> 00:00:59.990
+It should very much be considered that a fully-featured Blueprint is shipping-ready.
+
+11
+00:00:59.990 --> 00:01:02.490
+These two things are not distinct from each other.
+
+12
+00:01:02.490 --> 00:01:08.489
+In fact, the vast majority of Unreal games are developed with these two things in tandem,
+
+13
+00:01:08.489 --> 00:01:12.280
+and they both have advantages and disadvantages.
+
+14
+00:01:12.280 --> 00:01:16.280
+That being said, when you're developing a Blueprint, you should be making the same considerations
+
+15
+00:01:16.280 --> 00:01:19.280
+that you would make whenever you're working in C++.
+
+16
+00:01:19.280 --> 00:01:23.780
+If this isn't just iteration and exploration, and we're going for a fully-featured system,
+
+17
+00:01:23.780 --> 00:01:25.780
+we do need to be considering the same things.
+
+18
+00:01:25.780 --> 00:01:28.780
+Are the functions I'm running in this going to be killing my frame rate?
+
+19
+00:01:28.780 --> 00:01:32.780
+Am I doing this thing more frequently than I need to be doing it?
+
+20
+00:01:32.780 --> 00:01:38.780
+Is this methodology or functionality that I'm using as efficient as it could be?
+
+21
+00:01:38.780 --> 00:01:43.780
+Have I made good use of object-oriented principles when developing this Blueprint?
+
+22
+00:01:43.780 --> 00:01:45.780
+Am I jumping all over the place?
+
+23
+00:01:45.780 --> 00:01:49.780
+The same considerations need to be taken into account.
+
+24
+00:01:49.780 --> 00:01:53.780
+That being said, that's not to say there is no room for C++.
+
+25
+00:01:53.780 --> 00:01:55.780
+These two things are meant to communicate.
+
+26
+00:01:55.780 --> 00:01:59.780
+So how do we do that? How do we communicate between C++ and Blueprint?
+
+27
+00:01:59.780 --> 00:02:03.780
+We've already touched on this a little bit, but it's worth going back over it.
+
+28
+00:02:03.780 --> 00:02:06.780
+Ultimately, Blueprint is built on top of C++.
+
+29
+00:02:06.780 --> 00:02:11.780
+The way we expose these two things to each other, the way we expose C++ to Blueprint,
+
+30
+00:02:11.780 --> 00:02:18.780
+is through a set of markup that we can do via UProperties, UFunctions, and things like that.
+
+31
+00:02:18.780 --> 00:02:24.780
+Very, very common examples of this would be with UFunction, we have BlueprintCallable
+
+32
+00:02:24.780 --> 00:02:29.780
+and a BlueprintCallable function that is const or marked as BlueprintPure.
+
+33
+00:02:29.780 --> 00:02:33.780
+A BlueprintCallable function is a function that is intended to be called via Blueprint.
+
+34
+00:02:33.780 --> 00:02:38.780
+So it's C++ code that will be executed, but Blueprint can see it and call it.
+
+35
+00:02:38.780 --> 00:02:43.780
+An example of that would be setActorLocation on the Actor class.
+
+36
+00:02:43.780 --> 00:02:49.780
+A BlueprintCallable with const or BlueprintPure function works in the same way,
+
+37
+00:02:49.780 --> 00:02:53.780
+but it looks and executes slightly differently in Blueprint.
+
+38
+00:02:53.780 --> 00:02:55.780
+So that would be getActorLocation.
+
+39
+00:02:55.780 --> 00:03:01.780
+These are both BlueprintCallable in a sense functions, but getActorLocation is BlueprintPure.
+
+40
+00:03:01.780 --> 00:03:07.780
+The distinction, which is relatively obvious, being that BlueprintPure functions don't have this execution line.
+
+41
+00:03:07.780 --> 00:03:12.780
+Whereas setActorLocation will get executed as and when this execution line is followed here
+
+42
+00:03:12.780 --> 00:03:17.780
+and we hit this pin, getActorLocation is called whenever its return value
+
+43
+00:03:17.780 --> 00:03:21.780
+or one of its return values, if it has multiple, is referenced.
+
+44
+00:03:21.780 --> 00:03:25.780
+The important distinction here, and this is very important to bear in mind,
+
+45
+00:03:25.780 --> 00:03:29.780
+is that a normal BlueprintCallable function will cache all its output values.
+
+46
+00:03:29.780 --> 00:03:34.780
+So at the point that we execute this, it takes all its inputs and we cache our sweep hit result
+
+47
+00:03:34.780 --> 00:03:36.780
+and our return value here.
+
+48
+00:03:36.780 --> 00:03:41.840
+And any subsequent functions that use that data,
+
+49
+00:03:41.840 --> 00:03:45.840
+there will just be a cached value for each of these pins.
+
+50
+00:03:45.840 --> 00:03:50.840
+And unlike that, when we try and use getActorLocation,
+
+51
+00:03:50.840 --> 00:03:55.840
+BlueprintPure functions rerun the function every time that value is accessed.
+
+52
+00:03:55.840 --> 00:04:01.840
+So when we have these two print strings, because we get the output from getActorLocation twice,
+
+53
+00:04:01.840 --> 00:04:04.840
+getActorLocation will be run twice.
+
+54
+00:04:04.840 --> 00:04:10.840
+So whereas with getActorLocation it's relatively cheap, with more expensive functions,
+
+55
+00:04:10.840 --> 00:04:14.840
+it can be something very important to bear in mind that when you're doing something pure,
+
+56
+00:04:14.840 --> 00:04:17.839
+it will be rerun every time we try and use one of its outputs.
+
+57
+00:04:17.839 --> 00:04:19.839
+So it's a very important distinction.
+
+58
+00:04:19.839 --> 00:04:24.000
+But the advantage you gain is obviously it can be good for tidiness's sake,
+
+59
+00:04:24.000 --> 00:04:26.000
+it can be good for kind of speed's sake,
+
+60
+00:04:26.000 --> 00:04:31.000
+and sometimes you don't want everything on your execution path
+
+61
+00:04:31.000 --> 00:04:35.000
+that can make your Blueprints very, very long when they don't necessarily need to be.
+
+62
+00:04:35.000 --> 00:04:42.089
+Another two bits of UFunction markup that are very important to bear in mind
+
+63
+00:04:42.089 --> 00:04:46.089
+and you'll be using a lot are BlueprintImplementableEvent and BlueprintNativeEvent.
+
+64
+00:04:46.089 --> 00:04:51.089
+BlueprintImplementableEventss are essentially a little bit like notifies.
+
+65
+00:04:51.089 --> 00:04:56.089
+If we have some, for example, a cosmetic functionality that we want to trigger from code,
+
+66
+00:04:56.089 --> 00:05:01.089
+but we just kind of want to notify Blueprint that it has happened,
+
+67
+00:05:01.089 --> 00:05:03.089
+we can do that with a BlueprintImplementableEvent,
+
+68
+00:05:03.089 --> 00:05:08.089
+and then any Blueprint inheriting from that or has access to that can be notified of that.
+
+69
+00:05:08.089 --> 00:05:12.089
+BlueprintNativeEvent is very similar to BlueprintImplementable,
+
+70
+00:05:12.089 --> 00:05:17.089
+but the idea being that there is also a C++ implementation of this function.
+
+71
+00:05:17.089 --> 00:05:22.089
+So the way this will work is it will look for the most inherited class,
+
+72
+00:05:22.089 --> 00:05:28.089
+and if the Blueprint implements that event, then it will use that one,
+
+73
+00:05:28.089 --> 00:05:33.089
+but if there is no Blueprint implementation, it will default back to a C++ implementation.
+
+74
+00:05:33.089 --> 00:05:37.540
+So very, very similar, but BlueprintNative has C++.
+
+75
+00:05:37.540 --> 00:05:40.540
+BlueprintImplementable is Blueprint only.
+
+76
+00:05:40.540 --> 00:05:45.540
+It's worth highlighting as well that with BlueprintImplementableEventss,
+
+77
+00:05:45.540 --> 00:05:52.540
+even though your compiler or your IDE might complain that this is expecting a body,
+
+78
+00:05:52.540 --> 00:05:56.540
+actually it's not. Unreal will expect for BlueprintImplementableEventss
+
+79
+00:05:56.540 --> 00:06:00.540
+there to be no body inside your C++ code.
+
+80
+00:06:00.540 --> 00:06:03.540
+And this is just an example of a BlueprintImplementableEvent
+
+81
+00:06:03.540 --> 00:06:07.540
+that's very, very common in the editor itself, is we have BeginPlay.
+
+82
+00:06:07.540 --> 00:06:12.540
+Very much like normal virtual functions in C++,
+
+83
+00:06:12.540 --> 00:06:15.540
+BlueprintImplementableEvents and BlueprintNativeEvents,
+
+84
+00:06:15.540 --> 00:06:23.540
+the most inherited form, the lowest implementation in a class hierarchy of that function
+
+85
+00:06:23.540 --> 00:06:27.540
+will be the one that gets called, is then up to that function
+
+86
+00:06:27.540 --> 00:06:31.540
+to call the parent implementations if that's desired.
+
+87
+00:06:31.540 --> 00:06:36.540
+So with your BeginPlay, if I have a Blueprint class that inherits from a Blueprint class,
+
+88
+00:06:36.540 --> 00:06:41.540
+inherits from a Blueprint class, it is the bottommost child of that inheritance hierarchy
+
+89
+00:06:41.540 --> 00:06:43.540
+that will have its BeginPlay called.
+
+90
+00:06:43.540 --> 00:06:47.540
+If you want the parents to have their BeginPlay BlueprintImplementableEventss called,
+
+91
+00:06:47.540 --> 00:06:49.540
+then you need to call this parent BeginPlay,
+
+92
+00:06:49.540 --> 00:06:52.540
+and the same thing is true for BlueprintNativeEvents.
+
+93
+00:06:52.540 --> 00:06:55.540
+And that goes all the way back up to C++.
+
+94
+00:06:55.540 --> 00:06:59.139
+On the other side, with UProperties,
+
+95
+00:06:59.139 --> 00:07:02.139
+some examples of typical things that you might need to do.
+
+96
+00:07:02.139 --> 00:07:07.139
+As a programmer, we internally use C++ and Blueprints ourselves,
+
+97
+00:07:07.139 --> 00:07:11.139
+but a lot of the time it's about exposing functionality to design,
+
+98
+00:07:11.139 --> 00:07:18.139
+but also about trying to ensure that design do things in the way that you intend.
+
+99
+00:07:18.139 --> 00:07:22.139
+Very common uses of that might be UIMin and UIMax,
+
+100
+00:07:22.139 --> 00:07:26.139
+so that people can't put in ridiculous values that you don't want them to be able to use.
+
+101
+00:07:26.139 --> 00:07:30.139
+So if a value should only ever be between 0 and 10,
+
+102
+00:07:30.139 --> 00:07:35.139
+you can give it a visual that essentially gives you this kind of slider functionality,
+
+103
+00:07:35.139 --> 00:07:39.139
+and you can also clamp those values so that it literally will lock a value
+
+104
+00:07:39.139 --> 00:07:45.139
+so that it doesn't go higher or lower than two numbers that you specify.
+
+105
+00:07:45.139 --> 00:07:49.360
+Another thing that you might commonly want to do is use display names
+
+106
+00:07:49.360 --> 00:07:56.360
+so that some internal massive name can be condensed for readability
+
+107
+00:07:56.360 --> 00:08:00.360
+on the actual Unreal editor side of things.
+
+108
+00:08:00.360 --> 00:08:04.360
+And last of all, you can specify getters and setters.
+
+109
+00:08:04.360 --> 00:08:07.360
+So for example, if we have some kind of value,
+
+110
+00:08:07.360 --> 00:08:09.360
+but we want to inject some functionality on top,
+
+111
+00:08:09.360 --> 00:08:12.360
+this might be common for people who are used to writing C sharp,
+
+112
+00:08:12.360 --> 00:08:14.360
+where getters and setters are very common.
+
+113
+00:08:14.360 --> 00:08:17.360
+You can basically specify a function to be run
+
+114
+00:08:17.360 --> 00:08:19.360
+whenever we try and get this value,
+
+115
+00:08:19.360 --> 00:08:22.360
+and a function to be run whenever we try and set this value.
+
+116
+00:08:22.360 --> 00:08:25.360
+And those would look exactly like the normal get and set nodes,
+
+117
+00:08:25.360 --> 00:08:29.360
+but actually secretly under the hood, it's calling these functions.
+
+118
+00:08:29.360 --> 00:08:32.360
+So those are kind of things that you might commonly use,
+
+119
+00:08:32.360 --> 00:08:35.360
+but that being said, both of these things, UFunction and UProperty,
+
+120
+00:08:35.360 --> 00:08:38.360
+have far, far more extensive lists of things that you can do
+
+121
+00:08:38.360 --> 00:08:42.360
+and things that you can utilize in the objectmacros.h,
+
+122
+00:08:42.360 --> 00:08:44.970
+so it's worth looking up all of those.
+
+123
+00:08:44.970 --> 00:08:47.970
+Last of all, it's worth highlighting that
+
+124
+00:08:47.970 --> 00:08:51.970
+because Blueprint is a fully featured scripting language,
+
+125
+00:08:51.970 --> 00:08:54.970
+it also implements interfaces.
+
+126
+00:08:54.970 --> 00:08:58.970
+So the way we would introduce an interface at C++ level,
+
+127
+00:08:58.970 --> 00:09:01.970
+they can also be created in Blueprint,
+
+128
+00:09:01.970 --> 00:09:04.970
+there are Blueprint interfaces, but at C++ level,
+
+129
+00:09:04.970 --> 00:09:06.970
+is we would create an interface class,
+
+130
+00:09:06.970 --> 00:09:08.970
+and that would look something like this.
+
+131
+00:09:08.970 --> 00:09:10.970
+So if you create one through Unreal,
+
+132
+00:09:10.970 --> 00:09:12.970
+it will automatically generate a class that looks like this.
+
+133
+00:09:12.970 --> 00:09:14.970
+We have the U interface section of the class
+
+134
+00:09:14.970 --> 00:09:17.970
+and the I interface part of the class.
+
+135
+00:09:17.970 --> 00:09:21.970
+U interface is pretty much there for interaction with Blueprint,
+
+136
+00:09:21.970 --> 00:09:24.970
+so there's very little you need to do here,
+
+137
+00:09:24.970 --> 00:09:27.970
+there is just whatever you need to specify
+
+138
+00:09:27.970 --> 00:09:31.970
+in this U interface markup here in the macro at the top.
+
+139
+00:09:31.970 --> 00:09:35.970
+So for example, if you want this to be accessible by Blueprint,
+
+140
+00:09:35.970 --> 00:09:41.320
+you would need to add the Blueprintable markup.
+
+141
+00:09:41.320 --> 00:09:44.320
+And then any functions that you want to implement inside this interface
+
+142
+00:09:44.320 --> 00:09:48.320
+would then go in the I interface part of the interface.
+
+143
+00:09:48.320 --> 00:09:50.320
+And then each of these functions,
+
+144
+00:09:50.320 --> 00:09:54.320
+as long as this is part of a U interface class,
+
+145
+00:09:54.320 --> 00:09:58.320
+as long as it's a class that has that matching U interface class,
+
+146
+00:09:58.320 --> 00:10:02.320
+each of these functions can then have normal U function markup above it,
+
+147
+00:10:02.320 --> 00:10:07.320
+and all of the same U function properties will be available to you,
+
+148
+00:10:07.320 --> 00:10:10.320
+anything that you can do to a normal class U function you can do here.
+
+149
+00:10:10.320 --> 00:10:13.320
+So for example, this could be a Blueprint implementable event,
+
+150
+00:10:13.320 --> 00:10:16.320
+it could be a Blueprint native event, we can change the display name,
+
+151
+00:10:16.320 --> 00:10:20.149
+we can do any kind of meta markup there that we want to do.
+
+152
+00:10:20.149 --> 00:10:24.149
+It's worth highlighting as well that not all functions
+
+153
+00:10:24.149 --> 00:10:26.149
+inside a Blueprint interface
+
+154
+00:10:26.149 --> 00:10:29.149
+have to be Blueprint callable or exposed to Blueprint.
+
+155
+00:10:29.149 --> 00:10:32.149
+Some of them can be specifically for native,
+
+156
+00:10:32.149 --> 00:10:34.149
+and that's an important distinction to bear in mind
+
+157
+00:10:34.149 --> 00:10:37.149
+when we're talking about actually using that interface.
+
+158
+00:10:37.149 --> 00:10:39.149
+So the way we might utilize that in code
+
+159
+00:10:39.149 --> 00:10:43.149
+once we have something that implements that interface is,
+
+160
+00:10:43.149 --> 00:10:45.149
+well, there's really two ways.
+
+161
+00:10:45.149 --> 00:10:48.149
+So we can call this templated function implements,
+
+162
+00:10:48.149 --> 00:10:52.149
+so something that implements this interface,
+
+163
+00:10:52.149 --> 00:10:55.149
+we can check that through this templated function.
+
+164
+00:10:55.149 --> 00:10:59.149
+Here we do need to pass in the U interface type,
+
+165
+00:10:59.149 --> 00:11:02.149
+so the I1 will cause a compile issue,
+
+166
+00:11:02.149 --> 00:11:04.149
+we need to specify the U interface type,
+
+167
+00:11:04.149 --> 00:11:06.149
+and then that would have turned true
+
+168
+00:11:06.149 --> 00:11:10.379
+if this object does implement that interface.
+
+169
+00:11:10.379 --> 00:11:13.379
+If it does, and then we want to call functions on that,
+
+170
+00:11:13.379 --> 00:11:16.379
+with the U interface and the I interface,
+
+171
+00:11:16.379 --> 00:11:19.379
+a set of functions will be statically generated
+
+172
+00:11:19.379 --> 00:11:22.379
+that you then statically call
+
+173
+00:11:22.379 --> 00:11:24.379
+through the I version of the interface.
+
+174
+00:11:24.379 --> 00:11:27.379
+So I my interface, and as you can see,
+
+175
+00:11:27.379 --> 00:11:30.379
+we had this some Blueprint implementable function,
+
+176
+00:11:30.379 --> 00:11:34.379
+we call execute, we get the static version of the interface,
+
+177
+00:11:34.379 --> 00:11:37.379
+execute underscore and then the function name.
+
+178
+00:11:37.379 --> 00:11:42.379
+Because this function takes two parameters,
+
+179
+00:11:42.379 --> 00:11:44.379
+we can see those are passed in here and here,
+
+180
+00:11:44.379 --> 00:11:48.379
+the first parameter of this static version of the function
+
+181
+00:11:48.379 --> 00:11:50.379
+takes in the actual object that you're calling it on.
+
+182
+00:11:50.379 --> 00:11:52.379
+So as you can see, because it's static,
+
+183
+00:11:52.379 --> 00:11:54.379
+there is no concept of the object we're calling it on,
+
+184
+00:11:54.379 --> 00:11:59.379
+so the first parameter is which object am I calling this function on.
+
+185
+00:11:59.379 --> 00:12:02.379
+The alternative and the kind of more,
+
+186
+00:12:02.379 --> 00:12:06.379
+the way that you might assume to do it in C++ more naturally
+
+187
+00:12:06.379 --> 00:12:12.379
+is to just cast that object using the I version of the interface
+
+188
+00:12:12.379 --> 00:12:14.379
+to check whether or not that interface,
+
+189
+00:12:14.379 --> 00:12:16.379
+whether or not it's null, and if it's not null,
+
+190
+00:12:16.379 --> 00:12:19.379
+we would go inside this if statement body.
+
+191
+00:12:19.379 --> 00:12:22.379
+That's absolutely fine, but it's worth bearing in mind,
+
+192
+00:12:22.379 --> 00:12:24.379
+and very important to bear in mind,
+
+193
+00:12:24.379 --> 00:12:28.379
+that when you cast to an interface in this way,
+
+194
+00:12:28.379 --> 00:12:30.379
+that will tell you whether or not
+
+195
+00:12:30.379 --> 00:12:32.379
+that object implements that interface,
+
+196
+00:12:32.379 --> 00:12:36.379
+but if you have functions that are implemented in Blueprint,
+
+197
+00:12:36.379 --> 00:12:39.379
+those will not get detected when you try and call them,
+
+198
+00:12:39.379 --> 00:12:43.379
+and that can lead to a lot of very frustrating and slow debugging.
+
+199
+00:12:43.379 --> 00:12:48.379
+Native functions and natively implemented functions
+
+200
+00:12:48.379 --> 00:12:51.379
+for that interface will work absolutely fine,
+
+201
+00:12:51.379 --> 00:12:54.379
+but if you have functions that are either Blueprint implementable
+
+202
+00:12:54.379 --> 00:12:58.379
+or Blueprint native, it simply won't see those.
+
+203
+00:12:58.379 --> 00:13:00.379
+So if you had a Blueprint native function,
+
+204
+00:13:00.379 --> 00:13:03.379
+it would probably call the C++ version of that function,
+
+205
+00:13:03.379 --> 00:13:05.379
+but even if you're calling on a Blueprint
+
+206
+00:13:05.379 --> 00:13:07.379
+that overrides that functionality,
+
+207
+00:13:07.379 --> 00:13:10.379
+it would probably just call the C++ native version of the function
+
+208
+00:13:10.379 --> 00:13:13.379
+and not the Blueprint implementation.
+
+209
+00:13:13.379 --> 00:13:16.379
+So if you have anything that is Blueprint implementable
+
+210
+00:13:16.379 --> 00:13:19.379
+or Blueprint native, unfortunately,
+
+211
+00:13:19.379 --> 00:13:23.379
+using this casting to the interface is not going to be suitable.
+
+212
+00:13:23.379 --> 00:13:28.169
+In short, Blueprint is an incredible tool
+
+213
+00:13:28.169 --> 00:13:30.169
+and should be used to its fullest extent,
+
+214
+00:13:30.169 --> 00:13:32.169
+and it should be very much considered
+
+215
+00:13:32.169 --> 00:13:35.169
+as something that is in tandem with C++.
+
+216
+00:13:35.169 --> 00:13:37.169
+We use both of these things together,
+
+217
+00:13:37.169 --> 00:13:39.169
+and they both have their advantages.
+
+218
+00:13:39.169 --> 00:13:41.169
+Again, incredibly fast iteration times,
+
+219
+00:13:41.169 --> 00:13:43.169
+visual debugability with Blueprints,
+
+220
+00:13:43.169 --> 00:13:47.169
+it can sometimes actually be much easier to see execution paths in real time
+
+221
+00:13:47.169 --> 00:13:50.169
+rather than having to stop everything with breakpoints
+
+222
+00:13:50.169 --> 00:13:51.169
+and step through your code.
+
+223
+00:13:51.169 --> 00:13:54.169
+You can watch it all happening as it's running.
+
+224
+00:13:54.169 --> 00:13:57.169
+Where C++, slightly more performant,
+
+225
+00:13:57.169 --> 00:14:01.169
+access to the full range of all the Unreal Engine code base
+
+226
+00:14:01.169 --> 00:14:03.169
+and increased debugability
+
+227
+00:14:03.169 --> 00:14:05.169
+when you get into the fine-grained things
+
+228
+00:14:05.169 --> 00:14:08.169
+like really needing to see every variable
+
+229
+00:14:08.169 --> 00:14:10.169
+and things like your call stack.
+
+230
+00:14:10.169 --> 00:14:14.860
+So wrapping up, we're just going to talk a little bit
+
+231
+00:14:14.860 --> 00:14:17.860
+about some of the resources that we've got available to us.
+
+232
+00:14:17.860 --> 00:14:20.860
+Obviously, this has been a bit of a whirlwind exploration
+
+233
+00:14:20.860 --> 00:14:23.860
+of a lot of the basic fundamentals.
+
+234
+00:14:23.860 --> 00:14:25.860
+If you want to follow up on any of this,
+
+235
+00:14:25.860 --> 00:14:28.860
+we have Unreal Engine documentation at unrealengine.com.
+
+236
+00:14:28.860 --> 00:14:30.860
+We have the Unreal Engine YouTube channel.
+
+237
+00:14:30.860 --> 00:14:31.860
+We have a Twitch.
+
+238
+00:14:31.860 --> 00:14:34.860
+UDN is the Unreal Developer Network.
+
+239
+00:14:34.860 --> 00:14:37.860
+This is dedicated for Unreal Engine licensees,
+
+240
+00:14:37.860 --> 00:14:40.860
+so you would need to be a licensee to have access to this.
+
+241
+00:14:40.860 --> 00:14:43.860
+But if that's not available to you,
+
+242
+00:14:43.860 --> 00:14:45.860
+then we do still have the AnswerHub,
+
+243
+00:14:45.860 --> 00:14:51.860
+which is essentially a little bit like Quora or Yahoo Answers,
+
+244
+00:14:51.860 --> 00:14:53.860
+but specifically around Unreal.
+
+245
+00:14:53.860 --> 00:14:55.860
+Very, very active community there,
+
+246
+00:14:55.860 --> 00:14:58.860
+really good for looking for people
+
+247
+00:14:58.860 --> 00:15:00.860
+who might have already stumbled across the same issue as you.
+
+248
+00:15:00.860 --> 00:15:03.860
+And then last of all, we have the Unreal Engine Community Wiki,
+
+249
+00:15:03.860 --> 00:15:07.860
+where people have hosted up a whole load of different kinds of tutorials
+
+250
+00:15:07.860 --> 00:15:11.860
+that have come more from the community side
+
+251
+00:15:11.860 --> 00:15:16.139
+than official Epic stuff.
+
+252
+00:15:16.139 --> 00:15:17.139
+So I think that's everything.
+
+253
+00:15:17.139 --> 00:15:20.139
+It's a lot to cover, and it's a lot to take in.
+
+254
+00:15:20.139 --> 00:15:24.139
+Like I said, this has been a very, very shallow view
+
+255
+00:15:24.139 --> 00:15:25.139
+of all of these things,
+
+256
+00:15:25.139 --> 00:15:29.139
+but it's just good to have this kind of broad understanding
+
+257
+00:15:29.139 --> 00:15:32.139
+of a lot of these different systems and functionalities
+
+258
+00:15:32.139 --> 00:15:34.139
+when you're coming to Unreal for the first time.
+
+259
+00:15:34.139 --> 00:15:36.139
+Maybe not all of this sticks the first time,
+
+260
+00:15:36.139 --> 00:15:38.139
+might need a couple of rewatches,
+
+261
+00:15:38.139 --> 00:15:41.139
+but hopefully we've just planted enough seeds
+
+262
+00:15:41.139 --> 00:15:43.139
+that next time you kind of come across something,
+
+263
+00:15:43.139 --> 00:15:45.139
+you might be like, oh yeah, I think I remember something about that.
+
+264
+00:15:45.139 --> 00:15:47.139
+Hopefully this has been useful.
+
+265
+00:15:47.139 --> 00:15:49.139
+Thanks very much for watching, and see you next time.

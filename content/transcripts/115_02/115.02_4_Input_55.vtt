@@ -1,0 +1,1237 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:10.169
+Now if we're going to talk about animation, obviously we need to think a little bit about how we're going to trigger that and very typically in the context of games it's going to be relating to input.
+
+2
+00:00:10.169 --> 00:00:13.169
+So that's going to bring us on to our next subject.
+
+3
+00:00:13.169 --> 00:00:17.170
+So input in Unreal is broadly broken up into two categories.
+
+4
+00:00:17.170 --> 00:00:21.170
+We have the old legacy system and we have the new enhanced input system.
+
+5
+00:00:21.170 --> 00:00:27.170
+Both of these can handle input from keyboards, mice, game pads, VR controllers.
+
+6
+00:00:27.170 --> 00:00:32.170
+So you can ultimately ship a game on either of these things.
+
+7
+00:00:32.170 --> 00:00:40.170
+The vast majority of online content is probably going to be talking about the legacy system because enhanced input is still relatively new.
+
+8
+00:00:40.170 --> 00:00:48.170
+It hasn't really been introduced since I think Unreal 5, but ultimately you can ship on either of these things.
+
+9
+00:00:48.170 --> 00:00:51.579
+So it's worth kind of looking into them both.
+
+10
+00:00:51.579 --> 00:00:55.579
+So to begin with, in legacy input we have the two kind of key concepts.
+
+11
+00:00:55.579 --> 00:00:57.579
+We have action mappings and axis mappings.
+
+12
+00:00:57.579 --> 00:01:04.579
+Action mappings are your button presses, your mouse clicks, your kind of like this thing is on or it is off kind of inputs.
+
+13
+00:01:04.579 --> 00:01:19.579
+Then we have axis mappings which relates to things like thumb sticks, it relates to mouse movement, anything that is kind of like continuous constant input that might be fractional and it's not on or off, it varies by degrees.
+
+14
+00:01:19.579 --> 00:01:26.579
+All of these mappings can be edited and accessed through the developer settings, through the project settings menu.
+
+15
+00:01:26.579 --> 00:01:33.579
+And if you're interested about like where any of these types are coming from, you can look at inputCoreTypes.h inside C++.
+
+16
+00:01:33.579 --> 00:01:44.579
+Ultimately all of this input in this system gets filed through player input, which is an object that gets spawned by the player controller and that gets passed around to communicate with the various player input components,
+
+17
+00:01:44.579 --> 00:01:49.579
+which will get added to your actors as they become enabled for input.
+
+18
+00:01:49.579 --> 00:01:57.420
+So if we were to actually look at how we might implement these inputs, there's kind of two ways we can do it.
+
+19
+00:01:57.420 --> 00:02:03.420
+We can do it through code, which is much less common, but you can actually do this at runtime.
+
+20
+00:02:03.420 --> 00:02:07.420
+This is the default Pawn. You can actually see it adds its own custom inputs.
+
+21
+00:02:07.420 --> 00:02:17.419
+This is kind of helpful, I suppose, if you want to make sure that the project doesn't have to be set up correctly, as long as you've carried this code over, this character's or this Pawn's input is going to work.
+
+22
+00:02:17.419 --> 00:02:19.419
+And then you have the more typical way of doing it through project settings.
+
+23
+00:02:19.419 --> 00:02:23.419
+So if we were to quickly jump into our project, we can look at that.
+
+24
+00:02:23.419 --> 00:02:30.419
+Like I said, we go into edit, project settings, and then under the input section, we can see the inputs here.
+
+25
+00:02:30.419 --> 00:02:33.419
+We have our action mappings, like we said, and our axis mappings.
+
+26
+00:02:33.419 --> 00:02:38.419
+And by default, when you start up most projects, it's going to have some pre-existing inputs.
+
+27
+00:02:38.419 --> 00:02:42.419
+So clearly here, the jump input has already been made for us.
+
+28
+00:02:42.419 --> 00:02:46.419
+We have these various look and move inputs under our axis mappings.
+
+29
+00:02:46.419 --> 00:02:52.509
+And it's just worth briefly mentioning here that you can add as many of these as you like, but it's not exclusive.
+
+30
+00:02:52.509 --> 00:02:59.509
+Just because spacebar is bound to our jump input doesn't mean we can't also have, I don't know, menu back.
+
+31
+00:02:59.509 --> 00:03:03.509
+And we can also bind that to our keyboard spacebar.
+
+32
+00:03:03.509 --> 00:03:08.509
+So these things, you do need to be a little bit careful about maintaining your own input settings
+
+33
+00:03:08.509 --> 00:03:14.509
+and making sure that if you do have multiple actions that can have the same input,
+
+34
+00:03:14.509 --> 00:03:18.509
+that you're kind of accounting for that so you're not getting weird crossover of logic there.
+
+35
+00:03:18.509 --> 00:03:26.550
+Then we actually have the kind of using these inputs that we've made side of things,
+
+36
+00:03:26.550 --> 00:03:28.550
+and that's going to be the input binding.
+
+37
+00:03:28.550 --> 00:03:31.550
+This can be done in two ways. We can either do it through C++ or Blueprint.
+
+38
+00:03:31.550 --> 00:03:37.550
+The C++ way is definitely more verbose, but depending on the functionality you need,
+
+39
+00:03:37.550 --> 00:03:41.550
+they both provide the same, they expose the same functionality.
+
+40
+00:03:41.550 --> 00:03:45.550
+So typically here you have this set up player input component,
+
+41
+00:03:45.550 --> 00:03:47.550
+which is going to be part of the character flow.
+
+42
+00:03:47.550 --> 00:03:51.550
+And at this point, the input component gets passed in as a parameter.
+
+43
+00:03:51.550 --> 00:03:56.550
+And all you need to do is either bind actions or bind axes to the input component
+
+44
+00:03:56.550 --> 00:03:59.550
+through these two function calls. These are very, very similar.
+
+45
+00:03:59.550 --> 00:04:04.550
+Essentially, all you do is you say the name of the action that you're trying to bind to.
+
+46
+00:04:04.550 --> 00:04:09.550
+Then at the end, you provide the function this is going to be utilizing.
+
+47
+00:04:09.550 --> 00:04:14.550
+So in this case, these functions are going to take in slightly different things.
+
+48
+00:04:14.550 --> 00:04:18.550
+For this jump function, it's just going to be a blank void function.
+
+49
+00:04:18.550 --> 00:04:23.550
+But for this move forward function, it's going to need to take in a float parameter,
+
+50
+00:04:23.550 --> 00:04:28.550
+which is your input for whatever axis this is bound to.
+
+51
+00:04:28.550 --> 00:04:33.550
+Both of them pass in this object, so what object this binding is going to be firing on.
+
+52
+00:04:33.550 --> 00:04:37.550
+But the key difference is that for the bind action,
+
+53
+00:04:37.550 --> 00:04:40.550
+this is going to be firing based on this key event.
+
+54
+00:04:40.550 --> 00:04:43.550
+So it's either going to be IE pressed or IE released,
+
+55
+00:04:43.550 --> 00:04:46.550
+depending on whether or not you've pressed that button or you want it to fire when it's released.
+
+56
+00:04:46.550 --> 00:04:50.550
+Whereas for the bind axis, that's actually called every tick.
+
+57
+00:04:50.550 --> 00:04:53.550
+So you're not binding that in a certain situation.
+
+58
+00:04:53.550 --> 00:04:57.550
+It's not when this input is over a certain amount.
+
+59
+00:04:57.550 --> 00:04:59.550
+It's not doing deadzoning stuff.
+
+60
+00:04:59.550 --> 00:05:02.899
+You would do that yourself in the function call.
+
+61
+00:05:02.899 --> 00:05:06.899
+And then the kind of simpler implementation clearly is in Blueprints,
+
+62
+00:05:06.899 --> 00:05:08.899
+where as soon as you've made an input,
+
+63
+00:05:08.899 --> 00:05:12.899
+and you've compiled your Blueprints,
+
+64
+00:05:12.899 --> 00:05:14.899
+these axes will actually be made available to you.
+
+65
+00:05:14.899 --> 00:05:19.899
+So again, because we've already got jump and menu back as actions that we've made,
+
+66
+00:05:19.899 --> 00:05:22.899
+if I were to just open up any old Blueprint,
+
+67
+00:05:22.899 --> 00:05:25.899
+if I just make some actor,
+
+68
+00:05:25.899 --> 00:05:38.670
+as soon as those inputs exist in my event graph, I can just bind them.
+
+69
+00:05:38.670 --> 00:05:44.379
+So input action jump comes up like that.
+
+70
+00:05:44.379 --> 00:05:48.379
+Or indeed menu back is the new one I just made.
+
+71
+00:05:48.379 --> 00:05:50.379
+You can see just it makes it so in that sense,
+
+72
+00:05:50.379 --> 00:05:53.379
+it's a lot easier to do it through Blueprint instead of kind of a little bit less setup.
+
+73
+00:05:53.379 --> 00:05:58.269
+But ultimately, it depends on what your needs for the project are.
+
+74
+00:05:58.269 --> 00:06:02.269
+So the other system available to us, as we mentioned before, is enhanced inputs.
+
+75
+00:06:02.269 --> 00:06:05.269
+This is primarily asset based. So it's not done through the project settings.
+
+76
+00:06:05.269 --> 00:06:09.269
+This is actually all handled through assets in your content browser.
+
+77
+00:06:09.269 --> 00:06:11.269
+And there's two key assets we need to be thinking about.
+
+78
+00:06:11.269 --> 00:06:16.269
+We have input actions, which is actually the concept of something that you can do in your game.
+
+79
+00:06:16.269 --> 00:06:19.269
+And we have context, which is really what marries all these things together.
+
+80
+00:06:19.269 --> 00:06:22.269
+A context will define which actions apply in this context,
+
+81
+00:06:22.269 --> 00:06:26.430
+and which buttons tie to each of those actions.
+
+82
+00:06:26.430 --> 00:06:28.430
+The powerful thing about the enhanced input system
+
+83
+00:06:28.430 --> 00:06:32.430
+is that all of this stuff can be easily easily chopped and changed at runtime.
+
+84
+00:06:32.430 --> 00:06:36.430
+If you imagine a game where you're running around on foot,
+
+85
+00:06:36.430 --> 00:06:38.430
+you're going to be worrying about different inputs,
+
+86
+00:06:38.430 --> 00:06:41.430
+like picking things up, reloading your gun, shooting.
+
+87
+00:06:41.430 --> 00:06:43.430
+Whereas when you jump into a car,
+
+88
+00:06:43.430 --> 00:06:45.430
+you might actually need to listen for different buttons
+
+89
+00:06:45.430 --> 00:06:48.430
+and you want responding even to the same inputs in different ways.
+
+90
+00:06:48.430 --> 00:06:52.430
+So each of those things, you want to handle that in a dynamic way,
+
+91
+00:06:52.430 --> 00:06:55.430
+and enhanced input can handle a lot of that stuff for you.
+
+92
+00:06:55.430 --> 00:06:59.519
+If we were to actually go through the process of really briefly demonstrating
+
+93
+00:06:59.519 --> 00:07:03.519
+the kind of relevant things when utilizing these assets.
+
+94
+00:07:03.519 --> 00:07:06.519
+First off, they can be created in the content browser.
+
+95
+00:07:06.519 --> 00:07:13.480
+You right-click, go to input, and you've got, not interchange, input.
+
+96
+00:07:13.480 --> 00:07:15.480
+And you have input action here.
+
+97
+00:07:15.480 --> 00:07:17.480
+Typical naming convention will be IA.
+
+98
+00:07:17.480 --> 00:07:28.370
+So if we do IA fire gun, and we'll just create another one for IA move.
+
+99
+00:07:29.370 --> 00:07:34.579
+And then if we're going to create a context,
+
+100
+00:07:34.579 --> 00:07:38.579
+at the same place, input, input mapping context,
+
+101
+00:07:38.579 --> 00:07:40.579
+and typical naming convention there is IMC,
+
+102
+00:07:40.579 --> 00:07:43.930
+and we'll just call it walk shoot.
+
+103
+00:07:43.930 --> 00:07:45.930
+So inside an input action,
+
+104
+00:07:45.930 --> 00:07:48.930
+there's actually not a huge amount of detail here,
+
+105
+00:07:48.930 --> 00:07:51.930
+a little bit of default information, some description stuff.
+
+106
+00:07:51.930 --> 00:07:53.930
+The key thing that we need to be worrying about
+
+107
+00:07:53.930 --> 00:07:55.930
+is the value type of our action.
+
+108
+00:07:55.930 --> 00:07:58.930
+So for a digital action is a little bit like our actions
+
+109
+00:07:58.930 --> 00:08:01.930
+for our previous system, where it's kind of on or off.
+
+110
+00:08:01.930 --> 00:08:05.930
+So that might be like firing the gun or not firing the gun.
+
+111
+00:08:05.930 --> 00:08:08.930
+But we also have available three kinds of axes.
+
+112
+00:08:08.930 --> 00:08:09.930
+So if you think about this,
+
+113
+00:08:09.930 --> 00:08:11.930
+it's like this might be something like a trigger,
+
+114
+00:08:11.930 --> 00:08:14.930
+one dimensional, it's only going from zero to one,
+
+115
+00:08:14.930 --> 00:08:18.930
+or minus one to whatever.
+
+116
+00:08:18.930 --> 00:08:21.930
+2D axis might represent something like your whole thumb stick.
+
+117
+00:08:21.930 --> 00:08:23.930
+So it's your up and down and your left and right,
+
+118
+00:08:23.930 --> 00:08:26.930
+or your mouse would be another 2D axis.
+
+119
+00:08:26.930 --> 00:08:30.930
+And 3D axis is more typically going to be used by things like VR,
+
+120
+00:08:30.930 --> 00:08:32.929
+but maybe also your mobile phone's gyroscope
+
+121
+00:08:32.929 --> 00:08:34.929
+if you're doing a mobile game.
+
+122
+00:08:34.929 --> 00:08:36.929
+So that's the key thing you need to be worrying about
+
+123
+00:08:36.929 --> 00:08:37.929
+when defining an input action.
+
+124
+00:08:37.929 --> 00:08:40.929
+So for example, in this case, fire gun would be digital,
+
+125
+00:08:40.929 --> 00:08:42.929
+and our move,
+
+126
+00:08:42.929 --> 00:08:45.929
+well, if it's meant to represent our whole 2D movement plane,
+
+127
+00:08:45.929 --> 00:08:49.929
+then we would have that as a 2D vector.
+
+128
+00:08:49.929 --> 00:08:53.090
+It's actually our mapping context then that, like we said,
+
+129
+00:08:53.090 --> 00:08:55.090
+marries the inputs to those actions
+
+130
+00:08:55.090 --> 00:08:59.090
+and can define which input actions do we care about at a certain time.
+
+131
+00:08:59.090 --> 00:09:02.090
+So if we open up the input mapping context,
+
+132
+00:09:02.090 --> 00:09:03.090
+we've got this list of mappings,
+
+133
+00:09:03.090 --> 00:09:07.090
+and here you would choose the actions that you defined.
+
+134
+00:09:07.090 --> 00:09:08.090
+So again, you don't have to use all of them.
+
+135
+00:09:08.090 --> 00:09:10.090
+It depends on what you're actually doing.
+
+136
+00:09:10.090 --> 00:09:12.090
+It depends on the context, no pun intended.
+
+137
+00:09:12.090 --> 00:09:18.090
+But here we'll just say we want to use our fire gun and our IA move.
+
+138
+00:09:18.090 --> 00:09:19.279
+As you can see,
+
+139
+00:09:19.279 --> 00:09:21.279
+even though these are different types of actions,
+
+140
+00:09:21.279 --> 00:09:24.279
+ultimately the options available to us are the same.
+
+141
+00:09:24.279 --> 00:09:28.279
+And the things we need to think about here are which buttons tie to this action.
+
+142
+00:09:28.279 --> 00:09:31.279
+So in this case, I'll say it's our left mouse button,
+
+143
+00:09:31.279 --> 00:09:34.279
+and for move, I'll just bind W for now.
+
+144
+00:09:34.279 --> 00:09:36.279
+And then we have triggers,
+
+145
+00:09:36.279 --> 00:09:41.279
+which essentially affect how this input fires this logic.
+
+146
+00:09:41.279 --> 00:09:45.279
+So this is really useful for anyone who's ever had to think about making inputs.
+
+147
+00:09:45.279 --> 00:09:47.279
+I only want to be able to quit out of this menu
+
+148
+00:09:47.279 --> 00:09:49.279
+when you press and hold for a second.
+
+149
+00:09:49.279 --> 00:09:50.279
+That's already handled for you here.
+
+150
+00:09:50.279 --> 00:09:52.279
+There's a hold and release.
+
+151
+00:09:52.279 --> 00:09:55.279
+There's hold, there's combo buttons, there's corded actions.
+
+152
+00:09:55.279 --> 00:09:57.279
+All of those things are here for you,
+
+153
+00:09:57.279 --> 00:10:00.279
+and it's handled at the input system level.
+
+154
+00:10:00.279 --> 00:10:03.019
+And then the other thing we have is modifiers,
+
+155
+00:10:03.019 --> 00:10:06.019
+which is useful for a whole bunch of different things.
+
+156
+00:10:06.019 --> 00:10:08.019
+Dead zones being the really obvious ones.
+
+157
+00:10:08.019 --> 00:10:09.019
+If you have your thumb sticks
+
+158
+00:10:09.019 --> 00:10:11.019
+and you just don't want to listen to that input
+
+159
+00:10:11.019 --> 00:10:13.019
+unless they've pushed a certain amount in that direction.
+
+160
+00:10:13.019 --> 00:10:18.019
+The power being that particularly if you have a 2D axis,
+
+161
+00:10:18.019 --> 00:10:21.019
+that dead zone doesn't...
+
+162
+00:10:22.019 --> 00:10:24.019
+It's very typical if you're doing something like controlling a cursor,
+
+163
+00:10:24.019 --> 00:10:26.019
+you want to move that cursor
+
+164
+00:10:26.019 --> 00:10:29.019
+when you've moved either of your axes
+
+165
+00:10:29.019 --> 00:10:31.019
+in total a certain amount in a direction,
+
+166
+00:10:31.019 --> 00:10:34.019
+rather than just listening to each axis separately.
+
+167
+00:10:34.019 --> 00:10:36.019
+So the dead zone provides the ability
+
+168
+00:10:36.019 --> 00:10:38.019
+to listen to each individual axis separately
+
+169
+00:10:38.019 --> 00:10:40.019
+or all of it together.
+
+170
+00:10:40.019 --> 00:10:41.019
+And then you have other things
+
+171
+00:10:41.019 --> 00:10:42.019
+like the ability to negate
+
+172
+00:10:42.019 --> 00:10:45.019
+so that I can make my S button affect,
+
+173
+00:10:45.019 --> 00:10:47.019
+make me go backwards.
+
+174
+00:10:47.019 --> 00:10:50.019
+I can make it so that my D key registers
+
+175
+00:10:50.019 --> 00:10:52.019
+the Y axis instead and that kind of thing.
+
+176
+00:10:52.019 --> 00:10:54.019
+So modifiers give you a lot of way
+
+177
+00:10:54.019 --> 00:10:56.019
+to actually change the input
+
+178
+00:10:56.019 --> 00:10:58.019
+once it's been triggered by your trigger behavior,
+
+179
+00:10:58.019 --> 00:10:59.019
+whatever that is.
+
+180
+00:10:59.019 --> 00:11:03.200
+Then when we actually come to the binding,
+
+181
+00:11:03.200 --> 00:11:06.669
+we've got a couple of other things to do.
+
+182
+00:11:06.669 --> 00:11:09.669
+So a little bit like our input system
+
+183
+00:11:09.669 --> 00:11:11.669
+for the legacy system,
+
+184
+00:11:11.669 --> 00:11:14.669
+we can bind to it through C++.
+
+185
+00:11:14.669 --> 00:11:18.669
+We can also bind to it through Blueprint,
+
+186
+00:11:18.669 --> 00:11:21.669
+but there's a kind of key step that we need to do
+
+187
+00:11:21.669 --> 00:11:24.669
+is we actually need to register that mapping context.
+
+188
+00:11:24.669 --> 00:11:26.669
+As we said, the whole point of this system
+
+189
+00:11:26.669 --> 00:11:29.669
+is that it can be adjusted and added to
+
+190
+00:11:29.669 --> 00:11:32.669
+and pulled in and pulled out at runtime.
+
+191
+00:11:32.669 --> 00:11:36.090
+So that's done through adding contexts.
+
+192
+00:11:36.090 --> 00:11:37.090
+All of this is handled
+
+193
+00:11:37.090 --> 00:11:40.090
+through the enhanced input local player subsystem.
+
+194
+00:11:40.090 --> 00:11:42.090
+And you can see here,
+
+195
+00:11:42.090 --> 00:11:43.090
+this is how we would do that.
+
+196
+00:11:43.090 --> 00:11:45.090
+We would get hold of the player controller
+
+197
+00:11:45.090 --> 00:11:48.090
+and we'd get the enhanced input local player subsystem
+
+198
+00:11:48.090 --> 00:11:52.090
+and then it's through that that we would add our context in.
+
+199
+00:11:52.090 --> 00:11:55.090
+And this is whatever context asset you already have.
+
+200
+00:11:55.090 --> 00:11:56.090
+You can do the same thing in Blueprint,
+
+201
+00:11:56.090 --> 00:11:58.090
+which I'll demonstrate in a second.
+
+202
+00:11:58.090 --> 00:12:01.090
+And then separately from that in C++,
+
+203
+00:12:01.090 --> 00:12:03.090
+like with our previous system,
+
+204
+00:12:03.090 --> 00:12:05.090
+we would bind our actions.
+
+205
+00:12:05.090 --> 00:12:08.090
+The difference being here that all of our actions
+
+206
+00:12:08.090 --> 00:12:10.090
+are referred to as actions.
+
+207
+00:12:10.090 --> 00:12:13.090
+And then we have this much broader range
+
+208
+00:12:13.090 --> 00:12:14.090
+of trigger events here,
+
+209
+00:12:14.090 --> 00:12:17.090
+whereas previously it was just IE pressed and IE released.
+
+210
+00:12:17.090 --> 00:12:21.090
+Here we have a whole different range of different options.
+
+211
+00:12:21.090 --> 00:12:24.090
+We have triggered, started, ongoing, canceled.
+
+212
+00:12:24.090 --> 00:12:26.090
+And that's something that you should definitely
+
+213
+00:12:26.090 --> 00:12:28.090
+look into in more detail if that's of interest to you.
+
+214
+00:12:28.090 --> 00:12:31.090
+But just to quickly demonstrate these nodes
+
+215
+00:12:31.090 --> 00:12:33.090
+on the Blueprint level,
+
+216
+00:12:33.090 --> 00:12:36.090
+if we actually go inside our BP actor
+
+217
+00:12:36.090 --> 00:12:39.090
+that we used for our previous demonstration,
+
+218
+00:12:39.090 --> 00:12:40.090
+we can do the same thing,
+
+219
+00:12:40.090 --> 00:12:43.090
+but we can listen to IA fire gun now.
+
+220
+00:12:43.090 --> 00:12:45.090
+And that's very, very simple, right?
+
+221
+00:12:45.090 --> 00:12:47.090
+This is how we actually do the binding.
+
+222
+00:12:47.090 --> 00:12:49.090
+Again, quite a bit simpler here.
+
+223
+00:12:49.090 --> 00:12:52.090
+But to demonstrate actually registering
+
+224
+00:12:52.090 --> 00:12:56.090
+our input mapping contexts,
+
+225
+00:12:56.090 --> 00:13:03.210
+we would just do enhanced input local player subsystem,
+
+226
+00:13:03.210 --> 00:13:07.370
+and you would do add context,
+
+227
+00:13:07.370 --> 00:13:11.980
+add mapping context and remove mapping context.
+
+228
+00:13:11.980 --> 00:13:13.980
+So these are the kind of two key nodes
+
+229
+00:13:13.980 --> 00:13:15.980
+that you need to be caring about here.
+
+230
+00:13:15.980 --> 00:13:21.980
+Your inputs, even if you bind to a gun input,
+
+231
+00:13:21.980 --> 00:13:23.980
+this is not going to fire if your player controller
+
+232
+00:13:23.980 --> 00:13:26.980
+doesn't currently have a mapping context on it
+
+233
+00:13:26.980 --> 00:13:29.980
+that has that action bound.
+
+234
+00:13:29.980 --> 00:13:31.980
+So here, before you do that,
+
+235
+00:13:31.980 --> 00:13:33.980
+the typical thing might be something like begin play
+
+236
+00:13:33.980 --> 00:13:34.980
+or something like that.
+
+237
+00:13:34.980 --> 00:13:37.980
+You would add a mapping context.
+
+238
+00:13:37.980 --> 00:13:39.980
+In this case, it would be our IMC walk, shoot one.
+
+239
+00:13:39.980 --> 00:13:42.980
+And then when you want to move out of that context,
+
+240
+00:13:42.980 --> 00:13:44.980
+you don't want to listen to any of those inputs anymore.
+
+241
+00:13:44.980 --> 00:13:51.169
+And then remove that context.
+
+242
+00:13:51.169 --> 00:13:54.169
+So that about covers it for the actual system itself.
+
+243
+00:13:54.169 --> 00:13:56.169
+But it's worth zooming out a little bit
+
+244
+00:13:56.169 --> 00:13:59.169
+just to think about how input actually flows
+
+245
+00:13:59.169 --> 00:14:02.169
+through the kind of unreal in total.
+
+246
+00:14:02.169 --> 00:14:03.169
+It's worth bearing in mind,
+
+247
+00:14:03.169 --> 00:14:05.169
+I think I've already touched on this a little bit.
+
+248
+00:14:05.169 --> 00:14:08.169
+But the fact that typically when we think about input,
+
+249
+00:14:08.169 --> 00:14:10.169
+we do tend to think about player controllers and pawns.
+
+250
+00:14:10.169 --> 00:14:13.169
+But actually, input can be handled through
+
+251
+00:14:13.169 --> 00:14:15.169
+really any actor in the game.
+
+252
+00:14:15.169 --> 00:14:18.169
+It can be handled through the level script actor
+
+253
+00:14:18.169 --> 00:14:22.169
+and really any actor can be made to listen to input
+
+254
+00:14:22.169 --> 00:14:25.169
+through the enable input function.
+
+255
+00:14:25.169 --> 00:14:26.169
+So it's worth thinking a little bit
+
+256
+00:14:26.169 --> 00:14:30.169
+about how input moves through our stack really.
+
+257
+00:14:30.169 --> 00:14:34.330
+So first off, we have the actual hardware input, right?
+
+258
+00:14:34.330 --> 00:14:36.330
+We're pressing the button on our keyboard,
+
+259
+00:14:36.330 --> 00:14:37.330
+we're clicking the button on our mouse,
+
+260
+00:14:37.330 --> 00:14:39.330
+we're pushing a stick on our gamepad.
+
+261
+00:14:39.330 --> 00:14:42.330
+And that will move into the actual player input
+
+262
+00:14:42.330 --> 00:14:46.330
+where we kind of might process that input in some way,
+
+263
+00:14:46.330 --> 00:14:47.330
+do certain things to it.
+
+264
+00:14:47.330 --> 00:14:50.330
+You can create your own player input class
+
+265
+00:14:50.330 --> 00:14:53.330
+if you need to have a little bit more control over that.
+
+266
+00:14:53.330 --> 00:14:58.330
+And then we essentially flow through a series of actors, right?
+
+267
+00:14:58.330 --> 00:15:01.330
+We have the kind of first and foremost thing
+
+268
+00:15:01.330 --> 00:15:06.330
+is any actors that we've called the set input enabled function on.
+
+269
+00:15:06.330 --> 00:15:08.330
+So you could do that again,
+
+270
+00:15:08.330 --> 00:15:10.330
+say we just have a,
+
+271
+00:15:10.330 --> 00:15:13.330
+you might see certain tutorials suggest the way to do this.
+
+272
+00:15:13.330 --> 00:15:16.330
+It's not something I would necessarily recommend to use too much.
+
+273
+00:15:16.330 --> 00:15:21.970
+But if we just had a BP sum switch,
+
+274
+00:15:21.970 --> 00:15:24.970
+we can actually have that switch bind to some input action.
+
+275
+00:15:24.970 --> 00:15:27.970
+So if we just say, listen to the jump event.
+
+276
+00:15:27.970 --> 00:15:30.970
+And at some point in our game code,
+
+277
+00:15:30.970 --> 00:15:32.970
+we can call enable input.
+
+278
+00:15:32.970 --> 00:15:35.970
+And by enabling input and providing a player controller,
+
+279
+00:15:35.970 --> 00:15:36.970
+this would then,
+
+280
+00:15:36.970 --> 00:15:39.970
+this thing that we've just called enable input
+
+281
+00:15:39.970 --> 00:15:41.970
+would go to the top of our input stack.
+
+282
+00:15:41.970 --> 00:15:43.970
+That is the thing that we're going to check against first.
+
+283
+00:15:43.970 --> 00:15:47.970
+And it's up to that thing to choose to either consume that input,
+
+284
+00:15:47.970 --> 00:15:49.970
+which you can also define in blueprint,
+
+285
+00:15:49.970 --> 00:15:51.970
+you can say when this input gets used,
+
+286
+00:15:51.970 --> 00:15:53.970
+do we consume that input or not?
+
+287
+00:15:53.970 --> 00:15:57.970
+And if it doesn't, then it would filter on downwards.
+
+288
+00:15:57.970 --> 00:16:01.159
+And it's worth highlighting as well that
+
+289
+00:16:01.159 --> 00:16:04.159
+because you can call enable input on several actors,
+
+290
+00:16:04.159 --> 00:16:07.159
+the order in which it goes is the latest actor
+
+291
+00:16:07.159 --> 00:16:09.159
+to have enable input called on it
+
+292
+00:16:09.159 --> 00:16:11.159
+will be the first one in that stack.
+
+293
+00:16:11.159 --> 00:16:13.159
+And it goes in top to bottom order in that sense.
+
+294
+00:16:13.159 --> 00:16:15.159
+Then we move on to the player controller
+
+295
+00:16:15.159 --> 00:16:17.159
+and the player controller has the same opportunity
+
+296
+00:16:17.159 --> 00:16:19.159
+to handle that input, consume it.
+
+297
+00:16:19.159 --> 00:16:22.159
+And after that, it will filter through to level blueprint
+
+298
+00:16:22.159 --> 00:16:25.159
+and only then does it go to our pawn.
+
+299
+00:16:25.159 --> 00:16:26.159
+So even though typically,
+
+300
+00:16:26.159 --> 00:16:30.159
+pawn is going to be responsible for our input
+
+301
+00:16:30.159 --> 00:16:32.159
+the majority of the time,
+
+302
+00:16:32.159 --> 00:16:34.159
+that's kind of the intended system,
+
+303
+00:16:34.159 --> 00:16:36.159
+we're actually going through several things
+
+304
+00:16:36.159 --> 00:16:38.159
+that would take priority over that
+
+305
+00:16:38.159 --> 00:16:40.159
+enabled input actors, then player controller,
+
+306
+00:16:40.159 --> 00:16:42.159
+then our level blueprint.
+
+307
+00:16:42.159 --> 00:16:45.159
+And then the pawn that we're currently possessing.
+
+308
+00:16:45.159 --> 00:16:48.159
+And it's only after that that that then goes on
+
+309
+00:16:48.159 --> 00:16:49.159
+and affects other game logic.

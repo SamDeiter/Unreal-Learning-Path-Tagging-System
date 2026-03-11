@@ -1,0 +1,2157 @@
+WEBVTT
+
+1
+00:00:01.330 --> 00:00:02.290
+Hello, everyone.
+
+2
+00:00:02.290 --> 00:00:03.290
+My name is Martin Cousins.
+
+3
+00:00:03.290 --> 00:00:05.650
+I'm going to be your instructor for this course,
+
+4
+00:00:05.650 --> 00:00:08.369
+Introduction into Gameplay in Unreal Engine for Programmers
+
+5
+00:00:08.369 --> 00:00:09.970
+for Unreal 5.5.
+
+6
+00:00:09.970 --> 00:00:11.810
+This is a follow-on from the first course
+
+7
+00:00:11.810 --> 00:00:14.970
+that we did, which was Introduction to Unreal.
+
+8
+00:00:14.970 --> 00:00:16.489
+Quite obviously from the title,
+
+9
+00:00:16.489 --> 00:00:18.530
+we're going to focus more on the gameplay
+
+10
+00:00:18.530 --> 00:00:21.750
+aspects of the engine right now.
+
+11
+00:00:21.750 --> 00:00:23.289
+So just covering what we're actually
+
+12
+00:00:23.289 --> 00:00:27.109
+going to go over in the duration of this course,
+
+13
+00:00:27.109 --> 00:00:29.429
+we've got to do a quick recap of a little bit of what
+
+14
+00:00:29.429 --> 00:00:31.750
+we covered towards the end of our first course,
+
+15
+00:00:31.750 --> 00:00:35.350
+just talking a bit about how the fundamental types in the engine.
+
+16
+00:00:35.350 --> 00:00:38.829
+Then we're going to go more on to the first entry
+
+17
+00:00:38.829 --> 00:00:41.950
+point for key classes relating to the player
+
+18
+00:00:41.950 --> 00:00:44.509
+and some of the gameplay framework,
+
+19
+00:00:44.509 --> 00:00:46.670
+it would officially be called, that's involved there.
+
+20
+00:00:46.670 --> 00:00:48.390
+Going to move on from that a little bit
+
+21
+00:00:48.390 --> 00:00:49.890
+and broaden that out a little bit
+
+22
+00:00:49.890 --> 00:00:52.109
+to talk about game world and the flow that
+
+23
+00:00:52.109 --> 00:00:54.030
+goes on when you start a game.
+
+24
+00:00:54.030 --> 00:00:56.549
+Then we're going to talk about animation and inputs,
+
+25
+00:00:56.549 --> 00:00:59.750
+both obviously very relevant for gameplay code.
+
+26
+00:00:59.789 --> 00:01:01.189
+And then we're going to finish off
+
+27
+00:01:01.189 --> 00:01:05.870
+with a couple of sections about just general coding concepts
+
+28
+00:01:05.870 --> 00:01:07.349
+that are important to be aware of.
+
+29
+00:01:07.349 --> 00:01:09.069
+You'll probably have encountered things
+
+30
+00:01:09.069 --> 00:01:11.590
+like this in other domains, but just how Unreal
+
+31
+00:01:11.590 --> 00:01:12.629
+works with these things.
+
+32
+00:01:12.629 --> 00:01:15.310
+So that's delegates and events, serialization,
+
+33
+00:01:15.310 --> 00:01:18.549
+programming subsystems, which is a more Unreal-specific thing
+
+34
+00:01:18.549 --> 00:01:20.890
+to be aware of, and then just some of the libraries available
+
+35
+00:01:20.890 --> 00:01:23.909
+to you that can just provide some out-of-the-box functionality
+
+36
+00:01:23.909 --> 00:01:29.040
+to make things a little bit quicker.
+
+37
+00:01:29.040 --> 00:01:30.760
+So first off, a little bit of a recap
+
+38
+00:01:30.799 --> 00:01:34.129
+of what we covered in our last session.
+
+39
+00:01:34.129 --> 00:01:38.170
+So the fundamental classes on the absolute most base level
+
+40
+00:01:38.170 --> 00:01:41.450
+on Unreal, we start with UObject.
+
+41
+00:01:41.450 --> 00:01:43.129
+We'll get into each of these in a little bit,
+
+42
+00:01:43.129 --> 00:01:44.250
+but we've got UObject.
+
+43
+00:01:44.250 --> 00:01:46.890
+Inheriting from that, we have actor and actor component.
+
+44
+00:01:46.890 --> 00:01:48.450
+And then inheriting from that, we have scene component.
+
+45
+00:01:48.450 --> 00:01:50.209
+We'll go into a little bit more detail.
+
+46
+00:01:50.209 --> 00:01:53.790
+UObject is the base class for all our other Unreal
+
+47
+00:01:53.790 --> 00:01:54.290
+classes.
+
+48
+00:01:54.290 --> 00:01:58.329
+It's the entry point for reflection.
+
+49
+00:01:58.329 --> 00:02:00.569
+It's got no physical representation in world,
+
+50
+00:02:00.569 --> 00:02:03.689
+so most objects that inherit directly from UObject
+
+51
+00:02:03.689 --> 00:02:07.569
+are kind of intended to be data only.
+
+52
+00:02:07.569 --> 00:02:09.449
+They have no inbuilt tick functionality,
+
+53
+00:02:09.449 --> 00:02:12.689
+tick being the updates.
+
+54
+00:02:12.689 --> 00:02:14.490
+If your game is running 60 times a second,
+
+55
+00:02:14.490 --> 00:02:16.849
+your tick would be called 60 times a second.
+
+56
+00:02:16.849 --> 00:02:20.289
+And UObjects have no inbuilt tick functionality.
+
+57
+00:02:20.289 --> 00:02:21.849
+When you're spawning UObject, you
+
+58
+00:02:21.849 --> 00:02:23.629
+have to provide it with an outer, which
+
+59
+00:02:23.629 --> 00:02:24.930
+is the thing that owns it.
+
+60
+00:02:24.930 --> 00:02:26.409
+If you don't provide an outer,
+
+61
+00:02:26.409 --> 00:02:28.689
+then we use the transient package,
+
+62
+00:02:28.689 --> 00:02:31.090
+which is essentially things that are not saved.
+
+63
+00:02:31.090 --> 00:02:33.370
+So it's a kind of temporary transient object
+
+64
+00:02:33.370 --> 00:02:36.610
+that exists for probably the duration of a level.
+
+65
+00:02:36.610 --> 00:02:39.689
+UObjects can support networking, but it's not.
+
+66
+00:02:39.689 --> 00:02:41.969
+You need to do some kind of additional layers
+
+67
+00:02:41.969 --> 00:02:42.930
+of functionality.
+
+68
+00:02:42.930 --> 00:02:45.009
+So if you're intending on doing networking,
+
+69
+00:02:45.009 --> 00:02:47.569
+UObjects might not always be your first protocol
+
+70
+00:02:47.569 --> 00:02:49.969
+or shouldn't necessarily be always your first protocol.
+
+71
+00:02:49.969 --> 00:02:52.650
+And what we gave an example of in our last session
+
+72
+00:02:52.650 --> 00:02:55.810
+was just a data asset, which is quite a typical way
+
+73
+00:02:55.810 --> 00:02:57.969
+to use a UObject, which is say
+
+74
+00:02:57.969 --> 00:02:59.250
+we're trying to define an explosion,
+
+75
+00:02:59.250 --> 00:03:03.050
+we might have a UObject that has some data that kind of groups
+
+76
+00:03:03.050 --> 00:03:07.050
+that data together in a kind of editor friendly way.
+
+77
+00:03:07.050 --> 00:03:10.250
+So we might have a particle explosion and a radius,
+
+78
+00:03:10.250 --> 00:03:13.330
+and we use all of those to define an explosion.
+
+79
+00:03:13.330 --> 00:03:15.939
+Then we use that later elsewhere.
+
+80
+00:03:15.939 --> 00:03:18.219
+Actor inherits from UObject.
+
+81
+00:03:18.219 --> 00:03:20.860
+And this is kind of another big branching point for the engine
+
+82
+00:03:20.860 --> 00:03:23.259
+where a lot of things then extend from Actor.
+
+83
+00:03:23.259 --> 00:03:25.419
+That covers a lot of the gameplay functionality
+
+84
+00:03:25.419 --> 00:03:28.060
+we'll inherit from Actor.
+
+85
+00:03:28.099 --> 00:03:32.699
+Unlike UObjects, Actors do provide kind of easy functionality
+
+86
+00:03:32.699 --> 00:03:35.139
+for replication and connecting between client and server.
+
+87
+00:03:35.139 --> 00:03:39.539
+So it's whereas you should be a little bit more considerate
+
+88
+00:03:39.539 --> 00:03:42.419
+when you're trying to implement networked UObjects.
+
+89
+00:03:42.419 --> 00:03:47.419
+Once you're at the Actor level, it's a lot simpler.
+
+90
+00:03:47.979 --> 00:03:49.860
+We talked a little bit about this in the last session,
+
+91
+00:03:49.860 --> 00:03:52.580
+but when things inherit from the UObjects,
+
+92
+00:03:52.580 --> 00:03:54.419
+they start with this prefix U,
+
+93
+00:03:54.419 --> 00:03:56.900
+when they inherit from Actor and downwards from that,
+
+94
+00:03:56.900 --> 00:03:58.180
+they start with the prefix A,
+
+95
+00:03:58.180 --> 00:03:59.900
+and that is hard coded into Unreal.
+
+96
+00:03:59.900 --> 00:04:02.259
+You'll get compile complaints
+
+97
+00:04:02.259 --> 00:04:06.219
+if you're not obeying that naming convention.
+
+98
+00:04:06.219 --> 00:04:07.620
+The other thing about Actors,
+
+99
+00:04:07.620 --> 00:04:10.259
+which you can kind of see from the display here,
+
+100
+00:04:10.259 --> 00:04:13.979
+is that Actors are intended to utilize
+
+101
+00:04:13.979 --> 00:04:15.979
+a kind of component architecture.
+
+102
+00:04:15.979 --> 00:04:18.699
+So an Actor might inherit
+
+103
+00:04:18.699 --> 00:04:21.060
+and implement a lot of functionality itself,
+
+104
+00:04:21.060 --> 00:04:23.579
+but they are also intended to utilize
+
+105
+00:04:23.579 --> 00:04:26.339
+this kind of modular framework of components
+
+106
+00:04:26.779 --> 00:04:30.300
+so that it's easy to import kind of similar sets
+
+107
+00:04:30.300 --> 00:04:33.860
+of functionality between multiple Actors.
+
+108
+00:04:33.860 --> 00:04:35.500
+Again, referencing our last talk,
+
+109
+00:04:35.500 --> 00:04:40.500
+we had the explosive barrel, which was our example Actor.
+
+110
+00:04:40.620 --> 00:04:42.860
+And as you can see, that utilizes several components.
+
+111
+00:04:42.860 --> 00:04:45.339
+We've got a scene component, which is our scene route.
+
+112
+00:04:45.339 --> 00:04:47.579
+I'll talk a little bit more about that again in a second.
+
+113
+00:04:47.579 --> 00:04:50.660
+Static mesh Actor, explosion component,
+
+114
+00:04:50.660 --> 00:04:52.459
+which is our custom component that we made,
+
+115
+00:04:52.459 --> 00:04:53.579
+and then just some variables.
+
+116
+00:04:53.579 --> 00:04:56.899
+So Actors can implement their own functionality,
+
+117
+00:04:56.899 --> 00:04:59.420
+but they're best used as kind of ways
+
+118
+00:04:59.420 --> 00:05:02.899
+to combine sets of functionality through components.
+
+119
+00:05:03.899 --> 00:05:06.860
+Components, again, we've already covered a little bit,
+
+120
+00:05:06.860 --> 00:05:10.660
+but they are essentially our modular building block.
+
+121
+00:05:10.660 --> 00:05:13.259
+So, you know, typical out of the box examples
+
+122
+00:05:13.259 --> 00:05:17.100
+would be a collision component or a mesh component.
+
+123
+00:05:17.100 --> 00:05:19.139
+So if you want to be able to visualize something
+
+124
+00:05:19.139 --> 00:05:20.300
+or provide collision,
+
+125
+00:05:21.180 --> 00:05:23.740
+those are really, really obvious examples.
+
+126
+00:05:23.740 --> 00:05:25.660
+Another one I can think of off the top of my head
+
+127
+00:05:25.660 --> 00:05:28.300
+is something that provides just pure functionality,
+
+128
+00:05:28.300 --> 00:05:31.259
+something like a path following component,
+
+129
+00:05:31.259 --> 00:05:32.620
+or I think there's a component
+
+130
+00:05:32.620 --> 00:05:34.540
+just to make things spin on the spot.
+
+131
+00:05:34.540 --> 00:05:36.100
+If you just need, I don't know,
+
+132
+00:05:36.100 --> 00:05:37.939
+a display in a gallery that just spins,
+
+133
+00:05:37.939 --> 00:05:39.660
+there's a component for that.
+
+134
+00:05:39.660 --> 00:05:41.540
+It provides this functionality in a portable way
+
+135
+00:05:41.540 --> 00:05:43.100
+that you can easily chop and change it
+
+136
+00:05:43.100 --> 00:05:45.139
+and put it on different Actors.
+
+137
+00:05:45.139 --> 00:05:47.939
+There is a relatively strict relationship
+
+138
+00:05:47.939 --> 00:05:49.259
+between components and Actors
+
+139
+00:05:49.259 --> 00:05:52.379
+in that components can't exist without Actors.
+
+140
+00:05:52.379 --> 00:05:54.620
+Actors contain their components
+
+141
+00:05:54.620 --> 00:05:57.459
+and that kind of, it's not a one-to-one relationship
+
+142
+00:05:57.459 --> 00:05:59.100
+because an Actor can have many components,
+
+143
+00:05:59.100 --> 00:06:01.939
+but a current component cannot exist without an Actor.
+
+144
+00:06:03.620 --> 00:06:04.939
+Yeah, and essentially they provide
+
+145
+00:06:04.939 --> 00:06:07.420
+that kind of back and forth communication between them.
+
+146
+00:06:07.420 --> 00:06:09.540
+Components are aware of the Actor that owns them
+
+147
+00:06:09.540 --> 00:06:11.779
+and the Actor is aware of the components that it has,
+
+148
+00:06:11.779 --> 00:06:13.420
+which hence what this blue arrow is there
+
+149
+00:06:13.420 --> 00:06:15.379
+to kind of communicate.
+
+150
+00:06:15.379 --> 00:06:18.220
+And they kind of step down from component
+
+151
+00:06:18.220 --> 00:06:21.019
+from just a plain Actor component is the scene component.
+
+152
+00:06:21.019 --> 00:06:25.139
+This is inherits, hence this kind of line to indicate that.
+
+153
+00:06:25.139 --> 00:06:28.660
+And a scene component is essentially an Actor component,
+
+154
+00:06:28.660 --> 00:06:31.100
+but it has physical presence in the level.
+
+155
+00:06:31.100 --> 00:06:34.100
+Where an Actor component can just provide functionality,
+
+156
+00:06:34.100 --> 00:06:36.459
+scene components also provide functionality,
+
+157
+00:06:36.459 --> 00:06:39.019
+but in the context of a position in world.
+
+158
+00:06:39.019 --> 00:06:42.139
+So when I gave the example of a collision
+
+159
+00:06:42.139 --> 00:06:45.420
+or a visual mesh, obviously both of those things
+
+160
+00:06:45.420 --> 00:06:46.740
+would have positions in world.
+
+161
+00:06:46.740 --> 00:06:48.939
+So both of those things would actually inherit
+
+162
+00:06:48.939 --> 00:06:50.779
+from a scene component.
+
+163
+00:06:50.779 --> 00:06:54.060
+Actors also require, at least at the blueprint level,
+
+164
+00:06:54.060 --> 00:06:55.899
+require at least one scene component,
+
+165
+00:06:55.899 --> 00:06:58.740
+which is referred to as the root component.
+
+166
+00:06:58.740 --> 00:07:01.060
+And when you ask an Actor,
+
+167
+00:07:01.060 --> 00:07:03.300
+what is your location or rotation of world?
+
+168
+00:07:03.300 --> 00:07:05.660
+Actually that Actor doesn't innately
+
+169
+00:07:05.660 --> 00:07:06.980
+have a location and rotation.
+
+170
+00:07:06.980 --> 00:07:08.939
+What you're actually asking is what are the,
+
+171
+00:07:08.939 --> 00:07:10.259
+is the location and rotation
+
+172
+00:07:10.259 --> 00:07:12.180
+of that Actor's root component.
+
+173
+00:07:12.180 --> 00:07:13.860
+They can only have one root component
+
+174
+00:07:13.860 --> 00:07:15.019
+and then their other components
+
+175
+00:07:15.019 --> 00:07:16.899
+are attached to that component.
+
+176
+00:07:16.899 --> 00:07:20.860
+And scene components have this kind of hierarchical,
+
+177
+00:07:20.860 --> 00:07:21.939
+unlike Actor components,
+
+178
+00:07:21.939 --> 00:07:23.579
+which are kind of just slotted in,
+
+179
+00:07:23.579 --> 00:07:25.420
+scene components have a hierarchy between them.
+
+180
+00:07:25.420 --> 00:07:26.819
+So you can child them to each other
+
+181
+00:07:26.819 --> 00:07:29.379
+and all scene components of an Actor
+
+182
+00:07:29.379 --> 00:07:32.449
+are childed to the root component.
+
+183
+00:07:32.449 --> 00:07:34.529
+So that about covers our kind of fundamentals.
+
+184
+00:07:34.529 --> 00:07:36.649
+Again, if you want to go into any more detail,
+
+185
+00:07:36.649 --> 00:07:39.209
+any of that, you can go into our previous talk,
+
+186
+00:07:39.209 --> 00:07:40.850
+but now let's talk a little bit more
+
+187
+00:07:40.850 --> 00:07:43.290
+about the kind of the key classes
+
+188
+00:07:43.290 --> 00:07:47.740
+relating to the player.
+
+189
+00:07:47.740 --> 00:07:49.300
+So once we get to this level,
+
+190
+00:07:49.300 --> 00:07:51.819
+we've got quite a bit of a more complex
+
+191
+00:07:51.819 --> 00:07:54.579
+web of relationships to be aware of,
+
+192
+00:07:54.579 --> 00:07:57.980
+hence the kind of slightly possibly overwhelming graph.
+
+193
+00:07:57.980 --> 00:08:01.819
+Again, just to highlight what all these visuals mean,
+
+194
+00:08:01.819 --> 00:08:03.540
+we have these kind of solid white lines.
+
+195
+00:08:03.540 --> 00:08:05.819
+This is just to kind of demonstrate inheritance
+
+196
+00:08:05.819 --> 00:08:07.899
+and the dotted white lines is just indicating,
+
+197
+00:08:07.899 --> 00:08:09.579
+obviously there are a lot more classes
+
+198
+00:08:09.579 --> 00:08:10.699
+that inherit from Actor.
+
+199
+00:08:10.699 --> 00:08:13.019
+There are a lot more classes that inherit from Pawn
+
+200
+00:08:13.019 --> 00:08:14.980
+and so on and so forth.
+
+201
+00:08:15.019 --> 00:08:18.019
+But this is the kind of things
+
+202
+00:08:18.019 --> 00:08:19.420
+we're going to go into right now.
+
+203
+00:08:19.420 --> 00:08:20.660
+These are the kind of relationships
+
+204
+00:08:20.660 --> 00:08:21.620
+we need to be concerned about.
+
+205
+00:08:21.620 --> 00:08:23.860
+We'll zoom into each of these as we go along
+
+206
+00:08:23.860 --> 00:08:25.259
+and talk a little bit more about them,
+
+207
+00:08:25.259 --> 00:08:27.019
+but this is just kind of an overview
+
+208
+00:08:27.019 --> 00:08:29.930
+of all the things we're going to be covering.
+
+209
+00:08:29.930 --> 00:08:31.730
+So we already talked about Actor,
+
+210
+00:08:31.730 --> 00:08:33.370
+but once we're at the player level,
+
+211
+00:08:33.370 --> 00:08:35.529
+one of the first things to talk about is a Pawn.
+
+212
+00:08:35.529 --> 00:08:39.529
+A Pawn is essentially a base class of any Actor
+
+213
+00:08:40.690 --> 00:08:42.090
+that can be possessed.
+
+214
+00:08:42.090 --> 00:08:44.769
+That is either be by a player or an AI.
+
+215
+00:08:44.769 --> 00:08:46.889
+Possess is the term for this thing
+
+216
+00:08:46.889 --> 00:08:49.210
+has something controlling it.
+
+217
+00:08:49.210 --> 00:08:53.450
+A Pawn is the physical representation of a player and agent.
+
+218
+00:08:53.450 --> 00:08:55.289
+So it exists in world.
+
+219
+00:08:55.289 --> 00:08:57.450
+Typically when you have a playable character,
+
+220
+00:08:57.450 --> 00:08:59.610
+it would be a Pawn.
+
+221
+00:08:59.610 --> 00:09:02.690
+And it's kind of a very basic plain canvas.
+
+222
+00:09:02.690 --> 00:09:04.929
+It doesn't innately have much in the way
+
+223
+00:09:04.929 --> 00:09:06.049
+of movement capability.
+
+224
+00:09:06.049 --> 00:09:07.129
+It doesn't have collision.
+
+225
+00:09:07.129 --> 00:09:09.090
+It has no visuals.
+
+226
+00:09:09.090 --> 00:09:11.490
+A basic Pawn has very, very little in it.
+
+227
+00:09:11.570 --> 00:09:14.769
+Just this functionality to be controlled.
+
+228
+00:09:14.769 --> 00:09:17.450
+Pawns have a one-to-one relationship with a controller.
+
+229
+00:09:17.450 --> 00:09:19.730
+Hence this kind of blue arrow here.
+
+230
+00:09:19.730 --> 00:09:21.649
+Pawns are aware of the thing that controls them,
+
+231
+00:09:21.649 --> 00:09:23.610
+which is a controller, which we'll touch on in a second.
+
+232
+00:09:23.610 --> 00:09:26.970
+And controllers are aware of the Pawn they're controlling.
+
+233
+00:09:26.970 --> 00:09:28.809
+Pawns aren't assumed to be humanoid.
+
+234
+00:09:28.809 --> 00:09:29.730
+They could be anything.
+
+235
+00:09:29.730 --> 00:09:31.450
+They could be abstract.
+
+236
+00:09:31.450 --> 00:09:33.129
+They do have a location in world,
+
+237
+00:09:33.129 --> 00:09:36.649
+but you could have a Pawn that represents a mini game.
+
+238
+00:09:36.649 --> 00:09:38.129
+And it's kind of like the thing
+
+239
+00:09:38.129 --> 00:09:39.850
+that's pulling all your input together.
+
+240
+00:09:39.889 --> 00:09:43.049
+You could have a Pawn that represents a flying drone
+
+241
+00:09:43.049 --> 00:09:43.889
+or something like that.
+
+242
+00:09:43.889 --> 00:09:45.610
+It's not inherently a character
+
+243
+00:09:45.610 --> 00:09:48.570
+with two legs running around kind of thing.
+
+244
+00:09:48.570 --> 00:09:49.970
+It's also worth touching on the fact
+
+245
+00:09:49.970 --> 00:09:53.809
+that Actors themselves can consume input
+
+246
+00:09:53.809 --> 00:09:56.450
+and have their transform manipulated.
+
+247
+00:09:56.450 --> 00:09:58.570
+So that is not unique to Pawn,
+
+248
+00:09:58.570 --> 00:10:01.009
+but it is facilitated more strongly within Pawn.
+
+249
+00:10:01.009 --> 00:10:03.529
+So if you are thinking about controlling something,
+
+250
+00:10:03.529 --> 00:10:05.129
+Pawn should be your starting point.
+
+251
+00:10:05.129 --> 00:10:07.889
+It's Actors you can listen for input,
+
+252
+00:10:07.889 --> 00:10:09.090
+but it requires a bit more setup
+
+253
+00:10:09.090 --> 00:10:12.779
+and that should be for special cases really.
+
+254
+00:10:12.779 --> 00:10:15.179
+So coming down from the Pawn level,
+
+255
+00:10:15.179 --> 00:10:16.419
+we have two more classes.
+
+256
+00:10:16.419 --> 00:10:18.700
+We have Default Pawn and Spectator Pawn.
+
+257
+00:10:18.700 --> 00:10:22.179
+Default Pawn is not inherited from
+
+258
+00:10:22.179 --> 00:10:24.379
+in other classes from the game.
+
+259
+00:10:24.379 --> 00:10:26.299
+It's only into Spectator Pawn.
+
+260
+00:10:26.299 --> 00:10:28.100
+So it should not be the base class
+
+261
+00:10:28.100 --> 00:10:29.860
+for when you're intending to make your own.
+
+262
+00:10:29.860 --> 00:10:31.899
+It's just the kind of engine Default Pawn.
+
+263
+00:10:31.899 --> 00:10:33.820
+So if you're in a random level
+
+264
+00:10:33.820 --> 00:10:36.259
+and you don't have anything playable
+
+265
+00:10:36.259 --> 00:10:38.299
+and you just click play,
+
+266
+00:10:38.299 --> 00:10:40.740
+I'm currently playing as the Default Pawn now.
+
+267
+00:10:40.740 --> 00:10:43.940
+It essentially provides some basic movement functionality.
+
+268
+00:10:43.940 --> 00:10:46.820
+It does have a collision.
+
+269
+00:10:46.820 --> 00:10:48.500
+It's got no gravity.
+
+270
+00:10:48.500 --> 00:10:50.019
+It's kind of a flying style movement
+
+271
+00:10:50.019 --> 00:10:52.379
+and it's bound to input.
+
+272
+00:10:52.379 --> 00:10:55.139
+So by default, you can use WASD
+
+273
+00:10:55.139 --> 00:10:57.710
+and jumping to kind of move up.
+
+274
+00:10:57.710 --> 00:10:59.389
+And it just provides some really,
+
+275
+00:10:59.389 --> 00:11:01.990
+really basic fundamental functionality.
+
+276
+00:11:01.990 --> 00:11:04.750
+Spectator Pawn inherits from Default Pawn
+
+277
+00:11:04.750 --> 00:11:08.309
+and therefore brings along a lot of the same functionality.
+
+278
+00:11:08.309 --> 00:11:10.110
+Actually what the Spectator Pawn does
+
+279
+00:11:10.110 --> 00:11:12.870
+is replace the movement component that it uses.
+
+280
+00:11:12.870 --> 00:11:16.110
+The Spectator Pawn's movement component
+
+281
+00:11:16.110 --> 00:11:18.269
+is primarily there to add in some extra functionality
+
+282
+00:11:18.269 --> 00:11:21.070
+for the ability to possibly ignore time dilation
+
+283
+00:11:21.070 --> 00:11:23.750
+if you don't want slow-mo to affect it.
+
+284
+00:11:23.750 --> 00:11:26.110
+And also just to remove the concept of a mesh
+
+285
+00:11:26.110 --> 00:11:28.710
+because the spectators are meant to be abstract.
+
+286
+00:11:28.710 --> 00:11:30.269
+A spectator obviously being for
+
+287
+00:11:30.269 --> 00:11:32.269
+at the end of a match if your character has died
+
+288
+00:11:32.269 --> 00:11:34.509
+and you still want to move around the space,
+
+289
+00:11:34.509 --> 00:11:35.909
+that's the kind of assumption
+
+290
+00:11:36.309 --> 00:11:38.590
+for why the Spectator Pawn exists.
+
+291
+00:11:38.590 --> 00:11:40.389
+Obviously if you want to implement your own,
+
+292
+00:11:40.389 --> 00:11:43.529
+you can absolutely do that.
+
+293
+00:11:43.529 --> 00:11:45.649
+So going back up that chain slightly,
+
+294
+00:11:45.649 --> 00:11:47.370
+the other class that we have out of the box
+
+295
+00:11:47.370 --> 00:11:49.330
+inheriting from Pawn that we need to talk about
+
+296
+00:11:49.330 --> 00:11:50.610
+is the Character.
+
+297
+00:11:50.610 --> 00:11:52.929
+Character is essentially a shortcut class.
+
+298
+00:11:52.929 --> 00:11:54.809
+You don't need to use it,
+
+299
+00:11:54.809 --> 00:11:56.889
+but essentially what Epic realized
+
+300
+00:11:56.889 --> 00:11:58.850
+was the vast majority of the time
+
+301
+00:11:58.850 --> 00:12:00.090
+when we are making games
+
+302
+00:12:00.090 --> 00:12:01.730
+or if we've got a playable character,
+
+303
+00:12:01.730 --> 00:12:04.970
+it is typically an upright,
+
+304
+00:12:05.009 --> 00:12:07.730
+probably capsule-like shape
+
+305
+00:12:08.610 --> 00:12:10.210
+and we would need movement,
+
+306
+00:12:10.210 --> 00:12:12.690
+we would need visual mesh and we would need collision.
+
+307
+00:12:12.690 --> 00:12:15.129
+So the character essentially just provides
+
+308
+00:12:15.129 --> 00:12:16.490
+all of that stuff out of the box.
+
+309
+00:12:16.490 --> 00:12:18.289
+It comes with a collision component,
+
+310
+00:12:18.289 --> 00:12:20.090
+it comes with a skeletal mesh component
+
+311
+00:12:20.090 --> 00:12:22.970
+because most of the time our characters are animated
+
+312
+00:12:22.970 --> 00:12:25.330
+and it also comes with movement functionality
+
+313
+00:12:25.330 --> 00:12:26.169
+baked into it.
+
+314
+00:12:26.169 --> 00:12:27.409
+It has this special relationship
+
+315
+00:12:27.409 --> 00:12:29.129
+with a unique kind of movement component
+
+316
+00:12:29.129 --> 00:12:30.730
+called a character movement component,
+
+317
+00:12:30.730 --> 00:12:32.370
+which we'll get into in a moment.
+
+318
+00:12:32.370 --> 00:12:35.370
+But typically when you're making a human-like
+
+319
+00:12:35.370 --> 00:12:37.169
+or humanoid character,
+
+320
+00:12:37.169 --> 00:12:39.169
+a character might as well be your starting point
+
+321
+00:12:39.169 --> 00:12:42.149
+because it just provides a bunch of functionality for you.
+
+322
+00:12:42.149 --> 00:12:44.870
+The character movement component is a specialized form
+
+323
+00:12:44.870 --> 00:12:46.429
+of the Pawn movement component
+
+324
+00:12:46.429 --> 00:12:48.590
+and it's linked quite tightly with the character.
+
+325
+00:12:48.590 --> 00:12:51.269
+So every time you pull in a character class,
+
+326
+00:12:51.269 --> 00:12:52.149
+it's always going to pull in
+
+327
+00:12:52.149 --> 00:12:53.789
+a character movement component with it
+
+328
+00:12:53.789 --> 00:12:55.389
+and the character movement component
+
+329
+00:12:55.389 --> 00:12:57.149
+depends on a character existing.
+
+330
+00:12:57.149 --> 00:12:59.509
+It expects to be implementing movement
+
+331
+00:12:59.509 --> 00:13:02.110
+for a character class.
+
+332
+00:13:02.110 --> 00:13:04.230
+The movement component provides
+
+333
+00:13:04.230 --> 00:13:05.870
+a whole bunch of functionality.
+
+334
+00:13:05.870 --> 00:13:07.509
+It's first and foremost,
+
+335
+00:13:07.509 --> 00:13:09.870
+it's got networking already baked into it,
+
+336
+00:13:09.870 --> 00:13:12.429
+meaning that if you just instantly create
+
+337
+00:13:12.429 --> 00:13:15.789
+a networked multiplayer game and you're using characters,
+
+338
+00:13:15.789 --> 00:13:18.070
+that will mean you've already got your positions
+
+339
+00:13:18.070 --> 00:13:19.350
+and rotations being communicated
+
+340
+00:13:19.350 --> 00:13:20.710
+between the server and client.
+
+341
+00:13:20.710 --> 00:13:23.110
+And it means that you've got client-side prediction,
+
+342
+00:13:23.110 --> 00:13:24.110
+meaning that you're going to get
+
+343
+00:13:24.110 --> 00:13:26.269
+a less aggressive reconciliation
+
+344
+00:13:26.269 --> 00:13:27.990
+between your server and your client.
+
+345
+00:13:27.990 --> 00:13:30.710
+It accounts for several different modes of moving.
+
+346
+00:13:30.710 --> 00:13:33.909
+So we have walking, running, falling, swimming, and flying.
+
+347
+00:13:35.590 --> 00:13:37.909
+And each of these is kind of handled distinctly
+
+348
+00:13:37.909 --> 00:13:38.750
+within the code.
+
+349
+00:13:38.750 --> 00:13:41.429
+So if you need to kind of investigate
+
+350
+00:13:41.429 --> 00:13:43.789
+or inject functionality into these classes,
+
+351
+00:13:43.789 --> 00:13:46.710
+they're all kind of broken up into separate sections.
+
+352
+00:13:46.710 --> 00:13:49.509
+You can also add in additional movement modes.
+
+353
+00:13:49.509 --> 00:13:50.830
+So if you want to add in
+
+354
+00:13:50.830 --> 00:13:52.950
+your own custom new movement mode
+
+355
+00:13:52.950 --> 00:13:55.110
+that doesn't fall under any of the preexisting categories,
+
+356
+00:13:55.110 --> 00:13:56.710
+you can do that.
+
+357
+00:13:56.710 --> 00:13:59.950
+That being said, the character movement component
+
+358
+00:13:59.990 --> 00:14:01.789
+isn't marked as blueprintable,
+
+359
+00:14:01.789 --> 00:14:03.750
+so you can't make blueprints that inherit
+
+360
+00:14:03.750 --> 00:14:06.029
+from the character movement component by default,
+
+361
+00:14:06.029 --> 00:14:08.870
+unless you can go and edit the engine code yourself.
+
+362
+00:14:08.870 --> 00:14:10.909
+And what that means is that if you do want
+
+363
+00:14:10.909 --> 00:14:14.870
+to kind of blueprint your own custom movement mode,
+
+364
+00:14:14.870 --> 00:14:16.470
+the way that's actually best to do that
+
+365
+00:14:16.470 --> 00:14:19.190
+is on the character blueprint itself.
+
+366
+00:14:19.190 --> 00:14:20.710
+So because the character
+
+367
+00:14:20.710 --> 00:14:23.549
+and the character movement component are so tightly linked,
+
+368
+00:14:23.549 --> 00:14:26.110
+quite a lot of the movement functionality
+
+369
+00:14:26.110 --> 00:14:28.309
+can be accessed through the character class.
+
+370
+00:14:28.309 --> 00:14:32.190
+And so the update custom movement event
+
+371
+00:14:32.190 --> 00:14:35.710
+on the character blueprint itself would be getting called,
+
+372
+00:14:35.710 --> 00:14:37.870
+and that's the point where you can inject
+
+373
+00:14:37.870 --> 00:14:40.750
+any kind of custom movement functionality that you need.
+
+374
+00:14:40.750 --> 00:14:42.070
+The other thing to kind of bear in mind
+
+375
+00:14:42.070 --> 00:14:44.429
+is that as character is, you know,
+
+376
+00:14:44.429 --> 00:14:47.429
+inherently got a capsule, an upright standing capsule,
+
+377
+00:14:47.429 --> 00:14:49.710
+character movement component is expecting you
+
+378
+00:14:49.710 --> 00:14:53.190
+to make an upright vertically aligned character.
+
+379
+00:14:53.190 --> 00:14:55.389
+So if you're not doing something like that
+
+380
+00:14:55.389 --> 00:14:56.669
+and you want something more like a,
+
+381
+00:14:56.669 --> 00:14:59.750
+maybe like, I don't know, something quadrupedal,
+
+382
+00:14:59.750 --> 00:15:02.429
+like a dog or a cat character
+
+383
+00:15:02.429 --> 00:15:03.429
+and the character movement component
+
+384
+00:15:03.429 --> 00:15:07.379
+might not be completely suitable for that.
+
+385
+00:15:07.379 --> 00:15:09.419
+So stepping all the way back up the chain now
+
+386
+00:15:09.419 --> 00:15:11.259
+up to actor and inheriting from that,
+
+387
+00:15:11.259 --> 00:15:12.379
+we have controllers.
+
+388
+00:15:12.379 --> 00:15:14.860
+We've touched on in this a little bit already,
+
+389
+00:15:14.860 --> 00:15:17.419
+but controllers are essentially
+
+390
+00:15:17.419 --> 00:15:20.179
+where a pawn is the thing that gets controlled.
+
+391
+00:15:20.179 --> 00:15:22.299
+A controller is the thing that does the controlling.
+
+392
+00:15:22.299 --> 00:15:23.659
+So where a pawn represents
+
+393
+00:15:23.659 --> 00:15:26.659
+the kind of physical object in world,
+
+394
+00:15:26.700 --> 00:15:29.139
+controller represents a little bit more
+
+395
+00:15:29.139 --> 00:15:32.299
+like that object's mind.
+
+396
+00:15:32.299 --> 00:15:33.779
+It has no physical actor.
+
+397
+00:15:33.779 --> 00:15:35.860
+It does technically have a position in world.
+
+398
+00:15:35.860 --> 00:15:39.139
+Like if you started play, if I played a level
+
+399
+00:15:39.139 --> 00:15:43.659
+and you could actually see that I do have a,
+
+400
+00:15:43.659 --> 00:15:45.419
+there are controllers actually in my level
+
+401
+00:15:45.419 --> 00:15:47.419
+and they do actually have a location,
+
+402
+00:15:47.419 --> 00:15:49.620
+but for the most part,
+
+403
+00:15:49.620 --> 00:15:51.700
+their transform is somewhat irrelevant.
+
+404
+00:15:51.700 --> 00:15:53.740
+They don't have any kind of collision
+
+405
+00:15:53.740 --> 00:15:56.019
+or visual representation.
+
+406
+00:15:56.019 --> 00:15:59.299
+The main purpose for a controller is to possess a pawn.
+
+407
+00:16:00.419 --> 00:16:02.340
+It has a one-to-one relationship with a pawn.
+
+408
+00:16:02.340 --> 00:16:05.860
+So a pawn can only be controlled by one controller.
+
+409
+00:16:07.620 --> 00:16:09.419
+Really it's intended that controllers
+
+410
+00:16:09.419 --> 00:16:11.299
+only control one pawn.
+
+411
+00:16:11.299 --> 00:16:13.740
+Obviously in certain situations and certain game setups
+
+412
+00:16:13.740 --> 00:16:15.659
+that might not be completely suitable,
+
+413
+00:16:15.659 --> 00:16:18.179
+but the standard intent is for a controller
+
+414
+00:16:18.179 --> 00:16:19.220
+to control a single pawn
+
+415
+00:16:19.220 --> 00:16:23.110
+and a pawn to be controlled by a single controller.
+
+416
+00:16:23.110 --> 00:16:25.629
+Controllers also get informed about a lot of events
+
+417
+00:16:25.950 --> 00:16:27.750
+and notifications about the pawns they're controlling,
+
+418
+00:16:27.750 --> 00:16:29.590
+if they possess it, if they stop possessing it
+
+419
+00:16:29.590 --> 00:16:31.269
+and many other things.
+
+420
+00:16:31.269 --> 00:16:32.590
+The other thing is that
+
+421
+00:16:32.590 --> 00:16:33.870
+none of the transform functionalities
+
+422
+00:16:33.870 --> 00:16:36.710
+are exposed in native in C++.
+
+423
+00:16:36.710 --> 00:16:41.110
+So again, you're really not intended to manipulate
+
+424
+00:16:41.110 --> 00:16:43.269
+the location and rotation of the controller.
+
+425
+00:16:43.269 --> 00:16:45.350
+One thing to talk about very briefly though,
+
+426
+00:16:45.350 --> 00:16:46.669
+is that as you could see
+
+427
+00:16:46.669 --> 00:16:49.029
+when I was quickly demonstrating there,
+
+428
+00:16:49.029 --> 00:16:53.029
+if at runtime you have your controller selected,
+
+429
+00:16:53.029 --> 00:16:57.230
+you will be able to see that our rotation is changing
+
+430
+00:16:57.230 --> 00:16:59.549
+as we move our viewer around.
+
+431
+00:16:59.549 --> 00:17:01.509
+This is kind of a slightly more in depth,
+
+432
+00:17:01.509 --> 00:17:05.069
+but essentially when you are controlling a pawn,
+
+433
+00:17:05.069 --> 00:17:08.150
+you have a concept called the control rotation.
+
+434
+00:17:08.150 --> 00:17:10.990
+And that is vaguely meant a way,
+
+435
+00:17:10.990 --> 00:17:12.710
+a default way of representing
+
+436
+00:17:12.710 --> 00:17:16.430
+what is the kind of intent direction of this pawn.
+
+437
+00:17:16.430 --> 00:17:18.430
+And that might be the player's view rotation.
+
+438
+00:17:18.430 --> 00:17:21.230
+It might be the direction that an AI is moving in.
+
+439
+00:17:21.230 --> 00:17:22.869
+And that is when you're talking about
+
+440
+00:17:22.869 --> 00:17:23.710
+that control rotation,
+
+441
+00:17:23.710 --> 00:17:26.950
+that is actually the rotation of the controller.
+
+442
+00:17:26.950 --> 00:17:28.910
+So whilst for the most part,
+
+443
+00:17:28.910 --> 00:17:31.349
+you don't need to be editing these things,
+
+444
+00:17:31.349 --> 00:17:33.589
+the rotation of the controller
+
+445
+00:17:33.589 --> 00:17:34.990
+does actually have some meaning,
+
+446
+00:17:34.990 --> 00:17:38.880
+which is why you see updating in runtime.
+
+447
+00:17:38.880 --> 00:17:41.160
+So inheriting from controllers themselves,
+
+448
+00:17:41.160 --> 00:17:42.680
+we have two different classes.
+
+449
+00:17:42.680 --> 00:17:44.839
+Unlike these other classes, pawn and actor,
+
+450
+00:17:44.839 --> 00:17:46.880
+which might have a lot of things inheriting from them,
+
+451
+00:17:46.880 --> 00:17:49.319
+controller is specifically only inherited
+
+452
+00:17:49.319 --> 00:17:50.480
+by these two types.
+
+453
+00:17:50.480 --> 00:17:52.440
+You could inherit from it yourself,
+
+454
+00:17:52.440 --> 00:17:54.920
+but a controller is an abstract class
+
+455
+00:17:54.920 --> 00:17:57.000
+and player controller and AI controller,
+
+456
+00:17:57.000 --> 00:17:58.960
+where we actually kind of get into things
+
+457
+00:17:58.960 --> 00:18:02.160
+that you might actually see getting spawned in your game.
+
+458
+00:18:02.160 --> 00:18:06.440
+So a player controller represents the human player's will.
+
+459
+00:18:06.440 --> 00:18:09.240
+You would have a player controller exist
+
+460
+00:18:09.240 --> 00:18:12.279
+for every human player in your game.
+
+461
+00:18:12.279 --> 00:18:17.039
+So if you had a local co-op game
+
+462
+00:18:17.039 --> 00:18:18.359
+and you had four players,
+
+463
+00:18:18.359 --> 00:18:20.599
+you would expect to have four player controllers
+
+464
+00:18:20.599 --> 00:18:21.839
+spawned in your level.
+
+465
+00:18:22.599 --> 00:18:24.599
+They essentially act as a centralizing point
+
+466
+00:18:24.599 --> 00:18:26.759
+for your player's camera and input.
+
+467
+00:18:26.759 --> 00:18:29.000
+Both of these systems are actually handled
+
+468
+00:18:29.000 --> 00:18:31.319
+by other systems under the hood.
+
+469
+00:18:31.319 --> 00:18:32.880
+There's something called the player camera manager
+
+470
+00:18:32.880 --> 00:18:34.279
+and the player input components,
+
+471
+00:18:34.279 --> 00:18:36.160
+which they kind of really handle
+
+472
+00:18:36.160 --> 00:18:37.759
+each of those things directly,
+
+473
+00:18:37.759 --> 00:18:39.599
+but the player controller gives you a way
+
+474
+00:18:39.599 --> 00:18:42.039
+to interface with both of those things.
+
+475
+00:18:42.039 --> 00:18:43.920
+Player controllers also persist
+
+476
+00:18:43.920 --> 00:18:45.880
+throughout the duration of a world.
+
+477
+00:18:47.079 --> 00:18:48.839
+That's true of controllers in general,
+
+478
+00:18:48.839 --> 00:18:51.880
+but typically when you start a level,
+
+479
+00:18:51.920 --> 00:18:53.119
+your players would already exist.
+
+480
+00:18:53.119 --> 00:18:55.720
+There is functionality to spawn new players in,
+
+481
+00:18:55.720 --> 00:18:57.599
+but a player controller would exist
+
+482
+00:18:57.599 --> 00:18:58.680
+for the duration of a world
+
+483
+00:18:58.680 --> 00:19:00.990
+as long as that player exists.
+
+484
+00:19:00.990 --> 00:19:03.670
+The other thing we'll get onto in a moment
+
+485
+00:19:03.670 --> 00:19:05.589
+is the fact that the player controller exists
+
+486
+00:19:05.589 --> 00:19:08.750
+on the server and on the controlling client's machine.
+
+487
+00:19:08.750 --> 00:19:11.869
+So in a networked multiplayer scenario,
+
+488
+00:19:11.869 --> 00:19:14.109
+the server would have a copy of each player controller
+
+489
+00:19:14.109 --> 00:19:17.069
+and each client would see their own player controller,
+
+490
+00:19:17.069 --> 00:19:18.509
+but not others.
+
+491
+00:19:18.509 --> 00:19:20.309
+We'll go into more detail about that later,
+
+492
+00:19:20.309 --> 00:19:24.089
+but it's a thing that's worth highlighting.
+
+493
+00:19:24.089 --> 00:19:25.410
+So separately from that,
+
+494
+00:19:25.410 --> 00:19:27.769
+the other kind of branch that we can go down
+
+495
+00:19:27.769 --> 00:19:29.569
+is AI controllers.
+
+496
+00:19:29.569 --> 00:19:30.730
+Pretty self-explanatory.
+
+497
+00:19:30.730 --> 00:19:35.730
+This is the will of an AI entity.
+
+498
+00:19:38.170 --> 00:19:40.730
+So where a player controller represents a human player,
+
+499
+00:19:40.730 --> 00:19:43.769
+an AI controller represents some kind of AI
+
+500
+00:19:43.769 --> 00:19:46.210
+that would be controlling entities within the world.
+
+501
+00:19:46.210 --> 00:19:47.410
+Just like a player controller,
+
+502
+00:19:47.410 --> 00:19:49.250
+because they're a form of controller,
+
+503
+00:19:49.250 --> 00:19:51.009
+they can possess pawns.
+
+504
+00:19:51.009 --> 00:19:53.529
+And this means that you can have a pawn
+
+505
+00:19:53.529 --> 00:19:55.049
+that can be controlled by a player
+
+506
+00:19:55.049 --> 00:19:58.089
+and the exact same pawn could be controlled by an AI.
+
+507
+00:19:58.089 --> 00:20:00.450
+And the idea being that it's intentionally abstracted
+
+508
+00:20:00.450 --> 00:20:01.769
+into separate sections
+
+509
+00:20:01.769 --> 00:20:04.170
+so that you might be able to reuse these things,
+
+510
+00:20:04.170 --> 00:20:07.130
+thinking about something like a game like Unreal Tournament
+
+511
+00:20:07.130 --> 00:20:07.970
+or something like that.
+
+512
+00:20:07.970 --> 00:20:10.210
+You really have the same characters running around,
+
+513
+00:20:10.210 --> 00:20:12.970
+picking up guns, driving cars, shooting things.
+
+514
+00:20:12.970 --> 00:20:15.769
+And it might be a human controlling that entity
+
+515
+00:20:15.769 --> 00:20:16.769
+or it might be an AI.
+
+516
+00:20:16.809 --> 00:20:19.329
+So this is kind of helpful way to think about these things,
+
+517
+00:20:19.329 --> 00:20:22.309
+about why they might be structured the way they are.
+
+518
+00:20:22.309 --> 00:20:24.430
+And the way an AI controller works
+
+519
+00:20:24.430 --> 00:20:26.150
+is there's a set of components
+
+520
+00:20:26.150 --> 00:20:28.589
+that really kind of drive that logic.
+
+521
+00:20:28.589 --> 00:20:30.869
+We'll get into more detail in this in another session,
+
+522
+00:20:30.869 --> 00:20:32.589
+but just briefly to touch on it,
+
+523
+00:20:32.589 --> 00:20:34.230
+you have the blackboard component,
+
+524
+00:20:34.230 --> 00:20:38.430
+which is essentially that AI's kind of knowledge and memory.
+
+525
+00:20:38.430 --> 00:20:39.829
+And then you have the brain component,
+
+526
+00:20:39.829 --> 00:20:41.990
+which kind of performs the logic.
+
+527
+00:20:41.990 --> 00:20:44.230
+And that's most typically exists
+
+528
+00:20:44.230 --> 00:20:46.869
+in the form of the behavior tree,
+
+529
+00:20:46.869 --> 00:20:49.230
+but there are other classes that implement that behavior,
+
+530
+00:20:49.230 --> 00:20:51.829
+that kind of brain logic.
+
+531
+00:20:51.829 --> 00:20:54.390
+The other thing to highlight is unlike player controllers,
+
+532
+00:20:54.390 --> 00:20:55.910
+these only exist on the server
+
+533
+00:20:55.910 --> 00:20:59.990
+because Unreal is server authoritative.
+
+534
+00:20:59.990 --> 00:21:03.190
+It's only the server that really is managing the AI's
+
+535
+00:21:03.190 --> 00:21:04.589
+and then each client,
+
+536
+00:21:04.589 --> 00:21:08.190
+what they really get is just a replicated form
+
+537
+00:21:08.190 --> 00:21:10.470
+of what all the AI's are doing on the server.
+
+538
+00:21:10.470 --> 00:21:11.630
+So it's only the server
+
+539
+00:21:11.630 --> 00:21:13.670
+that needs those AI controllers to exist.

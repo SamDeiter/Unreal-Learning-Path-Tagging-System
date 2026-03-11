@@ -1,0 +1,129 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:31.670
+Hi, everyone. In this lesson, we're going to go and take a look at the settings for lumen in our project settings, getting that set up, and then we're going to take a deeper dive into the post process volume. So let's get started. So one of the first things we want to do underneath lumen, we want to make sure or I should say rendering, we want to make sure in our project settings that we turn on lumen, and each one of these methods in our dynamic global illumination method in our reflections and reflection method, make sure those two are on. You also want to make sure that
+
+2
+00:00:31.670 --> 00:01:01.509
+you're supporting hardware ray tracing, and you're using hardware ray tracing when available. This is going to help us with our reflections, but also with our calculations as geometry goes into each other and our bounces in our scene, making it so that we have a clean and a very controllable scene to get the cinematic quality we're shooting for. You also want to make sure especially if you're getting an older scene, that you're using SM six, that is very important, as well as direct x 12.
+
+3
+00:01:01.670 --> 00:01:31.109
+In our scene overall. Now, again, that's mainly for older scenes that you're inheriting. Unreal usually will give you a prompt and say, look, you need to turn on SM six, you need to make sure that that you're using direct x 12. But by out of the box, you will see that SM six is on. And your lumen will be on but your hardware ray tracing, supporting hardware ray tracing will not necessarily be on because Unreal doesn't know what your
+
+4
+00:01:31.109 --> 00:02:02.689
+hardware can do. So you're going to have to turn those on ahead of time. Let's go and dive into one real and take a look at these up close. One of the first things we need to do as you saw the slides when we go to our project settings. Let's open that up. And let's go down to render. Now when we go to rendering here, and again, this is underneath our engine, and you'll see rendering, I'll pulse my cursor so you can see it. We want to make sure that we scroll down a bit here. And we want to make sure that we're using lumen underneath our initially our global illumination.
+
+5
+00:02:03.030 --> 00:02:32.469
+So we have lumen set in now by default, these should already be on your reflection method and as well as your dynamic global illumination. But we want to make sure also that we're turning on our light array lighting mode underneath lumen, as well as our and make sure you choose which one you want hit lighting or lighting reflections, surface catch each one of these have a different dependency. And what I mean by that is hit lighting is the most expensive. And I usually turn that on because I
+
+6
+00:02:32.469 --> 00:03:02.449
+want it to be as good as possible. Initially. Now to be able to support that you want to make sure you're using hardware ray tracing, when available in lumen. You also want to make sure underneath hardware ray tracing here, you want to turn on support hardware ray tracing. Now the reason why these sections are kind of split up. One is direct lumen support. And the other one is if you want to switch the path tracer. So this is actually a good idea. You want to turn both of these on even though you may be only in lumen and never have any desire to get into path tracing.
+
+7
+00:03:02.789 --> 00:03:32.199
+You still want to turn these on because you want to support as much as possible to get the best reflections as possible, as well as intersecting geometry, you making sure that it's calculated and your bounces are calculated accurately. So we have it on here, use hardware ray tracing when available. And then underneath hardware ray tracing, you want to put supports hardware ray tracing, you want to make sure those are on. Now again, you can choose what your lighting mode is here re lighting mode that can be done also in the post
+
+8
+00:03:32.199 --> 00:04:02.080
+process volume, which we'll talk about in just a second. And then we also have software ray tracing mode. Notice I have detailed ray tracing, the difference between these is detailed is a lot more expensive with more better results. And global is a lot lighter with not and it's a faster way to trace things. And you won't get you'll get less realistic results. And you'll see here we have a simple screen tracing source, it says seeing color, and that's fine in here. Now the difference between these, we don't need to worry about this anti alias, the
+
+9
+00:04:02.080 --> 00:04:31.439
+scene color with translucency. So lumen screen traces will sample the previous frames anti alias, the scene color, you'll see SSDSR here output, this contains translucency and is pre filtered, reducing lumens noise from small emissive elements. So this actually can be turned on, if you run into the problem where you're getting very noisy for the small ray tracing items. But if you don't have that you don't need it like you don't have small, I should say glowing items. If you don't have any
+
+10
+00:04:31.439 --> 00:05:01.939
+small glowing items, and you're not getting any noise to worry about, you don't necessarily have to turn this on. But the option is there, if that is necessary. So we have that implemented now. Alright, cool. Also, if you're inheriting an old scene, like I said before, you want to make sure that SM six Unreal should give you a prompt on that is turned on. Now you can choose whether you want to have it as a Mac, maybe you're sharing at your studio, there is people with Macs and others with other PC, different setups, like
+
+11
+00:05:01.939 --> 00:05:31.139
+you see vocal Vulcan here is an option. That's up to you to turn those on. And again, that's available, you'll see desktop SM six here. So these HR eyes are available here for this particular one, and the other ones SM six, I want to turn those on. Alright, so that's really important. If you're not in direct x 12. And it's an older scene in Unreal, again, we'll let you know that you need to turn that on some things may not work. But for a out of the box, your SM six should be active already.
+
+12
+00:05:32.420 --> 00:06:01.639
+But again, Unreal is really nice and tries to be your personal secretary and let you know if some things aren't on. But it's always good to double check, especially if you're getting an older scene. Alright, so one of the first things you want to do is put in a post process volume, this is super, super important. So this post process volume is going to give us control after the fact. So you can simply just type in post process volume with your quick add to scene here. Or you can just go under volumes and pull it. So you can see post process volume, I have one already in our scene here. And one of the first things you want to do is make
+
+13
+00:06:01.639 --> 00:06:35.660
+sure that you turn on infinite extend unbound. Now, the reason why we want to turn that on, we want to make sure that this is calculating all through our scene. Now, um, let me see here. So if we collapse some of these, there's a lot I have in here, let's collapse some of these we don't need. Let's go to the brush settings. And right above brush settings, you're going to see post process volume settings. And you want to turn on infinite extend unbound right
+
+14
+00:06:35.660 --> 00:07:07.279
+here. So again, you can encapsulate it, especially if you want to do a comparable. This is what the settings look like here. This is what the performance looks like over here. You can but on Unreal's lumen, which really well, where you can set this to infinite extended band, and we should be fine. So let's go up here and take a look at a few things. So this also depends on your hardware, where your hardware lands, especially for doing things that are going to be a little bit more GPU taxing, like increasing, say our lumen lighting quality. This is
+
+15
+00:07:07.279 --> 00:07:36.879
+going to be going to cost you a bit more, but for larger scale, causes lumen scenarios here, you'll see. So it scales lumens scene quality, but larger scales cause lumen scenes to calculate with a higher fidelity. So we're going to get better quality overall. Now, we are doing pretty well, we're at we're getting a little bit of noise as we move around on our objects. But this is a great improvement compared to 5.4 or 5.3. I've turned up the rough on
+
+16
+00:07:36.879 --> 00:08:06.800
+purpose on our materials to really push it and see and analyze how much noise we're getting. And we're really just getting noise when we get up close. And you can see a little bit of motioning here. To fix some of that in the material itself, you can actually control the rough. And we'll get to that in just a bit. But let's go back to the post process volume for a second. So go and click on that post process volume. Let's go back into here. And let's actually bump up our lighting scene quality here, we're going to get higher values here, and better
+
+17
+00:08:06.800 --> 00:08:36.120
+scene overall. Now you may not see a huge change. But you definitely want to be able to turn on such things as our lumen scene detail. And this controls the size of instances that can be represented in lumen scene. So these larger values make it so that it's a GPU more expensive. But this makes it so we have a better visual fidelity for our scene overall, it's getting the detail and making sure things are bouncing on the surfaces, and the materials are being calculated accordingly. And realistically,
+
+18
+00:08:36.440 --> 00:09:05.799
+there's also a lumen scene view distance. Now again, you can calculate this on the fly, as we talked about with the skylight, you can decide what that distance is going to be by middle mouse dragging, and how far you want that calculation to adhere to the settings that we have in place. That was a middle mouse drag, if you forgot, we also have final gather quality, this can remove a lot of the noise that can occur. There was some pulsing going on here earlier, when we were up close, we now rare barely see it at
+
+19
+00:09:05.799 --> 00:09:35.480
+all, which is really great. So if we decline or shouldn't decline, but if we move this down, you will see some noise pop in a little bit stronger, you can see that shift here, as I move that really low. And we move it up, you'll see that the lights and the surfaces start to change and remove some of the noise. Now we don't have a whole lot of things to clean up here. So I made this scene pretty clean. But you will see some shadows that may occur and noise on some of the
+
+20
+00:09:35.480 --> 00:10:03.960
+dark areas of your surfaces. And those will get cleaned up as you move them around. And the way that unreal explains this, if we go and float over, you'll see it scales lumens final gather quality, larger scales reduce noise, but greatly increase GPU cost. So we also have screen traces. This makes it so that if you're getting some weird reflectivity and noise off of your surfaces, you can kind of control this by using this
+
+21
+00:10:03.960 --> 00:10:33.799
+particular sample here, you can see as I turn it on and off, there's the screen traces active here. And there's also max trace distance. So again, here, now this one's nice, because you can help to control the darker regions inside of interiors. So you'll see values that are too small will cause lighting to leak into large caves, while values that are large will increase GPU costs. So if we increase this number, if we have to say like we're getting our numbers
+
+22
+00:10:33.799 --> 00:11:03.480
+are too low for the type of environment interior we have, we can actually solve some of that and fix some of that if we need to. You'll also notice there's a screen capture resolution scale. This also scale factors for lumen surface catch resolution for scene capture. So it's capturing the scene information and making it so that our lights bouncing accurately, and things are going in the right spot. But you'll see that smaller values save GPU memory. So if your hardware is giving you some trouble, you can lower this number. But this
+
+23
+00:11:03.480 --> 00:11:33.000
+is at a cost of quality. So just be aware of it, I bought mine up to one default at 0.5, if not overridden. So this can change as you need to notice there's an advanced area. This is for refresh purposes for the most part. And you'll see here lumen scene lighting speed, I've increased that to four. There's also like a poor man's increase of color for your scene almost like a quick, quick boost of saturation, you can use a diffuse color boost.
+
+24
+00:11:33.840 --> 00:12:03.399
+I left that at one not needed. There's also sky light leaking here. Now this keeps make sure that there's not any dark areas that are giving you trouble inside of your scene. You'll see here this is useful as an art direction knob. So basically, if you're noticing your game, or your film is a bit too dark. It's not physically based, but you can control this. This keeps your indoor areas from going full lead black. So you see your characters moving around, you can't see where he's going,
+
+25
+00:12:03.399 --> 00:12:25.200
+you can control that. And again, we have full skylight leaking distance. So you can control this too. And this allows it so that you know, you can you can basically it's like art control. So you can make your areas lighter, and use that GI coming from those skylights, and so forth, and making it so that it doesn't look too flat, or too bright.
+
+26
+00:12:26.200 --> 00:12:55.149
+It's up to you. So it's really kind of an art knob here for your skylights environment in this particular section here. So you're basically using a little bit of art direction and going outside the regular calculated, realistic values to be able to make things a bit more believable, really nice to be able to have those features inside of Unreal. In older versions of Unreal, you had to use some C bars with ray tracing to make sure that skylights were calculated correctly, because they were a bit of an issue. So
+
+27
+00:12:55.149 --> 00:13:24.830
+having the knob here is actually kind of nice to be able to are, I should say, values to scale back and forth, not really a knob, there's not really a knob there. It's just basically rolling back and forth with your cursor. Now you'll notice there is an advanced area, don't let this confuse you. This is not part of Lumen. This is the old school, if we're using the screen space, GI, we would actually use that a bit more. So he's kind of a standalone on his own. We do have reflection method here, you'll notice it is Lumen, which is great. And then we have Lumen reflections here, we have quality control
+
+28
+00:13:24.830 --> 00:13:54.750
+screen space again. And then we have high quality translucency, reflections and roughness to trace. So if we wanted to, we could lower the roughness, and it does it on all the values here. And you can see an increase or decrease. And this allows you as a quick dial knob, if you needed all of your scene to be controlled in that area, and you're noticing you're still getting noise. Now, again, I got to give Lumen props, the noise here has been greatly decreased on what it was in the past, and it works quite fantastic. We have
+
+29
+00:13:55.549 --> 00:14:24.230
+max reflection bounces here. So we can control how our reflectivity is being controlled. I have mine set to one, but I can easily bump that up to two if I needed to. And that gives us a little bit more push to realism. And then we have max refraction bounces over here. Also here, so you'll probably see what's the difference? Well, one, I should say, is reflection. And the next one is refraction, the difference is reflectivity. And this is our bouncing overall on the
+
+30
+00:14:24.230 --> 00:14:29.990
+surfaces. You can think of it that way. Awesome. Well, that's it for this video. In the next video,
+
+31
+00:14:29.990 --> 00:14:35.110
+we're going to go ahead and dive in a bit more working with these tools when it comes to Lumen
+
+32
+00:14:35.110 --> 00:14:40.870
+and other items such as shadows and Nanite. Thank you. Thanks again.

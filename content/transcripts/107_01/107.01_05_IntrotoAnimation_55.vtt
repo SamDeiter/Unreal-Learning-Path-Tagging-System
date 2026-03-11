@@ -1,0 +1,821 @@
+WEBVTT
+
+1
+00:00:01.560 --> 00:00:03.140
+One last thing we're going to look at
+
+2
+00:00:03.140 --> 00:00:05.620
+is how to attach something to our character.
+
+3
+00:00:05.620 --> 00:00:08.300
+Because so often in games and cinematics,
+
+4
+00:00:08.300 --> 00:00:10.039
+a character might be wearing something
+
+5
+00:00:10.039 --> 00:00:12.560
+or picking something up, equipping something.
+
+6
+00:00:12.560 --> 00:00:14.859
+And this is essentially just a great thing
+
+7
+00:00:14.859 --> 00:00:16.739
+to know how to do.
+
+8
+00:00:16.739 --> 00:00:20.140
+So in the engine, we do this using sockets.
+
+9
+00:00:20.140 --> 00:00:23.019
+Now a socket is something that we add to the skeleton
+
+10
+00:00:23.019 --> 00:00:24.539
+and it's parented to a bone
+
+11
+00:00:24.539 --> 00:00:27.460
+and it just follows that bone wherever it goes.
+
+12
+00:00:27.460 --> 00:00:28.800
+We'll then add the asset
+
+13
+00:00:28.800 --> 00:00:31.199
+that we want to attach into our sequence.
+
+14
+00:00:31.199 --> 00:00:33.380
+We'll reference the socket inside the sequence
+
+15
+00:00:33.380 --> 00:00:35.570
+to attach the two together.
+
+16
+00:00:35.570 --> 00:00:37.250
+Now in the sequence, we're going to use
+
+17
+00:00:37.250 --> 00:00:39.810
+an attach track to do this attachment.
+
+18
+00:00:39.810 --> 00:00:43.490
+But you can also use things like blueprint logic
+
+19
+00:00:43.490 --> 00:00:47.060
+and events in the timeline to trigger those attachments.
+
+20
+00:00:47.060 --> 00:00:48.939
+So let's add a socket to our skeleton first
+
+21
+00:00:48.939 --> 00:00:51.259
+and then we can set that up in the sequence.
+
+22
+00:00:51.259 --> 00:00:53.539
+So to find a skeleton for a character,
+
+23
+00:00:53.539 --> 00:00:55.039
+I'm going to select the character
+
+24
+00:00:55.039 --> 00:00:58.179
+that we have in the level, press Control B
+
+25
+00:00:58.179 --> 00:01:01.770
+and that'll browse to the asset in your content browser.
+
+26
+00:01:02.409 --> 00:01:03.719
+If I was to open that up,
+
+27
+00:01:03.719 --> 00:01:06.680
+we can then use the animation sub-editor icon
+
+28
+00:01:06.680 --> 00:01:08.079
+at the top here to find the skeleton
+
+29
+00:01:08.079 --> 00:01:10.099
+that's connected to this character.
+
+30
+00:01:10.099 --> 00:01:12.120
+So if I select that,
+
+31
+00:01:12.120 --> 00:01:14.140
+this is now a skeleton that we're using
+
+32
+00:01:14.140 --> 00:01:15.159
+and we've got a skeleton tree
+
+33
+00:01:15.159 --> 00:01:16.719
+in the left hand side here.
+
+34
+00:01:16.719 --> 00:01:19.819
+So I'm going to select probably spine four
+
+35
+00:01:19.819 --> 00:01:23.049
+or spine five here, let's go with spine five.
+
+36
+00:01:23.049 --> 00:01:26.659
+I'll right click this and I will add a socket.
+
+37
+00:01:26.659 --> 00:01:30.280
+And if we select the socket here, oops,
+
+38
+00:01:30.280 --> 00:01:34.040
+you can see if I change our preview settings,
+
+39
+00:01:34.040 --> 00:01:37.150
+so character bones and tick sockets here,
+
+40
+00:01:37.150 --> 00:01:38.390
+you'll be able to see any sockets
+
+41
+00:01:38.390 --> 00:01:40.430
+that we have on our character.
+
+42
+00:01:40.430 --> 00:01:42.230
+So you can see we have one here,
+
+43
+00:01:42.230 --> 00:01:44.870
+there'll be like some sort of item attachment socket
+
+44
+00:01:44.870 --> 00:01:48.239
+and we've got the spine of five socket.
+
+45
+00:01:48.239 --> 00:01:52.069
+So if I right click and rename our socket,
+
+46
+00:01:52.069 --> 00:01:55.209
+we'll just call this backpack underscore socket
+
+47
+00:01:55.209 --> 00:01:56.730
+because we're going to be attaching a backpack
+
+48
+00:01:56.730 --> 00:01:58.760
+to our character.
+
+49
+00:01:58.760 --> 00:02:00.840
+Now, if we were to go back to our skeletal mesh
+
+50
+00:02:00.840 --> 00:02:02.719
+and have a look in our skeleton tree,
+
+51
+00:02:02.719 --> 00:02:05.620
+we should also see that socket there.
+
+52
+00:02:05.620 --> 00:02:14.050
+If I save this, we don't, which is interesting.
+
+53
+00:02:14.050 --> 00:02:18.789
+How about I close it and I open it again.
+
+54
+00:02:18.789 --> 00:02:20.830
+There we go, so it's just refreshed now.
+
+55
+00:02:20.830 --> 00:02:23.500
+So we can see our backpack socket here
+
+56
+00:02:23.500 --> 00:02:25.530
+connected to our spine of five.
+
+57
+00:02:25.530 --> 00:02:27.129
+So coming back to our sequence here,
+
+58
+00:02:27.129 --> 00:02:28.789
+we can now add our backpack
+
+59
+00:02:28.789 --> 00:02:30.569
+that we want to attach to the character
+
+60
+00:02:30.569 --> 00:02:33.199
+and we can set up the attach track.
+
+61
+00:02:33.199 --> 00:02:34.740
+I jump over to the content browser
+
+62
+00:02:34.740 --> 00:02:37.800
+and if I just search for backpack
+
+63
+00:02:37.800 --> 00:02:41.710
+and then click and hold the skeletal mesh version,
+
+64
+00:02:41.710 --> 00:02:43.069
+hover over the sequencer tab
+
+65
+00:02:43.069 --> 00:02:44.990
+and drop it into our sequencer window here,
+
+66
+00:02:44.990 --> 00:02:46.349
+that'll bring it in.
+
+67
+00:02:46.349 --> 00:02:49.710
+If I just minimize money to make this a bit clearer.
+
+68
+00:02:49.710 --> 00:02:51.500
+To add an attach track,
+
+69
+00:02:51.500 --> 00:02:53.979
+just over the items that you want to attach,
+
+70
+00:02:53.979 --> 00:02:56.830
+hit the plus on the right hand side here,
+
+71
+00:02:56.830 --> 00:02:59.189
+hover over attach and choose the asset
+
+72
+00:02:59.189 --> 00:03:00.969
+that you want to attach it to.
+
+73
+00:03:00.969 --> 00:03:02.789
+So if the asset that you want to attach it to
+
+74
+00:03:02.789 --> 00:03:04.650
+is inside your sequence already,
+
+75
+00:03:04.650 --> 00:03:07.409
+you can choose it from this existing binding heading.
+
+76
+00:03:07.409 --> 00:03:08.689
+But if it's something that's in the level
+
+77
+00:03:08.689 --> 00:03:09.969
+that's not in the sequence,
+
+78
+00:03:09.969 --> 00:03:11.090
+you could go to new binding
+
+79
+00:03:11.090 --> 00:03:13.270
+and choose that from your outline here.
+
+80
+00:03:13.270 --> 00:03:14.729
+But we want to attach it to money,
+
+81
+00:03:14.729 --> 00:03:17.900
+so we'll just click that.
+
+82
+00:03:17.900 --> 00:03:18.740
+And we can see here,
+
+83
+00:03:18.740 --> 00:03:20.360
+we've got a handful of sockets
+
+84
+00:03:20.360 --> 00:03:21.780
+and all the joints of our character
+
+85
+00:03:21.780 --> 00:03:24.189
+that we're able to attach this to.
+
+86
+00:03:24.189 --> 00:03:25.789
+But we're just gonna choose backpack socket
+
+87
+00:03:25.789 --> 00:03:29.729
+because that's the one we set up to attach.
+
+88
+00:03:29.729 --> 00:03:31.810
+Now, you can see here
+
+89
+00:03:31.810 --> 00:03:34.449
+that it has attached to our character
+
+90
+00:03:34.449 --> 00:03:36.569
+and it's jumped up onto that socket.
+
+91
+00:03:36.569 --> 00:03:38.250
+So as we scrub through and play,
+
+92
+00:03:38.250 --> 00:03:40.370
+it's following our character around.
+
+93
+00:03:40.370 --> 00:03:43.289
+But it doesn't look quite right.
+
+94
+00:03:43.289 --> 00:03:46.490
+So it's halfway inside our character.
+
+95
+00:03:46.490 --> 00:03:48.930
+Now we could correct this one of two ways.
+
+96
+00:03:48.930 --> 00:03:50.830
+We could select the backpack
+
+97
+00:03:50.830 --> 00:03:53.550
+and then come to frame zero here,
+
+98
+00:03:53.550 --> 00:03:55.189
+set a key on the transform track
+
+99
+00:03:55.189 --> 00:03:57.509
+and just move it out
+
+100
+00:03:57.509 --> 00:04:02.740
+and reposition it to however we want the asset to look.
+
+101
+00:04:02.740 --> 00:04:04.639
+But if this is something you're doing,
+
+102
+00:04:04.639 --> 00:04:06.479
+you know, several times,
+
+103
+00:04:06.479 --> 00:04:07.819
+then you don't really want
+
+104
+00:04:07.819 --> 00:04:09.159
+to have to do this step every time.
+
+105
+00:04:09.159 --> 00:04:11.379
+Or if you're doing it in blueprints with an event,
+
+106
+00:04:11.379 --> 00:04:14.060
+you don't want to have to set up any extra logic there.
+
+107
+00:04:14.060 --> 00:04:16.939
+So we can actually change the default location
+
+108
+00:04:16.939 --> 00:04:21.379
+of our backpack socket to account for this.
+
+109
+00:04:21.379 --> 00:04:27.600
+So if we jump back to our skeleton socket here,
+
+110
+00:04:27.699 --> 00:04:30.199
+we can see that we've got our socket selected
+
+111
+00:04:30.199 --> 00:04:32.560
+and we can add a preview mesh to this.
+
+112
+00:04:32.560 --> 00:04:35.279
+So we can see what a mesh might look like
+
+113
+00:04:35.279 --> 00:04:37.660
+when it gets attached to the socket.
+
+114
+00:04:37.660 --> 00:04:39.319
+So if I right click the socket
+
+115
+00:04:39.319 --> 00:04:41.720
+and choose add preview asset,
+
+116
+00:04:41.720 --> 00:04:44.860
+I can then search for backpack
+
+117
+00:04:44.860 --> 00:04:46.779
+and that'll allow us to add it to,
+
+118
+00:04:48.490 --> 00:04:50.410
+as a preview mesh to see what it looks like
+
+119
+00:04:50.410 --> 00:04:51.910
+when it's attaching.
+
+120
+00:04:51.910 --> 00:04:54.589
+Now, because we're using SKM Manny
+
+121
+00:04:54.589 --> 00:04:56.990
+as our preview inside the sequence,
+
+122
+00:04:56.990 --> 00:05:00.029
+I'm actually gonna change our preview mesh here
+
+123
+00:05:00.029 --> 00:05:01.230
+to match SKM Manny
+
+124
+00:05:01.269 --> 00:05:06.180
+because his mesh is quite different from Quinn's mesh.
+
+125
+00:05:06.180 --> 00:05:07.139
+And we want to know that we're working
+
+126
+00:05:07.139 --> 00:05:09.019
+with the right mesh here.
+
+127
+00:05:09.019 --> 00:05:12.540
+So if I select the backpack socket
+
+128
+00:05:12.540 --> 00:05:15.339
+and just bring that out and reposition it
+
+129
+00:05:15.339 --> 00:05:18.350
+to where we think the backpack looks good,
+
+130
+00:05:18.350 --> 00:05:20.839
+I think that'll probably work for now.
+
+131
+00:05:20.839 --> 00:05:24.050
+Straighten up a bit more.
+
+132
+00:05:24.050 --> 00:05:25.430
+Once we come back out to,
+
+133
+00:05:25.430 --> 00:05:26.910
+if I save that actually first,
+
+134
+00:05:26.910 --> 00:05:29.759
+once we come back out to our sequence,
+
+135
+00:05:29.759 --> 00:05:33.660
+we can see now that we kind of have a double offset
+
+136
+00:05:33.660 --> 00:05:35.259
+because we have this transform track
+
+137
+00:05:35.259 --> 00:05:36.660
+working at the same time.
+
+138
+00:05:36.660 --> 00:05:38.339
+But we can see that there's definitely been a change
+
+139
+00:05:38.339 --> 00:05:41.329
+and has been an update to the location of this backpack.
+
+140
+00:05:41.329 --> 00:05:45.680
+So with the backpack selected
+
+141
+00:05:45.680 --> 00:05:46.740
+and the anim details here,
+
+142
+00:05:46.740 --> 00:05:50.300
+I'm just gonna hit this arrow, whoops,
+
+143
+00:05:50.300 --> 00:05:52.839
+to reset the property to the default values,
+
+144
+00:05:52.839 --> 00:05:55.269
+which is just zero.
+
+145
+00:05:55.269 --> 00:05:56.189
+And as you can see,
+
+146
+00:05:56.189 --> 00:05:59.129
+it will snap back to the location
+
+147
+00:05:59.129 --> 00:06:01.629
+that the socket's now in by default.
+
+148
+00:06:01.629 --> 00:06:04.709
+So if I set a key just where we are now
+
+149
+00:06:04.709 --> 00:06:10.819
+and delete that original key and drag this back to zero,
+
+150
+00:06:10.819 --> 00:06:13.420
+you can see that when a character moves,
+
+151
+00:06:13.420 --> 00:06:15.500
+our backpack is now attached to them
+
+152
+00:06:17.110 --> 00:06:18.490
+in the correct location.
+
+153
+00:06:18.490 --> 00:06:20.750
+And anytime that we attach this backpack,
+
+154
+00:06:20.750 --> 00:06:24.750
+whether it's in blueprint or whether it's in sequencer,
+
+155
+00:06:24.750 --> 00:06:26.750
+we know confidently that it's gonna snap to the right
+
+156
+00:06:26.750 --> 00:06:30.310
+place without us having to add any more transform offsets
+
+157
+00:06:30.310 --> 00:06:32.149
+to that with like a transform track
+
+158
+00:06:32.149 --> 00:06:34.949
+or any transform values that might need to be added
+
+159
+00:06:37.779 --> 00:06:41.129
+after the attachment.
+
+160
+00:06:41.129 --> 00:06:42.410
+So there it is.
+
+161
+00:06:42.410 --> 00:06:44.910
+We've just seen how to create a new animation
+
+162
+00:06:44.910 --> 00:06:47.660
+using Control Rig inside Sequencer.
+
+163
+00:06:47.660 --> 00:06:50.139
+Also how to blend existing animations together
+
+164
+00:06:50.139 --> 00:06:51.720
+to create something new
+
+165
+00:06:51.720 --> 00:06:54.879
+and how to then save that animation asset
+
+166
+00:06:54.879 --> 00:06:57.259
+to use elsewhere in the project.
+
+167
+00:06:57.259 --> 00:06:59.300
+And also how you can then animate on top
+
+168
+00:06:59.300 --> 00:07:02.180
+of a preexisting animation non-destructively
+
+169
+00:07:02.180 --> 00:07:04.769
+using a layered control rig.
+
+170
+00:07:04.810 --> 00:07:07.129
+There's really so much more to learn about control rig
+
+171
+00:07:07.129 --> 00:07:09.050
+and how animations work in engine.
+
+172
+00:07:09.050 --> 00:07:10.490
+And we have several different courses
+
+173
+00:07:10.490 --> 00:07:11.529
+that go into great detail
+
+174
+00:07:11.529 --> 00:07:13.569
+about how to create your own control rig
+
+175
+00:07:13.569 --> 00:07:15.889
+and how to utilize all of the other animation tools
+
+176
+00:07:15.889 --> 00:07:16.930
+in the engine.
+
+177
+00:07:16.930 --> 00:07:18.889
+So if there's more you want to learn about control rig
+
+178
+00:07:18.889 --> 00:07:20.589
+and how to animate in the engine,
+
+179
+00:07:20.589 --> 00:07:25.500
+you should definitely go and check those out.
+
+180
+00:07:25.500 --> 00:07:27.139
+I just wanted to share this last slide
+
+181
+00:07:27.139 --> 00:07:28.980
+that has a couple of links that goes into
+
+182
+00:07:28.980 --> 00:07:31.899
+a bit more detail about root motion in the engine,
+
+183
+00:07:31.899 --> 00:07:34.180
+as well as a link for more detailed breakdown
+
+184
+00:07:34.180 --> 00:07:36.300
+about animation blueprints
+
+185
+00:07:36.300 --> 00:07:38.100
+and a link for any Blender add-ons
+
+186
+00:07:38.100 --> 00:07:42.180
+that exist for the Unreal Engine.
+
+187
+00:07:42.180 --> 00:07:43.459
+And just to wrap up,
+
+188
+00:07:43.459 --> 00:07:45.540
+we've learned about the different types of animations
+
+189
+00:07:45.540 --> 00:07:46.500
+in the engine.
+
+190
+00:07:46.500 --> 00:07:49.019
+And we now know how to import and export our characters
+
+191
+00:07:49.019 --> 00:07:51.519
+and animations to and from the engine.
+
+192
+00:07:51.519 --> 00:07:53.120
+We have an understanding of the differences
+
+193
+00:07:53.120 --> 00:07:55.560
+between skeletons and skeletal meshes,
+
+194
+00:07:55.560 --> 00:07:56.839
+and then a brief overview
+
+195
+00:07:56.839 --> 00:07:58.639
+of the different animation subeditors
+
+196
+00:07:58.639 --> 00:08:00.579
+and what you could use those for.
+
+197
+00:08:00.579 --> 00:08:03.720
+Then we actually created our own animation from scratch,
+
+198
+00:08:03.720 --> 00:08:06.300
+as well as learning how to blend animations together
+
+199
+00:08:06.300 --> 00:08:07.779
+to create new animations
+
+200
+00:08:08.420 --> 00:08:10.420
+and how to attach these props to your characters
+
+201
+00:08:10.420 --> 00:08:12.500
+using sockets.
+
+202
+00:08:12.500 --> 00:08:14.180
+So thank you very much for listening
+
+203
+00:08:14.180 --> 00:08:16.300
+and remember to check out any of our other courses
+
+204
+00:08:16.300 --> 00:08:18.019
+if you want to continue developing
+
+205
+00:08:18.019 --> 00:08:20.620
+and best of luck with your animations in the future.

@@ -1,0 +1,265 @@
+WEBVTT
+
+1
+00:00:01.710 --> 00:00:07.509
+In this video, we'll look at how we can rebuild the logic controlling our dancing characters animations.
+
+2
+00:00:07.509 --> 00:00:15.210
+So here we see a basic Unity animation state machine, linking two dances to get or two animations together
+
+3
+00:00:15.210 --> 00:00:19.219
+with the Boolean controlling the transition between them.
+
+4
+00:00:19.219 --> 00:00:24.289
+Again, this is showing the Boolean state for one of the transitions.
+
+5
+00:00:24.289 --> 00:00:30.899
+Now inside of Unreal, we're going to be creating something that looks very similar to this.
+
+6
+00:00:30.899 --> 00:00:39.929
+So in order to create our animation blueprint, we can right click on our skeletal mesh of our dancer,
+
+7
+00:00:39.929 --> 00:00:44.429
+come up to create and go to anim blueprint.
+
+8
+00:00:44.429 --> 00:00:54.479
+And I'm going to call this ABP session demo dancer.
+
+9
+00:00:54.479 --> 00:01:01.979
+An important thing to note is that animation blueprints can only be tied to a specific skeleton.
+
+10
+00:01:01.979 --> 00:01:07.480
+So if you report characters or bring in a lot of other characters that have different skeletons,
+
+11
+00:01:07.480 --> 00:01:10.980
+you'll need different animation blueprints for each one.
+
+12
+00:01:10.980 --> 00:01:20.140
+When we open it up, we see something that looks very similar to our regular animation or our regular blueprint graph.
+
+13
+00:01:20.209 --> 00:01:24.209
+Except this is our animation state machine graph.
+
+14
+00:01:24.209 --> 00:01:30.709
+Over here to the left, we see our regular event graph, like on a basic blueprint.
+
+15
+00:01:30.709 --> 00:01:43.140
+But what we need here in our animation graph is to provide a node that will output a pose to our output pose node,
+
+16
+00:01:43.140 --> 00:01:48.140
+and ultimately drive the bones of our skeleton.
+
+17
+00:01:48.140 --> 00:01:58.760
+So if we right click in here, search for state machine, we can create one and we'll just leave it called new for now.
+
+18
+00:01:59.900 --> 00:02:03.900
+So if we click in to the state machine of our animation graph,
+
+19
+00:02:03.900 --> 00:02:10.900
+now we're going to start to see something that looks very similar to our animator in Unity.
+
+20
+00:02:10.900 --> 00:02:16.900
+We can look in this out asset browser window, which will show us all the different animations in our project.
+
+21
+00:02:16.900 --> 00:02:20.900
+See, we have a chicken dance that we can drag in.
+
+22
+00:02:20.900 --> 00:02:24.930
+And we have a hip hop dance that we can drag in.
+
+23
+00:02:24.930 --> 00:02:29.469
+So I'm actually going to orient these this way.
+
+24
+00:02:29.969 --> 00:02:38.969
+So just like we would in Unity, we'll drag a transition from the entry state into our first dancer animation state.
+
+25
+00:02:38.969 --> 00:02:48.770
+Then we can drag a transition from the first animation to the second and one from the second animation back to the first.
+
+26
+00:02:48.770 --> 00:03:00.479
+However, now we need to set up our transitions, as well as set looping settings inside of our animations.
+
+27
+00:03:00.479 --> 00:03:07.050
+If we come in here, here, we can click on the node that represents the animation file itself.
+
+28
+00:03:07.050 --> 00:03:15.050
+And if we scroll down, we should see a checkbox here for a loop animation, which we want to set to true.
+
+29
+00:03:15.050 --> 00:03:23.050
+We'll do we can click these on these labels up here to go up and down or to go back up in our graph.
+
+30
+00:03:23.050 --> 00:03:30.550
+So we can do that and come over here to the chicken dance animation, scroll down and set this to be looping as well.
+
+31
+00:03:31.050 --> 00:03:36.759
+Go ahead and compile this. And now we'll see our animation playing.
+
+32
+00:03:39.810 --> 00:03:42.810
+Next, though, we need to set our transitions.
+
+33
+00:03:42.810 --> 00:03:57.569
+And so if we come here and click into it, we need to give ourselves a Boolean that will control our that will control our transition.
+
+34
+00:03:57.569 --> 00:04:11.340
+So over here, we can do this in the new trick we can do to create our Boolean variable is to right click on the Boolean pin of our result and click promote to variable.
+
+35
+00:04:11.340 --> 00:04:14.340
+I'm going to call this chicken dance.
+
+36
+00:04:14.340 --> 00:04:29.720
+So when chicken dance is true, we will transition from the hip hop dance down to our chicken dance.
+
+37
+00:04:29.720 --> 00:04:40.589
+Now, if we enter into the logic for the transition that goes from our chicken dance back to our hip hop dance, we can drag.
+
+38
+00:04:40.589 --> 00:04:48.810
+So we can drag in our variable from the list down here on the left, get our chicken dance.
+
+39
+00:04:48.810 --> 00:04:51.810
+And then we want to get when it's not true.
+
+40
+00:04:51.810 --> 00:04:58.100
+So if we type in not Boolean, you'll get this handy little conversion node.
+
+41
+00:04:58.100 --> 00:05:05.100
+So whenever chicken dance is false, now we will go from the chicken dance back to the hip hop dance.
+
+42
+00:05:05.100 --> 00:05:10.230
+We'll hit compile. We'll see we get no more warnings. We're all happy here.
+
+43
+00:05:10.230 --> 00:05:17.000
+And our logic is fully set up on that front.
+
+44
+00:05:17.000 --> 00:05:35.279
+The next thing, though, we need is a way for an outside actors to be like our player to be able to call an event on this animation blueprint that will change the value of the chicken dance Boolean.
+
+45
+00:05:35.279 --> 00:05:40.889
+So once again, we can create a custom event like we did on our cube.
+
+46
+00:05:40.889 --> 00:05:46.079
+We can call this session dance toggle.
+
+47
+00:05:46.079 --> 00:05:55.920
+So we create a custom event called session dance toggle, and we're going to use this to set the value of our chicken dance Boolean.
+
+48
+00:05:55.920 --> 00:06:05.920
+So one way we can do that is by dragging off a new reference to our chicken dance Boolean and looking for the branch node.
+
+49
+00:06:05.920 --> 00:06:12.920
+This is a handy node inside of blueprints that is very similar to an if statement inside of C sharp.
+
+50
+00:06:13.920 --> 00:06:24.170
+So in thinking about this and C sharp terms, if chicken dance is true, then we want to set it to false.
+
+51
+00:06:24.170 --> 00:06:32.300
+If chicken dance is false and duplicate this with control D, then we want to set chicken dance to true.
+
+52
+00:06:32.300 --> 00:06:42.879
+Now, this will work well and good, but there's actually another handy node that we can use inside of unreal that we get for free called flip flop.
+
+53
+00:06:44.000 --> 00:06:49.000
+And so a flip flop will do the exact same thing, but without needing to do this comparison.
+
+54
+00:06:49.000 --> 00:07:03.449
+It will just automatically every time we go to execute this little bit of code, the first time it will go to A and the second time it will go to B.
+
+55
+00:07:03.449 --> 00:07:10.449
+Now, another neat thing we can use with this flip flop node is instead of having two different set nodes here,
+
+56
+00:07:10.449 --> 00:07:21.120
+we can instead just use the one, have A and B both go into it, but use the value of A to set our chicken dance.
+
+57
+00:07:21.120 --> 00:07:32.560
+So if A is true, chicken dance will be true. If B executes, A will be false and chicken dance will be false.
+
+58
+00:07:32.560 --> 00:07:39.560
+This will then drive the logic inside of our state machine, switching between hip hop dance and chicken dance.
+
+59
+00:07:39.560 --> 00:07:51.029
+So now if we want to see our dancer dancing in the world, we can drag her in, press play, and there she goes.
+
+60
+00:07:51.029 --> 00:07:57.029
+However, we still don't have a way to call that dance toggle event yet, which we'll get to next.
+
+61
+00:07:57.029 --> 00:08:04.439
+We also see that the animations are playing to the side here.
+
+62
+00:08:04.439 --> 00:08:17.160
+So in order to fix that, we can open up our animation, go to reimport with dialogue, give ourselves a 90 degree offset, save.
+
+63
+00:08:17.160 --> 00:08:30.629
+And let's do that for our other dance as well. Reimport with dialogue, 90 degree import, save.
+
+64
+00:08:30.629 --> 00:08:36.759
+And now hopefully we will see her facing the correct way. Beautiful.
+
+65
+00:08:36.759 --> 00:08:51.919
+We can also delete our statuesque.
+
+66
+00:08:51.919 --> 00:08:57.919
+In the next video, we'll look at rebuilding our Unity shader graph with an Unreal Engine material.

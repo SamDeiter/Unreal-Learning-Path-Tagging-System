@@ -1,0 +1,965 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:05.160
+Let's talk about the Unreal Build Tool or the UBT.
+
+2
+00:00:05.160 --> 00:00:06.040
+As we've just seen,
+
+3
+00:00:06.040 --> 00:00:08.279
+Unreal is fundamentally split into modules
+
+4
+00:00:08.279 --> 00:00:10.820
+and the engine has got a lot of them.
+
+5
+00:00:10.820 --> 00:00:13.259
+This tool essentially regenerates your project solution
+
+6
+00:00:13.259 --> 00:00:16.179
+by iterating over all build.cs files,
+
+7
+00:00:16.179 --> 00:00:19.100
+discovering new DLLs that it needs to build,
+
+8
+00:00:19.100 --> 00:00:21.579
+as well as adding any new target.cs files
+
+9
+00:00:21.579 --> 00:00:24.120
+that you may have added as configuration options.
+
+10
+00:00:24.120 --> 00:00:26.500
+The Unreal Build Tool runs totally independently
+
+11
+00:00:26.500 --> 00:00:27.980
+from any development environment
+
+12
+00:00:27.980 --> 00:00:29.739
+and can be accessed through a contextual button
+
+13
+00:00:29.739 --> 00:00:31.260
+on the U project file.
+
+14
+00:00:31.260 --> 00:00:34.500
+You should rerun the UBT every time files are added
+
+15
+00:00:34.500 --> 00:00:36.619
+or removed from the project.
+
+16
+00:00:36.619 --> 00:00:39.479
+Let's take a look at what it does under the hood.
+
+17
+00:00:39.479 --> 00:00:42.840
+When we initialize the build tool, the following happens.
+
+18
+00:00:42.840 --> 00:00:45.560
+The UBT takes a project, target platform,
+
+19
+00:00:45.560 --> 00:00:46.840
+and a configuration,
+
+20
+00:00:46.840 --> 00:00:49.399
+and then gathers all of the target.cs files
+
+21
+00:00:49.399 --> 00:00:52.719
+and the build.cs files for its modules.
+
+22
+00:00:52.719 --> 00:00:54.000
+With the specified target,
+
+23
+00:00:54.000 --> 00:00:55.840
+it will create an instance of that target
+
+24
+00:00:55.840 --> 00:00:58.079
+and then find all of the modules, source code,
+
+25
+00:00:58.079 --> 00:01:01.619
+and plugins required to successfully build that target.
+
+26
+00:01:01.619 --> 00:01:04.299
+We'll then look for all the header files for the modules,
+
+27
+00:01:04.299 --> 00:01:05.819
+looking specifically for files
+
+28
+00:01:05.819 --> 00:01:08.750
+that contain Unreal-related metadata.
+
+29
+00:01:08.750 --> 00:01:10.010
+It then passes those header files
+
+30
+00:01:10.010 --> 00:01:13.370
+to the Unreal header tool or the UHT for parsing
+
+31
+00:01:13.370 --> 00:01:15.010
+to create the generated code
+
+32
+00:01:15.010 --> 00:01:18.510
+which gets fed back into the Unreal Build Tool.
+
+33
+00:01:18.510 --> 00:01:20.689
+The UBT then generates an action graph,
+
+34
+00:01:20.689 --> 00:01:22.629
+which is a graph full of all the compilation
+
+35
+00:01:22.629 --> 00:01:24.109
+and linking operations needed
+
+36
+00:01:24.109 --> 00:01:26.189
+to be performed to build the desired project
+
+37
+00:01:26.189 --> 00:01:28.930
+for a specified target and configuration.
+
+38
+00:01:28.930 --> 00:01:31.969
+The action graph, which are essentially just cl.exe
+
+39
+00:01:31.969 --> 00:01:35.010
+or link.exe nodes with parameters applied,
+
+40
+00:01:35.010 --> 00:01:36.329
+gets saved into a makefile
+
+41
+00:01:36.329 --> 00:01:37.530
+so that it doesn't need to keep doing
+
+42
+00:01:37.530 --> 00:01:39.590
+these steps constantly.
+
+43
+00:01:39.590 --> 00:01:42.549
+It will then execute the action graph to build two projects
+
+44
+00:01:42.549 --> 00:01:45.829
+with an executer to compile all .obj files
+
+45
+00:01:45.829 --> 00:01:50.230
+and link them to .exe or .dlls and PDBs.
+
+46
+00:01:50.230 --> 00:01:51.409
+Realistically, as engineers,
+
+47
+00:01:51.409 --> 00:01:53.670
+we're unlikely to interact with either the UBT
+
+48
+00:01:53.670 --> 00:01:55.030
+or the UHT directly,
+
+49
+00:01:55.030 --> 00:01:57.670
+aside from rerunning it when we update our project.
+
+50
+00:01:57.670 --> 00:01:58.790
+But it's important that we at least
+
+51
+00:01:58.790 --> 00:02:01.430
+have a cursory knowledge of what happens under the hood
+
+52
+00:02:01.430 --> 00:02:03.370
+before going forward.
+
+53
+00:02:03.370 --> 00:02:06.689
+Unlike raw C++, Unreal's flavor of C++
+
+54
+00:02:06.689 --> 00:02:08.389
+fully supports reflection,
+
+55
+00:02:08.389 --> 00:02:12.120
+and for the most part, it revolves around the UObject.
+
+56
+00:02:12.120 --> 00:02:13.560
+The Unreal Reflection System,
+
+57
+00:02:13.560 --> 00:02:16.039
+which is otherwise known as the Property System,
+
+58
+00:02:16.039 --> 00:02:18.639
+is an opt-in system that gives the program
+
+59
+00:02:18.639 --> 00:02:21.360
+the ability to examine itself at runtime.
+
+60
+00:02:21.360 --> 00:02:23.659
+This system not only powers our game projects,
+
+61
+00:02:23.659 --> 00:02:27.069
+but also the engine and its constituent parts.
+
+62
+00:02:27.069 --> 00:02:29.550
+All reflected types are based off of UObject,
+
+63
+00:02:29.550 --> 00:02:31.250
+with UObject being the lowest class
+
+64
+00:02:31.289 --> 00:02:34.590
+that we can get to in terms of the Unreal file structure.
+
+65
+00:02:34.590 --> 00:02:38.150
+Every player, game object, bullet, visual effects, sound cue,
+
+66
+00:02:38.150 --> 00:02:42.520
+their class hierarchy all eventually lead to UObject.
+
+67
+00:02:42.520 --> 00:02:43.560
+We can't mention UObject
+
+68
+00:02:43.560 --> 00:02:46.240
+without pointing out that U prefix.
+
+69
+00:02:46.240 --> 00:02:48.840
+Unreal has got a strongly enforced naming convention system
+
+70
+00:02:48.840 --> 00:02:51.139
+that lets us know what the class we're working with
+
+71
+00:02:51.139 --> 00:02:52.840
+is currently based on.
+
+72
+00:02:52.840 --> 00:02:54.719
+So as an example, we can see the child classes
+
+73
+00:02:54.719 --> 00:02:56.479
+that are not based off of actor
+
+74
+00:02:56.479 --> 00:02:59.960
+have got the U prefix, such as the UData asset.
+
+75
+00:02:59.960 --> 00:03:01.979
+Actor-derived types have the A prefix,
+
+76
+00:03:02.659 --> 00:03:04.270
+such as the A exploding barrel.
+
+77
+00:03:04.270 --> 00:03:07.469
+Structs or non-UObject classes have got the F prefix,
+
+78
+00:03:07.469 --> 00:03:11.159
+such as the F explosion params or the F archive.
+
+79
+00:03:11.159 --> 00:03:13.000
+Enums have got the E prefix,
+
+80
+00:03:13.000 --> 00:03:15.039
+and templated types have got the T prefix,
+
+81
+00:03:15.039 --> 00:03:16.819
+such as T my templated class,
+
+82
+00:03:16.819 --> 00:03:19.949
+or T unique pointer with a template being passed in.
+
+83
+00:03:19.949 --> 00:03:21.289
+To create and mark a file
+
+84
+00:03:21.289 --> 00:03:23.349
+as containing a reflected system type,
+
+85
+00:03:23.349 --> 00:03:25.469
+the following must be added to the class.
+
+86
+00:03:25.469 --> 00:03:26.729
+We add a special include,
+
+87
+00:03:26.729 --> 00:03:31.400
+that being the hash include of myFileName.generated.h,
+
+88
+00:03:31.400 --> 00:03:33.979
+we then mark the class with the U class markup,
+
+89
+00:03:33.979 --> 00:03:37.139
+a struct with a U struct, or an enum with U enum.
+
+90
+00:03:37.139 --> 00:03:38.080
+We then add the following
+
+91
+00:03:38.080 --> 00:03:40.039
+within the class declaration body.
+
+92
+00:03:40.039 --> 00:03:42.659
+We add the generated body macro.
+
+93
+00:03:42.659 --> 00:03:45.020
+This will generate typedefs and additional functions,
+
+94
+00:03:45.020 --> 00:03:47.340
+such as static class and static struct,
+
+95
+00:03:47.340 --> 00:03:48.780
+that are used in the reflection system
+
+96
+00:03:48.780 --> 00:03:51.939
+to retrieve reflection data from this class.
+
+97
+00:03:51.939 --> 00:03:52.780
+And that's it.
+
+98
+00:03:52.780 --> 00:03:55.509
+This type is now part of the Unreal reflection system.
+
+99
+00:03:55.509 --> 00:03:58.250
+And the editor can actually do this for you.
+
+100
+00:03:58.250 --> 00:04:00.389
+The editor contains a new class wizard.
+
+101
+00:04:00.389 --> 00:04:02.750
+It will generate both a header and a CPP file
+
+102
+00:04:02.750 --> 00:04:04.310
+in a specified location,
+
+103
+00:04:04.310 --> 00:04:06.699
+and add all of this boilerplate for you.
+
+104
+00:04:06.699 --> 00:04:08.939
+The above will mark this class as a reflected type,
+
+105
+00:04:08.939 --> 00:04:10.939
+and it will be subject to that parsing phase
+
+106
+00:04:10.939 --> 00:04:13.719
+of the Unreal build tool that we spoke about previously.
+
+107
+00:04:13.719 --> 00:04:15.400
+That being the phase that was looking for files
+
+108
+00:04:15.400 --> 00:04:18.480
+containing Unreal metadata.
+
+109
+00:04:18.480 --> 00:04:19.480
+As well as U class,
+
+110
+00:04:19.480 --> 00:04:21.959
+we can also mark up many other parts of our code
+
+111
+00:04:21.959 --> 00:04:23.519
+to pass along to the UBT,
+
+112
+00:04:23.519 --> 00:04:26.920
+giving us extended functionality such as editor visibility
+
+113
+00:04:26.920 --> 00:04:29.279
+or smart memory management.
+
+114
+00:04:29.319 --> 00:04:31.560
+We can mark up member variables with U property
+
+115
+00:04:31.560 --> 00:04:34.459
+to prevent garbage collection from nulling out the pointer,
+
+116
+00:04:34.459 --> 00:04:35.779
+or functions with U function
+
+117
+00:04:35.779 --> 00:04:38.680
+to make them callable from blueprint.
+
+118
+00:04:38.680 --> 00:04:41.519
+U class allows engineers to mark up members within
+
+119
+00:04:41.519 --> 00:04:42.920
+with additional macros,
+
+120
+00:04:42.920 --> 00:04:45.639
+as well as provide additional class specifies to this class,
+
+121
+00:04:45.639 --> 00:04:47.120
+expanding its use.
+
+122
+00:04:47.120 --> 00:04:49.000
+For example, we have blueprint type,
+
+123
+00:04:49.000 --> 00:04:51.319
+blueprintable, and abstract,
+
+124
+00:04:51.319 --> 00:04:52.759
+but there are many other options available
+
+125
+00:04:52.759 --> 00:04:56.839
+and a full list can be found inside objectmacros.h.
+
+126
+00:04:56.839 --> 00:04:59.399
+The U property markup is applied to member variables
+
+127
+00:04:59.800 --> 00:05:00.639
+within a U class,
+
+128
+00:05:00.639 --> 00:05:03.879
+and much like U class lets us specify property specifies
+
+129
+00:05:03.879 --> 00:05:05.639
+for a particular member.
+
+130
+00:05:05.639 --> 00:05:07.680
+Critically, it also prevents garbage collection
+
+131
+00:05:07.680 --> 00:05:10.079
+from nulling out any cache pointers.
+
+132
+00:05:10.079 --> 00:05:11.560
+We don't have to manage our own memory
+
+133
+00:05:11.560 --> 00:05:12.939
+when working with U properties.
+
+134
+00:05:12.939 --> 00:05:14.759
+They're being reference counted for us.
+
+135
+00:05:14.759 --> 00:05:17.040
+As long as they're flagged up with the U property macro,
+
+136
+00:05:17.040 --> 00:05:18.259
+we should be fine.
+
+137
+00:05:18.259 --> 00:05:20.680
+Some examples of specifies that we would typically see
+
+138
+00:05:20.680 --> 00:05:23.360
+inside a U project would be edit anywhere.
+
+139
+00:05:23.360 --> 00:05:27.009
+This value is exposed to property windows in the editor.
+
+140
+00:05:27.009 --> 00:05:28.129
+Edit defaults only.
+
+141
+00:05:28.170 --> 00:05:30.250
+This value is exposed to property windows,
+
+142
+00:05:30.250 --> 00:05:32.410
+but only in archetypes.
+
+143
+00:05:32.410 --> 00:05:33.410
+Visible anywhere.
+
+144
+00:05:33.410 --> 00:05:36.029
+This value is visible, but cannot be edited.
+
+145
+00:05:36.029 --> 00:05:37.029
+Replicated.
+
+146
+00:05:37.029 --> 00:05:39.610
+This value is liable to network replication.
+
+147
+00:05:39.610 --> 00:05:40.889
+Additional setup is required
+
+148
+00:05:40.889 --> 00:05:42.389
+to actually get it to replicate,
+
+149
+00:05:42.389 --> 00:05:44.819
+but this is just the first step towards getting there.
+
+150
+00:05:44.819 --> 00:05:46.100
+And then finally we've got transient,
+
+151
+00:05:46.100 --> 00:05:48.300
+which basically means this property is not serialized
+
+152
+00:05:48.300 --> 00:05:51.560
+and will be zero filled at runtime.
+
+153
+00:05:51.560 --> 00:05:52.660
+As with U class,
+
+154
+00:05:52.660 --> 00:05:56.939
+objectmacros.h has got a more definitive list.
+
+155
+00:05:56.939 --> 00:05:58.680
+Having discussed the U property macro
+
+156
+00:05:58.720 --> 00:06:00.420
+and how we can use it to prevent our pointers
+
+157
+00:06:00.420 --> 00:06:01.959
+from being garbage collected,
+
+158
+00:06:01.959 --> 00:06:04.040
+it's also important that we discuss a new addition
+
+159
+00:06:04.040 --> 00:06:07.699
+to Unreal Engine 5, the T object pointer.
+
+160
+00:06:07.699 --> 00:06:08.980
+Firstly, it's important to note
+
+161
+00:06:08.980 --> 00:06:10.180
+that the use of raw pointers
+
+162
+00:06:10.180 --> 00:06:13.100
+is still a totally valid way to store your data.
+
+163
+00:06:13.100 --> 00:06:14.360
+However, we'd recommend the use
+
+164
+00:06:14.360 --> 00:06:17.269
+of a T object pointer instead.
+
+165
+00:06:17.269 --> 00:06:19.290
+A T object pointer is the size equivalent
+
+166
+00:06:19.290 --> 00:06:21.149
+of a 64 bit pointer,
+
+167
+00:06:21.149 --> 00:06:22.589
+and will convert to a raw pointer
+
+168
+00:06:22.589 --> 00:06:26.389
+when passed into functions and stored in local variables.
+
+169
+00:06:26.389 --> 00:06:28.310
+Its main advantage comes in editor builds
+
+170
+00:06:28.310 --> 00:06:30.230
+where it supports lazy load behavior,
+
+171
+00:06:30.230 --> 00:06:32.879
+which will speed up your engine boot times.
+
+172
+00:06:32.879 --> 00:06:34.519
+The T object pointer can also cache
+
+173
+00:06:34.519 --> 00:06:36.000
+resolved object addresses.
+
+174
+00:06:36.000 --> 00:06:37.740
+So in range based iteration,
+
+175
+00:06:37.740 --> 00:06:39.879
+it's recommended to use something like an auto ref
+
+176
+00:06:39.879 --> 00:06:44.839
+or a const auto ref to speed up future access attempts.
+
+177
+00:06:44.839 --> 00:06:46.279
+In terms of garbage collection,
+
+178
+00:06:46.279 --> 00:06:48.759
+this will still work the same as a raw pointer,
+
+179
+00:06:48.759 --> 00:06:50.600
+namely because we still use in conjunction
+
+180
+00:06:50.600 --> 00:06:53.199
+with the U property macro.
+
+181
+00:06:53.199 --> 00:06:54.879
+Its other advantage is that it supports
+
+182
+00:06:54.879 --> 00:06:58.050
+cook time dependency tracking.
+
+183
+00:06:58.050 --> 00:06:59.769
+This means that their use is tracked
+
+184
+00:06:59.769 --> 00:07:03.439
+to build up asset to asset cook dependencies.
+
+185
+00:07:03.439 --> 00:07:05.480
+The engine itself has already been converted
+
+186
+00:07:05.480 --> 00:07:06.800
+to use a T object pointer.
+
+187
+00:07:06.800 --> 00:07:08.199
+So for example, in actor,
+
+188
+00:07:08.199 --> 00:07:10.319
+the root component variable is now converted
+
+189
+00:07:10.319 --> 00:07:12.399
+to use a T object pointer.
+
+190
+00:07:12.399 --> 00:07:14.240
+So any direct interactions with this variable
+
+191
+00:07:14.240 --> 00:07:15.879
+will need to be updated.
+
+192
+00:07:15.879 --> 00:07:18.199
+However, the get root component still returns
+
+193
+00:07:18.199 --> 00:07:21.980
+the same U scene component pointer.
+
+194
+00:07:21.980 --> 00:07:24.300
+Similar in implementation to U property,
+
+195
+00:07:24.300 --> 00:07:25.740
+U function allows engineers
+
+196
+00:07:25.740 --> 00:07:28.100
+to give different functionality to a function
+
+197
+00:07:28.100 --> 00:07:29.699
+based off of the meta specified.
+
+198
+00:07:29.740 --> 00:07:31.899
+For instance, blueprint callable,
+
+199
+00:07:31.899 --> 00:07:34.079
+this function can be called from blueprint.
+
+200
+00:07:34.079 --> 00:07:35.379
+Blueprint cosmetic,
+
+201
+00:07:35.379 --> 00:07:37.879
+this function will not be run on dedicated servers.
+
+202
+00:07:37.879 --> 00:07:40.879
+So think playing VFX or a sound cue.
+
+203
+00:07:40.879 --> 00:07:42.120
+We've then got server,
+
+204
+00:07:42.120 --> 00:07:45.160
+this function is replicated and executed on the server.
+
+205
+00:07:45.160 --> 00:07:46.600
+When this is called on a client,
+
+206
+00:07:46.600 --> 00:07:49.300
+its implementation will be executed on the server.
+
+207
+00:07:49.300 --> 00:07:51.199
+So think passing input information
+
+208
+00:07:51.199 --> 00:07:53.779
+from the client back up to the server.
+
+209
+00:07:53.779 --> 00:07:55.980
+We've then got client, similar to server,
+
+210
+00:07:55.980 --> 00:07:59.139
+this function is replicated and executed on the client.
+
+211
+00:07:59.139 --> 00:08:00.500
+When this is called on the server,
+
+212
+00:08:00.500 --> 00:08:02.220
+its implementation will be called on the client.
+
+213
+00:08:02.220 --> 00:08:06.949
+So think UI updating based off of authoritative information.
+
+214
+00:08:06.949 --> 00:08:08.170
+We've then got net multicast
+
+215
+00:08:08.170 --> 00:08:10.069
+and this function is replicated as well.
+
+216
+00:08:10.069 --> 00:08:11.569
+And when called on the server,
+
+217
+00:08:11.569 --> 00:08:13.810
+the implementation is fired everywhere.
+
+218
+00:08:13.810 --> 00:08:15.889
+So that would be locally on the server
+
+219
+00:08:15.889 --> 00:08:18.759
+as well as on any relevant clients.
+
+220
+00:08:18.759 --> 00:08:19.759
+These networked functions
+
+221
+00:08:19.759 --> 00:08:23.160
+are called remote procedure calls or RPCs.
+
+222
+00:08:23.160 --> 00:08:26.560
+Structs and enums also have their own reflection markup
+
+223
+00:08:26.560 --> 00:08:30.149
+that being the U struct and U enum respectively.
+
+224
+00:08:30.709 --> 00:08:32.509
+U struct, much like all other types of markup
+
+225
+00:08:32.509 --> 00:08:34.429
+supports meta, the most common of which
+
+226
+00:08:34.429 --> 00:08:35.929
+being the blueprint type,
+
+227
+00:08:35.929 --> 00:08:38.389
+which lets us use this type in the editor.
+
+228
+00:08:38.389 --> 00:08:40.629
+What it also does is allow us to mark up members
+
+229
+00:08:40.629 --> 00:08:42.629
+of the struct itself as U property,
+
+230
+00:08:42.629 --> 00:08:44.590
+much like we would in a U class.
+
+231
+00:08:44.590 --> 00:08:47.450
+In this way, we can have pointers inside of structs
+
+232
+00:08:47.450 --> 00:08:50.940
+with no fear of them being GC'd erroneously.
+
+233
+00:08:50.940 --> 00:08:53.759
+U enums also support blueprint type as a meta
+
+234
+00:08:53.759 --> 00:08:55.419
+and it lets us add U meta
+
+235
+00:08:55.419 --> 00:08:57.740
+to individual members of the enum.
+
+236
+00:08:57.740 --> 00:09:00.139
+For example, we can hide the max member
+
+237
+00:09:00.659 --> 00:09:02.460
+of an enum from being shown in the editor
+
+238
+00:09:02.460 --> 00:09:05.740
+as max members are typically only used for iteration,
+
+239
+00:09:05.740 --> 00:09:09.230
+not actual gameplay designs or implementations.
+
+240
+00:09:09.230 --> 00:09:11.870
+By no means are these the only reflection meta specifiers,
+
+241
+00:09:11.870 --> 00:09:13.870
+they're just the most common examples.

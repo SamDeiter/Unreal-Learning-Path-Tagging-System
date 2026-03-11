@@ -1,0 +1,625 @@
+WEBVTT
+
+1
+00:00:01.389 --> 00:00:07.690
+So now that we've covered those kind of under-the-hood fundamentals that go into making a project even open in the first place
+
+2
+00:00:08.009 --> 00:00:12.630
+It's worth going into a little bit more of the kind of gameplay side the kind of fundamental
+
+3
+00:00:12.869 --> 00:00:15.990
+Lego bricks that go into making the kind of gameplay functionality
+
+4
+00:00:16.469 --> 00:00:22.039
+So everything really fundamentally leads back to UObject like we'd spoke about before
+
+5
+00:00:22.320 --> 00:00:27.820
+It's important to bear in mind that when we're talking about just a raw UObject these things have no
+
+6
+00:00:28.440 --> 00:00:31.359
+Representation in the world. They have no collision. They have no position. They're just data
+
+7
+00:00:32.359 --> 00:00:38.140
+That data can be updated at runtime. It's not plain old data, but it is just a kind of data object
+
+8
+00:00:38.659 --> 00:00:43.399
+They have no inbuilt tick functionality. They have no concept of a world that they exist in
+
+9
+00:00:43.399 --> 00:00:48.840
+They have no way to tick. Tick is Unreal's version of an update function something that runs once per frame
+
+10
+00:00:49.520 --> 00:00:56.679
+Whenever you're spawning a UObject you have to be provided with some kind of outer if you which is the object it lives within
+
+11
+00:00:57.200 --> 00:01:01.340
+If you don't provide it with an outer it will default to the transient package
+
+12
+00:01:01.359 --> 00:01:07.400
+And transient like the UProperty markup means that this object is kind of regarded as temporary and won't be saved
+
+13
+00:01:08.310 --> 00:01:13.269
+It's important to highlight that UObjects can support networking, but it does require some additional setup
+
+14
+00:01:13.590 --> 00:01:19.950
+So if you're thinking about data needing to get replicated over a network you can do it through UObject
+
+15
+00:01:19.950 --> 00:01:23.650
+But it's worth questioning whether or not there might be a better way a more kind of like
+
+16
+00:01:24.469 --> 00:01:27.269
+Streamlined and easier to implement with the engine way of doing that
+
+17
+00:01:27.590 --> 00:01:32.909
+UObjects isn't always the first thing you should be thinking of when you when you're thinking about network replication
+
+18
+00:01:33.430 --> 00:01:39.670
+just to kind of give an example of what a UObject might be in a typical game situation if we have an
+
+19
+00:01:40.269 --> 00:01:42.430
+example of an explosive barrel
+
+20
+00:01:42.950 --> 00:01:46.829
+And that explosive barrel will exist in the world
+
+21
+00:01:46.829 --> 00:01:50.349
+It'll be an actor which we'll get to in a moment, and it will have some components on it
+
+22
+00:01:50.349 --> 00:01:52.510
+Which we'll also get to in a moment, but maybe
+
+23
+00:01:53.510 --> 00:02:00.030
+The way we store and this this barrel can explode and the way we store that data about what the explosion is
+
+24
+00:02:00.189 --> 00:02:04.709
+That might be the kind of thing we do through a UObject so just through some editing magic
+
+25
+00:02:04.709 --> 00:02:08.930
+I've jumped ahead and kind of created an example of this explosive barrel that we can kind of look at
+
+26
+00:02:09.310 --> 00:02:12.909
+So just jumping into this explosion data asset
+
+27
+00:02:13.349 --> 00:02:19.650
+This is what that might look like as a UData asset extends from a UObject so we can see here
+
+28
+00:02:20.409 --> 00:02:22.409
+And you can see we've got the
+
+29
+00:02:22.810 --> 00:02:29.310
+Markup, but we need you before because this is we've not we're still in that UObject part of the hierarchy
+
+30
+00:02:29.689 --> 00:02:35.590
+So this is a data asset and here we've implemented the particle this explosion should use when it fires
+
+31
+00:02:35.650 --> 00:02:38.669
+The sound effect that it plays and the kind of radius
+
+32
+00:02:38.669 --> 00:02:43.250
+so this is some example of what a UObject might look like in your game and
+
+33
+00:02:44.050 --> 00:02:48.069
+Then moving on we have an actor. This is the kind of
+
+34
+00:02:49.030 --> 00:02:54.669
+Fundamental building block that you see in the level so unlike UObjects these do exist in the level
+
+35
+00:02:54.710 --> 00:02:57.110
+They can have positions they can have collisions
+
+36
+00:02:57.110 --> 00:02:59.110
+they can have a visual representation and
+
+37
+00:02:59.270 --> 00:03:05.949
+It's worth mentioning that whenever you're in an editor a really easy way to tell if something is an actor is if it appears in
+
+38
+00:03:05.949 --> 00:03:12.310
+This section on the right here the world outliner, and it's not to say a hundred percent of actors displayed here
+
+39
+00:03:12.310 --> 00:03:14.310
+There are cut one or two that are hidden away
+
+40
+00:03:14.669 --> 00:03:20.229
+But for the most part of them the folders here anything that is in this list is going to be an actor
+
+41
+00:03:20.669 --> 00:03:23.150
+That's just kind of a good rule of thumb
+
+42
+00:03:25.139 --> 00:03:28.960
+So yeah unlike objects where they require a bit of manual setup
+
+43
+00:03:29.259 --> 00:03:34.300
+It's much easier to get that kind of client server network communication working on an actor
+
+44
+00:03:34.300 --> 00:03:38.379
+It's set up for that kind of thing. It's set up for RPCs. It's set up for
+
+45
+00:03:39.900 --> 00:03:42.340
+Variable replication data replication in that way
+
+46
+00:03:43.099 --> 00:03:48.699
+And the other thing to highlight is that actors can inject their own behavior importantly
+
+47
+00:03:48.699 --> 00:03:53.319
+That's something that distinguishes unreal from other proprietary software that you may have used
+
+48
+00:03:54.340 --> 00:03:57.580
+Actors can have their own opinion about how code should work
+
+49
+00:03:57.620 --> 00:04:02.699
+But they do also implement this component architecture which allows us to bring functionality
+
+50
+00:04:03.060 --> 00:04:06.659
+In from other places and make it a little bit more portable which we'll get into in a moment
+
+51
+00:04:06.979 --> 00:04:12.900
+So an explosive an example of an actor might be the X a explosive barrel again note the a
+
+52
+00:04:13.180 --> 00:04:19.579
+Before the because now we are in the actor element of the hierarchy. So just jumping back into our code
+
+53
+00:04:20.579 --> 00:04:23.740
+We have our exploding barrel actor
+
+54
+00:04:24.220 --> 00:04:27.879
+This is just a quick example that I made we can see this
+
+55
+00:04:28.199 --> 00:04:33.579
+Exploding barrel you has the a in the class definition, but not actually in the file name
+
+56
+00:04:34.100 --> 00:04:37.259
+Inherits from actor and we can see what an actor might look like
+
+57
+00:04:37.259 --> 00:04:41.220
+We'll talk about components in a moment, but you can see this actor has several components within it
+
+58
+00:04:42.019 --> 00:04:46.680
+Implements its own behavior. So it is not just subject to the functionality of the components
+
+59
+00:04:46.680 --> 00:04:49.040
+It can have its own data and functions
+
+60
+00:04:49.339 --> 00:04:55.500
+So just here what I've said is that when this if we jump into this definition when this explosive barrel
+
+61
+00:04:55.860 --> 00:05:00.259
+Takes damage, then it causes it makes its explosion component explode
+
+62
+00:05:01.259 --> 00:05:04.220
+So what can I go into more detail about that in a second
+
+63
+00:05:05.139 --> 00:05:09.180
+But yeah, this is what and it just a really small example of what an actor might look like
+
+64
+00:05:10.959 --> 00:05:16.240
+We can also actually jump quickly into our engine to show a kind of useful
+
+65
+00:05:16.639 --> 00:05:23.660
+Flow for when thinking about putting things in C++ or blueprint and in our example scene, I've got here
+
+66
+00:05:24.560 --> 00:05:28.420
+We've got two of my amazing exploding barrel assets
+
+67
+00:05:29.060 --> 00:05:32.680
+And the way I've actually created this is we have this initial
+
+68
+00:05:33.500 --> 00:05:38.459
+Class here in C++. This is where we define kind of all the fundamental functionality
+
+69
+00:05:38.459 --> 00:05:42.300
+So we've said it has these components in it. It's got this data in it. It's got this functionality
+
+70
+00:05:43.100 --> 00:05:45.379
+We override this functionality from the base class
+
+71
+00:05:45.740 --> 00:05:52.620
+But once you're at the level of dealing with content and this will be dealt with in more detail in other sessions
+
+72
+00:05:53.180 --> 00:05:57.500
+But once you're at the level of dealing with content, it's kind of better to do that in blueprint
+
+73
+00:05:57.500 --> 00:06:04.220
+so what I've actually done here and this is a typical workflow is that I've done to find all the base behavior in C++ and
+
+74
+00:06:04.220 --> 00:06:10.060
+Then at the level that I've got something that's actually dealing with content like meshes and actual sound effects and things like that
+
+75
+00:06:10.660 --> 00:06:17.699
+I've made a blueprint that inherits from our exploding barrel class and I've made BP exploding barrel worth noting as well that
+
+76
+00:06:18.420 --> 00:06:22.000
+The BP underscore is just a typical naming convention
+
+77
+00:06:22.000 --> 00:06:27.399
+It is not hard coded as a requirement unlike the C++ A and U notation
+
+78
+00:06:28.569 --> 00:06:31.370
+And you can see here. I've just on the barrel mesh
+
+79
+00:06:31.370 --> 00:06:35.529
+I've just specified that it's going to have a cylinder mesh and it's using the default material and things like that
+
+80
+00:06:35.730 --> 00:06:41.569
+So this is a kind of typical workflow that you might have once you've got actors or really anything that's using content is
+
+81
+00:06:41.569 --> 00:06:46.810
+You have the base classes in C++ and you actually reference the content via a blueprint
+
+82
+00:06:47.370 --> 00:06:50.410
+Then that'll be explained more another time why that's particularly useful
+
+83
+00:06:52.240 --> 00:06:55.240
+And then finally our kind of last component
+
+84
+00:06:55.920 --> 00:07:00.319
+No pun intended of this workflow is the component itself
+
+85
+00:07:00.800 --> 00:07:03.139
+So when we talk about components
+
+86
+00:07:03.139 --> 00:07:09.839
+We're not talking about an ECS architecture for bringing all your data and having it together in one place for quick
+
+87
+00:07:10.000 --> 00:07:16.680
+referencing for your your CPU and that that's something distinct unreal does have an implementation for that called mass and
+
+88
+00:07:17.279 --> 00:07:24.560
+But we're talking about something slightly distinct that is more in common with the idea of entities and components in terms of other
+
+89
+00:07:25.600 --> 00:07:27.480
+engines such as unity
+
+90
+00:07:27.480 --> 00:07:32.800
+Where we have an odd an entity in this case the actor that represents the object in world
+
+91
+00:07:33.279 --> 00:07:35.279
+and components as
+
+92
+00:07:35.399 --> 00:07:38.379
+Interchangeable modular bits that can bring extra functionality
+
+93
+00:07:40.000 --> 00:07:44.860
+So yeah, they bring you reusable functionality and we can add them and remove them even at runtime
+
+94
+00:07:45.860 --> 00:07:51.220
+Components actor components are importantly called actor components because they rely on an actor to exist
+
+95
+00:07:51.220 --> 00:07:54.819
+We cannot have a component without an actor all components
+
+96
+00:07:55.420 --> 00:08:00.060
+Need to be attached to an actor and then they can reference that actor if required which will jump in
+
+97
+00:08:00.060 --> 00:08:02.060
+I'll give an example of that in a second
+
+98
+00:08:02.459 --> 00:08:04.459
+and the other thing is that
+
+99
+00:08:04.740 --> 00:08:07.720
+We have a availability to expose
+
+100
+00:08:08.540 --> 00:08:10.300
+functionality and expose
+
+101
+00:08:10.300 --> 00:08:17.139
+Variables just like on an actor to our blueprints mean that we can make as well as the components bringing this modularity
+
+102
+00:08:17.779 --> 00:08:24.259
+Inherently, we can also edit components in different situations to use the same component but provide different data to it
+
+103
+00:08:24.740 --> 00:08:31.850
+So if I were to give an example of what a component might look like is another example again using this same explosive barrel
+
+104
+00:08:31.850 --> 00:08:37.809
+The actual explosion that this barrel does is handled by a component and that means it's inherently reusable
+
+105
+00:08:37.809 --> 00:08:42.529
+So not only barrels can explode now and now I can put this explosion component on other things and
+
+106
+00:08:43.090 --> 00:08:46.409
+You can see we've used this explosion data asset here
+
+107
+00:08:47.090 --> 00:08:48.129
+and
+
+108
+00:08:48.129 --> 00:08:53.450
+our actual explode functionality is handed inside our component which basically just
+
+109
+00:08:53.970 --> 00:08:56.850
+Reads data from our explosion asset. It says, okay
+
+110
+00:08:56.850 --> 00:09:03.570
+Does it have a sound particle system then spawn that particle if it has a sound play that sound and then just do a little
+
+111
+00:09:03.809 --> 00:09:08.169
+World query to find all actors within the radius specified by the data again and
+
+112
+00:09:08.529 --> 00:09:14.090
+damage those actors and what that leads to is something vaguely explosion like where it damages
+
+113
+00:09:14.090 --> 00:09:20.929
+It does a particle does a sound effect and damages things in a radius, right and just to kind of demonstrate that behavior actually working
+
+114
+00:09:22.090 --> 00:09:26.129
+So I you don't need to worry about the actual blueprint functionality here
+
+115
+00:09:26.129 --> 00:09:30.090
+But just to quickly show what I'm doing when the level starts after a one second delay
+
+116
+00:09:30.129 --> 00:09:32.610
+I'm just damaging one of these barrels
+
+117
+00:09:32.889 --> 00:09:39.409
+but what you'll see is that because of the way the component works it damages everything around it and actually both of the barrels are going
+
+118
+00:09:39.409 --> 00:09:42.289
+To explode even though I'm only actually damaging one of them
+
+119
+00:09:42.730 --> 00:09:50.419
+So not exactly the most impressive sound effect not the best visuals, but I was just working with pre-made editor assets
+
+120
+00:09:51.059 --> 00:09:58.179
+But you can see then that that functionality clearly works. And what it means again is that we've got that added level of
+
+121
+00:09:59.019 --> 00:10:05.700
+Portability that you know, I've got explosive barrels now and now I can add that explosion functionality to grenades or whatever else that I want
+
+122
+00:10:06.179 --> 00:10:09.779
+The last component of this again, no pun intended
+
+123
+00:10:10.379 --> 00:10:16.500
+The last element of this is scene components, which we have already been demonstrating but not explicitly
+
+124
+00:10:17.460 --> 00:10:20.580
+Scene components are inherit from actor components
+
+125
+00:10:20.580 --> 00:10:22.059
+So they are actor components
+
+126
+00:10:22.059 --> 00:10:27.899
+But they're a very common and important distinction where scene components
+
+127
+00:10:28.379 --> 00:10:35.059
+Whereas raw actor components are there to provide functionality scene components exist within the world
+
+128
+00:10:35.820 --> 00:10:40.500
+And you can actually see this these two things are separated on an actor
+
+129
+00:10:40.500 --> 00:10:45.899
+And I'll just display that in a second actor components are maintained in a separate list to your scene components
+
+130
+00:10:46.299 --> 00:10:54.139
+And scene components provide anything that you would there would need some kind of world representation. So it can just be a location
+
+131
+00:10:54.740 --> 00:10:57.460
+It can be collision it can be visuals
+
+132
+00:10:58.059 --> 00:11:03.860
+scene components can also be attached to bones and sockets which makes them very useful for anything that needs to be
+
+133
+00:11:04.299 --> 00:11:09.220
+Relate to players something they might need to be holding like a knife mesh or something like that or a hat
+
+134
+00:11:09.419 --> 00:11:13.419
+Very very common one and yeah, they can also be used to detect collisions
+
+135
+00:11:13.419 --> 00:11:17.539
+So components can overlap with other components for any collision behavior that you need
+
+136
+00:11:19.019 --> 00:11:21.879
+Just to kind of quickly demonstrate some of the stuff I've been talking about
+
+137
+00:11:22.799 --> 00:11:24.799
+If we look here we'll see
+
+138
+00:11:25.559 --> 00:11:30.440
+We have a barrel mesh component. This is not a component that I've written myself
+
+139
+00:11:30.440 --> 00:11:35.000
+This is a static mesh component is a component that exists just in unreal by default
+
+140
+00:11:35.000 --> 00:11:42.440
+And you can see our actor has split these two sets of components up. We have my explosion component, which has no location data
+
+141
+00:11:42.440 --> 00:11:46.519
+It's kind of just abstract and it just provides the functionality of blowing up
+
+142
+00:11:47.159 --> 00:11:52.460
+And then we have our scene components which are maintained in this kind of hierarchy that will be similar maybe to any
+
+143
+00:11:53.519 --> 00:11:59.679
+DDC packages that you're used to working with where we have kind of a hierarchy
+
+144
+00:11:59.720 --> 00:12:03.019
+It's important to highlight that when we're dealing with scene components
+
+145
+00:12:03.720 --> 00:12:08.620
+At least at the blueprint level every actor must have at least one scene component
+
+146
+00:12:08.620 --> 00:12:14.120
+And it's that component that provides an actor with its location rotation
+
+147
+00:12:14.299 --> 00:12:16.299
+so when we have a
+
+148
+00:12:17.240 --> 00:12:20.879
+When we have when we ask an actor about its location and rotation
+
+149
+00:12:21.600 --> 00:12:28.399
+Actually, what we're doing is we're saying the location rotation of its scene of its root component a
+
+150
+00:12:28.919 --> 00:12:35.080
+Typical workflow might be that you have what's called a scene root, which is just a blank scene component with no extra data in it
+
+151
+00:12:35.080 --> 00:12:40.679
+It's basically just a position as an object's kind of pivot and then you attach other things to that
+
+152
+00:12:40.679 --> 00:12:44.679
+and that makes it very easy to do things like by default this barrel would actually be
+
+153
+00:12:45.240 --> 00:12:48.639
+Hit positioned here and then you would see all our barrels would be halfway through the floor
+
+154
+00:12:48.720 --> 00:12:51.840
+so we can use that scene root as a kind of
+
+155
+00:12:52.120 --> 00:12:58.019
+We can offset from that and because our mesh is a is a scene component itself. It has its own
+
+156
+00:12:58.720 --> 00:13:03.559
+Location rotation and scale so we can move it independently of this of this root component

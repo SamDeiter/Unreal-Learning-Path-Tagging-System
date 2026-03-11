@@ -1,0 +1,1149 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:05.139
+Welcome to another Epic Games Unreal Engine training course.
+
+2
+00:00:05.139 --> 00:00:08.140
+Today we're going to be taking a look at an introduction to animation
+
+3
+00:00:08.140 --> 00:00:11.650
+in Unreal Engine version 5.5.
+
+4
+00:00:11.650 --> 00:00:15.650
+So we're going to aim to end with an understanding of the different types of animations
+
+5
+00:00:15.650 --> 00:00:17.649
+that you have within the engine.
+
+6
+00:00:17.649 --> 00:00:21.649
+And we'll take a look at the animation editors and the different features that are available
+
+7
+00:00:21.649 --> 00:00:24.649
+depending on what type of animation you're working with,
+
+8
+00:00:24.649 --> 00:00:28.649
+how you can import and export animations to and from the engine.
+
+9
+00:00:28.649 --> 00:00:33.649
+We'll also get an understanding of the differences between skeletons and skeletal meshes
+
+10
+00:00:33.649 --> 00:00:36.649
+and cover a brief overview of the animation subeditors.
+
+11
+00:00:36.649 --> 00:00:40.649
+Then we'll go over how to create some new animation assets within the engine
+
+12
+00:00:40.649 --> 00:00:44.649
+and for that we'll utilize Sequencer and pre-existing animations
+
+13
+00:00:44.649 --> 00:00:50.899
+and we'll briefly cover how to attach an item to a character using a socket.
+
+14
+00:00:50.899 --> 00:00:54.899
+So when we're talking about the different types of animation that you can have in engine
+
+15
+00:00:54.899 --> 00:00:56.899
+what do we mean by this?
+
+16
+00:00:56.899 --> 00:01:02.899
+So it's more understanding what you're going to use that animation for
+
+17
+00:01:02.899 --> 00:01:06.900
+which will sort of dictate how you should approach creating the animation
+
+18
+00:01:06.900 --> 00:01:10.599
+and how you set the animation up in engine.
+
+19
+00:01:10.599 --> 00:01:16.599
+The first type of animation you could consider is what we might call input animation.
+
+20
+00:01:16.599 --> 00:01:21.599
+So these animations are typically used for the player character that you're controlling
+
+21
+00:01:21.599 --> 00:01:24.599
+and they're authored on the spot so the character won't be moving through space
+
+22
+00:01:24.599 --> 00:01:26.599
+when you export these animations.
+
+23
+00:01:26.599 --> 00:01:32.599
+Now the reason for that is that it's not the animations that dictate the character's movement
+
+24
+00:01:32.599 --> 00:01:34.599
+but something called the player pawn.
+
+25
+00:01:34.599 --> 00:01:38.599
+Now the player pawn is essentially a container of logic
+
+26
+00:01:38.599 --> 00:01:43.599
+that takes the input information from your controller or your keyboard or your iPad
+
+27
+00:01:43.599 --> 00:01:47.599
+or whatever it might be that you're using to control the character
+
+28
+00:01:47.599 --> 00:01:52.629
+and it dictates what the character should be doing when you press a certain button.
+
+29
+00:01:52.629 --> 00:01:56.950
+So when I press W on my keyboard the character's moving forwards
+
+30
+00:01:56.950 --> 00:01:59.950
+and when I press S it's moving backwards.
+
+31
+00:01:59.950 --> 00:02:05.180
+And you can see this sort of container around our character here
+
+32
+00:02:05.180 --> 00:02:07.180
+something that's called the capsule.
+
+33
+00:02:07.180 --> 00:02:13.270
+Now this is just a visual representation of where this character's moving and how they're moving.
+
+34
+00:02:13.270 --> 00:02:17.270
+So as I traverse around the space you can see that that container is moving
+
+35
+00:02:17.270 --> 00:02:20.270
+and we've got animations playing within that container.
+
+36
+00:02:20.270 --> 00:02:26.879
+Now it's the animation blueprint itself that dictates what animation should be playing on the character
+
+37
+00:02:26.879 --> 00:02:29.879
+and it sort of gives that illusion of movement.
+
+38
+00:02:29.879 --> 00:02:32.879
+So as this capsule is moving through the world
+
+39
+00:02:32.879 --> 00:02:34.879
+these animations are playing on the spot
+
+40
+00:02:34.879 --> 00:02:37.879
+at a speed that matches the capsule's speed
+
+41
+00:02:37.879 --> 00:02:39.879
+to give that illusion of movement.
+
+42
+00:02:39.879 --> 00:02:43.419
+And this can be done with all sorts of different animation types
+
+43
+00:02:43.419 --> 00:02:47.419
+so if you're jumping, you're running or walking, you're flying or swimming
+
+44
+00:02:47.419 --> 00:02:49.419
+you know whatever it is you want your character to do
+
+45
+00:02:49.419 --> 00:02:57.520
+you'd first set up the inputs from the controller to the player pawn
+
+46
+00:02:57.520 --> 00:03:00.520
+and then that information is fed through to the animation blueprint
+
+47
+00:03:00.520 --> 00:03:03.520
+which tells the character what animation to be playing
+
+48
+00:03:03.520 --> 00:03:06.520
+and how it should look when it's moving in a specific way.
+
+49
+00:03:06.520 --> 00:03:13.569
+And the other type of animation we would call linear animation.
+
+50
+00:03:13.569 --> 00:03:17.569
+So this is more often used for cinematics
+
+51
+00:03:17.569 --> 00:03:21.569
+or something that doesn't need to be controlled at runtime essentially.
+
+52
+00:03:21.569 --> 00:03:25.569
+And also this means it doesn't need to be authored on the spot.
+
+53
+00:03:25.569 --> 00:03:28.569
+So this is where our character or whatever it might be
+
+54
+00:03:28.569 --> 00:03:30.569
+can be moving through space in the world
+
+55
+00:03:30.569 --> 00:03:34.699
+and not worry about having to make adjustments at runtime.
+
+56
+00:03:34.699 --> 00:03:39.699
+So this could come in the form of animations that you've created in external software
+
+57
+00:03:39.699 --> 00:03:42.699
+or you could actually create them directly in the engine
+
+58
+00:03:42.699 --> 00:03:44.699
+using Control Rig inside Sequencer
+
+59
+00:03:44.699 --> 00:03:48.699
+or maybe you've got pre-recorded mocap or alembic caches
+
+60
+00:03:48.699 --> 00:03:50.699
+that you could also set up inside Sequencer.
+
+61
+00:03:50.699 --> 00:03:54.789
+But the key point is that they don't need to be controlled at runtime
+
+62
+00:03:54.789 --> 00:03:57.789
+and it's something that doesn't need to be authored on the spot
+
+63
+00:03:57.789 --> 00:03:59.789
+the same way that an input animation needs to be.
+
+64
+00:03:59.789 --> 00:04:04.789
+It's more like a one shot or a cinematic that would trigger once
+
+65
+00:04:04.789 --> 00:04:06.789
+and then you would just allow that to play out.
+
+66
+00:04:06.789 --> 00:04:13.099
+Digging a little deeper into how animations are set up in engine
+
+67
+00:04:13.099 --> 00:04:15.330
+we have something called root motion.
+
+68
+00:04:15.330 --> 00:04:18.329
+Now earlier I said that it's not the animation
+
+69
+00:04:18.329 --> 00:04:20.329
+that drives the movement of the character
+
+70
+00:04:20.329 --> 00:04:22.329
+but it's actually the movement of the character
+
+71
+00:04:22.329 --> 00:04:25.329
+that defines what animation should be being played.
+
+72
+00:04:25.329 --> 00:04:29.360
+So whether that's walking or jumping or running, whatever it is.
+
+73
+00:04:29.360 --> 00:04:33.360
+Now root motion is a way of actually flipping that relationship.
+
+74
+00:04:33.360 --> 00:04:37.360
+And as you can see here, it's a method to control the character's movement
+
+75
+00:04:37.360 --> 00:04:40.360
+using the animation data on the skeleton's root bone.
+
+76
+00:04:40.360 --> 00:04:44.899
+So looking at this GIF that's playing on the right hand side
+
+77
+00:04:44.899 --> 00:04:46.899
+you can see that as the animation plays
+
+78
+00:04:46.899 --> 00:04:49.899
+the character is moving forward through space
+
+79
+00:04:49.899 --> 00:04:51.899
+and as they return to that idle pose
+
+80
+00:04:51.899 --> 00:04:54.899
+you can see that they blend back to the capsule
+
+81
+00:04:54.899 --> 00:04:59.220
+because they're currently exiting the capsule with the animation.
+
+82
+00:04:59.220 --> 00:05:02.220
+Now when you enable a root motion inside the animation
+
+83
+00:05:02.220 --> 00:05:04.220
+you can see on the left hand side here
+
+84
+00:05:04.220 --> 00:05:08.220
+that that information on the root is being transferred to the capsule
+
+85
+00:05:08.220 --> 00:05:11.220
+and as they're blending back to idle they're not snapping back
+
+86
+00:05:11.220 --> 00:05:15.220
+because the capsule is now moved to where that root would have been.
+
+87
+00:05:15.220 --> 00:05:18.410
+Now an important thing to note here
+
+88
+00:05:18.410 --> 00:05:21.410
+is that a skeleton needs a root bone for this to work.
+
+89
+00:05:21.410 --> 00:05:26.410
+So if you're downloading animations or skeletons from somewhere online
+
+90
+00:05:26.410 --> 00:05:28.410
+like Mixamo for example
+
+91
+00:05:28.410 --> 00:05:30.410
+you might find that they don't actually have a root bone
+
+92
+00:05:30.410 --> 00:05:35.410
+or they're using like the hips or pelvis in place of it
+
+93
+00:05:35.410 --> 00:05:37.410
+and it's actually in the wrong place.
+
+94
+00:05:37.410 --> 00:05:40.439
+So what you need is a root bone, a unique bone
+
+95
+00:05:40.439 --> 00:05:42.439
+that's at the top of the hierarchy
+
+96
+00:05:42.439 --> 00:05:45.439
+that is at world zero by default.
+
+97
+00:05:45.439 --> 00:05:48.209
+A second thing to note is that
+
+98
+00:05:48.209 --> 00:05:51.209
+root motion is not enabled by default.
+
+99
+00:05:51.209 --> 00:05:54.209
+So this is something that you need to enable in the animation itself
+
+100
+00:05:54.209 --> 00:05:57.209
+and then something you need to set up in the animation blueprint
+
+101
+00:05:57.209 --> 00:06:01.209
+to take the data from the skeleton's root bone
+
+102
+00:06:01.209 --> 00:06:03.209
+and transfer that to the capsule
+
+103
+00:06:03.209 --> 00:06:05.209
+so that you can get the movement from it
+
+104
+00:06:05.209 --> 00:06:08.209
+and use that when you're controlling the character.
+
+105
+00:06:08.209 --> 00:06:10.100
+To give an example of this
+
+106
+00:06:10.100 --> 00:06:13.100
+you can see that we've got a root bone at the top here
+
+107
+00:06:13.100 --> 00:06:15.100
+the top of all of our hierarchy
+
+108
+00:06:15.100 --> 00:06:18.100
+which is essentially your reference point
+
+109
+00:06:18.100 --> 00:06:20.100
+for the entire skeletal structure
+
+110
+00:06:20.100 --> 00:06:22.100
+and so everything would be a child of this
+
+111
+00:06:22.100 --> 00:06:24.170
+in one way or another.
+
+112
+00:06:24.170 --> 00:06:27.170
+Now in characters like bipeds or quadrupeds
+
+113
+00:06:27.170 --> 00:06:30.170
+or anything that's living typically
+
+114
+00:06:30.170 --> 00:06:33.170
+the root goes to sort of a central branching point
+
+115
+00:06:33.170 --> 00:06:35.170
+that is typically the pelvis or the hips
+
+116
+00:06:35.170 --> 00:06:38.170
+and then everything else branches off that
+
+117
+00:06:38.170 --> 00:06:41.170
+in smaller branches like your spine
+
+118
+00:06:41.170 --> 00:06:43.170
+your hands down to your fingers
+
+119
+00:06:43.170 --> 00:06:46.259
+or your thigh down to your feet.
+
+120
+00:06:46.259 --> 00:06:48.259
+And what you'll find is with something like a car
+
+121
+00:06:48.259 --> 00:06:51.259
+or something mechanical that's non-organic
+
+122
+00:06:51.259 --> 00:06:54.259
+you may actually have several of these branching points
+
+123
+00:06:54.259 --> 00:06:57.259
+depending on the requirement of the thing that you're animating
+
+124
+00:06:57.259 --> 00:07:01.259
+or what the mesh needs to do.
+
+125
+00:07:01.259 --> 00:07:06.509
+Now organic characters often require things like twist joints as well.
+
+126
+00:07:06.509 --> 00:07:09.769
+Now these allow you to preserve the volume
+
+127
+00:07:09.769 --> 00:07:12.769
+of like forearm for example as the wrist twists
+
+128
+00:07:12.769 --> 00:07:15.769
+and the recommended hierarchy for these
+
+129
+00:07:15.769 --> 00:07:18.769
+are that they're best created as individual children
+
+130
+00:07:18.769 --> 00:07:20.769
+of for example the elbow
+
+131
+00:07:20.769 --> 00:07:23.769
+rather than being in a direct chain
+
+132
+00:07:23.769 --> 00:07:25.769
+from the elbow to the wrist.
+
+133
+00:07:25.769 --> 00:07:28.769
+Now this just gives you more control over the rotation
+
+134
+00:07:28.769 --> 00:07:30.769
+without affecting the other joints in the chain.
+
+135
+00:07:30.769 --> 00:07:34.379
+And overall the key to the successful skeleton
+
+136
+00:07:34.379 --> 00:07:36.379
+is just the hierarchy
+
+137
+00:07:36.379 --> 00:07:39.379
+and considering how your character needs to deform
+
+138
+00:07:39.379 --> 00:07:43.459
+and setting up the hierarchy and service of that.
+
+139
+00:07:43.459 --> 00:07:45.459
+So we've looked quite a bit at gameplay animations
+
+140
+00:07:45.459 --> 00:07:47.459
+and how you should set up your skeleton
+
+141
+00:07:47.459 --> 00:07:49.459
+and the reasons why you might animate something
+
+142
+00:07:49.459 --> 00:07:51.459
+on the spot or whatever.
+
+143
+00:07:51.459 --> 00:07:53.459
+But now if we compare sort of
+
+144
+00:07:53.459 --> 00:07:56.459
+cinematic animation pipelines
+
+145
+00:07:56.459 --> 00:07:58.939
+sort of in engine and out of engine
+
+146
+00:07:58.939 --> 00:08:01.939
+you'll find that a pre-made animation pipeline
+
+147
+00:08:01.939 --> 00:08:03.939
+you know it's a fairly rigid workflow.
+
+148
+00:08:03.939 --> 00:08:05.939
+It's been developed over many years
+
+149
+00:08:05.939 --> 00:08:07.939
+by many different companies.
+
+150
+00:08:07.939 --> 00:08:09.939
+You know typically you'll create
+
+151
+00:08:09.939 --> 00:08:11.939
+and you'll animate your characters
+
+152
+00:08:11.939 --> 00:08:13.939
+in an external software like Maya or Blender
+
+153
+00:08:13.939 --> 00:08:15.939
+and then you'll bring those baked
+
+154
+00:08:15.939 --> 00:08:17.939
+animations into the engine
+
+155
+00:08:17.939 --> 00:08:19.939
+where you would then you know
+
+156
+00:08:19.939 --> 00:08:21.939
+set up the logic to utilize those
+
+157
+00:08:21.939 --> 00:08:23.939
+animations. So typically in
+
+158
+00:08:23.939 --> 00:08:25.939
+Sequencer the cinematic tool in engine
+
+159
+00:08:25.939 --> 00:08:27.939
+you'd take those baked
+
+160
+00:08:27.939 --> 00:08:29.939
+animation assets and you could
+
+161
+00:08:29.939 --> 00:08:31.939
+maybe stitch some animations
+
+162
+00:08:31.939 --> 00:08:33.940
+back to back blend them with one another
+
+163
+00:08:33.940 --> 00:08:35.940
+even apply some animations
+
+164
+00:08:35.940 --> 00:08:37.940
+additively to get like some facial
+
+165
+00:08:37.940 --> 00:08:39.940
+animation on there or
+
+166
+00:08:39.940 --> 00:08:41.940
+some other additive animation
+
+167
+00:08:41.940 --> 00:08:43.940
+on there. But any
+
+168
+00:08:43.940 --> 00:08:45.940
+animation any edit you need to make
+
+169
+00:08:45.940 --> 00:08:47.940
+really you tend to come
+
+170
+00:08:47.940 --> 00:08:49.940
+back into your external software
+
+171
+00:08:49.940 --> 00:08:51.940
+make that edit export
+
+172
+00:08:51.940 --> 00:08:53.940
+your animation and then import it back
+
+173
+00:08:53.940 --> 00:08:55.940
+into the engine.
+
+174
+00:08:55.940 --> 00:08:58.200
+Now you can
+
+175
+00:08:58.200 --> 00:09:00.200
+modify the animation in Sequencer
+
+176
+00:09:00.200 --> 00:09:02.200
+with the FK control rig that
+
+177
+00:09:02.200 --> 00:09:04.200
+comes with it. So you could bake to the control rig and
+
+178
+00:09:04.200 --> 00:09:06.200
+then make your edits and then bake that back down to
+
+179
+00:09:06.200 --> 00:09:08.200
+an animation sequence.
+
+180
+00:09:08.200 --> 00:09:10.389
+But typically what you would
+
+181
+00:09:10.389 --> 00:09:12.389
+do is you would go back to your
+
+182
+00:09:12.389 --> 00:09:14.389
+external software make your edits and bring that
+
+183
+00:09:14.389 --> 00:09:17.799
+back into the engine. And here's
+
+184
+00:09:17.799 --> 00:09:19.799
+an example of you know that typical pipeline.
+
+185
+00:09:19.799 --> 00:09:21.860
+It's quite like an
+
+186
+00:09:21.860 --> 00:09:23.860
+assembly line where one thing
+
+187
+00:09:23.860 --> 00:09:25.860
+typically needs to be completed before the next
+
+188
+00:09:25.860 --> 00:09:27.860
+thing can start. So kicking
+
+189
+00:09:27.860 --> 00:09:29.860
+off with your story development your story
+
+190
+00:09:29.860 --> 00:09:31.860
+boards getting those
+
+191
+00:09:31.860 --> 00:09:33.860
+iterated on and then going
+
+192
+00:09:33.860 --> 00:09:35.860
+back and forth with the tutorial and
+
+193
+00:09:35.860 --> 00:09:37.860
+as soon as they get signed off
+
+194
+00:09:37.860 --> 00:09:39.860
+that then allows you to start your modeling and
+
+195
+00:09:39.860 --> 00:09:41.860
+your rigging and your you know your
+
+196
+00:09:41.860 --> 00:09:43.860
+scene set up.
+
+197
+00:09:43.860 --> 00:09:45.860
+And as soon as that's all worked on and that's set up
+
+198
+00:09:45.860 --> 00:09:47.860
+and that's been signed off you can then
+
+199
+00:09:47.860 --> 00:09:49.860
+start animating so you can start blocking
+
+200
+00:09:49.860 --> 00:09:51.860
+in your rough layout of your
+
+201
+00:09:51.860 --> 00:09:53.860
+you know your characters animation
+
+202
+00:09:53.860 --> 00:09:55.860
+and then you'll keep
+
+203
+00:09:55.860 --> 00:09:57.860
+iterating back and forth back and forth back and
+
+204
+00:09:57.860 --> 00:09:59.860
+forth until that's signed off. And once
+
+205
+00:09:59.860 --> 00:10:01.860
+that's when the next the next team
+
+206
+00:10:01.860 --> 00:10:03.860
+can kind of jump on it and start working on
+
+207
+00:10:03.860 --> 00:10:05.860
+maybe it's effects or crowds
+
+208
+00:10:05.860 --> 00:10:07.860
+or moving on to
+
+209
+00:10:07.860 --> 00:10:09.860
+lighting after that. But you'll see
+
+210
+00:10:09.860 --> 00:10:11.860
+that typically one
+
+211
+00:10:11.860 --> 00:10:13.860
+thing can't really start until the
+
+212
+00:10:13.860 --> 00:10:15.860
+previous has been completed
+
+213
+00:10:15.860 --> 00:10:18.889
+and comparing that to
+
+214
+00:10:18.889 --> 00:10:20.889
+the pipeline in engine you have
+
+215
+00:10:20.889 --> 00:10:22.889
+a lot of tools that will allow you to keep the rigging
+
+216
+00:10:22.889 --> 00:10:24.889
+and the animation inside the engine
+
+217
+00:10:24.889 --> 00:10:26.889
+without the need for re exporting
+
+218
+00:10:26.889 --> 00:10:28.889
+and then re importing when you need to make some
+
+219
+00:10:28.889 --> 00:10:31.370
+changes. So tools within
+
+220
+00:10:31.370 --> 00:10:33.370
+the engine like control rig
+
+221
+00:10:33.370 --> 00:10:35.370
+and I've got access to
+
+222
+00:10:35.370 --> 00:10:37.370
+procedural rigging and modular rigging
+
+223
+00:10:37.370 --> 00:10:39.370
+and these allow you to
+
+224
+00:10:39.370 --> 00:10:41.370
+create templates for different parts of
+
+225
+00:10:41.370 --> 00:10:43.370
+the skeletons that work instantly
+
+226
+00:10:43.370 --> 00:10:45.370
+across multiple characters in the project
+
+227
+00:10:45.370 --> 00:10:47.370
+so you could create and set
+
+228
+00:10:47.370 --> 00:10:49.370
+up sort of FK and IK arms
+
+229
+00:10:49.370 --> 00:10:51.370
+and legs that you can instantly just plug
+
+230
+00:10:51.370 --> 00:10:53.370
+into different characters and that will just work straight
+
+231
+00:10:53.370 --> 00:10:55.429
+away. You can then animate
+
+232
+00:10:55.429 --> 00:10:57.429
+directly in the scene that you're rendering
+
+233
+00:10:57.429 --> 00:10:59.429
+in with your control rig inside the sequencer
+
+234
+00:10:59.429 --> 00:11:01.429
+so this allows you to
+
+235
+00:11:01.429 --> 00:11:03.429
+work with other teams in parallel as the scenes
+
+236
+00:11:03.429 --> 00:11:05.429
+are being built and you're not having to wait
+
+237
+00:11:05.429 --> 00:11:07.429
+for them to be finished before you can start
+
+238
+00:11:07.429 --> 00:11:09.429
+before you can start animating.
+
+239
+00:11:09.429 --> 00:11:12.139
+Some of the newer tools in Unreal
+
+240
+00:11:12.139 --> 00:11:14.139
+Engine as well actually allow you
+
+241
+00:11:14.139 --> 00:11:16.139
+to create skeletons
+
+242
+00:11:16.139 --> 00:11:18.139
+and skin characters directly
+
+243
+00:11:18.139 --> 00:11:20.139
+in the engine. This is available
+
+244
+00:11:20.139 --> 00:11:22.139
+from version 5.3 and
+
+245
+00:11:22.139 --> 00:11:24.139
+above which means that your
+
+246
+00:11:24.139 --> 00:11:26.139
+entire rigging and animation process can live
+
+247
+00:11:26.139 --> 00:11:28.139
+inside the engine working with the assets
+
+248
+00:11:28.139 --> 00:11:30.139
+and the final scene that you're rendering out.
+
+249
+00:11:30.139 --> 00:11:32.970
+A real-time pipeline has
+
+250
+00:11:32.970 --> 00:11:34.970
+a few benefits over the offline pipeline
+
+251
+00:11:34.970 --> 00:11:36.970
+or the pre-made pipeline.
+
+252
+00:11:36.970 --> 00:11:38.970
+So all the previs
+
+253
+00:11:38.970 --> 00:11:40.970
+can be done directly within the engine
+
+254
+00:11:40.970 --> 00:11:42.970
+and then as you're working through each
+
+255
+00:11:42.970 --> 00:11:44.970
+iteration you update with the final
+
+256
+00:11:44.970 --> 00:11:46.970
+assets as they're being created.
+
+257
+00:11:46.970 --> 00:11:48.970
+You don't have to throw away any work
+
+258
+00:11:48.970 --> 00:11:50.970
+and everything that you're doing is building
+
+259
+00:11:50.970 --> 00:11:52.970
+towards that final shot through each iteration.
+
+260
+00:11:52.970 --> 00:11:55.029
+Now that allows teams to
+
+261
+00:11:55.029 --> 00:11:57.029
+work more in parallel with one another
+
+262
+00:11:57.029 --> 00:11:59.029
+rather than the waterfall effect
+
+263
+00:11:59.029 --> 00:12:01.029
+where you're waiting for one to finish before you can
+
+264
+00:12:01.029 --> 00:12:03.029
+kick off. You can get your characters
+
+265
+00:12:03.029 --> 00:12:05.029
+rigged and set up
+
+266
+00:12:05.029 --> 00:12:07.029
+and animated in scenes that are being
+
+267
+00:12:07.029 --> 00:12:09.029
+set up at the same time
+
+268
+00:12:09.029 --> 00:12:11.029
+and a huge advantage
+
+269
+00:12:11.029 --> 00:12:13.029
+is being able to animate within the actual
+
+270
+00:12:13.029 --> 00:12:15.029
+scene that you're rendering and you can see
+
+271
+00:12:15.029 --> 00:12:17.029
+all the real-time lighting, how that's affecting
+
+272
+00:12:17.029 --> 00:12:19.029
+your character, all the
+
+273
+00:12:19.029 --> 00:12:21.029
+effects that are in there and anything that
+
+274
+00:12:21.029 --> 00:12:23.029
+your character will be interacting with in the final
+
+275
+00:12:23.029 --> 00:12:25.029
+shot all happening in real-time.
+
+276
+00:12:25.029 --> 00:12:27.289
+And all of that together gives you
+
+277
+00:12:27.289 --> 00:12:29.289
+sort of a faster iteration
+
+278
+00:12:29.289 --> 00:12:31.289
+time without having to jump between different
+
+279
+00:12:31.289 --> 00:12:33.289
+softwares, importing and exporting.
+
+280
+00:12:33.289 --> 00:12:35.289
+You're also not having to wait for renders
+
+281
+00:12:35.289 --> 00:12:37.289
+to see how your shot looks
+
+282
+00:12:37.289 --> 00:12:39.289
+because it all runs in real-time
+
+283
+00:12:39.289 --> 00:12:41.289
+and gives you more sort of opportunities
+
+284
+00:12:41.289 --> 00:12:43.289
+to experiment and more creative
+
+285
+00:12:43.289 --> 00:12:45.289
+freedom to try things that would normally
+
+286
+00:12:45.289 --> 00:12:47.289
+probably be too costly or
+
+287
+00:12:47.289 --> 00:12:49.289
+time consuming with that traditional linear pipeline.

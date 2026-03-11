@@ -1,0 +1,309 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:06.700
+As you can see, not all data makes the jump correctly from Twinmotion to Unreal.
+
+2
+00:00:06.700 --> 00:00:10.630
+Another example of this is in the form of the animated doors.
+
+3
+00:00:10.630 --> 00:00:20.410
+They are animated in Twinmotion as you get close to them, but that functionality has disappeared with the transfer to UE5.
+
+4
+00:00:20.410 --> 00:00:30.809
+The rotators are still in place acting as hinges, as are the hierarchies, but not the animation.
+
+5
+00:00:30.809 --> 00:00:36.009
+The good news is that you can replicate the effect in UE5 with the help of a simple blueprint.
+
+6
+00:00:36.009 --> 00:00:44.359
+Adjust your view outside the doors on the upper floor. Also set Play Mode to activate from the current camera location.
+
+7
+00:00:44.359 --> 00:00:57.840
+In the Theater folder in the Content Browser, create a BP for Blueprint subfolder.
+
+8
+00:00:57.840 --> 00:01:12.859
+In it, create a new actor blueprint and name it DoorOpen. Double-click the blueprint to edit it.
+
+9
+00:01:12.859 --> 00:01:20.459
+Select one of the doors and browse to the asset in the Content Browser.
+
+10
+00:01:25.269 --> 00:01:28.269
+Add a new Static Mesh component to the blueprint.
+
+11
+00:01:28.269 --> 00:01:37.879
+Because the door asset is selected in the Content Browser, it will be automatically added to the Blueprint viewport.
+
+12
+00:01:37.879 --> 00:01:46.500
+Simplify the name of the Static Mesh component in the blueprint as Door.
+
+13
+00:01:46.500 --> 00:01:53.609
+Select the default scene root entry and add Child Actor.
+
+14
+00:01:53.609 --> 00:01:59.189
+This will act as a non-renderable null object and will be used as a hinge for the door.
+
+15
+00:01:59.189 --> 00:02:01.689
+In fact, name it Hinge.
+
+16
+00:02:01.689 --> 00:02:09.719
+Adjust the position of the door so that its right side is aligned with the hinge at 0,0,0.
+
+17
+00:02:09.719 --> 00:02:15.139
+Use a Snap value of 1cm for better control.
+
+18
+00:02:15.139 --> 00:02:22.050
+Parent the door to the hinge.
+
+19
+00:02:22.050 --> 00:02:25.099
+Next, you need a trigger box.
+
+20
+00:02:25.099 --> 00:02:30.349
+Select the default scene root again and add a Box Collision component.
+
+21
+00:02:30.349 --> 00:02:36.379
+Name it Trigger.
+
+22
+00:02:36.379 --> 00:02:43.620
+Adjust its position and Extents to match the door.
+
+23
+00:02:43.620 --> 00:02:52.180
+And also make sure it extends enough in the Y direction to allow a fair distance to trigger it as you step in.
+
+24
+00:02:52.180 --> 00:03:00.180
+In the Event Graph tab, delete all existing nodes, you won't need them.
+
+25
+00:03:00.180 --> 00:03:04.659
+Select the Trigger component and go lower in the Details panel.
+
+26
+00:03:04.659 --> 00:03:17.479
+Click the On Component Begin Overlap and On Component End Overlap events.
+
+27
+00:03:17.479 --> 00:03:23.840
+This will add nodes where you can define what happens when you step in or out of the trigger volume.
+
+28
+00:03:23.840 --> 00:03:33.120
+Drag the Hinge component into the working area, and add Set Relative Rotation to it with a 90 degree Z rotation angle.
+
+29
+00:03:33.120 --> 00:03:41.949
+Connect the action to the Begin Overlap event.
+
+30
+00:03:41.949 --> 00:03:46.430
+This will set the door to rotate 90 degrees when you step into the volume.
+
+31
+00:03:46.430 --> 00:03:56.240
+Compile and save, and then drag an instance of the blueprint to the scene to test the results.
+
+32
+00:03:56.240 --> 00:04:01.669
+Test the scene in Play mode.
+
+33
+00:04:01.669 --> 00:04:10.710
+At this stage, the door opens with a snap and remains open.
+
+34
+00:04:10.710 --> 00:04:23.089
+You could expand on the blueprint by duplicating nodes and resetting the rotation angle to 0 as you end the overlap.
+
+35
+00:04:23.089 --> 00:04:29.449
+To duplicate nodes, select them and then press Ctrl-D.
+
+36
+00:04:29.449 --> 00:04:37.279
+Compile and save.
+
+37
+00:04:37.279 --> 00:04:49.240
+The effect works but the snapping is bothersome.
+
+38
+00:04:49.240 --> 00:04:51.240
+You need a smoother rotation.
+
+39
+00:04:51.240 --> 00:05:00.810
+To create a smoother rotation, add a Timeline node.
+
+40
+00:05:00.810 --> 00:05:15.180
+Rewire the connections to the door on Begin Overlap, and double-click the Timeline node to edit it.
+
+41
+00:05:15.180 --> 00:05:19.250
+Add a float track named Door Opening.
+
+42
+00:05:19.250 --> 00:05:24.250
+Here we'll define an animation curve to smoothly open the door between two angle values.
+
+43
+00:05:24.250 --> 00:05:28.920
+With a right-click, add two keyframes to the curve.
+
+44
+00:05:28.920 --> 00:05:36.060
+Select them both and set them to Auto Tangents.
+
+45
+00:05:36.060 --> 00:05:40.060
+This will add ease-in, ease-out effects to the door opening and closing.
+
+46
+00:05:41.480 --> 00:05:45.480
+Set the first key at a time position of 0 with a value of 0.
+
+47
+00:05:45.480 --> 00:05:49.480
+This means that the door is closed before you get into the trigger volume.
+
+48
+00:05:49.480 --> 00:05:58.699
+Set the second key to a time position of 2, as in 2 seconds, and a value of 110.
+
+49
+00:05:58.699 --> 00:06:03.699
+This essentially means that it'll take 2 seconds for the door to rotate 110 degrees.
+
+50
+00:06:03.699 --> 00:06:11.259
+Use the Zoom buttons on the toolbar to view the extents of the curve.
+
+51
+00:06:11.259 --> 00:06:17.759
+Go back to the event graph when done and note the new door opening pin representing the new timeline curve.
+
+52
+00:06:17.759 --> 00:06:25.120
+Right-click the new rotation track in the Set Relative Rotation event and split the structure pin.
+
+53
+00:06:25.120 --> 00:06:30.319
+This separates the Vector3 XYZ rotation and separate float tracks.
+
+54
+00:06:30.319 --> 00:06:35.139
+Wire the door opening curve to the Z Relative Rotation of the hinge.
+
+55
+00:06:35.639 --> 00:06:45.480
+To reverse the action of the door, you only need to wire the On Component End overlap node to the reverse pin of the timeline.
+
+56
+00:06:45.480 --> 00:06:49.889
+You can delete any excess nodes at this time.
+
+57
+00:06:49.889 --> 00:06:59.329
+Compile and save the blueprint, then test your work.
+
+58
+00:06:59.329 --> 00:07:16.889
+The door should be behaving much better now.
+
+59
+00:07:16.889 --> 00:07:19.389
+Delete the test instance when done.
+
+60
+00:07:19.389 --> 00:07:22.889
+Next, you will replace the Twinmotion doors with the blueprint.
+
+61
+00:07:22.889 --> 00:07:27.089
+Start with the upper door on the right as viewed from the bridge.
+
+62
+00:07:27.089 --> 00:07:32.660
+It is actually made of two actors, a mesh door and a non-renderable rotator.
+
+63
+00:07:32.660 --> 00:07:40.300
+You won't need the door at all as the blueprint you have defined already contains a duplicate, so go ahead and delete it.
+
+64
+00:07:40.300 --> 00:07:45.410
+Select the remaining rotator actor.
+
+65
+00:07:45.410 --> 00:07:49.699
+Make sure the blueprint is also selected in the Content Browser.
+
+66
+00:07:49.699 --> 00:07:55.240
+Right-click the selected actor in the Outliner and replace it with the blueprint.
+
+67
+00:07:55.240 --> 00:08:00.839
+Test your work.
+
+68
+00:08:00.839 --> 00:08:09.629
+Note that the door is swinging to the incorrect side.
+
+69
+00:08:09.629 --> 00:08:18.649
+Arguably the easiest way to fix this is by setting its Y scale to minus 1.
+
+70
+00:08:18.649 --> 00:08:34.409
+This will reverse the swing.
+
+71
+00:08:34.409 --> 00:08:46.600
+Repeat the procedure with the left door.
+
+72
+00:08:46.600 --> 00:08:50.600
+This one will swing correctly and does not require Y scale adjustments.
+
+73
+00:08:50.600 --> 00:09:08.600
+Repeat the procedure for the doors at the ground level.
+
+74
+00:09:08.600 --> 00:09:14.100
+These will require slight adjustments to their X scale as well, as they are a little wider.
+
+75
+00:09:14.100 --> 00:09:17.100
+A value of 1.35 should work well.
+
+76
+00:09:17.100 --> 00:09:34.899
+You can now use the doors to get in and out of the building.
+
+77
+00:09:34.899 --> 00:09:36.899
+Save your work before moving on.

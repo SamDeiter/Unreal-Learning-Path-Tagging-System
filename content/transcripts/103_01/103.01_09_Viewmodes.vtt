@@ -1,0 +1,385 @@
+WEBVTT
+
+1
+00:00:00.430 --> 00:00:02.049
+OK, so the next thing that we need
+
+2
+00:00:02.049 --> 00:00:06.580
+to look at within the context of lightmaps and lightmaps,
+
+3
+00:00:06.580 --> 00:00:08.460
+view modes and visualizers are going
+
+4
+00:00:08.460 --> 00:00:11.509
+to help us understand what's actually
+
+5
+00:00:11.509 --> 00:00:13.710
+going on under the hood when it comes to performance
+
+6
+00:00:13.710 --> 00:00:14.710
+optimization.
+
+7
+00:00:14.710 --> 00:00:16.289
+So the categories that we're going
+
+8
+00:00:16.289 --> 00:00:17.870
+to cover for the visualizers are
+
+9
+00:00:17.870 --> 00:00:20.210
+going to be light complexity and lightmap density.
+
+10
+00:00:20.210 --> 00:00:21.670
+Now, they're really easy to access.
+
+11
+00:00:21.670 --> 00:00:26.370
+All you have to do is go to the View Mode tab
+
+12
+00:00:26.370 --> 00:00:29.710
+and go to Optimization Modes and choose either of these.
+
+13
+00:00:29.949 --> 00:00:31.589
+In the case of lightmap complexity,
+
+14
+00:00:31.589 --> 00:00:33.369
+it's going to be View Mode, Optimization View
+
+15
+00:00:33.369 --> 00:00:35.820
+Modes, and Light Complexity.
+
+16
+00:00:35.820 --> 00:00:37.780
+It'll give you, essentially, a colored view,
+
+17
+00:00:37.780 --> 00:00:42.060
+as you can see here, of the scene that
+
+18
+00:00:42.060 --> 00:00:45.939
+explains how complex a particular lighting setup is
+
+19
+00:00:45.939 --> 00:00:48.119
+for a given pixel.
+
+20
+00:00:48.119 --> 00:00:51.539
+So you'll notice that overlapping movable lights
+
+21
+00:00:51.539 --> 00:00:52.780
+will be very expensive.
+
+22
+00:00:52.780 --> 00:00:55.780
+They'll go closer to the pink-white range.
+
+23
+00:00:55.780 --> 00:00:59.899
+And you'll see the static lights are basically free.
+
+24
+00:00:59.899 --> 00:01:01.899
+So bake your light wherever possible
+
+25
+00:01:01.899 --> 00:01:03.479
+if you're using the lightmap solution,
+
+26
+00:01:03.479 --> 00:01:07.939
+because it will be the cheapest way of rendering your scene.
+
+27
+00:01:07.939 --> 00:01:10.260
+The next one is going to be lightmap density, which
+
+28
+00:01:10.260 --> 00:01:13.340
+is going to be in the same spot just right below it.
+
+29
+00:01:13.340 --> 00:01:15.739
+And it displays the density based on the tessellation
+
+30
+00:01:15.739 --> 00:01:17.019
+display.
+
+31
+00:01:17.019 --> 00:01:21.299
+Try and keep your lightmaps as low as possible.
+
+32
+00:01:21.299 --> 00:01:23.140
+And essentially, this will help in general
+
+33
+00:01:23.140 --> 00:01:27.219
+with baking and optimization, baking times specifically.
+
+34
+00:01:27.219 --> 00:01:29.599
+So let's go ahead and take a look at how this actually
+
+35
+00:01:29.640 --> 00:01:30.120
+works.
+
+36
+00:01:30.120 --> 00:01:32.959
+So if I go into the editor with the project
+
+37
+00:01:32.959 --> 00:01:34.959
+that you've been supplied for this,
+
+38
+00:01:34.959 --> 00:01:36.920
+I've gone to my interior scene.
+
+39
+00:01:36.920 --> 00:01:40.840
+So we're going to Light in 103.1, Interior,
+
+40
+00:01:40.840 --> 00:01:42.750
+and I've just opened the level.
+
+41
+00:01:42.750 --> 00:01:47.840
+Let's take a look at how we can see those optimization
+
+42
+00:01:47.840 --> 00:01:48.359
+view modes.
+
+43
+00:01:48.359 --> 00:01:51.719
+So I'm going to go to my View Mode tab,
+
+44
+00:01:51.719 --> 00:01:57.920
+go to Optimization View Modes, and look at Light Complexity.
+
+45
+00:01:57.920 --> 00:01:59.420
+So here, you can see the areas
+
+46
+00:01:59.459 --> 00:02:02.980
+where light is basically fully baked, very, very little
+
+47
+00:02:02.980 --> 00:02:05.459
+performance impact.
+
+48
+00:02:05.459 --> 00:02:09.419
+But the more dynamic in certain areas the lights become
+
+49
+00:02:09.419 --> 00:02:10.780
+and the more overlapping we have,
+
+50
+00:02:10.780 --> 00:02:12.219
+the more expensive it becomes.
+
+51
+00:02:12.219 --> 00:02:13.580
+Let's take a quick look at it.
+
+52
+00:02:13.580 --> 00:02:15.460
+If I just add a light now without building
+
+53
+00:02:15.460 --> 00:02:18.840
+and essentially calculate it as dynamic.
+
+54
+00:02:18.840 --> 00:02:24.629
+So I'll go to Lights, Point Light, and drag one in.
+
+55
+00:02:24.629 --> 00:02:25.990
+And I set it as Moveable.
+
+56
+00:02:25.990 --> 00:02:28.729
+So we're not technically needing to build this,
+
+57
+00:02:28.770 --> 00:02:31.860
+but this is being calculated at runtime, right?
+
+58
+00:02:31.860 --> 00:02:38.030
+So if I take a look at that lighting complexity again,
+
+59
+00:02:38.030 --> 00:02:40.830
+you'll notice it starts to get really expensive.
+
+60
+00:02:40.830 --> 00:02:44.310
+As I duplicate lights and have overlaps of those light
+
+61
+00:02:44.310 --> 00:02:47.710
+radiuses, you'll see it grows exponentially almost.
+
+62
+00:02:47.710 --> 00:02:50.990
+So something to keep in mind, again, bake whatever you can.
+
+63
+00:02:50.990 --> 00:02:53.349
+But as I say, this View Mode here
+
+64
+00:02:53.349 --> 00:02:55.349
+is going to help you a lot to understand
+
+65
+00:02:55.349 --> 00:02:57.509
+why your frame rate might be dropping in certain areas
+
+66
+00:02:57.509 --> 00:02:59.370
+due to lighting.
+
+67
+00:02:59.370 --> 00:03:02.189
+So the next thing is going to be Optimization View Modes,
+
+68
+00:03:02.189 --> 00:03:03.069
+Lightmap Density.
+
+69
+00:03:03.069 --> 00:03:05.030
+And you can see here, it allows
+
+70
+00:03:05.030 --> 00:03:07.550
+you to see the density of a particular mesh.
+
+71
+00:03:07.550 --> 00:03:10.389
+Now, if a mesh, for example, was a little too high,
+
+72
+00:03:10.389 --> 00:03:14.449
+for example, these small ones, it'll appear as red.
+
+73
+00:03:14.449 --> 00:03:16.009
+And that's just down to the resolution
+
+74
+00:03:16.009 --> 00:03:20.169
+that it has per size on the screen or density.
+
+75
+00:03:20.169 --> 00:03:23.050
+So one thing you can do is you can overwrite
+
+76
+00:03:23.050 --> 00:03:24.729
+the lightmap resolution.
+
+77
+00:03:24.729 --> 00:03:28.800
+And let's say, for example, I set this to 1024.
+
+78
+00:03:28.800 --> 00:03:31.639
+You can see it shows us much smaller little squares,
+
+79
+00:03:31.639 --> 00:03:33.680
+and it starts to give us the information
+
+80
+00:03:33.680 --> 00:03:37.639
+on the visualization mode here that it's
+
+81
+00:03:37.639 --> 00:03:39.840
+a little higher than the rest of the scene around it.
+
+82
+00:03:39.840 --> 00:03:41.560
+So that's something to keep in mind.
+
+83
+00:03:41.560 --> 00:03:43.360
+One other thing to keep in mind with this
+
+84
+00:03:43.360 --> 00:03:46.479
+is that it's better to have the general scene kind of have
+
+85
+00:03:46.479 --> 00:03:48.360
+an overall similar tone.
+
+86
+00:03:48.360 --> 00:03:51.099
+And the reason for this is if you have a very high resolution
+
+87
+00:03:51.099 --> 00:03:54.560
+mesh here or lightmap resolution here compared
+
+88
+00:03:54.560 --> 00:03:55.939
+to this one, you'll probably start
+
+89
+00:03:55.939 --> 00:03:58.479
+to notice differences in the resolution of the shadows.
+
+90
+00:03:58.479 --> 00:04:00.060
+And that's something to keep in mind
+
+91
+00:04:00.460 --> 00:04:03.020
+because it can make things a little bit more noticeable
+
+92
+00:04:03.020 --> 00:04:03.860
+in that sense.
+
+93
+00:04:03.860 --> 00:04:06.620
+So try and keep things nice and consistent.
+
+94
+00:04:06.620 --> 00:04:08.699
+And that's really it for visualization view modes
+
+95
+00:04:08.699 --> 00:04:09.699
+in terms of lighting.
+
+96
+00:04:10.680 --> 00:04:13.039
+Next, we'll take a look at IES profiles.

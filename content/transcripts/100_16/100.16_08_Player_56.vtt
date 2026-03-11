@@ -1,0 +1,653 @@
+WEBVTT
+
+1
+00:00:01.649 --> 00:00:08.150
+In this video, we'll look at how the player can be linked to the new interactive elements in our level.
+
+2
+00:00:08.150 --> 00:00:13.650
+To start, we're going to take a look at another unique feature to Unreal, the Level Blueprint.
+
+3
+00:00:13.650 --> 00:00:17.649
+This is a great place for quickly prototyping interactions,
+
+4
+00:00:17.649 --> 00:00:24.149
+because in the same way that a regular Blueprint has an innate understanding of everything inside of it,
+
+5
+00:00:24.149 --> 00:00:29.149
+the Level Blueprint has an innate understanding of everything in that level,
+
+6
+00:00:29.149 --> 00:00:36.210
+which makes it very easy to create references and link different Actors and their components together.
+
+7
+00:00:36.210 --> 00:00:38.710
+Just be careful you don't rely on this too much,
+
+8
+00:00:38.710 --> 00:00:43.210
+as you have to duplicate everything from one Level Blueprint to the next.
+
+9
+00:00:43.210 --> 00:00:50.479
+So if you want to have code that's reusable, you're going to need to have that exist in standalone Actors.
+
+10
+00:00:50.479 --> 00:00:55.979
+To open the Level Blueprint, we can simply come up here to this Blueprint button,
+
+11
+00:00:55.979 --> 00:01:02.479
+which gives us a list of everything in the level, and we can see here, open Level Blueprint.
+
+12
+00:01:02.479 --> 00:01:06.609
+Right now, this is just blank.
+
+13
+00:01:06.609 --> 00:01:10.819
+We're going to delete both of these,
+
+14
+00:01:10.819 --> 00:01:18.819
+and we're going to start by once again adding a space bar.
+
+15
+00:01:18.819 --> 00:01:25.500
+We'll continue to use that for triggering our logic.
+
+16
+00:01:27.569 --> 00:01:32.569
+If we're wondering how can we now get a reference to our Dancer,
+
+17
+00:01:32.569 --> 00:01:38.069
+as well as the Stage or the Material Parameter Collection
+
+18
+00:01:38.069 --> 00:01:43.069
+that's controlling the color of our material for our columns,
+
+19
+00:01:43.069 --> 00:01:47.069
+we're going to be able to do that in a couple ways.
+
+20
+00:01:47.069 --> 00:01:50.069
+The first, we can make a variable here,
+
+21
+00:01:50.069 --> 00:01:56.069
+click on the dropdown, and we'll call this Color NPC.
+
+22
+00:01:57.819 --> 00:02:01.819
+We will change its type to Material.
+
+23
+00:02:01.819 --> 00:02:09.129
+You can see we get a long list of everything matching what we're typing in,
+
+24
+00:02:09.129 --> 00:02:10.629
+and this is the one we want.
+
+25
+00:02:10.629 --> 00:02:18.360
+Material Parameter Collection, hit Compile, and we can set its type to Session Color Change.
+
+26
+00:02:18.360 --> 00:02:23.710
+In order to get a version of our Dancer,
+
+27
+00:02:23.710 --> 00:02:27.210
+what we need to do is click on them in the level so they're selected,
+
+28
+00:02:27.210 --> 00:02:34.710
+come over here, and now we can right-click and create a reference to our Demo Dancer.
+
+29
+00:02:34.710 --> 00:02:40.210
+Instead of needing to do a whole searching for an actor of a specific class
+
+30
+00:02:40.210 --> 00:02:43.210
+and saving them in a variable,
+
+31
+00:02:43.210 --> 00:02:48.210
+we can just quickly get them right here in our Blueprint.
+
+32
+00:02:48.210 --> 00:02:54.909
+From this, we want to get our Skeletal Mesh component.
+
+33
+00:02:55.409 --> 00:02:58.990
+We don't need this, but we do need this.
+
+34
+00:02:58.990 --> 00:03:00.990
+We want to get the Animation Instance,
+
+35
+00:03:00.990 --> 00:03:05.900
+so the Animation Blueprint that is tied to our Skeletal Mesh in that scene.
+
+36
+00:03:05.900 --> 00:03:10.990
+We'll get an Instance, perfect.
+
+37
+00:03:10.990 --> 00:03:16.490
+And then from here, we want to be able to call that Dance Toggle event
+
+38
+00:03:16.490 --> 00:03:18.990
+on that Animation Blueprint.
+
+39
+00:03:18.990 --> 00:03:23.990
+What we can do is drag off, and we're going to use a Cast node.
+
+40
+00:03:23.990 --> 00:03:30.729
+This is something kind of unique to C++ and Blueprints.
+
+41
+00:03:30.729 --> 00:03:32.729
+Session Demo Dancer, there we are.
+
+42
+00:03:32.729 --> 00:03:37.729
+Casting is maybe a little bit confusing to get your head around at first,
+
+43
+00:03:37.729 --> 00:03:43.729
+but essentially what this allows us to do is ask if this object that we're inputting,
+
+44
+00:03:43.729 --> 00:03:50.729
+can we treat this object as this ABP Session Demo Dancer?
+
+45
+00:03:50.729 --> 00:03:56.729
+If they match, so if this object is this class or a child of it,
+
+46
+00:03:56.729 --> 00:04:01.729
+then we succeed, and we can execute our logic.
+
+47
+00:04:01.729 --> 00:04:06.860
+In this case, we can pull off, search for Session Dance Toggle.
+
+48
+00:04:06.860 --> 00:04:09.020
+There it is, and voila.
+
+49
+00:04:09.020 --> 00:04:13.020
+If the cast fails, so it is whatever we get through here,
+
+50
+00:04:13.020 --> 00:04:16.019
+it is not an ABP Session Demo Dancer.
+
+51
+00:04:16.019 --> 00:04:20.019
+Then this Cast Failed pin will execute,
+
+52
+00:04:20.019 --> 00:04:24.720
+and we can, for fun, just have a print string saying,
+
+53
+00:04:24.720 --> 00:04:27.910
+Not Demo Dancer.
+
+54
+00:04:27.910 --> 00:04:30.360
+We know something went wrong.
+
+55
+00:04:30.360 --> 00:04:35.540
+So we want to be able to, before we just pipe this in here,
+
+56
+00:04:35.540 --> 00:04:41.540
+we also want our space bar to simultaneously be able to change
+
+57
+00:04:41.540 --> 00:04:46.730
+our color of our material.
+
+58
+00:04:46.730 --> 00:04:50.730
+So if we want a single, we could, just once this finishes,
+
+59
+00:04:50.730 --> 00:04:55.730
+be able to drag off from here and start going into maybe another,
+
+60
+00:04:55.730 --> 00:04:58.730
+our logic that would control that.
+
+61
+00:04:58.730 --> 00:05:02.730
+But one thing we can do that's another handy node is a Sequence node.
+
+62
+00:05:02.730 --> 00:05:08.730
+This allows you to kind of structure your code a little bit more legibly
+
+63
+00:05:08.730 --> 00:05:12.730
+and have it going down versus scrolling off to the side in infinity,
+
+64
+00:05:12.730 --> 00:05:18.730
+and you can add more output pins depending on how many things you want in your sequence,
+
+65
+00:05:18.730 --> 00:05:21.730
+and then you can right-click to remove any that you don't need.
+
+66
+00:05:21.730 --> 00:05:23.730
+We'll come down to here.
+
+67
+00:05:23.730 --> 00:05:27.850
+We'll look for a flip-flop again,
+
+68
+00:05:27.850 --> 00:05:33.980
+and we want to get our reference to our stage pillar
+
+69
+00:05:33.980 --> 00:05:37.980
+or our color material parameter collection.
+
+70
+00:05:37.980 --> 00:05:40.980
+We're also going to need a variable for text.
+
+71
+00:05:40.980 --> 00:05:45.230
+So this is going to be our text.
+
+72
+00:05:45.230 --> 00:05:48.620
+This is when we see from here,
+
+73
+00:05:48.620 --> 00:05:50.620
+when we pull, I'm getting ahead of myself slightly,
+
+74
+00:05:50.620 --> 00:05:54.620
+but in order to set the value of that parameter, we have to have its name.
+
+75
+00:05:54.620 --> 00:05:58.970
+So if we do set scalar parameter value,
+
+76
+00:05:58.970 --> 00:06:04.579
+this is what we can use to change it from 0 to 1
+
+77
+00:06:04.579 --> 00:06:07.579
+and change the color of our material,
+
+78
+00:06:07.579 --> 00:06:09.579
+but we need to pipe in a name here.
+
+79
+00:06:09.579 --> 00:06:18.230
+So I guess we'll change this to parameter name.
+
+80
+00:06:18.230 --> 00:06:20.230
+Always helpful to know what everything is.
+
+81
+00:06:20.230 --> 00:06:24.899
+We can just send the type of name to grab this.
+
+82
+00:06:24.899 --> 00:06:31.540
+I kind of like sometimes to situate them up here if I have the room to do that.
+
+83
+00:06:31.540 --> 00:06:36.540
+You can have your own preferences to how you like to arrange your nodes.
+
+84
+00:06:36.540 --> 00:06:41.220
+We will set this to, what do we call it?
+
+85
+00:06:41.220 --> 00:06:43.220
+Color change A to B.
+
+86
+00:06:43.220 --> 00:06:44.949
+Copy that.
+
+87
+00:06:44.949 --> 00:06:45.949
+Plug that in here.
+
+88
+00:06:45.949 --> 00:06:46.949
+Fantastic.
+
+89
+00:06:46.949 --> 00:06:51.660
+And so the first time we're setting it as a default to 0,
+
+90
+00:06:51.660 --> 00:06:54.660
+the first time we want to switch it to 1.
+
+91
+00:06:54.660 --> 00:06:56.689
+We can duplicate this.
+
+92
+00:06:56.689 --> 00:06:59.689
+And then once again drag these down.
+
+93
+00:06:59.689 --> 00:07:03.519
+Set this to 0 the second time.
+
+94
+00:07:03.519 --> 00:07:09.920
+And now we should be good to go here.
+
+95
+00:07:09.920 --> 00:07:12.920
+I'm remembering though in our demo dance
+
+96
+00:07:12.920 --> 00:07:28.379
+that I believe we might have set up our base bar logic.
+
+97
+00:07:28.379 --> 00:07:31.689
+Where did we do that?
+
+98
+00:07:31.689 --> 00:07:32.689
+We didn't do that yet.
+
+99
+00:07:32.689 --> 00:07:34.689
+This had the space bar logic to spin.
+
+100
+00:07:34.689 --> 00:07:35.689
+That's right.
+
+101
+00:07:35.689 --> 00:07:40.689
+Okay.
+
+102
+00:07:40.689 --> 00:07:43.139
+So now we should be good to go here.
+
+103
+00:07:43.139 --> 00:07:48.129
+If we press play, press space.
+
+104
+00:07:48.129 --> 00:07:50.660
+Oh, consuming input.
+
+105
+00:07:50.660 --> 00:07:53.699
+So here's another nice trick to know.
+
+106
+00:07:53.699 --> 00:07:56.699
+One thing that's important to look out for.
+
+107
+00:07:56.699 --> 00:08:06.490
+Why didn't our demo dancer here change their dance?
+
+108
+00:08:06.490 --> 00:08:09.490
+Well, if we open up our spin cube here again
+
+109
+00:08:09.490 --> 00:08:11.490
+and look for our space bar,
+
+110
+00:08:11.490 --> 00:08:15.490
+we can see that consume input here is checked.
+
+111
+00:08:15.490 --> 00:08:19.490
+So this will mean that this instance of this node
+
+112
+00:08:19.490 --> 00:08:23.490
+on this specific blueprint will use our space bar input.
+
+113
+00:08:23.490 --> 00:08:28.490
+And nothing else in our project that uses this space bar input node
+
+114
+00:08:28.490 --> 00:08:30.490
+will be able to get that input.
+
+115
+00:08:30.490 --> 00:08:34.320
+So if we uncheck this, save,
+
+116
+00:08:34.320 --> 00:08:38.320
+and we come over here and make sure this is also unchecked.
+
+117
+00:08:38.320 --> 00:08:41.700
+Save these.
+
+118
+00:08:41.700 --> 00:08:44.700
+Now, if we play, we should see.
+
+119
+00:08:44.700 --> 00:08:45.700
+There we go.
+
+120
+00:08:45.700 --> 00:08:49.330
+Fantastic stuff.
+
+121
+00:08:49.330 --> 00:08:53.330
+Both the cube changes spinning direction,
+
+122
+00:08:53.330 --> 00:08:57.799
+and the dancer changes their dance.
+
+123
+00:08:57.799 --> 00:08:59.799
+However, we're seeing that we do not have
+
+124
+00:08:59.799 --> 00:09:02.799
+our super cool material on our boxes yet.
+
+125
+00:09:02.799 --> 00:09:05.799
+So in order to be able to see our new material
+
+126
+00:09:05.799 --> 00:09:07.799
+on the pillars around our stage,
+
+127
+00:09:07.799 --> 00:09:10.799
+we're going to need to be able to see two materials
+
+128
+00:09:10.799 --> 00:09:12.799
+on that FBX at the same time.
+
+129
+00:09:12.799 --> 00:09:14.799
+So in order to do that,
+
+130
+00:09:14.799 --> 00:09:18.799
+we're actually going to reimport this stage object here.
+
+131
+00:09:18.799 --> 00:09:21.799
+We're going to come up.
+
+132
+00:09:21.799 --> 00:09:25.470
+I have a version of it here that does not have
+
+133
+00:09:25.470 --> 00:09:31.470
+the parent selected when we were exporting the FBX out of Unity,
+
+134
+00:09:31.470 --> 00:09:34.470
+which I'll show, go back and show in a sec.
+
+135
+00:09:34.470 --> 00:09:37.470
+But we want to make sure we also have this checkbox enabled here,
+
+136
+00:09:37.470 --> 00:09:39.470
+keep section separate.
+
+137
+00:09:39.470 --> 00:09:41.539
+So I'll go ahead and import.
+
+138
+00:09:41.539 --> 00:09:43.600
+We'll say yes to these.
+
+139
+00:09:43.600 --> 00:09:45.600
+And now when we open it up,
+
+140
+00:09:45.600 --> 00:09:48.600
+we can see that we have a bunch of new material slots
+
+141
+00:09:48.600 --> 00:09:52.600
+for our individual pillars, which is what we want.
+
+142
+00:09:52.600 --> 00:09:57.860
+So let's copy this location here.
+
+143
+00:09:57.860 --> 00:10:02.940
+And actually, we can just copy the whole transform.
+
+144
+00:10:02.940 --> 00:10:06.580
+Then we can delete this,
+
+145
+00:10:06.580 --> 00:10:14.840
+bring in our stage here.
+
+146
+00:10:15.840 --> 00:10:21.320
+And it looks like we applied a rotation when we imported it.
+
+147
+00:10:21.320 --> 00:10:24.320
+So that looks like it is correct.
+
+148
+00:10:24.320 --> 00:10:27.960
+And that's looking good.
+
+149
+00:10:27.960 --> 00:10:31.960
+So now we have a bunch more materials here.
+
+150
+00:10:31.960 --> 00:10:35.960
+So what we can do is drag in our...
+
+151
+00:10:35.960 --> 00:10:40.750
+Where was our new material? There it is, stage pillar mat.
+
+152
+00:10:40.750 --> 00:10:42.820
+We'll drag that in here.
+
+153
+00:10:42.820 --> 00:10:44.820
+There we go.
+
+154
+00:10:44.820 --> 00:10:52.860
+Fun stuff.
+
+155
+00:10:52.860 --> 00:10:54.600
+I'll save.
+
+156
+00:10:54.600 --> 00:11:01.970
+Now when we press play, look at that.
+
+157
+00:11:01.970 --> 00:11:02.970
+Now for an activity,
+
+158
+00:11:02.970 --> 00:11:05.970
+let's take the logic that we've created in the level blueprint
+
+159
+00:11:05.970 --> 00:11:08.970
+and break that out into individual blueprints
+
+160
+00:11:08.970 --> 00:11:10.970
+for our dancer and our stage
+
+161
+00:11:10.970 --> 00:11:12.970
+so that we can reuse them in other levels.
+
+162
+00:11:12.970 --> 00:11:14.970
+In the next video,
+
+163
+00:11:14.970 --> 00:11:17.970
+we'll look at how we went through this on our end together.

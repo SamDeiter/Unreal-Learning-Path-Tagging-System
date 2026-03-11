@@ -1,0 +1,1001 @@
+WEBVTT
+
+1
+00:00:01.229 --> 00:00:05.389
+In this lesson we're going to go over the outline for the introduction for lighting
+
+2
+00:00:05.389 --> 00:00:07.230
+for this series of courses
+
+3
+00:00:07.230 --> 00:00:11.230
+and then we're also going to be looking at terminology and types.
+
+4
+00:00:11.230 --> 00:00:12.730
+So let's get started.
+
+5
+00:00:12.730 --> 00:00:16.190
+So the course outline for these series of videos
+
+6
+00:00:16.190 --> 00:00:20.030
+is first we're going to look at lighting terminology and types.
+
+7
+00:00:20.030 --> 00:00:25.789
+That entails lighting definitions and types, static versus dynamic, and light types overall.
+
+8
+00:00:25.789 --> 00:00:28.750
+Later on we'll look at lighting properties and settings,
+
+9
+00:00:28.910 --> 00:00:33.789
+light properties and how to control them, and light mobility and how it plays with your light
+
+10
+00:00:33.789 --> 00:00:39.710
+concerning which type of light, GI, global illumination, direction you're going.
+
+11
+00:00:39.710 --> 00:00:41.469
+Then we'll look at an introduction to Lumen.
+
+12
+00:00:41.469 --> 00:00:42.509
+What is Lumen?
+
+13
+00:00:42.509 --> 00:00:47.869
+How to set it up, quality control, tips and tricks, and Lumen visualize.
+
+14
+00:00:47.869 --> 00:00:50.670
+Later we'll look at Nanite and virtual shadow maps,
+
+15
+00:00:50.670 --> 00:00:54.030
+why use Nanite, using it, how to set it up,
+
+16
+00:00:54.030 --> 00:01:00.170
+and virtual shadow maps as an overall whole view of how it works.
+
+17
+00:01:00.170 --> 00:01:03.530
+Later on we'll look at lighting tools, environment light mixer,
+
+18
+00:01:03.530 --> 00:01:07.209
+and light mixer, and we're going to do an interactive build
+
+19
+00:01:07.209 --> 00:01:11.450
+of light for our hero object that I've given to you guys
+
+20
+00:01:11.450 --> 00:01:13.599
+and it'll be a lot of fun.
+
+21
+00:01:13.599 --> 00:01:17.280
+So let's go ahead and take a look at lighting terminology and types
+
+22
+00:01:17.280 --> 00:01:20.519
+and how that's all working with Unreal.
+
+23
+00:01:20.519 --> 00:01:23.799
+First up we'll look at direct lighting.
+
+24
+00:01:23.799 --> 00:01:24.519
+What does that mean?
+
+25
+00:01:24.519 --> 00:01:26.519
+When it comes to this real time scenario,
+
+26
+00:01:26.519 --> 00:01:28.760
+a lot of people can be unfamiliar with Unreal,
+
+27
+00:01:28.760 --> 00:01:32.120
+specifically in lighting because real time is very different
+
+28
+00:01:32.120 --> 00:01:34.140
+than an offline render.
+
+29
+00:01:34.140 --> 00:01:37.019
+In this particular case, direct lighting is a light
+
+30
+00:01:37.019 --> 00:01:39.579
+that falls onto the surface without any interference.
+
+31
+00:01:39.579 --> 00:01:41.420
+The light travels directly to the surface
+
+32
+00:01:41.420 --> 00:01:44.959
+and that surface receives the full color spectrum of light.
+
+33
+00:01:44.959 --> 00:01:46.719
+We also have indirect lighting.
+
+34
+00:01:46.719 --> 00:01:48.560
+You'll see that many times in the details
+
+35
+00:01:48.560 --> 00:01:50.879
+for particular lights that you're working with.
+
+36
+00:01:50.879 --> 00:01:54.239
+It's a lighting that has been reflected by other surfaces nearby
+
+37
+00:01:54.319 --> 00:01:56.640
+as the light bounces off these surfaces,
+
+38
+00:01:56.640 --> 00:01:58.560
+light waves are absorbed or reflected
+
+39
+00:01:58.560 --> 00:02:00.480
+based on the surface's properties
+
+40
+00:02:00.480 --> 00:02:02.799
+and passed onto the surface you were looking at.
+
+41
+00:02:02.799 --> 00:02:05.200
+Thus indirect lighting contributes to the mood
+
+42
+00:02:05.200 --> 00:02:06.799
+and overall light intensity.
+
+43
+00:02:08.270 --> 00:02:09.789
+We also have shadows.
+
+44
+00:02:09.789 --> 00:02:11.469
+Now there's several ways to approach shadows,
+
+45
+00:02:12.110 --> 00:02:14.669
+but in Unreal there's the bake method
+
+46
+00:02:15.389 --> 00:02:18.590
+and you'll see in Unreal takes a snapshot of the mesh actor
+
+47
+00:02:18.590 --> 00:02:20.750
+from light's point of view and projects that information
+
+48
+00:02:21.469 --> 00:02:24.030
+on another mesh actor on the opposite side.
+
+49
+00:02:24.110 --> 00:02:25.629
+In the case of virtual shadow maps,
+
+50
+00:02:25.629 --> 00:02:28.909
+shadows update in real time using mesh distance fields
+
+51
+00:02:28.909 --> 00:02:32.030
+for accurate calculations and updates with movable lights.
+
+52
+00:02:32.960 --> 00:02:34.719
+So static versus dynamic.
+
+53
+00:02:34.719 --> 00:02:36.560
+What does that exactly mean when it comes Unreal?
+
+54
+00:02:37.560 --> 00:02:38.840
+Let's break this down.
+
+55
+00:02:38.840 --> 00:02:41.479
+We have a brand new system that came through with Unreal 5
+
+56
+00:02:42.120 --> 00:02:43.240
+and that is Lumen.
+
+57
+00:02:43.240 --> 00:02:45.319
+It's our fully dynamic global illumination
+
+58
+00:02:45.319 --> 00:02:46.759
+and reflection system
+
+59
+00:02:46.759 --> 00:02:49.400
+that is designed for next generation consoles,
+
+60
+00:02:49.400 --> 00:02:52.120
+but it is not limited to consoles or games.
+
+61
+00:02:52.120 --> 00:02:53.719
+It can be used for Final Pixel.
+
+62
+00:02:53.719 --> 00:02:57.800
+It can be used for VR training or VR experiences
+
+63
+00:02:57.800 --> 00:03:01.080
+and it can be used for virtual production.
+
+64
+00:03:01.080 --> 00:03:03.159
+It is the default global illumination
+
+65
+00:03:03.159 --> 00:03:05.400
+and reflection system in Unreal currently.
+
+66
+00:03:06.080 --> 00:03:07.759
+Lumen renders diffuse,
+
+67
+00:03:07.759 --> 00:03:10.080
+inter-reflection with infinite bounces
+
+68
+00:03:10.080 --> 00:03:14.000
+and indirect specular reflections and large detailed environments
+
+69
+00:03:14.000 --> 00:03:17.199
+at scales ranging from millimeters to kilometers.
+
+70
+00:03:17.199 --> 00:03:19.199
+So it's really nicely optimized
+
+71
+00:03:19.199 --> 00:03:22.080
+so it can scale down nicely to your needs.
+
+72
+00:03:23.069 --> 00:03:27.389
+Now, baked static lighting and also stationary,
+
+73
+00:03:27.389 --> 00:03:30.430
+which stationary is used in that particular direction,
+
+74
+00:03:30.990 --> 00:03:33.789
+is pre-computed rendered lighting.
+
+75
+00:03:33.789 --> 00:03:36.110
+Baked lighting is created using Unreal's
+
+76
+00:03:36.110 --> 00:03:38.110
+Lightmass Radiosity Baker.
+
+77
+00:03:39.229 --> 00:03:41.229
+And you'll see that when the thing called swarm,
+
+78
+00:03:41.229 --> 00:03:42.990
+you'll see it on the bottom of your screen
+
+79
+00:03:43.629 --> 00:03:44.590
+or swarm agent,
+
+80
+00:03:44.590 --> 00:03:46.909
+which will appear if you are using the baking system.
+
+81
+00:03:48.009 --> 00:03:50.650
+It'll be on the bottom right hand side typically.
+
+82
+00:03:51.479 --> 00:03:53.960
+It is similar to rendering lighting with V-Ray
+
+83
+00:03:54.520 --> 00:03:55.719
+or Corona, et cetera.
+
+84
+00:03:55.719 --> 00:03:58.520
+It is used to create high quality indirect lighting
+
+85
+00:03:58.520 --> 00:04:00.680
+using light and shadow maps.
+
+86
+00:04:01.400 --> 00:04:03.719
+Baked lighting cannot be altered at runtime
+
+87
+00:04:03.719 --> 00:04:06.360
+but has little impact on real-time performance.
+
+88
+00:04:06.360 --> 00:04:08.919
+Now, static lighting is your primary baked source.
+
+89
+00:04:09.560 --> 00:04:12.280
+Stationary light is used within that scenario.
+
+90
+00:04:12.919 --> 00:04:15.400
+Stationary light can be used for movable objects,
+
+91
+00:04:15.400 --> 00:04:17.399
+for objects moving in the environment
+
+92
+00:04:17.399 --> 00:04:19.639
+and static would not affect those lights.
+
+93
+00:04:20.360 --> 00:04:22.120
+So there's a lot of give and take.
+
+94
+00:04:22.120 --> 00:04:23.399
+You have to be very strategic
+
+95
+00:04:24.040 --> 00:04:27.240
+and deterministic when using baked lighting.
+
+96
+00:04:27.240 --> 00:04:29.480
+But baked lighting can give you some really cool results
+
+97
+00:04:29.480 --> 00:04:30.360
+at a cheap cost,
+
+98
+00:04:30.920 --> 00:04:34.680
+yet not quite as realistic or performance ready
+
+99
+00:04:34.680 --> 00:04:38.040
+as Lumen when it comes to being able to change things on the fly.
+
+100
+00:04:38.910 --> 00:04:41.069
+Now, real-time that takes us to our next topic,
+
+101
+00:04:41.069 --> 00:04:42.670
+real-time dynamic lighting.
+
+102
+00:04:42.670 --> 00:04:44.829
+It's lighting that is updated each frame.
+
+103
+00:04:44.829 --> 00:04:47.310
+It is fully dynamic and can be moved around
+
+104
+00:04:47.310 --> 00:04:48.990
+and modified at runtime.
+
+105
+00:04:49.069 --> 00:04:53.389
+It has no global illumination component, only direct light.
+
+106
+00:04:53.389 --> 00:04:56.910
+It is also expensive to use, affects a real-time performance.
+
+107
+00:04:58.319 --> 00:05:03.439
+Now, dynamic light in the sense that you're outside of Lumen,
+
+108
+00:05:03.439 --> 00:05:06.480
+say you used a dynamic light in baked mode,
+
+109
+00:05:06.480 --> 00:05:07.839
+you're not going to get the GI
+
+110
+00:05:07.839 --> 00:05:09.519
+that you're necessarily going for.
+
+111
+00:05:10.079 --> 00:05:12.639
+But that's where Lumen kind of breaks the mold.
+
+112
+00:05:13.629 --> 00:05:16.110
+Unreal can use both static and dynamic lighting.
+
+113
+00:05:16.110 --> 00:05:17.470
+That's that note here.
+
+114
+00:05:17.470 --> 00:05:20.269
+So architectural visualization will do this sometimes,
+
+115
+00:05:20.269 --> 00:05:22.110
+although now they're using more of Lumen.
+
+116
+00:05:22.750 --> 00:05:25.470
+But the projects, the project assets,
+
+117
+00:05:25.470 --> 00:05:28.910
+typically stationary in baked static lighting
+
+118
+00:05:28.910 --> 00:05:30.910
+is mostly used older way.
+
+119
+00:05:30.910 --> 00:05:32.269
+Now, Lumen can be used,
+
+120
+00:05:32.269 --> 00:05:34.910
+but there is currently some reflection limitations.
+
+121
+00:05:34.910 --> 00:05:36.110
+So when you're using Lumen,
+
+122
+00:05:36.110 --> 00:05:38.350
+you're going to be leaning more towards fully dynamic.
+
+123
+00:05:38.350 --> 00:05:39.709
+Real light is movable
+
+124
+00:05:39.709 --> 00:05:42.189
+and Lumen will give you global illumination.
+
+125
+00:05:42.189 --> 00:05:45.310
+So that's kind of breaking the old mold.
+
+126
+00:05:45.310 --> 00:05:46.750
+It's basically the new guard.
+
+127
+00:05:47.310 --> 00:05:48.589
+It's a new way to do things.
+
+128
+00:05:49.389 --> 00:05:51.629
+Now, before Lumen, there was ray tracing.
+
+129
+00:05:51.629 --> 00:05:53.550
+So ray tracing, this type of lighting
+
+130
+00:05:53.550 --> 00:05:54.990
+is real-time global illumination
+
+131
+00:05:54.990 --> 00:05:57.389
+updated with all lights set to movable.
+
+132
+00:05:57.389 --> 00:06:00.750
+If they are animated, the GI updates on the fly
+
+133
+00:06:00.750 --> 00:06:02.029
+and the same thing goes with Lumen
+
+134
+00:06:02.029 --> 00:06:04.189
+because Lumen borrows some of that architecture.
+
+135
+00:06:04.189 --> 00:06:05.790
+Note some aspects of ray tracing
+
+136
+00:06:05.790 --> 00:06:07.149
+is taken into account with Lumen
+
+137
+00:06:07.149 --> 00:06:08.430
+as you see in the bottom here,
+
+138
+00:06:08.430 --> 00:06:10.670
+such as reflections and some light calculations.
+
+139
+00:06:11.579 --> 00:06:15.740
+So each one of these has a very specific mindset
+
+140
+00:06:15.740 --> 00:06:16.860
+when you start diving into it.
+
+141
+00:06:16.860 --> 00:06:18.220
+Now, we're not going to get into ray trace
+
+142
+00:06:18.220 --> 00:06:19.500
+for this first course,
+
+143
+00:06:19.500 --> 00:06:21.740
+but we will talk about Lumen specifically.
+
+144
+00:06:21.740 --> 00:06:23.339
+We're not going to get into baking
+
+145
+00:06:23.339 --> 00:06:25.180
+and how to work with a baking scenario.
+
+146
+00:06:25.180 --> 00:06:26.699
+That is for the other classes,
+
+147
+00:06:27.339 --> 00:06:29.500
+more advanced classes coming down the pipe.
+
+148
+00:06:29.500 --> 00:06:30.459
+But for the most part,
+
+149
+00:06:30.459 --> 00:06:32.379
+we're going to be focusing more on Lumen.
+
+150
+00:06:33.920 --> 00:06:35.839
+So the types of lights and how to use them.
+
+151
+00:06:36.699 --> 00:06:38.699
+We're going to get more into the properties
+
+152
+00:06:39.420 --> 00:06:40.860
+and how to edit them.
+
+153
+00:06:40.860 --> 00:06:42.220
+But for this particular section,
+
+154
+00:06:42.220 --> 00:06:44.139
+we're going to just give you an overview
+
+155
+00:06:44.139 --> 00:06:44.860
+on how these work.
+
+156
+00:06:45.420 --> 00:06:46.379
+So directional light.
+
+157
+00:06:47.019 --> 00:06:47.660
+Awesome.
+
+158
+00:06:47.660 --> 00:06:49.660
+It works just like a regular directional light
+
+159
+00:06:49.660 --> 00:06:51.500
+you would have with Maya or 3D Studio Max
+
+160
+00:06:52.139 --> 00:06:54.459
+or many other 3D packages.
+
+161
+00:06:54.459 --> 00:06:55.899
+It is your primary sunlight.
+
+162
+00:06:56.879 --> 00:06:58.480
+There's also the point light.
+
+163
+00:06:58.480 --> 00:06:59.920
+Notice I put Omni here.
+
+164
+00:07:00.480 --> 00:07:02.639
+Well, if you're more of a 3D Studio Max person,
+
+165
+00:07:02.639 --> 00:07:03.920
+you'll get that point.
+
+166
+00:07:03.920 --> 00:07:06.160
+It works kind of like a bulb or a mini sunlight
+
+167
+00:07:06.879 --> 00:07:08.480
+and it can be used definitely
+
+168
+00:07:08.480 --> 00:07:09.839
+for particular scenarios.
+
+169
+00:07:10.860 --> 00:07:11.899
+There's the spotlight,
+
+170
+00:07:11.899 --> 00:07:13.740
+which is your typical spotlight with Unreal.
+
+171
+00:07:13.740 --> 00:07:16.060
+Has that per number and has a cone angle.
+
+172
+00:07:16.060 --> 00:07:17.339
+All those things can be controlled.
+
+173
+00:07:18.319 --> 00:07:19.680
+We also have the rec light.
+
+174
+00:07:19.680 --> 00:07:20.879
+The rec light is great.
+
+175
+00:07:20.879 --> 00:07:22.480
+Now you hear me repeat this several times.
+
+176
+00:07:22.480 --> 00:07:24.560
+The rec light is like a series of point lights
+
+177
+00:07:24.560 --> 00:07:27.199
+within a square that can be shaped into a rectangle
+
+178
+00:07:27.839 --> 00:07:29.279
+and many shapes and forms.
+
+179
+00:07:29.279 --> 00:07:30.240
+We'll get into that later.
+
+180
+00:07:30.800 --> 00:07:33.519
+It is one of my favorite ones for fill light.
+
+181
+00:07:33.519 --> 00:07:34.800
+It works fantastic.
+
+182
+00:07:36.120 --> 00:07:37.560
+Then we also have the skylight.
+
+183
+00:07:38.120 --> 00:07:41.759
+Now the skylight is used many times
+
+184
+00:07:41.759 --> 00:07:43.120
+with architectural rendering.
+
+185
+00:07:43.120 --> 00:07:44.480
+They'll pull into the scene
+
+186
+00:07:44.480 --> 00:07:45.519
+and I like to use it too
+
+187
+00:07:45.519 --> 00:07:48.160
+because it gives me a nice little GI bounce everywhere.
+
+188
+00:07:49.120 --> 00:07:51.519
+Your skylight can also be attached to an HDR image
+
+189
+00:07:51.519 --> 00:07:52.079
+if you want to.
+
+190
+00:07:53.199 --> 00:07:56.160
+Otherwise it will use the information,
+
+191
+00:07:56.160 --> 00:07:58.720
+the data and the scene to bounce your light around
+
+192
+00:07:58.720 --> 00:08:01.199
+but you can load an HDR image
+
+193
+00:08:01.199 --> 00:08:04.079
+such as ones you can get at HDR Haven.
+
+194
+00:08:04.079 --> 00:08:05.120
+They're working really great
+
+195
+00:08:05.920 --> 00:08:07.040
+and those are open source.
+
+196
+00:08:07.600 --> 00:08:09.199
+There's also HDR backdrop
+
+197
+00:08:09.759 --> 00:08:12.399
+which is similar to the skylight
+
+198
+00:08:12.399 --> 00:08:14.240
+but in the fact that it is a backdrop
+
+199
+00:08:14.240 --> 00:08:15.920
+where you can actually see the image
+
+200
+00:08:15.920 --> 00:08:18.399
+but it will also bounce the light around
+
+201
+00:08:18.399 --> 00:08:19.839
+like you would with a skylight.
+
+202
+00:08:19.839 --> 00:08:22.480
+So it's using the HDRI backdrop.
+
+203
+00:08:23.040 --> 00:08:24.800
+It's a predefined HDR.
+
+204
+00:08:25.360 --> 00:08:29.360
+Now this one typically is used a lot of times for product
+
+205
+00:08:29.920 --> 00:08:32.240
+and for vehicles.
+
+206
+00:08:32.240 --> 00:08:35.039
+It's not necessarily used for in a game scenario
+
+207
+00:08:35.759 --> 00:08:37.600
+and if it's used for virtual production
+
+208
+00:08:38.639 --> 00:08:40.000
+and you just need something down and dirty
+
+209
+00:08:40.000 --> 00:08:42.240
+it might be perfect in some scenarios
+
+210
+00:08:43.120 --> 00:08:47.360
+and but not really for final pixel or for video games
+
+211
+00:08:47.360 --> 00:08:49.360
+and the fact that if you turn your camera
+
+212
+00:08:49.360 --> 00:08:51.519
+you can kind of see that it's kind of fake
+
+213
+00:08:51.519 --> 00:08:52.799
+but it works really great
+
+214
+00:08:52.799 --> 00:08:54.559
+has a lighting blueprint set up for it
+
+215
+00:08:55.279 --> 00:08:59.360
+and it may be great for what you want to do, may not
+
+216
+00:08:59.360 --> 00:09:00.480
+but if you want realism
+
+217
+00:09:01.039 --> 00:09:04.320
+you might want to steer more towards directional light
+
+218
+00:09:04.320 --> 00:09:06.080
+skylight and a few of the other lights
+
+219
+00:09:06.080 --> 00:09:07.120
+depending on your scene
+
+220
+00:09:07.759 --> 00:09:08.960
+but it's really great.
+
+221
+00:09:08.960 --> 00:09:11.919
+A lot of our product people use them
+
+222
+00:09:11.919 --> 00:09:13.679
+our clients such as automotive
+
+223
+00:09:14.480 --> 00:09:16.639
+and architectural
+
+224
+00:09:17.549 --> 00:09:19.549
+and the next we have sun in sky
+
+225
+00:09:19.549 --> 00:09:21.149
+so this lighting blueprint
+
+226
+00:09:21.149 --> 00:09:23.309
+allows you to pull this into the scene
+
+227
+00:09:23.309 --> 00:09:25.549
+and makes it so that you can change the time of day
+
+228
+00:09:26.590 --> 00:09:28.350
+using longitude and latitude
+
+229
+00:09:28.350 --> 00:09:30.990
+and we're not going to get really deep into these last two
+
+230
+00:09:31.549 --> 00:09:33.629
+these were covered in some other classes
+
+231
+00:09:33.629 --> 00:09:35.230
+but for the most part we're going to be covering
+
+232
+00:09:35.230 --> 00:09:38.509
+skylight, rec light, spotlight, point light, and directional light.
+
+233
+00:09:39.659 --> 00:09:41.419
+The sun in sky is great
+
+234
+00:09:41.419 --> 00:09:43.179
+because you can actually drag it into a scene
+
+235
+00:09:43.179 --> 00:09:44.220
+and then you can punch
+
+236
+00:09:44.220 --> 00:09:45.259
+again like I said
+
+237
+00:09:45.259 --> 00:09:47.419
+you can punch in your exact time of day that you need
+
+238
+00:09:47.419 --> 00:09:50.460
+longitude, latitude, time of day, and so forth.
+
+239
+00:09:50.460 --> 00:09:52.860
+Now it's not quite as robust as you would get
+
+240
+00:09:52.860 --> 00:09:56.539
+as I think 3D Studio Max is one
+
+241
+00:09:56.539 --> 00:09:58.860
+and I think Maya also has one
+
+242
+00:09:59.980 --> 00:10:01.179
+with the longitude and latitude
+
+243
+00:10:01.179 --> 00:10:03.019
+Max is a little bit more robust I believe
+
+244
+00:10:04.620 --> 00:10:05.659
+but it gets pretty close.
+
+245
+00:10:06.519 --> 00:10:08.120
+That's it with this course
+
+246
+00:10:08.120 --> 00:10:09.399
+and you can see we have a link here
+
+247
+00:10:09.399 --> 00:10:10.759
+if you want to dive in a little deeper
+
+248
+00:10:11.720 --> 00:10:13.000
+in the next course we're going to look at
+
+249
+00:10:13.000 --> 00:10:14.360
+lighting properties and settings.
+
+250
+00:10:15.080 --> 00:10:16.360
+Thanks again.

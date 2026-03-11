@@ -1,0 +1,309 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:08.839
+So in the last video we created a door blueprint, and we've connected up the E button to an event.
+
+2
+00:00:09.580 --> 00:00:17.250
+Now we're going to connect this event to opening and closing the door. So back to the blueprint here.
+
+3
+00:00:17.769 --> 00:00:25.710
+I'm gonna leave the print string here just so that we know that this is running, in case we need to debug anything.
+
+4
+00:00:28.339 --> 00:00:29.440
+Now
+
+5
+00:00:29.679 --> 00:00:39.560
+The first thing that I'm going to connect after this, is I'm going to drag off, and I'm going to search for a flip-flop node.
+
+6
+00:00:41.250 --> 00:00:51.170
+Now the flip-flop node is a flow control node, and what it's going to do is, the first time that we execute this,
+
+7
+00:00:51.490 --> 00:00:59.170
+it's going to do whatever is attached to the A. And the second time we do it, it's going to do whatever is attached to the B.
+
+8
+00:00:59.570 --> 00:01:05.329
+And then the third time, it's going to go back to A, and it will alternate between the two different options.
+
+9
+00:01:05.730 --> 00:01:13.969
+Meaning we can toggle something on and off. We will use it in this instance to open and close the door.
+
+10
+00:01:17.090 --> 00:01:24.599
+Now, after the flip-flop node, we're going to pull off, and search for something that's called a timeline.
+
+11
+00:01:27.670 --> 00:01:34.950
+On this timeline, we're going to rename to be open slash close door.
+
+12
+00:01:40.000 --> 00:01:48.420
+Now the first flip-flop is set to play. What I want to do, is I want to connect the second one to reverse.
+
+13
+00:01:49.409 --> 00:01:56.450
+Now, how a timeline works, is this is going to run for the one we push play.
+
+14
+00:01:56.769 --> 00:02:00.450
+The timeline is going to run for however long we set it off for.
+
+15
+00:02:01.219 --> 00:02:07.780
+And whenever we push reverse, it will reverse from the point that it is to the beginning.
+
+16
+00:02:08.020 --> 00:02:13.780
+So the play is going to exit play forward, and reverse will reverse.
+
+17
+00:02:14.580 --> 00:02:21.219
+Now, we're not using the play from start or reverse from the end. So this means if we would
+
+18
+00:02:21.219 --> 00:02:26.659
+hit this up halfway through, or we'd stop it for some reason, it will pick up where it's left off.
+
+19
+00:02:28.039 --> 00:02:33.719
+Now, on the output pins for the timeline, you can see we have an update and a finish.
+
+20
+00:02:34.879 --> 00:02:42.000
+Now, what a timeline will do, is whilst this is be playing and updating,
+
+21
+00:02:42.930 --> 00:02:51.460
+it will trigger anything which is connected to the update pin on every frame of the game.
+
+22
+00:02:51.460 --> 00:02:57.000
+So effectively on tick. What we're going to do, is we're going to use this to animate and rotate
+
+23
+00:02:57.000 --> 00:03:02.789
+the door out. And when it's finished, it will execute anything that's attached to the finished
+
+24
+00:03:02.789 --> 00:03:11.250
+sign. But we need to set up some kind of output variables from this.
+
+25
+00:03:11.810 --> 00:03:14.689
+So double-click on the timeline to open it up,
+
+26
+00:03:15.639 --> 00:03:19.240
+and you're going to see that we get a page which looks a little bit like this.
+
+27
+00:03:21.169 --> 00:03:26.930
+At the moment, the timeline is set to go on for five seconds. This is too long. We don't
+
+28
+00:03:26.930 --> 00:03:31.650
+want the door to take five seconds to open. So let's change this to one second.
+
+29
+00:03:32.960 --> 00:03:40.159
+Now, next to this, we have a plus track. If I click on the plus track, you can see
+
+30
+00:03:40.159 --> 00:03:48.280
+I have five options. Now, we're going to use the add float track, because we don't
+
+31
+00:03:48.280 --> 00:03:54.960
+need anything more complicated. And that's going to create a new track that looks like this.
+
+32
+00:03:56.719 --> 00:04:08.469
+And I'm going to call this door open alpha. Now, all we want to do is we want to return a value
+
+33
+00:04:08.469 --> 00:04:15.830
+between zero and one. And these values are going to determine how open the door is,
+
+34
+00:04:15.830 --> 00:04:23.699
+with zero being completely closed and one being completely open. And over the one second,
+
+35
+00:04:23.699 --> 00:04:31.329
+it is going to return different values, depending on how far through, in order for us to open the
+
+36
+00:04:31.329 --> 00:04:39.649
+door. So let's add in some values. So place your cursor as close to zero zero as possible,
+
+37
+00:04:40.290 --> 00:04:47.569
+double-click, right-hand click, and select add key to curve float zero. And up here,
+
+38
+00:04:47.569 --> 00:04:52.689
+I'm just going to make sure we've got absolutely zero zero. And now you can see that we have one
+
+39
+00:04:52.769 --> 00:04:58.360
+key. And now I'm going to come up to the top right-hand corner. So that's one second.
+
+40
+00:04:59.240 --> 00:05:05.959
+And I am going to add a curve. I've added a key there. Now, this is too low. What I want is I
+
+41
+00:05:05.959 --> 00:05:11.959
+want the time to be one and the value to be one. Now, as you can see, this has now
+
+42
+00:05:11.959 --> 00:05:17.399
+gone off the charts, and we can't see what it looks like. However, if I press the zoom to fit,
+
+43
+00:05:18.199 --> 00:05:25.779
+we now get a better idea. But the way that the timeline is going to work is it's going to return
+
+44
+00:05:25.779 --> 00:05:34.980
+a value to the update for every interval of time that it is pinned. So if the update happens
+
+45
+00:05:34.980 --> 00:05:41.699
+zero, it will return the value zero. However, if the update happens 0.25
+
+46
+00:05:41.699 --> 00:05:48.819
+seconds since the timeline has started, it will return 0.25. And the same for 0.5.
+
+47
+00:05:49.620 --> 00:05:56.579
+And in the end, when it finishes, it will return the value one. This is going to, on each tick,
+
+48
+00:05:56.579 --> 00:06:01.620
+return a different value. They've got a very simple line here, but if it was slightly more
+
+49
+00:06:01.620 --> 00:06:09.360
+complicated, then we could get more values out of that. Now, I will now come back to the
+
+50
+00:06:09.360 --> 00:06:16.879
+event graph, and you'll see that a new output pin has appeared on the right-hand side of the
+
+51
+00:06:16.879 --> 00:06:27.139
+open to close, and that is the door open alpha. Now, if I move to the right, what I want to do
+
+52
+00:06:27.699 --> 00:06:34.449
+is I want to grab the door mesh, and I'm going to pull in a reference to that.
+
+53
+00:06:35.250 --> 00:06:41.040
+So we have a reference to the door mesh, and I'm going to drag off, and I'm going to type in
+
+54
+00:06:41.759 --> 00:06:51.750
+set relative rotation. Now, if I drag out and connect that up to the update,
+
+55
+00:06:52.930 --> 00:06:59.829
+this is going to allow us to set the rotation of the door. Now, I don't know what rotations
+
+56
+00:06:59.829 --> 00:07:04.870
+I want yet. To start with, I'm probably going to stick with zero, zero, zero, but I don't know
+
+57
+00:07:04.870 --> 00:07:08.870
+what I'm going to rotate to. But that doesn't matter too much because I'm using an alpha.
+
+58
+00:07:09.589 --> 00:07:17.459
+So what I'm going to do is I'm going to drag off of the new rotator, and I'm going to type in
+
+59
+00:07:18.339 --> 00:07:27.779
+lerp. And there is an option for lerp rotator. Now, what the lerp is, is it is a shortening
+
+60
+00:07:27.779 --> 00:07:36.550
+turn for a linear interpolate. And what a linear interpolate would do is when this value
+
+61
+00:07:36.550 --> 00:07:45.110
+is zero, it will provide you, it will provide the result of A. When this alpha is one, it will
+
+62
+00:07:45.110 --> 00:07:54.560
+provide you the result of B. And when it is 0.5, it will return you halfway between
+
+63
+00:07:54.560 --> 00:08:01.269
+these two values. And this is really useful for us to use in combination with an alpha.
+
+64
+00:08:01.269 --> 00:08:10.199
+So if I pull out in the alpha here, and if I change A, we're fine with it being zero, zero, zero.
+
+65
+00:08:11.410 --> 00:08:15.810
+So I'm going to need to figure out what rotation I need here at the end.
+
+66
+00:08:15.810 --> 00:08:21.170
+So in order to do that, I'm going to jump back to the viewport. I'm going to grab the door.
+
+67
+00:08:21.810 --> 00:08:29.250
+I'm just going to rotate it out. I think about 90 degrees is good. So I know that my rotation
+
+68
+00:08:29.250 --> 00:08:35.009
+that I want to get to is zero, zero, 90. I'll reset this back to the default.
+
+69
+00:08:35.730 --> 00:08:41.090
+And I'm going to jump back into the event graph. I'm just going to put 90 here.
+
+70
+00:08:42.370 --> 00:08:50.789
+So what this does now is it's going to use the timeline's alpha on the lerp to set the
+
+71
+00:08:50.789 --> 00:08:58.769
+relative rotation of just the component, the door mesh. And it will either play this from
+
+72
+00:08:58.769 --> 00:09:02.370
+the beginning or from the other flip flop. It's going to reverse it back.
+
+73
+00:09:02.370 --> 00:09:06.960
+So we're playing this timeline forwards and backwards. Let's test this out.
+
+74
+00:09:08.149 --> 00:09:14.840
+Now if I walk up to the door and press E, we can see that it opens. If I press E again,
+
+75
+00:09:16.120 --> 00:09:20.519
+you can see that we are playing that timeline backwards and forwards over one second.
+
+76
+00:09:23.320 --> 00:09:28.600
+Right. So we now have the functionality for the door to open and close.
+
+77
+00:09:28.600 --> 00:09:32.950
+What I want to do next is we're going to look at locking this.

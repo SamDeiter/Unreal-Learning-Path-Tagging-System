@@ -1,0 +1,613 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:09.580
+Hello and welcome to Introduction to Blueprints for Unreal Engine 5.6.
+
+2
+00:00:09.580 --> 00:00:13.580
+In this course, we're looking to achieve a number of different things,
+
+3
+00:00:13.580 --> 00:00:18.579
+but mainly we want you to come accustomed to and have a good foundation
+
+4
+00:00:18.579 --> 00:00:26.579
+in using our visual scripting language that's called Blueprints and is built into the engine.
+
+5
+00:00:26.579 --> 00:00:35.350
+So what we'd like to achieve is we'd like to go over some of the basics of object-orientated programming,
+
+6
+00:00:35.350 --> 00:00:38.350
+just some nuts so that you understand what's going on.
+
+7
+00:00:38.350 --> 00:00:44.670
+Then we'd like you to gain an understanding of how Blueprints touch the engine
+
+8
+00:00:44.670 --> 00:00:47.670
+and where this would work.
+
+9
+00:00:47.670 --> 00:00:54.729
+Next, we're going to spend a lot of time doing an exercise within the engine
+
+10
+00:00:54.729 --> 00:00:59.729
+so that you can actively go in and create your own Blueprints
+
+11
+00:00:59.729 --> 00:01:05.730
+using just simple node-based graphical system.
+
+12
+00:01:05.730 --> 00:01:14.400
+Finally, we'd like to do a little bit of work getting you to get actors to communicate with each other.
+
+13
+00:01:14.400 --> 00:01:18.400
+It doesn't make much sense yet, but it is a very useful skill
+
+14
+00:01:18.400 --> 00:01:26.280
+if you want to integrate some functionality into the engine.
+
+15
+00:01:26.280 --> 00:01:30.280
+In this video, we're going to go over just a couple of basic concepts,
+
+16
+00:01:30.280 --> 00:01:37.709
+so we're all starting with a similar foundation of knowledge.
+
+17
+00:01:37.709 --> 00:01:41.870
+First up, let's talk about what are Blueprints.
+
+18
+00:01:41.870 --> 00:01:47.870
+Now, I think the easiest way to understand this is to go back to the roots of Unreal.
+
+19
+00:01:47.870 --> 00:01:51.870
+Unreal is a game engine at heart.
+
+20
+00:01:51.870 --> 00:01:57.870
+It now works across many different industries, but it started out as a game engine.
+
+21
+00:01:57.870 --> 00:02:03.000
+What's interesting about gaming, much like other industries,
+
+22
+00:02:03.000 --> 00:02:08.000
+is you tend to have a mix of people of different specialties.
+
+23
+00:02:08.000 --> 00:02:13.060
+Now, Unreal is written in the programming language C++.
+
+24
+00:02:13.060 --> 00:02:19.060
+The thing about C++ is it's quite a complicated programming language,
+
+25
+00:02:19.060 --> 00:02:26.060
+and it's a relatively big ask for everybody who works within the engine
+
+26
+00:02:26.060 --> 00:02:30.060
+to have to go away and learn to code C++.
+
+27
+00:02:30.060 --> 00:02:34.379
+So what we did here quite early on
+
+28
+00:02:34.379 --> 00:02:41.379
+was we decided to expose some of the functionality of C++ into the editor.
+
+29
+00:02:41.379 --> 00:02:46.379
+And for this, we created a visual scripting language,
+
+30
+00:02:46.379 --> 00:02:48.379
+and that's called Blueprints.
+
+31
+00:02:48.379 --> 00:02:55.419
+Now, over the years, this scripting language has grown to be very powerful.
+
+32
+00:02:55.419 --> 00:03:04.419
+And at this point, there are quite a few games that are developed or released
+
+33
+00:03:04.419 --> 00:03:08.419
+which are either entirely written with Blueprints
+
+34
+00:03:08.419 --> 00:03:12.419
+or at least majoritatively written with Blueprints
+
+35
+00:03:12.419 --> 00:03:18.419
+with just little bits of functionality got away and written in C++.
+
+36
+00:03:18.419 --> 00:03:25.340
+Now, Blueprints are not necessarily as fast as C++,
+
+37
+00:03:25.340 --> 00:03:29.340
+but in most cases, they're almost comparative.
+
+38
+00:03:29.340 --> 00:03:35.340
+And because the code at compilation is converted to C++,
+
+39
+00:03:35.340 --> 00:03:37.340
+it's still very fast.
+
+40
+00:03:37.340 --> 00:03:43.340
+And in most cases, the code wouldn't be the bottleneck for your optimization.
+
+41
+00:03:43.340 --> 00:03:51.340
+So Blueprints really are a very plausible option when developing something.
+
+42
+00:03:51.340 --> 00:04:00.479
+Next up, we're going to have to talk a little bit about object-orientated programming language.
+
+43
+00:04:00.479 --> 00:04:05.409
+C++ is an object-orientated programming language.
+
+44
+00:04:05.409 --> 00:04:09.409
+But the main thing about object-orientated
+
+45
+00:04:09.409 --> 00:04:14.409
+is the code creates specific objects.
+
+46
+00:04:14.409 --> 00:04:21.410
+And these objects are born of classes, which are templates for code.
+
+47
+00:04:21.410 --> 00:04:26.410
+But you can have one class which can have numerous objects,
+
+48
+00:04:26.410 --> 00:04:30.410
+and each of these objects can have different settings and stats.
+
+49
+00:04:30.410 --> 00:04:33.410
+Now, this is very useful in a computer game
+
+50
+00:04:33.410 --> 00:04:39.410
+where you have lots of characters and elements to be part of a game.
+
+51
+00:04:39.410 --> 00:04:45.410
+All of them can share the same underlying code functionality,
+
+52
+00:04:45.410 --> 00:04:49.410
+but they'll all be contained within their own objects.
+
+53
+00:04:49.410 --> 00:04:57.930
+This should hopefully make more sense as we jump into the engine.
+
+54
+00:04:57.930 --> 00:05:00.930
+Next up, something that we're going to talk about a lot
+
+55
+00:05:00.930 --> 00:05:03.930
+is the concept of classes and instances.
+
+56
+00:05:03.930 --> 00:05:10.079
+So when you're in the engine, you'll see that we have a content browser,
+
+57
+00:05:10.079 --> 00:05:14.079
+which is effectively Unreal's file system,
+
+58
+00:05:14.079 --> 00:05:23.079
+where we can only see files which are of classes which Unreal understands.
+
+59
+00:05:23.079 --> 00:05:30.079
+And these classes are templates for what ultimately would be instances.
+
+60
+00:05:30.079 --> 00:05:34.079
+In this case here, we have the third person character,
+
+61
+00:05:34.079 --> 00:05:41.079
+which is what you control as a pawn if you're using the third person template.
+
+62
+00:05:41.079 --> 00:05:46.079
+But I've dragged three versions of it into the level, as you can see.
+
+63
+00:05:46.079 --> 00:05:51.079
+So these are all three unique instances of the same class.
+
+64
+00:05:51.079 --> 00:05:55.079
+And all of these would have their own settings and variables.
+
+65
+00:05:55.079 --> 00:06:00.079
+For example, if they were enemies, they might all have their own health,
+
+66
+00:06:00.079 --> 00:06:05.079
+which would be tracked independently on each instance.
+
+67
+00:06:05.079 --> 00:06:12.899
+Now, because it's an object-orientated programming language,
+
+68
+00:06:12.899 --> 00:06:14.899
+Unreal uses inheritance.
+
+69
+00:06:14.899 --> 00:06:20.899
+And this is where every class that you create within Unreal
+
+70
+00:06:20.899 --> 00:06:24.899
+will have a parent class associated with it
+
+71
+00:06:24.899 --> 00:06:29.899
+and can have one or multiple child classes associated with it.
+
+72
+00:06:29.899 --> 00:06:36.180
+Now, a child class will share the functionality and data
+
+73
+00:06:36.180 --> 00:06:40.180
+of each of its parent classes.
+
+74
+00:06:40.180 --> 00:06:44.410
+And therefore, this allows us to make code very modular,
+
+75
+00:06:44.410 --> 00:06:48.410
+meaning that we can program a whole lot of code into one class
+
+76
+00:06:48.410 --> 00:06:50.410
+and then just create child classes to it.
+
+77
+00:06:50.410 --> 00:06:53.410
+Which would share that functionality.
+
+78
+00:06:53.410 --> 00:06:58.980
+Now, this is an example of how inheritance might work.
+
+79
+00:06:58.980 --> 00:07:03.259
+At the top here in pink, we have object class.
+
+80
+00:07:03.259 --> 00:07:06.259
+And within C++, this would be UObject.
+
+81
+00:07:06.259 --> 00:07:12.259
+But this is the highest class which we will be working with in Unreal.
+
+82
+00:07:12.259 --> 00:07:19.490
+And this has a lot of very low level functionality attached to it.
+
+83
+00:07:20.810 --> 00:07:25.810
+The functionality that I've highlighted here is garbage collection.
+
+84
+00:07:25.810 --> 00:07:28.810
+Now, encoding what garbage collection is,
+
+85
+00:07:28.810 --> 00:07:34.810
+is when you have a class or an object or an instance
+
+86
+00:07:34.810 --> 00:07:38.810
+or something in memory, and you've decided you no longer need it,
+
+87
+00:07:38.810 --> 00:07:45.290
+so you mark it to be destroyed, it isn't automatically destroyed.
+
+88
+00:07:45.290 --> 00:07:51.290
+So there will be some memory which would be earmarked
+
+89
+00:07:51.290 --> 00:07:54.290
+for the use of that object.
+
+90
+00:07:54.290 --> 00:07:59.290
+Now, it isn't automatically got rid of within C++.
+
+91
+00:07:59.290 --> 00:08:05.449
+However, within Unreal, everything which inherits from the object class
+
+92
+00:08:05.449 --> 00:08:10.449
+will be part of Unreal's garbage collection system.
+
+93
+00:08:10.449 --> 00:08:12.449
+And that means that Unreal will go away
+
+94
+00:08:12.449 --> 00:08:18.449
+and it will clean up unused instances in memory
+
+95
+00:08:18.449 --> 00:08:21.449
+so that you can keep the game running smoothly.
+
+96
+00:08:21.449 --> 00:08:23.449
+So it's just a whole load of functionality
+
+97
+00:08:23.449 --> 00:08:26.449
+that we don't need to worry about creating ourselves
+
+98
+00:08:26.449 --> 00:08:28.449
+because it's already there.
+
+99
+00:08:28.449 --> 00:08:34.779
+A child class of the object, amongst many others,
+
+100
+00:08:34.779 --> 00:08:36.779
+is the actor class.
+
+101
+00:08:36.779 --> 00:08:41.779
+Now, the actor class is very prominent in games
+
+102
+00:08:41.779 --> 00:08:46.909
+because an actor class will have a transform.
+
+103
+00:08:46.909 --> 00:08:52.909
+And a transform is details of an actor's location, rotation, and scale.
+
+104
+00:08:52.909 --> 00:08:56.070
+These are what's required in order to create it
+
+105
+00:08:56.070 --> 00:09:00.360
+within a 3D space and simulation.
+
+106
+00:09:00.360 --> 00:09:03.360
+Now, the actor has that functionality in it
+
+107
+00:09:03.360 --> 00:09:06.360
+and nothing else in the class itself,
+
+108
+00:09:06.360 --> 00:09:09.360
+but it will be the parent class to anything
+
+109
+00:09:09.360 --> 00:09:11.360
+which needs to exist within your level
+
+110
+00:09:11.360 --> 00:09:13.360
+and not just in memory.
+
+111
+00:09:13.360 --> 00:09:18.580
+The next child class of actor we have is Plaw.
+
+112
+00:09:18.580 --> 00:09:20.580
+And this has the extra functionality
+
+113
+00:09:20.580 --> 00:09:24.580
+of being able to be possessed and receive input
+
+114
+00:09:24.580 --> 00:09:26.580
+from a controller.
+
+115
+00:09:26.580 --> 00:09:29.929
+What a controller would do is then it could possibly
+
+116
+00:09:29.929 --> 00:09:34.929
+listen for keyboard, mouse, or controller inputs,
+
+117
+00:09:34.929 --> 00:09:40.059
+or it could be a controller in memory,
+
+118
+00:09:40.059 --> 00:09:44.059
+a stuff like an A.I. controller for the enemies, for example.
+
+119
+00:09:44.059 --> 00:09:47.279
+But either way, the Plaw has the functionality
+
+120
+00:09:47.279 --> 00:09:50.279
+of being possessed and receiving input.
+
+121
+00:09:50.279 --> 00:09:54.240
+Now, this makes the Plaw the perfect parent class
+
+122
+00:09:54.240 --> 00:09:56.240
+for the character.
+
+123
+00:09:56.240 --> 00:09:59.240
+Now, what a character class does
+
+124
+00:09:59.240 --> 00:10:03.240
+is it adds a couple of different components
+
+125
+00:10:03.240 --> 00:10:06.240
+which are used for different functionality
+
+126
+00:10:06.240 --> 00:10:09.240
+as well as some other functionality.
+
+127
+00:10:09.240 --> 00:10:13.460
+But the character class would have a skeletal mesh, for example.
+
+128
+00:10:13.460 --> 00:10:17.460
+And that's what would represent usually our character
+
+129
+00:10:17.460 --> 00:10:20.460
+where we would see animated within a scene.
+
+130
+00:10:20.460 --> 00:10:23.779
+It also has something called the movement component.
+
+131
+00:10:23.779 --> 00:10:26.779
+And this adds functionality and logic
+
+132
+00:10:26.779 --> 00:10:28.779
+for doing stuff like running and jumping.
+
+133
+00:10:28.779 --> 00:10:34.840
+So our character class is inheriting functionality
+
+134
+00:10:34.840 --> 00:10:37.840
+from the Plaw to be able to be possessed,
+
+135
+00:10:37.840 --> 00:10:41.840
+from the Actor to be able to exist in the world,
+
+136
+00:10:41.840 --> 00:10:45.840
+and from the Object class to do a lot of low-level functionality
+
+137
+00:10:45.840 --> 00:10:47.840
+like garbage collection.
+
+138
+00:10:47.840 --> 00:10:54.309
+Classes don't need to have just one child.
+
+139
+00:10:54.309 --> 00:10:57.309
+The class can have multiple children,
+
+140
+00:10:57.309 --> 00:11:00.309
+and they can do multiple different functionality.
+
+141
+00:11:00.309 --> 00:11:04.309
+For example, the Object doesn't have just the Actor class.
+
+142
+00:11:04.309 --> 00:11:06.309
+It would also have the Actor component
+
+143
+00:11:06.309 --> 00:11:08.309
+as one of its children class.
+
+144
+00:11:08.309 --> 00:11:11.309
+It has the ability to be attached to an Actor.
+
+145
+00:11:11.309 --> 00:11:15.340
+And there would also be a lot of data-only classes.
+
+146
+00:11:15.340 --> 00:11:18.340
+So a lot of classes which are loaded into memory,
+
+147
+00:11:18.340 --> 00:11:21.340
+but not necessarily have any visual component
+
+148
+00:11:21.340 --> 00:11:23.340
+or exist within the world.
+
+149
+00:11:23.340 --> 00:11:28.820
+That brings us to the end of our introduction and concepts.
+
+150
+00:11:28.820 --> 00:11:31.820
+We will go over a number of these concepts again
+
+151
+00:11:31.820 --> 00:11:35.820
+whilst we are in the engine and in a project.
+
+152
+00:11:35.820 --> 00:11:39.820
+But that should hopefully give us a good foundation to start from.
+
+153
+00:11:39.820 --> 00:11:40.950
+Thanks for listening.

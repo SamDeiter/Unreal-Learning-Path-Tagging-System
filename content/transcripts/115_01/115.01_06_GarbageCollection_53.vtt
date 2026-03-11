@@ -1,0 +1,333 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:05.120
+As we previously discussed, the Unreal Engine's reflection system does some of the memory
+
+2
+00:00:05.120 --> 00:00:09.560
+management for us, however we should have a deeper dive into the garbage collector.
+
+3
+00:00:09.560 --> 00:00:14.660
+As mentioned earlier, data is marked for memory management using the reflection macros.
+
+4
+00:00:14.660 --> 00:00:19.339
+For instance, for a member variable to be managed, it must be marked up with UProperty.
+
+5
+00:00:19.339 --> 00:00:23.539
+Unreal keeps a root set of UObjects, acting as a base for the garbage collector's
+
+6
+00:00:23.539 --> 00:00:27.989
+iterative searches, and we'll touch on how it uses that root set in just a second.
+
+7
+00:00:27.989 --> 00:00:32.289
+Many objects can be added to the root set, and actors can be explicitly destroyed, removing
+
+8
+00:00:32.289 --> 00:00:35.350
+them from the root set and allowing them to be GC'd.
+
+9
+00:00:35.350 --> 00:00:38.869
+This will also mean that their components can be GC'd as well, as their link to that
+
+10
+00:00:38.869 --> 00:00:40.869
+root set has been broken.
+
+11
+00:00:40.869 --> 00:00:46.549
+Once GC starts, Unreal proceeds through the following steps to find what needs collecting.
+
+12
+00:00:46.549 --> 00:00:50.329
+We can see in Figure 1, when the garbage collector kicks in, all UObjects are marked
+
+13
+00:00:50.329 --> 00:00:53.130
+as unreachable from the root set.
+
+14
+00:00:53.130 --> 00:00:56.710
+At this point, all objects are considered viable for garbage collection.
+
+15
+00:00:56.710 --> 00:01:01.700
+We need to process all references to see if anything truly is unreachable.
+
+16
+00:01:01.700 --> 00:01:06.219
+We can see in Figure 2, Unreal builds a reference tree, breaking down how one object is linked
+
+17
+00:01:06.219 --> 00:01:07.519
+to another.
+
+18
+00:01:07.519 --> 00:01:11.340
+We can see that we've got a single tree from the root set with two branches.
+
+19
+00:01:11.340 --> 00:01:15.099
+In this case, we can see that nothing is left truly unreachable, and none of the
+
+20
+00:01:15.099 --> 00:01:17.280
+objects will be viable for garbage collection.
+
+21
+00:01:17.280 --> 00:01:21.340
+If the UObject is still unreachable once we've iterated over all of the objects, we can
+
+22
+00:01:21.340 --> 00:01:24.250
+commence collecting that object.
+
+23
+00:01:24.250 --> 00:01:28.010
+Moving on to Figure 3, we can see that if we were to break the reference between Object
+
+24
+00:01:28.010 --> 00:01:32.969
+1 and Object 3, we can see that the Object 3 to Object 4 branch is now unreachable in
+
+25
+00:01:32.969 --> 00:01:37.310
+its entirety, and will be appropriately garbage collected.
+
+26
+00:01:37.310 --> 00:01:41.349
+We discussed earlier, when talking about reflection macros, how the use of UClass gives
+
+27
+00:01:41.349 --> 00:01:46.629
+us access to all UFunction and UProperty specifiers, allowing Unreal to manage the memory for
+
+28
+00:01:46.629 --> 00:01:47.719
+us.
+
+29
+00:01:47.719 --> 00:01:53.090
+However, we may want to keep a reference to a reflected type inside of a regular class.
+
+30
+00:01:53.090 --> 00:01:57.150
+As that class isn't a reflected type itself, it will not show up in that initial reference
+
+31
+00:01:57.150 --> 00:02:00.780
+tree, and any members inside will be unreachable.
+
+32
+00:02:00.780 --> 00:02:05.319
+We can solve this by extending our class from the FGCObject class, and implementing
+
+33
+00:02:05.319 --> 00:02:10.580
+its AddReferencedObject or AddReferencedObjects functions.
+
+34
+00:02:10.580 --> 00:02:14.319
+The members added to the FReferenceCollector will be managed as if they have been marked
+
+35
+00:02:14.319 --> 00:02:16.849
+up by a UProperty specifier.
+
+36
+00:02:16.849 --> 00:02:23.669
+As long as the GCObject remains in existence, the UObjects within it will remain referenced.
+
+37
+00:02:23.710 --> 00:02:26.849
+When working with the garbage collector as engineers and developers, there's a few things
+
+38
+00:02:26.849 --> 00:02:29.240
+we really should keep in mind.
+
+39
+00:02:29.240 --> 00:02:31.879
+UObject manipulation isn't thread safe.
+
+40
+00:02:31.879 --> 00:02:35.580
+It's highly recommended that UObjects are accessed from the game thread.
+
+41
+00:02:35.580 --> 00:02:39.719
+In cases where we want access on other threads, proper use of synchronization primitives
+
+42
+00:02:39.719 --> 00:02:43.900
+are required to avoid common parallel programming errors, and be cautious as this could
+
+43
+00:02:43.900 --> 00:02:46.569
+result in a loss of performance.
+
+44
+00:02:46.569 --> 00:02:50.969
+The garbage collector cannot see raw pointers inside UObjects, so always use reflective
+
+45
+00:02:50.969 --> 00:02:54.139
+properties or smart pointers when possible.
+
+46
+00:02:54.139 --> 00:02:58.099
+An object can be marked as pending kill, meaning the developer wants the object to
+
+47
+00:02:58.099 --> 00:03:00.919
+be garbage collected even if it is still referenced.
+
+48
+00:03:00.919 --> 00:03:02.900
+This will not cause the immediate destruction.
+
+49
+00:03:02.900 --> 00:03:05.900
+It merely indicates to the garbage collector that this object should be considered for
+
+50
+00:03:05.900 --> 00:03:09.909
+cleanup next time the garbage collector is triggered.
+
+51
+00:03:09.909 --> 00:03:14.090
+The Unreal Engine offers C++ programmers a smart pointer library, which is Epic's
+
+52
+00:03:14.090 --> 00:03:17.930
+own flavor of C++ smart pointers.
+
+53
+00:03:17.930 --> 00:03:22.110
+It's important to know that Unreal smart pointers are for non-UObjects, because as
+
+54
+00:03:22.110 --> 00:03:26.349
+we discussed in the previous slides, reflected types are handled by a different memory tracking
+
+55
+00:03:26.349 --> 00:03:29.780
+system, with the exception of the TWig object pointer.
+
+56
+00:03:29.780 --> 00:03:35.620
+These T-pointers and T-refs are platform-agnostic versions of the standard C++ smart pointers,
+
+57
+00:03:35.620 --> 00:03:40.169
+and have been designed to behave similarly to their C++ counterparts.
+
+58
+00:03:40.169 --> 00:03:44.210
+These pointers allow us to manage the lifespan of non-reflected types with knowledge
+
+59
+00:03:44.210 --> 00:03:48.280
+that they'll be cleaned up safely when all the references have been removed.
+
+60
+00:03:48.319 --> 00:03:54.360
+Aside from the C++-based smart pointers, we also have access to TWig object pointers.
+
+61
+00:03:54.360 --> 00:03:58.629
+This smart pointer is unique in that it is purely for reflected types.
+
+62
+00:03:58.629 --> 00:04:02.990
+A TWig object pointer behaves exactly as a standard library's Wig pointer does.
+
+63
+00:04:02.990 --> 00:04:06.389
+It will not keep the object alive or kept away from the garbage collector.
+
+64
+00:04:06.389 --> 00:04:11.349
+A TWig object pointer can be assessed for validity without accessing the pointer itself,
+
+65
+00:04:11.349 --> 00:04:15.990
+which is very, very useful when working with a lambda-heavy codebase.
+
+66
+00:04:15.990 --> 00:04:19.149
+Smart pointers provide a number of benefits to the Unreal programmer.
+
+67
+00:04:19.149 --> 00:04:22.230
+They help prevent memory leaks, as the memory is released as soon as the inner pointer is
+
+68
+00:04:22.230 --> 00:04:24.110
+no longer referenced anywhere.
+
+69
+00:04:24.110 --> 00:04:27.310
+They can be thread-safe, with the caveat that the thread-safe versions are slower
+
+70
+00:04:27.310 --> 00:04:31.709
+than the non-thread-safe versions because of the atomic reference counting.
+
+71
+00:04:31.709 --> 00:04:35.350
+And they also provide a great deal of runtime safety, in that a T-shared ref cannot
+
+72
+00:04:35.350 --> 00:04:39.269
+be null, and it can be dereferenced safely.
+
+73
+00:04:39.269 --> 00:04:42.670
+T-shared and the shared pointer inside the standard library are the same size under the
+
+74
+00:04:42.670 --> 00:04:43.670
+hood.
+
+75
+00:04:43.670 --> 00:04:49.180
+However, we'd opt for Unreal's flavor of shared pointer for its platform agnosticism.
+
+76
+00:04:49.180 --> 00:04:52.779
+Objects don't intrinsically know that they're wrapped in a T-shared pointer, so Unreal
+
+77
+00:04:52.779 --> 00:04:56.680
+presents a solution, the T-shared from this class.
+
+78
+00:04:56.680 --> 00:05:00.639
+Inheriting from T-shared from this with a template allows us to grab a T-shared ref
+
+79
+00:05:00.639 --> 00:05:06.889
+to the class using the following functions, the as-shared and shared this functions.
+
+80
+00:05:06.889 --> 00:05:10.290
+It should be noted that whilst Unreal smart pointers are a fantastic tool for developers,
+
+81
+00:05:10.290 --> 00:05:12.029
+they do not come for free.
+
+82
+00:05:12.029 --> 00:05:16.069
+They do incur a small performance cost when passing them around, and as such it's advisable
+
+83
+00:05:16.069 --> 00:05:19.230
+that the underlying pointer is passed around as a const ref instead.

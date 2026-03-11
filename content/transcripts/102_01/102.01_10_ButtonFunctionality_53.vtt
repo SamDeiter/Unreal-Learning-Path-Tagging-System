@@ -1,0 +1,469 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:12.199
+So now we have the door working, the final thing that we need to do is create a button which can be used in order to lock or unlock the door.
+
+2
+00:00:12.199 --> 00:00:21.199
+This gives us an opportunity to look at communication between two different factors and how we might go about setting that up.
+
+3
+00:00:21.199 --> 00:00:24.679
+So let's create a new factor.
+
+4
+00:00:24.679 --> 00:00:32.810
+So to do that, I'm going to watch and click in the content browser and I'm going to come up and create a new blueprint class.
+
+5
+00:00:32.810 --> 00:00:44.079
+Again, I'm going to select from an actor and I'm going to call this BP underscore button.
+
+6
+00:00:44.079 --> 00:00:50.850
+I'm going to double click to open it up. Now in this, I want a couple of things, a couple of components.
+
+7
+00:00:50.850 --> 00:00:59.020
+I'm going to start with a static mesh, static mesh component.
+
+8
+00:00:59.020 --> 00:01:03.340
+I'm going to call this button mesh.
+
+9
+00:01:03.340 --> 00:01:13.500
+And in this, I'm going to search for corner and that should bring up the SM underscore corner frame.
+
+10
+00:01:13.500 --> 00:01:21.500
+So this is just a nondescript static mesh that we can use in this case as a button.
+
+11
+00:01:21.500 --> 00:01:31.959
+Okay, now we're going to want to push this button in the same way that we do with the E key.
+
+12
+00:01:31.959 --> 00:01:36.989
+So I'm going to add in a collision.
+
+13
+00:01:36.989 --> 00:01:41.340
+So I'm going to type in box, box collision.
+
+14
+00:01:41.340 --> 00:01:50.540
+Now I'm going to want to take this and scale it up so that it fits comfortably in front of the mesh.
+
+15
+00:01:50.540 --> 00:01:56.680
+Okay, that should give us enough spice.
+
+16
+00:01:56.680 --> 00:01:59.680
+Now again, like we did last time, I'm going to need two events.
+
+17
+00:01:59.680 --> 00:02:04.680
+The on component begin overlap and the on component end overlap.
+
+18
+00:02:04.680 --> 00:02:13.669
+Jump in and rather than rewriting all the code myself, I'm going to jump into the BP door
+
+19
+00:02:13.669 --> 00:02:21.930
+and I am going to highlight these three sections of the code and hold down control
+
+20
+00:02:21.930 --> 00:02:24.960
+and add in another. So I've got these sections.
+
+21
+00:02:24.960 --> 00:02:28.960
+So I've got the enable input and the player controller and the E key.
+
+22
+00:02:28.960 --> 00:02:37.819
+I'm going to press control C, jump across to the blueprints and press control V.
+
+23
+00:02:37.819 --> 00:02:42.080
+It's down and connect these up.
+
+24
+00:02:42.080 --> 00:02:46.080
+So we straight away got most of the code that we need here.
+
+25
+00:02:46.080 --> 00:02:51.689
+Now, when we press the E key, we don't actually want to be running code
+
+26
+00:02:51.689 --> 00:02:57.689
+on the BP underscore button. We want to be running code on the BP underscore door.
+
+27
+00:02:57.689 --> 00:03:06.719
+In order to do that, we're going to need a means of defining which doors belong to which buttons.
+
+28
+00:03:06.719 --> 00:03:09.009
+We'll do that by using a variable.
+
+29
+00:03:09.009 --> 00:03:19.460
+So if you come down into the variables and press plus, I'm going to call this connected doors.
+
+30
+00:03:19.460 --> 00:03:26.379
+And I'm going to hit the button, for instance, and I want to be able to set this per instance.
+
+31
+00:03:26.379 --> 00:03:38.139
+And now for variable type, I'm going to do a drop down and I am going to search for BP underscore door.
+
+32
+00:03:38.139 --> 00:03:44.139
+And when I scroll over, you'll see the left knob, an option for object reference.
+
+33
+00:03:44.139 --> 00:03:46.819
+And this is what I'm going to select.
+
+34
+00:03:46.819 --> 00:03:48.819
+There's one more thing that I'm going to do.
+
+35
+00:03:48.819 --> 00:03:53.979
+I want to be able to add more than one door to a button.
+
+36
+00:03:53.979 --> 00:04:04.169
+So to do this, rather than having a singular door reference, I'm going to do a drop down box and select an array.
+
+37
+00:04:04.169 --> 00:04:09.169
+So an array is just going to change this variable to rather than one single variable,
+
+38
+00:04:09.169 --> 00:04:14.169
+it's going to be a list of doors and we can add multiple entries in.
+
+39
+00:04:14.169 --> 00:04:19.509
+So to work with this, I'm going to drag the connected doors in.
+
+40
+00:04:19.509 --> 00:04:21.509
+I'm going to change to a get.
+
+41
+00:04:21.509 --> 00:04:29.500
+I'm going to then drag off of the connected tools and I'm going to look for a for loop.
+
+42
+00:04:29.500 --> 00:04:33.529
+A for each loop to be exact.
+
+43
+00:04:33.529 --> 00:04:36.720
+I'm going to connect that up to the execution pin.
+
+44
+00:04:36.720 --> 00:04:42.720
+The way a for each loop works is if you provide it with an array,
+
+45
+00:04:42.720 --> 00:04:52.490
+it will trigger the loop body once for each actor which is inside this array.
+
+46
+00:04:52.490 --> 00:04:58.649
+So this allows us to go through and perform an action for each actor.
+
+47
+00:04:58.649 --> 00:05:04.000
+Right. Now that we have a link to the actor here,
+
+48
+00:05:04.000 --> 00:05:11.610
+I'm going to want to do one thing and that is change the step.
+
+49
+00:05:11.610 --> 00:05:14.610
+The Boolean for is locked.
+
+50
+00:05:14.610 --> 00:05:18.610
+So if it is locked, it will be true and I want to change it to false.
+
+51
+00:05:18.610 --> 00:05:20.610
+If it's false, I want to change it to true.
+
+52
+00:05:20.610 --> 00:05:24.019
+So I'm going to drag off. First thing I need to do is query it.
+
+53
+00:05:24.019 --> 00:05:30.089
+So I'm going to do get locked and that will give me get is locked.
+
+54
+00:05:30.089 --> 00:05:34.110
+And I'm also going to want to set.
+
+55
+00:05:34.110 --> 00:05:41.300
+So I'll type set locked and go set is locked next to that up.
+
+56
+00:05:41.300 --> 00:05:44.300
+Now I want to reverse this value.
+
+57
+00:05:44.300 --> 00:05:49.300
+So I'm going to drag off and I'm going to search for or not.
+
+58
+00:05:49.300 --> 00:05:53.560
+So this is going to this is going to to reverse it.
+
+59
+00:05:53.560 --> 00:05:55.560
+If it's true, it will return false.
+
+60
+00:05:55.560 --> 00:05:58.779
+If it is false, it will return true.
+
+61
+00:05:58.779 --> 00:05:59.779
+This is great.
+
+62
+00:05:59.779 --> 00:06:04.779
+What we've got here is we are changing the we're changing the Boolean.
+
+63
+00:06:04.779 --> 00:06:06.779
+We're toggling the Boolean.
+
+64
+00:06:06.779 --> 00:06:09.779
+Now there's one more thing that I'd like to do.
+
+65
+00:06:09.779 --> 00:06:18.779
+And that is update the lights, because that way we can see if the door is locked or is unlocked.
+
+66
+00:06:18.779 --> 00:06:24.819
+So I'm going to drag off and I'm going to search for update light.
+
+67
+00:06:24.819 --> 00:06:27.819
+And this is the function that we created.
+
+68
+00:06:27.819 --> 00:06:34.850
+And this is a great example of why creating code in functions is a really good way to do something,
+
+69
+00:06:34.850 --> 00:06:38.850
+because this will this is then we can call this and we can run this at any point.
+
+70
+00:06:38.850 --> 00:06:41.850
+Any point that we want to make sure the lights are updated.
+
+71
+00:06:41.850 --> 00:06:47.850
+We can just run this function without having to go away or write the appropriate code.
+
+72
+00:06:47.850 --> 00:06:55.459
+So we have quite a simple straightforward script here for each connected door.
+
+73
+00:06:55.459 --> 00:07:00.459
+We are going to swap the variable or swap the variable over.
+
+74
+00:07:00.459 --> 00:07:03.459
+So it's true to false, to false to true.
+
+75
+00:07:03.459 --> 00:07:06.459
+And then we're going to update the lights.
+
+76
+00:07:06.459 --> 00:07:08.459
+So let's see this in action.
+
+77
+00:07:08.459 --> 00:07:11.459
+And hit compile and save.
+
+78
+00:07:11.459 --> 00:07:16.459
+Right. So I'm going to grab my BP dot button and drag it into the world.
+
+79
+00:07:16.459 --> 00:07:20.680
+Shift it up and rotate it.
+
+80
+00:07:20.680 --> 00:07:27.740
+I'm going to push it back a bit to make sure that it doesn't overlap with the player start.
+
+81
+00:07:27.740 --> 00:07:38.350
+Now with this button, you can see with it selected, we have connected doors as an input in the details.
+
+82
+00:07:38.350 --> 00:07:44.350
+Now I want to connect this to both the doors, so I'm going to push it twice to program two.
+
+83
+00:07:44.350 --> 00:07:47.639
+And you'll see now we have two entries in this array.
+
+84
+00:07:47.639 --> 00:07:53.639
+Now I could do a drop down, which would allow me to select a door in the nether manually.
+
+85
+00:07:53.639 --> 00:07:57.769
+But also I have next to it a per pent.
+
+86
+00:07:57.769 --> 00:08:07.769
+Now, if I click on that, it's not going to let me click on anything until I am overlapping the specific class,
+
+87
+00:08:07.769 --> 00:08:13.769
+which it is. So you can see here the BP, the PIC BP underscore door.
+
+88
+00:08:13.769 --> 00:08:17.860
+I'm going to have that as my first entry and this is my second entry.
+
+89
+00:08:17.860 --> 00:08:21.120
+Right. So now it's time to test.
+
+90
+00:08:21.120 --> 00:08:28.629
+So if I jump into the level, walk up to my sling, my shoulder,
+
+91
+00:08:28.629 --> 00:08:33.629
+you can see when I push the button, it is flicking between the two separate doors.
+
+92
+00:08:33.629 --> 00:08:42.860
+And we should now be able to see that the left hand door will open and the right hand door won't.
+
+93
+00:08:42.860 --> 00:08:47.309
+So it looks like a relatively simple example.
+
+94
+00:08:47.309 --> 00:08:54.309
+But with this, we would be able to create numerous buttons and numerous doors with overlapping functionality.
+
+95
+00:08:54.309 --> 00:08:59.309
+So you'd easily be able to create some kind of puzzle maze or something.
+
+96
+00:08:59.309 --> 00:09:05.309
+But it goes as a simple example of how we're going to animate an actor
+
+97
+00:09:05.309 --> 00:09:12.309
+and we can go away and control and control settings from an external.
+
+98
+00:09:12.309 --> 00:09:16.399
+Great. Now, one last thing before we finish.
+
+99
+00:09:16.399 --> 00:09:21.690
+Something that we haven't done to this point is looked at commenting.
+
+100
+00:09:21.690 --> 00:09:26.879
+Now, commenting is an important part of coding.
+
+101
+00:09:26.879 --> 00:09:30.879
+If you want to make sure that other people can understand what you've created.
+
+102
+00:09:30.879 --> 00:09:36.879
+It goes alongside good naming conventions for variables and functions.
+
+103
+00:09:36.879 --> 00:09:38.879
+We haven't shown how to do that yet.
+
+104
+00:09:38.879 --> 00:09:49.100
+So for example, I wanted to comment this here because this is the opening and the closing of the door.
+
+105
+00:09:49.100 --> 00:09:54.100
+Let me left-hand click. So I select all of them.
+
+106
+00:09:54.100 --> 00:10:02.740
+Then just by pressing the C key, I can make a comment.
+
+107
+00:10:02.740 --> 00:10:14.330
+Update door mesh rotation over time.
+
+108
+00:10:14.330 --> 00:10:24.629
+OK, so it's a simple comment here, but there are also some settings that I can come in here.
+
+109
+00:10:24.629 --> 00:10:28.629
+But if I double click, the main thing is I can change the color.
+
+110
+00:10:28.629 --> 00:10:40.700
+And this is really useful because you can see now from what can be just a pile of spaghetti with lots and lots of things connected.
+
+111
+00:10:40.700 --> 00:10:45.700
+You can now make a bit more sense out of what's going on in this case.
+
+112
+00:10:45.700 --> 00:10:51.080
+Great. So that is you just need to highlight something and press the C button.
+
+113
+00:10:51.080 --> 00:10:58.429
+So, blueprints and its functionality are all over Unreal Engine.
+
+114
+00:10:58.429 --> 00:11:11.429
+There's not much of the engine which can't be controlled or sort of like added to functionality wise by just knowing a little bit of blueprints.
+
+115
+00:11:11.429 --> 00:11:15.429
+So thank you for sticking with this tutorial.
+
+116
+00:11:15.429 --> 00:11:17.429
+I hope you've got some value out of it.
+
+117
+00:11:17.429 --> 00:11:24.429
+It should act as a good foundation if you want to go into learning more complicated blueprints.

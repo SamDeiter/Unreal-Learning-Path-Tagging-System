@@ -1,0 +1,473 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:05.200
+Hello and welcome to this video on jump animations.
+
+2
+00:00:05.200 --> 00:00:14.519
+In this video we are going to be using the state machine to create a jump animation loop.
+
+3
+00:00:14.519 --> 00:00:17.519
+That's going to consist of three animations.
+
+4
+00:00:17.519 --> 00:00:23.940
+So it's going to consist of start jump, a falling loop, and a landing animation.
+
+5
+00:00:23.940 --> 00:00:29.460
+So let's go back into the project now.
+
+6
+00:00:29.460 --> 00:00:33.460
+So the first thing we're going to want to do is open back up our animation blueprint.
+
+7
+00:00:33.460 --> 00:00:44.469
+Now in order to trigger this animation we need to know if the character is in the air.
+
+8
+00:00:44.469 --> 00:00:48.469
+So this would cover either if it was falling or jumping.
+
+9
+00:00:48.469 --> 00:00:53.429
+And we're going to do that on the event blueprint update animation.
+
+10
+00:00:53.429 --> 00:00:59.619
+Now the first thing I'm going to do is I'm going to add in the sequence at the beginning.
+
+11
+00:00:59.619 --> 00:01:05.620
+And I can do that by holding down the S key and left clicking on the background.
+
+12
+00:01:05.620 --> 00:01:09.170
+I'm just going to connect that up here.
+
+13
+00:01:09.170 --> 00:01:12.519
+This is just so I can keep things tidy really.
+
+14
+00:01:12.519 --> 00:01:24.420
+And here on the then1 output pin, what I'm going to do is I'm going to grab another reference to the character movement.
+
+15
+00:01:24.420 --> 00:01:28.420
+So I'll just copy this and paste this here.
+
+16
+00:01:28.420 --> 00:01:33.560
+Because we're going to use the character movement component again.
+
+17
+00:01:33.560 --> 00:01:36.560
+Because that's going to tell us if we are in the air.
+
+18
+00:01:36.560 --> 00:01:41.040
+There's a function which allows us to figure this out.
+
+19
+00:01:41.040 --> 00:01:45.069
+You drag off and you type in isFalling.
+
+20
+00:01:45.069 --> 00:01:55.260
+And you'll see that this function will detect if you are falling.
+
+21
+00:01:55.260 --> 00:02:02.260
+And it's going to return a boolean value for true if you're falling and false if you're not falling.
+
+22
+00:02:03.060 --> 00:02:08.060
+So I will right-hand click on this and promote this to a variable.
+
+23
+00:02:08.060 --> 00:02:16.449
+And I'm going to call this variable isFalling.
+
+24
+00:02:16.449 --> 00:02:21.169
+And connect that up.
+
+25
+00:02:21.169 --> 00:02:25.969
+All this is going to do each time the animation is updated,
+
+26
+00:02:25.969 --> 00:02:30.969
+is just going to check the character movement, see if we're falling and save that to a variable.
+
+27
+00:02:30.969 --> 00:02:37.020
+As I mentioned before, this is going to run multiple animations.
+
+28
+00:02:37.020 --> 00:02:40.020
+And we're going to use the state machine to achieve this.
+
+29
+00:02:40.020 --> 00:02:44.090
+So I'm going to jump back into our locomotion state machine.
+
+30
+00:02:44.090 --> 00:02:49.439
+And as you can see, at the moment, we only have idle to run.
+
+31
+00:02:49.439 --> 00:02:54.400
+Now, I want to add three more states.
+
+32
+00:02:54.400 --> 00:03:02.620
+And I'm going to do that by just coming over to my asset library here.
+
+33
+00:03:02.620 --> 00:03:05.620
+And I'm going to search for jump.
+
+34
+00:03:05.620 --> 00:03:11.490
+And I'll find mm underscore jump, drag that in.
+
+35
+00:03:11.490 --> 00:03:20.620
+You can see it's going to automatically create a state that is going to play the mm underscore jump animation.
+
+36
+00:03:20.620 --> 00:03:23.620
+It's a nice quick way to make a state.
+
+37
+00:03:23.620 --> 00:03:26.620
+I could rename it, but I'm not going to worry about that now.
+
+38
+00:03:26.620 --> 00:03:34.639
+The next one I want, if I type in full, is the mm underscore full loop.
+
+39
+00:03:34.639 --> 00:03:37.930
+Drag that in, place that over here.
+
+40
+00:03:37.930 --> 00:03:42.780
+And the final one I want is land.
+
+41
+00:03:42.780 --> 00:03:46.580
+And I'm going to drag that in down the bottom here.
+
+42
+00:03:46.580 --> 00:03:55.020
+Now, in order for us to use any of these, we are going to have to connect them up.
+
+43
+00:03:55.020 --> 00:04:00.139
+So if I come from the idle to run, drag over and connect that up,
+
+44
+00:04:00.139 --> 00:04:05.139
+it's going to create me a transition between these two states.
+
+45
+00:04:05.139 --> 00:04:06.689
+Do that.
+
+46
+00:04:06.689 --> 00:04:12.689
+And I am going to create another transition from the jump to the full loop.
+
+47
+00:04:12.689 --> 00:04:17.100
+The last one from the full loop to the land loop.
+
+48
+00:04:17.100 --> 00:04:21.100
+And the final one back to the idle to run.
+
+49
+00:04:21.100 --> 00:04:26.670
+Now this is the first time we've come across transitions.
+
+50
+00:04:26.670 --> 00:04:31.670
+The transition is going to be a gate which, when the condition is true,
+
+51
+00:04:31.670 --> 00:04:37.670
+it will move you into the other state or animation with a little bit of a blend in between.
+
+52
+00:04:37.670 --> 00:04:42.860
+So at the moment, if I was to click on the idle to run animation,
+
+53
+00:04:42.860 --> 00:04:48.860
+you can see here I have a boolean input with a can enter transition.
+
+54
+00:04:48.860 --> 00:04:51.930
+Now we have nothing plugged into this.
+
+55
+00:04:51.930 --> 00:04:57.930
+We want to plug in some kind of condition to see if we can enter this transition.
+
+56
+00:04:57.930 --> 00:05:05.220
+And what we're going to do for that is we're just going to grab the isFalling variable that we populated
+
+57
+00:05:05.220 --> 00:05:08.250
+and place that on top of it.
+
+58
+00:05:08.250 --> 00:05:10.250
+So if I jump back,
+
+59
+00:05:10.250 --> 00:05:15.250
+so what this is going to mean is we're going to start in the idle to run.
+
+60
+00:05:15.250 --> 00:05:19.439
+And as soon as it's detected that we're falling,
+
+61
+00:05:19.439 --> 00:05:27.600
+it's going to move down this transition to the mm underscore jump and play that animation.
+
+62
+00:05:27.600 --> 00:05:34.560
+Now we also want to move out of this transition into the m underscore m full loop.
+
+63
+00:05:34.560 --> 00:05:39.810
+So if I double click on this transition and to enter this transition,
+
+64
+00:05:39.810 --> 00:05:45.810
+I want to wait until the animation that we've just played is almost finished.
+
+65
+00:05:45.810 --> 00:05:49.810
+So how I'm going to do that is I'm going to right-hand click
+
+66
+00:05:49.810 --> 00:05:53.810
+and I am going to search for remain.
+
+67
+00:05:53.810 --> 00:06:00.540
+And you'll see that we have an option of time remaining and time remaining ratio.
+
+68
+00:06:00.540 --> 00:06:03.540
+I'm going to use the time remaining ratio
+
+69
+00:06:03.540 --> 00:06:16.310
+and I'm going to drag out and I'm going to do is less than and have 0.1
+
+70
+00:06:16.310 --> 00:06:20.310
+less than 0.1. So right at the end of the animation.
+
+71
+00:06:20.310 --> 00:06:25.350
+Now I'm going to connect that up.
+
+72
+00:06:25.350 --> 00:06:32.769
+This means when the animation is almost over, you can enter the transition into the next section.
+
+73
+00:06:32.769 --> 00:06:39.660
+Now we're in the full loop.
+
+74
+00:06:39.660 --> 00:06:44.949
+I want to leave the full loop when we're no longer falling.
+
+75
+00:06:44.949 --> 00:06:48.949
+So it's going to remain in here until we hit the ground.
+
+76
+00:06:48.949 --> 00:06:53.079
+And so I'm going to jump into this transition here.
+
+77
+00:06:53.079 --> 00:06:57.980
+From here, again, I'm going to grab the is falling.
+
+78
+00:06:57.980 --> 00:07:04.139
+However, this time I'm just going to get it because I want to do this one on the floor.
+
+79
+00:07:04.139 --> 00:07:08.139
+So I want to add a boolean for not.
+
+80
+00:07:08.139 --> 00:07:12.139
+A not boolean and I want to plug that in.
+
+81
+00:07:12.139 --> 00:07:17.680
+So all this is going to do is it's going to check that we are no longer falling.
+
+82
+00:07:17.680 --> 00:07:20.680
+Then it will allow us to enter the next state.
+
+83
+00:07:20.680 --> 00:07:26.060
+Finally, for our last transition, I'm going to jump in.
+
+84
+00:07:26.060 --> 00:07:30.629
+We are just going to kick this arm.
+
+85
+00:07:30.629 --> 00:07:35.629
+So this means we will automatically be able to enter the other transition.
+
+86
+00:07:35.629 --> 00:07:38.790
+So we're going to do this because this animation is so short
+
+87
+00:07:38.790 --> 00:07:44.790
+that just the blend in and the blend out time is going to be enough for us.
+
+88
+00:07:44.790 --> 00:07:48.709
+Hit compile.
+
+89
+00:07:48.709 --> 00:07:52.709
+And now if I come back into the game and I play,
+
+90
+00:07:52.709 --> 00:07:55.709
+you're going to see that we hit something a little bit odd.
+
+91
+00:07:55.709 --> 00:08:03.569
+If I jump, suddenly at a small point, I shrink down to almost nothing.
+
+92
+00:08:03.569 --> 00:08:07.569
+Now this is an oddity of the land animation.
+
+93
+00:08:09.459 --> 00:08:13.509
+So let's go back to the stage tree.
+
+94
+00:08:13.509 --> 00:08:16.509
+If I go into the mm underscore land.
+
+95
+00:08:16.509 --> 00:08:23.740
+Now the odd thing about the land animation is this is an additive animation.
+
+96
+00:08:23.740 --> 00:08:27.740
+So it is actually very small because it only contains the data
+
+97
+00:08:27.740 --> 00:08:30.740
+that would need to be added to another animation
+
+98
+00:08:30.740 --> 00:08:36.740
+in order to imitate the rebound on the floor.
+
+99
+00:08:36.740 --> 00:08:40.960
+So therefore, if we play this as a simple animation,
+
+100
+00:08:40.960 --> 00:08:46.470
+it's going to shrink the character down to that small additive data.
+
+101
+00:08:46.470 --> 00:08:50.470
+Now, in order to fix this, what I'm going to do is
+
+102
+00:08:50.470 --> 00:08:55.470
+I am going to disconnect the result pin here.
+
+103
+00:08:55.470 --> 00:09:01.879
+And I'm going to search for a apply additive.
+
+104
+00:09:01.879 --> 00:09:07.120
+I'm going to plug this into our output pin.
+
+105
+00:09:07.120 --> 00:09:12.440
+I'm going to plug the mm underscore land into the additive.
+
+106
+00:09:12.440 --> 00:09:16.440
+Now I need a base animation at this point to play.
+
+107
+00:09:16.440 --> 00:09:19.570
+So we're going to use the blend space that we created.
+
+108
+00:09:19.570 --> 00:09:22.570
+So I'm going to find the my blend space walk run,
+
+109
+00:09:22.570 --> 00:09:27.570
+drag that in, and then plug that into the base.
+
+110
+00:09:27.570 --> 00:09:33.629
+And again, in order to get this to work, we need to add the speed in.
+
+111
+00:09:33.629 --> 00:09:38.879
+And so what this is going to do is it's going to go back to our walk cycle and play that
+
+112
+00:09:38.879 --> 00:09:40.879
+because we've hit the ground.
+
+113
+00:09:40.879 --> 00:09:45.879
+And it's just going to add in the small rebound additive data in here
+
+114
+00:09:45.879 --> 00:09:49.419
+so we can see that rebound.
+
+115
+00:09:49.419 --> 00:09:54.419
+If we now compile, save, jump back into the mat and play,
+
+116
+00:09:54.419 --> 00:09:59.419
+you should see that this is a pretty realistic run and jump.
+
+117
+00:09:59.419 --> 00:10:03.419
+In the next video, we're going to look at how we can trigger an animation
+
+118
+00:10:03.419 --> 00:10:06.419
+to be played from a keyboard input.

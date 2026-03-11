@@ -1,0 +1,221 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:09.259
+So we've talked quite a lot already about the idea of your different modules being found, discovered, compiled and then linked.
+
+2
+00:00:09.259 --> 00:00:16.059
+The thing that does that is actually the Unreal build tool, which is very, very important to be aware of when you're on the C++ side of things.
+
+3
+00:00:16.059 --> 00:00:21.059
+The Unreal build tool is entirely distinct from the actual Unreal executable.
+
+4
+00:00:21.059 --> 00:00:26.760
+The most common way that you'd be interacting with it is whenever you generate project files, which I'll demonstrate in a little bit.
+
+5
+00:00:26.760 --> 00:00:35.460
+But it's also worth highlighting that this is used when you open up your Unreal editor and you try and package the game.
+
+6
+00:00:35.460 --> 00:00:42.060
+It's an entirely separate XE that worries about the compilation, the linking and then the actual creation of builds.
+
+7
+00:00:42.060 --> 00:00:46.179
+Be that an editor build, be that a shipping build or anything like that.
+
+8
+00:00:46.179 --> 00:00:56.240
+So like I said, the most common way that you would be interacting with this day to day is when you are generating project files, which might not be a term you're familiar with yet.
+
+9
+00:00:56.240 --> 00:01:07.540
+The way you typically do this is you go to your U project file, your U project, you go to your right click context menu and it's this generate Visual Studio project files.
+
+10
+00:01:07.540 --> 00:01:11.040
+So this is something you need to do quite commonly and I'll explain when you would do that in a second.
+
+11
+00:01:11.040 --> 00:01:20.340
+The other case which is commonly comes up is if you're switching engine versions, then automatically your project files get generated and generating those project files uses the Unreal build tool.
+
+12
+00:01:20.340 --> 00:01:25.439
+Now the case in which you would typically want to generate project files is whenever you introduce a new class,
+
+13
+00:01:25.439 --> 00:01:31.040
+you basically have to rerun the Unreal build tool to make sure that it discovers that new file that you found.
+
+14
+00:01:31.040 --> 00:01:37.439
+So if you add a new class and it doesn't seem to be appearing in your solution, that's because you need to rerun your Unreal build tool.
+
+15
+00:01:37.439 --> 00:01:42.120
+And the simplest way to do that is generate project files just to make you aware of that.
+
+16
+00:01:42.120 --> 00:01:46.719
+So let's talk a little bit about what the steps for the actual Unreal build tool look like.
+
+17
+00:01:46.719 --> 00:01:50.819
+First off, we pass a project in with a desired target.
+
+18
+00:01:50.819 --> 00:01:53.120
+So your target platform and a configuration.
+
+19
+00:01:53.120 --> 00:01:58.120
+So that's debug game or debug editor.
+
+20
+00:01:58.120 --> 00:02:03.920
+And what the Unreal build tool would do then is look through all the target CS files for that project,
+
+21
+00:02:03.920 --> 00:02:08.020
+find the right target, and then start looking up the modules required by that target.
+
+22
+00:02:08.020 --> 00:02:11.520
+So this is what we had in our example.
+
+23
+00:02:11.520 --> 00:02:16.719
+If we were trying to build the editor target, it's going to find the target CS that matches that.
+
+24
+00:02:16.719 --> 00:02:18.319
+It's the target type editor.
+
+25
+00:02:18.319 --> 00:02:23.419
+It's going to find this and then it's going to start looking through each of these modules.
+
+26
+00:02:23.419 --> 00:02:28.419
+What it will then do is include all the modules that each of those modules depend on,
+
+27
+00:02:28.419 --> 00:02:32.319
+either through your private or public dependencies.
+
+28
+00:02:32.319 --> 00:02:40.120
+And then it will basically step through every header file in each of those modules and look for kind of Unreal class metadata.
+
+29
+00:02:40.120 --> 00:02:44.719
+So we'll come to these in a second, but that's your kind of U properties, your U functions,
+
+30
+00:02:44.719 --> 00:02:49.520
+and your U markup, U classes and things like that.
+
+31
+00:02:49.520 --> 00:02:53.919
+The thing that actually does the passing of those headers is a separate tool called the Unreal header tool.
+
+32
+00:02:53.919 --> 00:02:57.319
+So whenever anyone talks about the UHT, that's what that is.
+
+33
+00:02:57.319 --> 00:03:04.120
+And it is actually the UHT that is then passing through all those files and kind of generating Unreal specific code.
+
+34
+00:03:04.120 --> 00:03:11.819
+Whenever anyone talks about the, whenever you see includes for a, I don't know, actor.generated.h,
+
+35
+00:03:11.819 --> 00:03:14.620
+that generated file, that is what the UHT is doing.
+
+36
+00:03:14.620 --> 00:03:19.919
+It's generating code based off that Unreal markup.
+
+37
+00:03:19.919 --> 00:03:22.919
+So then the Unreal build tool generates an action graph,
+
+38
+00:03:22.919 --> 00:03:29.520
+which is essentially a graph of all the things that need compilation and all the things that need linking for that desired target.
+
+39
+00:03:29.520 --> 00:03:32.819
+And then the action graph essentially gets executed.
+
+40
+00:03:32.819 --> 00:03:40.719
+The nodes on this, the nodes on the action graph are essentially CL.XE or link.XE with parameters,
+
+41
+00:03:40.719 --> 00:03:43.819
+and they get saved into a make file so that it doesn't need constantly redoing.
+
+42
+00:03:43.819 --> 00:03:46.020
+We don't need to redo this every single time.
+
+43
+00:03:46.020 --> 00:03:51.520
+And then it'll execute that build graph and it'll perform all those compilations and all those links
+
+44
+00:03:51.520 --> 00:03:56.219
+and it will generate those OBJ files and finally link them all together into a XE,
+
+45
+00:03:56.219 --> 00:04:02.719
+a DLL and you'll generate your PDB files for your debugging symbols.
+
+46
+00:04:02.719 --> 00:04:06.719
+So realistically as engineers, we don't need to know a huge amount more than that.
+
+47
+00:04:06.719 --> 00:04:10.219
+The Unreal build tool and the Unreal header tool are relatively complicated.
+
+48
+00:04:10.219 --> 00:04:14.020
+All we need to know is that we need to rerun them whenever we introduce new classes
+
+49
+00:04:14.020 --> 00:04:17.819
+and that it is really what's being used underneath the hood.
+
+50
+00:04:17.819 --> 00:04:20.819
+Both of these tools are actually available inside the Unreal source.
+
+51
+00:04:20.819 --> 00:04:27.620
+So if something seems to be going wrong with your build process or with your parsing process,
+
+52
+00:04:27.620 --> 00:04:31.420
+you can actually debug them as long as you have your symbols downloaded.
+
+53
+00:04:31.420 --> 00:04:33.120
+So you can actually dig into them.
+
+54
+00:04:33.120 --> 00:04:36.720
+They're not black boxes, they're available in the source code,
+
+55
+00:04:36.720 --> 00:04:39.019
+but they are entirely distinct from the rest of the engine.

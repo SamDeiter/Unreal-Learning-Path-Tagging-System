@@ -1,0 +1,337 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:04.019
+Now, before we dive into actually creating our sequence,
+
+2
+00:00:04.019 --> 00:00:07.980
+there are a few core principles or structures
+
+3
+00:00:07.980 --> 00:00:09.779
+that we need to understand as it
+
+4
+00:00:09.779 --> 00:00:12.939
+relates to translating traditional film
+
+5
+00:00:12.939 --> 00:00:17.980
+terminology to game development or at least a game engine.
+
+6
+00:00:17.980 --> 00:00:19.379
+So some of the engine terminology
+
+7
+00:00:19.379 --> 00:00:21.620
+that we've used, which you probably know about,
+
+8
+00:00:21.620 --> 00:00:24.179
+are things like static and skeletal meshes.
+
+9
+00:00:24.179 --> 00:00:26.980
+We have actors, pawns, characters.
+
+10
+00:00:26.980 --> 00:00:29.579
+We have worlds, maps, levels.
+
+11
+00:00:29.579 --> 00:00:33.259
+Level sequences, control rig, which is a animation feature
+
+12
+00:00:33.259 --> 00:00:35.939
+that we have available in the engine, volumes.
+
+13
+00:00:35.939 --> 00:00:38.979
+In fact, we will talk about using trigger volumes when
+
+14
+00:00:38.979 --> 00:00:41.740
+we do our shot creation process,
+
+15
+00:00:41.740 --> 00:00:45.820
+blueprints, as well as source control.
+
+16
+00:00:45.820 --> 00:00:47.920
+Some of our sequence or terminology
+
+17
+00:00:47.920 --> 00:00:50.200
+that's important to understand is scene assemblies.
+
+18
+00:00:50.200 --> 00:00:52.280
+So this is going to be as we bring things together
+
+19
+00:00:52.280 --> 00:00:53.439
+collectively.
+
+20
+00:00:53.439 --> 00:00:55.719
+We have performance takes.
+
+21
+00:00:55.719 --> 00:00:58.479
+We have sets, layouts, and staging,
+
+22
+00:00:58.479 --> 00:01:01.399
+which will be very similar to our world maps and levels,
+
+23
+00:01:01.399 --> 00:01:03.759
+but we're going to be using that terminology slightly
+
+24
+00:01:03.759 --> 00:01:07.579
+different as we're doing our assembly process.
+
+25
+00:01:07.579 --> 00:01:11.420
+Level sequences and shot sequences, as well as just
+
+26
+00:01:11.420 --> 00:01:13.069
+shots.
+
+27
+00:01:13.069 --> 00:01:14.909
+In this particular slide, on the left,
+
+28
+00:01:14.909 --> 00:01:17.909
+we have more traditional film terminology.
+
+29
+00:01:17.909 --> 00:01:20.109
+And with that, we have things like a film,
+
+30
+00:01:20.109 --> 00:01:22.459
+like a feature or short film.
+
+31
+00:01:22.459 --> 00:01:25.939
+We have acts, so various different major blocks
+
+32
+00:01:25.939 --> 00:01:29.180
+within our film storytelling process.
+
+33
+00:01:29.180 --> 00:01:33.840
+We have sequences, scenes, shots, and takes.
+
+34
+00:01:33.840 --> 00:01:36.239
+And on the right, we have the terminology
+
+35
+00:01:36.239 --> 00:01:37.920
+that we traditionally use when it
+
+36
+00:01:37.920 --> 00:01:41.840
+comes to establishing these same things with Unreal.
+
+37
+00:01:41.840 --> 00:01:46.450
+So we have things like film or a master sequence.
+
+38
+00:01:46.450 --> 00:01:48.450
+For our act that we would call in film,
+
+39
+00:01:48.450 --> 00:01:50.810
+we call that more or less just a level sequence.
+
+40
+00:01:50.810 --> 00:01:53.129
+And then you'll see we have a level sequence
+
+41
+00:01:53.129 --> 00:01:55.810
+within the actual sequence, the scene itself.
+
+42
+00:01:55.810 --> 00:01:59.049
+Again, keep in mind that a sequence is really
+
+43
+00:01:59.090 --> 00:02:00.049
+just a container.
+
+44
+00:02:00.049 --> 00:02:03.530
+It's how we use it that changes the way that it operates
+
+45
+00:02:03.530 --> 00:02:06.700
+and it functions within the engine.
+
+46
+00:02:06.700 --> 00:02:09.139
+And then, of course, after our level sequence,
+
+47
+00:02:09.139 --> 00:02:11.699
+we have shots and we have takes.
+
+48
+00:02:11.699 --> 00:02:13.219
+Now, something to keep in mind here
+
+49
+00:02:13.219 --> 00:02:16.699
+is that even though this terminology is something
+
+50
+00:02:16.699 --> 00:02:19.659
+that's often widely adopted by the industry,
+
+51
+00:02:19.659 --> 00:02:21.900
+it doesn't necessarily mean that you have to use this
+
+52
+00:02:21.900 --> 00:02:23.060
+verbatim.
+
+53
+00:02:23.060 --> 00:02:25.939
+The most important thing when it comes to establishing
+
+54
+00:02:25.939 --> 00:02:28.659
+Sequencer or your Sequencer workflow
+
+55
+00:02:28.699 --> 00:02:32.419
+is make sure that you have a system that's both scalable
+
+56
+00:02:32.419 --> 00:02:36.460
+and simple enough that the average person can understand
+
+57
+00:02:36.460 --> 00:02:39.500
+its core structure, how to use it, et cetera.
+
+58
+00:02:39.500 --> 00:02:41.180
+The last thing you want to do is get towards the end
+
+59
+00:02:41.180 --> 00:02:43.539
+of production and realize you have content spread
+
+60
+00:02:43.539 --> 00:02:46.030
+everywhere within your project.
+
+61
+00:02:46.030 --> 00:02:47.590
+So again, on this slide, this is really more
+
+62
+00:02:47.590 --> 00:02:50.150
+just guideposts to help you when it comes
+
+63
+00:02:50.150 --> 00:02:53.030
+to establishing your workflow with Sequencer
+
+64
+00:02:53.030 --> 00:02:55.150
+and how to best organize it based off
+
+65
+00:02:55.150 --> 00:02:57.509
+of the traditional principles of film.
+
+66
+00:02:57.509 --> 00:02:59.830
+Now, there are a few plugins that are often used
+
+67
+00:02:59.830 --> 00:03:01.030
+in game development.
+
+68
+00:03:01.030 --> 00:03:03.990
+Now, one major caveat is all of the plugins
+
+69
+00:03:03.990 --> 00:03:05.469
+that we have here on the screen,
+
+70
+00:03:05.469 --> 00:03:08.990
+you don't necessarily have to have these plugins enabled
+
+71
+00:03:08.990 --> 00:03:12.189
+if you're going to be working within game development.
+
+72
+00:03:12.189 --> 00:03:16.150
+As an example, you may not have any motion capture suits
+
+73
+00:03:16.150 --> 00:03:21.139
+or using the AR kit from Apple to do, like,
+
+74
+00:03:21.139 --> 00:03:22.819
+for example, facial capture.
+
+75
+00:03:22.819 --> 00:03:25.699
+So you could disable the Apple AR kit and Live Link.
+
+76
+00:03:25.699 --> 00:03:28.139
+However, if you are using that workflow,
+
+77
+00:03:28.139 --> 00:03:30.020
+you're going to want to have those plugins enabled.
+
+78
+00:03:30.020 --> 00:03:31.180
+And you can see that there are a series
+
+79
+00:03:31.180 --> 00:03:34.340
+of other different plugins that translate
+
+80
+00:03:34.340 --> 00:03:38.259
+to allowing you to create those real-time sequences
+
+81
+00:03:38.259 --> 00:03:41.060
+or to be able to do motion capture, right?
+
+82
+00:03:41.060 --> 00:03:44.139
+Things that are often used in game development
+
+83
+00:03:44.139 --> 00:03:48.180
+as it relates to creating cinematics, in-game cut scenes,
+
+84
+00:03:48.180 --> 00:03:51.699
+or anything where Sequencer would come into play.

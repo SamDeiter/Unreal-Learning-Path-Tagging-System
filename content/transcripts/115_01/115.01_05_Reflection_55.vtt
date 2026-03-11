@@ -1,0 +1,861 @@
+WEBVTT
+
+1
+00:00:01.419 --> 00:00:08.220
+So reflection is at the heart of some of the functionality we just talked about for anyone who's not familiar with the term reflection
+
+2
+00:00:08.519 --> 00:00:14.320
+You might be familiar with it if you're used to something like C sharp. It's codes ability to examine itself
+
+3
+00:00:15.460 --> 00:00:19.760
+C++ doesn't have any reflection capability at the moment
+
+4
+00:00:19.760 --> 00:00:25.640
+I know there's some discussion about reflection getting added in the C++ 26 standard or something like that
+
+5
+00:00:25.640 --> 00:00:27.640
+I'm not completely certain about that
+
+6
+00:00:27.640 --> 00:00:34.719
+But for now unreal has a reflection system that it implements itself and that all stems from the U object
+
+7
+00:00:35.240 --> 00:00:40.420
+So U object is unreal's kind of base type for anything that is really
+
+8
+00:00:40.880 --> 00:00:47.920
+In relation to the engine and gameplay functionality U object is kind of base the start of anything that can be reflected comes from
+
+9
+00:00:48.219 --> 00:00:54.299
+U object any game object any bullet visual effect sound cue anything in the class hierarchy
+
+10
+00:00:54.299 --> 00:00:56.340
+It all comes from U object as the base
+
+11
+00:00:56.859 --> 00:01:03.880
+It's important noting that get U objects anything that extends from U downwards is only accessible on the game thread
+
+12
+00:01:04.099 --> 00:01:09.260
+Their memory is automatically handled by unreal which implements garbage collection and U objects
+
+13
+00:01:09.700 --> 00:01:13.260
+Support serialization and all that means for saving and networking and all stuff like that
+
+14
+00:01:14.400 --> 00:01:18.659
+So it's important to highlight that the U in U object is actually important
+
+15
+00:01:18.939 --> 00:01:25.739
+Unreal has kind of a strong and strict naming convention where if you try a break this you will actually get compiler errors
+
+16
+00:01:26.659 --> 00:01:31.579
+Anything that is a just a raw object. It starts with U. So
+
+17
+00:01:32.340 --> 00:01:37.299
+Any kind of anything that is just data is a U object as soon as something
+
+18
+00:01:37.579 --> 00:01:40.459
+Exists in the world and has a position and can run around and do things
+
+19
+00:01:40.459 --> 00:01:45.879
+It's an actor actor inherits from U object and at that point we start using the a letter
+
+20
+00:01:46.000 --> 00:01:48.920
+So all your classes would start with you know a
+
+21
+00:01:50.159 --> 00:01:52.159
+my snazzy car
+
+22
+00:01:52.200 --> 00:01:58.840
+That's only in the C++ itself in the actual solution Explorer. It would still be just called classy car or whatever
+
+23
+00:02:00.250 --> 00:02:03.689
+structs and non U object classes have the prefix of F
+
+24
+00:02:05.250 --> 00:02:08.849
+Enums have the prefix of E and any templated types
+
+25
+00:02:09.569 --> 00:02:13.090
+Using generics start with T. So and again
+
+26
+00:02:13.090 --> 00:02:18.210
+This is a strong convention that you'll get compiler errors about if you don't pay attention to it
+
+27
+00:02:18.729 --> 00:02:24.960
+The other thing about when introducing a class that uses this reflection system. There's a couple of things you need to do
+
+28
+00:02:25.560 --> 00:02:31.960
+First off and in going chronological all the top to bottom of the file is you would need a generated H include
+
+29
+00:02:32.159 --> 00:02:35.759
+so if you look at any class inside unreal, you'll see
+
+30
+00:02:36.319 --> 00:02:40.759
+There'll be a generated H include if it's a kind of reflected class type
+
+31
+00:02:41.000 --> 00:02:46.800
+But also it's important to highlight that this include will normally complain at you if it's not the last
+
+32
+00:02:47.000 --> 00:02:52.159
+Include in your include list. So if we just quickly jump to some code we would see this in
+
+33
+00:02:53.000 --> 00:02:55.680
+Whenever you make a game mode, you'd see it here
+
+34
+00:02:55.680 --> 00:03:01.360
+We've got this is a whenever you create an unreal project. Typically it creates a game mode class for you
+
+35
+00:03:01.439 --> 00:03:07.039
+So it comes I haven't written this is get automatically generated and you can see it's got some simple includes and then it's got this
+
+36
+00:03:07.680 --> 00:03:09.680
+Generated include itself
+
+37
+00:03:09.759 --> 00:03:17.189
+We'd also have some kind of reflection markup. So if it's a class then it would be headed with a u-class markup
+
+38
+00:03:17.909 --> 00:03:20.889
+Macro, if it's a struct it would have u-struct above it
+
+39
+00:03:20.889 --> 00:03:23.550
+And if it's an enum it would have you enum the last thing
+
+40
+00:03:24.150 --> 00:03:27.430
+For u-class and u-struct is it would have generated body
+
+41
+00:03:27.430 --> 00:03:32.889
+So you'd see this here any struct that it's headed with u-struct or any class
+
+42
+00:03:32.889 --> 00:03:37.889
+That's headed with u-class needs a generated body within it. Otherwise again, the compiler will complain at you
+
+43
+00:03:39.699 --> 00:03:45.979
+It's worth highlighting as well that when creating a new class, you can actually create classes through the editor itself
+
+44
+00:03:45.979 --> 00:03:47.979
+you don't have to go through the kind of
+
+45
+00:03:48.900 --> 00:03:51.939
+laborious process of creating a class yourself and
+
+46
+00:03:52.099 --> 00:03:57.419
+Creating the header and creating the CPP and adding all this boilerplate. The unreal editor can actually create it for you
+
+47
+00:03:57.419 --> 00:04:02.180
+If you just go to outside of your content your C++ classes
+
+48
+00:04:02.439 --> 00:04:05.460
+You can add a new class this way or you can do file
+
+49
+00:04:06.900 --> 00:04:09.319
+This is maybe changed a little bit since
+
+50
+00:04:10.379 --> 00:04:15.939
+your tools new C++ class and you can create that here if I went to create a new pawn and
+
+51
+00:04:16.420 --> 00:04:19.740
+Do all that it would give me a bunch of things and if I went to create that
+
+52
+00:04:20.379 --> 00:04:22.560
+But just give this a second
+
+53
+00:04:22.560 --> 00:04:31.250
+Okay, we'll probably edit that out. So it's a little bit shorter, but it does did eventually generate the class for me
+
+54
+00:04:31.730 --> 00:04:38.009
+And you get the other thing to highlight is that when you do classes this way it will actually automatically regenerate your project files
+
+55
+00:04:38.009 --> 00:04:42.649
+And it'll perform this live coding compile, which is kind of recompiles all that code
+
+56
+00:04:42.649 --> 00:04:43.930
+So it'll be updated
+
+57
+00:04:43.930 --> 00:04:49.610
+but if I just quickly jump back to my project you see is asking me to reload and when I do that it's
+
+58
+00:04:49.610 --> 00:04:51.129
+going to
+
+59
+00:04:51.129 --> 00:05:11.310
+When I give a visual studio a second and it's finally caught up
+
+60
+00:05:12.110 --> 00:05:14.310
+you see we've got a new pawn here and
+
+61
+00:05:15.230 --> 00:05:16.829
+If I open that up
+
+62
+00:05:16.829 --> 00:05:21.819
+Yeah, you can see it's got all this markup for us
+
+63
+00:05:21.819 --> 00:05:25.660
+So you can see our porn is called my porn in the actual solution explorer
+
+64
+00:05:25.660 --> 00:05:30.399
+But once it's within code is referred to as a my porn because porn inherits from actor
+
+65
+00:05:30.399 --> 00:05:34.939
+It's already got a generated header include. It's already got a u-class markup. It's already got generated body
+
+66
+00:05:34.980 --> 00:05:38.000
+So it's just worth highlighting that if you go through the editor
+
+67
+00:05:38.300 --> 00:05:42.259
+It will generate all this boilerplate for you as well as some kind of stub functions
+
+68
+00:05:42.259 --> 00:05:46.019
+You might typically need like begin play and tick which I'm sure we'll get to in another session
+
+69
+00:05:46.939 --> 00:05:49.120
+But just to highlight that that's all kind of done for you
+
+70
+00:05:49.120 --> 00:05:53.899
+If you go through the editor certain IDEs also do provide the functionality to do that within code
+
+71
+00:05:53.899 --> 00:05:56.040
+So you don't have to have editor open to do that
+
+72
+00:05:56.420 --> 00:06:00.540
+But otherwise you can just do this from scratch and just add this boilerplate yourself. It just takes a little bit longer
+
+73
+00:06:02.959 --> 00:06:05.240
+if we just jump to
+
+74
+00:06:06.120 --> 00:06:10.170
+play the presentation
+
+75
+00:06:10.209 --> 00:06:15.810
+It's worth highlighting as well that these macros as they provide a lot of it's not just about
+
+76
+00:06:16.129 --> 00:06:21.050
+Exposing them to the to the unreal reflection system or that is definitely an important part of it
+
+77
+00:06:21.449 --> 00:06:25.290
+There's a whole suite of different things that we can mark up with these macros
+
+78
+00:06:25.329 --> 00:06:32.870
+We've got u-property u-functions u-classes u-struct and u-enum and we'll kind of dig into each of these and what they actually mean
+
+79
+00:06:33.490 --> 00:06:38.689
+First and foremost the most important thing is that u-property you'll see a lot
+
+80
+00:06:39.209 --> 00:06:45.329
+It's worth highlighting that when we've said that unreal has garbage collection, and it's a memory. It's managed memory
+
+81
+00:06:45.970 --> 00:06:49.209
+U-property is a key component of that which I'll dig into it a little bit more in a bit
+
+82
+00:06:49.689 --> 00:06:56.699
+So it's kind of go through these in an order. We'll start off with u-class. So anytime you have a class type that is
+
+83
+00:06:58.000 --> 00:07:02.779
+Reflected type so anything that is u-object or down will need this u-class markup above it
+
+84
+00:07:02.779 --> 00:07:07.579
+You can just have u-classes blank, but you can also add in some extra metadata
+
+85
+00:07:08.379 --> 00:07:10.379
+to provide some extra kind of
+
+86
+00:07:11.060 --> 00:07:14.579
+Information to the engine about how it might be used in the editor side of things
+
+87
+00:07:14.660 --> 00:07:21.939
+So you can a typical ones might be blueprint type which would mean that in blueprint code this class can is
+
+88
+00:07:22.259 --> 00:07:26.100
+Accessible. It's a type that exists is the type that blueprint understands exists
+
+89
+00:07:26.819 --> 00:07:28.500
+blueprintable would mean that you can make
+
+90
+00:07:28.500 --> 00:07:32.740
+Blueprints that inherit from this type and then abstract same as C++ abstract
+
+91
+00:07:32.740 --> 00:07:35.240
+It just means that this class has nothing within it
+
+92
+00:07:35.240 --> 00:07:40.100
+It's kind of exists as a template to have other classes inherit from it and then implement each of these functions
+
+93
+00:07:41.509 --> 00:07:47.350
+All of the u-class markup it can be found in object macros and the same is true for all these reflected types
+
+94
+00:07:47.350 --> 00:07:49.350
+The u-struct, u-property
+
+95
+00:07:49.829 --> 00:07:51.829
+object.macros.h
+
+96
+00:07:52.389 --> 00:07:56.069
+Contains the full list of all these definitions. We'll just quickly jump to that to show you
+
+97
+00:07:56.750 --> 00:07:58.939
+u-property
+
+98
+00:07:58.939 --> 00:08:04.939
+yeah, so these are all the
+
+99
+00:08:06.220 --> 00:08:12.139
+Markup for u-properties and the same thing can be found in here for you know classes, structs, etc
+
+100
+00:08:15.750 --> 00:08:23.389
+So u-properties again, we would add u-property goes above any member variables of either a u-struct or a u-class
+
+101
+00:08:24.629 --> 00:08:31.610
+It's probably worth iterating this multiple times, but you can't introduce properties with u-property above them. You can't introduce kind of
+
+102
+00:08:32.389 --> 00:08:38.990
+Editor facing variables if it's not with inside a class or a struct that also is a u-class or a u-struct
+
+103
+00:08:38.990 --> 00:08:43.509
+So you can't have u-properties inside a non u-class class if that makes sense
+
+104
+00:08:44.169 --> 00:08:46.169
+So you would typically add it above variables
+
+105
+00:08:47.350 --> 00:08:54.090
+The important thing to highlight about this is that whenever you have a pointer type the u-property markup is required
+
+106
+00:08:54.669 --> 00:08:56.669
+to prevent that
+
+107
+00:08:56.669 --> 00:09:01.070
+What's contained within that variable getting marked for garbage collection?
+
+108
+00:09:01.110 --> 00:09:04.830
+so if you have an actor variable and you
+
+109
+00:09:05.350 --> 00:09:09.669
+Or an object variable or something like that and it doesn't have u-property above it
+
+110
+00:09:09.669 --> 00:09:12.029
+There's a good chance it will get cleaned up by garbage collection
+
+111
+00:09:12.110 --> 00:09:15.149
+So the u-property is kind of means that this
+
+112
+00:09:15.509 --> 00:09:19.870
+Pointer type is reference counted and that it won't get cleaned up by garbage collection until there are no
+
+113
+00:09:20.029 --> 00:09:27.220
+Objects with u-property above it referencing it. So you typical u-property meta markup would be edit anywhere
+
+114
+00:09:27.360 --> 00:09:29.360
+which essentially means that this
+
+115
+00:09:29.539 --> 00:09:32.659
+This value is exposed to the editor and can be tweaked either
+
+116
+00:09:33.220 --> 00:09:37.019
+Play an editor time or it can be tweaked within the editor or within blueprints
+
+117
+00:09:37.500 --> 00:09:45.139
+Edit defaults only means that this variable is exposed but can only be edited in blueprints in the actual kind of archetype not within
+
+118
+00:09:45.340 --> 00:09:46.980
+instances within the level
+
+119
+00:09:46.980 --> 00:09:52.220
+Visible anywhere is pretty self-explanatory just means that you can see this value, but you can't edit it
+
+120
+00:09:52.899 --> 00:09:56.100
+Replicated means that this is intended for network replication
+
+121
+00:09:56.100 --> 00:10:01.179
+But it will actually that this work isn't enough on its own. You will need to do some additional
+
+122
+00:10:01.980 --> 00:10:06.179
+coding to kind of mark up this thing to get passed around the network and
+
+123
+00:10:06.700 --> 00:10:12.860
+Transient which just means that this property isn't serialized and it will get filled with the zero value at load time
+
+124
+00:10:13.340 --> 00:10:22.500
+It's worth highlighting as well that when we're talking about pointers, there has been a transition from Unreal 4 to Unreal 5
+
+125
+00:10:23.139 --> 00:10:26.059
+a lot of the code base you'll still see will have
+
+126
+00:10:27.539 --> 00:10:30.419
+Pointer types that look a little bit like this
+
+127
+00:10:30.740 --> 00:10:37.980
+What if I go inside that porn I just quickly created and you would see inside the header if it had a reference to
+
+128
+00:10:38.419 --> 00:10:45.100
+An actor it might look like this a actor pointer right a standard kind of raw pointer and then it's still absolutely fine
+
+129
+00:10:45.580 --> 00:10:50.799
+But with Unreal 5 what they introduced was this new type T object pointer
+
+130
+00:10:51.340 --> 00:10:57.700
+It is the size equivalent of a 64-bit pointer, but it provides kind of a whole set of extra functionality on top
+
+131
+00:10:57.740 --> 00:11:01.740
+So it's generally advised that whenever you're having a member property
+
+132
+00:11:01.740 --> 00:11:08.059
+That is a pointer type instead of a so if I had this type as my actor and again that should definitely have
+
+133
+00:11:08.299 --> 00:11:11.620
+You property above it because otherwise it's gonna get garbage collected
+
+134
+00:11:11.980 --> 00:11:17.899
+So you might see something like this the kind of encouraged new type is that we use you T
+
+135
+00:11:18.299 --> 00:11:20.480
+T object pointer like this
+
+136
+00:11:21.139 --> 00:11:28.419
+It's not required but it is encouraged. It brings a whole suite of other functionality with it though. I'll just go into now
+
+137
+00:11:28.980 --> 00:11:32.539
+So most importantly it supports lazy load behavior
+
+138
+00:11:32.740 --> 00:11:38.019
+What that essentially means is that it's going to speed up your editor build times. So this is more about
+
+139
+00:11:39.019 --> 00:11:44.620
+Improved quality of life in editor than it is really very much to do with runtime performance
+
+140
+00:11:45.059 --> 00:11:51.379
+So improve its loaded lazy load behavior, which will heat speed up your load times in editor. It supports access tracking
+
+141
+00:11:52.360 --> 00:11:53.879
+which is
+
+142
+00:11:53.879 --> 00:11:59.620
+Not only useful but important to bear in mind when you're doing things like a range based loop
+
+143
+00:11:59.779 --> 00:12:05.960
+It's that because the actual T object pointer itself will now have data inside it
+
+144
+00:12:06.360 --> 00:12:11.179
+You want to be looping through those as a kind of like on a reference basis, right?
+
+145
+00:12:11.179 --> 00:12:15.700
+So you want auto ref rather than making copies of your T object pointers
+
+146
+00:12:16.399 --> 00:12:20.340
+And when passing it round to functions and when returning it from functions
+
+147
+00:12:20.340 --> 00:12:23.679
+It can just be used as a it can just return a raw pointer
+
+148
+00:12:23.679 --> 00:12:30.279
+So it won't have a complete knock-on effect across your entire code base. It's you mainly need to be worrying about it in your actual
+
+149
+00:12:31.200 --> 00:12:33.200
+member variable declarations
+
+150
+00:12:34.320 --> 00:12:39.559
+It has supports the same prevention of garbage collections like a normal raw pointer again
+
+151
+00:12:39.559 --> 00:12:42.440
+It will still require this you property mark up above it
+
+152
+00:12:43.240 --> 00:12:48.080
+and the other thing is it supports cook time dependency tracking which means that they're
+
+153
+00:12:49.200 --> 00:12:50.519
+essentially
+
+154
+00:12:50.519 --> 00:12:54.960
+Increases the chance that the cooker keeps a good track of everything that relies on everything else
+
+155
+00:12:56.840 --> 00:13:01.279
+Yeah, the places you can already see a lot of the engine has actually made use of this
+
+156
+00:13:01.279 --> 00:13:03.279
+so if we go to the
+
+157
+00:13:05.070 --> 00:13:10.750
+Sorry using the wrong hotkeys here, but if we went to the actor class so a
+
+158
+00:13:11.549 --> 00:13:12.990
+actor dot H
+
+159
+00:13:12.990 --> 00:13:21.720
+Yeah, you can see that a lot of the engines own
+
+160
+00:13:22.360 --> 00:13:25.919
+Code has already shifted to using T object pointers rather than raw pointers
+
+161
+00:13:25.919 --> 00:13:27.960
+If you've already got some raw pointers
+
+162
+00:13:27.960 --> 00:13:31.940
+It is actually worth highlighting that there's a useful tool that can kind of speed up that transition
+
+163
+00:13:31.940 --> 00:13:36.240
+which is this unreal object pointer tool that lives in
+
+164
+00:13:36.919 --> 00:13:38.919
+your
+
+165
+00:13:39.470 --> 00:13:40.950
+Project
+
+166
+00:13:40.950 --> 00:13:45.809
+In your engine binaries one second if I can just locate that
+
+167
+00:13:46.509 --> 00:13:58.850
+So if you locate your unreal engine and you go to your binaries folder
+
+168
+00:13:59.429 --> 00:14:05.659
+Win 64 and you kind of filter for your applications. You'll find it here. It's called
+
+169
+00:14:06.860 --> 00:14:08.379
+Unreal object pointer tool
+
+170
+00:14:08.379 --> 00:14:10.700
+So there's a couple of steps to actually using this
+
+171
+00:14:10.799 --> 00:14:14.879
+If you look up the unreal 5 migration guide it kind of goes into a bit more detail about that
+
+172
+00:14:14.879 --> 00:14:19.039
+But that can just help you make that transition from kind of raw pointers to T object pointer
+
+173
+00:14:19.519 --> 00:14:22.779
+So the next type we're going to talk about is the you function
+
+174
+00:14:22.919 --> 00:14:26.679
+So this is added to any functions that need to be callable in
+
+175
+00:14:27.519 --> 00:14:34.960
+in blueprints, it's also important to highlight that any time you have a delegate or a
+
+176
+00:14:35.840 --> 00:14:37.159
+timer
+
+177
+00:14:37.159 --> 00:14:39.159
+that you kind of or a
+
+178
+00:14:39.879 --> 00:14:45.080
+I think maybe it's just delegates and timers you will need to add even just a blank
+
+179
+00:14:45.279 --> 00:14:47.399
+U-function markup above it if you want this to be
+
+180
+00:14:47.960 --> 00:14:53.159
+Used so it's essentially anything that interfaces the actual engine level and it supports a couple of different
+
+181
+00:14:55.120 --> 00:14:58.639
+Markup metadata's the most typical one is blueprint callable
+
+182
+00:14:58.639 --> 00:15:04.759
+Meaning this C++ function can get called by blueprint. If that's not there blueprint won't know that this function exists
+
+183
+00:15:05.759 --> 00:15:09.860
+Blueprint cosmetic which is essentially saying that this is only relevant to a client-side
+
+184
+00:15:10.679 --> 00:15:12.799
+This is only kind of a client-side function
+
+185
+00:15:12.799 --> 00:15:15.720
+The server doesn't need to know about this because it's purely a kind of visual thing
+
+186
+00:15:16.840 --> 00:15:23.080
+Server and client and net multicast. These are about the way that information is passed around a server
+
+187
+00:15:23.080 --> 00:15:26.279
+So is this a message that comes from the server and goes to a client?
+
+188
+00:15:26.279 --> 00:15:31.399
+Is this a function that goes from the client to the server to notify it of something like input and net?
+
+189
+00:15:31.440 --> 00:15:34.799
+Multicast is a function that comes from the server and goes to all clients
+
+190
+00:15:35.519 --> 00:15:39.000
+There's a lot more information that goes into that but those are typical ones that you might see
+
+191
+00:15:39.879 --> 00:15:47.080
+It's also worth highlighting that this you function would be required to allow any any of these functions to be called over a network and
+
+192
+00:15:48.899 --> 00:15:55.779
+Lastly we have ustruct and uenum. So ustruct is very much like uclass, but rather than for classes. It's for structs
+
+193
+00:15:56.419 --> 00:16:03.899
+And it is actually required for as I mentioned previously if you have any u properties within a struct
+
+194
+00:16:03.899 --> 00:16:09.460
+That struct must be a ustruct type and it must therefore have a generated body
+
+195
+00:16:10.139 --> 00:16:11.820
+line within it
+
+196
+00:16:11.820 --> 00:16:13.820
+the typical
+
+197
+00:16:13.860 --> 00:16:18.740
+metadata that you would see above a ustruct is to say that a blueprint type which again is just means that this is a
+
+198
+00:16:19.139 --> 00:16:23.279
+Struct type that is visible to blueprint. You can pass it around in blueprints
+
+199
+00:16:23.740 --> 00:16:31.460
+It's also worth a kind of slight discrepancy between uclasses and ustructs is that with a lot of data inside a uclass
+
+200
+00:16:32.299 --> 00:16:36.299
+Unreal will automatically zero fill all of that data particularly pointer types
+
+201
+00:16:36.740 --> 00:16:42.779
+The same is not true for ustructs, so it's worth being it is good process anyway to kind of
+
+202
+00:16:43.740 --> 00:16:48.740
+Use your initializer lists to fill all your variables with the correct default values
+
+203
+00:16:48.860 --> 00:16:51.980
+But you need to be particularly sensitive of that with ustructs
+
+204
+00:16:51.980 --> 00:16:56.019
+So you should be you know, no pointer in by default your your pointers
+
+205
+00:16:56.139 --> 00:17:00.600
+Otherwise, you might end up with some garbage data in there and that's particularly sensitive with ustructs
+
+206
+00:17:01.379 --> 00:17:03.840
+And then uenums again just above
+
+207
+00:17:04.680 --> 00:17:07.160
+Enum types worth pointing out that
+
+208
+00:17:07.680 --> 00:17:11.079
+Unreal currently only supports uint8 enums
+
+209
+00:17:11.359 --> 00:17:16.700
+So and I believe they need to be enum class types. So a lot of the time you would see
+
+210
+00:17:17.480 --> 00:17:20.380
+I'm just trying to think of an any enum type off the top of my head
+
+211
+00:17:29.440 --> 00:17:32.920
+Collision type I think is one collision shape type if
+
+212
+00:17:33.640 --> 00:17:40.680
+It's used by engine you'll see it's an enum class and inherits from uint8 if if this were a
+
+213
+00:17:42.440 --> 00:17:46.799
+Class actually the need to be exposed to blueprint that would need to be a uenum
+
+214
+00:17:46.920 --> 00:17:51.839
+But a uenum would only work if it's an enum class and it inherits from uint8
+
+215
+00:17:51.839 --> 00:17:55.880
+We can't have 32-bit enums that's not supported by the engine at the moment

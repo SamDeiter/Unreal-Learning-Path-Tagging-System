@@ -1,0 +1,733 @@
+WEBVTT
+
+1
+00:00:05.099 --> 00:00:10.419
+So, I think the first thing I want to do is make sure this door frame actually fits my
+
+2
+00:00:10.419 --> 00:00:12.220
+body through.
+
+3
+00:00:12.220 --> 00:00:17.940
+So let's go back into the viewpoint and let's maybe make this door a little bit wider.
+
+4
+00:00:17.940 --> 00:00:22.379
+Let's maybe go to 1.2 scale.
+
+5
+00:00:22.379 --> 00:00:24.019
+And that looks pretty good.
+
+6
+00:00:24.019 --> 00:00:29.899
+Now the cool thing about having the door frame charted to the door is that the door
+
+7
+00:00:29.899 --> 00:00:32.000
+takes on the scale of the parent.
+
+8
+00:00:32.000 --> 00:00:35.520
+So the door frame was the parent and the door is the child.
+
+9
+00:00:35.520 --> 00:00:38.920
+So if I make this twice as wide, the door will just inherit that.
+
+10
+00:00:38.920 --> 00:00:42.880
+Now obviously the door starts to look a little bit funky there.
+
+11
+00:00:42.880 --> 00:00:45.039
+The handle is a little bit stretched.
+
+12
+00:00:45.039 --> 00:00:48.880
+And any artist on your team might be shouting at you at this point.
+
+13
+00:00:48.880 --> 00:00:50.659
+So you do want to keep this in mind.
+
+14
+00:00:50.659 --> 00:00:55.100
+You don't generally want to scale assets too wide.
+
+15
+00:00:55.100 --> 00:00:59.640
+However let's just try and create a little bit of a larger blueprint.
+
+16
+00:00:59.640 --> 00:01:00.640
+So I'm just going to save.
+
+17
+00:01:00.640 --> 00:01:04.200
+I'm going to jump back into my map and I just want to make sure I can run through
+
+18
+00:01:04.200 --> 00:01:07.930
+this door.
+
+19
+00:01:07.930 --> 00:01:10.569
+So let's just make it double the size.
+
+20
+00:01:10.569 --> 00:01:14.769
+Let's just make sure that we're able to do this.
+
+21
+00:01:14.769 --> 00:01:15.769
+So let's just save.
+
+22
+00:01:15.769 --> 00:01:17.409
+Let's press map.
+
+23
+00:01:17.409 --> 00:01:19.250
+I'm just going to keep jumping in and out.
+
+24
+00:01:19.250 --> 00:01:20.849
+We'll find a good value.
+
+25
+00:01:20.849 --> 00:01:23.530
+Okay so I can run through there.
+
+26
+00:01:23.530 --> 00:01:25.890
+My door is double the size.
+
+27
+00:01:25.890 --> 00:01:29.129
+Probably it's not going to look great for artists but at least we've got some basic
+
+28
+00:01:29.129 --> 00:01:30.189
+functionality now.
+
+29
+00:01:30.189 --> 00:01:32.390
+So that works for me.
+
+30
+00:01:32.390 --> 00:01:37.829
+Again if you have a specific prop made you just want to make sure that the assets are
+
+31
+00:01:37.829 --> 00:01:40.989
+suitable for whatever you're using.
+
+32
+00:01:40.989 --> 00:01:44.469
+Because the door's gone a little bit wider let's just make this box a little bit wider
+
+33
+00:01:44.469 --> 00:01:45.469
+as well.
+
+34
+00:01:45.469 --> 00:01:47.329
+And so we're in a good place to start doing our code.
+
+35
+00:01:47.329 --> 00:01:50.989
+So let's get some more polished functionality.
+
+36
+00:01:50.989 --> 00:01:54.010
+So I've just clicked back into my event graph here.
+
+37
+00:01:54.010 --> 00:01:55.010
+So we're setting the rotation.
+
+38
+00:01:55.010 --> 00:01:57.409
+I'm just going to drag this rotation out.
+
+39
+00:01:57.409 --> 00:02:03.390
+I've just selected by left mouse drag and left clicked to drag it sideways.
+
+40
+00:02:03.390 --> 00:02:06.569
+And we want to somehow make this door look a little bit nicer.
+
+41
+00:02:06.569 --> 00:02:11.389
+When you saw what I was playing in the editor, when I'm running over to this door you're
+
+42
+00:02:11.389 --> 00:02:16.229
+kind of seeing it snap open and I just want to get rid of that snap functionality.
+
+43
+00:02:16.229 --> 00:02:20.270
+I also want to close the door once I've already walked through it.
+
+44
+00:02:20.270 --> 00:02:25.550
+So that you know next time I enter the door it will open and close again.
+
+45
+00:02:25.550 --> 00:02:30.009
+So let's do the open and close functionality first and then add the lerping to our door.
+
+46
+00:02:30.009 --> 00:02:34.490
+So when we're working in blueprint sometimes it's good to write down a list of functionality
+
+47
+00:02:34.490 --> 00:02:37.030
+that you know you want from your blueprint.
+
+48
+00:02:37.030 --> 00:02:41.650
+Even if you don't know how to get to the end point sometimes by writing down a series
+
+49
+00:02:41.650 --> 00:02:45.770
+of bullet points and doing it step by step will allow you to get to that goal.
+
+50
+00:02:45.770 --> 00:02:51.650
+So if we click on the player overlap we'll scroll down and where we created a begin
+
+51
+00:02:51.650 --> 00:02:55.009
+overlap event I'll just give us a bit more real estate to work with there.
+
+52
+00:02:55.009 --> 00:02:59.360
+We want to create an end overlap event now so we want to click plus.
+
+53
+00:02:59.360 --> 00:03:04.479
+We've got our player end overlap and I'm going to select the set actor rotation, I'm going
+
+54
+00:03:04.479 --> 00:03:09.840
+to copy, I'm going to paste to create a new set rotation, I'm going to drag across
+
+55
+00:03:09.840 --> 00:03:15.659
+here and I'm going to set z to zero.
+
+56
+00:03:15.659 --> 00:03:21.479
+So on begin overlap, so we've got on component begin overlap we set the rotation to minus
+
+57
+00:03:21.479 --> 00:03:26.280
+90 which opens it and on end overlap we set it back to zero.
+
+58
+00:03:26.280 --> 00:03:31.520
+So I'm going to compile, save and if you go ahead and test that out what should happen
+
+59
+00:03:31.520 --> 00:03:36.800
+is we should be able to open the door and close the door, open the door and close
+
+60
+00:03:36.800 --> 00:03:38.379
+the door.
+
+61
+00:03:38.379 --> 00:03:42.740
+So very quickly you can see once you've got some initial code in place you can start
+
+62
+00:03:42.740 --> 00:03:46.379
+manipulating this blueprint and adding just more functionality.
+
+63
+00:03:46.379 --> 00:03:52.060
+So the lerping is really bothering me now, the snapping of the door, it doesn't look
+
+64
+00:03:52.060 --> 00:03:56.939
+great so let's add some new functionality to make that door open a little bit more nicely.
+
+65
+00:03:56.939 --> 00:04:02.620
+So we're going to right click in some empty space and we're going to type timeline.
+
+66
+00:04:02.620 --> 00:04:08.219
+So timeline all one word and we want to select the bottom option add timeline.
+
+67
+00:04:08.219 --> 00:04:14.340
+Now just whilst we have it selected you can rename this again by right clicking and
+
+68
+00:04:14.340 --> 00:04:15.340
+renaming.
+
+69
+00:04:15.340 --> 00:04:21.730
+I'm just going to call this TL underscore door.
+
+70
+00:04:21.730 --> 00:04:24.850
+So TL standing for timeline underscore door.
+
+71
+00:04:24.850 --> 00:04:28.930
+Now you don't have to rename this, the blueprint will work without you renaming it.
+
+72
+00:04:28.930 --> 00:04:34.610
+However again just moving forward, good process especially as your blueprints get bigger
+
+73
+00:04:34.610 --> 00:04:38.490
+you'll see this TL door in the components list down here.
+
+74
+00:04:38.490 --> 00:04:42.629
+You know when we have this list of components you'll see TL door which is a new component
+
+75
+00:04:42.629 --> 00:04:43.629
+that we've added.
+
+76
+00:04:43.629 --> 00:04:48.430
+Now it's not in the components list up here because it exists in gameplay code but down
+
+77
+00:04:48.430 --> 00:04:54.069
+here in our blueprint functionality we have TL door which is the timeline.
+
+78
+00:04:54.069 --> 00:04:59.550
+So let's move this into position, we want to go from the execution line to the play
+
+79
+00:04:59.550 --> 00:05:01.149
+input.
+
+80
+00:05:01.149 --> 00:05:06.889
+From the play input, from the update sorry we want to go into the set rotation.
+
+81
+00:05:06.889 --> 00:05:11.370
+So on component begin overlap we want to play the timeline and we want to set the
+
+82
+00:05:11.370 --> 00:05:13.699
+relative door rotation.
+
+83
+00:05:13.740 --> 00:05:18.639
+Now if we double click this timeline, so we double click on it, you'll see a new window
+
+84
+00:05:18.639 --> 00:05:21.220
+that's popped up which is empty right now.
+
+85
+00:05:21.220 --> 00:05:26.579
+A timeline is a way for us to animate some content inside of Unreal Engine.
+
+86
+00:05:26.579 --> 00:05:31.339
+So the first thing we want to do is we want to go to this green button, track here.
+
+87
+00:05:31.339 --> 00:05:36.019
+Again we're in the timeline window, we want to select track and we want to select the
+
+88
+00:05:36.019 --> 00:05:40.529
+first option which is add float track.
+
+89
+00:05:40.529 --> 00:05:47.360
+And I'm going to call this door, you can name it whatever you would like, again you
+
+90
+00:05:47.360 --> 00:05:49.699
+don't even need to give it a name.
+
+91
+00:05:49.699 --> 00:05:54.220
+So now we've got this grey space here, I'm going to right click on the grey space
+
+92
+00:05:54.220 --> 00:05:58.410
+anywhere you want and I'm going to add key to curve float.
+
+93
+00:05:58.410 --> 00:06:00.709
+So we've just got a key here.
+
+94
+00:06:00.709 --> 00:06:08.290
+So we can left click this key, drag it around the key and we've got a time and a value.
+
+95
+00:06:08.290 --> 00:06:14.959
+So we want time set to 0 and we want value, again if you click off it by accident just
+
+96
+00:06:14.959 --> 00:06:19.399
+select the key again, we want value to be 0.
+
+97
+00:06:19.399 --> 00:06:25.240
+So we want a key here on 0,0 and I'm just left mouse dragging to get that.
+
+98
+00:06:25.240 --> 00:06:30.959
+Now I'm going to add a new key, now you could either do right click, add key, you
+
+99
+00:06:30.959 --> 00:06:38.000
+could hold shift and left mouse click as well to add a new key and you can drag this
+
+100
+00:06:38.000 --> 00:06:39.000
+into position.
+
+101
+00:06:39.000 --> 00:06:45.040
+Now time in this instance now, our first key was 0,0 and that's fine.
+
+102
+00:06:45.040 --> 00:06:50.920
+Our second key is time, how long do we want the door to rotate open.
+
+103
+00:06:50.920 --> 00:06:55.639
+Say we want a really slow creaking door, maybe you might even give that a time of
+
+104
+00:06:55.639 --> 00:06:56.759
+10 seconds.
+
+105
+00:06:56.759 --> 00:07:00.600
+Because this is a door that we'll be using a lot for our gameplay level, it's
+
+106
+00:07:00.600 --> 00:07:07.000
+something that the player runs in and out of, let's give it 2 seconds.
+
+107
+00:07:07.000 --> 00:07:11.560
+Now you'll see the key snapped off into the other 2 second mark which isn't currently
+
+108
+00:07:11.560 --> 00:07:12.560
+on our screen.
+
+109
+00:07:12.560 --> 00:07:16.649
+But whilst we're here let's give it a value of 1.
+
+110
+00:07:16.649 --> 00:07:20.689
+Now don't worry if you deselected your key before selecting that 1, what we'll
+
+111
+00:07:20.689 --> 00:07:26.050
+do is we'll click this button that zooms to fit vertical and this button that zooms
+
+112
+00:07:26.050 --> 00:07:29.709
+to fit horizontal and now we can see both keys.
+
+113
+00:07:29.709 --> 00:07:34.610
+You can mouse wheel zoom out as well, so if you weren't able to set that value don't
+
+114
+00:07:34.610 --> 00:07:36.649
+worry you can just zoom in and out.
+
+115
+00:07:36.649 --> 00:07:43.779
+And so we'll go from 0 to a value of 1 over 2 seconds.
+
+116
+00:07:43.779 --> 00:07:47.420
+So your value is vertical, your time is horizontal.
+
+117
+00:07:47.420 --> 00:07:50.620
+The only thing I want to change here just whilst we're here is you can actually right
+
+118
+00:07:50.620 --> 00:07:54.259
+click on this key and you can do an auto.
+
+119
+00:07:54.259 --> 00:07:58.420
+So select auto and it adds a little bit of a nice ease in here.
+
+120
+00:07:58.420 --> 00:08:03.569
+Just make sure the second one is auto and you'll see that the door will slowly lerp
+
+121
+00:08:03.569 --> 00:08:08.410
+open and slowly lerp close instead of a linear line.
+
+122
+00:08:08.410 --> 00:08:12.569
+Again, more polish than functionality but it's nice to add whilst we're here.
+
+123
+00:08:12.569 --> 00:08:17.750
+So we'll click compile and save, we'll go back into our event graph.
+
+124
+00:08:17.750 --> 00:08:22.050
+We can actually close this door, when I was referring in the powerpoints to where
+
+125
+00:08:22.050 --> 00:08:26.610
+you saw the print text function here, again you can open many many windows that are just
+
+126
+00:08:26.610 --> 00:08:28.129
+quick access to favorites.
+
+127
+00:08:28.129 --> 00:08:31.930
+I don't need this timeline open again now unless something breaks and goes wrong.
+
+128
+00:08:32.169 --> 00:08:34.250
+In which case I could just double click this.
+
+129
+00:08:34.250 --> 00:08:35.789
+So I'll just close this.
+
+130
+00:08:35.789 --> 00:08:40.049
+If you do need to get back into your timeline just double click, it opens again and I'm
+
+131
+00:08:40.049 --> 00:08:41.049
+going to close it.
+
+132
+00:08:41.049 --> 00:08:45.549
+So all the code is still housed inside of this timeline so don't worry about closing
+
+133
+00:08:45.549 --> 00:08:46.549
+that window.
+
+134
+00:08:46.549 --> 00:08:53.850
+And so what we've got here is we've got begin overlap, door, set relative rotation.
+
+135
+00:08:53.850 --> 00:08:59.570
+Now this value, this value from the door, so you'll see that whatever we gave the
+
+136
+00:08:59.570 --> 00:09:01.009
+name to our track.
+
+137
+00:09:01.009 --> 00:09:04.529
+So again you don't need to do this but I called this door up here.
+
+138
+00:09:04.529 --> 00:09:10.049
+So if I rename that to frame, it's not the frame but let me just rename it.
+
+139
+00:09:10.049 --> 00:09:12.509
+You don't need to do this but you'll see frame here.
+
+140
+00:09:12.509 --> 00:09:22.519
+So whatever you name this track you can see that as an output now on your timeline.
+
+141
+00:09:22.519 --> 00:09:27.279
+So now we've got a 0 to 1 value and we know we've got a 0 to 1 value because we
+
+142
+00:09:27.279 --> 00:09:28.279
+added the 0 to 1.
+
+143
+00:09:28.279 --> 00:09:32.519
+We go from 0 to 1 over 2 seconds.
+
+144
+00:09:32.519 --> 00:09:36.840
+So this will go from 0 to 1 over 2 seconds.
+
+145
+00:09:36.840 --> 00:09:42.679
+Now when we're updating our set relative rotation we're updating that on every frame
+
+146
+00:09:42.679 --> 00:09:46.470
+so that keeps playing over 2 seconds.
+
+147
+00:09:46.470 --> 00:09:51.450
+Now what we want to do is we want to set the rotation based on these 2 seconds
+
+148
+00:09:51.450 --> 00:09:53.269
+of the door opening.
+
+149
+00:09:53.269 --> 00:09:58.629
+So we're going to drag out from new rotation, so we're going to drag left now and you should
+
+150
+00:09:58.629 --> 00:10:06.129
+have a purple line appearing and we're going to type lerp and lerp is a linear interpolate.
+
+151
+00:10:06.129 --> 00:10:10.070
+You don't necessarily need to remember that for the functionality of this course
+
+152
+00:10:10.070 --> 00:10:13.279
+but I'm just going to move that into position.
+
+153
+00:10:13.279 --> 00:10:16.320
+I'm going to make sure I give myself a bit more room.
+
+154
+00:10:16.320 --> 00:10:20.000
+Now I'm just using the arrow keys on my keyboard now to just shift it out to the
+
+155
+00:10:20.000 --> 00:10:21.000
+right.
+
+156
+00:10:21.100 --> 00:10:23.759
+Now however you'd like to move them you can left mouse drag.
+
+157
+00:10:23.759 --> 00:10:30.149
+You'll see on the alpha here we've got a door and we can drag to the green.
+
+158
+00:10:30.149 --> 00:10:32.110
+So green goes to green.
+
+159
+00:10:32.110 --> 00:10:37.370
+And so this value is spitting out 0 to 1 over 2 seconds and the alpha is saying ok
+
+160
+00:10:37.370 --> 00:10:40.629
+I'll go from A to B over 2 seconds.
+
+161
+00:10:40.629 --> 00:10:42.429
+So you can probably guess where we're going here.
+
+162
+00:10:42.429 --> 00:10:49.029
+We'll go from Z, 0, Z, minus 80.
+
+163
+00:10:49.029 --> 00:10:53.389
+We don't need to change any of the rotations because we know it's just rotating open and
+
+164
+00:10:53.389 --> 00:10:58.070
+so we go from 0 to minus 80 over 2 seconds.
+
+165
+00:10:58.070 --> 00:11:05.409
+Now let's compile, let's save and let's play the game and let's see what's happening
+
+166
+00:11:05.409 --> 00:11:06.409
+here.
+
+167
+00:11:06.409 --> 00:11:09.850
+So I'm not going to take my weapon this time I know it's safe through the door so
+
+168
+00:11:09.850 --> 00:11:11.690
+no danger here.
+
+169
+00:11:11.690 --> 00:11:14.570
+Now we've got a door that rotates open.
+
+170
+00:11:14.570 --> 00:11:19.490
+Now when we step back from the door it snaps shut which we don't really want to happen
+
+171
+00:11:19.490 --> 00:11:21.289
+and that snaps open.
+
+172
+00:11:21.289 --> 00:11:26.730
+So we've instantly broken our door now which isn't great so let's go ahead and fix
+
+173
+00:11:26.730 --> 00:11:27.730
+that.
+
+174
+00:11:27.730 --> 00:11:31.980
+So we want to hit escape, we want to go back into our blueprint door and now the
+
+175
+00:11:31.980 --> 00:11:35.340
+set relative rotation that we had before let's just delete that.
+
+176
+00:11:35.340 --> 00:11:39.220
+It didn't take us too long to set up and it's a shame to waste work but it was
+
+177
+00:11:39.220 --> 00:11:42.419
+good for the purposes of seeing what was happening in blueprint.
+
+178
+00:11:42.419 --> 00:11:46.179
+So now from the end overlap we just want to go into reverse here.
+
+179
+00:11:46.179 --> 00:11:52.139
+So we'll play when we enter the overlap, when we begin overlap, when we end the overlap
+
+180
+00:11:52.139 --> 00:11:55.139
+therefore we've left the box we'll reverse.
+
+181
+00:11:55.139 --> 00:12:02.289
+So let's compile, let's save, let's jump in, again no need for weapons here.
+
+182
+00:12:02.289 --> 00:12:08.419
+Let's run in, door opens and when we leave the door closes so now we've got some
+
+183
+00:12:08.419 --> 00:12:13.340
+basic blueprint functionality working for a door opening and closing.

@@ -1,0 +1,1089 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:09.140
+Now we're going to move on to just a couple of talks about various tools that you will be utilizing for gameplay code and systems code
+
+2
+00:00:09.140 --> 00:00:14.140
+that are kind of good to be aware of that don't really fit tidily into any of those previous brackets.
+
+3
+00:00:14.140 --> 00:00:16.140
+So first off we have delegates and events.
+
+4
+00:00:16.140 --> 00:00:18.579
+First thing we should talk about is what actually is a delegate.
+
+5
+00:00:18.579 --> 00:00:24.579
+This might be a kind of term and concept that you're already familiar with, especially if you've worked in C sharp because they've got them there.
+
+6
+00:00:25.579 --> 00:00:32.579
+But if you're not aware of them, delegates are essentially a type that can reference and execute member functions on objects.
+
+7
+00:00:32.579 --> 00:00:41.579
+So if you imagine a type that maintains an array of function pointers and it can maintain a reference to either a single function pointer or a set of them
+
+8
+00:00:41.579 --> 00:00:46.579
+and then you can execute those functions from a single location, that's essentially what it is.
+
+9
+00:00:46.579 --> 00:00:50.579
+It's an implementation of what would be called in formal terms the observer pattern.
+
+10
+00:00:50.579 --> 00:00:56.579
+It's important to highlight one of the great powers and uses for these things is these delegates can be bound dynamically at runtime
+
+11
+00:00:56.579 --> 00:01:02.579
+so you can change the functions that will get called back from a delegate.
+
+12
+00:01:02.579 --> 00:01:05.579
+A classic example would be a switch in a video game.
+
+13
+00:01:05.579 --> 00:01:12.579
+You as a designer might want a switch to open a door and then maybe one time you want to reuse that switch and have it turn on a light.
+
+14
+00:01:12.579 --> 00:01:17.579
+And so if you do that by a delegate you're not having to really tightly couple these systems together.
+
+15
+00:01:17.579 --> 00:01:23.579
+The light doesn't have to know or the switch doesn't have to know that it's going to be used on a light and a door.
+
+16
+00:01:23.579 --> 00:01:32.579
+The switch just knows I'm telling people that I've been switched on and it's the people who are registering to that event that need to know about the light.
+
+17
+00:01:32.579 --> 00:01:35.319
+Delegates are also safe to copy around.
+
+18
+00:01:35.319 --> 00:01:41.319
+You can pass them around by value but it will allocate memory on the heap when you do this.
+
+19
+00:01:41.319 --> 00:01:48.319
+So when possible, when it's not too difficult, passing by reference is probably a little bit more memory efficient.
+
+20
+00:01:48.319 --> 00:01:51.700
+So there's a whole set of delegates available to us in Unreal.
+
+21
+00:01:51.700 --> 00:01:56.700
+The key ones to highlight is we have the concept of single versus multicast.
+
+22
+00:01:56.700 --> 00:01:59.700
+So single is a one-to-one binding.
+
+23
+00:01:59.700 --> 00:02:02.700
+You can only bind one function into this delegate at a time.
+
+24
+00:02:02.700 --> 00:02:05.700
+If you want to have a new function you need to remove the old one.
+
+25
+00:02:05.700 --> 00:02:08.770
+Multicast is kind of one-to-many bindings.
+
+26
+00:02:08.770 --> 00:02:15.770
+So three, four, twenty functions could all link themselves, bind themselves to this one delegate.
+
+27
+00:02:15.770 --> 00:02:20.770
+And when that delegate fires, all of those functions will get executed one after another.
+
+28
+00:02:20.770 --> 00:02:23.150
+And then we have the concept of dynamic.
+
+29
+00:02:23.150 --> 00:02:27.150
+There are both dynamic single and dynamic multicast delegates.
+
+30
+00:02:27.150 --> 00:02:34.150
+And dynamic essentially represents that they are available to the reflection system for a start.
+
+31
+00:02:34.150 --> 00:02:38.150
+So dynamic delegates can only be used on UObject and downwards types.
+
+32
+00:02:38.150 --> 00:02:41.150
+So ones that are kind of part of the Unreal ecosystem.
+
+33
+00:02:41.150 --> 00:02:47.150
+And they, particularly multicast dynamic delegates, can be exposed to Blueprints.
+
+34
+00:02:47.150 --> 00:02:50.150
+So that's one of the great uses for dynamic delegates.
+
+35
+00:02:50.150 --> 00:02:54.150
+Dynamic delegates are also serializable, meaning we can save them more easily.
+
+36
+00:02:54.150 --> 00:03:01.699
+The kind of one that is something to bear in mind about dynamic versus non-dynamic is that dynamic do tend to be slower.
+
+37
+00:03:02.699 --> 00:03:04.699
+So they're less kind of performant.
+
+38
+00:03:04.699 --> 00:03:08.699
+And we have more capabilities available to us if we choose non-dynamic.
+
+39
+00:03:08.699 --> 00:03:16.699
+So we can bind lambdas, we can bind function pointers to non-UObject types.
+
+40
+00:03:16.699 --> 00:03:22.699
+And we can also use payloads, which we can't use for dynamic delegates.
+
+41
+00:03:22.699 --> 00:03:24.699
+Which we'll get into a little bit more in a bit.
+
+42
+00:03:24.699 --> 00:03:26.699
+There is also the concept of events.
+
+43
+00:03:26.699 --> 00:03:32.699
+This is a kind of specialized type of delegate where the execution of that delegate is restricted to a particular class.
+
+44
+00:03:32.699 --> 00:03:38.699
+So that delegate is owned by a particular class, its execution can only be fired by the class that owns that delegate.
+
+45
+00:03:38.699 --> 00:03:44.699
+This still exists in code, but it's just worth mentioning that whilst it still exists and you can use it,
+
+46
+00:03:44.699 --> 00:03:51.699
+actually that rule about only being owned by this particular type isn't actually strictly enforced.
+
+47
+00:03:51.699 --> 00:03:55.699
+So from 4.2.6 onwards, it's deemed as essentially deprecated.
+
+48
+00:03:55.699 --> 00:03:58.699
+So you might still find them referenced occasionally and used,
+
+49
+00:03:58.699 --> 00:04:03.699
+but actually for the express purpose for which they're intended, it's not actually forced.
+
+50
+00:04:03.699 --> 00:04:06.659
+You could kind of break that.
+
+51
+00:04:06.659 --> 00:04:10.659
+So just some demonstrations for a single non-dynamic delegate.
+
+52
+00:04:10.659 --> 00:04:11.659
+This is how it would look.
+
+53
+00:04:11.659 --> 00:04:15.659
+Every time we declare a delegate, it would be in a format similar to this.
+
+54
+00:04:15.659 --> 00:04:17.660
+So we'll get onto this in the following page with the other examples.
+
+55
+00:04:17.660 --> 00:04:19.660
+You'll see this is kind of in common.
+
+56
+00:04:19.660 --> 00:04:24.660
+These declarations always come with a declare underscore, it's a macro.
+
+57
+00:04:24.660 --> 00:04:25.660
+So declare delegate.
+
+58
+00:04:25.660 --> 00:04:29.660
+Retval here means this is a delegate that can return a value,
+
+59
+00:04:29.660 --> 00:04:33.660
+which is only applicable for single delegates because obviously if you had a multicast,
+
+60
+00:04:33.660 --> 00:04:36.660
+if five items bind to this delegate,
+
+61
+00:04:36.660 --> 00:04:40.660
+how would you know which of those five return values you're going to use?
+
+62
+00:04:40.660 --> 00:04:44.660
+So retval is only relevant when you're doing a non-multicast delegate.
+
+63
+00:04:44.660 --> 00:04:48.689
+And one param means that this delegate takes one parameter.
+
+64
+00:04:48.689 --> 00:04:53.689
+All forms of delegates can take up to, I think it's nine parameters they can have.
+
+65
+00:04:54.689 --> 00:05:02.779
+There's a header you can actually look into, which is delegate combinations, I think it is,
+
+66
+00:05:02.779 --> 00:05:06.779
+where you can just see all the different versions, iterations of this macro.
+
+67
+00:05:06.779 --> 00:05:09.779
+But yeah, ultimately they can name conventions the same.
+
+68
+00:05:09.779 --> 00:05:12.779
+So once you've written one, you'll kind of know how the rest are written.
+
+69
+00:05:12.779 --> 00:05:17.360
+So what this does is this defines a signature for that delegate.
+
+70
+00:05:17.360 --> 00:05:21.360
+And then we define an instance of that delegate to actually bind to and to broadcast from.
+
+71
+00:05:21.360 --> 00:05:25.360
+So this is defining the signature, and then this is the actual delegate that we're talking about.
+
+72
+00:05:25.360 --> 00:05:30.360
+And then in terms of actually using that delegate, this is an example of the code we might have.
+
+73
+00:05:30.360 --> 00:05:34.360
+So the kind of key things to highlight here is that because this is a non-dynamic delegate,
+
+74
+00:05:34.360 --> 00:05:37.360
+again, we can bind to non-U object types.
+
+75
+00:05:37.360 --> 00:05:42.360
+So I've just created a temporary instance of this F some non-U object class
+
+76
+00:05:42.360 --> 00:05:47.360
+using shared pointers here, which we talked about in a previous session.
+
+77
+00:05:47.360 --> 00:05:50.360
+And this is just a little example of what that class actually looks like.
+
+78
+00:05:50.360 --> 00:05:53.360
+So you can see we've just got this one function. It's really not very interesting class.
+
+79
+00:05:53.360 --> 00:05:56.360
+It's just a kind of very minimal implementation.
+
+80
+00:05:56.360 --> 00:05:59.490
+This function does need to be public so that we can bind to it.
+
+81
+00:05:59.490 --> 00:06:03.490
+But if we look, the delegate says it's a one parameter delegate.
+
+82
+00:06:03.490 --> 00:06:08.490
+And it's got a return value of int32 here we specified.
+
+83
+00:06:08.490 --> 00:06:12.490
+So this function does return an int32, but it takes two parameters.
+
+84
+00:06:12.490 --> 00:06:15.490
+So the reason that this is okay, the reason that you combine this function
+
+85
+00:06:15.490 --> 00:06:17.490
+is because we're using something called payloads.
+
+86
+00:06:17.490 --> 00:06:23.490
+So payload is essentially an ability to bind additional data to a delegate at bind time.
+
+87
+00:06:23.490 --> 00:06:26.490
+So our delegate signature says it takes in one parameter.
+
+88
+00:06:26.490 --> 00:06:30.490
+But if we want to bind to a function that takes additional parameters,
+
+89
+00:06:30.490 --> 00:06:34.490
+we just need to say, and for those additional parameters, here's the data to feed into those.
+
+90
+00:06:34.490 --> 00:06:38.490
+So at the point that we bind that function to that delegate,
+
+91
+00:06:38.490 --> 00:06:41.490
+we're specifying what that additional data would be.
+
+92
+00:06:41.490 --> 00:06:45.490
+So in this case, when we actually finally execute that delegate,
+
+93
+00:06:45.490 --> 00:06:48.490
+which is what we're doing here, you can see because it has a return value,
+
+94
+00:06:48.490 --> 00:06:52.490
+we can feed that value back into a variable and do whatever we want with that.
+
+95
+00:06:52.490 --> 00:06:57.519
+We only execute and pass in the one variable that we specify here.
+
+96
+00:06:57.519 --> 00:06:59.519
+This is our one parameter.
+
+97
+00:06:59.519 --> 00:07:02.519
+But the other value that's going to be fed into this some other float
+
+98
+00:07:02.519 --> 00:07:05.519
+has already been specified at the bind, and that's going to be this number seven.
+
+99
+00:07:05.519 --> 00:07:10.519
+So when this function gets executed, it's going to receive 0.2 as infloat,
+
+100
+00:07:10.519 --> 00:07:13.519
+and it's going to receive 7.0 as some other float.
+
+101
+00:07:13.519 --> 00:07:15.519
+And then we can do whatever we want with that.
+
+102
+00:07:15.519 --> 00:07:21.870
+The kind of things to mention here is that particularly when you're doing return values,
+
+103
+00:07:21.870 --> 00:07:25.870
+we need to be sure that this delegate actually has something bound to it,
+
+104
+00:07:25.870 --> 00:07:28.870
+so that's what this is bound is for.
+
+105
+00:07:28.870 --> 00:07:32.870
+And when you're binding raw, when you're doing things that aren't UObjects,
+
+106
+00:07:32.870 --> 00:07:37.870
+so we can't count on the fact that they're going to be properly garbage collected and cleaned up,
+
+107
+00:07:37.870 --> 00:07:39.870
+when you're binding raw functions,
+
+108
+00:07:39.870 --> 00:07:43.870
+it's possible that objects get deleted before you execute the delegate,
+
+109
+00:07:43.870 --> 00:07:46.870
+which would cause a crash, and there's nothing protecting us from that.
+
+110
+00:07:46.870 --> 00:07:51.870
+So you need to be quite diligent with making sure that when this object is getting destroyed,
+
+111
+00:07:51.870 --> 00:07:54.870
+you make sure it unbinds from any delegates that it might be bound to.
+
+112
+00:07:54.870 --> 00:07:58.279
+So then we move on to multicast.
+
+113
+00:07:58.279 --> 00:08:00.279
+This is also the example of non-dynamic.
+
+114
+00:08:00.279 --> 00:08:04.279
+So multicast, again, is our kind of one-to-many binding.
+
+115
+00:08:04.279 --> 00:08:06.279
+Naming convention looks pretty similar.
+
+116
+00:08:06.279 --> 00:08:11.379
+As you can see, declare multicast delegate and then our number of params.
+
+117
+00:08:11.379 --> 00:08:16.759
+We don't have retval because multicast delegates can't return a return value.
+
+118
+00:08:16.759 --> 00:08:18.759
+But the kind of thing I wanted to highlight here was,
+
+119
+00:08:18.759 --> 00:08:21.759
+as you can see, we've got a delegate signature name,
+
+120
+00:08:21.759 --> 00:08:25.759
+and then we have our two parameters, so this takes a bool and a UObject pointer.
+
+121
+00:08:25.759 --> 00:08:27.759
+Now, this is defining a signature,
+
+122
+00:08:27.759 --> 00:08:31.759
+but multiple instances could reuse that same signature,
+
+123
+00:08:31.759 --> 00:08:33.759
+and you will see this in Unreal code sometimes,
+
+124
+00:08:33.759 --> 00:08:35.759
+that we declare a signature once,
+
+125
+00:08:35.759 --> 00:08:38.759
+and then you reuse that signature for different occasions.
+
+126
+00:08:38.759 --> 00:08:40.759
+So you could imagine some situation where,
+
+127
+00:08:40.759 --> 00:08:45.759
+if really all that we care about is what input parameters it takes,
+
+128
+00:08:45.759 --> 00:08:50.759
+we don't need to do two, three, four different delegate declarations
+
+129
+00:08:50.759 --> 00:08:54.759
+if we're going to have several types that essentially take the same input parameters.
+
+130
+00:08:54.759 --> 00:08:59.759
+So we have an onHit object and an onDamagedBy object that both have the same signature,
+
+131
+00:08:59.759 --> 00:09:01.759
+so we can reuse that delegate signature,
+
+132
+00:09:01.759 --> 00:09:03.759
+even though these are different delegate instances
+
+133
+00:09:03.759 --> 00:09:05.759
+and can be bound to independently.
+
+134
+00:09:05.759 --> 00:09:09.690
+So when it actually comes to using this in code,
+
+135
+00:09:09.690 --> 00:09:12.690
+the key things I wanted to highlight here is that
+
+136
+00:09:12.690 --> 00:09:15.690
+when we are binding to a multicast delegate,
+
+137
+00:09:15.690 --> 00:09:18.690
+rather than using the term bind, we use add,
+
+138
+00:09:18.690 --> 00:09:20.690
+because that's the concept, right?
+
+139
+00:09:20.690 --> 00:09:23.690
+It's almost like an array of functions that it would call back to,
+
+140
+00:09:23.690 --> 00:09:25.690
+so we use the term add.
+
+141
+00:09:25.690 --> 00:09:27.690
+And because, again, this is non-dynamic,
+
+142
+00:09:27.690 --> 00:09:29.690
+we have the ability to use lambdas.
+
+143
+00:09:29.690 --> 00:09:31.690
+So for anyone who's not familiar with lambdas,
+
+144
+00:09:31.690 --> 00:09:33.690
+that's also referred to as anonymous functions.
+
+145
+00:09:33.690 --> 00:09:36.690
+It's just kind of like writing a function in line.
+
+146
+00:09:36.690 --> 00:09:39.690
+So this is, I'm not going to go into detail about these things,
+
+147
+00:09:39.690 --> 00:09:43.690
+but essentially this is, the body of this function would be,
+
+148
+00:09:43.690 --> 00:09:45.690
+this isn't a function that's defined somewhere else in the class,
+
+149
+00:09:45.690 --> 00:09:49.139
+it's defined here in line inside our body.
+
+150
+00:09:49.139 --> 00:09:52.139
+And again, because it's multicast, we can add an additional function,
+
+151
+00:09:52.139 --> 00:09:56.139
+and addUObject is the kind of simplest way
+
+152
+00:09:56.139 --> 00:10:00.139
+to add a reference to a function that is part of a UObject,
+
+153
+00:10:00.139 --> 00:10:02.139
+so a non-raw object,
+
+154
+00:10:02.139 --> 00:10:05.139
+and then that means it's going to be automatically garbage collected
+
+155
+00:10:05.139 --> 00:10:06.139
+and it's a little bit safer.
+
+156
+00:10:06.139 --> 00:10:09.139
+If you try and bind a raw function to an object
+
+157
+00:10:09.139 --> 00:10:11.139
+that is actually a UObject or inherits from that chain,
+
+158
+00:10:11.139 --> 00:10:15.139
+so in this case, this is our actor which inherits from object,
+
+159
+00:10:15.139 --> 00:10:17.139
+you'll actually get told off by the compiler,
+
+160
+00:10:17.139 --> 00:10:18.139
+so it won't actually let you do that.
+
+161
+00:10:18.139 --> 00:10:23.139
+So you have to use addUObject if it's a UObject type or downwards.
+
+162
+00:10:23.139 --> 00:10:25.970
+And then you can just see here,
+
+163
+00:10:25.970 --> 00:10:29.970
+we just declared a null value just to kind of have some parameter
+
+164
+00:10:29.970 --> 00:10:31.970
+to feed in to this delegate.
+
+165
+00:10:31.970 --> 00:10:35.970
+And we can perform that same check here for isBound,
+
+166
+00:10:35.970 --> 00:10:38.970
+it's not necessary, but it's tidy.
+
+167
+00:10:38.970 --> 00:10:41.970
+And then instead of execute,
+
+168
+00:10:41.970 --> 00:10:43.970
+we use the term broadcast for multicast delegates
+
+169
+00:10:43.970 --> 00:10:45.970
+because that's kind of more indicative of what it's doing,
+
+170
+00:10:45.970 --> 00:10:47.970
+it's letting possibly several things know,
+
+171
+00:10:47.970 --> 00:10:49.970
+it's broadcasting this information.
+
+172
+00:10:49.970 --> 00:10:54.480
+And then last of all, we actually have the dynamic delegates.
+
+173
+00:10:54.480 --> 00:10:57.480
+Like I said, you can have non-multicast dynamic delegates,
+
+174
+00:10:57.480 --> 00:11:00.480
+but if you want this to be exposed to Blueprint,
+
+175
+00:11:00.480 --> 00:11:03.480
+it does need to be multicast.
+
+176
+00:11:03.480 --> 00:11:05.480
+So whenever you make a delegate,
+
+177
+00:11:05.480 --> 00:11:08.480
+or I think they're called event dispatches in Blueprint,
+
+178
+00:11:08.480 --> 00:11:11.480
+that is always a multicast dynamic delegate.
+
+179
+00:11:11.480 --> 00:11:14.480
+So this is what that syntax would look like,
+
+180
+00:11:14.480 --> 00:11:16.480
+very, very similar to the previous ones, as you can see,
+
+181
+00:11:16.480 --> 00:11:19.480
+but it's declared dynamic, then multicast,
+
+182
+00:11:19.480 --> 00:11:22.480
+or we wouldn't have multicast there if it was a single one,
+
+183
+00:11:22.480 --> 00:11:24.480
+declared dynamic multicast delegate,
+
+184
+00:11:24.480 --> 00:11:25.480
+and then our number of prams.
+
+185
+00:11:25.480 --> 00:11:27.480
+Again, because this is multicast,
+
+186
+00:11:27.480 --> 00:11:29.610
+it can't have a return value.
+
+187
+00:11:29.610 --> 00:11:31.610
+If you do want to expose it to Blueprint,
+
+188
+00:11:31.610 --> 00:11:33.610
+it does have to be dynamic multicast,
+
+189
+00:11:33.610 --> 00:11:36.610
+but also you need this additional metadata
+
+190
+00:11:36.610 --> 00:11:38.610
+above your delegate instance.
+
+191
+00:11:38.610 --> 00:11:40.610
+So in this case, you property,
+
+192
+00:11:40.610 --> 00:11:43.610
+because even though delegates kind of call two functions,
+
+193
+00:11:43.610 --> 00:11:47.610
+they are actually properties, they are data,
+
+194
+00:11:47.610 --> 00:11:50.610
+and you use this blueprint assignable.
+
+195
+00:11:50.610 --> 00:11:53.610
+If we didn't have this above our delegate instance,
+
+196
+00:11:53.610 --> 00:11:55.610
+then it wouldn't be visible to Blueprint.
+
+197
+00:11:55.610 --> 00:11:57.700
+Then in terms of actually binding and using it,
+
+198
+00:11:57.700 --> 00:11:59.700
+we have very similar functions
+
+199
+00:11:59.700 --> 00:12:02.700
+to our previous non-dynamic multicasts,
+
+200
+00:12:02.700 --> 00:12:04.700
+where it's using the term add,
+
+201
+00:12:04.700 --> 00:12:06.700
+and then it's add dynamic.
+
+202
+00:12:06.700 --> 00:12:09.700
+So we can use add dynamic or add unique dynamic
+
+203
+00:12:09.700 --> 00:12:10.700
+if you want to make sure
+
+204
+00:12:10.700 --> 00:12:12.700
+that you haven't already bound this function.
+
+205
+00:12:12.700 --> 00:12:13.700
+When you're typing this in,
+
+206
+00:12:13.700 --> 00:12:15.700
+it's just worth highlighting that actually sometimes
+
+207
+00:12:15.700 --> 00:12:18.700
+your IDE will kind of do some weird things
+
+208
+00:12:18.700 --> 00:12:20.700
+where it says it can't find the function,
+
+209
+00:12:20.700 --> 00:12:22.700
+but if you just type add unique dynamic,
+
+210
+00:12:22.700 --> 00:12:25.700
+it will actually realize that that's okay.
+
+211
+00:12:25.700 --> 00:12:27.700
+It might try and prompt you to preface it
+
+212
+00:12:27.700 --> 00:12:29.700
+with some underscores, but that's not necessary.
+
+213
+00:12:29.700 --> 00:12:31.700
+And then otherwise, it looked pretty much the same
+
+214
+00:12:31.700 --> 00:12:33.700
+as our U object bindings,
+
+215
+00:12:33.700 --> 00:12:35.700
+where we just specified the object
+
+216
+00:12:35.700 --> 00:12:37.700
+that the function is getting called on,
+
+217
+00:12:37.700 --> 00:12:40.700
+and then which function we're actually binding to.
+
+218
+00:12:40.700 --> 00:12:42.700
+Obviously, this function signature
+
+219
+00:12:42.700 --> 00:12:44.700
+needs to match the signature of our delegate
+
+220
+00:12:44.700 --> 00:12:46.700
+as the case with all the others.
+
+221
+00:12:46.700 --> 00:12:47.700
+As I mentioned previously,
+
+222
+00:12:47.700 --> 00:12:49.700
+we can't use payloads here,
+
+223
+00:12:49.700 --> 00:12:52.700
+so we can't use bind time data
+
+224
+00:12:52.700 --> 00:12:53.700
+to make functions
+
+225
+00:12:53.700 --> 00:12:55.700
+that don't actually have the same signature
+
+226
+00:12:55.700 --> 00:12:56.700
+match our delegate signature,
+
+227
+00:12:56.700 --> 00:12:58.700
+so just worth bearing that in mind.
+
+228
+00:12:58.700 --> 00:13:00.700
+And then we have these same checks available to us
+
+229
+00:13:00.700 --> 00:13:01.700
+where we can check whether or not
+
+230
+00:13:01.700 --> 00:13:03.700
+that delegate has anything bound to it
+
+231
+00:13:03.700 --> 00:13:07.700
+and then that same terminology broadcast for our value.
+
+232
+00:13:07.700 --> 00:13:11.700
+Now, we don't have to bind Blueprint functions
+
+233
+00:13:11.700 --> 00:13:12.700
+to this delegate.
+
+234
+00:13:12.700 --> 00:13:14.700
+We can also bind C++ functions,
+
+235
+00:13:14.700 --> 00:13:16.700
+but the thing that's worth highlighting about that
+
+236
+00:13:16.700 --> 00:13:18.700
+is that if it's a dynamic delegate,
+
+237
+00:13:18.700 --> 00:13:22.700
+that function has to have a U function metadata on it.
+
+238
+00:13:22.700 --> 00:13:24.700
+If you tried to bind a function
+
+239
+00:13:24.700 --> 00:13:27.700
+to a dynamic delegate without U function,
+
+240
+00:13:27.700 --> 00:13:29.700
+it would probably not cause a compile error,
+
+241
+00:13:29.700 --> 00:13:31.700
+but when you go to broadcast that,
+
+242
+00:13:31.700 --> 00:13:32.700
+it would tell you off,
+
+243
+00:13:32.700 --> 00:13:34.700
+so that's just something to bear in mind.
+
+244
+00:13:34.700 --> 00:13:35.700
+And then last of all,
+
+245
+00:13:35.700 --> 00:13:39.740
+this is just what it would look like in Blueprint.
+
+246
+00:13:39.740 --> 00:13:41.740
+The one thing I haven't actually touched on here
+
+247
+00:13:41.740 --> 00:13:45.740
+is that with our delegate signature declaration,
+
+248
+00:13:45.740 --> 00:13:48.740
+with dynamic delegates, you specify for each parameter,
+
+249
+00:13:48.740 --> 00:13:49.740
+you specify the parameter type,
+
+250
+00:13:49.740 --> 00:13:52.740
+and then also a default name for that parameter.
+
+251
+00:13:52.740 --> 00:13:54.740
+And that's not relevant here.
+
+252
+00:13:54.740 --> 00:13:56.740
+You can see these names don't match up.
+
+253
+00:13:56.740 --> 00:13:58.740
+In C++, you can call it whatever you like,
+
+254
+00:13:58.740 --> 00:14:01.740
+but in Blueprint, if you go to bind to that delegate,
+
+255
+00:14:01.740 --> 00:14:03.740
+automatically it will use this default name
+
+256
+00:14:03.740 --> 00:14:04.740
+as your parameter name.
+
+257
+00:14:04.740 --> 00:14:06.740
+So I have not typed that in.
+
+258
+00:14:06.740 --> 00:14:09.740
+I just dragged off this event and typed custom event
+
+259
+00:14:09.740 --> 00:14:10.740
+and it auto-generated this
+
+260
+00:14:10.740 --> 00:14:12.740
+and it used float parameter name
+
+261
+00:14:12.740 --> 00:14:15.740
+as the default name for that parameter.
+
+262
+00:14:15.740 --> 00:14:17.740
+So that's the kind of difference
+
+263
+00:14:17.740 --> 00:14:21.740
+that you'll notice between delegate signature declarations
+
+264
+00:14:21.740 --> 00:14:22.740
+is with non-dynamics,
+
+265
+00:14:22.740 --> 00:14:25.740
+you don't specify a name per parameter,
+
+266
+00:14:25.740 --> 00:14:26.740
+but for dynamic delegates,
+
+267
+00:14:26.740 --> 00:14:28.740
+you do have to do an additional argument
+
+268
+00:14:28.740 --> 00:14:30.740
+that is a name for each parameter.
+
+269
+00:14:30.740 --> 00:14:32.740
+So if this were two parameters,
+
+270
+00:14:32.740 --> 00:14:34.740
+it would be float, float param name,
+
+271
+00:14:34.740 --> 00:14:37.860
+bool, bool param name or whatever.
+
+272
+00:14:37.860 --> 00:14:39.860
+So that about wraps it up for delegates.

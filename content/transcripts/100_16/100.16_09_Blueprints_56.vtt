@@ -1,0 +1,257 @@
+WEBVTT
+
+1
+00:00:01.679 --> 00:00:11.160
+To start with, we're going to look at how we take the logic for our demo dancer and put that into a standalone blueprint.
+
+2
+00:00:11.160 --> 00:00:18.160
+This is going to look relatively similar to what we have here in our level blueprint.
+
+3
+00:00:18.160 --> 00:00:27.160
+We'll kind of be copying this out and rebuilding these references since it will be its own self-contained blueprint actor.
+
+4
+00:00:27.160 --> 00:00:33.320
+So we'll come down here, we'll right click and add a blueprint class of type actor.
+
+5
+00:00:33.320 --> 00:00:40.149
+We'll call this BP session dancer.
+
+6
+00:00:40.149 --> 00:00:47.189
+Open it up and we have a nice blank blueprint here.
+
+7
+00:00:47.189 --> 00:00:51.189
+We can add a skeletal mesh component.
+
+8
+00:00:51.189 --> 00:00:57.890
+We can set the skeletal mesh asset to our session demo dancer.
+
+9
+00:00:57.890 --> 00:01:00.200
+There we go.
+
+10
+00:01:00.200 --> 00:01:06.260
+And we will set the use animation blueprint. We'll leave that to true.
+
+11
+00:01:06.260 --> 00:01:12.260
+And we will set our animation blueprint class to the session demo dance.
+
+12
+00:01:12.260 --> 00:01:16.079
+Beautiful.
+
+13
+00:01:16.079 --> 00:01:26.239
+Now, over here in the event graph, we are going to copy in the code that we can reuse from our level blueprint,
+
+14
+00:01:26.239 --> 00:01:29.340
+which is these.
+
+15
+00:01:29.340 --> 00:01:35.640
+And let's get over here.
+
+16
+00:01:35.640 --> 00:01:44.349
+We can delete this, copy these in and take the sequence out.
+
+17
+00:01:44.349 --> 00:01:53.060
+We don't need that. We'll get our skeletal mesh.
+
+18
+00:01:53.060 --> 00:02:03.060
+There we go. Get our animation instance, cast it to our ABP demo dancer and call dance toggle if that succeeds or not to demo dancer.
+
+19
+00:02:03.060 --> 00:02:06.060
+We'll print that out if it fails.
+
+20
+00:02:06.060 --> 00:02:12.060
+I deleted our event begin play, but I would actually like that back.
+
+21
+00:02:12.060 --> 00:02:22.469
+So that just like we did with our cube that spins around, we can enable input on this actor.
+
+22
+00:02:22.469 --> 00:02:28.469
+And we just need to make sure we have a reference to the player controller.
+
+23
+00:02:28.469 --> 00:02:34.939
+Excuse me. And we'll make sure that this spacebar is not consuming our input.
+
+24
+00:02:34.939 --> 00:02:42.150
+Awesome. Go ahead and close this spin cube here as well.
+
+25
+00:02:42.150 --> 00:02:46.729
+So the next thing we want to do, though, is get our stage here.
+
+26
+00:02:46.729 --> 00:02:50.759
+And it's a blueprint, its own blueprint.
+
+27
+00:02:50.759 --> 00:02:58.979
+Let's right click blueprint class actor BP session stage.
+
+28
+00:02:58.979 --> 00:03:09.909
+Open this up. We'll add a static mesh component.
+
+29
+00:03:09.909 --> 00:03:16.680
+We can set this to our look for stage.
+
+30
+00:03:16.680 --> 00:03:22.509
+We want session stage. This is the one with our separate materials compile.
+
+31
+00:03:22.509 --> 00:03:29.719
+And then once again here, we'll look for our stage pillars.
+
+32
+00:03:29.719 --> 00:03:38.729
+And we can actually find that here and drag it in maybe a little bit faster.
+
+33
+00:03:38.729 --> 00:04:03.229
+Awesome. So we'll save that. Come back here. We can delete this session stage.
+
+34
+00:04:03.229 --> 00:04:10.250
+Delete this animation blueprint. Delete this stuff.
+
+35
+00:04:10.250 --> 00:04:15.250
+We'll leave up here for now until we finish copying things over.
+
+36
+00:04:15.250 --> 00:04:20.250
+Including session stage. We want to come over here to our event graph.
+
+37
+00:04:20.250 --> 00:04:35.019
+Do our same enable input. Get the player controller.
+
+38
+00:04:35.019 --> 00:04:41.620
+Copy the space bar. Our flip flop. Our two variables.
+
+39
+00:04:41.620 --> 00:04:48.779
+And the nodes to change the parameter.
+
+40
+00:04:48.779 --> 00:04:53.290
+We'll bring that here. We'll then grab these.
+
+41
+00:04:53.290 --> 00:05:00.420
+And you'll notice, though, that even though we copied in these materials from our level blueprint,
+
+42
+00:05:00.420 --> 00:05:06.420
+we don't see them over here in our variables list for this specific actor blueprint.
+
+43
+00:05:06.420 --> 00:05:12.420
+What we can do is come over and right click. Simply create variable color MPC.
+
+44
+00:05:12.420 --> 00:05:17.639
+Right click. Create variable.
+
+45
+00:05:17.639 --> 00:05:21.639
+Make sure you click on the node itself and not the name of the node or the pin.
+
+46
+00:05:21.639 --> 00:05:27.089
+Create variable. Compile. And then we'll need to come in here again
+
+47
+00:05:27.089 --> 00:05:31.089
+to each of these and make sure we have the correct one.
+
+48
+00:05:31.089 --> 00:05:42.550
+So we can do this. There we go.
+
+49
+00:05:42.550 --> 00:05:49.740
+Fantastic. Now we can close that. Let's also unlink this without deleting everything.
+
+50
+00:05:49.740 --> 00:05:54.290
+It doesn't know where our old animation blueprint is, but that's OK.
+
+51
+00:05:54.290 --> 00:06:02.980
+Still compile. And then let's drag in our session stage.
+
+52
+00:06:02.980 --> 00:06:08.680
+Bring this up to 160. That's where we were.
+
+53
+00:06:08.680 --> 00:06:13.680
+Bring it back a little. Maybe over to the side.
+
+54
+00:06:13.680 --> 00:06:23.410
+Position ourselves up. OK, looking good.
+
+55
+00:06:23.410 --> 00:06:31.660
+And then our BP session demo dancer right on in here.
+
+56
+00:06:31.660 --> 00:06:42.420
+And now when we press play, everyone's dancing. We press space.
+
+57
+00:06:42.420 --> 00:06:48.459
+Everything works. But now we can reuse our session dancer and our stage
+
+58
+00:06:48.459 --> 00:06:54.459
+in as many different levels as we want, which gives us a lot more flexibility for our game.
+
+59
+00:06:54.459 --> 00:07:01.459
+And once again, these slides here just calling out the process
+
+60
+00:07:01.459 --> 00:07:05.459
+that we're going to go, you know, of getting everything linked up together.
+
+61
+00:07:05.459 --> 00:07:11.459
+You'll see here in this slide, though, we have our stage as a collection of separate objects.
+
+62
+00:07:11.459 --> 00:07:19.459
+And we'll actually get to that a little bit later after we look at the modeling tools in a future video.
+
+63
+00:07:19.459 --> 00:07:26.069
+In the next video, we'll look at how we can start leveraging more of Unreal Engine's unique features,
+
+64
+00:07:26.069 --> 00:07:35.069
+starting with Lumen real time global illumination and applying post-processing settings in our level to enhance the look and feel.

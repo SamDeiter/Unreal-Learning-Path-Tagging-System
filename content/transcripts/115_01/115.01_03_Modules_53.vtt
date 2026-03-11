@@ -1,0 +1,609 @@
+WEBVTT
+
+1
+00:00:01.070 --> 00:00:05.070
+Modules in Unreal represent a single, linkable library of functionality.
+
+2
+00:00:05.070 --> 00:00:10.070
+And there's a number of reasons why we might want to break our game up into modules straight out of the gate.
+
+3
+00:00:10.070 --> 00:00:14.070
+Whether we want very granular control of what gets deployed with particular targets,
+
+4
+00:00:14.070 --> 00:00:18.070
+or we've got a game of significant size that really crumbles under the link times,
+
+5
+00:00:18.070 --> 00:00:23.070
+or maybe we just want to break our game up into reusable pieces. Modules are the way to go.
+
+6
+00:00:23.070 --> 00:00:28.359
+Simply put, an Unreal game is a single EXE built from module libraries,
+
+7
+00:00:28.359 --> 00:00:31.359
+the most important of which being the primary gameplay module.
+
+8
+00:00:31.359 --> 00:00:38.869
+This module acts as the entry point for the EXE, and for the most part it is considered the glue for the rest of the game.
+
+9
+00:00:38.869 --> 00:00:42.869
+Modules are free to link to other modules depending on what functionality they want.
+
+10
+00:00:42.869 --> 00:00:46.869
+For editor targets, each module will produce a DLLEach,
+
+11
+00:00:46.869 --> 00:00:51.130
+which is stored in the project binaries folder of your working directory.
+
+12
+00:00:51.130 --> 00:00:55.130
+In a shipping target, we produce a single, monolithic executable.
+
+13
+00:00:55.130 --> 00:01:00.479
+As a quick example of how we might find a game structured when using the module approach,
+
+14
+00:01:00.479 --> 00:01:03.479
+let's consider spinning up a new project and let's call it FPSGame.
+
+15
+00:01:03.479 --> 00:01:08.859
+We'd find that Unreal will create a primary gameplay module for us, the FPSGame.dll,
+
+16
+00:01:08.859 --> 00:01:10.859
+and we've now got our entry point.
+
+17
+00:01:10.859 --> 00:01:14.959
+Now let's start adding features. Let's say we want guns and grenades.
+
+18
+00:01:14.959 --> 00:01:18.959
+Well, grenades and guns both kind of rely on the concept of projectiles,
+
+19
+00:01:18.959 --> 00:01:22.959
+so let's make a new module called projectiles that contains an abstracted framework,
+
+20
+00:01:22.959 --> 00:01:24.959
+and have both of these modules depend on it.
+
+21
+00:01:24.959 --> 00:01:28.959
+As with everything in programming, these dependencies can be cyclical,
+
+22
+00:01:28.959 --> 00:01:30.959
+so we should be cautious when we make these connections.
+
+23
+00:01:30.959 --> 00:01:35.959
+It's a good rule of thumb to have nothing rely on the primary gameplay module if possible.
+
+24
+00:01:35.959 --> 00:01:39.959
+Having it act as the glue helps reduce headaches down the line.
+
+25
+00:01:39.959 --> 00:01:43.819
+So how do we actually create a new module?
+
+26
+00:01:43.819 --> 00:01:49.019
+A module must at least contain the following, and don't worry, we will expand on each shortly.
+
+27
+00:01:49.019 --> 00:01:54.400
+It requires a working directory, and this is typically located in the source runtime folder.
+
+28
+00:01:54.400 --> 00:02:00.620
+Within the project folder structure, a module must be defined within a single folder in alongside your source.
+
+29
+00:02:00.620 --> 00:02:02.620
+So as an example to go with the image above,
+
+30
+00:02:02.620 --> 00:02:07.620
+we'd create a new test module folder within the source runtime directory.
+
+31
+00:02:07.620 --> 00:02:13.750
+We will also require a build.cs file, and this file is necessary to the genetic makeup of the module,
+
+32
+00:02:13.750 --> 00:02:16.750
+but don't worry, we will cover this in more detail soon.
+
+33
+00:02:16.750 --> 00:02:22.750
+In our example, we'd create a test module.build.cs file within the working directory that we just spoke about.
+
+34
+00:02:22.750 --> 00:02:25.849
+And lastly we need a module source file.
+
+35
+00:02:25.849 --> 00:02:32.909
+This source file defines the module class which inherits from the iModule interface and invokes the implement module macro.
+
+36
+00:02:32.909 --> 00:02:40.039
+The implement module macro is what signals to the Unreal build tool that there's a new DLL that needs to be generated.
+
+37
+00:02:40.039 --> 00:02:44.360
+A module is primarily defined by its build.cs file.
+
+38
+00:02:44.360 --> 00:02:50.360
+It's here that we outline what this module depends on and how this module interacts when it itself is depended upon,
+
+39
+00:02:50.360 --> 00:02:54.360
+and there are two very important string arrays that need populating in this file.
+
+40
+00:02:54.360 --> 00:02:58.969
+Firstly, we've got the public dependency module names,
+
+41
+00:02:58.969 --> 00:03:02.969
+and this is a list of what modules this module openly relies on.
+
+42
+00:03:02.969 --> 00:03:07.969
+In our example from earlier, if guns.dll publicly relied on projectiles.dll,
+
+43
+00:03:07.969 --> 00:03:12.969
+any import of guns, say we add gun.h to a file in my FPS game,
+
+44
+00:03:12.969 --> 00:03:16.969
+the linker would also prompt us to import projectiles as well.
+
+45
+00:03:16.969 --> 00:03:21.099
+Ideally we keep the public dependencies to an absolute minimum.
+
+46
+00:03:21.099 --> 00:03:28.099
+We want modules to be self-contained pieces of functionality that could theoretically be cut and pasted into a new project with minimal fuss.
+
+47
+00:03:28.099 --> 00:03:31.319
+Next we've got the private dependency module names,
+
+48
+00:03:31.319 --> 00:03:35.319
+and these are the modules that this module relies on but internally.
+
+49
+00:03:35.319 --> 00:03:42.319
+So in our example from earlier again, if guns relied on projectiles but entirely in private or non-API headers,
+
+50
+00:03:42.319 --> 00:03:48.319
+we can add a private dependency and not force any importing modules to also import projectiles.
+
+51
+00:03:48.319 --> 00:03:51.580
+But how do we build modules?
+
+52
+00:03:51.580 --> 00:03:57.580
+Simply adding the code within the module directory is not enough to get the compiler to pick it up and actually compile it.
+
+53
+00:03:57.580 --> 00:04:00.580
+In order to achieve this, we either need to do one of the following.
+
+54
+00:04:00.580 --> 00:04:04.900
+Firstly, we can have the primary gameplay module depend on it,
+
+55
+00:04:04.900 --> 00:04:07.900
+and this can either be as a public or as a private dependency.
+
+56
+00:04:07.900 --> 00:04:12.120
+Going back to our example with the FPS game, which was the primary gameplay module,
+
+57
+00:04:12.120 --> 00:04:17.120
+we did not depend on projectiles directly, but we did depend on guns.
+
+58
+00:04:17.120 --> 00:04:22.339
+These modules are now chained together in a sense and will all get roped into the compile.
+
+59
+00:04:22.339 --> 00:04:27.629
+If the module doesn't appear anywhere in that chain, it will not get detected by the compiler.
+
+60
+00:04:27.629 --> 00:04:31.629
+Alternatively, we can add the module to a target.cs file.
+
+61
+00:04:31.629 --> 00:04:34.629
+And this isn't the typical way of adding a module to the project,
+
+62
+00:04:34.629 --> 00:04:39.629
+but it is massively powerful if you desire a per-target compilation control.
+
+63
+00:04:39.629 --> 00:04:44.629
+For example, if you're building a server target, we can add the module to the mygameserver.target.cs file,
+
+64
+00:04:44.629 --> 00:04:48.629
+which will build it for this target and emit it from the clients.
+
+65
+00:04:48.629 --> 00:04:52.629
+Similarly, we can add a UI module to the mygameclient target,
+
+66
+00:04:52.629 --> 00:04:56.629
+and this will emit it from the server targets, which makes sense as a server,
+
+67
+00:04:56.629 --> 00:04:59.660
+doesn't really have any need for any UI functionality.
+
+68
+00:04:59.660 --> 00:05:02.660
+This last point is important when considering functionality such as cheats.
+
+69
+00:05:02.660 --> 00:05:06.660
+If we build a cheat module and emit it from our server and client targets,
+
+70
+00:05:06.660 --> 00:05:09.660
+then the players can't cheat if the code isn't there to begin with.
+
+71
+00:05:09.660 --> 00:05:14.660
+We also have the added bonus of stripping out any automation test modules that you may have added
+
+72
+00:05:14.660 --> 00:05:16.660
+during the development of your project.
+
+73
+00:05:16.660 --> 00:05:21.819
+Lastly, we also need to add the new module to the list of modules that is held within the UProject file.
+
+74
+00:05:21.819 --> 00:05:24.949
+This unique file can be opened as a JSON,
+
+75
+00:05:24.949 --> 00:05:28.949
+and within this file we can add our new module and define two key pieces of data about it,
+
+76
+00:05:28.949 --> 00:05:32.949
+that being the loading phase and the type of module that we have.
+
+77
+00:05:32.949 --> 00:05:34.949
+We'll cover what each of these mean in the next slide,
+
+78
+00:05:34.949 --> 00:05:38.949
+before circling back to the UProject file directly.
+
+79
+00:05:38.949 --> 00:05:42.180
+Modules themselves can be defined with a load phase and a type,
+
+80
+00:05:42.180 --> 00:05:47.180
+giving us a massive scope to define how and when a module is allowed to initialise.
+
+81
+00:05:47.180 --> 00:05:50.180
+Typically they'll fall into one of three categories,
+
+82
+00:05:50.180 --> 00:05:53.180
+although a great degree of nuance is possible.
+
+83
+00:05:53.180 --> 00:05:57.180
+You can take a look at the e-host type in the engine for a full list.
+
+84
+00:05:57.180 --> 00:06:00.240
+Definitions for both e-host type and e-load phase
+
+85
+00:06:00.240 --> 00:06:03.240
+can be found in the module descriptor.h file.
+
+86
+00:06:03.240 --> 00:06:07.819
+The first example of a module type would be the editor type,
+
+87
+00:06:07.819 --> 00:06:10.819
+meaning it only loads when the editor itself is starting up.
+
+88
+00:06:10.819 --> 00:06:13.329
+Following that we've got the runtime type,
+
+89
+00:06:13.329 --> 00:06:16.329
+which means it loads on all targets apart from programs.
+
+90
+00:06:16.329 --> 00:06:18.550
+From there we have developer tool,
+
+91
+00:06:18.550 --> 00:06:21.550
+which means it's initialised when compiling for targets with the
+
+92
+00:06:21.550 --> 00:06:24.550
+BBuildDeveloperTools set to true.
+
+93
+00:06:24.550 --> 00:06:28.550
+This is very useful for defining modules specifically to hold any automated testing
+
+94
+00:06:28.550 --> 00:06:31.550
+or any tools that benefit in-house development.
+
+95
+00:06:31.550 --> 00:06:34.939
+And from there we've got server only and client only types,
+
+96
+00:06:34.939 --> 00:06:36.939
+and these get spanned up exactly where you'd think.
+
+97
+00:06:36.939 --> 00:06:40.939
+They get spanned up on dedicated servers and non-dedicated servers, respectively.
+
+98
+00:06:40.939 --> 00:06:47.769
+Load phases are defined alongside the module type to define when a module spins up.
+
+99
+00:06:47.769 --> 00:06:52.800
+For instance, editor modules tend to get spanned up during the post engine init phase,
+
+100
+00:06:52.800 --> 00:06:55.800
+whereas actual gameplay modules tend to get spanned up during the default phase,
+
+101
+00:06:55.800 --> 00:06:59.800
+although the actual loading phase for each module varies depending on the actual use case.
+
+102
+00:06:59.800 --> 00:07:03.800
+You can see the e-loading phase enum for a full list.
+
+103
+00:07:03.800 --> 00:07:09.410
+We can see here inside the project file, which was opened just as a JSON file,
+
+104
+00:07:09.410 --> 00:07:12.410
+we're free to add a number of new modules to the module array,
+
+105
+00:07:12.410 --> 00:07:16.410
+and it's here that we define the phase and type of the module.
+
+106
+00:07:16.410 --> 00:07:20.660
+Modules are actually initialised and can quite easily be used as singletons,
+
+107
+00:07:20.660 --> 00:07:22.660
+with a varying use right across the code base already.
+
+108
+00:07:23.730 --> 00:07:27.920
+There's nothing stopping us from grabbing a reference to that instantiated module class.
+
+109
+00:07:27.920 --> 00:07:32.920
+A great example of using modules not just as compartmentalised pieces of functionality within the project,
+
+110
+00:07:32.920 --> 00:07:37.779
+but as tools in their own right, is when we extend the editor.
+
+111
+00:07:37.779 --> 00:07:39.779
+Let's consider the following line of code.
+
+112
+00:07:39.779 --> 00:07:46.009
+The module manager lets us statically grab a reference to the module with the name that we provide.
+
+113
+00:07:46.009 --> 00:07:51.069
+This name correlates to the name we passed into the implement module macro outlined earlier.
+
+114
+00:07:51.069 --> 00:07:56.069
+There's nothing stopping us from adding extra functionality to that single mymodule.cpp file,
+
+115
+00:07:56.069 --> 00:07:59.069
+and using it as a tool or a helper class.
+
+116
+00:07:59.069 --> 00:08:04.360
+Plugins are a collection of modules broken out into a standalone block of functionality
+
+117
+00:08:04.360 --> 00:08:07.360
+that can be turned on or off on a per project basis,
+
+118
+00:08:07.360 --> 00:08:10.360
+allowing for seamless integration with other projects.
+
+119
+00:08:10.360 --> 00:08:14.579
+Plugins can be developed to do anything that you would otherwise do directly in the project,
+
+120
+00:08:14.579 --> 00:08:19.579
+say extending the editor, adding a gameplay system or holding in-house tools.
+
+121
+00:08:19.579 --> 00:08:25.579
+They also reflect the U project's ability to mix and match different module types depending on your use case.
+
+122
+00:08:25.579 --> 00:08:28.970
+Let's say we want to add a new asset type to our project.
+
+123
+00:08:28.970 --> 00:08:33.970
+We can create a plugin that consists of a gameplay module and an editor module.
+
+124
+00:08:33.970 --> 00:08:37.000
+Our gameplay module would hold the new class definitions,
+
+125
+00:08:37.000 --> 00:08:41.000
+with the editor module handling the creation of that new asset type in the content browser,
+
+126
+00:08:41.000 --> 00:08:43.000
+adding new context menu support,
+
+127
+00:08:43.000 --> 00:08:49.350
+and invoking any custom editors that we may or may not have wanted to develop alongside our new asset.
+
+128
+00:08:49.350 --> 00:08:53.350
+We can see what plugins we currently have installed by opening the plugins menu in the editor,
+
+129
+00:08:53.350 --> 00:08:57.350
+and we can see that the engine comes with a whole suite of plugins already installed,
+
+130
+00:08:57.350 --> 00:08:59.350
+covering a massive array of use cases.
+
+131
+00:08:59.350 --> 00:09:04.350
+We can turn off the ones that we don't want, and turn on the ones that we do. It's pretty simple.
+
+132
+00:09:04.350 --> 00:09:07.350
+It's here that we can invoke the new plugin wizard,
+
+133
+00:09:07.350 --> 00:09:12.059
+generating the boilerplate for us so we can start fleshing out our own plugin.
+
+134
+00:09:12.059 --> 00:09:16.059
+The anatomy of a plugin is staggeringly close to that of the U project itself.
+
+135
+00:09:16.059 --> 00:09:19.059
+While our U project has got all of its code in a source folder,
+
+136
+00:09:19.059 --> 00:09:23.179
+all of our plugins are stored alongside that source folder.
+
+137
+00:09:23.179 --> 00:09:28.179
+Inside our plugins folder, we can see any plugins that we've currently got installed on a project level.
+
+138
+00:09:28.179 --> 00:09:31.250
+In this case, it's our new plugin, My Plugin.
+
+139
+00:09:31.250 --> 00:09:36.379
+Within My Plugin, we can see how the plugin itself has got the same architecture as the project.
+
+140
+00:09:36.379 --> 00:09:40.379
+That being a source, intermediate, content, and config folder,
+
+141
+00:09:40.379 --> 00:09:43.379
+but with a U plugin file instead of a U project file.
+
+142
+00:09:43.379 --> 00:09:46.470
+The U plugin file, otherwise known as a plugin descriptor,
+
+143
+00:09:46.470 --> 00:09:49.470
+acts identically to the U project file.
+
+144
+00:09:49.470 --> 00:09:53.470
+We can open it up as a JSON and add any modules that the plugin relies on,
+
+145
+00:09:53.470 --> 00:09:55.470
+just like we would with the U project file.
+
+146
+00:09:55.470 --> 00:09:58.950
+However, we also see that we have a resources folder.
+
+147
+00:09:58.950 --> 00:10:03.950
+This folder contains any iconography that we may want to appear in the editor.
+
+148
+00:10:03.950 --> 00:10:06.950
+By default, it contains the default icon that will appear in the plugins menu,
+
+149
+00:10:06.950 --> 00:10:08.950
+as pictured on the previous slide.
+
+150
+00:10:08.950 --> 00:10:14.559
+Plugins can also be packaged, allowing for easy project-to-project integration.
+
+151
+00:10:14.559 --> 00:10:18.659
+If you're authoring a system that isn't specifically tied to your project,
+
+152
+00:10:18.659 --> 00:10:20.659
+consider making it a plugin instead.

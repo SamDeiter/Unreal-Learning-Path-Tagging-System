@@ -1,0 +1,245 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:06.639
+So that was a bit of a whistle-stop tour on the kind of fundamental building blocks of getting gameplay working
+
+2
+00:00:06.639 --> 00:00:12.859
+But one thing we also really need to touch on is garbage collection as already mentioned unreal is a garbage collected
+
+3
+00:00:13.660 --> 00:00:19.960
+Engine it's built on top of C++, which obviously isn't garbage collected, but that functionality has been implemented over the top
+
+4
+00:00:21.260 --> 00:00:23.260
+as mentioned earlier the
+
+5
+00:00:23.539 --> 00:00:28.280
+Most of the unreal garbage collection system is managed through the reflection macros
+
+6
+00:00:28.440 --> 00:00:35.259
+So when if we want something garbage collected it essentially needs to be marked up either as a uclass, a ustruct or a uproperty
+
+7
+00:00:36.299 --> 00:00:42.479
+The way garbage collection actually works is that unreal keeps a root set of u objects
+
+8
+00:00:42.479 --> 00:00:45.719
+That acts as the base for the garbage collected kind of iterative searches
+
+9
+00:00:45.719 --> 00:00:49.460
+And we'll touch on the root set in just a second to go into any more detail about how that works
+
+10
+00:00:50.560 --> 00:00:57.759
+Actors can be explicitly destroyed and that's how we easily remove things from that root set and once an actor has been destroyed
+
+11
+00:00:57.759 --> 00:01:02.899
+It'll get cleaned up by the garbage collector at the next garbage collection. This also means that any
+
+12
+00:01:03.640 --> 00:01:05.640
+properties or any
+
+13
+00:01:05.760 --> 00:01:07.599
+components on that actor
+
+14
+00:01:07.599 --> 00:01:10.620
+That aren't already being referenced by other things will get cleaned up
+
+15
+00:01:11.000 --> 00:01:15.280
+And actors own components will get automatically garbage collected at that point, too
+
+16
+00:01:15.719 --> 00:01:20.000
+So just going into a little bit about how the root set actually works like we said
+
+17
+00:01:20.319 --> 00:01:26.319
+Unreal maintains a kind of core root set of objects. You can add objects to this root set yourself if you need to
+
+18
+00:01:27.319 --> 00:01:30.719
+But if we were to kind of step through a garbage collection flow
+
+19
+00:01:31.159 --> 00:01:37.359
+The way unreal begins is it assumes that every object outside of that root set is unreachable
+
+20
+00:01:37.359 --> 00:01:39.859
+So it marks everything as needing garbage collection
+
+21
+00:01:39.859 --> 00:01:45.019
+It then goes through a series of iterative searches to try and build up connections where it can
+
+22
+00:01:45.099 --> 00:01:47.519
+To see what is and is not reachable
+
+23
+00:01:47.719 --> 00:01:49.319
+So in this example here
+
+24
+00:01:49.319 --> 00:01:55.760
+We have an object which references down a chain and we can see now all of these objects are reachable and therefore
+
+25
+00:01:55.840 --> 00:02:01.359
+None of them would get garbage collected if at the end of this iterative search any of these objects
+
+26
+00:02:01.680 --> 00:02:06.959
+Didn't have other objects referencing them. Then that would be marked up for garbage collection and cleaned up
+
+27
+00:02:07.840 --> 00:02:11.159
+If at some point we were to break one of these connections
+
+28
+00:02:11.159 --> 00:02:17.300
+So say for example objects one here was our level of level world and we've destroyed an actor
+
+29
+00:02:17.300 --> 00:02:18.319
+So object three is an actor
+
+30
+00:02:18.319 --> 00:02:23.520
+we've destroyed it that would be breaking its connection with the world and therefore the root set and
+
+31
+00:02:23.840 --> 00:02:28.919
+Therefore both the actor and the actors component would get garbage collected
+
+32
+00:02:30.460 --> 00:02:32.460
+so it's not just
+
+33
+00:02:32.979 --> 00:02:39.520
+The reflected types that can get garbage collected. It's not just a U class or a U struct
+
+34
+00:02:40.620 --> 00:02:45.699
+We can do it in another way if we have non U objects that we need to
+
+35
+00:02:46.340 --> 00:02:48.659
+Have still handle garbage collection
+
+36
+00:02:48.699 --> 00:02:55.259
+We can inherit from the FGC object class and that just implements this function of add referenced objects
+
+37
+00:02:55.259 --> 00:03:02.840
+And that way you can add in references to U objects and any type that inherits from that to a non U object class
+
+38
+00:03:04.379 --> 00:03:10.139
+You just need to make sure that you implement those functions and within that function you reference each one of the objects that you need
+
+39
+00:03:10.139 --> 00:03:11.060
+to be
+
+40
+00:03:11.060 --> 00:03:13.060
+Seen by the garbage collector
+
+41
+00:03:14.569 --> 00:03:17.610
+When working with garbage collection, there's a couple of key things to bear in mind
+
+42
+00:03:17.969 --> 00:03:22.490
+So whenever we're talking about U objects that manipulation isn't thread safe
+
+43
+00:03:22.650 --> 00:03:27.370
+It's highly highly recommended that we only manipulate and access
+
+44
+00:03:27.849 --> 00:03:29.849
+U objects on the game thread
+
+45
+00:03:29.849 --> 00:03:32.330
+It is possible to do it on other threads
+
+46
+00:03:32.490 --> 00:03:39.050
+But we need to use proper use of synchronization techniques and primitives to make sure that we don't get parallel programming errors
+
+47
+00:03:39.569 --> 00:03:41.969
+So be cautious because that can lead to performance
+
+48
+00:03:42.930 --> 00:03:45.189
+hitches
+
+49
+00:03:45.509 --> 00:03:51.280
+The garbage collector can't see raw pointers inside U objects. So even though the reflection
+
+50
+00:03:52.159 --> 00:03:57.520
+The unreal reflection system looks inside U classes and U structs if you have raw pointers
+
+51
+00:03:57.919 --> 00:04:00.159
+They're just not going to be seen by garbage collection
+
+52
+00:04:00.159 --> 00:04:05.819
+So you either need a U object for U property markup, or you can also use the shared pointer library
+
+53
+00:04:05.819 --> 00:04:08.219
+Which we'll get on to in a moment
+
+54
+00:04:08.219 --> 00:04:10.819
+Last of all, we can mark objects for pending kill
+
+55
+00:04:11.060 --> 00:04:16.939
+Which is essentially our manual way of marking sending an object for garbage collection. Actors can be destroyed
+
+56
+00:04:16.939 --> 00:04:18.740
+That's kind of a distinct thing
+
+57
+00:04:18.740 --> 00:04:25.480
+But generally we can mark an object up for pending kill the pending being the key word there because when you do that
+
+58
+00:04:25.500 --> 00:04:27.500
+It's not instantly
+
+59
+00:04:27.620 --> 00:04:33.860
+Deleted from the root set that simply breaks that connection and the next time garbage collection actually gets run
+
+60
+00:04:34.259 --> 00:04:36.779
+That's when the objects will be removed from memory
+
+61
+00:04:36.779 --> 00:04:43.300
+So it's only at the point of garbage collection pending kill simply says this will get garbage collected the next time we run garbage collection

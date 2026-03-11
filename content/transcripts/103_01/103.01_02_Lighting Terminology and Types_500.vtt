@@ -1,0 +1,749 @@
+WEBVTT
+
+1
+00:00:01.679 --> 00:00:04.960
+Okay, so first things first, let's take a look at some lighting terminology
+
+2
+00:00:04.960 --> 00:00:07.960
+and what types of lights we have available in Unreal Engine 5.
+
+3
+00:00:07.960 --> 00:00:09.960
+The topics that we're going to cover in this
+
+4
+00:00:09.960 --> 00:00:11.960
+are going to be lighting definitions and types,
+
+5
+00:00:11.960 --> 00:00:13.960
+what the difference is between static lighting
+
+6
+00:00:13.960 --> 00:00:15.960
+versus dynamic lighting,
+
+7
+00:00:15.960 --> 00:00:18.460
+as well as what light types are available for us.
+
+8
+00:00:18.460 --> 00:00:23.269
+So, when we go to talk about lighting definitions
+
+9
+00:00:23.269 --> 00:00:25.269
+and certain terminologies that we'll be using,
+
+10
+00:00:25.269 --> 00:00:28.269
+and you'll hear me use this a lot as I go through this course,
+
+11
+00:00:28.269 --> 00:00:31.070
+direct lighting is the light that falls onto a surface
+
+12
+00:00:31.149 --> 00:00:33.149
+without any interference, so essentially from
+
+13
+00:00:33.149 --> 00:00:35.149
+the point that the light has been emitted
+
+14
+00:00:35.149 --> 00:00:37.149
+directly onto the object.
+
+15
+00:00:37.149 --> 00:00:39.500
+Then we have indirect lighting,
+
+16
+00:00:39.500 --> 00:00:41.500
+or bounce lighting.
+
+17
+00:00:41.500 --> 00:00:43.500
+So that's lighting that's been reflected by another surface
+
+18
+00:00:43.500 --> 00:00:46.500
+that's nearby, and bounces off that surface
+
+19
+00:00:46.500 --> 00:00:48.500
+onto the object that you're looking at,
+
+20
+00:00:48.500 --> 00:00:50.500
+carrying some of the color information
+
+21
+00:00:50.500 --> 00:00:53.500
+from the surface that it's bouncing off.
+
+22
+00:00:53.500 --> 00:00:55.500
+And then we have the shadows,
+
+23
+00:00:55.500 --> 00:00:57.500
+which happens essentially when
+
+24
+00:00:57.500 --> 00:00:59.500
+Unreal Engine takes a snapshot of a mesh
+
+25
+00:00:59.579 --> 00:01:01.579
+from a lighting's point of view and projects
+
+26
+00:01:01.579 --> 00:01:03.579
+that shadow onto the opposite side of the actor.
+
+27
+00:01:03.579 --> 00:01:05.939
+So, again, you'll hear me
+
+28
+00:01:05.939 --> 00:01:07.939
+use the terms direct lighting and direct lighting
+
+29
+00:01:07.939 --> 00:01:09.939
+quite a lot, so
+
+30
+00:01:09.939 --> 00:01:11.939
+just keep in mind what these both mean
+
+31
+00:01:11.939 --> 00:01:13.939
+and understand
+
+32
+00:01:13.939 --> 00:01:16.799
+how they differ.
+
+33
+00:01:16.799 --> 00:01:18.799
+When we talk about static versus dynamic lighting,
+
+34
+00:01:18.799 --> 00:01:20.799
+we have a few options inside of Unreal.
+
+35
+00:01:20.799 --> 00:01:22.799
+So Lumen
+
+36
+00:01:22.799 --> 00:01:24.799
+is the new Unreal Engine 5
+
+37
+00:01:24.799 --> 00:01:26.799
+fully dynamic global
+
+38
+00:01:26.799 --> 00:01:28.799
+illumination system. It renders the fuse
+
+39
+00:01:28.879 --> 00:01:30.879
+into reflection with infinite bounces
+
+40
+00:01:30.879 --> 00:01:32.879
+and indirect specular reflections
+
+41
+00:01:32.879 --> 00:01:34.879
+in large, detailed environments
+
+42
+00:01:34.879 --> 00:01:36.879
+from really, really small to large
+
+43
+00:01:36.879 --> 00:01:38.879
+setups.
+
+44
+00:01:38.879 --> 00:01:40.879
+Then we also have
+
+45
+00:01:40.879 --> 00:01:42.879
+baked or static lighting,
+
+46
+00:01:42.879 --> 00:01:44.879
+which is pre-computed lighting, similar to what
+
+47
+00:01:44.879 --> 00:01:46.879
+you'd see with
+
+48
+00:01:46.879 --> 00:01:48.879
+other rendering engines, such as V-Ray,
+
+49
+00:01:48.879 --> 00:01:50.879
+Corona, et cetera. It creates
+
+50
+00:01:50.879 --> 00:01:52.879
+high quality indirect lighting
+
+51
+00:01:52.879 --> 00:01:54.879
+and has no performance
+
+52
+00:01:54.879 --> 00:01:56.879
+cost, essentially, on
+
+53
+00:01:56.959 --> 00:01:58.959
+real-time, because everything's
+
+54
+00:01:58.959 --> 00:02:00.959
+pre-computed and stored in textures.
+
+55
+00:02:00.959 --> 00:02:03.310
+And then we have real-time
+
+56
+00:02:03.310 --> 00:02:05.310
+dynamic lighting, which is lighting that's
+
+57
+00:02:05.310 --> 00:02:07.310
+updated on each frame. It's fully dynamic
+
+58
+00:02:07.310 --> 00:02:09.310
+and can be moved around and modified at runtime.
+
+59
+00:02:09.310 --> 00:02:11.310
+It has no global illumination,
+
+60
+00:02:11.310 --> 00:02:13.310
+so there's only direct lighting, so no
+
+61
+00:02:13.310 --> 00:02:15.310
+indirect lighting
+
+62
+00:02:15.310 --> 00:02:17.310
+whatsoever, unlike Lumen.
+
+63
+00:02:17.310 --> 00:02:20.300
+But it's also very expensive to use
+
+64
+00:02:20.300 --> 00:02:22.300
+and it does affect real-time
+
+65
+00:02:22.300 --> 00:02:24.719
+performance.
+
+66
+00:02:24.719 --> 00:02:26.719
+Unreal Engine can use a hybrid
+
+67
+00:02:26.800 --> 00:02:28.800
+between both static and dynamic lighting,
+
+68
+00:02:28.800 --> 00:02:30.800
+so that's something to keep
+
+69
+00:02:30.800 --> 00:02:32.990
+in mind.
+
+70
+00:02:32.990 --> 00:02:34.990
+We have also ray-traced
+
+71
+00:02:34.990 --> 00:02:36.990
+lighting. This type of lighting
+
+72
+00:02:36.990 --> 00:02:38.990
+is real-time global illumination,
+
+73
+00:02:38.990 --> 00:02:40.990
+updated with all lights set to
+
+74
+00:02:40.990 --> 00:02:42.990
+movable. It's important to note that
+
+75
+00:02:42.990 --> 00:02:44.990
+some aspects of
+
+76
+00:02:44.990 --> 00:02:46.990
+ray tracing are taken into account with
+
+77
+00:02:46.990 --> 00:02:48.990
+Lumen, such as reflections and shadowing when needed.
+
+78
+00:02:48.990 --> 00:02:50.990
+But the important thing is
+
+79
+00:02:50.990 --> 00:02:52.990
+the difference between Lumen and ray-traced
+
+80
+00:02:52.990 --> 00:02:54.990
+lighting is that ray-trace
+
+81
+00:02:55.069 --> 00:02:57.069
+actually is hardware ray-tracing, which means
+
+82
+00:02:57.069 --> 00:02:59.069
+that you need a graphics card able to
+
+83
+00:02:59.069 --> 00:03:01.069
+support it, whereas Lumen doesn't necessarily
+
+84
+00:03:01.069 --> 00:03:03.069
+need that. It's software ray-traced,
+
+85
+00:03:03.069 --> 00:03:05.259
+so it does not actually need
+
+86
+00:03:05.259 --> 00:03:07.259
+a card, for example, like an RTX
+
+87
+00:03:07.259 --> 00:03:09.259
+Nvidia card, to
+
+88
+00:03:09.259 --> 00:03:11.259
+do its global
+
+89
+00:03:11.259 --> 00:03:13.650
+illumination calculations.
+
+90
+00:03:13.650 --> 00:03:15.650
+The light types that we're going to see, and I'm running through this
+
+91
+00:03:15.650 --> 00:03:17.650
+as I go here, but we'll be doing an exercise
+
+92
+00:03:17.650 --> 00:03:19.650
+later on so you can actually see each light
+
+93
+00:03:19.650 --> 00:03:21.650
+and how they all differ.
+
+94
+00:03:21.650 --> 00:03:23.650
+We have directional light, like a sun,
+
+95
+00:03:23.729 --> 00:03:25.729
+a point light, a spotlight,
+
+96
+00:03:25.729 --> 00:03:27.729
+rectangular light, a skylight,
+
+97
+00:03:27.729 --> 00:03:29.729
+and then a couple of extra light
+
+98
+00:03:29.729 --> 00:03:31.729
+setups here, which are called the HDRI Backdrop
+
+99
+00:03:31.729 --> 00:03:33.729
+and Sun and Sky, which essentially are a couple
+
+100
+00:03:33.729 --> 00:03:35.729
+of blueprints that are set up
+
+101
+00:03:35.729 --> 00:03:37.729
+for HDR lighting in the case of
+
+102
+00:03:37.729 --> 00:03:39.729
+HDRI Backdrops, and Sun and Sky
+
+103
+00:03:39.729 --> 00:03:41.729
+allows you to essentially
+
+104
+00:03:41.729 --> 00:03:43.729
+have a very accurate
+
+105
+00:03:43.729 --> 00:03:45.729
+sun positioning for a particular
+
+106
+00:03:45.729 --> 00:03:47.729
+latitude and longitude in a specific place.
+
+107
+00:03:47.729 --> 00:03:49.729
+Really nice
+
+108
+00:03:49.729 --> 00:03:51.729
+couple of blueprints that you can use there specifically
+
+109
+00:03:51.810 --> 00:03:53.810
+if you need them, or that sort of thing for your project.
+
+110
+00:03:54.969 --> 00:03:56.969
+Now, when it comes to the properties and settings of the
+
+111
+00:03:56.969 --> 00:03:58.969
+lights, we're going
+
+112
+00:03:58.969 --> 00:04:00.969
+to cover the light properties and the
+
+113
+00:04:00.969 --> 00:04:03.349
+mobility options for each light.
+
+114
+00:04:03.349 --> 00:04:05.349
+So, when it comes to the properties and settings
+
+115
+00:04:05.349 --> 00:04:07.349
+that we can change, for
+
+116
+00:04:07.349 --> 00:04:09.349
+point lights and spotlights,
+
+117
+00:04:09.349 --> 00:04:11.349
+we are looking at candelas,
+
+118
+00:04:11.349 --> 00:04:13.349
+lumens, or unitless setups
+
+119
+00:04:13.349 --> 00:04:15.349
+for the intensity.
+
+120
+00:04:15.349 --> 00:04:17.350
+Now, importantly, 100 watts on a light bulb
+
+121
+00:04:17.350 --> 00:04:19.769
+would be called 100 lumens.
+
+122
+00:04:19.769 --> 00:04:21.769
+However, the directional light, which is more like a
+
+123
+00:04:21.850 --> 00:04:23.850
+sun, is calculated in lux values.
+
+124
+00:04:23.850 --> 00:04:25.850
+In each one of the lights,
+
+125
+00:04:25.850 --> 00:04:27.850
+all these things are going to be common,
+
+126
+00:04:27.850 --> 00:04:29.850
+so we're going to have
+
+127
+00:04:29.850 --> 00:04:31.980
+the intensity,
+
+128
+00:04:31.980 --> 00:04:33.980
+indirect lighting intensity, so how much they
+
+129
+00:04:33.980 --> 00:04:35.980
+contribute to that indirect bounce lighting.
+
+130
+00:04:35.980 --> 00:04:37.980
+The attenuation, which is how
+
+131
+00:04:37.980 --> 00:04:39.980
+far from the emission
+
+132
+00:04:39.980 --> 00:04:41.980
+point of the light the light actually travels.
+
+133
+00:04:41.980 --> 00:04:44.069
+We can use
+
+134
+00:04:44.069 --> 00:04:46.069
+temperature if we want to, to change the color
+
+135
+00:04:46.069 --> 00:04:48.069
+without having to actually change the color
+
+136
+00:04:48.069 --> 00:04:50.839
+and use a temperature value.
+
+137
+00:04:50.920 --> 00:04:52.920
+Source radius and source angle.
+
+138
+00:04:52.920 --> 00:04:54.920
+Source angles you'll see
+
+139
+00:04:54.920 --> 00:04:56.920
+on the directional light and source radius you'll
+
+140
+00:04:56.920 --> 00:04:58.920
+see on every other type of light, which will allow you
+
+141
+00:04:58.920 --> 00:05:00.920
+to change the softness of the radius as well as
+
+142
+00:05:00.920 --> 00:05:02.920
+the size of the specular
+
+143
+00:05:02.920 --> 00:05:04.920
+reflection on the surfaces.
+
+144
+00:05:04.920 --> 00:05:06.920
+Whether to use
+
+145
+00:05:06.920 --> 00:05:08.920
+inverse squared falloff for lighting,
+
+146
+00:05:08.920 --> 00:05:10.920
+and this is something I recommend to just use
+
+147
+00:05:10.920 --> 00:05:12.920
+for everything since it's a more realistic
+
+148
+00:05:12.920 --> 00:05:14.920
+approach to set up lighting.
+
+149
+00:05:14.920 --> 00:05:17.050
+And then we also have IES profiles
+
+150
+00:05:17.050 --> 00:05:19.050
+if we want to actually change the
+
+151
+00:05:19.129 --> 00:05:21.129
+way that light is distributed based on
+
+152
+00:05:21.129 --> 00:05:23.129
+a particular
+
+153
+00:05:23.129 --> 00:05:25.290
+real-life profile.
+
+154
+00:05:25.290 --> 00:05:27.379
+When it comes to light mobility,
+
+155
+00:05:27.379 --> 00:05:29.379
+we have static, which essentially means
+
+156
+00:05:29.379 --> 00:05:31.379
+this light's going to be baked
+
+157
+00:05:31.379 --> 00:05:33.379
+indirect and direct lighting.
+
+158
+00:05:33.379 --> 00:05:35.379
+It's the cheapest to use once again as it gets
+
+159
+00:05:35.379 --> 00:05:37.379
+stored into textures and does not
+
+160
+00:05:37.379 --> 00:05:39.379
+have an impact in performance at real-time.
+
+161
+00:05:39.379 --> 00:05:42.019
+We've got stationary,
+
+162
+00:05:42.019 --> 00:05:44.250
+which is baked indirect lighting.
+
+163
+00:05:44.250 --> 00:05:46.250
+It's high quality
+
+164
+00:05:46.250 --> 00:05:48.600
+direct lighting
+
+165
+00:05:48.680 --> 00:05:50.680
+and shadows that are on the fly, essentially that's the
+
+166
+00:05:50.680 --> 00:05:52.680
+dynamic side of it.
+
+167
+00:05:52.680 --> 00:05:54.680
+But it has a limited use. You can only have a
+
+168
+00:05:54.680 --> 00:05:56.680
+maximum of four overlapping lights,
+
+169
+00:05:56.680 --> 00:05:58.680
+but it's the highest quality to
+
+170
+00:05:58.680 --> 00:06:00.680
+medium performance if you're using a static
+
+171
+00:06:00.680 --> 00:06:02.680
+lighting sort of set.
+
+172
+00:06:02.680 --> 00:06:06.019
+And then we have movable,
+
+173
+00:06:06.019 --> 00:06:08.019
+which is fully dynamic lights and shadows.
+
+174
+00:06:08.019 --> 00:06:10.019
+If you're using Lumen, you will get
+
+175
+00:06:10.019 --> 00:06:12.019
+indirect lighting out of this.
+
+176
+00:06:12.019 --> 00:06:14.019
+If you're not,
+
+177
+00:06:14.019 --> 00:06:16.250
+you will only get direct lighting,
+
+178
+00:06:16.250 --> 00:06:18.250
+as I mentioned earlier.
+
+179
+00:06:18.329 --> 00:06:20.329
+It has the highest performance cost.
+
+180
+00:06:20.329 --> 00:06:22.329
+And again, if you're not using Lumen, you won't
+
+181
+00:06:22.329 --> 00:06:24.329
+get indirect lighting, but again,
+
+182
+00:06:24.329 --> 00:06:26.329
+if you're using Lumen, you will.
+
+183
+00:06:26.329 --> 00:06:28.329
+That's really it. After this, we're just going to
+
+184
+00:06:28.329 --> 00:06:30.329
+get into actually taking a look at Lumen
+
+185
+00:06:30.329 --> 00:06:32.329
+as the premier
+
+186
+00:06:32.329 --> 00:06:34.329
+Unreal Engine 5 lighting system.
+
+187
+00:06:34.329 --> 00:06:36.329
+Let's go ahead and do that.

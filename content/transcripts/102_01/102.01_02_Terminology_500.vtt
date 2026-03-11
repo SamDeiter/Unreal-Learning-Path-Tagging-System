@@ -1,0 +1,329 @@
+WEBVTT
+
+1
+00:00:05.040 --> 00:00:09.960
+Before we get stuck into Blueprints, let's discuss some terminology that might be useful
+
+2
+00:00:09.960 --> 00:00:14.000
+to help you get familiar with the concepts of Blueprints.
+
+3
+00:00:14.000 --> 00:00:18.920
+So in Unreal Engine, if you've not used any previous versions before, you can see
+
+4
+00:00:18.920 --> 00:00:25.280
+that a class is the highest type of template for anything that contains information.
+
+5
+00:00:25.280 --> 00:00:29.559
+So everything in Unreal is contained within a class.
+
+6
+00:00:29.559 --> 00:00:31.960
+Within a class, you can get objects.
+
+7
+00:00:31.960 --> 00:00:34.640
+This is the basis of all of the UE classes.
+
+8
+00:00:34.640 --> 00:00:39.880
+And it's a self-contained set of code, data, variables, essentially anything that holds
+
+9
+00:00:39.880 --> 00:00:44.000
+information such as functions, macros, these kind of things.
+
+10
+00:00:44.000 --> 00:00:47.020
+And then we have Actors in Unreal Engine.
+
+11
+00:00:47.020 --> 00:00:49.719
+And an Actor is a child class of an object.
+
+12
+00:00:49.719 --> 00:00:54.200
+And we'll go through a series of flow diagrams just to show you this flow of information.
+
+13
+00:00:54.200 --> 00:00:57.640
+But essentially Actors are all Unreal Engine specific.
+
+14
+00:00:57.640 --> 00:01:01.500
+They're things that define a special kind of object that can be placed in a level,
+
+15
+00:01:01.500 --> 00:01:03.539
+so they have X, Y, and Z coordinates.
+
+16
+00:01:03.539 --> 00:01:07.060
+They have properties that they can house.
+
+17
+00:01:07.060 --> 00:01:11.379
+You can have different Actor types like lights, cameras, meshes.
+
+18
+00:01:11.379 --> 00:01:15.700
+So if we just think about it from a kind of flow-based perspective, we start with
+
+19
+00:01:15.700 --> 00:01:24.040
+a class, we move to an object, and then an Actor is then what you would place inside the Editor.
+
+20
+00:01:24.040 --> 00:01:29.420
+So to give you a better idea about that description, if we think about an object,
+
+21
+00:01:29.420 --> 00:01:34.579
+Actors hold information, but they don't necessarily exist anywhere in the world.
+
+22
+00:01:34.579 --> 00:01:39.819
+They have this information that we spoke about before, they have the data that they
+
+23
+00:01:39.819 --> 00:01:45.459
+can execute, but they don't actually, they're not housed anywhere.
+
+24
+00:01:45.459 --> 00:01:51.340
+Whereas an Actor in Unreal Engine, the Actor thinks because it is based on an object,
+
+25
+00:01:51.340 --> 00:01:57.180
+so it has the properties of an object, and so an Actor can therefore say okay I exist
+
+26
+00:01:57.180 --> 00:02:03.459
+in the world, whether that be an X, Y, or Z coordinate in the Editor, through a camera,
+
+27
+00:02:03.459 --> 00:02:07.739
+a light, any of these Actor properties that we mentioned before.
+
+28
+00:02:07.739 --> 00:02:13.780
+And this is Unreal Engine concept for Unreal Engine 5, and it's been used in previous
+
+29
+00:02:13.780 --> 00:02:16.439
+Engines as well.
+
+30
+00:02:16.439 --> 00:02:23.240
+So if we think about the C++ terminology, parent classes in Unreal Engine, specific
+
+31
+00:02:23.240 --> 00:02:25.680
+classes that a child can inherit from.
+
+32
+00:02:25.680 --> 00:02:30.039
+So when we're talking about this flow of information, we're talking about having these
+
+33
+00:02:30.039 --> 00:02:35.479
+parent classes that hold the majority of the information, well maybe not the majority
+
+34
+00:02:35.479 --> 00:02:41.879
+of information, but all the core functionality that you would need within any child classes.
+
+35
+00:02:41.879 --> 00:02:47.400
+So it means that you don't have to rewrite code, you don't have to duplicate, a whole
+
+36
+00:02:47.400 --> 00:02:51.580
+bunch of information for things that you want had to have similar setups.
+
+37
+00:02:51.580 --> 00:02:57.020
+So in Unreal Engine, the main thing to take away here is that each parent class can
+
+38
+00:02:57.020 --> 00:02:59.460
+have many child classes.
+
+39
+00:02:59.460 --> 00:03:06.379
+And a child class inherits from this parent class, so you could refer to it as a subclass.
+
+40
+00:03:06.379 --> 00:03:10.900
+So when we're talking about the light example from the previous slide, when we're
+
+41
+00:03:10.900 --> 00:03:16.139
+talking about Actors in the level, parent class in this example would be the Point
+
+42
+00:03:16.139 --> 00:03:18.129
+Light Actor.
+
+43
+00:03:18.129 --> 00:03:23.449
+And therefore a Light Actor class is a child of the actor class.
+
+44
+00:03:23.449 --> 00:03:26.090
+And each child can only have a single parent class.
+
+45
+00:03:26.090 --> 00:03:32.849
+So you can't have this larger parent class and then create a child class from it.
+
+46
+00:03:32.849 --> 00:03:37.270
+And that child class has then multiple parents.
+
+47
+00:03:37.270 --> 00:03:42.250
+The easiest way to think about it is that each parent class can create many child
+
+48
+00:03:42.250 --> 00:03:48.530
+classes, so there's a flow, a downward flow of information from the main parent class.
+
+49
+00:03:48.530 --> 00:03:51.330
+And the child class can only have a single parent.
+
+50
+00:03:51.330 --> 00:03:55.669
+And what a parent class already contains is passed to the child.
+
+51
+00:03:55.669 --> 00:04:00.909
+So you can override this functionality inside the child class from the parent class, but
+
+52
+00:04:00.909 --> 00:04:07.569
+you can create information in the child class that then propagates up to the parent.
+
+53
+00:04:07.569 --> 00:04:11.300
+It's always a downward flow of information.
+
+54
+00:04:11.300 --> 00:04:14.919
+To give you an idea about this in a graph, we have the parent at the top, we have
+
+55
+00:04:14.919 --> 00:04:20.199
+a child class below, and you can still create these multiple child actors from the parent
+
+56
+00:04:20.199 --> 00:04:24.000
+class, however it doesn't work in the opposite direction.
+
+57
+00:04:24.000 --> 00:04:28.360
+And then to give you a deeper understanding more in the context of when we're making
+
+58
+00:04:28.360 --> 00:04:34.160
+games in Unreal Engine, all blueprint classes have a parent up until the object class,
+
+59
+00:04:34.160 --> 00:04:38.459
+which is a U object, which essentially stands for Unreal Object.
+
+60
+00:04:38.459 --> 00:04:40.459
+This is the origin class.
+
+61
+00:04:40.459 --> 00:04:45.100
+When you make a new blueprint, you must derive a child from an existing class.
+
+62
+00:04:45.100 --> 00:04:50.939
+So whenever you have a child class, it will always come from a previous class.
+
+63
+00:04:50.939 --> 00:04:53.579
+Object is the highest level and everything else comes from there.
+
+64
+00:04:53.579 --> 00:04:58.259
+So if we're talking about a character running through a scene, for example, you
+
+65
+00:04:58.259 --> 00:05:03.019
+can see the flow from, let's go from right to left here.
+
+66
+00:05:03.019 --> 00:05:05.259
+You start with this character classes.
+
+67
+00:05:05.259 --> 00:05:07.899
+You think, where did the character get its properties from?
+
+68
+00:05:07.899 --> 00:05:11.899
+Well in Unreal Engine, you have something called a Pawn, which has a bunch of these
+
+69
+00:05:11.899 --> 00:05:14.379
+properties that the child can inherit.
+
+70
+00:05:14.379 --> 00:05:17.180
+So with Pawn, you have Actor, which we referred to before.
+
+71
+00:05:17.180 --> 00:05:22.779
+The actor belongs in this 3D space, and the actor came from this larger object class.
+
+72
+00:05:22.779 --> 00:05:27.860
+And so that's essentially the class structure of how information flows, and it will help
+
+73
+00:05:27.860 --> 00:05:32.550
+give context to when you are creating your blueprints.
+
+74
+00:05:32.550 --> 00:05:38.709
+When we're talking about inheritance, in almost all aspects of its design, including
+
+75
+00:05:38.709 --> 00:05:42.709
+UE assets, there is some form of inheritance.
+
+76
+00:05:42.709 --> 00:05:47.990
+So using that previous example before from the character, the character inherited a whole
+
+77
+00:05:47.990 --> 00:05:55.029
+bunch of information that it prevents a duplication of information, and it just creates the communication
+
+78
+00:05:55.029 --> 00:05:57.629
+lines very clear in terms of where this came from.
+
+79
+00:05:57.629 --> 00:06:02.949
+So when we're opening blueprints up, say we open the character blueprint, for example,
+
+80
+00:06:02.949 --> 00:06:08.430
+still using this character example, you can see in the character blueprint that you can
+
+81
+00:06:08.430 --> 00:06:13.269
+go up through to the Pawn class, up through the Actor class, and into the Object class.
+
+82
+00:06:13.269 --> 00:06:16.110
+And we'll show this in more detail as we get into the course.

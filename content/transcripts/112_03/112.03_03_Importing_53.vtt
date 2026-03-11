@@ -1,0 +1,353 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:12.269
+Back in UE5, use the Quickly Add to the Project button on the main toolbar, and import the Datasmith file named Context.udatasmith that's been provided to you.
+
+2
+00:00:14.429 --> 00:00:19.230
+You are asked for a location on disk, create a folder named Theatron.
+
+3
+00:00:21.899 --> 00:00:27.199
+When asked for import options, make sure all options are enabled and import the file.
+
+4
+00:00:30.359 --> 00:00:39.359
+You may get a warning or two. In this case, the warning is about a Twinmotion material using the Grunge feature, which is not compatible with UE5.
+
+5
+00:00:40.119 --> 00:00:43.920
+Aside from that, everything seems to be properly in place.
+
+6
+00:00:46.659 --> 00:00:52.359
+Note the presence of multiple Twinmotion cameras that were derived from the Media panel in Twinmotion.
+
+7
+00:00:57.920 --> 00:01:04.319
+Keep in mind that Datasmith doesn't cater for collision data, and LODs behave erratically at times.
+
+8
+00:01:05.340 --> 00:01:07.939
+We'll look how to deal with that later in this class.
+
+9
+00:01:08.540 --> 00:01:10.739
+Let's bring in another part of the project.
+
+10
+00:01:11.340 --> 00:01:15.040
+Repeat the import process, this time for the vegetation part.
+
+11
+00:01:17.560 --> 00:01:23.359
+When you get to the Import Options dialog, disable cameras as you don't want them duplicated.
+
+12
+00:01:25.239 --> 00:01:29.040
+Once the Datasmith file is imported, look at the Outliner.
+
+13
+00:01:29.599 --> 00:01:35.099
+You have the Context and Vegetation folders representing the two Datasmith file hierarchies.
+
+14
+00:01:37.870 --> 00:01:40.269
+Both contain a Background entry.
+
+15
+00:01:41.349 --> 00:01:46.349
+That's a duplicated actor representing the circular city background around the scene.
+
+16
+00:01:47.230 --> 00:01:49.230
+You can safely delete one of those.
+
+17
+00:01:53.290 --> 00:02:01.590
+The other thing you'll notice as you zoom in with the imported trees, is that although they import properly, there is a problem with the display.
+
+18
+00:02:02.569 --> 00:02:14.949
+This promises to be fixed soon, but for now, the easiest fix is to save your level and all its assets, and restart the project.
+
+19
+00:02:20.599 --> 00:02:26.300
+The trees look better now, although that last LOD level leaves a lot to be desired.
+
+20
+00:02:27.539 --> 00:02:32.340
+And as mentioned, Datasmith doesn't carry over any collision information between apps.
+
+21
+00:02:33.550 --> 00:02:38.449
+Dealing with LODs and collisions one tree type at a time would be too time consuming.
+
+22
+00:02:39.500 --> 00:02:42.699
+So let's look at an alternative way of importing the data.
+
+23
+00:02:43.909 --> 00:02:50.610
+To delete all vegetation in the scene and in the project, start by selecting the Vegetation top parent in the Outliner.
+
+24
+00:02:51.849 --> 00:02:57.650
+Press Ctrl-Shift-D to select the hierarchy underneath and then press Delete.
+
+25
+00:02:58.250 --> 00:03:08.930
+Confirm all deletion and then select the files and folders in the Vegetation folder in the Content Browser and do the same.
+
+26
+00:03:14.810 --> 00:03:20.310
+Now that all vegetation is removed from the project, we'll import it again using a different technique.
+
+27
+00:03:21.389 --> 00:03:29.949
+In the empty Vegetation folder in the Content Browser, right-click and create a Dataprep asset. Name it Vegetation.
+
+28
+00:03:31.090 --> 00:03:34.189
+Double-click the asset to edit it in the Dataprep Editor.
+
+29
+00:03:35.210 --> 00:03:40.009
+Here, you can decide how to sort and adjust your incoming data in a node-based editor.
+
+30
+00:03:40.800 --> 00:03:48.449
+Start by selecting the file to import, in this case the Vegetation Datasmith file.
+
+31
+00:03:51.449 --> 00:03:53.949
+Click the Import button to see the file contents.
+
+32
+00:03:56.120 --> 00:04:03.020
+Note that the Datasmith file contains duplicates of elements you already have in the scene, such as the background and the cameras.
+
+33
+00:04:05.340 --> 00:04:09.439
+To get rid of those, you can filter the selection using an actor label.
+
+34
+00:04:12.439 --> 00:04:20.290
+You can type the name of an actor you wish to select, such as Background, and then add a Delete Objects node to that action.
+
+35
+00:04:23.449 --> 00:04:27.449
+Add another actor label to the graph, this time looking for cameras.
+
+36
+00:04:30.480 --> 00:04:34.980
+To select the child actors, add a Select Hierarchy node to the action.
+
+37
+00:04:38.689 --> 00:04:43.189
+And finally, a Delete Objects node to finish off that process.
+
+38
+00:04:45.519 --> 00:04:49.519
+To test your work, click the Execute button on the toolbar.
+
+39
+00:04:50.439 --> 00:04:55.740
+After a moment, you'll notice that the background and the camera actors have disappeared from the outliner.
+
+40
+00:04:57.040 --> 00:05:02.939
+Next, consider that all the trees in the incoming file have the label Growth in them.
+
+41
+00:05:04.529 --> 00:05:13.319
+Add a new actor label node based on the name Growth, and then add a Set LOD node to the action.
+
+42
+00:05:16.839 --> 00:05:21.439
+Disable Auto-Screen Size if you plan to define how the LODs will transition.
+
+43
+00:05:22.639 --> 00:05:27.040
+Add three LOD array elements, or three LOD levels if you will.
+
+44
+00:05:27.639 --> 00:05:29.439
+That should be enough for our purposes.
+
+45
+00:05:30.819 --> 00:05:34.920
+Adjust the numbers, you can follow my lead or experiment with other numbers.
+
+46
+00:05:36.449 --> 00:05:39.350
+This will take care of adding LODs for all trees.
+
+47
+00:05:41.670 --> 00:05:45.670
+Similarly, add a Set Convex Collision to the action.
+
+48
+00:05:46.620 --> 00:05:48.620
+Leave the default values as they are.
+
+49
+00:05:49.860 --> 00:05:52.759
+This will apply collision detection for all trees in the scene.
+
+50
+00:05:54.290 --> 00:05:56.689
+Execute the recipe to test the results.
+
+51
+00:05:57.189 --> 00:06:00.889
+This will take a while, but it's still faster than doing the work manually.
+
+52
+00:06:07.350 --> 00:06:11.949
+Once you're happy, click the Commit button to send the results to the editor.
+
+53
+00:06:17.860 --> 00:06:21.860
+Once you're back in the editor, save your data using the Save All button.
+
+54
+00:06:25.189 --> 00:06:30.689
+You still need to restart your project to refresh the texturing, but otherwise, you should be good to go.
+
+55
+00:06:36.569 --> 00:06:41.069
+As good as visual data prep is, sometimes it may just be overkill.
+
+56
+00:06:41.959 --> 00:06:45.160
+For the hero building, a simple import will work just fine.
+
+57
+00:06:46.560 --> 00:06:49.959
+Import the theory.datasmith file as you have learned earlier.
+
+58
+00:06:53.160 --> 00:06:57.560
+Again, make sure the Cameras option is disabled to prevent duplicates.
+
+59
+00:07:00.920 --> 00:07:05.620
+You'd still need to delete the duplicated background that is also part of this datasmith file.
+
+60
+00:07:12.519 --> 00:07:18.420
+For the most part, everything seems to be working well, but there are adjustments to be made at the lighting level.
+
+61
+00:07:19.470 --> 00:07:24.670
+All incoming lights are currently set to Static, as evidenced by the red warning in the viewport.
+
+62
+00:07:25.560 --> 00:07:28.360
+It suggests that light baking is needed for the scene.
+
+63
+00:07:29.149 --> 00:07:34.050
+If you're planning to use Lumen instead, all incoming lights should be set to Movable.
+
+64
+00:07:35.519 --> 00:07:40.120
+Other light issues can be viewed at night. Set the time of day to about 9pm.
+
+65
+00:07:47.279 --> 00:07:53.279
+Some spotlights could use a burst of energy, but the bigger problem lies in the street lights and bollards.
+
+66
+00:07:54.069 --> 00:07:59.470
+The lights associated with those should have shadow casting turned off to see any effects.
+
+67
+00:08:06.569 --> 00:08:10.970
+To fix all these issues, you need a tool to bulk edit lights.
+
+68
+00:08:11.959 --> 00:08:14.560
+You can use the Light Mixer tool in the Window menu.
+
+69
+00:08:17.620 --> 00:08:23.019
+The tool lists all the lights in your scene. It can also list properties that you need to edit.
+
+70
+00:08:23.519 --> 00:08:27.120
+You can add or remove properties by right-clicking the menu bar.
+
+71
+00:08:28.459 --> 00:08:31.360
+You already have the Mobility property displayed.
+
+72
+00:08:32.019 --> 00:08:38.779
+Add Cast Shadows, Intensity, and Indirect Lighting intensity to the mix.
+
+73
+00:08:43.059 --> 00:08:48.360
+Select any of the entries in the Light Mixer and then press Ctrl-A to select all the lights.
+
+74
+00:08:49.409 --> 00:08:53.110
+You can now easily change their mobility status to Immovable.
+
+75
+00:08:54.409 --> 00:09:00.409
+The Light Baking Red warning doesn't disappear from the viewport, which needs a refresh. We'll do that in a moment.
+
+76
+00:09:02.059 --> 00:09:05.460
+Scroll down the list and select Street Lights in the Light Mixer.
+
+77
+00:09:07.019 --> 00:09:09.919
+Right-click and choose Select Immediate Children.
+
+78
+00:09:11.289 --> 00:09:14.690
+Do it again on the sub-selection to ensure the whole hierarchy is selected.
+
+79
+00:09:17.690 --> 00:09:22.190
+Disable Cast Shadows to ensure they're off on street lamps and bollards.
+
+80
+00:09:23.370 --> 00:09:26.470
+Unfortunately, the effect is not immediate in the viewport.
+
+81
+00:09:27.159 --> 00:09:33.480
+Save your level and reload it to see the effect.
+
+82
+00:09:36.820 --> 00:09:39.820
+Note also that the Light Baking message has disappeared.
+
+83
+00:09:41.120 --> 00:09:44.019
+The Street Lights intensities could use a little boost.
+
+84
+00:09:48.490 --> 00:10:00.259
+In the Light Mixer, select all Streamlined entries and set the light intensities to 800 all around.
+
+85
+00:10:03.419 --> 00:10:07.320
+Again, it is unfortunate that you must save and reload the level to see the effects.
+
+86
+00:10:07.919 --> 00:10:11.320
+Here's hoping that this becomes more interactive in a future release.
+
+87
+00:10:13.330 --> 00:10:15.929
+Go back to a time of day around 1pm when you're done.
+
+88
+00:10:16.529 --> 00:10:19.629
+Next, we'll discuss LODs and collisions.

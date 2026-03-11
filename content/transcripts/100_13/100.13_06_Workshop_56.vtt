@@ -1,0 +1,1093 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:07.710
+Okay, so now that we have all the theory out of the way let's do a little workshop to show how all these different framework elements
+
+2
+00:00:08.169 --> 00:00:10.970
+Come together and we'll make a little prototype that shows
+
+3
+00:00:11.529 --> 00:00:16.170
+a character and possessing a character and loading a stream level, so
+
+4
+00:00:16.859 --> 00:00:18.500
+this is
+
+5
+00:00:18.500 --> 00:00:24.260
+This is the example that we're going to use today. I've just loaded the epic launcher
+
+6
+00:00:24.260 --> 00:00:28.699
+There's nothing special about this project. Just using the third-person template
+
+7
+00:00:28.699 --> 00:00:34.439
+I've changed the variant to platform and if you want to do that and you just need to give your project a name
+
+8
+00:00:35.020 --> 00:00:38.439
+You can just follow along with this and just watch along if you'd like
+
+9
+00:00:38.780 --> 00:00:42.380
+Or I will break down the individual steps if you would like to follow along
+
+10
+00:00:44.020 --> 00:00:48.950
+But let's dig into it so by default you'll see our scene and
+
+11
+00:00:49.850 --> 00:00:55.810
+Let's just figure out our world settings first. Let's see what kind of game settings we're using
+
+12
+00:00:55.810 --> 00:00:56.929
+So I'm just going to go to window
+
+13
+00:00:56.929 --> 00:01:02.409
+I go to world settings and you'll see world settings snaps here and you'll see my game mode is
+
+14
+00:01:02.609 --> 00:01:09.290
+The third-person game mode if I hover over this so if I press ALT and P to play the game
+
+15
+00:01:09.530 --> 00:01:11.769
+Which you can also just press the play button
+
+16
+00:01:12.450 --> 00:01:15.010
+But if I press ALT and P as the shortcut
+
+17
+00:01:15.209 --> 00:01:20.969
+You'll see that I spawn as this character and that all makes sense now this
+
+18
+00:01:21.689 --> 00:01:24.849
+character is being set from the game instance and
+
+19
+00:01:25.849 --> 00:01:32.829
+In our project settings, so if you're not sure where the project settings are just go to edit project settings and we can type game
+
+20
+00:01:33.629 --> 00:01:40.129
+Instance and you'll see a game instance class being set here. So we have two different elements going on
+
+21
+00:01:40.430 --> 00:01:46.390
+We have the game mode and if I drop down the game mode, you'll see the third-person character is being set there
+
+22
+00:01:46.390 --> 00:01:49.909
+So if you made a new character, you could plug in your character there
+
+23
+00:01:49.909 --> 00:01:55.030
+Which will do a very quick new character just to show that that behavior being set
+
+24
+00:01:55.230 --> 00:01:59.329
+You have your controller class, which we mentioned is the brain in the slide deck
+
+25
+00:01:59.829 --> 00:02:04.459
+And then we also have our game instance, which is holding some of the game behaviors
+
+26
+00:02:04.459 --> 00:02:07.439
+Which will extend to make our own game instance version
+
+27
+00:02:07.840 --> 00:02:08.960
+so
+
+28
+00:02:08.960 --> 00:02:14.560
+First thing we want to look at is why a character spawns the way it does and how it gets possessed
+
+29
+00:02:14.680 --> 00:02:17.759
+Now if I just move this player start over here
+
+30
+00:02:17.759 --> 00:02:20.300
+and if you ever need to add a player start you can just go to
+
+31
+00:02:20.560 --> 00:02:24.879
+Add the actor there and drag in a player start and that's fine to do that
+
+32
+00:02:25.280 --> 00:02:29.659
+I'm just gonna press ctrl and spacebar to load up my
+
+33
+00:02:30.580 --> 00:02:35.960
+Content drawer here and I believe in third person is probably where we'll find that character. Yes
+
+34
+00:02:35.960 --> 00:02:39.020
+so I'll drag in a character now if I
+
+35
+00:02:39.580 --> 00:02:44.060
+Removed my player start for example, and I just wanted to load as this character
+
+36
+00:02:44.770 --> 00:02:48.449
+Now if I press Alt and P to play the game
+
+37
+00:02:48.810 --> 00:02:52.210
+You'll see that I just spawned where the camera was
+
+38
+00:02:52.210 --> 00:02:55.889
+I spawned as a new player because the game mode is setting which player I spawn as
+
+39
+00:02:55.969 --> 00:02:59.770
+If I press Alt and P over here, you'll see that I'm spawning over here
+
+40
+00:03:00.009 --> 00:03:05.889
+So that's spawning in a new character. And again, if I add my player start here
+
+41
+00:03:06.460 --> 00:03:12.419
+You'll see that I just load at the player start no matter where my camera is. I'll just load at that player start
+
+42
+00:03:12.419 --> 00:03:15.180
+so what is it that's causing us not to
+
+43
+00:03:16.060 --> 00:03:20.099
+Take control as this character now in the details
+
+44
+00:03:20.099 --> 00:03:26.939
+You'll remember that we said each character has a controller that while the player is a controller
+
+45
+00:03:26.939 --> 00:03:34.620
+That can possess a character and if we type possess into the search bar here, you'll see that auto possess
+
+46
+00:03:35.060 --> 00:03:36.780
+Is disabled now
+
+47
+00:03:36.780 --> 00:03:42.340
+I'll go to player 0 here and I am always going to be player 0 as the first player in the world
+
+48
+00:03:42.539 --> 00:03:48.099
+And if I press Alt and P now, you'll see that I've not used that player start that was next to me
+
+49
+00:03:48.259 --> 00:03:49.900
+I've now used this
+
+50
+00:03:49.900 --> 00:03:51.900
+Character, so that's pretty interesting
+
+51
+00:03:52.060 --> 00:03:54.659
+If I don't possess this character by default
+
+52
+00:03:54.659 --> 00:03:59.500
+It'll just spawn me a new one at the player start and if I do want to possess it
+
+53
+00:03:59.699 --> 00:04:03.740
+It'll allow me to control that so that's already really interesting in that
+
+54
+00:04:03.740 --> 00:04:08.379
+I just have one controller one controller to rule them all me as a single-player game
+
+55
+00:04:08.659 --> 00:04:13.400
+Now this character here does not this case on the left does not have a controller
+
+56
+00:04:13.479 --> 00:04:18.519
+It's just the character with no controller whereas this playable character is
+
+57
+00:04:19.759 --> 00:04:27.000
+The character and what makes it playable is my controller being attached to that now to demonstrate that
+
+58
+00:04:27.000 --> 00:04:32.379
+I will go ahead and possess this other character just so you can see exactly what I'm talking about
+
+59
+00:04:32.720 --> 00:04:39.160
+So I'm gonna exit out of here. I'll select this character in the level
+
+60
+00:04:39.160 --> 00:04:41.680
+I'm going to open my level blueprint
+
+61
+00:04:41.759 --> 00:04:45.839
+So again, we're talking about a new concept in the level blueprint
+
+62
+00:04:46.439 --> 00:04:48.439
+That we went through in the slide deck
+
+63
+00:04:48.839 --> 00:04:55.199
+Now what I will do is I'll just delete these things for now. You don't need to delete them, but
+
+64
+00:04:55.720 --> 00:04:57.720
+You can do it just to clean things up
+
+65
+00:04:58.079 --> 00:05:02.269
+I'm going to type input F and I'm just gonna look for the F button here
+
+66
+00:05:02.629 --> 00:05:08.670
+The F button is not special, but I just want to use F for my little mechanic here now
+
+67
+00:05:08.670 --> 00:05:12.430
+I'm going to right-click and create a reference to the third person character
+
+68
+00:05:12.430 --> 00:05:18.709
+If you don't see that it's because you didn't have your character selected. So make sure you have your character selected
+
+69
+00:05:19.189 --> 00:05:20.990
+now I'm going to
+
+70
+00:05:20.990 --> 00:05:26.209
+Drag off here and type possess. No, I'm not I'm gonna move this out of the way
+
+71
+00:05:26.209 --> 00:05:31.350
+Sorry, I'm gonna right click and get the player controller first. So get player controller
+
+72
+00:05:31.350 --> 00:05:37.269
+And so this is our controller zero is the character that is a control that we default respond to
+
+73
+00:05:38.379 --> 00:05:40.639
+Let's drag off here and type possess
+
+74
+00:05:41.660 --> 00:05:48.420
+Now we've got possess there. So just reorder these and the pawn that we want to possess is now this
+
+75
+00:05:49.189 --> 00:05:51.790
+So let's compile. Let's save
+
+76
+00:05:52.350 --> 00:05:59.029
+Let's go back in. Let's press alt and P. So we are this there's only one controller that still exists now
+
+77
+00:05:59.029 --> 00:06:02.449
+Let's press F and now I am that character
+
+78
+00:06:02.889 --> 00:06:09.750
+Which is pretty interesting now if I just show you the differences here, so
+
+79
+00:06:10.589 --> 00:06:14.149
+You don't need to do this bit, but I'm just going to show you the color differences
+
+80
+00:06:14.149 --> 00:06:17.870
+So I'm just gonna get this green color. I'm just gonna duplicate it
+
+81
+00:06:17.870 --> 00:06:21.230
+It doesn't really matter what I call it just because it's a quick quick test
+
+82
+00:06:21.709 --> 00:06:24.850
+But if I just make a slightly lilac color
+
+83
+00:06:25.509 --> 00:06:27.430
+and assign
+
+84
+00:06:27.430 --> 00:06:28.550
+this
+
+85
+00:06:28.550 --> 00:06:29.990
+color to
+
+86
+00:06:29.990 --> 00:06:32.949
+The character should we say like this?
+
+87
+00:06:33.930 --> 00:06:35.689
+Let's just save everything
+
+88
+00:06:35.689 --> 00:06:40.279
+Let's press alt and P again. You'll see that's I mean I could have picked a stronger color
+
+89
+00:06:40.279 --> 00:06:44.519
+But you get the idea if I press F. I'm now this lilac colored character
+
+90
+00:06:45.600 --> 00:06:52.639
+That I've possessed. So there's still only one controller in this map. I am the controller and there's two characters
+
+91
+00:06:52.800 --> 00:06:58.180
+So there's one controller for two characters. I can switch my controller between possess and two characters
+
+92
+00:06:58.180 --> 00:07:03.399
+So hope that makes a bit of sense now to clean up this mechanic a little bit
+
+93
+00:07:03.399 --> 00:07:07.540
+What I'll do is I'll introduce the concept of the camera manager
+
+94
+00:07:07.680 --> 00:07:11.959
+So I'm just going to go back to my level blueprint. I'm going to get the player
+
+95
+00:07:12.639 --> 00:07:16.930
+Camera manager. I'm going to start the camera fade
+
+96
+00:07:17.569 --> 00:07:24.129
+Plug that in here. I will then add a delay
+
+97
+00:07:24.649 --> 00:07:31.339
+Just maybe move these out the way just tidy things up a little bit. Now. The delay is 0.2. That's fine
+
+98
+00:07:31.339 --> 00:07:33.899
+So I'm going to put the duration as 0.2 here
+
+99
+00:07:34.339 --> 00:07:41.740
+Now 0 is no fade 1 is a fade so I go from 0 to 1 over 0.2 seconds
+
+100
+00:07:41.740 --> 00:07:47.879
+So that's going to fade my camera. I'm going to select these two functions here ctrl C
+
+101
+00:07:48.779 --> 00:07:54.000
+Ctrl V to paste or you can just make them again. That's fine
+
+102
+00:07:54.220 --> 00:07:59.980
+And then this time I'll go from fade to no fade. So from 1 to 0
+
+103
+00:08:00.500 --> 00:08:05.899
+Over 0.2 seconds now, I'm going to compile save. Let's see what happens here
+
+104
+00:08:06.740 --> 00:08:12.379
+So I'm my character. I'm running around I press F I fade and now I'm this character
+
+105
+00:08:12.379 --> 00:08:15.439
+So you'll see a few different elements being used here
+
+106
+00:08:15.439 --> 00:08:20.500
+I've got my world settings that are set in my character that I should start as I
+
+107
+00:08:22.100 --> 00:08:23.620
+Then
+
+108
+00:08:23.620 --> 00:08:28.100
+Getting my controller and using the possess for the controller
+
+109
+00:08:28.100 --> 00:08:34.100
+And I'm also getting my camera manager which we mentioned in the slide deck and controlling the camera with this
+
+110
+00:08:34.100 --> 00:08:41.860
+So that's a few different components going on as well as this level blueprint, which is its own instance in the world. So
+
+111
+00:08:42.500 --> 00:08:49.179
+Just in this simple example, you can see very quickly. We just mocked up some nice cool gameplay here
+
+112
+00:08:49.700 --> 00:08:55.019
+And it's not as daunting hopefully as it felt, you know in the slide deck as we're going through these concepts
+
+113
+00:08:55.179 --> 00:09:02.620
+So I'm just gonna select all of these just by the left mouse drag in I'll press C to comment and I'll put
+
+114
+00:09:03.340 --> 00:09:04.860
+possess
+
+115
+00:09:04.860 --> 00:09:12.299
+Mechanic with fade or something like this. I'll change the color just to keep things nice and organized
+
+116
+00:09:12.740 --> 00:09:18.980
+And maybe change the font size to 40, but it just keeps things organized on our level blueprint
+
+117
+00:09:19.419 --> 00:09:22.580
+So that's our mechanic working
+
+118
+00:09:22.779 --> 00:09:26.399
+But now now what we'll do is we will
+
+119
+00:09:26.820 --> 00:09:31.360
+Store some kind of score value in our game instance
+
+120
+00:09:31.500 --> 00:09:35.580
+which if you remember the instance is the thing that
+
+121
+00:09:36.700 --> 00:09:42.620
+Persists across multiple levels. So let's go ahead and create a new game instance
+
+122
+00:09:42.620 --> 00:09:49.360
+So I'm going to press ctrl and space bar. I'll go to my blueprints folder here and
+
+123
+00:09:50.080 --> 00:09:53.679
+It doesn't matter which folder you put it in but I'll just put it in this third person
+
+124
+00:09:53.679 --> 00:10:01.299
+I'll go to a new blueprint class. I'll drop down all classes and I'll type game instance here
+
+125
+00:10:01.299 --> 00:10:08.080
+So I want the game instance there. So I'll select that and I'll just follow the same naming convention
+
+126
+00:10:08.080 --> 00:10:13.039
+I'll just call this BP third person and then I'll put game
+
+127
+00:10:14.120 --> 00:10:17.120
+Instance, there we go. So I'll double click this
+
+128
+00:10:18.320 --> 00:10:23.559
+Now game instance is there now just because we've created it does not mean it's assigned
+
+129
+00:10:23.559 --> 00:10:30.740
+So let's go back to our project settings. If you close the project settings window, just remember go to edit project settings
+
+130
+00:10:31.399 --> 00:10:38.360
+Type game instance at the top here and let's just plug in our new third person game instance
+
+131
+00:10:38.440 --> 00:10:44.100
+So just select it from the drop-down menu or I already had it selected. So I just selected it from the content browser
+
+132
+00:10:44.899 --> 00:10:48.940
+So, let's just check that this game instance is being used
+
+133
+00:10:49.500 --> 00:10:53.539
+Let's create a game instance and have begin play I guess
+
+134
+00:10:54.580 --> 00:11:00.940
+Let's just take our word for it. And let's just see see what happens. I'm sure it is being used. I'm pretty confident
+
+135
+00:11:01.659 --> 00:11:04.700
+But let's just go back to our third person level
+
+136
+00:11:05.460 --> 00:11:08.059
+And let's go to the end here
+
+137
+00:11:08.059 --> 00:11:14.519
+So on possess we'll just do a simple mechanic of adding some kind of score value to the game instance
+
+138
+00:11:14.779 --> 00:11:20.019
+So let's go to our game instance. Let's add a variable here and call it score
+
+139
+00:11:20.860 --> 00:11:27.220
+Let's change the variable type to an integer and you don't need to do this overall
+
+140
+00:11:27.220 --> 00:11:32.259
+But just to keep things organized. I'll just do game play
+
+141
+00:11:33.019 --> 00:11:38.139
+Mechanic something like this. And so now we've got a section here called gameplay mechanic
+
+142
+00:11:38.139 --> 00:11:42.700
+The cool thing here is that I did not put a space between the Y and the M
+
+143
+00:11:42.700 --> 00:11:48.480
+But I put a capital letter for the M and it automatically knows to create a space there. So that's kind of nice
+
+144
+00:11:48.899 --> 00:11:52.980
+I'll just compile and save so this is where our score is being saved
+
+145
+00:11:53.580 --> 00:12:00.740
+Now we want to in our third person level blueprint. We want to get game instance
+
+146
+00:12:01.220 --> 00:12:07.779
+This is a node that we mentioned in the slide deck. We want to cast to the third person game instance
+
+147
+00:12:07.860 --> 00:12:13.000
+So we want to get a reference directly to this new class that we created
+
+148
+00:12:13.500 --> 00:12:21.639
+We want to get the score and just remember this score is the gameplay mechanic variable that we created if we had called this
+
+149
+00:12:22.279 --> 00:12:25.840
+something else in here then that would be called something else and
+
+150
+00:12:26.360 --> 00:12:31.320
+What we will do is we will do out the plus button on our keyboard
+
+151
+00:12:31.679 --> 00:12:36.399
+So if you press shift and and the plus key that will load it up
+
+152
+00:12:36.399 --> 00:12:41.159
+And what we want is we want to have increment in there
+
+153
+00:12:41.200 --> 00:12:44.399
+So it'll essentially just add one to the score
+
+154
+00:12:45.259 --> 00:12:48.019
+Now we want to drag out and type score again
+
+155
+00:12:49.340 --> 00:12:53.360
+set score and
+
+156
+00:12:54.080 --> 00:12:57.279
+We'll just do that now just to check the score has
+
+157
+00:12:58.240 --> 00:13:03.090
+Incremented correctly, I'll do a print string. I'll drag that into there and
+
+158
+00:13:04.629 --> 00:13:13.039
+I'll just make it blue for example. I think I selected lilac. But anyway, that's fine. It seems like we're in a lilac mood today
+
+159
+00:13:14.200 --> 00:13:16.200
+compile save
+
+160
+00:13:16.200 --> 00:13:23.120
+Now when we possess the new character, it should add one to our score and give us a value of
+
+161
+00:13:24.000 --> 00:13:26.139
+1
+
+162
+00:13:26.139 --> 00:13:29.340
+Press play. So we're running around we press F
+
+163
+00:13:30.019 --> 00:13:34.820
+Now we've got a value of 1 so that's good. That's working so far
+
+164
+00:13:35.299 --> 00:13:41.379
+now the difficulty comes is this is stored on the level blueprint and
+
+165
+00:13:41.899 --> 00:13:45.779
+As we mentioned in the slide deck, it's not the cleanest way to store
+
+166
+00:13:46.580 --> 00:13:50.980
+Information like I every time I added a score I'd have to do it here and I'm not sure
+
+167
+00:13:51.899 --> 00:13:53.980
+Inside of the game instance what is happening
+
+168
+00:13:54.220 --> 00:14:00.580
+So just as a quick that this this would be fine to leave this way, but just as a quick cleanup example
+
+169
+00:14:00.820 --> 00:14:02.820
+I'll actually just add this
+
+170
+00:14:03.059 --> 00:14:07.220
+Scripting inside the game instance. So I'm gonna go back to my game instance
+
+171
+00:14:07.220 --> 00:14:13.460
+I'm gonna right-click I'm gonna type custom event and I'll do add score
+
+172
+00:14:13.980 --> 00:14:18.740
+Now I'll get the score holding down ctrl and dragging it out
+
+173
+00:14:19.220 --> 00:14:23.659
+To set the score you hold down alt to drag that out
+
+174
+00:14:23.659 --> 00:14:30.580
+So ctrl to get alt to set alternatively if you just drag it'll ask you which one without holding a button
+
+175
+00:14:30.580 --> 00:14:34.659
+It'll ask you which one so when we get the score we want to do the plus
+
+176
+00:14:35.340 --> 00:14:39.580
+increment exactly the same scripting we want to set and
+
+177
+00:14:41.350 --> 00:14:45.419
+Then let's do a little print string just to confirm
+
+178
+00:14:46.059 --> 00:14:53.059
+The current value and actually what I could do as well, this is a very quick
+
+179
+00:14:53.830 --> 00:14:56.710
+Quick thing if you want to do this as a little trick
+
+180
+00:14:57.230 --> 00:14:59.909
+You can do this type of thing
+
+181
+00:15:01.000 --> 00:15:03.159
+Where we could do current score
+
+182
+00:15:03.799 --> 00:15:09.789
+And this is just an append function if I drag off here and type append if you want to get that
+
+183
+00:15:10.029 --> 00:15:15.509
+And then this will append current score space with the current score and that's just a nice little
+
+184
+00:15:16.029 --> 00:15:18.029
+Cleaner way of doing it. I'll make it green
+
+185
+00:15:18.590 --> 00:15:26.059
+If I compile and save and I go back into my third person now, all of this is now irrelevant
+
+186
+00:15:26.179 --> 00:15:31.820
+So I'll just click that now I drag off the blue pin and type add score
+
+187
+00:15:32.100 --> 00:15:35.980
+Now that add score is now there if I double click add score
+
+188
+00:15:36.179 --> 00:15:40.500
+it's now there in the game instance, and that is a cleaner way of
+
+189
+00:15:41.340 --> 00:15:45.659
+Setting it rather than it living on the level blueprint scripting
+
+190
+00:15:46.250 --> 00:15:52.250
+Now that add score wouldn't have been possible to get from here because I've not got the third person game instance
+
+191
+00:15:52.250 --> 00:15:57.490
+This is just a generic game instance where I need to cast to the third person to get the score
+
+192
+00:15:57.730 --> 00:15:59.570
+So just keep that in mind
+
+193
+00:15:59.570 --> 00:16:04.889
+Now, let's see if it still prints the correct value just to test this out. So we'll press play
+
+194
+00:16:05.529 --> 00:16:07.379
+We'll press F
+
+195
+00:16:07.379 --> 00:16:14.539
+Current score is one. So that's great. Our game instance is working exactly how we want it to do
+
+196
+00:16:15.419 --> 00:16:20.379
+Now we want to load a new level and make sure that game instance
+
+197
+00:16:20.779 --> 00:16:26.340
+Remembers our score and it will do by default because game instance if you remember persists across levels
+
+198
+00:16:26.740 --> 00:16:31.259
+And we just want to check that. So what I'll do is I'll make a brand new level. I
+
+199
+00:16:32.419 --> 00:16:34.259
+will
+
+200
+00:16:34.259 --> 00:16:38.700
+what I'll do is I go to file save current level as and
+
+201
+00:16:39.299 --> 00:16:41.340
+I think are we in the third person?
+
+202
+00:16:41.340 --> 00:16:49.340
+Yeah, we've got third person level here and I'll just call this level 2 for example. So let's save as level 2
+
+203
+00:16:50.009 --> 00:16:53.289
+Now what I can do is I can go to my level blueprint
+
+204
+00:16:53.289 --> 00:16:56.690
+I don't need any of this script in because we're in level 2 right now
+
+205
+00:16:58.690 --> 00:17:01.299
+I'll find this color
+
+206
+00:17:01.820 --> 00:17:08.579
+so if you're in the third person folder here and you have the the colors, I'll just duplicate this again and
+
+207
+00:17:09.220 --> 00:17:14.779
+Let's maybe make an orange color. This is purely for visualization. This is not functional
+
+208
+00:17:14.779 --> 00:17:19.619
+So you don't need to follow along with this. I'm just proving that our game instance is the way it is
+
+209
+00:17:21.750 --> 00:17:26.670
+What I did was I recolored the first game instance and now our characters gone yellow
+
+210
+00:17:26.670 --> 00:17:29.150
+Which is fine and our level will be pink
+
+211
+00:17:30.190 --> 00:17:31.869
+Let's go with it
+
+212
+00:17:31.869 --> 00:17:33.869
+So let's make our level pink
+
+213
+00:17:34.869 --> 00:17:39.230
+Let's just get all these I don't need to do too many to prove my point
+
+214
+00:17:39.589 --> 00:17:44.549
+Let's just say a level 2 is a nice lilac staying in the theme of our LIGO work theme day
+
+215
+00:17:45.490 --> 00:17:46.609
+Okay
+
+216
+00:17:46.609 --> 00:17:51.069
+Saving everything now. Let's go back to level 1
+
+217
+00:17:51.880 --> 00:17:56.339
+Level 1 is green. Now. We got the yellow character, which is all fine. And
+
+218
+00:17:57.059 --> 00:18:00.420
+if I load level 2 level 2 is
+
+219
+00:18:01.299 --> 00:18:07.619
+Lilac okay. I'll just delete this character actually for level 2 because we don't need the second character
+
+220
+00:18:08.339 --> 00:18:12.859
+What I'll do though is I'll go to my level blueprint in level 2
+
+221
+00:18:13.849 --> 00:18:15.849
+right click begin play and
+
+222
+00:18:17.849 --> 00:18:25.069
+I'll delay for a second just to make sure the levels loaded correctly. Maybe I'll delay for two seconds now
+
+223
+00:18:25.069 --> 00:18:31.009
+I'll get the game instance and I'll say
+
+224
+00:18:31.849 --> 00:18:40.329
+Third person and I just want to get the score and check this
+
+225
+00:18:41.009 --> 00:18:42.849
+So I just want to check the current score
+
+226
+00:18:42.849 --> 00:18:44.250
+now what I'll do is I'll
+
+227
+00:18:44.250 --> 00:18:50.529
+Go to my game instance and I'll append this little thing here just because I want to copy and paste this you could just create
+
+228
+00:18:50.529 --> 00:18:56.490
+It yourself, but I'm just saving a bit of time here and I'll put the score into there like that now
+
+229
+00:18:57.210 --> 00:19:02.809
+Hopefully just buy it. Well, I'll just show you now by default if I play this game
+
+230
+00:19:03.690 --> 00:19:10.210
+Current score after two seconds is zero. So we know in the lilac, you know ish level
+
+231
+00:19:10.210 --> 00:19:14.150
+We still got some green, but let's call it a lilac level. The score is zero
+
+232
+00:19:14.690 --> 00:19:18.019
+now let's go into the first level and now let's
+
+233
+00:19:18.839 --> 00:19:20.900
+play and
+
+234
+00:19:21.059 --> 00:19:22.299
+possess
+
+235
+00:19:22.299 --> 00:19:28.099
+Current score is one. Okay. So now let's load into the second level and let's check
+
+236
+00:19:28.099 --> 00:19:30.099
+Our score is still one
+
+237
+00:19:30.450 --> 00:19:34.410
+So to do that we need to go to our level blueprint
+
+238
+00:19:36.660 --> 00:19:40.579
+For after we've added score. So after we possess
+
+239
+00:19:41.339 --> 00:19:46.859
+In the name of commenting. Should we just say add score to game?
+
+240
+00:19:48.339 --> 00:19:53.740
+Instance like this and then if we drag off here and we put open
+
+241
+00:19:54.240 --> 00:20:00.140
+Level so open level and if you press ctrl and spacebar to open your drawer
+
+242
+00:20:00.140 --> 00:20:05.779
+I'm just gonna press f2 to rename this property and just ctrl C
+
+243
+00:20:06.380 --> 00:20:08.380
+Alternatively, you can just right-click rename
+
+244
+00:20:08.460 --> 00:20:13.279
+But I want to ctrl C and then ctrl V and that will get the name
+
+245
+00:20:13.359 --> 00:20:18.940
+You can manually type out that name, of course, but you want to make sure there's zero spelling mistakes
+
+246
+00:20:18.940 --> 00:20:20.579
+Otherwise, this won't work
+
+247
+00:20:20.579 --> 00:20:22.579
+So just copy the name in there
+
+248
+00:20:22.779 --> 00:20:28.599
+Let's maybe add a slight delay just to make sure like adding delays is never a bad thing
+
+249
+00:20:29.339 --> 00:20:33.579
+Always helps with gameplay. Let's just comment it load level
+
+250
+00:20:34.099 --> 00:20:38.460
+Two and let's see how we're getting on now
+
+251
+00:20:38.579 --> 00:20:45.460
+The level should print string that we've got a score of one in the second level fingers crossed. Let's see
+
+252
+00:20:46.660 --> 00:20:48.970
+current score one
+
+253
+00:20:48.970 --> 00:20:51.589
+current score two current score one
+
+254
+00:20:52.309 --> 00:20:59.789
+Perfect so as you can see everything is working exactly the way we intended it to so if I even
+
+255
+00:21:01.190 --> 00:21:04.309
+Test that again. So again, we're in the first level
+
+256
+00:21:04.990 --> 00:21:08.869
+And we press ALT and P we can see that we're running around
+
+257
+00:21:09.549 --> 00:21:15.990
+If I press F top left score of one current score current score one
+
+258
+00:21:16.150 --> 00:21:19.750
+So that means that we have taken our score across
+
+259
+00:21:20.470 --> 00:21:22.470
+Into the second level
+
+260
+00:21:22.630 --> 00:21:28.230
+And so that's a summary of everything that we've done. We've we've covered a lot of ground
+
+261
+00:21:28.230 --> 00:21:36.529
+Hopefully wasn't too quick and the main demonstration was just showing that we've got a game world here with some game settings
+
+262
+00:21:36.950 --> 00:21:41.829
+We've set our game instance in the project settings
+
+263
+00:21:41.829 --> 00:21:49.230
+So just remember we've got a custom game instance here. The game instance is the thing that persists across multiple levels
+
+264
+00:21:49.309 --> 00:21:54.509
+so if we want to score the store, sorry our score or health or
+
+265
+00:21:55.349 --> 00:22:01.690
+Pickups, it could be anything you want to store here, but that will persist across multiple levels that you want to load
+
+266
+00:22:02.309 --> 00:22:08.829
+We have a mechanic here in the level that first of all, we're getting our camera manager
+
+267
+00:22:08.829 --> 00:22:11.710
+Which is a gameplay framework class in itself
+
+268
+00:22:12.349 --> 00:22:18.289
+Then we're possessing a new character. So we have two characters in the world only one controller
+
+269
+00:22:18.289 --> 00:22:23.970
+Which is us and we go from one character to another we then use the camera manager again
+
+270
+00:22:24.369 --> 00:22:29.849
+then we're using the game instance to do a score and then we're opening a new level and
+
+271
+00:22:30.769 --> 00:22:37.390
+Using the level blueprint across levels means that we're storing values in the game instance. So
+
+272
+00:22:38.279 --> 00:22:41.400
+hopefully that's just a really nice straightforward example of
+
+273
+00:22:42.519 --> 00:22:46.420
+Using the gameplay framework inside of Unreal Engine

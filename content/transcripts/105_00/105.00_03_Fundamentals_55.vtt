@@ -1,0 +1,209 @@
+WEBVTT
+
+1
+00:00:01.459 --> 00:00:06.540
+Sequencer is Unreal Engine's multi-track editor used for creating and playing back
+
+2
+00:00:06.540 --> 00:00:08.980
+cinematic sequences in real time.
+
+3
+00:00:08.980 --> 00:00:14.500
+It's the backbone for all linear content creation in Unreal Engine and a production
+
+4
+00:00:14.500 --> 00:00:22.480
+hub combining aspects of an editorial department with layout and animation, all within a non-linear
+
+5
+00:00:22.480 --> 00:00:23.539
+timeline.
+
+6
+00:00:23.539 --> 00:00:28.199
+Sequencer, while it can be used for more traditional film-like applications, has
+
+7
+00:00:28.199 --> 00:00:33.899
+many other capabilities that are beneficial to real-time applications, such as video games.
+
+8
+00:00:33.899 --> 00:00:38.700
+For the purposes of this course, we'll create in-game cutscenes with pre-defined
+
+9
+00:00:38.700 --> 00:00:45.039
+camera angles, animation, and event triggers, however, it's important to note that a sequence
+
+10
+00:00:45.039 --> 00:00:49.799
+doesn't always have to include cameras, for example, you could use a sequence in-game
+
+11
+00:00:49.799 --> 00:00:55.219
+to play a building collapse instead of relying on chaos physics at runtime.
+
+12
+00:00:55.219 --> 00:01:00.020
+It's also important to note that sequences can be loaded and unloaded at real-time and
+
+13
+00:01:00.020 --> 00:01:03.090
+are independent of a level.
+
+14
+00:01:03.090 --> 00:01:07.810
+A well-defined framework and pipeline for your cinematics are essential for maintaining
+
+15
+00:01:07.810 --> 00:01:11.569
+a clean, organized, and accessible project.
+
+16
+00:01:11.569 --> 00:01:17.209
+A common structure for feature films is the use of a parent cinematic, commonly used
+
+17
+00:01:17.209 --> 00:01:22.250
+for viewing the entire cinematic as well as rendering the final output, and nested
+
+18
+00:01:22.250 --> 00:01:25.189
+sequences and shots.
+
+19
+00:01:25.189 --> 00:01:30.109
+Using a structure like this has many benefits for video game development, specifically,
+
+20
+00:01:30.109 --> 00:01:35.090
+this type of workflow enables multiple departments to work concurrently on shots
+
+21
+00:01:35.090 --> 00:01:38.310
+while preserving a well-organized file structure.
+
+22
+00:01:38.310 --> 00:01:42.829
+And while this structure works for video games and films, I strongly recommend that
+
+23
+00:01:42.829 --> 00:01:48.209
+you take time early on in your project to define a file and folder structure for
+
+24
+00:01:48.209 --> 00:01:53.750
+your in-game cutscenes, establish your shot, assembly, and nesting templates, as well
+
+25
+00:01:53.750 --> 00:01:58.120
+as define a pipeline that best suits your project.
+
+26
+00:01:58.120 --> 00:02:02.659
+Within our sequences, we have a few options for spawning or controlling various actors.
+
+27
+00:02:02.659 --> 00:02:05.859
+Specifically, there are three classifications.
+
+28
+00:02:05.859 --> 00:02:10.780
+Possessibles are actors that already exist in our level that can be included in our
+
+29
+00:02:10.780 --> 00:02:15.020
+sequence, allowing us to control various parameters for that actor.
+
+30
+00:02:15.020 --> 00:02:19.689
+For example, within our level, we may have a doorway that we need to have our actor
+
+31
+00:02:19.689 --> 00:02:20.930
+open.
+
+32
+00:02:20.930 --> 00:02:25.650
+We can include the door actor, or blueprint, in our sequence and animate the door opening
+
+33
+00:02:25.650 --> 00:02:27.090
+and closing.
+
+34
+00:02:27.090 --> 00:02:31.550
+After the sequence is complete, the door will still remain in the level.
+
+35
+00:02:31.550 --> 00:02:34.509
+Our second type is known as a spawnable.
+
+36
+00:02:34.509 --> 00:02:38.669
+Spawnable actors are only loaded when the sequence is playing and are removed after
+
+37
+00:02:38.669 --> 00:02:40.430
+the sequence is complete.
+
+38
+00:02:40.430 --> 00:02:44.270
+For example, let's say we have a sequence where we have a spaceship fly in to deliver
+
+39
+00:02:44.270 --> 00:02:47.550
+cargo and then it flies off afterwards.
+
+40
+00:02:47.550 --> 00:02:52.629
+Because we really only need the ship to appear during the sequence, using a spawnable actor
+
+41
+00:02:52.629 --> 00:02:57.189
+is the most logical choice as opposed to placing the ship in the level and trying
+
+42
+00:02:57.189 --> 00:02:59.969
+to control it and then hide it afterwards.
+
+43
+00:02:59.969 --> 00:03:05.770
+Lastly, introduced in 5.5 is a new type known as replaceables.
+
+44
+00:03:05.770 --> 00:03:10.280
+Replaceables are similar to spawnables, however they can be swapped at runtime.
+
+45
+00:03:10.280 --> 00:03:14.639
+For example, let's say that you have a game where players have the ability to customize
+
+46
+00:03:14.639 --> 00:03:18.680
+a character at any time throughout the game.
+
+47
+00:03:18.680 --> 00:03:22.719
+Rather than loading a generic actor into our sequence, we want to load the player's
+
+48
+00:03:22.719 --> 00:03:27.360
+specific character as it appears when the sequence starts.
+
+49
+00:03:27.360 --> 00:03:32.400
+By using a replaceable actor in your sequence, you can build and animate the sequence using
+
+50
+00:03:32.400 --> 00:03:38.159
+a reference actor and replace that reference actor with the player's character at runtime.
+
+51
+00:03:38.159 --> 00:03:42.860
+The same principle applies to any actor that's loaded into a sequence when it's defined
+
+52
+00:03:42.860 --> 00:03:43.819
+as a replaceable.

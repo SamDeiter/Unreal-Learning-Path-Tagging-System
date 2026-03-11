@@ -1,0 +1,561 @@
+WEBVTT
+
+1
+00:00:01.300 --> 00:00:04.980
+The next thing we're going to cover is serialization and saving games.
+
+2
+00:00:04.980 --> 00:00:10.019
+Whilst this sounds like a pretty substantial topic in terms of you on your game,
+
+3
+00:00:10.019 --> 00:00:14.099
+normally the same system can get quite sizable, depending on the kind of game you're making,
+
+4
+00:00:14.099 --> 00:00:20.940
+but actually in terms of what you need to get a save system implemented in Unreal is actually pretty limited.
+
+5
+00:00:20.940 --> 00:00:25.820
+First off, what actually is save games, I think most of the people will know this,
+
+6
+00:00:25.820 --> 00:00:30.059
+but it gives us the ability to save the state that we define of the game,
+
+7
+00:00:30.059 --> 00:00:35.579
+close the game, reboot it, and players are able to resume from where they last left off.
+
+8
+00:00:35.579 --> 00:00:39.100
+The implementation is very much down to the kind of game that you're making.
+
+9
+00:00:39.100 --> 00:00:43.820
+If you're making a roguelike, you may not try and save the actual active world at the moment,
+
+10
+00:00:43.820 --> 00:00:46.939
+but maybe you save the unlocks that they have.
+
+11
+00:00:46.939 --> 00:00:51.259
+If you're saving something like a huge open-world RPG,
+
+12
+00:00:51.259 --> 00:00:55.659
+maybe you need to save where they are, the AIs around them, and it gets much more complicated.
+
+13
+00:00:55.659 --> 00:00:59.899
+In Unreal, really what it provides us is the ability to save games to a file
+
+14
+00:00:59.899 --> 00:01:04.299
+and load them back in, and then what we do beyond that is kind of up to us.
+
+15
+00:01:04.299 --> 00:01:10.219
+You can have multiple forms of save class, which is useful even within a single project,
+
+16
+00:01:10.219 --> 00:01:15.019
+because a very typical implementation might have you having a settings save file,
+
+17
+00:01:15.019 --> 00:01:19.739
+which is kind of global to all users, and then a per user save file.
+
+18
+00:01:19.739 --> 00:01:24.700
+For player one, you have got three slots and you have three different saves
+
+19
+00:01:24.700 --> 00:01:27.890
+that you can save in each of those independently.
+
+20
+00:01:27.890 --> 00:01:32.129
+As well as that, obviously it supports multiple save game files, like I already mentioned,
+
+21
+00:01:32.129 --> 00:01:34.769
+and the save game isn't restricted to C++.
+
+22
+00:01:34.769 --> 00:01:39.969
+You can have a Blueprint-only project and you can still implement all of this functionality.
+
+23
+00:01:39.969 --> 00:01:45.090
+So there's actual steps for having a project that actually has a save game
+
+24
+00:01:45.090 --> 00:01:46.769
+and you can save it and load it.
+
+25
+00:01:46.769 --> 00:01:51.730
+First thing you need to do is actually make your save game class, which inherits from save game.
+
+26
+00:01:51.730 --> 00:01:54.290
+Then you just choose what data that's going to store,
+
+27
+00:01:54.290 --> 00:02:00.290
+then you really need to define two key pieces of data, really one, which is your save slot name.
+
+28
+00:02:01.730 --> 00:02:03.170
+It depends on the platform you're on.
+
+29
+00:02:03.170 --> 00:02:05.969
+Save game index can or cannot be relevant.
+
+30
+00:02:05.969 --> 00:02:11.490
+Actually by default on Windows, the save game, the user index it's called,
+
+31
+00:02:11.490 --> 00:02:15.169
+actually isn't relevant, but it can apply for other platforms.
+
+32
+00:02:16.210 --> 00:02:20.210
+Then we just use the create save game object, create that save object,
+
+33
+00:02:20.770 --> 00:02:23.969
+put the data that we want to save into that object, and then save it.
+
+34
+00:02:24.610 --> 00:02:27.090
+We can do that synchronously or asynchronously.
+
+35
+00:02:27.090 --> 00:02:29.490
+Let's actually just quickly go through a demonstration of this.
+
+36
+00:02:30.770 --> 00:02:34.849
+In our example project, I've just made a class for us to reference.
+
+37
+00:02:35.569 --> 00:02:36.849
+It's as simple as this.
+
+38
+00:02:36.849 --> 00:02:40.289
+You make a Blueprint that inherits from the save game class.
+
+39
+00:02:40.289 --> 00:02:42.990
+Blueprint, save game.
+
+40
+00:02:46.180 --> 00:02:47.300
+It's that simple.
+
+41
+00:02:47.300 --> 00:02:49.460
+The one I've already made, very easy.
+
+42
+00:02:50.020 --> 00:02:53.300
+It inherits from the save game and I've just got this one float in it,
+
+43
+00:02:53.300 --> 00:02:55.139
+which is just some float that we want to save.
+
+44
+00:02:56.189 --> 00:02:59.229
+What can be a little bit confusing is you'll see in Unreal,
+
+45
+00:02:59.229 --> 00:03:02.349
+when you have a variable selected and you go into the advanced section,
+
+46
+00:03:02.349 --> 00:03:04.270
+we have this save game flag.
+
+47
+00:03:05.469 --> 00:03:08.110
+This doesn't magically make this get saved.
+
+48
+00:03:08.110 --> 00:03:10.349
+It's not really doing a huge amount for it.
+
+49
+00:03:10.349 --> 00:03:12.590
+It's not going to put it into your save file.
+
+50
+00:03:12.590 --> 00:03:16.509
+In fact, this save data will save even if that isn't ticked.
+
+51
+00:03:16.509 --> 00:03:22.189
+What this save game actually does is marking it for this variable for serialization.
+
+52
+00:03:22.189 --> 00:03:25.469
+When you're trying to save a U object or a struct,
+
+53
+00:03:25.469 --> 00:03:28.189
+and you're trying to serialize that object or struct
+
+54
+00:03:28.189 --> 00:03:30.590
+down into something that can be written into your save file,
+
+55
+00:03:31.150 --> 00:03:32.830
+that is what that flag is there to mark.
+
+56
+00:03:32.830 --> 00:03:35.310
+It's to say that when I try and serialize this object,
+
+57
+00:03:35.310 --> 00:03:38.030
+I'm interested, this piece of data is relevant.
+
+58
+00:03:40.509 --> 00:03:42.669
+This is like a serialization helper that just means
+
+59
+00:03:42.669 --> 00:03:46.189
+you don't have to manually put in every single variable for each class.
+
+60
+00:03:46.830 --> 00:03:49.389
+Unreal will find it for you to say,
+
+61
+00:03:49.389 --> 00:03:51.789
+oh, this is relevant to saving and loading.
+
+62
+00:03:52.349 --> 00:03:55.229
+If you mark this off, it's more about object serialization.
+
+63
+00:03:56.479 --> 00:03:59.680
+Either way, we've got this variable in our save game.
+
+64
+00:03:59.680 --> 00:04:01.840
+If I went to our level blueprint,
+
+65
+00:04:01.840 --> 00:04:03.919
+I've just done a little bit of a setup here.
+
+66
+00:04:03.919 --> 00:04:05.680
+Essentially, on our begin play,
+
+67
+00:04:05.680 --> 00:04:09.199
+we're going to try loading two different save files.
+
+68
+00:04:09.199 --> 00:04:13.599
+As I said, on Windows, the user index isn't relevant.
+
+69
+00:04:13.599 --> 00:04:16.560
+In all of these, I've just left user index is zero.
+
+70
+00:04:16.560 --> 00:04:18.800
+To define the two different save files,
+
+71
+00:04:18.800 --> 00:04:25.360
+instead, I've got this, I've actually customized the save slot name.
+
+72
+00:04:25.360 --> 00:04:29.360
+So we've got some default name, which is just example save slot.
+
+73
+00:04:31.180 --> 00:04:35.180
+And then we are just appending a value to it.
+
+74
+00:04:35.180 --> 00:04:37.420
+So this is to represent multiple save slots.
+
+75
+00:04:37.420 --> 00:04:40.379
+So the name plus one and the name plus two.
+
+76
+00:04:40.379 --> 00:04:42.139
+And we're trying to load both of those.
+
+77
+00:04:42.139 --> 00:04:46.300
+If it loads, we read out the value, that some save float value,
+
+78
+00:04:46.300 --> 00:04:49.660
+and we'll just print that out and set that as our save game.
+
+79
+00:04:49.819 --> 00:04:51.579
+And we do the same thing for number two,
+
+80
+00:04:51.579 --> 00:04:54.300
+but print out that it was from number two and set that as save two.
+
+81
+00:04:55.069 --> 00:04:58.430
+And then I've just got this, I'm just binding to these button keys.
+
+82
+00:04:58.430 --> 00:05:01.550
+When I press one, we randomize that number,
+
+83
+00:05:01.550 --> 00:05:02.670
+print out what the number was,
+
+84
+00:05:02.670 --> 00:05:05.870
+and save that game with that value written into it.
+
+85
+00:05:06.430 --> 00:05:09.629
+And same for two, but just for our second slot.
+
+86
+00:05:09.629 --> 00:05:12.509
+So if I, I'm just going to clear out my save files.
+
+87
+00:05:13.709 --> 00:05:16.589
+So to kind of demonstrate this, I'll come back to this in a second.
+
+88
+00:05:18.480 --> 00:05:25.779
+But if I go and play a game, you see no save game found for one or two.
+
+89
+00:05:25.779 --> 00:05:29.540
+Now if I hit one, that says it's saving the value is 3.8.
+
+90
+00:05:29.540 --> 00:05:34.100
+Now if we just remember that, if I stop, quit play in editor and play again,
+
+91
+00:05:34.100 --> 00:05:36.180
+you'll say it's found found no save game two,
+
+92
+00:05:36.180 --> 00:05:38.819
+but save game one, the value saved is 3.8.
+
+93
+00:05:38.819 --> 00:05:41.860
+And so if I do two, it's now 4.8.
+
+94
+00:05:41.860 --> 00:05:45.220
+And if I regenerate one, so the save file already exists,
+
+95
+00:05:45.220 --> 00:05:46.819
+but I'm just overwriting that data.
+
+96
+00:05:47.379 --> 00:05:51.220
+So 4.8 and 9.4, if I stop and play again,
+
+97
+00:05:51.220 --> 00:05:54.899
+we'll see 4.8 and 9.4 in those two different slots.
+
+98
+00:05:54.899 --> 00:05:55.939
+So it's that simple.
+
+99
+00:05:55.939 --> 00:05:57.540
+You just put data in the save object,
+
+100
+00:05:58.339 --> 00:06:01.220
+you create the save object, you push that data into it,
+
+101
+00:06:01.220 --> 00:06:02.259
+and then you save it.
+
+102
+00:06:02.259 --> 00:06:04.980
+And yeah, the load functions work in the same way.
+
+103
+00:06:05.810 --> 00:06:08.449
+So the only other thing is about where this data is actually saved.
+
+104
+00:06:08.449 --> 00:06:10.930
+You might have just, if you were paying close attention,
+
+105
+00:06:10.930 --> 00:06:13.490
+then you might have noticed me jumping into a folder there
+
+106
+00:06:13.490 --> 00:06:15.329
+just to delete the previous saves.
+
+107
+00:06:15.410 --> 00:06:19.250
+You can see by default, when you're in an editor project,
+
+108
+00:06:19.250 --> 00:06:21.410
+it will get whatever project you're in.
+
+109
+00:06:21.410 --> 00:06:26.050
+So in this case, example five, five project in the saved folder,
+
+110
+00:06:26.050 --> 00:06:29.170
+you can see we've got a save games folder,
+
+111
+00:06:29.170 --> 00:06:30.689
+and that's where they'll get created.
+
+112
+00:06:30.689 --> 00:06:40.129
+And these names will just match whatever you're feeding into that save game function call.
+
+113
+00:06:40.129 --> 00:06:44.050
+So just this slot name is what that literally the name of that file will be.
+
+114
+00:06:45.329 --> 00:06:47.649
+That being said, on a fully built version of your game,
+
+115
+00:06:48.449 --> 00:06:51.490
+it won't necessarily be, I think in a development build,
+
+116
+00:06:51.490 --> 00:06:53.730
+it will be next to your executable.
+
+117
+00:06:53.730 --> 00:06:55.329
+But in a shipping version of your game,
+
+118
+00:06:55.329 --> 00:06:58.290
+it will actually go into AppData on Windows at least.
+
+119
+00:06:58.290 --> 00:07:01.009
+I can't comment about Mac, but just worth bearing that in mind.
+
+120
+00:07:01.009 --> 00:07:04.209
+If you're struggling to find your direct people to your save games
+
+121
+00:07:04.209 --> 00:07:06.050
+in a shipping build of the game,
+
+122
+00:07:06.050 --> 00:07:10.050
+it's probably somewhere in your AppData, like AppData local,
+
+123
+00:07:10.050 --> 00:07:11.810
+whatever your game name is, something like that.
+
+124
+00:07:12.769 --> 00:07:17.810
+But that's essentially all you need to do to get a project saving.
+
+125
+00:07:18.689 --> 00:07:20.449
+The kind of last thing just to mention
+
+126
+00:07:20.449 --> 00:07:22.930
+is the fact that there are a couple of these key functions.
+
+127
+00:07:22.930 --> 00:07:25.569
+We've already covered some of them, creating the save game object,
+
+128
+00:07:25.569 --> 00:07:27.810
+saving the games to slot and loading the games to slot.
+
+129
+00:07:27.810 --> 00:07:31.329
+But there are also asynchronous variations of these things.
+
+130
+00:07:31.329 --> 00:07:33.889
+Both of these are available in blueprint and C++.
+
+131
+00:07:35.490 --> 00:07:38.610
+And it is despite the fact that the demonstration I just gave
+
+132
+00:07:38.610 --> 00:07:42.930
+did actually utilize synchronous saving and loading just for the sake of speed.
+
+133
+00:07:42.930 --> 00:07:44.290
+It is obviously strongly encouraged
+
+134
+00:07:44.290 --> 00:07:46.930
+that you probably lean on the asynchronous functionality,
+
+135
+00:07:46.930 --> 00:07:51.889
+especially if your game has larger save slots for loading and saving,
+
+136
+00:07:51.889 --> 00:07:54.610
+just because otherwise your game is going to freeze up and hitch.
+
+137
+00:07:55.410 --> 00:07:56.930
+And obviously that's not desirable.
+
+138
+00:07:56.930 --> 00:07:59.410
+So the asynchronous versions of these functions
+
+139
+00:07:59.410 --> 00:08:00.449
+are the ones that we encourage,
+
+140
+00:08:00.449 --> 00:08:02.610
+but otherwise it works in exactly the same way.

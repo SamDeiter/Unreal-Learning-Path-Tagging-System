@@ -1,0 +1,421 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:04.679
+From there, let's take a look at the object life cycle.
+
+2
+00:00:04.679 --> 00:00:06.040
+Creating a new object in Unreal
+
+3
+00:00:06.040 --> 00:00:08.679
+is as easy as calling the new object line
+
+4
+00:00:08.679 --> 00:00:10.900
+with the appropriate parameters.
+
+5
+00:00:10.900 --> 00:00:12.380
+When we actually create the object,
+
+6
+00:00:12.380 --> 00:00:15.640
+the following operations are going on under the hood.
+
+7
+00:00:15.640 --> 00:00:18.320
+We malloc the raw data, finding out how big it is
+
+8
+00:00:18.320 --> 00:00:20.879
+and allocating the associated memory footprint for it.
+
+9
+00:00:20.879 --> 00:00:22.160
+We then call memset zero
+
+10
+00:00:22.160 --> 00:00:23.920
+and clear all the associated memory
+
+11
+00:00:23.920 --> 00:00:25.859
+because we're about to populate it.
+
+12
+00:00:25.859 --> 00:00:27.640
+We then call the classes constructor
+
+13
+00:00:27.640 --> 00:00:29.120
+that initializes the virtual table
+
+14
+00:00:29.120 --> 00:00:32.600
+and initializes all properties within that block of memory.
+
+15
+00:00:32.600 --> 00:00:35.219
+From there, we copy over the archetype with a mem copy
+
+16
+00:00:35.219 --> 00:00:36.840
+and Unreal works from a template system
+
+17
+00:00:36.840 --> 00:00:39.850
+called the class default object.
+
+18
+00:00:39.850 --> 00:00:42.289
+We then have the post construction initialization,
+
+19
+00:00:42.289 --> 00:00:45.289
+which is where we duplicate all values from the CDO
+
+20
+00:00:45.289 --> 00:00:47.359
+into this new block of data.
+
+21
+00:00:47.359 --> 00:00:49.000
+From there, we load all properties
+
+22
+00:00:49.000 --> 00:00:50.640
+from configuration files.
+
+23
+00:00:50.640 --> 00:00:53.079
+We load all properties that would require from .config
+
+24
+00:00:53.079 --> 00:00:56.759
+or .ini files through a get defaults call.
+
+25
+00:00:56.759 --> 00:00:58.640
+Lastly, we call post init properties,
+
+26
+00:00:58.640 --> 00:01:00.799
+which is a gameplay function that we can implement
+
+27
+00:01:00.799 --> 00:01:03.310
+and use to drive gameplay logic.
+
+28
+00:01:03.310 --> 00:01:05.230
+Actors have a very specific life cycle
+
+29
+00:01:05.230 --> 00:01:07.989
+that we can absolutely use to our advantage.
+
+30
+00:01:07.989 --> 00:01:10.030
+Actors have a huge number of virtual functions
+
+31
+00:01:10.030 --> 00:01:12.269
+that we can override to add gameplay functionality.
+
+32
+00:01:12.269 --> 00:01:14.189
+Let's take a look how we can spawn an actor
+
+33
+00:01:14.189 --> 00:01:16.859
+and break down its subsequent life cycle.
+
+34
+00:01:16.859 --> 00:01:18.219
+As an actor is in the world,
+
+35
+00:01:18.219 --> 00:01:19.379
+we need to route our spawn
+
+36
+00:01:19.379 --> 00:01:21.299
+through the world we wish to spawn it into
+
+37
+00:01:21.299 --> 00:01:23.420
+and give it a transform to spawn at.
+
+38
+00:01:23.420 --> 00:01:25.659
+So in this example, we've got a transform defined.
+
+39
+00:01:25.659 --> 00:01:28.140
+In this case, we'll just use its default values.
+
+40
+00:01:28.140 --> 00:01:29.500
+We then grab a reference to the world
+
+41
+00:01:29.500 --> 00:01:30.680
+we want to spawn the actor in
+
+42
+00:01:30.680 --> 00:01:33.849
+and call its template its spawn actor function.
+
+43
+00:01:33.849 --> 00:01:36.090
+We give it a template, in this case, just actor,
+
+44
+00:01:36.090 --> 00:01:37.890
+and pass it in a class that we'd like to spawn
+
+45
+00:01:37.890 --> 00:01:40.819
+and a transform that we'd want it to spawn at.
+
+46
+00:01:40.819 --> 00:01:42.540
+As mentioned on the opening slide,
+
+47
+00:01:42.540 --> 00:01:44.480
+actors have got a number of critical functions
+
+48
+00:01:44.480 --> 00:01:45.620
+that are important for us to understand
+
+49
+00:01:45.620 --> 00:01:47.659
+when building systems.
+
+50
+00:01:47.659 --> 00:01:49.620
+Initialize components pre and post
+
+51
+00:01:49.620 --> 00:01:51.379
+is called when spinning up the actor.
+
+52
+00:01:51.379 --> 00:01:53.060
+This function is passed through to any components
+
+53
+00:01:53.060 --> 00:01:56.780
+that are on the set actor for their own initializations.
+
+54
+00:01:56.780 --> 00:01:58.060
+Begin play is called
+
+55
+00:01:58.060 --> 00:02:00.219
+as soon as the actor is spawned and is usable.
+
+56
+00:02:00.219 --> 00:02:03.579
+It's essentially finished its initialization at this point.
+
+57
+00:02:03.579 --> 00:02:05.280
+Tick is called at regular intervals
+
+58
+00:02:05.280 --> 00:02:07.379
+with every frame being its default,
+
+59
+00:02:07.379 --> 00:02:10.449
+with delta time being passed in as a parameter.
+
+60
+00:02:10.449 --> 00:02:12.770
+The length of a frame may vary wildly
+
+61
+00:02:12.770 --> 00:02:14.169
+on a per client basis.
+
+62
+00:02:14.169 --> 00:02:17.539
+So using delta time in our calculations is fairly critical.
+
+63
+00:02:17.539 --> 00:02:20.159
+Frame rates can be locked on both client and server
+
+64
+00:02:20.159 --> 00:02:22.719
+with the tick frequency changing accordingly.
+
+65
+00:02:22.719 --> 00:02:25.580
+However, we can also explicitly define our tick frequency
+
+66
+00:02:25.580 --> 00:02:27.300
+in the constructor of the class
+
+67
+00:02:27.300 --> 00:02:30.419
+should we want a very infrequent but consistent tick.
+
+68
+00:02:30.419 --> 00:02:33.060
+A tick can also be turned off and unregistered entirely
+
+69
+00:02:33.060 --> 00:02:36.439
+if your technical design doesn't require it.
+
+70
+00:02:36.439 --> 00:02:38.759
+End play is the actor's spin down function
+
+71
+00:02:38.759 --> 00:02:40.580
+and it's the opposite of begin play.
+
+72
+00:02:40.580 --> 00:02:43.699
+Typically this is used as a cleanup function.
+
+73
+00:02:43.699 --> 00:02:46.939
+Calling destroy on an actor marks it as pending kill
+
+74
+00:02:46.939 --> 00:02:49.699
+and begins the process of destroying the actor.
+
+75
+00:02:49.699 --> 00:02:52.620
+This involves calling begin destroy, finish destroy
+
+76
+00:02:52.620 --> 00:02:55.000
+and finally freeing up the memory.
+
+77
+00:02:55.000 --> 00:02:56.960
+Destroy is often called by engineers
+
+78
+00:02:56.960 --> 00:02:59.400
+and it's eventually rooted down into end play.
+
+79
+00:02:59.400 --> 00:03:01.620
+So we don't have to call that manually.
+
+80
+00:03:01.620 --> 00:03:03.780
+It's important to note that we can still access the actor
+
+81
+00:03:03.780 --> 00:03:05.900
+whilst it's in the process of being destroyed
+
+82
+00:03:05.900 --> 00:03:10.120
+but it will have the RF pending kill flag set on it.
+
+83
+00:03:10.120 --> 00:03:11.800
+We can see here that the actor life cycle
+
+84
+00:03:11.800 --> 00:03:13.280
+is actually fairly complex
+
+85
+00:03:13.280 --> 00:03:14.360
+and there's a number of different ways
+
+86
+00:03:14.360 --> 00:03:16.300
+we can initialize an actor.
+
+87
+00:03:16.300 --> 00:03:17.580
+We can see on the right hand side
+
+88
+00:03:17.580 --> 00:03:20.379
+that the actual spawning can be instant or deferred.
+
+89
+00:03:20.379 --> 00:03:22.259
+Deferred gives us a chance to change a value
+
+90
+00:03:22.259 --> 00:03:24.500
+on said actor before it hits begin play
+
+91
+00:03:24.500 --> 00:03:27.569
+and any subsequent gameplay functions that we've hooked in.
+
+92
+00:03:27.569 --> 00:03:29.449
+We can also see on the left that loading a map
+
+93
+00:03:29.449 --> 00:03:32.210
+also routes through the same begin play code
+
+94
+00:03:32.210 --> 00:03:33.969
+as our explicit spawning does,
+
+95
+00:03:33.969 --> 00:03:35.849
+whether it be from the direct loading of a map
+
+96
+00:03:35.849 --> 00:03:38.449
+or from clicking play in the editor.
+
+97
+00:03:38.449 --> 00:03:40.449
+We can also see that when and where
+
+98
+00:03:40.449 --> 00:03:43.370
+end play or destroy is called is also fairly fluid.
+
+99
+00:03:43.370 --> 00:03:44.689
+We can call destroy ourselves,
+
+100
+00:03:44.689 --> 00:03:46.449
+we can give an actor a lifetime
+
+101
+00:03:46.449 --> 00:03:49.009
+or we can simply exit the application.
+
+102
+00:03:49.009 --> 00:03:50.289
+Regardless, we need to make sure
+
+103
+00:03:50.289 --> 00:03:53.009
+that we're not leaving any actors unaccounted for.
+
+104
+00:03:53.009 --> 00:03:54.930
+They all route through end play functionality
+
+105
+00:03:54.930 --> 00:03:57.969
+marking them for kill and the eventual garbage collection.

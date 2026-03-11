@@ -1,0 +1,417 @@
+WEBVTT
+
+1
+00:00:01.520 --> 00:00:08.000
+Hello and welcome to this next video of our exercise. In this we are going to be
+
+2
+00:00:08.000 --> 00:00:14.480
+adding in the functionality to lock and unlock the door and make it so that it can be
+
+3
+00:00:17.019 --> 00:00:21.260
+and make it so that we can see it reflected in the color of the light
+
+4
+00:00:22.140 --> 00:00:29.949
+on the actor. So I'm back in the engine now and in this video we're going to be creating
+
+5
+00:00:29.949 --> 00:00:36.990
+a function which will change the light's color so that we can see if it is locked or unlocked.
+
+6
+00:00:37.740 --> 00:00:41.100
+And we're going to be putting in the functionality that will make that work.
+
+7
+00:00:42.380 --> 00:00:47.420
+So the first thing that we're going to want to do on this is we're going to want to talk
+
+8
+00:00:47.420 --> 00:00:53.259
+about variables. Because we're going to need to know if a door is locked or unlocked.
+
+9
+00:00:53.820 --> 00:00:58.380
+And we want you to save that. So we're going to save that data in a variable.
+
+10
+00:00:59.020 --> 00:01:05.420
+So that's all that a variable is. It's an allocation of memory on the computer where
+
+11
+00:01:05.420 --> 00:01:11.659
+we can save data. So in the left hand side here you can see we have the variable section.
+
+12
+00:01:12.219 --> 00:01:18.659
+And if I push plus it will create a new variable. Now in this case we created a transform.
+
+13
+00:01:19.620 --> 00:01:24.739
+You might have a boolean but let's talk through what the different types of variable are.
+
+14
+00:01:25.739 --> 00:01:33.299
+So if you look up in the top right hand corner in the details panel we have a drop down
+
+15
+00:01:34.180 --> 00:01:38.099
+with all of the different types of variables that we can have.
+
+16
+00:01:39.060 --> 00:01:46.500
+Now the first one is a boolean. And what a boolean is is it is simply a one or a zero.
+
+17
+00:01:47.140 --> 00:01:54.739
+And this is really useful for us to tell if something is true or false. So in this case
+
+18
+00:01:54.739 --> 00:02:02.530
+we're going to use a boolean and we're going to call the variable locked. And so what this is
+
+19
+00:02:02.530 --> 00:02:08.370
+going to do is if it is locked we'll set the boolean to true. If it is unlocked the boolean
+
+20
+00:02:08.370 --> 00:02:17.259
+will be false. Now let's have a quick look at the other variables. So as we go down the list
+
+21
+00:02:17.259 --> 00:02:24.219
+here we have a bunch of green ones and these are all numeric of varying different sizes.
+
+22
+00:02:24.699 --> 00:02:29.659
+The ones that we're probably going to see the most is the float which allows us to have a floating
+
+23
+00:02:29.659 --> 00:02:38.219
+point number like 0.5 or 0.2 and so on. This is great for percentages or anything we
+
+24
+00:02:39.259 --> 00:02:45.500
+need to get very very specific. We also have an integer. An integer is going to be a whole
+
+25
+00:02:45.500 --> 00:02:50.300
+number so it's only going to be one two three four. We're not going to have any floating points.
+
+26
+00:02:50.300 --> 00:02:55.020
+It's great for counting things or knowing how many times you've been around the loop.
+
+27
+00:02:57.469 --> 00:03:05.789
+Next we have these pinky sort of purpley ones and these are all different forms of text.
+
+28
+00:03:07.340 --> 00:03:13.439
+We won't worry too much about that. This one underneath that we have vectors rotators and
+
+29
+00:03:13.439 --> 00:03:23.919
+transforms. These are structs of floats and I'll create a transform so that we can look into it.
+
+30
+00:03:24.479 --> 00:03:30.159
+But I think one of the easiest ways to understand what a transform is is if we go into
+
+31
+00:03:31.199 --> 00:03:38.080
+the viewport and select anything for example our actor the transform will be the first thing
+
+32
+00:03:38.080 --> 00:03:43.740
+that appears in the details panel and that is our location rotation and scale.
+
+33
+00:03:44.699 --> 00:03:53.659
+All of these are structs of floats which have three values one denoting x y and z
+
+34
+00:03:54.460 --> 00:04:02.610
+so that we can figure out things in the 3d space. So if I was to look at the variable
+
+35
+00:04:02.610 --> 00:04:09.120
+I'll take my transform variable drag it in. First choice I have is get or set. Now
+
+36
+00:04:09.680 --> 00:04:15.360
+if when you get a variable all you are is reading the value that is inside that variable.
+
+37
+00:04:16.189 --> 00:04:21.949
+When you set a variable you are changing the value which is inside that variable.
+
+38
+00:04:22.670 --> 00:04:31.889
+And these both look a little bit different. So our get does not have an execution pin
+
+39
+00:04:31.889 --> 00:04:39.810
+and just as an output pin. Our set has to be connected up via an execution pin
+
+40
+00:04:39.810 --> 00:04:46.740
+and it has an input and an output. Now we talked about this being a struct.
+
+41
+00:04:46.740 --> 00:04:54.500
+A struct stands for structure which is a combination of variables. So if I come in here
+
+42
+00:04:54.500 --> 00:05:01.060
+I right-hand click and go split struct pin you can see that I'll get location rotation and scale.
+
+43
+00:05:01.870 --> 00:05:08.269
+I can even go further to split the struct pin again and that will give us x y and z which
+
+44
+00:05:08.269 --> 00:05:16.689
+will be green which is our floats that are recombined and so that gives us our our
+
+45
+00:05:16.689 --> 00:05:27.329
+transforms. Now I will show you one last part of variables which are worth referencing
+
+46
+00:05:27.889 --> 00:05:36.300
+and that is references. So if I search for example in here for actor you will see that we have the
+
+47
+00:05:36.300 --> 00:05:42.860
+object type actor. When I come to the right I have four options. An object reference,
+
+48
+00:05:42.860 --> 00:05:47.660
+a class reference, and a soft objects and soft class. Don't worry too much about them.
+
+49
+00:05:48.379 --> 00:05:57.259
+But the blue object reference is a connection to an instance of that. So this would be a connection
+
+50
+00:05:57.259 --> 00:06:04.660
+to a specific door which was in the level or a specific actor. The class reference is a reference
+
+51
+00:06:04.660 --> 00:06:11.699
+to the template that's on disk. So that would give us things like the default values
+
+52
+00:06:11.699 --> 00:06:20.180
+and allow us to spawn something using that class. But the light blue ones is an instant
+
+53
+00:06:20.180 --> 00:06:28.529
+reference. The purple ones is a class reference. Okay so I'm going to delete that variable
+
+54
+00:06:31.009 --> 00:06:39.040
+and let's create our function. Now functions are very useful because it allows us to write
+
+55
+00:06:39.040 --> 00:06:45.519
+a piece of code and then rather than having to have the entire code we can just call that
+
+56
+00:06:45.519 --> 00:06:50.800
+function and it will do everything which is inside that function. That's making a reusable
+
+57
+00:06:50.800 --> 00:06:57.009
+piece of code. And to create a function I'm coming into the left hand side here and I'm pushing
+
+58
+00:06:57.009 --> 00:07:10.740
+plus under function. And I am gonna call this function change light color. As I create the
+
+59
+00:07:10.740 --> 00:07:18.420
+function you can see it has automatically opened them up. We have our input pin here. For this
+
+60
+00:07:18.420 --> 00:07:25.019
+I want to drag in our point light. But let's have a quick look at the point light in the level.
+
+61
+00:07:25.740 --> 00:07:33.540
+Now the Polinite itself has got a very large attenuation radius. So I am going to reduce
+
+62
+00:07:33.540 --> 00:07:42.100
+that down. Let's try 100. That's a lot smaller. I'm going to increase the intensity as well to
+
+63
+00:07:42.100 --> 00:07:52.189
+make it brighter. So that's what our light looks like at the moment. Set to white.
+
+64
+00:07:52.829 --> 00:08:01.379
+It's coming up as green. And pile. There you go. So this is what our light looks like at the moment.
+
+65
+00:08:02.879 --> 00:08:07.759
+Right. So the change light color. I've got a reference to my point light and as you can see
+
+66
+00:08:07.759 --> 00:08:13.310
+this is blue. That means it's a reference to an instance of a point light. I'm going to drag
+
+67
+00:08:13.310 --> 00:08:20.639
+off the point light and I am going to search for light color. And you can see that I have
+
+68
+00:08:20.639 --> 00:08:26.189
+a get and a set light color. And we want to change it. So we're going to go for set.
+
+69
+00:08:28.399 --> 00:08:36.500
+Delete the duplication. I'm going to plug that into our light color. Now we have an input
+
+70
+00:08:36.500 --> 00:08:43.950
+pin for our light color here. But I want to base the color off of our boolean locked.
+
+71
+00:08:44.590 --> 00:08:51.470
+So what I'm going to do is I'm going to drag out and type in select. And under select
+
+72
+00:08:51.470 --> 00:08:59.070
+you can see that we have a select color. I'm going to do that. And now you can see that we have
+
+73
+00:09:00.909 --> 00:09:10.980
+some options here. We have three input pins. And one of them is a boolean. I'm going to get
+
+74
+00:09:10.980 --> 00:09:19.169
+our locked and place that to connect up to the boolean. And then I'm going to set A. So
+
+75
+00:09:19.169 --> 00:09:24.929
+is it locked? So you can see locked pick A. So that's going to be the locked convention.
+
+76
+00:09:24.929 --> 00:09:31.700
+I'm going to come in here. I'm going to change our color to one and go okay. And then B. I'm
+
+77
+00:09:31.700 --> 00:09:38.500
+going to change our color to one and go okay as well. So you can see here we have locked
+
+78
+00:09:38.500 --> 00:09:48.019
+true or false yes or no. If it's true pick A which is red. If it's false pick B which is green.
+
+79
+00:09:49.009 --> 00:09:56.750
+So we've written a relatively small function which is reusable. Now I want to come to our
+
+80
+00:09:56.750 --> 00:10:04.850
+construction script drag our change light color in and plug that in. Now if I look in our viewport
+
+81
+00:10:04.850 --> 00:10:10.980
+you can see that it's set to green. You can also see that our instance in the world is set
+
+82
+00:10:10.980 --> 00:10:20.259
+to green as well. Now I have multiple doors. I'd quite like to be able to change if they are
+
+83
+00:10:20.820 --> 00:10:27.470
+locked or unlocked inside the browser. And to do that what I'm going to do is I'm going to come
+
+84
+00:10:27.470 --> 00:10:34.899
+to our locked variable and I'm going to click on it so that it becomes instance editable.
+
+85
+00:10:35.710 --> 00:10:42.830
+That means that little i is going to be visible next to the variable. And in the details panel
+
+86
+00:10:42.830 --> 00:10:51.759
+you can see the instance editable is going to be ticked off. Hit compile. And now if I select
+
+87
+00:10:51.759 --> 00:10:58.399
+one of these instances you can see in the detail panel I have the option of locked.
+
+88
+00:10:59.649 --> 00:11:07.580
+And if I tick that on you can see that our door turns red and I'm not on the other side as well.
+
+89
+00:11:08.450 --> 00:11:14.450
+So just changing this variable will rerun the construction script which will update the
+
+90
+00:11:14.450 --> 00:11:20.980
+color of the door. Now that's great. We can change the way that it looks.
+
+91
+00:11:21.700 --> 00:11:28.179
+However this will not have any effect. Ideally when the door is locked we don't we don't want
+
+92
+00:11:28.179 --> 00:11:37.679
+it to be able to be opened. So let's come into the door and let's implement that functionality.
+
+93
+00:11:38.580 --> 00:11:46.139
+I'm going to come back to our event crawl. I'm going to go to our E button. We'll drag this
+
+94
+00:11:46.139 --> 00:11:53.200
+back. Hold down B. Left click. And that will add in a branch.
+
+95
+00:11:54.289 --> 00:11:58.769
+Now we talked about branch. This is our if statement. If it is true do what is
+
+96
+00:11:58.769 --> 00:12:03.679
+connected to this pin. If it is false do what is connected to this pin. You might
+
+97
+00:12:03.679 --> 00:12:13.519
+drag in the lock and get it. Then connect it as the input to the branch. Then if it is locked
+
+98
+00:12:13.519 --> 00:12:21.039
+and true I don't want it to do anything. If it locked is false I want the door to open and close.
+
+99
+00:12:23.490 --> 00:12:31.539
+So now if this is set to locked we will block this function out. So let's test that out
+
+100
+00:12:31.539 --> 00:12:38.399
+in level. Come in here. Come up to the door on the left. Press P. The door does not open.
+
+101
+00:12:39.279 --> 00:12:44.399
+One in the middle. Door opens fine. And the one on the right is closed.
+
+102
+00:12:46.190 --> 00:12:53.379
+So you can see now we are capable of changing the settings on a specific instance and having
+
+103
+00:12:53.379 --> 00:13:01.419
+it do something different. So thank you for sticking with me through this. Next up we will
+
+104
+00:13:01.419 --> 00:13:07.740
+be moving on to creating an actor which communicates with the door to lock and unlock it.

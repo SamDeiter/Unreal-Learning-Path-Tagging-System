@@ -1,0 +1,725 @@
+WEBVTT
+
+1
+00:00:01.550 --> 00:00:03.310
+In this video, we're going to take a look
+
+2
+00:00:03.310 --> 00:00:06.070
+at Nanite and virtual shadow maps.
+
+3
+00:00:06.070 --> 00:00:09.349
+And essentially, we'll be asking why we should use Nanite,
+
+4
+00:00:09.349 --> 00:00:11.589
+especially when in conjunction with Lumen.
+
+5
+00:00:11.589 --> 00:00:13.949
+We'll be taking a look at how you actually can use it
+
+6
+00:00:13.949 --> 00:00:15.750
+and how to set it up, and then
+
+7
+00:00:15.750 --> 00:00:18.510
+just have a quick overview of what virtual shadow maps are,
+
+8
+00:00:18.510 --> 00:00:22.559
+what the limitations are, and how they actually work.
+
+9
+00:00:22.559 --> 00:00:23.839
+So why Nanite?
+
+10
+00:00:23.839 --> 00:00:28.120
+It's Unreal Engine 5's virtualized geometry system.
+
+11
+00:00:28.120 --> 00:00:30.719
+It's still this hierarchical system of smaller parts
+
+12
+00:00:30.719 --> 00:00:33.479
+used in triangles and allows you to have
+
+13
+00:00:33.479 --> 00:00:37.270
+a lot more geometric complexity with fewer issues.
+
+14
+00:00:37.270 --> 00:00:39.630
+It allows for a higher visual fidelity
+
+15
+00:00:39.630 --> 00:00:41.590
+and works really well with Lumen.
+
+16
+00:00:41.590 --> 00:00:43.429
+Outside of Lumen, the generating of shadow maps
+
+17
+00:00:43.429 --> 00:00:47.950
+will also take too long on a complicated mesh.
+
+18
+00:00:47.950 --> 00:00:50.770
+So being used in conjunction with Lumen,
+
+19
+00:00:50.770 --> 00:00:53.509
+you'll get much better results.
+
+20
+00:00:53.509 --> 00:00:56.829
+Virtual shadow maps are used for more realistic results.
+
+21
+00:00:56.829 --> 00:00:58.429
+And instant object count and draw calls
+
+22
+00:00:58.429 --> 00:00:59.350
+are less of a limitation.
+
+23
+00:00:59.390 --> 00:01:01.590
+You can have each instance now with millions and millions
+
+24
+00:01:01.590 --> 00:01:05.469
+of polygons, and you get automatic LODs,
+
+25
+00:01:05.469 --> 00:01:08.150
+which use a cluster of data.
+
+26
+00:01:08.150 --> 00:01:10.750
+Importantly, it's more visually
+
+27
+00:01:10.750 --> 00:01:12.510
+accurate than displacement.
+
+28
+00:01:12.510 --> 00:01:16.500
+You get fewer shadow artifacts than using
+
+29
+00:01:16.500 --> 00:01:18.939
+an old system like in Unreal Engine 4's material
+
+30
+00:01:18.939 --> 00:01:20.510
+displacement.
+
+31
+00:01:20.510 --> 00:01:23.390
+It's inaccurate, especially with extreme shadowing changes
+
+32
+00:01:23.390 --> 00:01:26.099
+and light changes.
+
+33
+00:01:26.099 --> 00:01:28.560
+And the good thing is, again, that Nanite is great for really
+
+34
+00:01:28.560 --> 00:01:32.640
+high-resolution models, and you keep really good accuracy
+
+35
+00:01:32.640 --> 00:01:35.540
+in the shadow and through the virtual shadow maps.
+
+36
+00:01:35.540 --> 00:01:37.859
+So to enable Nanite on a mesh, it's really, really
+
+37
+00:01:37.859 --> 00:01:39.099
+quite simple.
+
+38
+00:01:39.099 --> 00:01:41.379
+You can open up the Static Mesh Editor
+
+39
+00:01:41.379 --> 00:01:44.140
+and tick the Build Nanite option here,
+
+40
+00:01:44.140 --> 00:01:46.700
+and it will be built automatically for you.
+
+41
+00:01:46.700 --> 00:01:48.900
+You can also right-click on the asset, go to Nanite,
+
+42
+00:01:48.900 --> 00:01:51.930
+and enable.
+
+43
+00:01:51.930 --> 00:01:53.810
+And if you're using Chaos, you
+
+44
+00:01:53.810 --> 00:01:56.010
+can also change it in the Collections Editor.
+
+45
+00:01:56.010 --> 00:02:00.780
+So you can have Enable Nanite support right there.
+
+46
+00:02:00.780 --> 00:02:03.459
+One note, actually, is that virtual textures aren't required
+
+47
+00:02:03.459 --> 00:02:06.700
+to be used with Nanite, but they are highly recommended,
+
+48
+00:02:06.700 --> 00:02:09.219
+especially if you're making a large world.
+
+49
+00:02:09.219 --> 00:02:12.020
+And we'll go into it a little bit later in a second,
+
+50
+00:02:12.020 --> 00:02:15.020
+but it essentially allows the MIP generation
+
+51
+00:02:15.020 --> 00:02:18.729
+to be a little bit more performant.
+
+52
+00:02:18.729 --> 00:02:20.169
+So when it comes to Nanite, you
+
+53
+00:02:20.169 --> 00:02:22.370
+can change some of the Nanite properties
+
+54
+00:02:22.370 --> 00:02:24.590
+via the Tools pulldown.
+
+55
+00:02:24.590 --> 00:02:26.009
+And one important thing as well
+
+56
+00:02:26.009 --> 00:02:28.669
+is that Nanite doesn't support hollow geometry,
+
+57
+00:02:28.669 --> 00:02:31.310
+so non-watertight meshes.
+
+58
+00:02:31.310 --> 00:02:32.629
+And really, it does support it.
+
+59
+00:02:32.629 --> 00:02:34.189
+It just means that the shadowing from those
+
+60
+00:02:34.189 --> 00:02:35.189
+will be inaccurate.
+
+61
+00:02:35.189 --> 00:02:37.229
+So you could use blocking geometry,
+
+62
+00:02:37.229 --> 00:02:39.110
+like a cube, to go behind that section
+
+63
+00:02:39.110 --> 00:02:43.539
+to actually get the shadowing that you need.
+
+64
+00:02:43.539 --> 00:02:46.620
+So let's take a look at virtual shadow maps.
+
+65
+00:02:46.620 --> 00:02:48.539
+The important thing about virtual shadow maps,
+
+66
+00:02:48.539 --> 00:02:50.379
+more than anything, is that it significantly
+
+67
+00:02:50.379 --> 00:02:53.580
+increases the resolution and makes sure that it
+
+68
+00:02:53.580 --> 00:02:56.979
+matches the Nanite geometry.
+
+69
+00:02:57.020 --> 00:02:59.979
+And this is different to just normal shadow maps,
+
+70
+00:02:59.979 --> 00:03:03.129
+which is just essentially a texture projection.
+
+71
+00:03:03.129 --> 00:03:06.569
+You get plausible soft shadows with really,
+
+72
+00:03:06.569 --> 00:03:09.569
+it says reasonable here, really nice, actually,
+
+73
+00:03:09.569 --> 00:03:11.969
+in control of performance costs.
+
+74
+00:03:11.969 --> 00:03:14.729
+Provides a simple solution that works by default
+
+75
+00:03:14.729 --> 00:03:17.460
+with limited amounts of adjustment.
+
+76
+00:03:17.460 --> 00:03:19.699
+And it replaces the use of stationary lights
+
+77
+00:03:19.699 --> 00:03:21.939
+in many cases and shadowing techniques
+
+78
+00:03:21.939 --> 00:03:25.379
+with a single unified path of just using those movable lights.
+
+79
+00:03:25.379 --> 00:03:27.099
+It's really made for Lumen.
+
+80
+00:03:27.099 --> 00:03:30.400
+It's not intended for really anything else.
+
+81
+00:03:30.400 --> 00:03:32.560
+So that's something to keep in mind.
+
+82
+00:03:32.560 --> 00:03:35.360
+Compared to big shadow maps, the things it solves
+
+83
+00:03:35.360 --> 00:03:37.759
+is essentially shadow maps are just like textures
+
+84
+00:03:37.759 --> 00:03:39.719
+and can have mismatching sampling rates.
+
+85
+00:03:39.719 --> 00:03:43.719
+So if you have more screen pixels than shadow pixels,
+
+86
+00:03:43.719 --> 00:03:46.879
+you'll get aliasing.
+
+87
+00:03:46.879 --> 00:03:49.159
+As well as more shadow pixels than screen pixels,
+
+88
+00:03:49.159 --> 00:03:52.389
+you get essentially wasted work.
+
+89
+00:03:52.389 --> 00:03:55.789
+It's impossible to match these rates perfectly.
+
+90
+00:03:55.830 --> 00:03:58.310
+And you also get perspective aliasing
+
+91
+00:03:58.310 --> 00:04:01.710
+due to camera positions.
+
+92
+00:04:01.710 --> 00:04:05.680
+Now, when it comes to virtual shadow mapping,
+
+93
+00:04:05.680 --> 00:04:08.759
+they deal with similar issues.
+
+94
+00:04:08.759 --> 00:04:12.800
+But they handle shadows similarly.
+
+95
+00:04:12.800 --> 00:04:14.439
+But virtual texturing will essentially
+
+96
+00:04:14.439 --> 00:04:17.639
+split the texture and mipchain into tiles.
+
+97
+00:04:17.639 --> 00:04:19.519
+So it only streams the tiles that it needs.
+
+98
+00:04:19.519 --> 00:04:22.040
+So when I was mentioning earlier
+
+99
+00:04:22.040 --> 00:04:26.000
+that it is recommended to actually use virtual textures,
+
+100
+00:04:26.000 --> 00:04:28.120
+this is the main reason why.
+
+101
+00:04:28.120 --> 00:04:31.319
+When it comes to local lights, you get a 16 by 16K resolution
+
+102
+00:04:31.319 --> 00:04:33.189
+with eight mips.
+
+103
+00:04:33.189 --> 00:04:36.670
+Spotlights use a single virtual shadow map.
+
+104
+00:04:36.670 --> 00:04:39.670
+Point and rectangular lights use six virtual shadow maps.
+
+105
+00:04:39.670 --> 00:04:42.540
+And that would be one per cubic phase.
+
+106
+00:04:42.540 --> 00:04:45.139
+You get 2K more than conventional shadow maps.
+
+107
+00:04:45.139 --> 00:04:50.730
+And it can still run out if you make massive local lights.
+
+108
+00:04:50.730 --> 00:04:55.990
+But you probably won't be encountering those issues.
+
+109
+00:04:56.029 --> 00:04:57.670
+When it comes to directional lights,
+
+110
+00:04:57.670 --> 00:04:59.870
+16K is just nowhere near enough anyways
+
+111
+00:04:59.870 --> 00:05:05.269
+because they essentially work for the entirety of the world.
+
+112
+00:05:05.269 --> 00:05:09.629
+So mipmaps are going to cover the same amount of work
+
+113
+00:05:09.629 --> 00:05:10.750
+but half the resolution.
+
+114
+00:05:10.750 --> 00:05:14.430
+And we essentially use clipmap levels that are all 16K
+
+115
+00:05:14.430 --> 00:05:15.990
+but cover double the area.
+
+116
+00:05:15.990 --> 00:05:18.870
+So the idea is that, depending on the location,
+
+117
+00:05:18.870 --> 00:05:22.829
+we create snaps of the clipmaps
+
+118
+00:05:22.829 --> 00:05:24.910
+to make sure that the pages fall on the grid.
+
+119
+00:05:24.990 --> 00:05:27.629
+And essentially get really nice shadows
+
+120
+00:05:27.629 --> 00:05:32.389
+for the entirety of the scene
+
+121
+00:05:32.389 --> 00:05:34.069
+while caching stuff for a lot of fallbacks
+
+122
+00:05:34.069 --> 00:05:35.550
+and things like that.
+
+123
+00:05:35.550 --> 00:05:37.990
+So you can see the virtual shadow maps
+
+124
+00:05:37.990 --> 00:05:39.629
+allow for more precise control.
+
+125
+00:05:40.670 --> 00:05:41.910
+But let's take a look at what we can do
+
+126
+00:05:41.910 --> 00:05:44.470
+to actually change the look of those shadows.
+
+127
+00:05:44.470 --> 00:05:46.269
+So you can use some console variables
+
+128
+00:05:46.269 --> 00:05:47.870
+to get better resolutions
+
+129
+00:05:47.870 --> 00:05:51.519
+and better effects at the cost of performance.
+
+130
+00:05:52.500 --> 00:05:55.180
+You can use some of the commands that you see here
+
+131
+00:05:55.180 --> 00:05:57.660
+in the console to actually adjust the number of rays.
+
+132
+00:05:57.660 --> 00:06:00.620
+The fewer the rays, the greater the noise.
+
+133
+00:06:00.620 --> 00:06:02.220
+But if you set it to zero,
+
+134
+00:06:02.220 --> 00:06:05.240
+it'll just create a straight up hard shadow.
+
+135
+00:06:05.240 --> 00:06:08.399
+And you can also change the number of samples
+
+136
+00:06:08.399 --> 00:06:10.040
+that are used for shadow rays.
+
+137
+00:06:10.040 --> 00:06:15.259
+And again, the higher the value, the worse performance.
+
+138
+00:06:15.459 --> 00:06:17.540
+But using values between four and eight
+
+139
+00:06:17.540 --> 00:06:20.430
+seems to work pretty well.
+
+140
+00:06:20.430 --> 00:06:22.069
+So the penumbra has limits,
+
+141
+00:06:22.069 --> 00:06:23.629
+but you can extend those limits again
+
+142
+00:06:23.670 --> 00:06:28.519
+if you use some of the commands for the console here.
+
+143
+00:06:28.519 --> 00:06:31.199
+So if you use either of these,
+
+144
+00:06:31.199 --> 00:06:32.399
+you can start tweaking the values
+
+145
+00:06:32.399 --> 00:06:36.519
+to essentially get more reasonable-looking shadows
+
+146
+00:06:36.519 --> 00:06:40.620
+for the performance that you're looking for.
+
+147
+00:06:40.620 --> 00:06:41.740
+When it comes to visualizing
+
+148
+00:06:41.740 --> 00:06:43.579
+and actually being able to see
+
+149
+00:06:43.579 --> 00:06:46.410
+what changes that you're doing are actually doing,
+
+150
+00:06:47.529 --> 00:06:48.610
+here's some useful ones.
+
+151
+00:06:48.610 --> 00:06:49.569
+So you've got the shadow mask,
+
+152
+00:06:49.569 --> 00:06:50.810
+which is the final shadow mask
+
+153
+00:06:50.810 --> 00:06:53.449
+that's being used for the shading,
+
+154
+00:06:53.449 --> 00:06:55.670
+the clip map or mip level.
+
+155
+00:06:55.670 --> 00:06:58.870
+So that's the chosen clip map for directional lights
+
+156
+00:06:58.870 --> 00:07:00.430
+or mip for local lights.
+
+157
+00:07:01.779 --> 00:07:02.620
+The virtual page,
+
+158
+00:07:02.620 --> 00:07:04.779
+so there's the visualization of the page address
+
+159
+00:07:04.779 --> 00:07:06.100
+and the cache page,
+
+160
+00:07:06.100 --> 00:07:08.620
+which they're tinted green, essentially,
+
+161
+00:07:08.620 --> 00:07:12.540
+and uncache-ed areas are tinted red.
+
+162
+00:07:12.540 --> 00:07:15.220
+Pages where only the static page is cached
+
+163
+00:07:15.220 --> 00:07:16.259
+will show up as blue.
+
+164
+00:07:16.259 --> 00:07:18.310
+So that's something to keep in mind.
+
+165
+00:07:18.310 --> 00:07:20.670
+Again, to get these visualizations,
+
+166
+00:07:20.670 --> 00:07:22.069
+especially for anything that's actually
+
+167
+00:07:22.069 --> 00:07:23.310
+used in virtual texturing,
+
+168
+00:07:23.310 --> 00:07:25.149
+like clip maps and things like that,
+
+169
+00:07:25.149 --> 00:07:27.870
+or these mips,
+
+170
+00:07:27.870 --> 00:07:29.709
+you will have to turn on Shader Model 6
+
+171
+00:07:29.709 --> 00:07:31.149
+or run DirectX 12,
+
+172
+00:07:31.149 --> 00:07:36.290
+like we mentioned earlier on our Lumen talk.
+
+173
+00:07:36.290 --> 00:07:37.129
+And that's really it.
+
+174
+00:07:37.129 --> 00:07:40.170
+After this, we're just gonna load up a project
+
+175
+00:07:40.170 --> 00:07:41.649
+and just create some lights,
+
+176
+00:07:41.649 --> 00:07:43.170
+create some glowing objects,
+
+177
+00:07:43.170 --> 00:07:44.370
+keep things nice and simple
+
+178
+00:07:44.370 --> 00:07:47.569
+to make sure that we can actually
+
+179
+00:07:47.569 --> 00:07:49.649
+take a look at things properly.
+
+180
+00:07:49.649 --> 00:07:50.889
+But yeah, mess around,
+
+181
+00:07:50.889 --> 00:07:53.089
+see if you can create some for yourself.

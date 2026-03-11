@@ -1,0 +1,617 @@
+WEBVTT
+
+1
+00:00:01.490 --> 00:00:06.950
+So with the shared pointer library, we've talked a little bit about like object lifetimes and that kind of life cycles
+
+2
+00:00:07.049 --> 00:00:13.130
+It's worth going back again to our you object and down from that hierarchy and talking actually about
+
+3
+00:00:13.529 --> 00:00:15.910
+What happens to an object once we create it?
+
+4
+00:00:16.329 --> 00:00:23.089
+So in the simplest form for just a you object unreal has a rather than saying a new you object, whatever
+
+5
+00:00:23.570 --> 00:00:28.250
+Unreal has its own specific function to use which is new object and that's a templated function
+
+6
+00:00:28.250 --> 00:00:34.490
+So we provide the type that we want to create an instance of and then that goes through a series of steps first off
+
+7
+00:00:34.490 --> 00:00:39.189
+We have malloc actually just like assigning setting aside the memory on our computer
+
+8
+00:00:39.250 --> 00:00:46.729
+We have a men set 0 which is essentially clearing out all the pre allocated all the values that might already be in that data
+
+9
+00:00:46.729 --> 00:00:48.729
+We just allocated
+
+10
+00:00:48.770 --> 00:00:55.609
+Then we call the classes constructor and that initializes our V table and initializes all properties within that block of memory
+
+11
+00:00:56.539 --> 00:00:58.939
+Next we copy over the archetype with a mem copy
+
+12
+00:00:59.820 --> 00:01:06.420
+Unreal has this thing called the class default object, which is where we get all our defaults from so a post construction
+
+13
+00:01:07.060 --> 00:01:13.019
+Initialization that's essentially where we copy all the values from that class default object into our as our kind of defaults
+
+14
+00:01:13.420 --> 00:01:15.959
+Next we have the actual get defaults function
+
+15
+00:01:16.219 --> 00:01:22.620
+This essentially is not opportunity to inject data from innies from config files that we might have elsewhere
+
+16
+00:01:22.620 --> 00:01:28.379
+So in unreal you can specify certain actors or whatever the inherit data from innies
+
+17
+00:01:28.379 --> 00:01:34.939
+Which lets you set that data outside of the the class itself in a config folder in config files
+
+18
+00:01:34.939 --> 00:01:38.659
+And so that will get pulled in at this point and then last of all
+
+19
+00:01:38.659 --> 00:01:44.420
+We have this function called post init properties and that's essentially our opportunity to inject
+
+20
+00:01:44.700 --> 00:01:47.739
+It's typically where you would inject gameplay functionality
+
+21
+00:01:47.739 --> 00:01:52.260
+So anything that you need to run after, you know, all the default values have been assigned
+
+22
+00:01:53.420 --> 00:01:55.420
+In the context of an actor
+
+23
+00:01:55.700 --> 00:02:01.939
+Actor is that kind of again a big fundamental building block of the game. They have it's a much more substantial classes
+
+24
+00:02:01.939 --> 00:02:03.939
+There's quite a lot more
+
+25
+00:02:04.099 --> 00:02:08.659
+Complexity to the way an actor establishes itself once we create one or once we load one in
+
+26
+00:02:09.900 --> 00:02:16.219
+So when it comes to spawning an actor in the kind of smallest simplest way, it would look a little bit like this
+
+27
+00:02:16.900 --> 00:02:22.340
+Transform for anyone who's not familiar with the term is basically just a location of rotation and a scale
+
+28
+00:02:22.819 --> 00:02:25.060
+It's probably a term you're familiar with from other packages
+
+29
+00:02:25.699 --> 00:02:30.219
+And this is how we would create an instance of an object by of an actor by spawning it
+
+30
+00:02:30.219 --> 00:02:35.300
+So as you can see we get access to our world. So all actors and components inherently have
+
+31
+00:02:36.219 --> 00:02:39.099
+knowledge of the world they're in the world is
+
+32
+00:02:40.139 --> 00:02:43.039
+Most of the time is the single
+
+33
+00:02:44.740 --> 00:02:45.740
+Global
+
+34
+00:02:45.740 --> 00:02:50.300
+Entity that represents your game level right now. It's a slightly complicated
+
+35
+00:02:51.060 --> 00:02:58.300
+Concept because the distinction between levels and worlds and unreal but the world there is one of these at runtime
+
+36
+00:02:59.539 --> 00:03:02.680
+Technically, there's a separate one for the editor, but we won't talk about that right now
+
+37
+00:03:03.259 --> 00:03:08.020
+But it's your kind of runtime world and everyone shares the same idea of the world that they're in
+
+38
+00:03:08.960 --> 00:03:13.439
+So you get access to that world and then you call spawn actor and this is a templated function
+
+39
+00:03:14.199 --> 00:03:20.280
+and you the kind of one of the simplest implementations you can do is you provide it a class to
+
+40
+00:03:20.680 --> 00:03:23.800
+spawn so in unreal where you have whenever you have a
+
+41
+00:03:24.599 --> 00:03:29.400
+C++ actor type or C++ you object type you have access to this static class
+
+42
+00:03:29.400 --> 00:03:32.479
+Which is basically that thing and that the class of that object
+
+43
+00:03:33.240 --> 00:03:35.259
+And then you just provide it a spawn transform
+
+44
+00:03:35.259 --> 00:03:40.139
+So a location and rotation scale to spawn at you technically don't even need to provide the transform
+
+45
+00:03:40.139 --> 00:03:43.840
+If you just want the object, I assume it would default to zero zero zero
+
+46
+00:03:44.680 --> 00:03:46.740
+But yeah, this is the most common simple one
+
+47
+00:03:46.740 --> 00:03:51.740
+There are plenty of overloads of this function where you can provide a little bit more detail about actors
+
+48
+00:03:51.740 --> 00:03:54.180
+You might want to own this actor or something like that
+
+49
+00:03:54.659 --> 00:04:01.419
+It's worth highlighting as well here that the templated type doesn't need to align with the class that you specify
+
+50
+00:04:01.419 --> 00:04:04.819
+So this is essentially just performing a cast for us. So if
+
+51
+00:04:05.699 --> 00:04:08.319
+It's a spawn actor a exploding barrel
+
+52
+00:04:08.819 --> 00:04:09.939
+This would be okay
+
+53
+00:04:09.939 --> 00:04:13.219
+But if that if I had my type over here is a exploding barrel
+
+54
+00:04:13.219 --> 00:04:18.379
+Then this would need to be at least a exploding barrel and it's for it to cast properly into the pointer
+
+55
+00:04:20.050 --> 00:04:24.110
+So like I said actors are quite a bit more substantial than you objects
+
+56
+00:04:24.110 --> 00:04:26.689
+They've got if you were to jump into the actor header
+
+57
+00:04:26.689 --> 00:04:30.569
+You would see it's got a lot of functionality and a lot of data in it. So there's quite a few more steps
+
+58
+00:04:31.350 --> 00:04:34.529
+Internally within the actor the kind of some key functions
+
+59
+00:04:34.529 --> 00:04:40.410
+We care about when spawning one in or generally as part of its lifecycle would be initializing components
+
+60
+00:04:40.410 --> 00:04:42.370
+Which is one of the first things that it does
+
+61
+00:04:42.370 --> 00:04:46.829
+Obviously as we spoke about before actors contain can contain many components
+
+62
+00:04:47.089 --> 00:04:51.069
+And if it's a blueprint actor, it needs at least one scene component
+
+63
+00:04:51.649 --> 00:04:55.089
+And so each of those components get individually initialized
+
+64
+00:04:55.410 --> 00:05:01.290
+Those components will then have functionality called on them to say, you know, we've we're initializing this component
+
+65
+00:05:01.290 --> 00:05:03.290
+So they'll have their own internal life cycles
+
+66
+00:05:03.290 --> 00:05:09.970
+But we have some functionality called before we initialize our components and just after we've initialized our components and then we call begin play
+
+67
+00:05:10.009 --> 00:05:15.470
+This is begin play is essentially the kind of universal the we have started in the game now
+
+68
+00:05:15.529 --> 00:05:19.050
+There's a few different ways that can get called but it's kind of like our
+
+69
+00:05:19.769 --> 00:05:21.529
+generic start point
+
+70
+00:05:21.529 --> 00:05:25.290
+And then over the lifecycle of an actor a really common function is our tick
+
+71
+00:05:25.370 --> 00:05:31.250
+I'm gonna mention about this before but tick is essentially our function that gets called once every frame by default
+
+72
+00:05:32.529 --> 00:05:36.829
+It's important to highlight that we can turn tick off for actors that don't need it
+
+73
+00:05:36.850 --> 00:05:39.569
+We can also specify a tick frequency
+
+74
+00:05:39.689 --> 00:05:47.730
+So by default, it's once every frame and that function the the time that that frame has taken will be passed into that function
+
+75
+00:05:47.730 --> 00:05:49.449
+So we have access to this Delta time
+
+76
+00:05:49.449 --> 00:05:55.610
+It's a concept that we'd be very familiar with for anyone who's done games programming before but just if you're not yeah
+
+77
+00:05:55.610 --> 00:05:56.449
+That's that's what it is
+
+78
+00:05:56.449 --> 00:06:01.730
+it's the change between the frames the amount of time we took from this frame to the last one and we can use that in
+
+79
+00:06:01.730 --> 00:06:04.410
+Things like movement where we want to smooth that out
+
+80
+00:06:04.410 --> 00:06:08.449
+So we're not getting sudden big jerks in movement just because our frame took longer
+
+81
+00:06:09.810 --> 00:06:11.300
+And
+
+82
+00:06:11.300 --> 00:06:19.620
+Yeah, essentially the we can specify a tick frequency specifically if we want something that is maybe ticks once every second
+
+83
+00:06:19.620 --> 00:06:25.379
+So we need to do something repeatedly throughout an object's lifetime, but it doesn't need to be every frame we can we can specify that
+
+84
+00:06:28.120 --> 00:06:34.360
+Yeah, the and then once an object gets once an actor gets destroyed we would call its end play
+
+85
+00:06:34.360 --> 00:06:38.519
+I should be more specific once an actor is
+
+86
+00:06:39.000 --> 00:06:42.720
+Removed from the world because there's a lot of different ways that that can happen which we'll go into in a moment
+
+87
+00:06:43.720 --> 00:06:50.810
+And essentially end play is just the opposite of begin play. It's our stripped-down function as our cleanup functionality and then
+
+88
+00:06:52.089 --> 00:06:56.610
+Something that would kind of in that could and would commonly invoke end play is our destroy
+
+89
+00:06:57.370 --> 00:06:59.769
+So it's worth kind of breaking that down specifically
+
+90
+00:06:59.769 --> 00:07:05.970
+This is destroy is typically the function you would take call to get rid of an actor say once it's died or something like that
+
+91
+00:07:06.610 --> 00:07:08.889
+And then that would call begin destroy
+
+92
+00:07:09.250 --> 00:07:16.209
+And then it goes through a couple of different steps and then because finish destroy and finally after that we call free
+
+93
+00:07:16.850 --> 00:07:20.050
+So it's only it's worth highlighting that again
+
+94
+00:07:20.050 --> 00:07:24.230
+We talked about this a little bit in the garbage collection when we call destroy
+
+95
+00:07:24.410 --> 00:07:28.910
+That's when we would get our pending kill flag gets marked up and then that would get marked up in
+
+96
+00:07:30.009 --> 00:07:34.850
+For our garbage collection, but it's only at the point that it gets garbage collected that are free is actually called
+
+97
+00:07:35.329 --> 00:07:37.329
+Technically that object still exists
+
+98
+00:07:37.970 --> 00:07:40.790
+You know in our memory until it gets garbage collected
+
+99
+00:07:41.850 --> 00:07:46.290
+So looking more in depth that kind of a full life cycle an actor as I said
+
+100
+00:07:46.290 --> 00:07:48.290
+There's there's quite a lot more
+
+101
+00:07:48.329 --> 00:07:52.050
+Context to how an actor can come about to being so you can see here on the left
+
+102
+00:07:52.050 --> 00:07:58.250
+This is kind of to describe actors that are already present in the world when we start and on the right here
+
+103
+00:07:58.250 --> 00:07:59.769
+This is an actor that we spawn in
+
+104
+00:07:59.769 --> 00:08:04.810
+So immediately you can see this kind of two ways that we might typically spawn an actor in we can either spawn an actor
+
+105
+00:08:04.810 --> 00:08:07.089
+And immediately or we can defer that spawn
+
+106
+00:08:07.250 --> 00:08:09.329
+the reason for this is if we have
+
+107
+00:08:09.610 --> 00:08:14.189
+We need to be able to inject some additional functionality or do some things to that actor
+
+108
+00:08:14.410 --> 00:08:19.410
+Before it actually gets kind of registered within the world properly that might be saying
+
+109
+00:08:19.970 --> 00:08:23.850
+Specifying that this actor owns this actor and we need to know that before begin player
+
+110
+00:08:24.250 --> 00:08:28.449
+Or we could assign some values or update some variables or things like that
+
+111
+00:08:28.449 --> 00:08:30.730
+That might be a reason we might want to defer that spawning
+
+112
+00:08:31.600 --> 00:08:33.600
+Or we just have the immediate spawn
+
+113
+00:08:33.799 --> 00:08:38.639
+And on the left here, like I said, these are the various ways that an actor might already exist in the world
+
+114
+00:08:38.879 --> 00:08:42.360
+So if it's just in our world and then we hit play an editor
+
+115
+00:08:42.919 --> 00:08:45.879
+If we have loaded into a map from another map
+
+116
+00:08:45.879 --> 00:08:50.700
+Or if we have called add to world gets called when we have streamed the level in
+
+117
+00:08:51.360 --> 00:08:56.740
+And as you can see, they a few different functions get called. So our construction gets called when we spawn it
+
+118
+00:08:57.419 --> 00:09:00.100
+For objects that are already in the level
+
+119
+00:09:00.379 --> 00:09:04.580
+Construct gets spawned as they get dragged into that level with a further foot for the first time
+
+120
+00:09:04.580 --> 00:09:11.620
+So in your editor, you would have construct called as you drag that actor in but construct and the posts
+
+121
+00:09:12.139 --> 00:09:17.100
+The execute construction on construction post out to construction that wouldn't be called as part of this flow
+
+122
+00:09:17.379 --> 00:09:20.960
+Because it's constructed at editor time. Whereas these are constructed at runtime
+
+123
+00:09:22.149 --> 00:09:29.750
+But then they share this pre the kind of steps that we spoke about before the pre initialized components initializing components the post initialized components and
+
+124
+00:09:30.269 --> 00:09:34.950
+Then they share this begin play and that's kind of like our standard starting point
+
+125
+00:09:34.950 --> 00:09:41.950
+And then after that point we just go on to the rest of the gameplay whatever we're doing. That's when ticking would occur and
+
+126
+00:09:42.909 --> 00:09:49.289
+Then we have this kind of similar. We have a reflection of that begin play process with our end play
+
+127
+00:09:49.289 --> 00:09:55.289
+So there's a whole bunch of ways that an actor could come to ending its its kind of ending play
+
+128
+00:09:55.289 --> 00:09:57.649
+I suppose the actor could get destroyed
+
+129
+00:09:58.409 --> 00:10:01.610
+When you spawn an actor, you can specify a lifetime for the actor
+
+130
+00:10:01.610 --> 00:10:03.250
+You can do that in blueprint or in C++
+
+131
+00:10:03.250 --> 00:10:06.350
+And say this is this actor only exists for three seconds
+
+132
+00:10:06.350 --> 00:10:11.370
+If you have something like a visual effect or maybe a bullet that you just want to automatically get cleaned up after a few seconds
+
+133
+00:10:11.370 --> 00:10:16.450
+You can specify a lifetime. So at the point that lifetime is exceeded it will automatically get destroyed
+
+134
+00:10:17.450 --> 00:10:24.649
+When we transition levels the unreal automatically just destroys every actor in the level we're in at the moment
+
+135
+00:10:25.809 --> 00:10:31.850
+It's not really intended the actors persist between scenes between full levels
+
+136
+00:10:32.769 --> 00:10:37.730
+There's slight caveat there about levels that get streamed in but yeah, mainly when we transition
+
+137
+00:10:38.409 --> 00:10:41.730
+Whole worlds we would clean up all the actors in that level
+
+138
+00:10:42.289 --> 00:10:45.549
+If we stop place or if we're in a play an editor session
+
+139
+00:10:45.549 --> 00:10:50.490
+Then we stop play all the actors in that game world will get destroyed if the game is just closing
+
+140
+00:10:50.970 --> 00:10:56.809
+Down or the game is ending. These are both situations where we would kind of begin this flow
+
+141
+00:10:57.610 --> 00:10:59.610
+Worth highlighting as well the end play
+
+142
+00:11:00.769 --> 00:11:05.750
+Actually gives you information about the way in which this actor is getting destroyed. So
+
+143
+00:11:06.509 --> 00:11:11.830
+We kind of had a little bit more context about precisely what is happening that has led to this actor getting destroyed
+
+144
+00:11:12.350 --> 00:11:18.840
+So again, we have our end play functionality is called we can override that and do any extra stuff that we need to do there
+
+145
+00:11:19.200 --> 00:11:24.240
+At this point our actor gets marked for a pending kill which is relevant to our garbage collection
+
+146
+00:11:24.639 --> 00:11:26.700
+then it gets removed from the
+
+147
+00:11:27.519 --> 00:11:32.279
+My you levels array of actors again if the level is transitioning that's less relevant
+
+148
+00:11:32.320 --> 00:11:39.139
+But obviously if this is an actor that's destroyed mid-level then it's good to know that that actor is no longer in our array of actors
+
+149
+00:11:39.139 --> 00:11:44.740
+And then finally later when our next garbage collection gets hit that's when the rest of this stuff occurs
+
+150
+00:11:44.919 --> 00:11:51.620
+We call begin destroy is ready for finish destroy gets checked against and then finally we call finish destroy
+
+151
+00:11:51.879 --> 00:11:54.220
+And it's after that that the memory is freed
+
+152
+00:11:54.240 --> 00:11:59.279
+So again just to touch about this a little bit before but just to highlight again that
+
+153
+00:11:59.559 --> 00:12:04.200
+The actor is still around until in memory until we get garbage collection
+
+154
+00:12:04.200 --> 00:12:09.080
+And it's only as garbage collection occurs that this begin destroy and finish destroy are finally called

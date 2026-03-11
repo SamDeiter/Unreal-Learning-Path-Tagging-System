@@ -1,0 +1,941 @@
+WEBVTT
+
+1
+00:00:00.980 --> 00:00:05.459
+And a common question when coming to Unreal Engine,
+
+2
+00:00:05.459 --> 00:00:07.379
+it can sometimes feel a lot to think,
+
+3
+00:00:07.379 --> 00:00:09.259
+okay, I know about all this data,
+
+4
+00:00:09.259 --> 00:00:12.019
+but where do I use it and how do I use it?
+
+5
+00:00:12.019 --> 00:00:16.160
+So there's a lot of blueprint communication going on here.
+
+6
+00:00:16.160 --> 00:00:21.160
+You'll see different wires connecting to different elements
+
+7
+00:00:21.160 --> 00:00:23.460
+and it can get a little bit overwhelming.
+
+8
+00:00:23.460 --> 00:00:25.879
+So let's try and demystify some of this.
+
+9
+00:00:25.879 --> 00:00:30.879
+So essentially you can put any data wherever you like
+
+10
+00:00:31.859 --> 00:00:35.119
+you know, maybe we should caveat this.
+
+11
+00:00:35.119 --> 00:00:37.399
+It definitely not is a one size fits all
+
+12
+00:00:37.399 --> 00:00:40.979
+and maybe we shouldn't say that, but on the whole,
+
+13
+00:00:40.979 --> 00:00:43.200
+yes, you can put the data wherever you like,
+
+14
+00:00:43.200 --> 00:00:46.640
+but let's kind of set a few guiding principles
+
+15
+00:00:46.640 --> 00:00:48.960
+of what might be good practice.
+
+16
+00:00:48.960 --> 00:00:53.000
+So what are the things do I need to access this data?
+
+17
+00:00:53.000 --> 00:00:55.159
+Like the blueprint communication,
+
+18
+00:00:55.159 --> 00:00:58.119
+like if the controller is connected to the character,
+
+19
+00:00:58.119 --> 00:01:01.119
+then I can pass things along quite easily.
+
+20
+00:01:01.119 --> 00:01:02.520
+But if there are two actors
+
+21
+00:01:02.520 --> 00:01:05.420
+that aren't currently connected with each other,
+
+22
+00:01:05.420 --> 00:01:10.420
+does it make accessing two bits of data accessible easy?
+
+23
+00:01:10.719 --> 00:01:11.719
+Possibly not.
+
+24
+00:01:11.719 --> 00:01:15.000
+So how long do I want this data to live for?
+
+25
+00:01:15.000 --> 00:01:18.359
+You remember that the game instance is spawned at runtime
+
+26
+00:01:18.359 --> 00:01:20.400
+and then destroyed again.
+
+27
+00:01:20.400 --> 00:01:22.620
+So if you want something to persist,
+
+28
+00:01:22.620 --> 00:01:26.040
+maybe the game instance isn't the right place to put that.
+
+29
+00:01:26.079 --> 00:01:31.079
+And what other context might the data accidentally end up in?
+
+30
+00:01:32.000 --> 00:01:35.680
+So, you know, if you're trying to store player lives
+
+31
+00:01:35.680 --> 00:01:38.599
+and you put the player lives on the character,
+
+32
+00:01:38.599 --> 00:01:43.219
+but then you also put it in maybe the game instance
+
+33
+00:01:43.219 --> 00:01:46.040
+and then you have a class that's called player lives
+
+34
+00:01:46.040 --> 00:01:49.239
+and you might start get accidentally overwriting
+
+35
+00:01:49.239 --> 00:01:51.879
+other bits of information, things could get messy.
+
+36
+00:01:51.879 --> 00:01:53.719
+So you kind of just want to think a little bit
+
+37
+00:01:53.719 --> 00:01:56.200
+about your architecture when you start.
+
+38
+00:01:56.200 --> 00:01:59.519
+Maybe asking yourself these three questions as you go
+
+39
+00:01:59.519 --> 00:02:03.920
+and that will help you organize your information.
+
+40
+00:02:03.920 --> 00:02:08.919
+So with the Pawn, for the duration of the Pawn,
+
+41
+00:02:09.919 --> 00:02:12.400
+it lives up until the level is destroyed
+
+42
+00:02:12.400 --> 00:02:14.319
+or destroyed by the game logic.
+
+43
+00:02:14.319 --> 00:02:16.400
+So multiple Pawns can be used
+
+44
+00:02:16.400 --> 00:02:19.280
+in one level and play session.
+
+45
+00:02:19.280 --> 00:02:24.080
+And, you know, something that the Pawn stores
+
+46
+00:02:24.080 --> 00:02:26.039
+is its capabilities and interactions.
+
+47
+00:02:26.039 --> 00:02:29.199
+So, you know, can it run, walk or fly
+
+48
+00:02:29.199 --> 00:02:33.080
+or can it interact with a door or something like this?
+
+49
+00:02:34.159 --> 00:02:35.439
+These are the kinds of things
+
+50
+00:02:35.439 --> 00:02:38.520
+that you want to put on the Pawn class.
+
+51
+00:02:38.520 --> 00:02:43.439
+There's some useful ways to get the Pawn data
+
+52
+00:02:43.439 --> 00:02:45.689
+and set the Pawn data.
+
+53
+00:02:45.689 --> 00:02:50.370
+So you'll see quite a common event that's in red here
+
+54
+00:02:50.370 --> 00:02:54.169
+on the image that's called event actor begin overlap.
+
+55
+00:02:54.169 --> 00:02:56.129
+And this is, you know, a standard trigger
+
+56
+00:02:56.129 --> 00:02:59.569
+inside of Unreal that detects something
+
+57
+00:02:59.569 --> 00:03:01.250
+that overlaps the trigger.
+
+58
+00:03:01.250 --> 00:03:04.810
+And you'll see that it says other actor with a blue pin.
+
+59
+00:03:04.810 --> 00:03:07.930
+And it's asking what just overlapped me?
+
+60
+00:03:07.930 --> 00:03:10.930
+Like, I am a trigger, what just overlaps me?
+
+61
+00:03:10.930 --> 00:03:12.810
+And it checks to see if this is a Pawn.
+
+62
+00:03:12.810 --> 00:03:14.129
+And if it's a Pawn,
+
+63
+00:03:14.129 --> 00:03:16.930
+then you can get some of that Pawn's data.
+
+64
+00:03:16.930 --> 00:03:18.370
+Maybe you want to say,
+
+65
+00:03:18.370 --> 00:03:21.090
+is the Pawn currently swimming right now
+
+66
+00:03:21.090 --> 00:03:21.930
+or something like this?
+
+67
+00:03:21.930 --> 00:03:24.169
+I don't know what conditional check you want to do,
+
+68
+00:03:24.169 --> 00:03:29.180
+but you have that information there to check against.
+
+69
+00:03:29.180 --> 00:03:31.419
+You can also get the player Pawn
+
+70
+00:03:31.419 --> 00:03:33.699
+and you can also get the controlled Pawn.
+
+71
+00:03:33.699 --> 00:03:38.139
+So get, look, remember to look out for the player index
+
+72
+00:03:38.139 --> 00:03:40.699
+because if there's multiple players
+
+73
+00:03:40.780 --> 00:03:44.900
+then getting player Pawn might return many values.
+
+74
+00:03:44.900 --> 00:03:49.060
+So zero will be just the first Pawn in the map.
+
+75
+00:03:49.060 --> 00:03:50.939
+So player index zero.
+
+76
+00:03:50.939 --> 00:03:53.020
+But if you get the controlled Pawn,
+
+77
+00:03:53.020 --> 00:03:55.180
+you will always get the Pawn
+
+78
+00:03:55.180 --> 00:03:56.460
+that the player is controlling.
+
+79
+00:03:56.460 --> 00:04:01.060
+So worth keeping those things in mind.
+
+80
+00:04:01.060 --> 00:04:04.699
+For the controller, again, the level of the controller
+
+81
+00:04:04.699 --> 00:04:07.379
+lives until the level is destroyed.
+
+82
+00:04:07.379 --> 00:04:09.979
+And it's not really expected to be destroyed
+
+83
+00:04:09.979 --> 00:04:13.620
+because the controller essentially is the player.
+
+84
+00:04:13.620 --> 00:04:16.779
+If you think when we're talking about the brain concepts,
+
+85
+00:04:16.779 --> 00:04:19.339
+you don't really want the brain to get destroyed
+
+86
+00:04:19.339 --> 00:04:20.899
+because it often outlays the Pawn.
+
+87
+00:04:20.899 --> 00:04:24.300
+The Pawn might die and the Pawn might get destroyed,
+
+88
+00:04:24.300 --> 00:04:27.500
+but you as the player still want to have a controller
+
+89
+00:04:27.500 --> 00:04:31.720
+to even things like using the menu system
+
+90
+00:04:31.720 --> 00:04:34.740
+that would still be run through some type of controller.
+
+91
+00:04:34.740 --> 00:04:39.740
+So the Pawn might get killed, for example, in a game,
+
+92
+00:04:40.019 --> 00:04:41.699
+but you might just possess a new Pawn
+
+93
+00:04:41.699 --> 00:04:43.980
+and the controller would still be persistent.
+
+94
+00:04:43.980 --> 00:04:47.540
+So this essentially relates to anything
+
+95
+00:04:47.540 --> 00:04:50.740
+that is the player or an AI.
+
+96
+00:04:50.740 --> 00:04:51.819
+Remember, it's a brain,
+
+97
+00:04:51.819 --> 00:04:54.740
+so the AI would still need a controller.
+
+98
+00:04:54.740 --> 00:04:59.319
+And so we might hold things like the score or kill count,
+
+99
+00:04:59.319 --> 00:05:01.680
+or do you have health there?
+
+100
+00:05:01.680 --> 00:05:03.199
+Again, you could store that in the character.
+
+101
+00:05:03.199 --> 00:05:04.620
+I don't want to get too in the weeds
+
+102
+00:05:04.620 --> 00:05:06.000
+of where you can store each things,
+
+103
+00:05:06.000 --> 00:05:09.279
+but it is data agnostic in that respect.
+
+104
+00:05:09.279 --> 00:05:13.000
+So just thinking about these concepts
+
+105
+00:05:13.920 --> 00:05:16.620
+and how long the controller lives for
+
+106
+00:05:16.620 --> 00:05:19.139
+is useful for when to store information.
+
+107
+00:05:19.139 --> 00:05:21.560
+So to get the controller,
+
+108
+00:05:21.560 --> 00:05:23.360
+we can just get the player controller,
+
+109
+00:05:23.360 --> 00:05:25.000
+we can get controller.
+
+110
+00:05:25.000 --> 00:05:29.420
+So that might be an AI controller that we want to get,
+
+111
+00:05:29.420 --> 00:05:32.680
+and then you can get the owning player as well.
+
+112
+00:05:32.680 --> 00:05:35.040
+So there's a few types of ways to get the player,
+
+113
+00:05:35.040 --> 00:05:38.339
+well, the controller in general.
+
+114
+00:05:38.339 --> 00:05:39.939
+Coming to the game mode.
+
+115
+00:05:40.259 --> 00:05:42.500
+So like we said, the game mode is a single instance
+
+116
+00:05:42.500 --> 00:05:45.420
+that exists before the level
+
+117
+00:05:45.420 --> 00:05:48.300
+and persists as long as the level hasn't changed.
+
+118
+00:05:48.300 --> 00:05:49.720
+So we can just get the game mode,
+
+119
+00:05:49.720 --> 00:05:51.300
+very simply on the level blueprint,
+
+120
+00:05:51.300 --> 00:05:53.740
+we can just do get game mode.
+
+121
+00:05:53.740 --> 00:05:58.740
+And this is essentially useful for getting information
+
+122
+00:05:58.980 --> 00:06:01.259
+for the level that's currently being played.
+
+123
+00:06:01.259 --> 00:06:04.139
+It can be classed as more long-term data,
+
+124
+00:06:04.139 --> 00:06:07.779
+which might span across multiple players,
+
+125
+00:06:07.779 --> 00:06:10.100
+or be a single set of data
+
+126
+00:06:10.100 --> 00:06:12.220
+that multiple entities need to get access to.
+
+127
+00:06:12.220 --> 00:06:15.060
+Say there's a world clock or something like this
+
+128
+00:06:15.060 --> 00:06:18.490
+that multiple players might need to know about.
+
+129
+00:06:18.490 --> 00:06:20.050
+We've got the game instance.
+
+130
+00:06:20.050 --> 00:06:24.250
+So the game instance spawns when you press play,
+
+131
+00:06:24.250 --> 00:06:27.810
+and then as soon as you exit the level,
+
+132
+00:06:27.810 --> 00:06:29.290
+the game instance will go away.
+
+133
+00:06:29.290 --> 00:06:30.810
+So the game instance,
+
+134
+00:06:30.810 --> 00:06:33.509
+you wouldn't really contain data
+
+135
+00:06:33.509 --> 00:06:35.689
+that relates to a particular level or current events,
+
+136
+00:06:35.689 --> 00:06:37.410
+it's just needed to store
+
+137
+00:06:37.410 --> 00:06:41.610
+any kind of currently runtime information.
+
+138
+00:06:41.610 --> 00:06:44.370
+And you can simply just get the game instance again,
+
+139
+00:06:44.370 --> 00:06:46.970
+like the get game mode, just get game instance.
+
+140
+00:06:46.970 --> 00:06:50.490
+And if you have a specific game instance
+
+141
+00:06:50.490 --> 00:06:53.569
+that you've created, if you get the game instance,
+
+142
+00:06:53.569 --> 00:06:56.129
+then you can cast to the name
+
+143
+00:06:56.129 --> 00:06:58.250
+of your specific game instance
+
+144
+00:06:58.250 --> 00:07:01.730
+to return some kind of variable from that,
+
+145
+00:07:01.730 --> 00:07:05.180
+that game instance that you've created.
+
+146
+00:07:05.180 --> 00:07:08.540
+So the HUD and HUD widgets, slightly different,
+
+147
+00:07:08.540 --> 00:07:12.579
+but the HUD is spawned alongside the player controller,
+
+148
+00:07:12.579 --> 00:07:15.459
+but it can be replaced at runtime by a function call.
+
+149
+00:07:15.459 --> 00:07:18.420
+The HUD widget is in control of the player,
+
+150
+00:07:18.420 --> 00:07:20.660
+but will be deleted on level close.
+
+151
+00:07:20.660 --> 00:07:24.019
+So this is essentially the internal state
+
+152
+00:07:24.019 --> 00:07:29.019
+of handling any UI elements, animations, current displays.
+
+153
+00:07:30.139 --> 00:07:32.259
+You can reference it across actors,
+
+154
+00:07:32.259 --> 00:07:37.579
+but again, you can store HUD widgets,
+
+155
+00:07:39.540 --> 00:07:43.819
+like we said before in a porn or a player controller,
+
+156
+00:07:43.819 --> 00:07:47.579
+you can just create a widget inside of these classes.
+
+157
+00:07:47.579 --> 00:07:49.579
+So you don't necessarily just have to use this class,
+
+158
+00:07:49.579 --> 00:07:51.500
+but if you are using the class,
+
+159
+00:07:51.500 --> 00:07:53.620
+you can just right click, get HUD,
+
+160
+00:07:53.620 --> 00:07:58.060
+and that will return the HUD that you might want to cast
+
+161
+00:07:58.060 --> 00:08:01.740
+to that the player currently has set.
+
+162
+00:08:01.740 --> 00:08:04.540
+The level blueprint, as we said,
+
+163
+00:08:04.540 --> 00:08:06.920
+lasts for as long as the level is loaded
+
+164
+00:08:06.920 --> 00:08:10.339
+and you might just have a very level specific scripts
+
+165
+00:08:10.339 --> 00:08:11.579
+in which we already covered, you know,
+
+166
+00:08:11.579 --> 00:08:13.879
+in the door example that I mentioned
+
+167
+00:08:13.879 --> 00:08:15.079
+on the level blueprint.
+
+168
+00:08:16.589 --> 00:08:19.949
+The level blueprint should listen for changes
+
+169
+00:08:19.949 --> 00:08:21.149
+and orchestrate events.
+
+170
+00:08:21.149 --> 00:08:26.410
+So any kind of, you know, gameplay scripts
+
+171
+00:08:26.930 --> 00:08:28.610
+in that happens throughout the level,
+
+172
+00:08:28.610 --> 00:08:31.529
+say the player does open this door
+
+173
+00:08:31.769 --> 00:08:33.929
+and you want to listen for the door opening
+
+174
+00:08:33.929 --> 00:08:35.610
+and then call a different event,
+
+175
+00:08:35.610 --> 00:08:40.149
+something like that is why you'd use a level blueprint,
+
+176
+00:08:40.149 --> 00:08:44.409
+but you can really get or set any specific data
+
+177
+00:08:44.409 --> 00:08:45.970
+on the level blueprint.
+
+178
+00:08:45.970 --> 00:08:48.250
+You wouldn't really want to take that approach.
+
+179
+00:08:48.250 --> 00:08:50.769
+It's more just for the moment to moment scripting
+
+180
+00:08:50.769 --> 00:08:53.590
+of a level blueprint, like in the examples we gave.
+
+181
+00:08:55.610 --> 00:08:58.529
+You can make your own actor components.
+
+182
+00:08:58.529 --> 00:09:00.950
+This is more advanced.
+
+183
+00:09:01.929 --> 00:09:03.370
+So you don't need to do this.
+
+184
+00:09:03.370 --> 00:09:07.389
+This would be more for maybe technical designers
+
+185
+00:09:07.389 --> 00:09:10.990
+and technical artists and maybe more engineers.
+
+186
+00:09:10.990 --> 00:09:14.549
+But when the data does need to be reusable
+
+187
+00:09:14.549 --> 00:09:16.850
+and exist on several different actors,
+
+188
+00:09:16.850 --> 00:09:20.049
+you can create blueprint actor components
+
+189
+00:09:20.049 --> 00:09:21.629
+from the content browser.
+
+190
+00:09:21.629 --> 00:09:23.990
+So that might be something you want to look into.
+
+191
+00:09:23.990 --> 00:09:26.230
+It doesn't just need to be in the C++.
+
+192
+00:09:26.230 --> 00:09:28.870
+You can create blueprint actor components
+
+193
+00:09:28.870 --> 00:09:33.110
+and you can also make your own manager actors.
+
+194
+00:09:33.110 --> 00:09:35.710
+So for example, if you're making a racing game
+
+195
+00:09:35.710 --> 00:09:38.129
+and you want to store all the races
+
+196
+00:09:38.129 --> 00:09:41.350
+and the current score and some kind of manager
+
+197
+00:09:41.350 --> 00:09:44.029
+that manages the race,
+
+198
+00:09:44.029 --> 00:09:46.789
+you would put this in just one per level
+
+199
+00:09:46.789 --> 00:09:49.470
+and it just organizes everything into one place,
+
+200
+00:09:49.470 --> 00:09:51.029
+which can be helpful.
+
+201
+00:09:51.029 --> 00:09:52.789
+It can just be an empty blueprint class
+
+202
+00:09:52.789 --> 00:09:54.269
+that is loaded on the level as well.
+
+203
+00:09:54.269 --> 00:09:58.250
+So just thinking about the architecture there is very useful.
+
+204
+00:09:58.450 --> 00:10:01.250
+And just to close out,
+
+205
+00:10:01.250 --> 00:10:03.230
+if you are new to Unreal Engine,
+
+206
+00:10:04.250 --> 00:10:06.970
+there is a great, great function to use.
+
+207
+00:10:06.970 --> 00:10:08.730
+It's super secret.
+
+208
+00:10:08.730 --> 00:10:11.970
+Nobody talks about it, but everyone talks about it.
+
+209
+00:10:11.970 --> 00:10:13.250
+It's this node here.
+
+210
+00:10:13.250 --> 00:10:17.809
+So you'll very quickly stumble upon this function
+
+211
+00:10:17.809 --> 00:10:20.029
+as your Unreal journey unfolds.
+
+212
+00:10:20.029 --> 00:10:23.250
+And it's a very useful kind of get all access of class.
+
+213
+00:10:23.250 --> 00:10:26.789
+So, you know, you might be looking for a certain player,
+
+214
+00:10:26.789 --> 00:10:28.629
+but you don't have a reference to the player.
+
+215
+00:10:28.629 --> 00:10:30.470
+So you just want to get all access of class
+
+216
+00:10:30.470 --> 00:10:32.509
+and you think, oh, does this one player exist?
+
+217
+00:10:32.509 --> 00:10:34.389
+So I'll just get everything
+
+218
+00:10:34.389 --> 00:10:36.269
+and then just return the first player
+
+219
+00:10:36.269 --> 00:10:38.389
+and that will be my player and I'll do something with it.
+
+220
+00:10:38.389 --> 00:10:43.389
+So you can do this for prototyping.
+
+221
+00:10:43.470 --> 00:10:44.830
+It can be helpful,
+
+222
+00:10:44.830 --> 00:10:48.029
+but it's a very heavy handed function to use.
+
+223
+00:10:49.820 --> 00:10:53.500
+It can be not the most optimized way to do things.
+
+224
+00:10:53.500 --> 00:10:55.539
+It can also cause bugs.
+
+225
+00:10:56.539 --> 00:10:58.019
+So just use it sparingly,
+
+226
+00:10:58.019 --> 00:11:00.059
+I think is the best recommendation there.
+
+227
+00:11:00.059 --> 00:11:04.059
+It's similar to how Tic exists on a level blueprint
+
+228
+00:11:04.059 --> 00:11:06.659
+or blueprints, should we say.
+
+229
+00:11:06.659 --> 00:11:09.379
+And you can access Tic for a number of reasons,
+
+230
+00:11:09.379 --> 00:11:11.659
+but you just want to use these kinds of things sparingly
+
+231
+00:11:11.659 --> 00:11:14.899
+because especially if you're working in games in production,
+
+232
+00:11:14.899 --> 00:11:17.139
+these are more heavy handed ways to do things
+
+233
+00:11:17.139 --> 00:11:20.700
+and maybe better used in quick prototypes
+
+234
+00:11:20.700 --> 00:11:23.139
+and just things that you're trying to get mocked up
+
+235
+00:11:23.139 --> 00:11:25.899
+quickly just to demonstrate a behavior.

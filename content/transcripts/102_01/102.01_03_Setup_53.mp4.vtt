@@ -1,0 +1,201 @@
+WEBVTT
+
+1
+00:00:01.139 --> 00:00:08.500
+In this video, and the future videos that we'll be going through, we are going to be jumping into the engine.
+
+2
+00:00:08.500 --> 00:00:17.100
+So, to follow along, it would be good if you can open and create an Unreal project.
+
+3
+00:00:17.100 --> 00:00:23.260
+For this workshop, I will be using the First Person Shooter template.
+
+4
+00:00:23.260 --> 00:00:34.020
+So, in order to do that, if you can open your Epic Installer, and go to the Unreal Engine tab,
+
+5
+00:00:34.020 --> 00:00:39.140
+select the Library tab, and hopefully by this point you have an engine version installed.
+
+6
+00:00:39.140 --> 00:00:43.030
+If not, just click on this plus button and install it.
+
+7
+00:00:43.030 --> 00:00:48.969
+But, I am going to launch 5.31.
+
+8
+00:00:48.969 --> 00:00:52.619
+It will take a minute to fire up.
+
+9
+00:00:52.619 --> 00:00:59.820
+Once the engine has fired up, come and select the Games tab, and under the Games tab,
+
+10
+00:00:59.820 --> 00:01:04.700
+we will have the First Person template.
+
+11
+00:01:04.700 --> 00:01:11.500
+Now, one more thing that I would like you to do is if you could tick the button for Start Content,
+
+12
+00:01:11.500 --> 00:01:17.900
+what this is going to do is it's going to include some basic meshes and materials
+
+13
+00:01:17.900 --> 00:01:23.500
+that we can use in the example we're going to be making.
+
+14
+00:01:23.500 --> 00:01:30.859
+Choose a project location and then a project name, and then just hit the Create.
+
+15
+00:01:30.859 --> 00:01:36.219
+Once the project has loaded up, you should see a screen which looks something like this.
+
+16
+00:01:36.219 --> 00:01:40.379
+Now, I'm going to do one extra thing here.
+
+17
+00:01:40.379 --> 00:01:47.040
+I am going to select the Content Draw, and I'm going to dock it into the layout.
+
+18
+00:01:47.040 --> 00:01:51.519
+The reason being, we're going to be working with assets in the Content Draw quite a lot,
+
+19
+00:01:51.519 --> 00:01:56.500
+so it'll be useful to have this visible at all times.
+
+20
+00:01:56.500 --> 00:01:58.739
+Now we have the project started up.
+
+21
+00:01:58.739 --> 00:02:05.939
+It'll be good for us to have a blueprint that we can play around with and explain.
+
+22
+00:02:05.939 --> 00:02:13.819
+So, to do that, I am going to right-hand click within the content directory,
+
+23
+00:02:13.819 --> 00:02:18.780
+and I'm going to get a menu of content that I can create.
+
+24
+00:02:18.780 --> 00:02:21.419
+I'm going to select Blueprint Class.
+
+25
+00:02:22.939 --> 00:02:28.539
+This will bring up a box which is going to show us all of the different parent classes
+
+26
+00:02:29.099 --> 00:02:33.500
+which we could possibly create a child class of.
+
+27
+00:02:34.219 --> 00:02:39.259
+Now, to start with, you can see that we have the Actor, Horn, and Character classes.
+
+28
+00:02:39.259 --> 00:02:45.020
+These are the three classes which we mentioned previously in the examples.
+
+29
+00:02:45.979 --> 00:02:49.659
+The Actor, the Character being a child of the Pawn class,
+
+30
+00:02:49.659 --> 00:02:52.300
+and the Pawn class being a child of the Actor class.
+
+31
+00:02:53.569 --> 00:02:56.289
+We also have the Player Controller.
+
+32
+00:02:59.810 --> 00:03:03.330
+This is not a child of the Actor and cannot be seen within the world,
+
+33
+00:03:03.330 --> 00:03:05.810
+but it can take control of the Pawn.
+
+34
+00:03:06.530 --> 00:03:11.490
+And we have a few other classes of interest down here.
+
+35
+00:03:11.490 --> 00:03:15.490
+Actor component being interesting because in the Character component,
+
+36
+00:03:15.490 --> 00:03:22.129
+the Skeletal Mesh and the Movement are both Actor components which are just attached to this
+
+37
+00:03:22.129 --> 00:03:29.150
+class. If at any point you want to create a child which is not on this list, down below
+
+38
+00:03:29.150 --> 00:03:35.550
+we have a drop-down box which will give us access to all of the different classes that
+
+39
+00:03:35.550 --> 00:03:42.669
+are available to us. Now, this can be augmented by either adding plugins
+
+40
+00:03:43.229 --> 00:03:48.669
+or by creating and adding extra classes to the system.
+
+41
+00:03:49.650 --> 00:03:53.409
+But what is useful as well is you can actually see the hierarchy here.
+
+42
+00:03:53.409 --> 00:03:58.930
+So, for example, you can see that we have under the Object class, we have the Actor class,
+
+43
+00:03:58.930 --> 00:04:02.210
+the Actor component, there are numerous other ones.
+
+44
+00:04:02.210 --> 00:04:06.930
+But if I was to do a drop-down of the Actor class, we can see that there are a whole
+
+45
+00:04:06.930 --> 00:04:11.810
+load of other Actors that are objects that we can be dragged into the world.
+
+46
+00:04:11.810 --> 00:04:16.529
+Now, for this example, we are going to use a simple Actor class,
+
+47
+00:04:17.740 --> 00:04:22.300
+and this is a common starting point for creating Blueprints.
+
+48
+00:04:24.910 --> 00:04:27.470
+In this, I'm going to rename this to be just Example,
+
+49
+00:04:28.189 --> 00:04:31.870
+and then I'm going to double-click on it to open it up.
+
+50
+00:04:31.870 --> 00:04:38.959
+And with that, we should be ready to start doing some coding.

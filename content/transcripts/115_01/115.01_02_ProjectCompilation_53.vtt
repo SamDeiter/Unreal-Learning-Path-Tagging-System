@@ -1,0 +1,441 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:04.500
+Jumping right in, Project Compilation.
+
+2
+00:00:04.500 --> 00:00:07.719
+Before we look at the minutia of what an Unreal project is,
+
+3
+00:00:07.719 --> 00:00:09.539
+let's take a look at what we've got available to us
+
+4
+00:00:09.539 --> 00:00:11.980
+when working with Compilation in the Unreal Engine.
+
+5
+00:00:11.980 --> 00:00:14.140
+The Unreal Engine provides custom building methods
+
+6
+00:00:14.140 --> 00:00:17.230
+via the Unreal Build Tool or the UBT.
+
+7
+00:00:17.230 --> 00:00:18.429
+This unique tool will build
+
+8
+00:00:18.429 --> 00:00:19.890
+the engine's reflection system.
+
+9
+00:00:19.890 --> 00:00:23.269
+It will integrate any C++ code with blueprints.
+
+10
+00:00:23.269 --> 00:00:25.410
+It'll deal with any replication backend
+
+11
+00:00:25.410 --> 00:00:27.620
+and deal with serialization.
+
+12
+00:00:27.620 --> 00:00:29.640
+The Unreal Build Tool is capable of spinning up
+
+13
+00:00:29.640 --> 00:00:32.079
+a wide selection of build configurations
+
+14
+00:00:32.079 --> 00:00:33.520
+that developers can leverage
+
+15
+00:00:33.520 --> 00:00:36.560
+during the development cycle of the project.
+
+16
+00:00:36.560 --> 00:00:38.960
+On the left, we have a sample of the configurations
+
+17
+00:00:38.960 --> 00:00:39.960
+that Unreal offers,
+
+18
+00:00:39.960 --> 00:00:41.719
+whilst on the right we have the targets
+
+19
+00:00:41.719 --> 00:00:43.890
+that we can build to.
+
+20
+00:00:43.890 --> 00:00:46.210
+To elaborate further on the configurations,
+
+21
+00:00:46.210 --> 00:00:49.850
+let's look at what each one offers us as engineers.
+
+22
+00:00:49.850 --> 00:00:51.649
+Debug, in this configuration,
+
+23
+00:00:51.649 --> 00:00:55.289
+the entire engine and game code is unoptimized.
+
+24
+00:00:55.289 --> 00:00:57.649
+This will be slower than any of the other configurations,
+
+25
+00:00:57.649 --> 00:00:59.289
+but it will give us a lot more access
+
+26
+00:00:59.289 --> 00:01:01.390
+to debug information.
+
+27
+00:01:01.390 --> 00:01:02.570
+We've then got Debug Game,
+
+28
+00:01:02.570 --> 00:01:04.230
+and this is similar to Debug,
+
+29
+00:01:04.230 --> 00:01:06.750
+but only the game code is unoptimized.
+
+30
+00:01:06.750 --> 00:01:07.989
+To be more precise,
+
+31
+00:01:07.989 --> 00:01:09.750
+this covers the code within our project,
+
+32
+00:01:09.750 --> 00:01:11.650
+but not the engine.
+
+33
+00:01:11.650 --> 00:01:13.150
+We've then got Development.
+
+34
+00:01:13.150 --> 00:01:15.170
+This configuration enables all but the most
+
+35
+00:01:15.170 --> 00:01:19.129
+time-consuming engine and game code optimizations.
+
+36
+00:01:19.129 --> 00:01:20.790
+From there, we've got Test.
+
+37
+00:01:20.790 --> 00:01:22.950
+This configuration optimizes the code,
+
+38
+00:01:22.950 --> 00:01:24.930
+but allows for debug console commands
+
+39
+00:01:24.930 --> 00:01:26.430
+and testing tools to be used,
+
+40
+00:01:26.430 --> 00:01:29.459
+such as stats and profiling tools.
+
+41
+00:01:29.459 --> 00:01:33.260
+This configuration does not work with an editor target.
+
+42
+00:01:33.260 --> 00:01:34.420
+Finally, we've got Shipping,
+
+43
+00:01:34.420 --> 00:01:36.780
+and this is our fully optimized code with stats,
+
+44
+00:01:36.780 --> 00:01:39.299
+profiling tools, and console commands removed.
+
+45
+00:01:39.299 --> 00:01:42.700
+And again, this does not work with editor targets.
+
+46
+00:01:42.700 --> 00:01:43.920
+These configurations are paired
+
+47
+00:01:43.920 --> 00:01:45.540
+with a particular target in mind,
+
+48
+00:01:45.540 --> 00:01:48.519
+which are listed on the right-hand side of this slide.
+
+49
+00:01:48.519 --> 00:01:50.040
+We've got Client and Server.
+
+50
+00:01:50.040 --> 00:01:52.200
+These targets build exactly what you think.
+
+51
+00:01:52.200 --> 00:01:56.200
+It will compile your project for a client or for a server.
+
+52
+00:01:56.200 --> 00:01:57.359
+Client code is stripped away
+
+53
+00:01:57.359 --> 00:02:00.920
+from any server-based targets and vice versa.
+
+54
+00:02:00.920 --> 00:02:03.920
+We can wrap sections of code with server code
+
+55
+00:02:03.920 --> 00:02:05.959
+or not with server code
+
+56
+00:02:05.959 --> 00:02:08.879
+to exclude code from particular deployments.
+
+57
+00:02:08.879 --> 00:02:10.120
+We've then got Editor,
+
+58
+00:02:10.120 --> 00:02:11.620
+and this target is unique
+
+59
+00:02:11.620 --> 00:02:13.259
+in that it will compile for all targets,
+
+60
+00:02:13.259 --> 00:02:16.169
+and we'll discuss this in more depth soon.
+
+61
+00:02:16.169 --> 00:02:17.689
+We've then got an Empty target,
+
+62
+00:02:17.689 --> 00:02:20.210
+and this is a standalone target for single-player games.
+
+63
+00:02:20.210 --> 00:02:22.650
+It'll be a single standalone game.
+
+64
+00:02:22.650 --> 00:02:25.490
+And this will include both server and client code.
+
+65
+00:02:25.490 --> 00:02:27.770
+Any code that is preprocessed, as we mentioned,
+
+66
+00:02:27.770 --> 00:02:29.810
+will be included in this build.
+
+67
+00:02:29.810 --> 00:02:32.469
+Just a few notes on the Editor itself.
+
+68
+00:02:32.469 --> 00:02:33.750
+The Editor is far more
+
+69
+00:02:33.750 --> 00:02:36.310
+than just a scripting tool for other teams.
+
+70
+00:02:36.310 --> 00:02:38.030
+Aside from providing a staggering array
+
+71
+00:02:38.030 --> 00:02:41.229
+of environment authoring tools and asset setup frameworks,
+
+72
+00:02:41.229 --> 00:02:42.830
+it allows developers to test their project
+
+73
+00:02:42.830 --> 00:02:45.469
+in both a single and a multiplayer environment.
+
+74
+00:02:45.469 --> 00:02:47.550
+This is why the Editor target is so unique.
+
+75
+00:02:47.550 --> 00:02:49.189
+It allows us to compile every target
+
+76
+00:02:49.189 --> 00:02:50.210
+that we could possibly want,
+
+77
+00:02:50.210 --> 00:02:53.110
+and allows us to use them all simultaneously.
+
+78
+00:02:53.110 --> 00:02:54.430
+The Play and Editor features
+
+79
+00:02:54.430 --> 00:02:57.430
+can spin up more than one user and a dedicated server,
+
+80
+00:02:57.430 --> 00:02:59.430
+all from within the Editor itself,
+
+81
+00:02:59.430 --> 00:03:02.229
+giving us a fantastic and easily accessible representation
+
+82
+00:03:02.229 --> 00:03:04.580
+of our project post deploy.
+
+83
+00:03:04.580 --> 00:03:05.900
+It's a common misconception
+
+84
+00:03:05.900 --> 00:03:08.300
+that Blueprint is for scripting and for prototyping.
+
+85
+00:03:08.300 --> 00:03:09.979
+This simply isn't the case.
+
+86
+00:03:09.979 --> 00:03:12.539
+Entire projects can and have been made in Blueprint alone
+
+87
+00:03:12.539 --> 00:03:13.939
+with no real downsides,
+
+88
+00:03:13.939 --> 00:03:16.199
+because it's a tool much like anything else.
+
+89
+00:03:16.199 --> 00:03:18.539
+If using Blueprint suits your studio's needs,
+
+90
+00:03:18.539 --> 00:03:20.099
+then it absolutely should be considered
+
+91
+00:03:20.099 --> 00:03:22.139
+as a primary implementation.
+
+92
+00:03:22.139 --> 00:03:25.300
+Projects can be written in both C++ and Blueprint
+
+93
+00:03:25.300 --> 00:03:27.539
+using the Epic Launcher version of the engine,
+
+94
+00:03:27.539 --> 00:03:29.930
+so you don't need the source.
+
+95
+00:03:29.930 --> 00:03:32.030
+Whilst having access to the source is fantastic,
+
+96
+00:03:32.030 --> 00:03:33.650
+it's entirely optional.
+
+97
+00:03:33.650 --> 00:03:35.930
+We can grab the engine from the Epic Games Launcher
+
+98
+00:03:35.930 --> 00:03:37.610
+and dive right in.
+
+99
+00:03:37.610 --> 00:03:38.930
+The Epic Launcher version of the engine
+
+100
+00:03:38.930 --> 00:03:42.250
+is simply a pre-compiled version of that source.
+
+101
+00:03:42.250 --> 00:03:43.849
+It's worth noting that we won't have access
+
+102
+00:03:43.849 --> 00:03:45.949
+to the source symbols by default, however.
+
+103
+00:03:45.949 --> 00:03:48.449
+They will need to be downloaded separately.
+
+104
+00:03:48.449 --> 00:03:50.389
+If you'd like to have access to the source code,
+
+105
+00:03:50.389 --> 00:03:52.349
+however, it is freely available.
+
+106
+00:03:53.229 --> 00:03:54.909
+It's available on the Unreal Git repo
+
+107
+00:03:54.909 --> 00:03:57.830
+and through the Unreal Perforce if you're a licensee.
+
+108
+00:03:57.830 --> 00:04:01.389
+It's very useful if you intend to make engine changes.
+
+109
+00:04:01.389 --> 00:04:02.550
+The symbols for the editor, however,
+
+110
+00:04:02.550 --> 00:04:05.270
+can be downloaded from the launcher as pictured.

@@ -1,0 +1,213 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:11.300
+In this last video, you add the final touches to the scene by importing the missing elements. These include people, cars, and some additional props.
+
+2
+00:00:12.179 --> 00:00:16.679
+Import the last Datasmith file, the one named Props, as you have learned before.
+
+3
+00:00:24.100 --> 00:00:27.699
+There will be some issues with the import that you can check in the message log.
+
+4
+00:00:28.519 --> 00:00:35.219
+These mostly relate to animated people and animated cars that do not translate well between Twinmotion and Unreal Engine.
+
+5
+00:00:36.450 --> 00:00:41.960
+Delete the redundant background and get closer to the scene.
+
+6
+00:00:43.320 --> 00:00:51.609
+Note that any posed characters imported correctly, but that any animated characters did not.
+
+7
+00:00:52.299 --> 00:00:55.100
+That's the import restriction as it currently stands.
+
+8
+00:00:56.210 --> 00:01:01.710
+Anything else that is static, like furniture and decorations, imported flawlessly.
+
+9
+00:01:02.729 --> 00:01:09.620
+Interestingly, all vehicles did import, but they are static. Their animations didn't come through.
+
+10
+00:01:10.349 --> 00:01:13.549
+Again, this is a known restriction that we currently have.
+
+11
+00:01:14.439 --> 00:01:22.629
+However, note the green squares in front and behind each car. These are decal objects for the headlights and taillights.
+
+12
+00:01:23.230 --> 00:01:29.930
+Unfortunately, their material did not translate correctly between Twinmotion and Unreal Engine, so we'll need to fix that.
+
+13
+00:01:30.430 --> 00:01:41.280
+Create a new folder under Content Theatron, Props, Materials, and name it Decals.
+
+14
+00:01:42.420 --> 00:01:46.019
+Create a new material named MCarLights.
+
+15
+00:01:48.730 --> 00:01:54.629
+Set the new material to be used as a deferred decal and set the blend mode to Translucent.
+
+16
+00:02:01.140 --> 00:02:11.490
+Look in the Textures folder and note the two imported textures TLightMaskFrontBC and TLightMaskRearBC.
+
+17
+00:02:12.159 --> 00:02:14.960
+These represent the front and taillights on the cars.
+
+18
+00:02:15.939 --> 00:02:21.740
+Drag the TLightMaskFrontBC texture into the newly created material.
+
+19
+00:02:23.370 --> 00:02:26.669
+Convert the node to a parameter and call it Light Mask.
+
+20
+00:02:27.969 --> 00:02:30.370
+This will allow you to change it at the instance level.
+
+21
+00:02:31.930 --> 00:02:36.930
+You could wire it directly to the emissive channel, but let's give ourselves a bit more control.
+
+22
+00:02:37.979 --> 00:02:42.280
+Press 3 and click in the material editor to add a color node.
+
+23
+00:02:44.000 --> 00:02:47.400
+Again, make it a parameter and name it Tint.
+
+24
+00:02:49.469 --> 00:02:53.370
+You'll use this to tint the mask which will be useful for the taillights.
+
+25
+00:02:53.870 --> 00:02:55.669
+Make the default color white though.
+
+26
+00:02:59.270 --> 00:03:02.169
+Press M and click to add a Multiply node.
+
+27
+00:03:03.379 --> 00:03:13.590
+Multiply the two nodes and then add another Multiply node before you wire that to the emissive channel.
+
+28
+00:03:14.250 --> 00:03:17.849
+The second Multiply node will be useful to control the intensity of the effect.
+
+29
+00:03:19.250 --> 00:03:24.250
+Add a Scalar node, S on the keyboard, and name it Intensity.
+
+30
+00:03:27.030 --> 00:03:31.030
+Wire it to the second Multiply node and set its default value to 1.
+
+31
+00:03:33.449 --> 00:03:36.449
+Save the material and close the material editor.
+
+32
+00:03:39.520 --> 00:03:48.310
+Create two material instances named miHeadlights and miTaillights.
+
+33
+00:03:49.360 --> 00:03:52.759
+Adjust their parameters such as intensities and colors.
+
+34
+00:03:56.050 --> 00:03:58.349
+You may need to revisit these values again.
+
+35
+00:04:03.750 --> 00:04:07.449
+Also make sure the taillights are based on the appropriate mask image.
+
+36
+00:04:14.610 --> 00:04:19.509
+Use the Outline Research Box to filter all the Decal F actors in the scene.
+
+37
+00:04:20.819 --> 00:04:23.920
+Note that the Twinmotion material assignment didn't carry through.
+
+38
+00:04:25.189 --> 00:04:28.389
+Assign the miHeadlights material you just created.
+
+39
+00:04:30.180 --> 00:04:34.079
+And repeat the procedure for the taillights or Decal R.
+
+40
+00:04:44.019 --> 00:04:46.120
+Switch to Nighttime to view the effects.
+
+41
+00:04:52.000 --> 00:04:56.199
+Lastly, you can help the night scene by adding a bit of a moon effect.
+
+42
+00:04:59.139 --> 00:05:01.040
+Add a Directional Light to the scene.
+
+43
+00:05:05.680 --> 00:05:07.779
+It will conflict with the SunSky system.
+
+44
+00:05:09.399 --> 00:05:12.800
+Rename the actor Moonlight and move it to the Lighting folder.
+
+45
+00:05:19.779 --> 00:05:23.980
+Note the error in the viewport. You need to adjust the Forward Shading Priority value.
+
+46
+00:05:25.339 --> 00:05:32.149
+Search for it in the Details panel and set it to 1 to remove the conflict.
+
+47
+00:05:34.379 --> 00:05:42.230
+Look also for Atmosphere and set the Sunlight Index to 1.
+
+48
+00:05:43.279 --> 00:05:45.379
+This will bring the sky and clouds into effect.
+
+49
+00:05:47.069 --> 00:05:55.540
+Change the light color to a blue that you like and reduce the intensity.
+
+50
+00:06:03.850 --> 00:06:08.250
+This will make the environment a bit more visible at night instead of being drowned in darkness.
+
+51
+00:06:15.050 --> 00:06:17.149
+It will not affect the scene much in daytime.
+
+52
+00:06:26.579 --> 00:06:30.879
+Save your project now that you have transferred your Twinmotion scene into UE5.
+
+53
+00:06:32.949 --> 00:06:37.050
+This brings us to the end of this class. I hope you have found it useful.

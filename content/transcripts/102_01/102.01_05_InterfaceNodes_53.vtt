@@ -1,0 +1,725 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:04.240
+Now we've gone through all the different sections of the interface,
+
+2
+00:00:04.240 --> 00:00:06.799
+we'll be ready to do some actual coding
+
+3
+00:00:06.799 --> 00:00:10.880
+and see about creating and connecting up some nodes.
+
+4
+00:00:10.880 --> 00:00:13.199
+Now here we are in the event graph,
+
+5
+00:00:13.199 --> 00:00:16.239
+in the example actor that we've made.
+
+6
+00:00:16.239 --> 00:00:20.320
+Now, we have three different red nodes.
+
+7
+00:00:20.320 --> 00:00:23.359
+Each of these represent an event.
+
+8
+00:00:23.359 --> 00:00:28.190
+What they are is a starting point for when you're going to run some code,
+
+9
+00:00:28.190 --> 00:00:30.910
+which would be triggered by the engine,
+
+10
+00:00:30.910 --> 00:00:34.020
+depending on what they are connected to.
+
+11
+00:00:34.020 --> 00:00:36.340
+So for here we have the event begin play,
+
+12
+00:00:36.340 --> 00:00:40.640
+the event actor begin overlap, and the event tick.
+
+13
+00:00:40.640 --> 00:00:44.399
+Now let's work with the event begin play first.
+
+14
+00:00:44.399 --> 00:00:50.500
+If I was to drag off and add in a print string afterwards,
+
+15
+00:00:50.500 --> 00:00:53.060
+this is a simple node which is going to print the word
+
+16
+00:00:53.060 --> 00:00:57.679
+hello when it is fired.
+
+17
+00:00:57.679 --> 00:01:02.740
+Now if I compile this, jump back into the engine,
+
+18
+00:01:02.740 --> 00:01:05.700
+I'm going to make sure that we have show stats ticked here,
+
+19
+00:01:05.700 --> 00:01:11.090
+just so that we can make sure that we can see the messages in the viewport.
+
+20
+00:01:11.090 --> 00:01:15.299
+Now if I push play, you can see that we have
+
+21
+00:01:15.299 --> 00:01:18.400
+hello in the top left hand corner here.
+
+22
+00:01:18.400 --> 00:01:21.760
+Now that's because this script will,
+
+23
+00:01:21.760 --> 00:01:24.159
+anything that's connected to this script,
+
+24
+00:01:24.159 --> 00:01:29.840
+will trigger when the actor is either spawned into the world,
+
+25
+00:01:29.920 --> 00:01:36.109
+or when the the program starts to begin play.
+
+26
+00:01:36.109 --> 00:01:42.290
+Now I'm going to drag this down and connect it to tick.
+
+27
+00:01:42.290 --> 00:01:46.530
+I'm going to press compile and jump into the engine again.
+
+28
+00:01:46.530 --> 00:01:50.450
+Now when I push play, we'll see that we have a long
+
+29
+00:01:50.450 --> 00:01:54.989
+string of hellos down the left hand side.
+
+30
+00:01:54.989 --> 00:02:01.870
+Now that's because this tick event will trigger when every frame
+
+31
+00:02:01.870 --> 00:02:05.069
+of the game. So if you're running at 60 frames per second,
+
+32
+00:02:05.069 --> 00:02:09.180
+that is going to run 60 times per second.
+
+33
+00:02:09.180 --> 00:02:13.460
+Now we have one other one that we are going to check out here,
+
+34
+00:02:13.460 --> 00:02:21.419
+and that is the construction script. Now if I was to do the same thing here,
+
+35
+00:02:21.419 --> 00:02:29.139
+and compile, you will now see if I grab our actor and move it in the world,
+
+36
+00:02:31.729 --> 00:02:35.659
+move it in the world,
+
+37
+00:02:35.659 --> 00:02:40.349
+so these go away, you can see that this will trigger on
+
+38
+00:02:40.349 --> 00:02:49.169
+all of the movements. So this is great for if you wanted to
+
+39
+00:02:49.169 --> 00:02:53.490
+randomize an asset when it was placed in, or you wanted to do some kind of
+
+40
+00:02:53.490 --> 00:02:57.250
+computation looking at the world when it is
+
+41
+00:02:57.250 --> 00:03:03.009
+placed into the world. That means that the load from the script is
+
+42
+00:03:03.009 --> 00:03:06.530
+done at construction time, and saved to the actor,
+
+43
+00:03:06.530 --> 00:03:12.110
+rather than at runtime, when a lot of other things might be firing.
+
+44
+00:03:12.110 --> 00:03:17.870
+So again what we have here is we have the event begin play. This will be
+
+45
+00:03:17.870 --> 00:03:22.539
+triggered at one time when it first starts off. We have the
+
+46
+00:03:22.539 --> 00:03:25.659
+event begin overlap, but we're going to ignore that. We're going to do this in a
+
+47
+00:03:25.659 --> 00:03:30.259
+different way slightly later on. And we have event tick. Now this
+
+48
+00:03:30.259 --> 00:03:34.740
+triggers on every single frame of the game
+
+49
+00:03:34.740 --> 00:03:39.139
+by default, so be very very careful what you place on this.
+
+50
+00:03:39.139 --> 00:03:44.259
+You can actually control it by coming into the class defaults and changing
+
+51
+00:03:44.259 --> 00:03:48.419
+the settings for the tick here. You can either
+
+52
+00:03:48.419 --> 00:03:54.770
+turn it off, or reduce the speed of it. And then
+
+53
+00:03:54.770 --> 00:03:58.530
+finally we have construction script. Construction script will fire on the
+
+54
+00:03:58.610 --> 00:04:07.139
+point of construction. So now let's go over
+
+55
+00:04:07.139 --> 00:04:13.310
+the different ways that you can add nodes to the event graph.
+
+56
+00:04:13.310 --> 00:04:16.750
+What I'd like to do is go over the three different,
+
+57
+00:04:16.750 --> 00:04:19.870
+most common ways I think that you'll come across
+
+58
+00:04:19.870 --> 00:04:27.540
+here in order of least used to most. Now the first way I'd like to
+
+59
+00:04:27.540 --> 00:04:32.740
+go over is something called the palette. Now if we go up to windows and
+
+60
+00:04:32.740 --> 00:04:37.300
+select palette in the drop down, this won't be turned on by default,
+
+61
+00:04:37.300 --> 00:04:40.980
+you'll see that we'll get a window on the right hand side.
+
+62
+00:04:40.980 --> 00:04:45.060
+And this is going to have two sections. At the top this is going to have your
+
+63
+00:04:45.060 --> 00:04:49.300
+favorite nodes, and below this
+
+64
+00:04:49.300 --> 00:04:52.819
+it's going to have a searchable library of all of the different nodes
+
+65
+00:04:52.819 --> 00:04:57.300
+that you can come across. Now in order to bring these in all
+
+66
+00:04:57.300 --> 00:05:01.389
+you need to do is select one, hold down the left hand mouse
+
+67
+00:05:01.389 --> 00:05:06.319
+button, and drag it onto the event graph. You can see here I've
+
+68
+00:05:06.319 --> 00:05:10.819
+just pulled a branch over. And again I'm going to remove this by
+
+69
+00:05:10.819 --> 00:05:16.899
+pushing delete. Now this is quite useful and it's good
+
+70
+00:05:16.899 --> 00:05:19.379
+if you want to search through everything.
+
+71
+00:05:19.379 --> 00:05:26.540
+However, it tends to be a little slow when we're programming.
+
+72
+00:05:26.540 --> 00:05:30.300
+The second way to get nodes into the chart
+
+73
+00:05:30.300 --> 00:05:36.139
+is via the hotkeys. Now there are a few standard hotkeys which
+
+74
+00:05:36.139 --> 00:05:40.300
+will come default with the engine when it's
+
+75
+00:05:40.300 --> 00:05:43.500
+installed. You can actually go in and update and
+
+76
+00:05:43.500 --> 00:05:48.720
+change them yourself, but the default ones are...
+
+77
+00:05:48.720 --> 00:05:52.480
+Now if you hold down a B you'll get a branch,
+
+78
+00:05:52.480 --> 00:05:55.680
+if you hold down a D you'll get a delay,
+
+79
+00:05:55.680 --> 00:05:58.720
+if you hold down S you'll get a sequence,
+
+80
+00:05:58.720 --> 00:06:04.879
+if you hold down G you'll get a gate, if you hold down an N you'll get a do
+
+81
+00:06:04.879 --> 00:06:11.279
+N times, and if you hold down O you will get a do once, and for M
+
+82
+00:06:11.279 --> 00:06:15.519
+you'll get a multi-gate. Now I'll expect you need to know what all of
+
+83
+00:06:15.519 --> 00:06:18.399
+these would do, but the important thing to understand
+
+84
+00:06:18.399 --> 00:06:23.949
+with these is they're mostly flow control. So these are mostly
+
+85
+00:06:23.949 --> 00:06:28.959
+going to allow you to control the method of execution.
+
+86
+00:06:28.959 --> 00:06:33.120
+Now the most common flow control node you're going to come across
+
+87
+00:06:33.120 --> 00:06:39.360
+is going to be the branch node, and now if we look at a branch node you'll
+
+88
+00:06:39.360 --> 00:06:44.720
+see on the left hand side of this we have a red pin. This denotes
+
+89
+00:06:44.720 --> 00:06:51.470
+a condition that is a boolean condition. Now we'll go over variables in a
+
+90
+00:06:51.470 --> 00:06:56.350
+second, but a boolean variable is a
+
+91
+00:06:56.350 --> 00:07:03.310
+zero or a one, and this would denote true or false usually, with zero being
+
+92
+00:07:03.310 --> 00:07:07.180
+false and one being true. And now you can see
+
+93
+00:07:07.180 --> 00:07:11.980
+with this flow control we would have an execution pin coming in from the left
+
+94
+00:07:11.980 --> 00:07:16.819
+here, and then if the condition was set
+
+95
+00:07:16.819 --> 00:07:20.019
+to true this would trigger anything that was
+
+96
+00:07:20.019 --> 00:07:24.899
+connected to the true pin. If the condition was set to false
+
+97
+00:07:24.899 --> 00:07:29.170
+this would trigger whatever was connected to the false pin.
+
+98
+00:07:29.170 --> 00:07:32.449
+So this is the equivalent of an if statement,
+
+99
+00:07:32.449 --> 00:07:35.810
+if you would be working within other programming
+
+100
+00:07:35.810 --> 00:07:40.189
+languages. Our final way of generating
+
+101
+00:07:40.189 --> 00:07:44.589
+nodes is going to be by right-hand clicking in the background.
+
+102
+00:07:44.589 --> 00:07:48.110
+And now what you'll see is we have a box
+
+103
+00:07:48.110 --> 00:07:54.850
+that appears, a search box. Now if I was to search for example
+
+104
+00:07:54.850 --> 00:07:59.360
+branch you'll see that it will bring up branch.
+
+105
+00:07:59.360 --> 00:08:03.600
+Now it's also quite smart as well, so if I was to search for if
+
+106
+00:08:03.600 --> 00:08:08.560
+it will also bring up branch as a selected, and just because it knows that
+
+107
+00:08:08.560 --> 00:08:12.639
+if you're working in coding, if you type in if, you probably want a branch
+
+108
+00:08:12.639 --> 00:08:15.759
+statement. And at this point if I was to just
+
+109
+00:08:15.759 --> 00:08:20.560
+press enter it's going to create it at the point
+
+110
+00:08:20.560 --> 00:08:24.050
+where the point where I clicked on the screen.
+
+111
+00:08:24.050 --> 00:08:28.699
+Now this is even more useful than other methods
+
+112
+00:08:28.699 --> 00:08:32.139
+because if you look in the top right hand corner here
+
+113
+00:08:32.139 --> 00:08:36.610
+we have a tick box that's called context sensitive.
+
+114
+00:08:36.610 --> 00:08:41.090
+Now what this means is this is only going to return
+
+115
+00:08:41.090 --> 00:08:45.490
+values for nodes which would be compatible
+
+116
+00:08:45.490 --> 00:08:50.129
+with the context you're in. So at the moment this is only going to return
+
+117
+00:08:50.129 --> 00:08:54.480
+any of the nodes which could be placed on an event graph.
+
+118
+00:08:54.480 --> 00:08:59.570
+Now if I untick this it's actually going to reconfigure this
+
+119
+00:08:59.570 --> 00:09:04.129
+and it's going to return every single node which is part of the
+
+120
+00:09:04.129 --> 00:09:07.570
+system or that you've created or other part of
+
+121
+00:09:07.570 --> 00:09:11.309
+plugins. And this can be quite useful if
+
+122
+00:09:11.309 --> 00:09:15.149
+you're searching for something very very specific you might want to
+
+123
+00:09:15.149 --> 00:09:18.690
+turn this off and then you can do a more thorough search.
+
+124
+00:09:18.690 --> 00:09:22.850
+However with context sensitive on this is going to help you find the right
+
+125
+00:09:22.850 --> 00:09:29.330
+nodes that you want to get hold of. So for example if I was to drag
+
+126
+00:09:29.330 --> 00:09:35.279
+in a cube so this is a reference this is a variable is a
+
+127
+00:09:35.279 --> 00:09:40.429
+reference to the cube component that I have here. If I was to drop
+
+128
+00:09:40.429 --> 00:09:42.429
+this it's going to give me an option to
+
+129
+00:09:42.429 --> 00:09:48.480
+get or set. Now I'm going to get the cube. Now if I was to
+
+130
+00:09:48.480 --> 00:09:56.419
+hover my mouse over the input pin the output pin for the cube drag off.
+
+131
+00:09:56.419 --> 00:10:03.139
+Now you can see here actions taking a static mesh component object reference.
+
+132
+00:10:03.139 --> 00:10:06.820
+So this is going to limit everything that's reported in here to
+
+133
+00:10:06.820 --> 00:10:13.460
+only things which would take a component a static mesh component as
+
+134
+00:10:13.460 --> 00:10:17.460
+an input. So if I come in here and I now type in
+
+135
+00:10:17.460 --> 00:10:21.970
+destroy you will see I get two options I get
+
+136
+00:10:21.970 --> 00:10:27.490
+destroy component and is component being destroyed.
+
+137
+00:10:27.490 --> 00:10:30.610
+So if I was to then select destroy component
+
+138
+00:10:30.610 --> 00:10:34.450
+you'll see it's going to create a node and it's automatically going to link
+
+139
+00:10:34.450 --> 00:10:38.429
+this up. Now let's compare that to if I right
+
+140
+00:10:38.429 --> 00:10:45.899
+hand clicked here and I typed in destroy you'll see I get a lot of
+
+141
+00:10:45.899 --> 00:10:52.620
+different nodes. I get a destroy actor event destroyed
+
+142
+00:10:52.620 --> 00:10:56.299
+and here is the destroyed component but it's harder to find the appropriate one
+
+143
+00:10:56.299 --> 00:10:59.419
+that I'm looking for where previously I would just get a
+
+144
+00:10:59.419 --> 00:11:03.200
+single one and I know that it would connect up.
+
+145
+00:11:03.200 --> 00:11:06.720
+So this context sensitive is really really useful
+
+146
+00:11:06.720 --> 00:11:11.279
+in order to to limit what you're seeing to only stuff that you can
+
+147
+00:11:11.279 --> 00:11:18.659
+actually use. So that way you've got
+
+148
+00:11:18.659 --> 00:11:23.059
+that is the most common method for for getting hold of nodes and adding them
+
+149
+00:11:23.059 --> 00:11:27.659
+into adding them into the there is also
+
+150
+00:11:27.659 --> 00:11:33.179
+something to be said for copying and pasting. Now if I wanted to
+
+151
+00:11:33.179 --> 00:11:36.620
+if I got nodes like this and I wanted to
+
+152
+00:11:36.620 --> 00:11:40.860
+copy them and all I need to do is use the standard computer
+
+153
+00:11:40.940 --> 00:11:44.460
+clipboard. So with these highlighted if I press
+
+154
+00:11:44.460 --> 00:11:51.360
+ctrl c I can then move to another another place press ctrl v
+
+155
+00:11:51.360 --> 00:11:54.559
+and you'll see that it's going to create those nodes
+
+156
+00:11:54.559 --> 00:11:59.200
+just by what is copied there. Now we can also use
+
+157
+00:11:59.200 --> 00:12:03.120
+our other methods for example if I was to press ctrl f
+
+158
+00:12:03.120 --> 00:12:07.519
+x I was to press ctrl x it'll take everything
+
+159
+00:12:07.519 --> 00:12:11.840
+and again if I press ctrl b I can then paste them anywhere.
+
+160
+00:12:11.840 --> 00:12:16.159
+That's because when you copy and paste these they're saved to the clipboard
+
+161
+00:12:16.159 --> 00:12:22.960
+as a as a text value. Now
+
+162
+00:12:22.960 --> 00:12:27.200
+one more option that we have here is with it highlighted if I was to press
+
+163
+00:12:27.200 --> 00:12:31.440
+ctrl d the duplicate it's going to copy
+
+164
+00:12:31.440 --> 00:12:36.240
+whatever I have highlighted at that time. That's just a useful
+
+165
+00:12:36.240 --> 00:12:44.320
+method of doing things. Now let's talk about connecting these up.
+
+166
+00:12:44.320 --> 00:12:48.879
+So as you can see here I have three branches
+
+167
+00:12:48.879 --> 00:12:52.480
+I'll say I wanted to connect this up to the event begin play
+
+168
+00:12:52.480 --> 00:12:59.519
+I can drag off of this execution pin and you'll see as I move the cursor
+
+169
+00:12:59.519 --> 00:13:03.120
+over the input pin on the branch I get a little green
+
+170
+00:13:03.120 --> 00:13:07.200
+arrow and that means that if I drop that it's going to allow me
+
+171
+00:13:07.200 --> 00:13:14.740
+it's going to connect that up. Now what I can do so say for example I
+
+172
+00:13:14.740 --> 00:13:19.220
+was to do that here now if I wanted if I wanted to
+
+173
+00:13:19.220 --> 00:13:23.779
+disconnect this and connect it up here I can do that by
+
+174
+00:13:23.779 --> 00:13:29.220
+floating over either of these pins holding down the alt key and left
+
+175
+00:13:29.220 --> 00:13:33.470
+clicking and let's go to disconnect. Something
+
+176
+00:13:33.470 --> 00:13:36.509
+else I can do is if I was to fall back over one of
+
+177
+00:13:36.509 --> 00:13:41.070
+these keys hold down the ctrl key you'll see that
+
+178
+00:13:41.070 --> 00:13:46.509
+this changes into a small little hat. If I left click I can now
+
+179
+00:13:46.509 --> 00:13:54.220
+drag that to reconnect to other locations. So with this video
+
+180
+00:13:54.220 --> 00:13:57.580
+we know how to bring in move around and connect up
+
+181
+00:13:57.580 --> 00:14:03.740
+nodes. In the next one we're going to start talking about variables.

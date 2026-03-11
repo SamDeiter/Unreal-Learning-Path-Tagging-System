@@ -1,0 +1,517 @@
+WEBVTT
+
+1
+00:00:01.740 --> 00:00:08.300
+Hello and welcome to this video. We will be moving on with the exercise at this point
+
+2
+00:00:08.300 --> 00:00:15.179
+and what we're going to be doing is we are going to be connecting up the door so that it can
+
+3
+00:00:15.179 --> 00:00:21.899
+accept inputs from the keyboard and we are going to be making the door open and close
+
+4
+00:00:21.899 --> 00:00:28.239
+on command. Okay so I've cleared away any of the code that I was experimenting with
+
+5
+00:00:28.239 --> 00:00:32.159
+and now I'm going to go about making the functionality for our door.
+
+6
+00:00:33.359 --> 00:00:41.840
+Right well I have a number of settings here. What I'm going to start with is my collision box. Now
+
+7
+00:00:41.840 --> 00:00:47.920
+what I want to do with my collision box is I'm going to use this to detect when the player is
+
+8
+00:00:47.920 --> 00:00:53.869
+close or far away from the door and this means we'll be able to know if the player would
+
+9
+00:00:53.869 --> 00:01:00.619
+be able to interact with it or not. So I'm going to right hand click on the component
+
+10
+00:01:00.619 --> 00:01:08.700
+in the components list and you'll see the second one down we have add event. Now these are a
+
+11
+00:01:08.700 --> 00:01:16.000
+number of events which are already connected to actor component working and we want two of
+
+12
+00:01:16.000 --> 00:01:23.359
+these. So the first one we want is the on component begin overlap. It's going to create
+
+13
+00:01:23.359 --> 00:01:32.239
+this one and I'm going to right-hand click and I'm going to grab on component end overlap. So
+
+14
+00:01:32.879 --> 00:01:42.849
+what this will do is when any actor overlaps with our ox component here this event would
+
+15
+00:01:42.849 --> 00:01:50.049
+be triggered as long as the collisions are set up correctly. So what I'm going to do is I'm just
+
+16
+00:01:50.049 --> 00:01:56.609
+going to test this out. So I'm going to drag off of the on component in begin overlap. I'm going
+
+17
+00:01:56.609 --> 00:02:06.290
+to search for print string and I will then duplicate that down to here. On the first one
+
+18
+00:02:06.290 --> 00:02:18.610
+I'm going to type overlap and on the second one I'm going to type end overlap. So what this
+
+19
+00:02:18.610 --> 00:02:25.710
+will do is it will print this message into the top left hand corner of the screen. So let's test
+
+20
+00:02:25.710 --> 00:02:32.479
+this out and jump back to my level. Now this is the player start so this is where we'll start
+
+21
+00:02:32.479 --> 00:02:40.159
+off correctly in front of the door. So when I push start I can see the door and as I walk
+
+22
+00:02:40.159 --> 00:02:48.590
+forward overlap appears in the top left hand corner and as I move away end overlap. So that is
+
+23
+00:02:48.590 --> 00:02:57.039
+working. Press escape. Come back out. I'm going to delete both of these because we don't need them.
+
+24
+00:02:59.569 --> 00:03:07.569
+Now what I want to do is I want to be able to push a key when I am close to these doors. So
+
+25
+00:03:08.699 --> 00:03:16.939
+in order for the actor to be able to register a key press it needs to have a Mabel input
+
+26
+00:03:16.939 --> 00:03:23.979
+set on this. And we talked about this before. The player controller is the class which is set up
+
+27
+00:03:23.979 --> 00:03:33.139
+in order to listen for inputs. Now this actor itself doesn't have the functionality
+
+28
+00:03:33.139 --> 00:03:39.539
+but what it can do is it can piggyback off of the standard player controller. And we can do this
+
+29
+00:03:39.539 --> 00:03:49.680
+in this way. So if I right-hand click and search for player controller you'll see that there is
+
+30
+00:03:49.680 --> 00:03:58.319
+a option for get player controller. You'll see that here under game and that's going to bring
+
+31
+00:03:58.319 --> 00:04:03.199
+up the player controller for player index zero. Now we only have one player so that's fine.
+
+32
+00:04:04.500 --> 00:04:15.389
+But what we're going to want to do is drag off and go enable input. Place that up here.
+
+33
+00:04:16.029 --> 00:04:26.899
+I'm going to drag down and I'm going to go disable input. And I'll plug these into the appropriate
+
+34
+00:04:26.899 --> 00:04:33.019
+boxes. Now there's one more thing we need to do otherwise this won't work. If we look at the
+
+35
+00:04:33.019 --> 00:04:39.819
+enable input and disable input you can see that there are two input pins. The top one is the
+
+36
+00:04:39.819 --> 00:04:46.459
+target. So that is the actor on which we want to enable the input on. And the second one is
+
+37
+00:04:46.459 --> 00:04:51.500
+the player controller. So this is the player controller which we would be listening to the
+
+38
+00:04:51.500 --> 00:05:00.079
+input for. Now we have this linked to the wrong one. I'm going to hold down the control button
+
+39
+00:05:00.079 --> 00:05:05.680
+to get up the little hand and drag this player controller down so that it plugs into the player
+
+40
+00:05:05.680 --> 00:05:13.379
+controller. And the target will default to self which is exactly what we want. So this
+
+41
+00:05:14.180 --> 00:05:23.889
+now enables and disables the player input. Now that we have access to the player controller
+
+42
+00:05:24.769 --> 00:05:31.569
+we can now put functionality in here which would work with the key presses. So what I'm
+
+43
+00:05:31.569 --> 00:05:38.930
+going to do is I'm going to come down beneath these two and I'm going to type in key and then
+
+44
+00:05:38.930 --> 00:05:45.459
+z. You'll see this will bring up a couple of options. And I'm going to select the bottom
+
+45
+00:05:45.459 --> 00:05:52.699
+one here from the keyboard z. And you can see that this is another red event which is just
+
+46
+00:05:52.699 --> 00:06:02.180
+for the input key z. Now I don't actually want this to be z and I want this to be e.
+
+47
+00:06:02.180 --> 00:06:08.420
+So with this selected rather than search for the e I find it a lot quicker to search for z because
+
+48
+00:06:08.420 --> 00:06:15.220
+it's the only one in there. And then in the input keys I am going to look here and we have
+
+49
+00:06:15.220 --> 00:06:23.629
+a drop down box where I could select any input key. And I also have a sort of select key value
+
+50
+00:06:23.629 --> 00:06:28.990
+button here. All this will do is when I push it it's going to go orange and it will wait for
+
+51
+00:06:28.990 --> 00:06:35.839
+the next key press which is e and I'll swap it over to e. That's a nice quick way to bring up
+
+52
+00:06:35.839 --> 00:06:43.329
+the e key. Now to check that this is working correctly I'm going to do another print string
+
+53
+00:06:44.370 --> 00:06:54.189
+and I'm going to change it to pressed key and leave it as hello if you want. Push compile,
+
+54
+00:06:55.230 --> 00:07:02.350
+go back into the level, press play. Now if I press e nothing happens. However if I get close
+
+55
+00:07:02.430 --> 00:07:06.670
+to the door and press e you can see that the print string is now registered.
+
+56
+00:07:07.779 --> 00:07:15.120
+Okay further away you can see it's not registering. So that means that this is
+
+57
+00:07:15.120 --> 00:07:27.069
+functioning. The print key will only register when inputs are enabled. So what do we want to do
+
+58
+00:07:27.069 --> 00:07:32.959
+on the press e? I'm going to delete this now that we know that it's working. What we want to
+
+59
+00:07:32.959 --> 00:07:40.850
+do is we want to open and close the door. So in order to do that I'm going to drag off of the e
+
+60
+00:07:41.790 --> 00:07:48.079
+and I am going to search for something that's called a flip-flop. Now this is one of the
+
+61
+00:07:48.079 --> 00:07:55.389
+flow control nodes. It's a macro in itself. But how this will work is the first time that
+
+62
+00:07:55.389 --> 00:08:01.870
+you enter this node you'll go down the a execution pin. The second time you'll go through b.
+
+63
+00:08:02.589 --> 00:08:10.029
+Third time you'll go back to a and it will continue alternating between the two different
+
+64
+00:08:10.029 --> 00:08:14.269
+pins. Now this is useful for us because the first time that we push it we're going to
+
+65
+00:08:14.269 --> 00:08:17.389
+want to open the door and the second time we're going to want to close it.
+
+66
+00:08:19.089 --> 00:08:28.269
+Now the opening and closing we are going to use a timeline. So I am going to drag off and I'm
+
+67
+00:08:28.269 --> 00:08:35.279
+going to search for timeline. You can see at the bottom here we have the option for add timeline.
+
+68
+00:08:36.259 --> 00:08:43.220
+I'm just going to bring up this yellow node. I'm going to rename it open slash close
+
+69
+00:08:45.460 --> 00:08:57.360
+door. Now to start with we're going to play this. What I would like to do is connect the b
+
+70
+00:08:57.360 --> 00:09:06.139
+up to the reverse. So this is interesting. Let's have a look at closely to a timeline.
+
+71
+00:09:07.519 --> 00:09:12.029
+What a timeline will do, and we'll double click and go and set it up in a second,
+
+72
+00:09:12.929 --> 00:09:19.009
+but what it will do is when you play the timeline it will play a timeline over time
+
+73
+00:09:19.649 --> 00:09:26.100
+and return values based on a curve. When you reverse it at whatever point it is in the timeline
+
+74
+00:09:26.100 --> 00:09:35.950
+it will start going in the opposite direction. Now the update pin, anything which is connected
+
+75
+00:09:35.950 --> 00:09:42.190
+to the update pin, will run every frame of the game whilst the timeline is running.
+
+76
+00:09:42.190 --> 00:09:50.019
+So this is effectively tick. When the timeline is finished, from the end or beginning,
+
+77
+00:09:50.659 --> 00:09:56.980
+anything that is connected to the finish pin will then be executed. So bear in mind if you
+
+78
+00:09:56.980 --> 00:10:03.620
+have one that runs for one second and you're running at 60 frames per second, whatever is
+
+79
+00:10:03.620 --> 00:10:08.980
+connected to the update will run 60 times and then the finish will run once at the end of the
+
+80
+00:10:08.980 --> 00:10:19.200
+second. Okay let's set up this timeline. So if I double click on this we're going to get a
+
+81
+00:10:19.200 --> 00:10:27.460
+window that looks a bit like this. Now at the moment I'm not going to go into a lot of details
+
+82
+00:10:27.460 --> 00:10:32.740
+about what you do with the timeline, but let's have a look. We have the length here. Now this
+
+83
+00:10:32.740 --> 00:10:40.639
+is the amount of time in seconds that this will run for. Now five seconds is too long. So I'm going
+
+84
+00:10:40.639 --> 00:10:48.700
+to change this to one second. And next we need to add in a track. So you can see that we have
+
+85
+00:10:48.700 --> 00:10:55.549
+a plus track element here. If I was to push that button it's going to give me some options
+
+86
+00:10:55.549 --> 00:11:01.149
+of the kind of tracks that we could use. Now I'm going to select the float track.
+
+87
+00:11:02.139 --> 00:11:05.100
+And that's going to bring up a track that looks a little bit like this.
+
+88
+00:11:06.929 --> 00:11:16.139
+Now this is a standard curve and we are able to make points on the curve in order to
+
+89
+00:11:16.139 --> 00:11:22.620
+calculate how they function. So let's start off at the beginning and we're going to add a curve
+
+90
+00:11:22.620 --> 00:11:29.539
+out of point. As you can see we really want this to be at time zero and value zero. So you
+
+91
+00:11:29.539 --> 00:11:36.190
+can use these boxes here. And then I'm going to go to the end, right-hand click, add a float.
+
+92
+00:11:36.830 --> 00:11:43.279
+And this will be time one, and I want this to be value one. And that brings that up here.
+
+93
+00:11:44.019 --> 00:11:50.299
+Now I can hold down the right-hand mouse button and drag. Once I've got this in screen,
+
+94
+00:11:51.789 --> 00:11:55.950
+I am going to select both of these, then right-hand click on either of them.
+
+95
+00:11:56.669 --> 00:12:02.909
+I'm going to change the key interpolation to auto. So that's going to give me a little bit
+
+96
+00:12:02.909 --> 00:12:08.990
+of a curve in and a curve out. That'll allow the door movement to look a bit more realistic.
+
+97
+00:12:10.509 --> 00:12:18.429
+Okay so that gives us our value from zero to one. Now because this runs over one second,
+
+98
+00:12:19.389 --> 00:12:26.299
+when it first kicks off it will provide us the value of zero. And then at about halfway through
+
+99
+00:12:26.299 --> 00:12:31.500
+it will provide us the value of point five. And at the end it will provide us the value of one.
+
+100
+00:12:32.059 --> 00:12:38.590
+And it will give us various different numbers as the timeline progresses.
+
+101
+00:12:40.669 --> 00:12:47.070
+Okay so that's the timeline set up. Let's jump back into the event graph. And you'll
+
+102
+00:12:47.070 --> 00:12:51.230
+now see that we have a new track here, which is a float, which is a green pin.
+
+103
+00:12:51.870 --> 00:13:04.019
+I'm going to rename this to an open alpha. And I'll close that down again. So the open alpha
+
+104
+00:13:05.070 --> 00:13:10.029
+is the green pin. And this is going to return the value between zero and one.
+
+105
+00:13:11.460 --> 00:13:16.500
+Okay so what we want to do now is we want to rotate this door. So we know we've got the
+
+106
+00:13:16.500 --> 00:13:23.379
+door mesh in the components list here. I'm going to drag that out, place that into the screen.
+
+107
+00:13:24.259 --> 00:13:37.059
+And I'm going to drag off, I'm going to search for set relative rotation. And I'm going to plug
+
+108
+00:13:37.059 --> 00:13:44.000
+that into the update. So the relative rotation, and this is because we don't want to set the
+
+109
+00:13:44.000 --> 00:13:50.639
+world rotation, we want to set it relative to the actor, which is its parent, which is
+
+110
+00:13:50.639 --> 00:13:57.279
+the door frame at this point. So regardless of the direction that you place your door in,
+
+111
+00:13:57.919 --> 00:14:06.460
+it will rotate in a consistent manner. Now what I want to do is drag off the new rotation
+
+112
+00:14:07.179 --> 00:14:17.279
+and type in lerp rotator. Now if you haven't encountered a lerp before, what this will do
+
+113
+00:14:17.279 --> 00:14:28.750
+is based on a alpha, it will move between two values. So if the alpha is zero, it will return
+
+114
+00:14:28.750 --> 00:14:37.389
+a to the rotation. If the alpha is one, it will return b. If the alpha is 0.5, it will return
+
+115
+00:14:37.389 --> 00:14:43.980
+halfway between these two rotations. So what I'm going to do is I'm going to plug in the open
+
+116
+00:14:43.980 --> 00:14:53.549
+alpha into the alpha, and then I am happy with a being zero. Because if we look at the viewport,
+
+117
+00:14:54.639 --> 00:15:04.179
+the rotation is zero zero zero when the door is closed. What I want to do is figure out a
+
+118
+00:15:04.179 --> 00:15:12.960
+rotation for it being open. It's actually going to be zero zero 90. Okay, so I know that's
+
+119
+00:15:13.679 --> 00:15:22.139
+what I want it to be. So the second one, I'm going to make 90. Okay, so our full
+
+120
+00:15:23.019 --> 00:15:41.500
+code that we've got here looks like that. Let's test this out. So I'm going to hit compile.
+
+121
+00:15:42.669 --> 00:15:50.529
+I'm going to open up the level, and I'm going to push play. Now as I get closer, if I push
+
+122
+00:15:50.529 --> 00:15:58.460
+e, the door opens. If I push it again, it closes. And you'll see if I push it halfway through,
+
+123
+00:15:59.580 --> 00:16:07.139
+it moves from the position it originally was. So you can change your mind halfway
+
+124
+00:16:07.139 --> 00:16:13.419
+through the opening of the door. Okay. So that gives us our first animation.
+
+125
+00:16:14.539 --> 00:16:23.250
+If you were to look at this whilst it was running, I'm going to select our debug objects,
+
+126
+00:16:24.429 --> 00:16:33.409
+press play. You'll be able to see as I come in and press e, it triggers and opens the door.
+
+127
+00:16:33.409 --> 00:16:47.649
+As I press it again, it goes in the opposite direction. Fantastic. So that brings us to the
+
+128
+00:16:47.649 --> 00:16:54.450
+end of the basic creation of the door opening and closing. We will be building on that in
+
+129
+00:16:54.450 --> 00:17:05.250
+the next video. I'm going to be creating a function to change the light's colour.

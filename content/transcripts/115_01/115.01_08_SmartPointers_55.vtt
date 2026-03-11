@@ -1,0 +1,285 @@
+WEBVTT
+
+1
+00:00:01.260 --> 00:00:09.259
+So as previously mentioned, Unreal has its own implementation of the C++ 11, I think, Smart Pointer Library.
+
+2
+00:00:09.259 --> 00:00:12.259
+It's worth just going into a little bit.
+
+3
+00:00:12.259 --> 00:00:20.260
+So anytime you have non-new objects that you want to have the memory managed for you in some way,
+
+4
+00:00:20.260 --> 00:00:22.260
+Smart Pointers are definitely something to consider.
+
+5
+00:00:22.260 --> 00:00:26.260
+You're probably already familiar with Smart Pointers for more C++ if that's something you've used before,
+
+6
+00:00:26.260 --> 00:00:29.260
+but just to kind of briefly go through them.
+
+7
+00:00:29.260 --> 00:00:34.259
+We have T-Shared Pointer, which is essentially a reference counted pointer.
+
+8
+00:00:34.259 --> 00:00:38.259
+So as this reference is copied around and passed around,
+
+9
+00:00:38.259 --> 00:00:42.259
+we keep track of how many things have access to that pointer.
+
+10
+00:00:42.259 --> 00:00:46.259
+As that number of references hits zero, then that memory is freed.
+
+11
+00:00:46.259 --> 00:00:50.259
+So we don't have to worry, it's kind of shared ownership of this pointer.
+
+12
+00:00:50.259 --> 00:00:56.259
+T-Unique Pointer is kind of the opposite of that, where we say one thing manages this memory,
+
+13
+00:00:56.259 --> 00:01:02.259
+so as and when this thing stops referencing it, we're going to free that memory, just automatically.
+
+14
+00:01:02.259 --> 00:01:08.260
+And T-Weak Pointer is when we say this pointer doesn't manage that memory at all.
+
+15
+00:01:08.260 --> 00:01:12.260
+It is conscious that that memory might get cleaned up underneath it.
+
+16
+00:01:12.260 --> 00:01:15.260
+It's really helpful for things like lambdas that might get executed,
+
+17
+00:01:15.260 --> 00:01:21.260
+and you're aware that execution may occur after the objects it's referencing are already deleted for other reasons.
+
+18
+00:01:21.260 --> 00:01:23.260
+So a Weak Pointer is a way you can say,
+
+19
+00:01:23.260 --> 00:01:30.260
+I'm not sure if this object still exists, but if it does, I want to perform some functions on it or something like that.
+
+20
+00:01:30.260 --> 00:01:38.260
+So those are the kind of standard C++ smart pointer library types that you would be aware of.
+
+21
+00:01:38.260 --> 00:01:40.260
+And then we also have two additional ones.
+
+22
+00:01:40.260 --> 00:01:44.260
+We have T-Shared Ref, which is the relationship from pointer to ref,
+
+23
+00:01:44.260 --> 00:01:48.260
+where a ref is essentially a promise that this can never be null.
+
+24
+00:01:48.260 --> 00:01:54.390
+The same thing applies for a T-Shared Ref, it's just in the shared pointer library.
+
+25
+00:01:54.390 --> 00:01:56.390
+And last of all, we have T-Weak Object Pointer.
+
+26
+00:01:56.390 --> 00:02:01.390
+Whereas the rest of these are intended for non-U-Object types,
+
+27
+00:02:01.390 --> 00:02:05.390
+T-Weak Object Pointer provides the same functionality as T-Weak Pointer,
+
+28
+00:02:05.390 --> 00:02:09.389
+but specifically for U-Object types.
+
+29
+00:02:09.389 --> 00:02:13.389
+So that same concept, again, the first thing I think of is lambdas.
+
+30
+00:02:13.389 --> 00:02:16.389
+Whenever you're passing a reference to a U-Object,
+
+31
+00:02:16.389 --> 00:02:20.389
+that you're aware that U-Object might be gone by the time that lambda executes,
+
+32
+00:02:20.389 --> 00:02:24.389
+T-Weak Object Pointer is a thing to consider using.
+
+33
+00:02:24.389 --> 00:02:29.939
+So the benefits of smart pointers, largely the same as C++ smart pointer benefits.
+
+34
+00:02:29.939 --> 00:02:32.939
+So if you're not aware of them, it helps prevent memory leaks.
+
+35
+00:02:32.939 --> 00:02:36.939
+That's a really, really common one. That's why they were introduced in the first place.
+
+36
+00:02:36.939 --> 00:02:42.939
+Unlike U-Objects, where it's highly recommended, you don't access them off the game thread.
+
+37
+00:02:43.939 --> 00:02:47.939
+The smart pointer library, particularly shared pointers, can be thread-safe.
+
+38
+00:02:47.939 --> 00:02:50.939
+It's worth a highlight that there are two options when you create a shared pointer.
+
+39
+00:02:50.939 --> 00:02:55.939
+It can be a thread-safe shared pointer, or it can be non-thread-safe.
+
+40
+00:02:55.939 --> 00:03:02.939
+The thread-safe pointer has its reference counting done by an atomic operation,
+
+41
+00:03:02.939 --> 00:03:05.939
+which essentially is an operation that occurs between threads.
+
+42
+00:03:05.939 --> 00:03:08.939
+So there's no way that two threads can end up in a race condition
+
+43
+00:03:08.939 --> 00:03:10.939
+for how many things are referencing this object.
+
+44
+00:03:10.939 --> 00:03:15.939
+That's beneficial for thread safety, but it does come at a certain performance cost,
+
+45
+00:03:15.939 --> 00:03:17.939
+so it's just worth bearing that in mind.
+
+46
+00:03:17.939 --> 00:03:20.939
+And then the last thing is obviously the runtime safety of T-SharedRef,
+
+47
+00:03:20.939 --> 00:03:22.939
+which is very, very useful.
+
+48
+00:03:22.939 --> 00:03:25.939
+The other thing to point out is obviously this is an implementation
+
+49
+00:03:25.939 --> 00:03:28.939
+of the C++ standard smart pointer library,
+
+50
+00:03:28.939 --> 00:03:33.939
+but the reason we would recommend using Unreal's implementation of these things
+
+51
+00:03:33.939 --> 00:03:35.969
+is it's platform agnostic.
+
+52
+00:03:35.969 --> 00:03:39.969
+So when it comes to actually something that implements or makes use of this shared pointer library,
+
+53
+00:03:39.969 --> 00:03:43.969
+it's worth highlighting that if it's from a non-reflected type,
+
+54
+00:03:43.969 --> 00:03:46.969
+we need to inherit from the T-SharedThis class.
+
+55
+00:03:46.969 --> 00:03:48.969
+So this is what an example implementation of that would look like.
+
+56
+00:03:48.969 --> 00:03:51.969
+We have some class, then we inherit from T-SharedThis,
+
+57
+00:03:51.969 --> 00:03:53.969
+and this is a generic implementation,
+
+58
+00:03:53.969 --> 00:03:56.969
+so we need to provide the class that we're implementing
+
+59
+00:03:56.969 --> 00:04:00.969
+as the argument there for the generic function.
+
+60
+00:04:00.969 --> 00:04:05.349
+And what this does is it gives us access to a suite of functions.
+
+61
+00:04:05.349 --> 00:04:07.349
+We have makeShared and makeSharable,
+
+62
+00:04:07.349 --> 00:04:11.349
+which are basically two ways of creating a shared pointer,
+
+63
+00:04:11.349 --> 00:04:14.349
+a shared reference for this type.
+
+64
+00:04:14.349 --> 00:04:17.350
+makeShared is encouraged to be used over makeSharable
+
+65
+00:04:17.350 --> 00:04:19.540
+because it's slightly more performant.
+
+66
+00:04:19.540 --> 00:04:25.540
+And then asShared and sharedThis basically just give us a sharedRef to that type,
+
+67
+00:04:25.540 --> 00:04:28.540
+but it's expecting that that type is already created.
+
+68
+00:04:28.540 --> 00:04:31.540
+And then these are all about getting access to a sharedRef,
+
+69
+00:04:31.540 --> 00:04:33.540
+and once we have that sharedRef,
+
+70
+00:04:33.540 --> 00:04:37.540
+we can easily dereference that into a T-Shared pointer to then pass around
+
+71
+00:04:37.540 --> 00:04:42.540
+if you don't want that runtime null checking safety.

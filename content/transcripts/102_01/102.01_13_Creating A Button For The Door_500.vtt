@@ -1,0 +1,537 @@
+WEBVTT
+
+1
+00:00:05.099 --> 00:00:08.519
+So now we've figured out a way on how to lock the door.
+
+2
+00:00:08.519 --> 00:00:12.619
+Let's figure out a way to say, okay, it's locked, yes.
+
+3
+00:00:12.619 --> 00:00:18.940
+How do we now create it open at run time so that not only by before we jump in the
+
+4
+00:00:18.940 --> 00:00:24.539
+game deciding if they're locked, depending on a certain action, how can I then open
+
+5
+00:00:24.539 --> 00:00:25.940
+a door?
+
+6
+00:00:25.940 --> 00:00:29.379
+So I'm just going to delete the second door, I don't need that now, and I'm going
+
+7
+00:00:29.379 --> 00:00:36.200
+to create a button to press for the door that then says this is now unlocked.
+
+8
+00:00:36.200 --> 00:00:39.939
+So we want to create a new blueprint for this, so I'm going to open my quickdraw, I'm going
+
+9
+00:00:39.939 --> 00:00:45.520
+to hit control space bar, I'm going to right click, I'm going to create a blueprint class
+
+10
+00:00:45.520 --> 00:00:50.799
+like we did before, I'm going to select actor like we did previously, I'm still going
+
+11
+00:00:50.799 --> 00:00:54.520
+to call this BP underscore, and I'm going to call this button.
+
+12
+00:00:54.520 --> 00:01:00.640
+So BP underscore button, hit enter, I'm going to hit enter again, and it's already at the
+
+13
+00:01:00.640 --> 00:01:02.659
+top of my window here.
+
+14
+00:01:02.659 --> 00:01:08.599
+Now I want to find a mesh for my button, so I'm going to hit control and space bar,
+
+15
+00:01:08.599 --> 00:01:13.280
+I'm going to scroll down to my starter content, I'll go to props, and I'll just
+
+16
+00:01:13.280 --> 00:01:21.640
+find something that looks button like I could, I could use this mesh here, I could use
+
+17
+00:01:21.640 --> 00:01:28.719
+a corner frame, I think right now I'm just going to use this as my button, this corner
+
+18
+00:01:28.719 --> 00:01:32.760
+frame, this looks like a good button to use.
+
+19
+00:01:32.760 --> 00:01:36.000
+So I'm going to click add, I'm going to go to static mesh, and again because
+
+20
+00:01:36.000 --> 00:01:40.900
+I selected the corner frame we can see it there, so we'll add that there.
+
+21
+00:01:40.900 --> 00:01:45.799
+So we've got our static mesh in place, now I want to go and add a box component
+
+22
+00:01:45.799 --> 00:01:49.900
+again, exactly how we did with our door, so you'll see we're clicking very similar
+
+23
+00:01:49.939 --> 00:01:54.269
+buttons as we did last time, and you kind of get into the flow creating these
+
+24
+00:01:54.269 --> 00:02:00.430
+blueprints, so box collision here, we want to create a box collision, and we'll
+
+25
+00:02:00.430 --> 00:02:05.969
+again change the scale of this box so that we make sure we are well within
+
+26
+00:02:05.969 --> 00:02:12.270
+the radius of creating the box, that's going to be the front of my switch on
+
+27
+00:02:12.270 --> 00:02:16.550
+this front side here, so the box doesn't really need to go into the
+
+28
+00:02:16.550 --> 00:02:23.349
+wall, so I'm going to drag it out like that a little bit, I'm going to compile
+
+29
+00:02:23.349 --> 00:02:28.189
+and I'm going to save, I'm going to go back into my first person map, maybe
+
+30
+00:02:28.189 --> 00:02:32.789
+let's put this button on this back wall here, so we want to scroll up to
+
+31
+00:02:32.789 --> 00:02:37.110
+where our interactions are, I want to find the button, let's put this button nice
+
+32
+00:02:37.110 --> 00:02:42.189
+in the dead center of this wall here, so we can see the button, got plenty of
+
+33
+00:02:42.189 --> 00:02:47.030
+radius for the player to be walking into the button, that looks good, I'm going to
+
+34
+00:02:47.069 --> 00:02:51.710
+move this door over here just for when I'm testing, it's going to make things a
+
+35
+00:02:51.710 --> 00:02:55.590
+little bit easier, not wasting your time just running over the map, I'm going
+
+36
+00:02:55.590 --> 00:03:00.879
+to move my player start here, I'm going to rotate this around, you don't need to do
+
+37
+00:03:00.879 --> 00:03:04.759
+this, I'm just going to make it quicker for us to debug and playtest, I'm
+
+38
+00:03:04.759 --> 00:03:09.800
+going to file, save all here, and now how do we add functionality, so if we
+
+39
+00:03:09.800 --> 00:03:14.599
+think about our list of criteria that we want to do, this door is locked, we know
+
+40
+00:03:14.599 --> 00:03:18.840
+it's locked because it's got a tick box, so that's locked, now we want to somehow
+
+41
+00:03:18.840 --> 00:03:23.520
+say to this bool, just turn to false don't we, that's essentially what we're
+
+42
+00:03:23.520 --> 00:03:29.169
+looking at here, so we want this button to say to this blueprint, false, so
+
+43
+00:03:29.169 --> 00:03:33.250
+let's see how we can make that work, so we want to go into the button, again
+
+44
+00:03:33.250 --> 00:03:37.930
+we'll do a begin overlap and an end overlap, so we're in our button, we'll
+
+45
+00:03:37.930 --> 00:03:42.370
+go to our event graph, I'll just delete any of the existing content here, it's
+
+46
+00:03:42.370 --> 00:03:48.289
+not really needed, again renaming is good, so I'm going to rename this box
+
+47
+00:03:48.289 --> 00:03:54.280
+button overlap, just so we know, again just naming convention, you don't need to
+
+48
+00:03:54.280 --> 00:03:57.960
+do this yourself, I'm going to scroll down, I'm going to create a begin
+
+49
+00:03:57.960 --> 00:04:02.319
+overlap event, as we did with the door, I'm going to select the button again, I'm
+
+50
+00:04:02.319 --> 00:04:07.259
+going to create an end overlap, I'm going to right-click, I'm going to get
+
+51
+00:04:07.259 --> 00:04:12.900
+the player controller, so get player controller, same way that we did it
+
+52
+00:04:12.900 --> 00:04:22.439
+before, we want to enable input, and again we want to drag down, I'm just
+
+53
+00:04:22.439 --> 00:04:26.839
+holding ctrl on my keyboard as a reminder, so I'm dragging down enable
+
+54
+00:04:26.839 --> 00:04:32.620
+input, I'm going to disable the input, holding ctrl I'm going to drag down, or
+
+55
+00:04:32.620 --> 00:04:38.170
+you can break the link, do it yourself, there we go, so we got a begin overlap
+
+56
+00:04:38.170 --> 00:04:42.050
+and end overlap, I'm just going to compile and save, we want our interact button,
+
+57
+00:04:42.930 --> 00:04:48.290
+so interact, which is there, now this is where we run into a stumbling block, so
+
+58
+00:04:48.290 --> 00:04:51.889
+what do we want to do, we know we can enable the interaction on this button
+
+59
+00:04:51.889 --> 00:04:56.930
+and we know we can interact with this, if I test it out and say print string
+
+60
+00:04:56.930 --> 00:05:04.250
+and we just say you know button pressed exclamation mark, I'll only do two exclamation
+
+61
+00:05:04.250 --> 00:05:12.250
+marks this time instead of three, there we go, so if I go over to this, okay so
+
+62
+00:05:12.449 --> 00:05:16.129
+I'm pressing E, you can see button press, so we know we've got our basic
+
+63
+00:05:16.129 --> 00:05:21.089
+functionality, same functionality that we added to the door, we've got on the
+
+64
+00:05:21.089 --> 00:05:25.329
+the button on the wall now, now we need to figure out how we're
+
+65
+00:05:25.329 --> 00:05:30.529
+communicating with this door, now the best way I like to do this is I'm just
+
+66
+00:05:30.529 --> 00:05:36.649
+going to compile and save, I'm going to create a new variable, I'm going to
+
+67
+00:05:36.649 --> 00:05:46.009
+call this door ref, so D O O R capital R for ref and then call it ref, I'm going
+
+68
+00:05:46.009 --> 00:05:51.009
+to hit enter, what I'm going to do is from the boolean menu, I'm going to type
+
+69
+00:05:51.009 --> 00:05:57.529
+BP underscore door and you'll see I can create a variable which is my
+
+70
+00:05:57.529 --> 00:06:01.769
+blueprint, and so it's a bit hard to see the options here just because I'm in
+
+71
+00:06:01.769 --> 00:06:04.850
+blueprint class, you don't need to click off this but I'm just going to move
+
+72
+00:06:05.009 --> 00:06:11.129
+into some better space to be able to show you here, you'll see BP door you can
+
+73
+00:06:11.129 --> 00:06:15.889
+create an object reference, now that would work in and of itself if you ever
+
+74
+00:06:15.889 --> 00:06:20.129
+created an object reference, that's fine to do, I'm going to create a soft
+
+75
+00:06:20.129 --> 00:06:24.370
+object reference because it's just the cleaner way to work and the sooner you
+
+76
+00:06:24.370 --> 00:06:27.769
+can start thinking about the clean workflow the better, so I'm going to
+
+77
+00:06:27.769 --> 00:06:34.930
+create a soft object reference, I'm going to compile and save, I'm going to
+
+78
+00:06:34.930 --> 00:06:41.370
+drag out the door reference, I'm going to hold ctrl and get, now you'll see that
+
+79
+00:06:41.370 --> 00:06:46.569
+there's a turquoise looking pin here, I'm going to drag out and type resolve
+
+80
+00:06:46.569 --> 00:06:53.850
+so R E S O resolve, hit enter, now that turns into a blue pin which is
+
+81
+00:06:53.850 --> 00:06:58.290
+great for us, now we've got a reference to the blueprint door, if I hover over
+
+82
+00:06:58.290 --> 00:07:03.569
+here it says blueprint door, now what reference do I want to get, now if I
+
+83
+00:07:03.569 --> 00:07:08.009
+compile and save this the reference that I'm trying to get is is locked, I
+
+84
+00:07:08.009 --> 00:07:13.930
+want to speak directly to this variable, so in the blueprint I'm going to type is
+
+85
+00:07:13.930 --> 00:07:18.850
+locked, as soon as I start typing this you'll see that I have a variable
+
+86
+00:07:18.850 --> 00:07:23.050
+that says set is locked, now previously we've only done get before,
+
+87
+00:07:23.050 --> 00:07:27.930
+we've only got a variable, now we want to set the variable, we want to set the
+
+88
+00:07:27.930 --> 00:07:35.389
+locked state to be false, so let's click set, let's drag up here, let's press this
+
+89
+00:07:35.389 --> 00:07:42.879
+and is locked false now, so if I look at my map and it's ticked true, is locked
+
+90
+00:07:42.879 --> 00:07:49.240
+true, on my button I'm going to set is locked to false and let's just double
+
+91
+00:07:49.240 --> 00:07:54.439
+check that it works by adding a print string as we've done before, I'm going to
+
+92
+00:07:54.439 --> 00:07:58.279
+say door unlocked and now I can do three exclamation marks because that's
+
+93
+00:07:58.319 --> 00:08:02.000
+pretty pretty exciting moment in our level if we can get this door unlocked
+
+94
+00:08:02.000 --> 00:08:08.720
+let's save, let's go back into our map and let's press play, let's run over here
+
+95
+00:08:08.720 --> 00:08:13.839
+let's just check our door first, we press E on the door, door does nothing, let's
+
+96
+00:08:13.839 --> 00:08:18.279
+go over here, door unlocked three exclamation marks, now when we go over
+
+97
+00:08:18.279 --> 00:08:25.519
+and we press E, the door does not open, so that that's an issue let's fix it
+
+98
+00:08:25.519 --> 00:08:29.360
+that was not as exciting as I intended it to be, but let's have a look here what's
+
+99
+00:08:29.360 --> 00:08:34.639
+going on, so this is a great first tutorial and it's almost like I I did
+
+100
+00:08:34.639 --> 00:08:38.120
+this intentionally just as a good teaching moment, so what we'll see here
+
+101
+00:08:38.120 --> 00:08:42.519
+is access none and it actually doesn't know what door it's talking to at the
+
+102
+00:08:42.519 --> 00:08:47.360
+moment, so very easy to fix but let's just file, save all, let's make sure we
+
+103
+00:08:47.360 --> 00:08:51.789
+got our door working, now the thing that I didn't do here is I created a door
+
+104
+00:08:51.789 --> 00:08:57.909
+reference, I said door say is locked, no we don't want the door locked and we want
+
+105
+00:08:57.909 --> 00:09:01.269
+the door to be unlocked, now it doesn't actually know what door we're looking
+
+106
+00:09:01.269 --> 00:09:05.549
+to here, so let's go back into our first person map and you'll see that
+
+107
+00:09:05.549 --> 00:09:11.840
+when we select the door and we scroll down, can we see our default
+
+108
+00:09:11.840 --> 00:09:17.370
+properties, so what we've not done first is exposed it, so again like we
+
+109
+00:09:17.370 --> 00:09:21.850
+did on this one let's expose the variable, so let's expose the variable
+
+110
+00:09:21.850 --> 00:09:25.289
+because we want to create a reference, let's also give it a default property
+
+111
+00:09:25.289 --> 00:09:28.929
+let's say let's call these button properties, instead of the door properties
+
+112
+00:09:28.929 --> 00:09:35.940
+let's call this button properties, so let's compile and save, so we've set
+
+113
+00:09:35.940 --> 00:09:39.460
+our properties so we're looking for button properties, again it doesn't
+
+114
+00:09:39.460 --> 00:09:42.740
+matter what name you give that, the important thing is here is that we
+
+115
+00:09:42.740 --> 00:09:46.980
+expose the variable, so we've exposed the variable, we've compiled, we've saved
+
+116
+00:09:46.980 --> 00:09:51.500
+now when we click on our button we've got button properties, we've got door
+
+117
+00:09:51.539 --> 00:09:56.340
+reference, but it doesn't know what door it's speaking to, if I had loads of doors
+
+118
+00:09:56.340 --> 00:09:59.659
+in this map, again you don't need to do this, but if I had loads of doors in
+
+119
+00:09:59.659 --> 00:10:04.330
+this map, that button does not know which door it's speaking to, let's go to
+
+120
+00:10:04.330 --> 00:10:08.370
+pick connector from the scene, we'll do a little pipette here and we'll click
+
+121
+00:10:08.370 --> 00:10:13.169
+this door, now it knows it's talking to that door, now this door is just called
+
+122
+00:10:13.169 --> 00:10:17.529
+BP door, this door here is called BP door 2, now you don't need to do this
+
+123
+00:10:17.529 --> 00:10:22.769
+but if I pipetted this door here, it's a BP door 2, so you know which door
+
+124
+00:10:22.769 --> 00:10:28.049
+you're speaking to here, so let's let's just pipette that door, so we know
+
+125
+00:10:28.049 --> 00:10:31.649
+we're speaking to this door, let's save all just in case anything breaks,
+
+126
+00:10:31.649 --> 00:10:35.450
+let's jump in the game, now we should be able to get this three
+
+127
+00:10:35.450 --> 00:10:39.370
+exclamation marks, so let's see if we can achieve this, now we press E, the
+
+128
+00:10:39.370 --> 00:10:45.269
+door doesn't open, we say door unlocked exclamation mark, now let's see if this
+
+129
+00:10:45.269 --> 00:10:50.750
+door opens, we'll run over, we'll press E, hey the door's opened, and so now we've got
+
+130
+00:10:50.750 --> 00:10:56.230
+some very complex functionality, where we've got a button opening a door to
+
+131
+00:10:56.230 --> 00:11:00.490
+progress through the level, and there's some quite complex scripting, we've
+
+132
+00:11:00.490 --> 00:11:04.990
+created a new button class, again it's pretty similar to the door but we've
+
+133
+00:11:04.990 --> 00:11:10.269
+added some door referencing functionality, we're setting some bools and we've
+
+134
+00:11:10.269 --> 00:11:15.230
+figured out how to communicate between two blueprints.

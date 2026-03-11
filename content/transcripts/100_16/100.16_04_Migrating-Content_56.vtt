@@ -1,0 +1,797 @@
+WEBVTT
+
+1
+00:00:01.620 --> 00:00:04.379
+In this video, we'll look at porting our content
+
+2
+00:00:04.379 --> 00:00:08.320
+out of our Unity project and into our new Unreal Engine project.
+
+3
+00:00:08.919 --> 00:00:12.580
+So this diagram is pulled from the Epic Games
+
+4
+00:00:12.580 --> 00:00:15.080
+Unity to Unreal documentation page.
+
+5
+00:00:15.820 --> 00:00:20.260
+We see a comparison of asset types inside of Unreal
+
+6
+00:00:20.260 --> 00:00:23.679
+and asset types inside of Unity and their supported formats.
+
+7
+00:00:24.320 --> 00:00:27.179
+The key things to note here are going to be some of the ones
+
+8
+00:00:27.179 --> 00:00:28.760
+that we covered already.
+
+9
+00:00:28.760 --> 00:00:31.660
+A Unity Mesh is a Static Mesh in Unreal Engine,
+
+10
+00:00:31.660 --> 00:00:35.359
+a Skinned Mesh is a Skeletal Mesh in Unreal Engine.
+
+11
+00:00:36.060 --> 00:00:39.320
+Animations are referred to as animation sequences,
+
+12
+00:00:39.320 --> 00:00:43.000
+but textures, audio files, video files, fonts,
+
+13
+00:00:43.000 --> 00:00:46.219
+GLTF and SpeedTree models are all called the same thing.
+
+14
+00:00:48.399 --> 00:00:51.659
+So now let's take a look at the Unity FBX Exporter.
+
+15
+00:00:52.560 --> 00:00:56.020
+If you have FBX models from your artist team
+
+16
+00:00:56.020 --> 00:00:57.219
+that you're working with already,
+
+17
+00:00:57.219 --> 00:00:58.920
+you'll be able to import those directly.
+
+18
+00:00:58.920 --> 00:01:02.960
+But if you have content that's been created inside of Unity,
+
+19
+00:01:02.960 --> 00:01:07.659
+or you want to group a cluster of FBXs together into a new one,
+
+20
+00:01:08.260 --> 00:01:11.560
+then we can do that with the Unity FBX Exporter.
+
+21
+00:01:11.560 --> 00:01:14.959
+Similarly, if you've authored any animations inside of Unity,
+
+22
+00:01:14.959 --> 00:01:16.859
+and you want those animations to come through
+
+23
+00:01:16.859 --> 00:01:21.260
+with their relevant objects or, yeah, their relevant Meshes,
+
+24
+00:01:21.879 --> 00:01:23.760
+the Unity FBX Exporter
+
+25
+00:01:23.760 --> 00:01:26.260
+is how we can keep everything grouped together.
+
+26
+00:01:27.200 --> 00:01:32.760
+It's important to note, though, that lights, cameras, volumes,
+
+27
+00:01:32.760 --> 00:01:35.299
+and custom script components
+
+28
+00:01:36.060 --> 00:01:38.099
+are not going to be able to come through.
+
+29
+00:01:38.959 --> 00:01:40.799
+The only things that we can get across
+
+30
+00:01:40.799 --> 00:01:46.060
+are going to be Mesh Assets, animations, and media files.
+
+31
+00:01:47.299 --> 00:01:49.620
+So let's take a look.
+
+32
+00:01:49.620 --> 00:01:54.709
+Here in Unity, we have our collection of Meshes
+
+33
+00:01:54.810 --> 00:01:58.109
+called State that I've named Stage Objects.
+
+34
+00:01:59.390 --> 00:02:02.189
+This is a collection of seven cubes
+
+35
+00:02:02.189 --> 00:02:04.950
+and a platform that our dancer is standing on.
+
+36
+00:02:05.530 --> 00:02:08.229
+So we can bring this over as one asset.
+
+37
+00:02:08.789 --> 00:02:10.789
+We have them selected here.
+
+38
+00:02:10.789 --> 00:02:16.000
+We can right-click, go to Export FBX.
+
+39
+00:02:16.759 --> 00:02:23.000
+We can call these, I'll call these Session Stage Objects.
+
+40
+00:02:23.000 --> 00:02:26.259
+I'll pick the folder I want them exported into.
+
+41
+00:02:26.300 --> 00:02:28.000
+This is this exported folder.
+
+42
+00:02:29.469 --> 00:02:32.069
+We have our source transform object.
+
+43
+00:02:32.069 --> 00:02:34.370
+In this case, I only want the models.
+
+44
+00:02:36.479 --> 00:02:38.259
+ASCII is good for that.
+
+45
+00:02:39.719 --> 00:02:43.639
+I had one named Key Instances. Perfect.
+
+46
+00:02:43.639 --> 00:02:45.530
+So I'll hit Export.
+
+47
+00:02:45.530 --> 00:02:47.930
+And now if we look in our Exports folder,
+
+48
+00:02:47.930 --> 00:02:50.629
+we have our Session Stage Objects.
+
+49
+00:02:51.189 --> 00:02:54.449
+You also see another one from where we were doing this earlier.
+
+50
+00:02:55.650 --> 00:02:58.650
+So for the next one, we are going to export our demo dancer.
+
+51
+00:02:59.750 --> 00:03:06.020
+So even we can right-click on her, Export to FBX.
+
+52
+00:03:07.020 --> 00:03:10.479
+We can go down to Models Only
+
+53
+00:03:10.479 --> 00:03:16.840
+and switch this to Models Plus Animation and Skin Mesh.
+
+54
+00:03:18.300 --> 00:03:20.500
+Everything else should be good to go.
+
+55
+00:03:20.500 --> 00:03:25.159
+Hit Export. Instead of overriding, we'll call this Session.
+
+56
+00:03:32.000 --> 00:03:35.139
+And here she is. Fantastic.
+
+57
+00:03:37.110 --> 00:03:40.240
+So now that we have, we can go ahead and save our unit.
+
+58
+00:03:40.879 --> 00:03:46.300
+But for instance, in this case, we have a timeline in here.
+
+59
+00:03:46.300 --> 00:03:48.300
+We have our stage lights.
+
+60
+00:03:48.300 --> 00:03:51.039
+We have a camera, directional light.
+
+61
+00:03:51.039 --> 00:03:55.240
+These things are not going to come through into Unreal.
+
+62
+00:03:55.240 --> 00:04:01.099
+So we unfortunately will need to rebuild either the logic around those
+
+63
+00:04:01.099 --> 00:04:05.639
+or the reposition them, add them to their equivalents
+
+64
+00:04:05.639 --> 00:04:11.780
+to our level inside of Unreal session content.
+
+65
+00:04:11.780 --> 00:04:14.330
+There it is.
+
+66
+00:04:14.430 --> 00:04:19.129
+So as we saw when we were exporting our assets out of Unity,
+
+67
+00:04:19.129 --> 00:04:21.089
+when you're exporting skinned meshes,
+
+68
+00:04:21.089 --> 00:04:25.290
+which are going to be character assets with their animations,
+
+69
+00:04:25.290 --> 00:04:28.730
+make sure you have Models Plus Animation selected
+
+70
+00:04:28.730 --> 00:04:31.790
+and make sure your export path is also configured correctly.
+
+71
+00:04:32.930 --> 00:04:35.790
+For regular meshes, just make sure in the options
+
+72
+00:04:35.790 --> 00:04:39.730
+that it's set to Models Only, and you should be good to go.
+
+73
+00:04:42.660 --> 00:04:43.959
+Another thing I'd like to call out here
+
+74
+00:04:43.959 --> 00:04:49.699
+before we look at importing our FBXs into Unreal
+
+75
+00:04:49.699 --> 00:04:51.699
+is the Unity Reporter.
+
+76
+00:04:51.699 --> 00:04:56.060
+This is very similar to Unreal Engine's Tape Reporter feature.
+
+77
+00:04:56.060 --> 00:05:00.060
+This allows you to render out videos from a camera
+
+78
+00:05:00.060 --> 00:05:06.759
+or record game object properties during play or simulation.
+
+79
+00:05:07.300 --> 00:05:10.699
+This is really useful for recording physics simulations
+
+80
+00:05:10.699 --> 00:05:13.399
+or game objects that are animated via the timeline
+
+81
+00:05:13.399 --> 00:05:15.240
+or animated via script.
+
+82
+00:05:15.240 --> 00:05:19.000
+If you know you have something set and it doesn't need to change
+
+83
+00:05:19.000 --> 00:05:21.199
+and you just need to get it over quickly
+
+84
+00:05:21.199 --> 00:05:24.910
+and you don't want to do all of that same work,
+
+85
+00:05:24.910 --> 00:05:28.240
+we can use the recorder.
+
+86
+00:05:28.240 --> 00:05:30.949
+Let's look over here in Unity.
+
+87
+00:05:30.949 --> 00:05:34.449
+This cube that's floating will now make a little more sense.
+
+88
+00:05:36.019 --> 00:05:43.019
+We have our Rigidbody enabled, so when we press Play,
+
+89
+00:05:43.019 --> 00:05:47.500
+look up here, we'll see our cube fall to the ground.
+
+90
+00:05:48.100 --> 00:05:52.040
+What if we wanted to bring that cube in and have that same animation logic
+
+91
+00:05:53.639 --> 00:05:57.740
+or have this same simulation play exactly the way that we want it to?
+
+92
+00:05:58.839 --> 00:06:03.339
+We can do this over here in the Unity Recorder.
+
+93
+00:06:03.339 --> 00:06:05.199
+Here we have our cube selected.
+
+94
+00:06:05.199 --> 00:06:09.639
+We want to record its transform into an FBX.
+
+95
+00:06:09.639 --> 00:06:12.699
+We don't need its hierarchy.
+
+96
+00:06:12.699 --> 00:06:17.339
+We would like the geometry source.
+
+97
+00:06:17.339 --> 00:06:21.040
+Let's drag in, drag this in again.
+
+98
+00:06:21.040 --> 00:06:24.290
+Actually, let's leave this as not.
+
+99
+00:06:24.290 --> 00:06:27.910
+Here we have the name of the animation file,
+
+100
+00:06:27.910 --> 00:06:32.879
+and it will be saved into assets folder.
+
+101
+00:06:32.879 --> 00:06:41.170
+Recordings, it's okay.
+
+102
+00:06:41.170 --> 00:06:48.569
+Take number two, and I'll hit Start Recording.
+
+103
+00:06:48.569 --> 00:06:52.120
+Stop recording, awesome.
+
+104
+00:06:52.120 --> 00:06:54.410
+So now if we look here,
+
+105
+00:06:54.410 --> 00:07:01.720
+we can see our cube animation waiting for us.
+
+106
+00:07:02.360 --> 00:07:12.790
+Now let's get to importing our assets into Unreal.
+
+107
+00:07:12.790 --> 00:07:14.829
+When importing static meshes for this,
+
+108
+00:07:14.829 --> 00:07:18.050
+we're mostly just going to leave it to the default settings.
+
+109
+00:07:18.050 --> 00:07:21.889
+There is an option to combine separate meshes into one,
+
+110
+00:07:21.889 --> 00:07:24.430
+but for us, in this instance, leaving them separate
+
+111
+00:07:24.430 --> 00:07:27.389
+makes it easier to make adjustments to them individually,
+
+112
+00:07:27.389 --> 00:07:31.089
+which we'll do later on in the session.
+
+113
+00:07:31.089 --> 00:07:34.379
+So we'll go Import.
+
+114
+00:07:34.379 --> 00:07:38.360
+We will look for our exports.
+
+115
+00:07:39.040 --> 00:07:43.459
+Session stage objects open.
+
+116
+00:07:43.459 --> 00:07:46.959
+Source name for asset is good.
+
+117
+00:07:46.959 --> 00:07:52.439
+We can apply different translation or rotation offsets.
+
+118
+00:07:52.839 --> 00:07:54.339
+Static meshes import.
+
+119
+00:07:54.339 --> 00:07:58.800
+We do not want them to be combined.
+
+120
+00:07:58.800 --> 00:08:02.660
+Import collision, that all looks good, okay.
+
+121
+00:08:02.660 --> 00:08:12.389
+Import, it looks like they all came in together
+
+122
+00:08:12.389 --> 00:08:15.589
+to start with, but we can see that our separate materials
+
+123
+00:08:15.589 --> 00:08:18.889
+did not come through, and they all just share one
+
+124
+00:08:19.730 --> 00:08:25.180
+calibration mat of the platform.
+
+125
+00:08:25.180 --> 00:08:34.399
+So let's bring in now our session demo dancer.
+
+126
+00:08:38.330 --> 00:08:43.419
+In this case, we will again leave everything to blank,
+
+127
+00:08:44.080 --> 00:08:48.879
+but for the animations, or everything to default,
+
+128
+00:08:48.879 --> 00:08:56.399
+but in animations, I believe we can.
+
+129
+00:08:56.399 --> 00:08:59.480
+This snap to closest frame boundary
+
+130
+00:08:59.480 --> 00:09:01.320
+will help prevent some warnings we get
+
+131
+00:09:01.320 --> 00:09:05.299
+during the import process.
+
+132
+00:09:05.299 --> 00:09:12.570
+Import, and here we see all of our dancer assets.
+
+133
+00:09:12.570 --> 00:09:14.529
+There's quite a few.
+
+134
+00:09:14.529 --> 00:09:19.320
+We have our skeletal mesh here is waiting for us,
+
+135
+00:09:19.320 --> 00:09:23.879
+but it appears she is facing the other direction.
+
+136
+00:09:23.879 --> 00:09:30.570
+See if we drag her in.
+
+137
+00:09:30.570 --> 00:09:35.730
+She's facing over to, how can we fix that?
+
+138
+00:09:35.730 --> 00:09:38.029
+So when importing skeletal mesh assets,
+
+139
+00:09:38.870 --> 00:09:40.570
+we also are gonna be able to leave this
+
+140
+00:09:40.570 --> 00:09:44.129
+mostly to default for now, but one thing to note
+
+141
+00:09:44.129 --> 00:09:47.570
+is that we want to have import animations checked
+
+142
+00:09:47.570 --> 00:09:51.090
+and snap to closest frame boundary also checks
+
+143
+00:09:51.090 --> 00:09:56.559
+to help prevent warnings on import.
+
+144
+00:09:56.559 --> 00:09:58.120
+When we're all done, these should be
+
+145
+00:09:58.120 --> 00:10:01.419
+all the different assets that we see.
+
+146
+00:10:01.419 --> 00:10:04.179
+In our case, we have all of our cubes combined
+
+147
+00:10:04.179 --> 00:10:07.120
+and stage assets combined together,
+
+148
+00:10:07.120 --> 00:10:12.690
+so we can work on splitting those apart a little bit later.
+
+149
+00:10:12.690 --> 00:10:16.129
+Once again, we can save everything by clicking the button
+
+150
+00:10:16.129 --> 00:10:18.490
+in the bottom right corner of that.
+
+151
+00:10:20.980 --> 00:10:24.620
+We noticed though that when we dragged our character in,
+
+152
+00:10:24.620 --> 00:10:26.960
+they are now facing to the right.
+
+153
+00:10:26.960 --> 00:10:29.399
+This is due to a difference in Unity
+
+154
+00:10:29.399 --> 00:10:33.100
+and Unreal's coordinate axes,
+
+155
+00:10:33.100 --> 00:10:38.379
+although this is changing in an upcoming version
+
+156
+00:10:38.580 --> 00:10:42.019
+of Unreal again, but it should make this transition
+
+157
+00:10:42.019 --> 00:10:44.379
+between the two programs a little bit easier.
+
+158
+00:10:45.879 --> 00:10:49.179
+For now though, if we want to have our character
+
+159
+00:10:49.179 --> 00:10:52.850
+come in facing the correct direction,
+
+160
+00:10:52.850 --> 00:10:57.850
+what we need to do is go to our skeletal mesh here,
+
+161
+00:10:57.950 --> 00:11:01.259
+report mesh with dialogue.
+
+162
+00:11:01.259 --> 00:11:06.379
+Then here, let's see if we change our Z rotation by 90
+
+163
+00:11:06.879 --> 00:11:11.919
+and import what that looks like,
+
+164
+00:11:14.889 --> 00:11:16.610
+and now she's facing the right way.
+
+165
+00:11:16.610 --> 00:11:17.809
+Amazing.
+
+166
+00:11:17.809 --> 00:11:20.929
+And we want to go ahead and make sure we save her.
+
+167
+00:11:20.929 --> 00:11:22.250
+There we go.
+
+168
+00:11:22.250 --> 00:11:24.970
+So next, let's drag in our static meshes
+
+169
+00:11:24.970 --> 00:11:28.679
+into our level.
+
+170
+00:11:28.679 --> 00:11:33.559
+So here we can drag in our stage objects.
+
+171
+00:11:33.559 --> 00:11:37.610
+I'm gonna put it here so that I can situate it
+
+172
+00:11:37.629 --> 00:11:42.870
+around our platform here.
+
+173
+00:11:42.870 --> 00:11:45.330
+So I think that'll look cool.
+
+174
+00:11:45.330 --> 00:11:47.019
+Awesome.
+
+175
+00:11:47.019 --> 00:11:49.259
+And then again, in this case,
+
+176
+00:11:49.259 --> 00:11:51.340
+instead of re-importing the static mesh,
+
+177
+00:11:51.340 --> 00:11:54.980
+I'm just going to rotate it 90 degrees
+
+178
+00:11:54.980 --> 00:11:57.740
+using its transform component here.
+
+179
+00:11:57.740 --> 00:11:59.879
+I think that will give us,
+
+180
+00:11:59.879 --> 00:12:02.899
+or that'll get it lined up nice and right.
+
+181
+00:12:02.899 --> 00:12:21.639
+And this will look really cool.
+
+182
+00:12:21.639 --> 00:12:23.450
+All right, not too bad.
+
+183
+00:12:23.450 --> 00:12:26.049
+If you want to check in the same way in Unity,
+
+184
+00:12:26.629 --> 00:12:29.590
+you can go into orthographic views up here
+
+185
+00:12:29.590 --> 00:12:31.809
+where the perspective camera is.
+
+186
+00:12:31.809 --> 00:12:33.269
+This dropdown is in Unreal.
+
+187
+00:12:33.269 --> 00:12:35.149
+This is where we can also go up
+
+188
+00:12:35.149 --> 00:12:39.350
+to look at an orthographic view inside of the viewport.
+
+189
+00:12:40.309 --> 00:12:44.029
+By default, everything is this wireframe view.
+
+190
+00:12:44.029 --> 00:12:45.870
+If you'd like to switch it from wireframe additionally,
+
+191
+00:12:45.870 --> 00:12:50.870
+here you can go and see it lit or unlit rendering.
+
+192
+00:12:50.909 --> 00:12:52.230
+But I generally find,
+
+193
+00:12:52.230 --> 00:12:54.269
+when I'm going to line things up perfectly up here,
+
+194
+00:12:54.269 --> 00:12:58.059
+it's kind of nice to have it in the wireframe view.
+
+195
+00:12:58.059 --> 00:13:01.570
+You can go back to our perspective.
+
+196
+00:13:01.570 --> 00:13:05.419
+Fantastic.
+
+197
+00:13:05.419 --> 00:13:06.740
+In the next video,
+
+198
+00:13:06.740 --> 00:13:08.620
+we'll be taking a look at how to create
+
+199
+00:13:08.620 --> 00:13:10.179
+different kinds of blueprints.

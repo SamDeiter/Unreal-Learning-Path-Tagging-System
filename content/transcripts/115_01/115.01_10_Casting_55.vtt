@@ -1,0 +1,121 @@
+WEBVTT
+
+1
+00:00:01.330 --> 00:00:05.370
+So casting is probably a concept that you're already pretty familiar with
+
+2
+00:00:05.450 --> 00:00:10.970
+But as with things like the the standard pointer library and just a lot of the standard template library
+
+3
+00:00:11.250 --> 00:00:16.410
+Unreal actually has its own implementations of these things, which we encourage you to use. So let's just look into that a little bit
+
+4
+00:00:17.649 --> 00:00:20.489
+So first off we have object is a
+
+5
+00:00:22.269 --> 00:00:25.730
+Essentially, this is what the function that you would call when you want to check
+
+6
+00:00:26.329 --> 00:00:32.270
+Purely whether a thing is another thing whether a class is actually a child of this is other type of class
+
+7
+00:00:33.009 --> 00:00:35.810
+Not when you need access to that classes information
+
+8
+00:00:35.810 --> 00:00:41.929
+But you just purely want to perform that check the kind of step up from that is the cast templated type T
+
+9
+00:00:41.929 --> 00:00:46.579
+And this is when you would be both checking. It's like a dynamic cast
+
+10
+00:00:46.679 --> 00:00:53.079
+It's when you are both checking for whether or not this object matches that type. But also if it does you get back a
+
+11
+00:00:53.880 --> 00:00:59.799
+An instance a copy of that variable with that type or a null pointer if it wasn't that type
+
+12
+00:00:59.799 --> 00:01:02.479
+And that's the kind of more complicated version
+
+13
+00:01:03.399 --> 00:01:07.640
+T cat the templated form of cast does essentially perform is a
+
+14
+00:01:08.480 --> 00:01:09.319
+under the hood
+
+15
+00:01:09.319 --> 00:01:15.640
+So again slightly less performant because it's a couple more steps if you only need the binary check for whether or not this is
+
+16
+00:01:15.640 --> 00:01:22.260
+a thing you don't need access to its data then I would it's preferable to use is a for slightly better performance
+
+17
+00:01:22.859 --> 00:01:30.180
+Exact cast it checks whether it is precisely this type not whether it is a child of this type, but whether the types match exactly
+
+18
+00:01:30.900 --> 00:01:35.780
+And last of all we have cast checked. This is essentially a
+
+19
+00:01:36.459 --> 00:01:40.859
+slightly more performant version of cast where if it
+
+20
+00:01:41.859 --> 00:01:44.140
+Fails to that cast then you would get a crash
+
+21
+00:01:44.659 --> 00:01:45.900
+so
+
+22
+00:01:45.900 --> 00:01:51.120
+But it performs an is a at editor time at development time, but actually in a shipping build
+
+23
+00:01:51.239 --> 00:01:55.079
+It doesn't perform that is a check you would just get a it would just crash
+
+24
+00:01:55.400 --> 00:02:01.519
+So this is this can this is used for a couple of reasons a it's slightly more performant because that is a is pulled out
+
+25
+00:02:01.519 --> 00:02:07.200
+Of the of the flow in shipping builds, but also it kind of conveys intention
+
+26
+00:02:07.439 --> 00:02:09.439
+cast checked is something that you would
+
+27
+00:02:10.520 --> 00:02:15.199
+You would use in code when you want some two things to be very very tightly linked to say I don't want this to
+
+28
+00:02:15.199 --> 00:02:17.719
+Be optional this needs to be this thing
+
+29
+00:02:17.719 --> 00:02:22.479
+So an example of that might be the behavior tree component in the AI controller
+
+30
+00:02:22.900 --> 00:02:29.719
+Nothing else should be in that pointer. So you can be is essentially saying, you know, this needs to be this thing

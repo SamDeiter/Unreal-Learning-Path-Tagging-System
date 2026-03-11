@@ -1,0 +1,613 @@
+WEBVTT
+
+1
+00:00:01.620 --> 00:00:09.710
+In this video, we'll start looking at how we can create assets like levels, static meshes, and materials inside of Unreal Engine.
+
+2
+00:00:09.710 --> 00:00:13.710
+Okay, so now let's look at creating a new level inside of Unreal Engine.
+
+3
+00:00:13.710 --> 00:00:20.710
+So similar to Unity, we can go up to the File menu, and instead of hitting New Scene, we can hit New Level.
+
+4
+00:00:20.710 --> 00:00:24.710
+This will open up a couple of templates that we can pick from.
+
+5
+00:00:24.710 --> 00:00:25.710
+Select Open World.
+
+6
+00:00:25.710 --> 00:00:30.710
+Additionally, we can right-click in the content drawer and create a new level from here.
+
+7
+00:00:30.710 --> 00:00:37.740
+Next, we'll create an actor, as opposed to Unity, which has the new Game Object button as part of the hierarchy.
+
+8
+00:00:37.740 --> 00:00:43.740
+Over in Unreal Engine, we have the new Actor button as part of the toolbar.
+
+9
+00:00:43.740 --> 00:00:49.740
+Here, I will go to Shapes and Cube and drag it into my level.
+
+10
+00:00:49.740 --> 00:00:53.740
+I can also press F to hone in on it and see it down here.
+
+11
+00:00:53.740 --> 00:01:00.740
+We can see that this cube has a transform and a static mesh component and a material component.
+
+12
+00:01:00.740 --> 00:01:15.090
+This is going to be very similar to a game object inside of Unity that has a transform component, a mesh filter, a mesh renderer, and a box collider, as well as a rigid body.
+
+13
+00:01:15.090 --> 00:01:18.090
+Next, we're going to add a component to our new actor.
+
+14
+00:01:18.090 --> 00:01:26.090
+This would be very similar to how we would do it in Unity, where we hit this Add Component button and select from our list of components.
+
+15
+00:01:26.090 --> 00:01:32.090
+In Unreal, we can select our cube and hit the Add Component button up here at the top.
+
+16
+00:01:32.090 --> 00:01:36.090
+In this case, I'm going to look for a rotating movement component.
+
+17
+00:01:36.090 --> 00:01:39.090
+Take off that one.
+
+18
+00:01:39.090 --> 00:01:41.090
+I think this is another one.
+
+19
+00:01:41.090 --> 00:01:49.090
+One thing to note here, if we want this static mesh to actually be able to move, we have to set it to movable here.
+
+20
+00:01:49.090 --> 00:01:59.090
+This is important for how Unreal Engine allocates objects for rendering so that movable objects can be rendered together and static objects can be rendered together.
+
+21
+00:01:59.090 --> 00:02:04.090
+Now, when we press Play, we can see our lovely box spinning in place for us.
+
+22
+00:02:04.090 --> 00:02:08.719
+Now, let's move on to creating a Blueprint.
+
+23
+00:02:08.719 --> 00:02:13.719
+This is how we're going to be able to add interactivity back to our content.
+
+24
+00:02:13.719 --> 00:02:19.719
+Entire games can actually be made using Blueprint visual scripting without even touching C++.
+
+25
+00:02:19.719 --> 00:02:28.330
+So, back over here in Unreal, I can right-click, create a Blueprint class.
+
+26
+00:02:28.330 --> 00:02:36.389
+We're going to pick an actor, and I will call this BP underscore spin cube.
+
+27
+00:02:36.389 --> 00:02:42.340
+We'll open this up. We see our Blueprint editor.
+
+28
+00:02:42.340 --> 00:02:45.340
+We see our default scene route.
+
+29
+00:02:45.340 --> 00:02:50.340
+And let's go ahead and add a static mesh component.
+
+30
+00:02:50.340 --> 00:02:55.550
+This has a transform, and we can assign a static mesh here.
+
+31
+00:02:55.550 --> 00:02:58.710
+We will look for cube.
+
+32
+00:02:58.710 --> 00:03:03.689
+We'll hit compile.
+
+33
+00:03:03.689 --> 00:03:06.689
+If we zoom out, there's our cube here.
+
+34
+00:03:06.689 --> 00:03:09.689
+We have a default material for now.
+
+35
+00:03:09.689 --> 00:03:12.689
+And then we see a couple tabs up here.
+
+36
+00:03:12.689 --> 00:03:18.689
+We have the construction tab that we won't look at, this construction graph, and our event graph.
+
+37
+00:03:18.689 --> 00:03:26.689
+So, instead of needing to write a C sharp component over here in Unity and add...
+
+38
+00:03:26.689 --> 00:03:37.069
+Let's see, we have an axis rotation component that I've written that will allow us to spin around our cube here in Unity.
+
+39
+00:03:37.069 --> 00:03:42.169
+Back over in Unreal, if we want to do the same thing,
+
+40
+00:03:42.169 --> 00:03:49.460
+once again, I can add my rotating movement component.
+
+41
+00:03:49.460 --> 00:03:54.939
+I can drag that into the graph to get a reference to it.
+
+42
+00:03:54.939 --> 00:04:00.939
+And I can get the pull-off from this pin here,
+
+43
+00:04:00.939 --> 00:04:07.939
+and this will bring up all of the different properties that we might want to look for
+
+44
+00:04:07.939 --> 00:04:11.000
+using the rotating movement component.
+
+45
+00:04:11.000 --> 00:04:15.150
+I'm going to get its rotation rate.
+
+46
+00:04:15.150 --> 00:04:18.470
+Let's see, there we go, get rotation rate.
+
+47
+00:04:18.470 --> 00:04:25.069
+I want to multiply this by negative one.
+
+48
+00:04:25.069 --> 00:04:31.709
+And then I want to set the rotation rate.
+
+49
+00:04:31.709 --> 00:04:39.709
+And so what this is going to allow me to do is change the direction that the cube is spinning in.
+
+50
+00:04:39.709 --> 00:04:45.449
+However, right now, these nodes here will never run
+
+51
+00:04:45.449 --> 00:04:50.449
+because they aren't hooked up to an event that will trigger them.
+
+52
+00:04:50.449 --> 00:04:54.449
+So, I'm going to delete both of these to give myself a little more room.
+
+53
+00:04:54.449 --> 00:04:57.449
+I'm going to search for the space bar.
+
+54
+00:04:57.449 --> 00:05:09.829
+We'll drag that up here, drag this back over, get ourselves a little more organized here.
+
+55
+00:05:09.829 --> 00:05:18.879
+And now, when we press the space bar, we are going to set our rotation rate.
+
+56
+00:05:18.879 --> 00:05:23.040
+However, if we try to do this immediately right now,
+
+57
+00:05:23.040 --> 00:05:25.040
+let's see if we drag in our spin cube.
+
+58
+00:05:25.040 --> 00:05:27.040
+Ooh, it's a little bit bigger, isn't it?
+
+59
+00:05:27.040 --> 00:05:29.139
+And we hit play.
+
+60
+00:05:29.139 --> 00:05:34.139
+We'll see that it spins, but when we hit space bar, nothing happens except for our character moving up.
+
+61
+00:05:34.139 --> 00:05:36.199
+Why is that?
+
+62
+00:05:36.199 --> 00:05:38.199
+So, how do we enable input?
+
+63
+00:05:38.199 --> 00:05:40.420
+Well, why don't we search for that?
+
+64
+00:05:40.420 --> 00:05:42.420
+Enable input.
+
+65
+00:05:42.420 --> 00:05:47.420
+And one thing we need for this to work here is a reference to the player controller.
+
+66
+00:05:47.420 --> 00:05:53.420
+We'll talk about this a little bit more when we go into the gameplay framework inside of Unreal Engine.
+
+67
+00:05:53.420 --> 00:05:57.420
+But now, I'm going to hit compile this.
+
+68
+00:05:57.420 --> 00:06:05.610
+We should see, we go to test, our cube is spinning, and we press space, and it turns the other way.
+
+69
+00:06:05.610 --> 00:06:09.779
+Amazing.
+
+70
+00:06:09.779 --> 00:06:14.779
+One more thing that we can do here in order to make our code a little more reusable
+
+71
+00:06:14.779 --> 00:06:21.779
+is what if we one day wanted to call this logic without pressing the space bar?
+
+72
+00:06:21.779 --> 00:06:27.939
+Well, in order to do that, we would need to create our own custom event
+
+73
+00:06:27.939 --> 00:06:37.350
+to switch direction and have our logic to change the rotation direction
+
+74
+00:06:37.350 --> 00:06:40.350
+listen for that instead.
+
+75
+00:06:40.350 --> 00:06:48.779
+Now, our space bar can call switch direction.
+
+76
+00:06:48.779 --> 00:06:51.779
+We'll save this again here. We'll compile this up here.
+
+77
+00:06:51.779 --> 00:06:59.779
+So, similar to when you save a C Sharp script and it compiles before you can add it to your game objects.
+
+78
+00:06:59.779 --> 00:07:04.779
+This is after we make changes. We want Unreal Engine to compile our blueprint code.
+
+79
+00:07:04.779 --> 00:07:06.839
+I'll save it as well.
+
+80
+00:07:06.839 --> 00:07:12.129
+And now, just to double check that it works, press space, and it spins around.
+
+81
+00:07:12.129 --> 00:07:20.310
+Okay, so now we'll start to change the look of our actors, and we'll do that by creating a material.
+
+82
+00:07:20.310 --> 00:07:28.310
+This is a look at the material graph, which looks a lot like the blueprint editor's graph.
+
+83
+00:07:28.310 --> 00:07:38.310
+We'll be dropping nodes onto here and using that to create logic that will affect the rendering properties of our material.
+
+84
+00:07:40.720 --> 00:07:48.720
+So, we can get started by right-clicking, creating material, and I'll call this M underscore cube.
+
+85
+00:07:48.720 --> 00:07:56.850
+And if you want to see how to more consistently name your assets throughout your project and across projects,
+
+86
+00:07:56.850 --> 00:08:02.850
+I would recommend checking out the Michael Auer style guide.
+
+87
+00:08:02.850 --> 00:08:08.850
+This is a wide array of generally accepted nomenclature.
+
+88
+00:08:08.850 --> 00:08:13.850
+So, when you start working with more developers or looking at other people's projects,
+
+89
+00:08:13.850 --> 00:08:18.550
+you'll be able to better understand what's inside of them.
+
+90
+00:08:18.550 --> 00:08:27.550
+So, here we have our basic output mode that's on the surface material domain and has a blend mode of opaque.
+
+91
+00:08:27.550 --> 00:08:34.549
+And with the default lit shading model, we won't worry too much about all that.
+
+92
+00:08:34.549 --> 00:08:39.549
+What we want to do is add a constant vector three.
+
+93
+00:08:39.549 --> 00:08:48.549
+So, if you don't know, this vector can also be a color representation.
+
+94
+00:08:48.549 --> 00:08:53.710
+So, I'm going to pick a color that I like, this color purple.
+
+95
+00:08:53.710 --> 00:09:00.779
+Okay, and we can drag that into the base color output, and we'll see our preview over here start to change.
+
+96
+00:09:00.779 --> 00:09:03.779
+And I'll drag it into the emissive color output.
+
+97
+00:09:03.779 --> 00:09:05.779
+And now it's starting to glow.
+
+98
+00:09:05.779 --> 00:09:11.779
+We'll hit apply. This is very similar to the compile button inside of a blueprint editor.
+
+99
+00:09:11.779 --> 00:09:23.340
+And then now over here in our level, we can drag our material onto, where's our static mesh?
+
+100
+00:09:23.340 --> 00:09:26.340
+There we go. And we'll see when we pick up the material to drag it in,
+
+101
+00:09:26.340 --> 00:09:33.340
+it highlights the area that it is applicable or possible to be dragged into.
+
+102
+00:09:34.340 --> 00:09:37.340
+And there we go. We've got our new material on our cube.
+
+103
+00:09:37.340 --> 00:09:40.340
+One thing we'll notice, we have a little asterisk here next to our level.
+
+104
+00:09:40.340 --> 00:09:42.340
+That means we aren't saved.
+
+105
+00:09:42.340 --> 00:09:44.340
+So, let's go ahead and click save.
+
+106
+00:09:44.340 --> 00:09:51.500
+And I'll call this one map session level.
+
+107
+00:09:51.500 --> 00:09:54.940
+And I'll save that here in the session content folder.
+
+108
+00:09:54.940 --> 00:09:57.299
+There we go. Awesome.
+
+109
+00:09:57.299 --> 00:10:02.330
+Now when we press play, we can see our material in action.
+
+110
+00:10:02.330 --> 00:10:08.220
+So, the next thing we're going to make is a material instance.
+
+111
+00:10:08.220 --> 00:10:15.220
+This is a great thing to get your head around early in your Unreal development journey.
+
+112
+00:10:15.220 --> 00:10:20.220
+Material instances are a way to take a single material asset
+
+113
+00:10:20.220 --> 00:10:22.220
+and make it more extendable and reusable
+
+114
+00:10:22.220 --> 00:10:29.220
+and reduce your total memory footprint of assets inside of your game.
+
+115
+00:10:29.220 --> 00:10:32.220
+So, what we can do by setting up our base material
+
+116
+00:10:32.220 --> 00:10:36.220
+that we just created with different parameters
+
+117
+00:10:36.220 --> 00:10:38.220
+is that we can then edit those parameters
+
+118
+00:10:38.220 --> 00:10:42.220
+in different instances of that material.
+
+119
+00:10:42.220 --> 00:10:44.220
+This gives us a lot more flexibility
+
+120
+00:10:44.220 --> 00:10:47.220
+and then reduces our memory footprint
+
+121
+00:10:47.220 --> 00:10:50.220
+and lets our game run better.
+
+122
+00:10:50.220 --> 00:10:52.220
+So, how are we going to do that?
+
+123
+00:10:52.220 --> 00:10:58.019
+Back over here in Unreal, we can right click on our material
+
+124
+00:10:58.019 --> 00:11:03.019
+and right up here at the top we see create material instance.
+
+125
+00:11:03.019 --> 00:11:09.970
+The nomenclature for this one is going to be MI
+
+126
+00:11:09.970 --> 00:11:11.970
+and we can open this up.
+
+127
+00:11:11.970 --> 00:11:13.970
+And so far we see we've got some parameters here
+
+128
+00:11:13.970 --> 00:11:17.970
+but nothing that we can change for our color.
+
+129
+00:11:17.970 --> 00:11:19.970
+So, how can we do that?
+
+130
+00:11:19.970 --> 00:11:21.970
+Well, if we come back over to our base material
+
+131
+00:11:21.970 --> 00:11:27.029
+and we right click, we'll see this option to convert to parameter.
+
+132
+00:11:27.029 --> 00:11:30.029
+This gives us an opportunity to name it
+
+133
+00:11:30.029 --> 00:11:35.029
+and then we also see it appear over here in the details panel.
+
+134
+00:11:35.029 --> 00:11:39.250
+Hit apply, save it too just for good measure
+
+135
+00:11:39.250 --> 00:11:42.250
+and now here in our material instance
+
+136
+00:11:42.250 --> 00:11:46.250
+we see that we have a global vector parameter for color
+
+137
+00:11:46.250 --> 00:11:53.250
+that we can override and make this one a fun green color for instance.
+
+138
+00:11:53.250 --> 00:11:56.379
+We'll hit save, go back to our session level,
+
+139
+00:11:56.379 --> 00:12:00.379
+select our cube instance and we can drag our material instance
+
+140
+00:12:00.379 --> 00:12:04.379
+into our cube and now we have two different cubes
+
+141
+00:12:04.379 --> 00:12:08.379
+but they both share the same core asset for their material.
+
+142
+00:12:08.379 --> 00:12:14.460
+In Unity, this direct relationship between a material
+
+143
+00:12:14.460 --> 00:12:19.460
+and a material instance doesn't exist in separate assets.
+
+144
+00:12:19.460 --> 00:12:26.460
+Although you can instance objects that have the same material on them
+
+145
+00:12:26.460 --> 00:12:30.200
+and so we just saw this over in editor
+
+146
+00:12:30.200 --> 00:12:32.200
+but after you've created a material instance
+
+147
+00:12:32.200 --> 00:12:36.200
+you can assign it in the material slot of a static mesh
+
+148
+00:12:36.200 --> 00:12:40.200
+the same way you can with a master or base material
+
+149
+00:12:40.200 --> 00:12:45.350
+and it should be noted that you should really try and rely on this workflow
+
+150
+00:12:45.350 --> 00:12:50.350
+as much as you can in order to reduce the total amount of memory
+
+151
+00:12:50.350 --> 00:12:54.350
+that your project takes up and game takes up.
+
+152
+00:12:56.149 --> 00:12:59.149
+In the next video, we'll look at how we can add content
+
+153
+00:12:59.149 --> 00:13:04.149
+to our Unreal Engine project and then use it in our levels.

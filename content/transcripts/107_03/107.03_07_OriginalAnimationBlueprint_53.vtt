@@ -1,0 +1,261 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:06.200
+Hello, and welcome to this video on the original Animation Blueprint.
+
+2
+00:00:06.200 --> 00:00:12.580
+In this, we're just going to have a look at the Animation Blueprint that we replaced at the beginning.
+
+3
+00:00:12.580 --> 00:00:20.579
+So, I've loaded up the Animation Blueprint, and first of all, we'll have a quick look at the Animation Graph.
+
+4
+00:00:20.579 --> 00:00:23.579
+In here, there are a few noteworthy differences.
+
+5
+00:00:23.579 --> 00:00:32.619
+For example, we're not splitting the animation by the spine, so that we can play and montage on different areas.
+
+6
+00:00:32.619 --> 00:00:36.619
+We've just got one default slot, which will allow us to play a montage.
+
+7
+00:00:36.619 --> 00:00:42.619
+That would take up the entire body at any one time, regardless of if you're moving or not.
+
+8
+00:00:42.619 --> 00:00:48.119
+The other section here, is we have a Control Rig.
+
+9
+00:00:48.119 --> 00:00:54.500
+Now, as you can see here on the Control Rig, we've got the Should Do IK trace.
+
+10
+00:00:54.500 --> 00:00:59.920
+Now, the first thing is, it's only going to do this when it isn't falling.
+
+11
+00:00:59.920 --> 00:01:09.079
+And what this is here for, is this is for making sure the feet automatically touch the ground.
+
+12
+00:01:09.079 --> 00:01:14.079
+When I was to come into the right hand side, you can see that we actually have a Control Rig class here,
+
+13
+00:01:14.079 --> 00:01:17.079
+which I could find and open up.
+
+14
+00:01:17.079 --> 00:01:24.409
+Now, this looks quite complicated, but what it's doing in most cases,
+
+15
+00:01:24.409 --> 00:01:27.409
+is it's doing a line trace off the bottom of the feet.
+
+16
+00:01:27.409 --> 00:01:31.500
+And it's seeing if it hits the ground.
+
+17
+00:01:31.500 --> 00:01:39.500
+And if it does, it's going to adjust the foot IK, so that the feet actually end up being perfectly on the ground.
+
+18
+00:01:39.500 --> 00:01:41.500
+And you can see this.
+
+19
+00:01:41.500 --> 00:01:47.500
+If I was to go back and change my default pawn back to the previous, the original one,
+
+20
+00:01:47.500 --> 00:01:52.879
+and push play, you can see this here.
+
+21
+00:01:52.879 --> 00:02:01.750
+So at any one time, the feet are exactly on the floor.
+
+22
+00:02:01.750 --> 00:02:09.680
+If I was to convert back to our original player character, and play that one,
+
+23
+00:02:09.680 --> 00:02:13.870
+you can already see at the moment that the feet are floating slightly.
+
+24
+00:02:13.870 --> 00:02:17.870
+That becomes even more pronounced when we go on an uneven level.
+
+25
+00:02:17.870 --> 00:02:22.090
+So the other thing that's different about this chart is,
+
+26
+00:02:22.090 --> 00:02:29.090
+you can see here that the locomotion state is being saved out into a cached pose.
+
+27
+00:02:29.090 --> 00:02:36.090
+However, it's not directly being used as an input for the default slot.
+
+28
+00:02:36.090 --> 00:02:39.439
+If we double click on the main state,
+
+29
+00:02:39.439 --> 00:02:46.759
+you can see that we actually have a relatively different state machine here.
+
+30
+00:02:46.759 --> 00:02:53.759
+If we were to jump into locomotion, you can see this is where the cached pose is being used.
+
+31
+00:02:53.759 --> 00:03:00.580
+Now the setup here looks quite a bit different to the previous one that we were working on.
+
+32
+00:03:00.580 --> 00:03:09.620
+And that's because we're using these elements, the To Falling and the To Land, state aliases.
+
+33
+00:03:09.620 --> 00:03:15.580
+And these are mainly used to clean up a graph.
+
+34
+00:03:15.580 --> 00:03:19.580
+Because standardly, if you were to build this setup,
+
+35
+00:03:19.580 --> 00:03:22.580
+we would need to have a lot of links going through all of these different places
+
+36
+00:03:22.580 --> 00:03:26.580
+to make sure that you could transition at the correct time.
+
+37
+00:03:26.580 --> 00:03:33.580
+To get to the To Falling node, we would need to either come from the locomotion or the land.
+
+38
+00:03:33.580 --> 00:03:37.580
+So we would need to have connections to connect up the jump
+
+39
+00:03:37.580 --> 00:03:41.580
+or the fall loop from both the locomotion and both of the land.
+
+40
+00:03:41.580 --> 00:03:44.770
+One for each of these settings.
+
+41
+00:03:44.770 --> 00:03:50.770
+Now, what this means is, for this falling, these two conduits,
+
+42
+00:03:50.770 --> 00:03:54.770
+the Is Falling velocity Z and the Is Falling,
+
+43
+00:03:54.770 --> 00:04:02.770
+are both accessible from the locomotion or the land states, because they're ticked on here.
+
+44
+00:04:03.120 --> 00:04:05.120
+And the same for the To Land.
+
+45
+00:04:05.120 --> 00:04:13.180
+This conduit, Is Not Falling, would be accessible from the jump or the fall loop.
+
+46
+00:04:13.180 --> 00:04:19.180
+So these clear up a lot of the messy spaghetti that you would see.
+
+47
+00:04:19.180 --> 00:04:26.209
+The other thing that's worth noting here is where we standardly went into the jump node,
+
+48
+00:04:26.209 --> 00:04:29.240
+as soon as you weren't falling.
+
+49
+00:04:29.240 --> 00:04:31.240
+In this we have two conditions.
+
+50
+00:04:31.240 --> 00:04:37.240
+We're actually checking to see if the velocity is going up on the Z.
+
+51
+00:04:37.240 --> 00:04:44.240
+So it's only going to go to the jump if your velocity heading upwards is quite strong.
+
+52
+00:04:44.240 --> 00:04:47.240
+Otherwise, it's going to jump immediately into the fall.
+
+53
+00:04:47.240 --> 00:04:50.339
+This means, and I'll demonstrate in a second,
+
+54
+00:04:50.339 --> 00:04:55.339
+we're going to have smoother transitions if you just run off the edge.
+
+55
+00:04:55.339 --> 00:04:57.459
+So if we check that out now.
+
+56
+00:04:57.459 --> 00:05:01.689
+So this was the animation blueprint we put together.
+
+57
+00:05:01.689 --> 00:05:06.850
+And as you can see, when she falls off, it's a rather odd animation.
+
+58
+00:05:06.850 --> 00:05:09.939
+A combination of the jump.
+
+59
+00:05:09.939 --> 00:05:14.379
+And here is the original blueprint.
+
+60
+00:05:14.379 --> 00:05:21.329
+And as you can see, it's a lot smoother falling off.
+
+61
+00:05:21.329 --> 00:05:25.029
+It's just going straight into the drop without the jump.
+
+62
+00:05:25.029 --> 00:05:29.259
+So with that, that will bring us to the end of this video.
+
+63
+00:05:29.259 --> 00:05:34.259
+So I mainly wanted to make sure that you could understand the difference between the
+
+64
+00:05:34.259 --> 00:05:40.259
+animation blueprint we created and the one standardly you get with this template.
+
+65
+00:05:40.259 --> 00:05:42.959
+Thank you for watching.
