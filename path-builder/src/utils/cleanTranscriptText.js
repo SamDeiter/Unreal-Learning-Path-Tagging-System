@@ -28,6 +28,19 @@ export function cleanTranscriptText(text) {
     cleaned = cleaned.replace(pattern, "");
   }
 
+  // Remove Epic Developer Community / Unreal Engine Documentation SEO boilerplate
+  const docsBoilerplate = [
+    /Unreal Engine \d\.\d(?: Documentation)?/gi,
+    /Epic Developer Community/gi,
+    /Table of Contents/gi,
+    /## What's New\?/gi,
+    /\|/g, // remove stray pipe characters from headers
+  ];
+
+  for (const pattern of docsBoilerplate) {
+    cleaned = cleaned.replace(pattern, "");
+  }
+
   // Clean up leftover whitespace and punctuation artifacts
   cleaned = cleaned
     .replace(/\s{2,}/g, " ")    // collapse multiple spaces
