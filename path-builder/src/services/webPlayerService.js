@@ -8,6 +8,27 @@
 
 import { cleanTranscriptText } from "../utils/cleanTranscriptText";
 
+/**
+ * Strip markdown artifacts from text, producing clean plain text.
+ * Summaries are transcript/doc extracts, not intentional markdown,
+ * so we remove all formatting characters.
+ */
+function stripMarkdown(text) {
+  if (!text) return "";
+  return text
+    .replace(/#{1,6}\s*/g, "")            // strip markdown headers (# ## ### etc.)
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1") // strip bold/italic markers
+    .replace(/`([^`]+)`/g, "$1")           // strip inline code backticks
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // convert [text](url) → text
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1") // strip image syntax
+    .replace(/^[-*+]\s+/gm, "• ")          // list markers → bullet
+    .replace(/^\d+\.\s+/gm, "")            // strip numbered list markers
+    .replace(/^>\s?/gm, "")                // strip blockquotes
+    .replace(/---+/g, "")                  // strip horizontal rules
+    .replace(/\s{2,}/g, " ")              // collapse whitespace
+    .trim();
+}
+
 // ── Step Data Preparation ──────────────────────────────────────────
 
 /**
@@ -29,7 +50,7 @@ export function prepareStepData(steps, bridges = []) {
       step.segment?.text ||
       step.description ||
       "";
-    let summary = cleanTranscriptText(rawSummary);
+    let summary = stripMarkdown(cleanTranscriptText(rawSummary));
 
     // Fallback for empty summaries
     if (!summary) {

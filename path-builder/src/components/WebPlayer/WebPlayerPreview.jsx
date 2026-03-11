@@ -15,7 +15,6 @@ import {
   formatTime,
   getCategoryClass,
 } from "../../services/webPlayerService";
-import { markdownToHtml } from "../../utils/markdownToHtml";
 import "./WebPlayerPreview.css";
 
 export default function WebPlayerPreview({
@@ -273,12 +272,7 @@ export default function WebPlayerPreview({
               {current.source && <span>Source: {current.source}</span>}
             </div>
             {current.summary ? (
-              <div
-                className="wp-step-summary"
-                dangerouslySetInnerHTML={{
-                  __html: markdownToHtml(current.summary),
-                }}
-              />
+              <p className="wp-step-summary">{current.summary}</p>
             ) : (
               <p className="wp-no-content">
                 <em>No content summary available for this step.</em>
