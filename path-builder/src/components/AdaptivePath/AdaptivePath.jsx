@@ -48,6 +48,8 @@ export default function AdaptivePath() {
   const [pathLoading, setPathLoading] = useState(false);
   const [pathError, setPathError] = useState(null);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
+  const [feasibilityFailed, setFeasibilityFailed] = useState(false);
+  const [aiWarning, setAiWarning] = useState(null);
 
   // Step expansion
   const [expandedStep, setExpandedStep] = useState(null);
@@ -193,6 +195,8 @@ export default function AdaptivePath() {
 
     setPathLoading(true);
     setPathError(null);
+    setFeasibilityFailed(false);
+    setAiWarning(null);
     setPipelineStep(0);
 
     // Animate pipeline steps during generation
@@ -226,6 +230,8 @@ export default function AdaptivePath() {
         setPathData(result);
         setExpandedStep(0);
         setIsAiGenerated(!!result.isAiGenerated);
+        setFeasibilityFailed(!!result.feasibilityFailed);
+        setAiWarning(result.aiGeneratedWarning || null);
         cachePath(profileKey, result);
       }
     } catch (err) {
@@ -362,10 +368,74 @@ export default function AdaptivePath() {
     return (
       <div className="adaptive-path">
         <div className="adaptive-error">
-          <p className="adaptive-error-msg">⚠️ {pathError}</p>
-          <button className="adaptive-retry-btn" onClick={handleReset}>
-            Start Over
-          </button>
+          {feasibilityFailed ? (
+            <>
+              <div style={{
+                fontSize: '2.5rem',
+                marginBottom: '12px',
+                filter: 'grayscale(0.2)',
+              }}>🚫</div>
+              <h3 style={{
+                color: '#f0f0f0',
+                margin: '0 0 8px 0',
+                fontSize: '1.1rem',
+              }}>Topic Not Covered</h3>
+              <p className="adaptive-error-msg" style={{
+                color: '#94a3b8',
+                fontSize: '0.85rem',
+                lineHeight: 1.5,
+              }}>{pathError}</p>
+              <div style={{
+                marginTop: '16px',
+                padding: '12px',
+                background: 'rgba(99, 102, 241, 0.08)',
+                borderRadius: '8px',
+                border: '1px solid rgba(99, 102, 241, 0.2)',
+              }}>
+                <p style={{ color: '#a5b4fc', fontSize: '0.78rem', margin: '0 0 8px 0' }}>
+                  💡 Try one of these UE5 topics:
+                </p>
+                {['Blueprint communication', 'Niagara particle systems', 'Landscape & terrain', 'C++ gameplay programming'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => {
+                      setQuery(suggestion);
+                      setPathError(null);
+                      setFeasibilityFailed(false);
+                    }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '6px 10px',
+                      margin: '4px 0',
+                      background: 'rgba(99, 102, 241, 0.12)',
+                      border: '1px solid rgba(99, 102, 241, 0.25)',
+                      borderRadius: '6px',
+                      color: '#c7d2fe',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={(e) => e.target.style.background = 'rgba(99, 102, 241, 0.25)'}
+                    onMouseOut={(e) => e.target.style.background = 'rgba(99, 102, 241, 0.12)'}
+                  >
+                    → {suggestion}
+                  </button>
+                ))}
+              </div>
+              <button className="adaptive-retry-btn" onClick={handleReset} style={{ marginTop: '16px' }}>
+                Try Something Else
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="adaptive-error-msg">⚠️ {pathError}</p>
+              <button className="adaptive-retry-btn" onClick={handleReset}>
+                Start Over
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -471,14 +541,14 @@ export default function AdaptivePath() {
                       textAlign: "center",
                       padding: "10px 16px",
                       fontSize: "0.75rem",
-                      color: "#7dd3fc",
-                      background: "rgba(125, 211, 252, 0.06)",
-                      border: "1px solid rgba(125, 211, 252, 0.15)",
+                      color: "#fbbf24",
+                      background: "rgba(251, 191, 36, 0.06)",
+                      border: "1px solid rgba(251, 191, 36, 0.15)",
                       borderRadius: "8px",
                       margin: "0 0 16px 0",
                     }}
                   >
-                    🎨 Custom AI-powered path created just for you!
+                    {aiWarning || "⚠️ Generated from AI knowledge — not from our verified course library"}
                     <br />
                     <span style={{ color: "#94a3b8", fontSize: "0.7rem" }}>
                       💡 Tip: Adding UE5-specific terms (e.g. &quot;horse <em>character in UE5</em>

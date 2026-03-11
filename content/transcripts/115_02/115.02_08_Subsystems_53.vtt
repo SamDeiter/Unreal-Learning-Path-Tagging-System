@@ -1,0 +1,233 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:06.200
+So now we have an understanding of our pawn types, controllers, animation, saving and loading,
+
+2
+00:00:06.200 --> 00:00:10.199
+the game world setup and other gameplay types that allow us to achieve our desired goals.
+
+3
+00:00:10.199 --> 00:00:16.199
+With all that in mind, we should maybe take a look to see if whether or not our technical designs need us to override any engine specific classes,
+
+4
+00:00:16.199 --> 00:00:20.199
+specifically the complex classes such as the game instance.
+
+5
+00:00:20.199 --> 00:00:24.649
+This is where the programming subsystems really do come in handy.
+
+6
+00:00:24.649 --> 00:00:28.649
+Programming subsystems allow us as developers to make use of instantiated classes
+
+7
+00:00:28.649 --> 00:00:33.450
+to implement functionality without needing to override engine classes.
+
+8
+00:00:33.450 --> 00:00:37.450
+The lifetime of a subsystem is managed. This means that we have a definitive start and end
+
+9
+00:00:37.450 --> 00:00:40.450
+that we can use to drive any functionality that we want.
+
+10
+00:00:40.450 --> 00:00:47.340
+The lifespan of a subsystem will vary depending on which subsystem you use, but we'll cover those in just a second.
+
+11
+00:00:47.340 --> 00:00:51.409
+So to put it into better context, let's say that we're considering a piece of functionality
+
+12
+00:00:51.409 --> 00:00:54.409
+and we've identified that the game instance fits our needs.
+
+13
+00:00:54.409 --> 00:00:59.409
+This is a really complex class and whilst it is perfectly fine to add whatever functionality we want,
+
+14
+00:00:59.409 --> 00:01:03.409
+it might bloat our class beyond what we really need it to, and if we haven't already overridden it,
+
+15
+00:01:03.409 --> 00:01:07.409
+then it might feel a bit overkill to override it to add our new functionality.
+
+16
+00:01:07.409 --> 00:01:11.019
+This is where the benefits of a programming subsystem come into play.
+
+17
+00:01:11.019 --> 00:01:15.019
+We can simply extend from a chosen subsystem class and piggyback on the back of that
+
+18
+00:01:15.019 --> 00:01:18.019
+for its initialisation to implement our own functionality.
+
+19
+00:01:18.019 --> 00:01:22.819
+Furthermore, programming subsystems provide easy to use extension points
+
+20
+00:01:22.819 --> 00:01:26.819
+where developers can get Blueprint and Python exposure straight away.
+
+21
+00:01:26.819 --> 00:01:30.819
+And it's all done without having to override any engine classes in the process.
+
+22
+00:01:30.819 --> 00:01:34.819
+So as we can see, the Unreal Engine offers us some supported subsystems straight out of the box.
+
+23
+00:01:34.819 --> 00:01:38.819
+And as can be seen here, all we need to do is identify our desired subsystem
+
+24
+00:01:38.819 --> 00:01:40.819
+and simply inherit from that class.
+
+25
+00:01:40.819 --> 00:01:45.840
+As we've discussed, programming subsystems have got a managed lifetime.
+
+26
+00:01:45.840 --> 00:01:48.840
+However, their lifetime will vary depending on which subsystem you use.
+
+27
+00:01:48.840 --> 00:01:52.480
+So if we take the Engine and Editor subsystems as an example,
+
+28
+00:01:52.480 --> 00:01:56.480
+these share common initialisation and de-initialisation points.
+
+29
+00:01:56.480 --> 00:01:59.510
+Both of their subsystems will be spanned up and spanned down
+
+30
+00:01:59.510 --> 00:02:02.510
+when their corresponding modules are created and turned down.
+
+31
+00:02:02.510 --> 00:02:06.700
+To give access to these in C++, we simply use the global GEngine
+
+32
+00:02:06.700 --> 00:02:09.699
+or GEditor pointers that are available to programmers.
+
+33
+00:02:09.699 --> 00:02:15.759
+As for the game instance subsystem, this is spun up and spun down alongside the game instance itself,
+
+34
+00:02:15.759 --> 00:02:17.759
+which we've already covered previously.
+
+35
+00:02:17.759 --> 00:02:21.020
+To grab a hold of the game instance subsystem, all we simply need to do
+
+36
+00:02:21.020 --> 00:02:24.020
+is grab a reference to the game instance from our world.
+
+37
+00:02:24.020 --> 00:02:27.979
+The local player is possibly a bit more unique
+
+38
+00:02:27.979 --> 00:02:30.979
+in that the local player is created when the player enters the world
+
+39
+00:02:30.979 --> 00:02:32.979
+and is held by the player's player controller.
+
+40
+00:02:32.979 --> 00:02:36.979
+It's worth noting that the subsystem will only exist on the server or owning client,
+
+41
+00:02:36.979 --> 00:02:41.300
+as the player controllers are not replicated to any remote clients.
+
+42
+00:02:41.300 --> 00:02:45.300
+Lastly, we can go over how to access a subsystem from outside of C++.
+
+43
+00:02:45.300 --> 00:02:50.810
+As we've already covered, programming subsystems can be accessed via Blueprint or Python.
+
+44
+00:02:50.810 --> 00:02:54.479
+Within Blueprint, all we simply have to do is grab our desired subsystem
+
+45
+00:02:54.479 --> 00:02:59.150
+and call whatever function that we have exposed for Blueprint to use.
+
+46
+00:02:59.150 --> 00:03:02.150
+As for Python, you can follow the example at the bottom of the slide.
+
+47
+00:03:02.150 --> 00:03:04.439
+It's important to note that the Python integration
+
+48
+00:03:04.439 --> 00:03:08.439
+is currently considered an experimental feature in the engine.
+
+49
+00:03:08.439 --> 00:03:12.300
+And that concludes introduction to gameplay in Unreal Engine.
+
+50
+00:03:12.300 --> 00:03:16.620
+Today, we learned about the core classes involved in Unreal's gameplay framework,
+
+51
+00:03:16.620 --> 00:03:22.099
+such as the player and player controller, as well as how to set up a game world.
+
+52
+00:03:22.099 --> 00:03:27.099
+We've looked at the basic building blocks of animation, such as montages and skeletons.
+
+53
+00:03:27.099 --> 00:03:29.099
+And we've learned about how Unreal handles input
+
+54
+00:03:29.099 --> 00:03:33.099
+and what systems Unreal provides when going about building our control schemes.
+
+55
+00:03:33.099 --> 00:03:35.460
+We've covered delegates and events,
+
+56
+00:03:35.460 --> 00:03:39.460
+as well as helper libraries that come with Unreal straight out of the box.
+
+57
+00:03:39.460 --> 00:03:44.840
+We looked at serialization before wrapping up with programming subsystems.
+
+58
+00:03:44.840 --> 00:03:46.840
+Thanks so much for watching, and have a fantastic day.

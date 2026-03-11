@@ -1,0 +1,789 @@
+WEBVTT
+
+1
+00:00:01.199 --> 00:00:03.359
+So we know now how to create a character
+
+2
+00:00:03.359 --> 00:00:04.679
+and have them respond to input
+
+3
+00:00:04.679 --> 00:00:06.280
+and have them animate as they do so.
+
+4
+00:00:06.280 --> 00:00:07.259
+But what is the glue
+
+5
+00:00:07.259 --> 00:00:09.640
+that binds all of these classes together?
+
+6
+00:00:09.640 --> 00:00:13.589
+Let's take a look at how we set up a world in Unreal.
+
+7
+00:00:13.589 --> 00:00:14.769
+There are two main classes
+
+8
+00:00:14.769 --> 00:00:17.859
+that handle what game is being played.
+
+9
+00:00:17.859 --> 00:00:19.120
+Firstly, we have the game mode
+
+10
+00:00:19.120 --> 00:00:21.600
+and this handles the rules for the current game.
+
+11
+00:00:21.600 --> 00:00:24.359
+That could be how many players are allowed to connect,
+
+12
+00:00:24.359 --> 00:00:25.879
+where do these players spawn
+
+13
+00:00:25.879 --> 00:00:28.559
+and how many points will earn a team a win.
+
+14
+00:00:28.559 --> 00:00:30.120
+The game mode is the intended home
+
+15
+00:00:30.120 --> 00:00:31.719
+for this kind of logic.
+
+16
+00:00:31.719 --> 00:00:34.600
+And in a networked game, the game mode is server only
+
+17
+00:00:34.600 --> 00:00:37.820
+because we need it to be authoritative.
+
+18
+00:00:37.820 --> 00:00:39.780
+The game state on the other hand
+
+19
+00:00:39.780 --> 00:00:40.979
+is a replicated actor
+
+20
+00:00:40.979 --> 00:00:43.100
+that contains all of the pertinent information
+
+21
+00:00:43.100 --> 00:00:45.679
+about the set game mode.
+
+22
+00:00:45.679 --> 00:00:47.939
+Let's take capture the flag as an example.
+
+23
+00:00:47.939 --> 00:00:50.399
+The game mode would handle actually capturing the flag
+
+24
+00:00:50.399 --> 00:00:52.340
+and the allocation of the points.
+
+25
+00:00:52.340 --> 00:00:54.479
+Those points are then stored in the game state
+
+26
+00:00:54.479 --> 00:00:57.429
+where any client can easily see them.
+
+27
+00:00:57.429 --> 00:00:59.950
+There's also a third critical class that we can implement
+
+28
+00:00:59.950 --> 00:01:02.619
+and that is the game instance.
+
+29
+00:01:02.619 --> 00:01:04.379
+While the game mode and game state
+
+30
+00:01:04.379 --> 00:01:07.099
+are destroyed and recreated between levels,
+
+31
+00:01:07.099 --> 00:01:10.500
+think of the score beam reset when we move to a new map,
+
+32
+00:01:10.500 --> 00:01:11.980
+the game instance is created
+
+33
+00:01:11.980 --> 00:01:14.239
+as soon as the game EXE is executed
+
+34
+00:01:14.239 --> 00:01:17.349
+and persists across all maps.
+
+35
+00:01:17.349 --> 00:01:19.189
+We use the game instance to store data
+
+36
+00:01:19.189 --> 00:01:21.750
+that we want to transfer between levels.
+
+37
+00:01:21.750 --> 00:01:23.590
+Building on our capture the flag example,
+
+38
+00:01:23.590 --> 00:01:26.829
+so we pick the red team in the main menu.
+
+39
+00:01:26.829 --> 00:01:28.969
+When we load into the actual gameplay map,
+
+40
+00:01:28.969 --> 00:01:30.689
+we'd want the game mode to assign you
+
+41
+00:01:30.689 --> 00:01:32.670
+to the team of your choosing.
+
+42
+00:01:33.189 --> 00:01:34.469
+As the game instance persists,
+
+43
+00:01:34.469 --> 00:01:37.189
+we can safely bring that data along from the main menu
+
+44
+00:01:37.189 --> 00:01:40.260
+over into the main level.
+
+45
+00:01:40.260 --> 00:01:42.420
+The game mode gives us exceptionally useful
+
+46
+00:01:42.420 --> 00:01:44.019
+virtual functions to implement,
+
+47
+00:01:44.019 --> 00:01:45.780
+allowing us to shape any kind of game mode
+
+48
+00:01:45.780 --> 00:01:47.859
+that we would choose.
+
+49
+00:01:47.859 --> 00:01:49.459
+The game mode is the default class
+
+50
+00:01:49.459 --> 00:01:51.299
+that comes with the engine as a 4.14
+
+51
+00:01:51.299 --> 00:01:54.540
+and is a more streamlined version of game mode base
+
+52
+00:01:54.540 --> 00:01:55.980
+with a lot of the convenience functions
+
+53
+00:01:55.980 --> 00:01:59.650
+we'd expect of most standard multiplayer modes.
+
+54
+00:01:59.650 --> 00:02:02.370
+As an example, we have the init game function
+
+55
+00:02:02.370 --> 00:02:05.609
+and this is called exceptionally early in the game flow.
+
+56
+00:02:05.609 --> 00:02:07.090
+This is our initial kickoff
+
+57
+00:02:07.090 --> 00:02:08.090
+and it's called even before
+
+58
+00:02:08.090 --> 00:02:10.370
+the pre-initialize components function.
+
+59
+00:02:10.370 --> 00:02:11.770
+It's used by the game mode base
+
+60
+00:02:11.770 --> 00:02:15.849
+to initialize parameters and spawn any helper classes.
+
+61
+00:02:15.849 --> 00:02:17.629
+Additionally, we have pre-login
+
+62
+00:02:17.629 --> 00:02:20.629
+and this is called as new players request to join the game
+
+63
+00:02:20.629 --> 00:02:22.310
+and it's ultimately in charge of accepting
+
+64
+00:02:22.310 --> 00:02:24.560
+or rejecting that connection.
+
+65
+00:02:24.560 --> 00:02:27.639
+It's called before the proper full fledged login function
+
+66
+00:02:27.639 --> 00:02:30.860
+with a potentially non-trivial time in between the two,
+
+67
+00:02:30.860 --> 00:02:32.180
+especially if the joining player
+
+68
+00:02:32.219 --> 00:02:35.699
+has a lot of content to download before joining.
+
+69
+00:02:35.699 --> 00:02:37.039
+We also have post login
+
+70
+00:02:37.039 --> 00:02:38.960
+and this is called after a successful login
+
+71
+00:02:38.960 --> 00:02:40.580
+and it's the first place it's safe to call
+
+72
+00:02:40.580 --> 00:02:42.460
+any replicated or networked functionality
+
+73
+00:02:42.460 --> 00:02:44.409
+on the joined client.
+
+74
+00:02:44.409 --> 00:02:45.889
+We've got a nice convenience function here
+
+75
+00:02:45.889 --> 00:02:48.229
+called on post login that can be hooked up in blueprint
+
+76
+00:02:48.229 --> 00:02:49.789
+for a designer to expand.
+
+77
+00:02:49.789 --> 00:02:52.069
+So say we want to add some kind of UI sting
+
+78
+00:02:52.069 --> 00:02:55.580
+to the screen saying someone has joined the game.
+
+79
+00:02:55.580 --> 00:02:58.099
+Next, we've got the handle starting new player function
+
+80
+00:02:58.099 --> 00:03:00.740
+and this is called after post login.
+
+81
+00:03:00.740 --> 00:03:02.500
+By default, it spawns the pawn in
+
+82
+00:03:02.500 --> 00:03:04.319
+but we could extend it to do anything we want to,
+
+83
+00:03:04.319 --> 00:03:06.699
+say, changing the mesh of a particular player
+
+84
+00:03:06.699 --> 00:03:10.090
+or assigning them to a team.
+
+85
+00:03:10.090 --> 00:03:12.370
+Next, we've got spawn default pawn at transform
+
+86
+00:03:12.370 --> 00:03:13.210
+and this is a function
+
+87
+00:03:13.210 --> 00:03:16.289
+that actually does the spawning of that pawn.
+
+88
+00:03:16.289 --> 00:03:17.770
+And finally, we've got logout
+
+89
+00:03:17.770 --> 00:03:19.330
+and this is called when a player leaves the game
+
+90
+00:03:19.330 --> 00:03:21.349
+or is destroyed.
+
+91
+00:03:21.349 --> 00:03:23.069
+On logout is called in blueprint.
+
+92
+00:03:23.069 --> 00:03:25.870
+So say we want a player has left the game UI prompt
+
+93
+00:03:25.870 --> 00:03:29.110
+to show on the screen.
+
+94
+00:03:29.110 --> 00:03:31.270
+Any number of classes extending off of game mode
+
+95
+00:03:31.270 --> 00:03:33.469
+can be created all with different rules.
+
+96
+00:03:33.469 --> 00:03:35.349
+So your classic capture the flag, death match
+
+97
+00:03:35.590 --> 00:03:37.310
+and search and destroy would all be game modes
+
+98
+00:03:37.310 --> 00:03:38.550
+with their own sets of rules
+
+99
+00:03:38.550 --> 00:03:41.370
+and methods for spawning players in.
+
+100
+00:03:41.370 --> 00:03:44.710
+When talking about game mode as opposed to game mode base,
+
+101
+00:03:44.710 --> 00:03:47.419
+we have access to match states.
+
+102
+00:03:47.419 --> 00:03:49.919
+For example, we have the match state entering map
+
+103
+00:03:49.919 --> 00:03:52.620
+followed by in progress and waiting to start.
+
+104
+00:03:52.620 --> 00:03:54.419
+Waiting to start being your classic
+
+105
+00:03:54.419 --> 00:03:57.419
+waiting for more players to join state.
+
+106
+00:03:57.419 --> 00:03:59.259
+From there, we've got waiting post match.
+
+107
+00:03:59.259 --> 00:04:01.139
+Say we want to view the player scores
+
+108
+00:04:01.139 --> 00:04:04.009
+or vote on the next level to travel to
+
+109
+00:04:04.009 --> 00:04:07.719
+before proceeding into the leaving map state.
+
+110
+00:04:07.719 --> 00:04:09.520
+The Unreal Engine goes through a game flow
+
+111
+00:04:09.520 --> 00:04:13.280
+that determines when the necessary classes are initialized.
+
+112
+00:04:13.280 --> 00:04:15.240
+Similar to the life cycle of an actor,
+
+113
+00:04:15.240 --> 00:04:16.819
+how all this flows will depend differing
+
+114
+00:04:16.819 --> 00:04:18.480
+on whether or not you're starting in the editor
+
+115
+00:04:18.480 --> 00:04:21.569
+or launching a standalone game.
+
+116
+00:04:21.569 --> 00:04:22.769
+So the first thing we need to notice
+
+117
+00:04:22.769 --> 00:04:24.250
+is that when we start from the editor,
+
+118
+00:04:24.250 --> 00:04:25.730
+we initialize the editor engine
+
+119
+00:04:25.730 --> 00:04:28.519
+and then we start the engine proper.
+
+120
+00:04:28.519 --> 00:04:30.660
+It's only once we've hit play in editor button
+
+121
+00:04:30.660 --> 00:04:32.660
+that we actually create the game instance.
+
+122
+00:04:32.660 --> 00:04:33.980
+Whereas in a standalone game,
+
+123
+00:04:33.980 --> 00:04:35.139
+we initialize our game engine
+
+124
+00:04:35.139 --> 00:04:38.300
+and then create the game instance.
+
+125
+00:04:38.300 --> 00:04:39.920
+From there, we can see that we differ slightly
+
+126
+00:04:39.920 --> 00:04:42.300
+in the steps taken after the creation of the game instance.
+
+127
+00:04:42.300 --> 00:04:44.220
+However, both paths eventually lead
+
+128
+00:04:44.220 --> 00:04:47.519
+to calling begin play on the world.
+
+129
+00:04:47.519 --> 00:04:49.480
+All of this information is worth bearing in mind
+
+130
+00:04:49.480 --> 00:04:50.660
+when you actually come to decide
+
+131
+00:04:50.660 --> 00:04:53.389
+where to place any of your game logic.
+
+132
+00:04:53.389 --> 00:04:55.470
+As we can see with the spinning up of the game instance,
+
+133
+00:04:55.470 --> 00:04:57.550
+it happens exceptionally early on in the process,
+
+134
+00:04:57.550 --> 00:04:59.310
+whereas the game mode only exists
+
+135
+00:04:59.310 --> 00:05:02.870
+when the gold is ready to start playing.
+
+136
+00:05:02.870 --> 00:05:05.389
+The game mode can be set in a few ways.
+
+137
+00:05:05.389 --> 00:05:07.089
+The first is to set it on a project level
+
+138
+00:05:07.129 --> 00:05:08.730
+through the game map settings section
+
+139
+00:05:08.730 --> 00:05:11.050
+in the default engine.ini config file
+
+140
+00:05:11.050 --> 00:05:14.959
+with your usual ini key pair syntax.
+
+141
+00:05:14.959 --> 00:05:17.040
+We can also set it on a per level basis
+
+142
+00:05:17.040 --> 00:05:19.560
+through the world settings tab in the editor.
+
+143
+00:05:19.560 --> 00:05:21.120
+This is very useful when you want to consider
+
+144
+00:05:21.120 --> 00:05:23.480
+non-gameplay maps such as the main menu.
+
+145
+00:05:23.480 --> 00:05:26.339
+We may just want a level with no real gameplay rules,
+
+146
+00:05:26.339 --> 00:05:28.560
+just a map to load into to act as an entry point
+
+147
+00:05:28.560 --> 00:05:31.459
+for any player input.
+
+148
+00:05:31.459 --> 00:05:33.860
+As mentioned previously, the game state is responsible
+
+149
+00:05:33.860 --> 00:05:36.459
+for keeping track of game mode data.
+
+150
+00:05:36.459 --> 00:05:38.019
+More specifically, it keeps track
+
+151
+00:05:38.579 --> 00:05:39.819
+of the data that is intended to be visible
+
+152
+00:05:39.819 --> 00:05:42.120
+to all connected clients.
+
+153
+00:05:42.120 --> 00:05:44.519
+That might be the score, the time until the end of the game,
+
+154
+00:05:44.519 --> 00:05:45.899
+the time since the start of the game,
+
+155
+00:05:45.899 --> 00:05:49.240
+or even the list of other players in the match.
+
+156
+00:05:49.240 --> 00:05:51.319
+It's the game state that replicates down to clients,
+
+157
+00:05:51.319 --> 00:05:53.399
+giving them access to the current state of the game,
+
+158
+00:05:53.399 --> 00:05:55.750
+not the game mode.
+
+159
+00:05:55.750 --> 00:05:57.149
+The game state shouldn't, however,
+
+160
+00:05:57.149 --> 00:05:59.589
+keep track of specific player data.
+
+161
+00:05:59.589 --> 00:06:01.129
+There's a class specifically for this
+
+162
+00:06:01.129 --> 00:06:02.009
+called the player state,
+
+163
+00:06:02.009 --> 00:06:05.069
+which we're gonna touch on in just a moment.
+
+164
+00:06:05.069 --> 00:06:07.189
+The game state is trivially expandable.
+
+165
+00:06:07.189 --> 00:06:08.930
+It's basically just a publicly accessible
+
+166
+00:06:08.949 --> 00:06:11.129
+replicated class that contains data.
+
+167
+00:06:11.129 --> 00:06:13.970
+So most use cases are to simply add additional variables
+
+168
+00:06:13.970 --> 00:06:17.360
+depending on the game mode that you're authoring.
+
+169
+00:06:17.360 --> 00:06:18.240
+Much like the game state,
+
+170
+00:06:18.240 --> 00:06:19.600
+there's also a player state class
+
+171
+00:06:19.600 --> 00:06:22.579
+and it's intended for much of the same uses.
+
+172
+00:06:22.579 --> 00:06:24.180
+This is for storing player data,
+
+173
+00:06:24.180 --> 00:06:27.319
+say your own score during a death match.
+
+174
+00:06:27.319 --> 00:06:28.180
+Consider the following.
+
+175
+00:06:28.180 --> 00:06:29.579
+We have a death flow that results
+
+176
+00:06:29.579 --> 00:06:30.779
+in the porn being destroyed,
+
+177
+00:06:30.779 --> 00:06:32.860
+which is a fairly typical flow.
+
+178
+00:06:32.860 --> 00:06:34.819
+We have our player die and let them get respawned
+
+179
+00:06:34.819 --> 00:06:37.500
+through the restart player function in the game mode.
+
+180
+00:06:37.500 --> 00:06:40.040
+But where do we keep their score?
+
+181
+00:06:40.040 --> 00:06:41.620
+We could keep it in the player controller,
+
+182
+00:06:41.620 --> 00:06:43.000
+but that doesn't really make much sense
+
+183
+00:06:43.000 --> 00:06:44.600
+in terms of architecture.
+
+184
+00:06:44.600 --> 00:06:47.870
+And this is where the player state comes in.
+
+185
+00:06:47.870 --> 00:06:50.069
+We can add any number of variables to our player state
+
+186
+00:06:50.069 --> 00:06:53.519
+and have them survive our game's death flow.
+
+187
+00:06:53.519 --> 00:06:55.319
+The player state is also replicated
+
+188
+00:06:55.319 --> 00:06:58.000
+and fully supports client to server remote procedure calls
+
+189
+00:06:58.000 --> 00:07:00.240
+or RPCs because they're ultimately owned
+
+190
+00:07:00.240 --> 00:07:01.600
+by the player controller.
+
+191
+00:07:01.600 --> 00:07:03.500
+And this is gonna give us a direct line of communication
+
+192
+00:07:03.500 --> 00:07:06.519
+from the client to the server.
+
+193
+00:07:06.519 --> 00:07:08.600
+The player state is set through the game mode.
+
+194
+00:07:08.600 --> 00:07:10.360
+The game mode has a public member
+
+195
+00:07:10.360 --> 00:07:11.720
+called player state class.
+
+196
+00:07:11.720 --> 00:07:13.160
+And it's here that we actually set the class
+
+197
+00:07:13.160 --> 00:07:15.360
+that we intend to use as the player state.

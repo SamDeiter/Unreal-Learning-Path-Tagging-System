@@ -29,6 +29,56 @@ export { sequencePath, computeTopicOverlap } from "./pathSequencer";
 export { generateBridgeNarration } from "./pathNarration";
 export { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
 
+// ── Phase 0: UE5 Query Feasibility Gate ──
+// Prevents hallucinated paths for off-topic queries (e.g., "Horses in UE5")
+const UE5_DOMAINS = [
+  'blueprint', 'material', 'landscape', 'niagara', 'animation',
+  'ai', 'navigation', 'physics', 'collision', 'widget', 'umg',
+  'common ui', 'networking', 'replication', 'pcg', 'procedural',
+  'metahuman', 'nanite', 'lumen', 'virtual shadow', 'mass',
+  'gameplay ability', 'gas', 'data asset', 'subsystem',
+  'c++', 'actor', 'component', 'pawn', 'character', 'controller',
+  'game mode', 'game state', 'sequencer', 'level', 'world',
+  'packaging', 'deployment', 'lighting', 'rendering', 'shader',
+  'texture', 'mesh', 'static mesh', 'skeletal mesh', 'fbx',
+  'import', 'export', 'fab', 'marketplace', 'plugin',
+  'modeling', 'modelling', 'uv', 'unwrap', 'retopology',
+  'cinematic', 'camera', 'hud', 'inventory', 'dialogue',
+  'behavior tree', 'blackboard', 'eqs', 'pathfinding',
+  'audio', 'sound', 'metasound', 'quartz',
+  'chaos', 'destruction', 'fracture', 'water', 'ocean',
+  'foliage', 'terrain', 'world partition', 'data layer',
+  'source control', 'perforce', 'git', 'multiplayer',
+  'dedicated server', 'listen server', 'session',
+  'save game', 'serialization', 'data table', 'curve',
+  'motion matching', 'control rig', 'ik', 'ragdoll',
+  'post process', 'volumetric', 'fog', 'cloud', 'sky',
+  'blueprint interface', 'event dispatcher', 'delegate',
+  'enum', 'struct', 'array', 'map', 'set',
+  'widget blueprint', 'anchor', 'canvas', 'slate',
+  'cooking', 'pak', 'IoStore', 'shipping',
+  'live link', 'motion capture', 'mocap',
+  'pixel streaming', 'nDisplay', 'virtual production',
+  'game instance', 'player state', 'hism', 'instancing',
+  'spline', 'cable', 'rope', 'chain',
+  'verse', 'uefn', 'fortnite creative',
+];
+
+const UE5_ENGINE_REGEX = /unreal|ue5|ue4|blueprint|editor|game\s*dev|level\s*design|game\s*engine/i;
+
+/**
+ * Check whether a query is related to Unreal Engine 5.
+ * Used as a gate before hybrid AI fallback to prevent hallucinations.
+ * @param {string} query - The user's search query
+ * @returns {boolean} true if the query appears UE5-relevant
+ */
+export function isQueryUE5Relevant(query) {
+  const queryLower = query.toLowerCase();
+  const hasDomainTerm = UE5_DOMAINS.some(d => queryLower.includes(d));
+  const mentionsEngine = UE5_ENGINE_REGEX.test(query);
+  return hasDomainTerm || mentionsEngine;
+}
+
 // Internal imports for orchestration
 import { findRelevantSegments } from "./pathSearch";
 import { SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
@@ -269,6 +319,23 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
 
     if (forceHybrid) {
       devLog(`[BespokePath] Hybrid fallback triggered (reason: ${hybridReason})`);
+
+      // ── Phase 0: Query Feasibility Gate ──
+      // Before generating from AI knowledge, verify the query is actually about UE5.
+      // This prevents hallucinated paths for off-topic queries like "Horses in UE5".
+      const queryIsRelevant = isQueryUE5Relevant(userQuery);
+      if (!queryIsRelevant) {
+        devWarn(`[BespokePath] Feasibility gate BLOCKED query: "${userQuery}" — not UE5-relevant`);
+        trackHybridFallbackTriggered({
+          reason: 'feasibility_blocked',
+          bestSimilarity,
+          corpusSegments: segments.length,
+        });
+        result.error = "This topic doesn't appear to be related to Unreal Engine 5. Try a UE5-specific query like 'lighting setup', 'Blueprint communication', or 'Niagara particle systems'.";
+        result.feasibilityFailed = true;
+        return result;
+      }
+
       trackHybridFallbackTriggered({
         reason: hybridReason,
         bestSimilarity,
@@ -276,6 +343,7 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       });
       result.path = await generateHybridPath(userQuery, knowledgeProfile);
       result.isAiGenerated = true;
+      result.aiGeneratedWarning = "⚠️ Generated from AI knowledge — not from our verified course library";
 
       if (result.path.length === 0) {
         result.error =

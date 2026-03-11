@@ -1,0 +1,737 @@
+WEBVTT
+
+1
+00:00:01.169 --> 00:00:05.669
+Whilst we could roll our own solution for input by polling for keys every frame, Unreal
+
+2
+00:00:05.669 --> 00:00:09.929
+provides a fantastic and flexible way of adding inputs to our game with full keyboard, mouse,
+
+3
+00:00:09.929 --> 00:00:13.470
+controller, joystick, touch and VR support.
+
+4
+00:00:13.470 --> 00:00:16.949
+Unreal supports two systems when it comes to handling input.
+
+5
+00:00:16.949 --> 00:00:20.109
+There's the old, what we're going to call legacy input support that is rooted
+
+6
+00:00:20.109 --> 00:00:21.670
+heavily in Unreal 4.
+
+7
+00:00:21.670 --> 00:00:25.980
+And then there's the newer, more flexible and feature-rich enhanced input.
+
+8
+00:00:25.980 --> 00:00:30.260
+The legacy system offers a system that can handle hardware inputs, be it from keyboard
+
+9
+00:00:30.260 --> 00:00:33.460
+and mouse, console controllers and touch controls.
+
+10
+00:00:33.460 --> 00:00:37.500
+Specialised input devices that don't conform to the aforementioned inputs can also be handled
+
+11
+00:00:37.500 --> 00:00:40.530
+through the raw input plugin.
+
+12
+00:00:40.530 --> 00:00:44.729
+The player input is a U object that resides within the player controller, and it's tasked
+
+13
+00:00:44.729 --> 00:00:46.450
+with managing the player's input.
+
+14
+00:00:46.450 --> 00:00:50.369
+It's also important to note that this object is only spawned on the client, so we have
+
+15
+00:00:50.369 --> 00:00:54.070
+no server-side input.
+
+16
+00:00:54.070 --> 00:00:58.490
+Within Unreal, we can make use of two modes of input binding.
+
+17
+00:00:58.490 --> 00:01:01.000
+The first is an action mapping.
+
+18
+00:01:01.000 --> 00:01:04.519
+These will map a button or key pressed to a friendly name that will later be bound to
+
+19
+00:01:04.519 --> 00:01:06.359
+gameplay behaviours.
+
+20
+00:01:06.359 --> 00:01:10.000
+This is not polled, rather the gameplay behaviour linked to this mapping will fire
+
+21
+00:01:10.000 --> 00:01:12.799
+when the button in question is pressed or released.
+
+22
+00:01:12.799 --> 00:01:16.000
+Secondly, we've got axis mappings.
+
+23
+00:01:16.000 --> 00:01:19.260
+These will map a button or key pressed to a friendly name that will later be bound to
+
+24
+00:01:19.260 --> 00:01:23.340
+a continuous gameplay behaviour, such as player movement.
+
+25
+00:01:23.340 --> 00:01:27.219
+These mappings are polled continuously, even when they're not being pressed, in which case
+
+26
+00:01:27.219 --> 00:01:31.500
+they're going to return a value of zero.
+
+27
+00:01:31.500 --> 00:01:35.019
+Input mapping can be done both in native, as we can see at the top of the slide, or
+
+28
+00:01:35.019 --> 00:01:39.799
+in the Unreal Engine editor, as we can see at the bottom of the slide.
+
+29
+00:01:39.799 --> 00:01:43.319
+Whilst within the editor, we can access the input binding mappings through the project
+
+30
+00:01:43.319 --> 00:01:45.780
+settings menu.
+
+31
+00:01:45.780 --> 00:01:49.439
+Under the engine menu header on the left, we can select input, which will then take
+
+32
+00:01:49.439 --> 00:01:53.060
+us to the window that we can see at the bottom of this slide.
+
+33
+00:01:53.060 --> 00:01:57.319
+Input binding in Unreal is simple and can be done in both native C++ and blueprint,
+
+34
+00:01:57.319 --> 00:02:01.939
+giving developers flexibility in how they implement this functionality.
+
+35
+00:02:02.019 --> 00:02:08.189
+Next we can look at a simple native C++ implementation of binding to our input in our gameplay code.
+
+36
+00:02:08.189 --> 00:02:12.590
+As we can see in the first image, we simply override the setupPlayerInputComponent function,
+
+37
+00:02:12.590 --> 00:02:17.340
+which passes through the input component for the character in this example.
+
+38
+00:02:17.340 --> 00:02:21.419
+To bind an action, we simply feed through the action name, in our case jump, and
+
+39
+00:02:21.419 --> 00:02:26.210
+then how we want to react to this event either on the key pressed or on the key released.
+
+40
+00:02:26.210 --> 00:02:29.289
+Next we pass through the object that the function will be called on, and then lastly
+
+41
+00:02:29.289 --> 00:02:32.979
+we pass through a function pointer that will be called directly.
+
+42
+00:02:32.979 --> 00:02:37.300
+For an axis binding, again we feed through an action name, in our case moveForward.
+
+43
+00:02:37.300 --> 00:02:39.919
+Then we pass through the object that we want to call this function on, and lastly the
+
+44
+00:02:39.919 --> 00:02:42.080
+function pointer.
+
+45
+00:02:42.080 --> 00:02:46.020
+Because an axis binding is continuously polled, we don't need to pass through a pressed
+
+46
+00:02:46.020 --> 00:02:50.580
+or released parameter, it's going to be polled regardless.
+
+47
+00:02:50.580 --> 00:02:55.750
+And now for the blueprint implementation, and as we can see, it is much much more simple.
+
+48
+00:02:55.750 --> 00:02:59.389
+Having created our input mappings as shown on the previous slide, Unreal will create
+
+49
+00:02:59.389 --> 00:03:05.550
+handy InputAxis and InputAction events that match the name of our input mappings.
+
+50
+00:03:05.550 --> 00:03:09.069
+In the top node, we have our continuously polled axis mapping, which feeds through the
+
+51
+00:03:09.069 --> 00:03:12.430
+value detected by the input system.
+
+52
+00:03:12.430 --> 00:03:16.210
+We still need to keep in mind that even though a button is not pressed, it will continue
+
+53
+00:03:16.210 --> 00:03:20.530
+to feed through a value of 0 to any of these bindings.
+
+54
+00:03:20.530 --> 00:03:24.379
+We can see on the bottom node that we have our action mappings.
+
+55
+00:03:24.379 --> 00:03:28.180
+Blueprint allows us to use either the pressed and or released callbacks to bind our gameplay
+
+56
+00:03:28.180 --> 00:03:33.139
+functionality, as well as feed through the key that was detected.
+
+57
+00:03:33.139 --> 00:03:36.379
+So now that we know how input mapping and input binding works, we should maybe take
+
+58
+00:03:36.379 --> 00:03:41.060
+a look at how the actual input is processed under the hood.
+
+59
+00:03:41.060 --> 00:03:45.620
+The Enhanced Input System is a plugin that makes creating and manipulating inputs easier
+
+60
+00:03:45.620 --> 00:03:48.629
+by means of making them asset based.
+
+61
+00:03:48.629 --> 00:03:51.870
+There are two types of asset we need to be familiar with when working with the Enhanced
+
+62
+00:03:51.870 --> 00:03:53.530
+Input System.
+
+63
+00:03:53.530 --> 00:03:58.229
+The first is the InputAction, and this defines the concept of a binding.
+
+64
+00:03:58.229 --> 00:04:02.740
+For example, we might create a new asset called WalkForwards or Jump.
+
+65
+00:04:02.740 --> 00:04:07.259
+We've not actually linked the idea to a set of keys or modifiers, merely outlined that
+
+66
+00:04:07.259 --> 00:04:11.360
+walking forwards and jumping is something that we want to be able to do in our game
+
+67
+00:04:11.360 --> 00:04:14.110
+and bind gameplay functionality to it.
+
+68
+00:04:14.110 --> 00:04:18.629
+In this sense, we can think of an InputAction as a way of identifying a particular section
+
+69
+00:04:18.629 --> 00:04:21.930
+of the keyboard bindings later down the line.
+
+70
+00:04:21.930 --> 00:04:27.170
+The InputContext lets us marry that InputAction to a set of hardware inputs such as keys
+
+71
+00:04:27.170 --> 00:04:30.000
+to be used in our gameplay code.
+
+72
+00:04:30.000 --> 00:04:33.920
+The InputAction asset is actually fairly sparse in terms of settings and parameters
+
+73
+00:04:33.920 --> 00:04:34.920
+for us to play with.
+
+74
+00:04:34.920 --> 00:04:39.300
+The most important parameter we should look at is the value type where we specify what
+
+75
+00:04:39.300 --> 00:04:43.329
+kind of data we expect this input to produce.
+
+76
+00:04:43.329 --> 00:04:49.360
+Digital is a 0 or a 1, ideal for fire and forget actions such as jumping.
+
+77
+00:04:49.360 --> 00:04:54.420
+Axis 1 is ideal for strength based inputs like move forwards.
+
+78
+00:04:54.420 --> 00:04:59.259
+Axis 2 is good for bi-directional inputs such as thumbstick input, assessing both X
+
+79
+00:04:59.259 --> 00:05:02.089
+and Y at the same time.
+
+80
+00:05:02.089 --> 00:05:05.889
+Axis 3 is good for things like spatial movements or inputs that take into account
+
+81
+00:05:05.889 --> 00:05:09.550
+a vertical movement like VR input.
+
+82
+00:05:09.550 --> 00:05:13.930
+As mentioned earlier in this topic, an InputContext gives us a method of linking input actions
+
+83
+00:05:13.930 --> 00:05:16.189
+to keys and behaviors.
+
+84
+00:05:16.189 --> 00:05:19.970
+In terms of actual setup, we can see we simply choose what input action we want to
+
+85
+00:05:19.970 --> 00:05:25.389
+add to our context before defining what hardware inputs we want to link to it.
+
+86
+00:05:25.389 --> 00:05:29.689
+You can also see that we have an array of modifiers per key, and this is fantastically
+
+87
+00:05:29.689 --> 00:05:32.790
+useful when dealing with things like dead zones.
+
+88
+00:05:32.790 --> 00:05:36.769
+We can simply add a dead zone modifier to our thumbstick binding, and Unreal will
+
+89
+00:05:36.769 --> 00:05:40.470
+handle filtering out the dead zone input for us, so no need to build in any additional
+
+90
+00:05:40.470 --> 00:05:44.189
+functionality to our code to handle these errant cases.
+
+91
+00:05:44.189 --> 00:05:47.470
+Of course, we're free to author our own modifiers to complement the ones that come
+
+92
+00:05:47.470 --> 00:05:50.850
+out of the box.
+
+93
+00:05:50.850 --> 00:05:55.050
+Binding to an enhanced input is similar to our legacy bindings but with a couple more
+
+94
+00:05:55.050 --> 00:05:56.209
+steps.
+
+95
+00:05:56.209 --> 00:06:01.050
+Firstly, we need to push our context, and this is our opportunity to source the correct
+
+96
+00:06:01.050 --> 00:06:03.910
+context for our current circumstances.
+
+97
+00:06:03.910 --> 00:06:08.569
+Do we need the swimming context, or the walking context, or even the driving a car
+
+98
+00:06:08.569 --> 00:06:09.910
+context?
+
+99
+00:06:09.910 --> 00:06:12.720
+We simply add the context that we need.
+
+100
+00:06:12.720 --> 00:06:16.199
+And of course, we're free to clear all mappings as shown above.
+
+101
+00:06:16.199 --> 00:06:19.180
+Lastly, we need to bind our actions.
+
+102
+00:06:19.180 --> 00:06:24.319
+In this case, InputMove is an input action we've defined alongside our contexts.
+
+103
+00:06:24.319 --> 00:06:28.259
+You'll notice that the IE pressed and IE released enums have been replaced with an
+
+104
+00:06:28.259 --> 00:06:33.060
+E-trigger event enum, covering an extended spread of input cases.
+
+105
+00:06:33.060 --> 00:06:40.420
+We can now support triggered, started, ongoing, cancelled, and completed as trigger types.
+
+106
+00:06:40.420 --> 00:06:44.319
+Input components are present on all actors, but are most commonly seen inside pawns and
+
+107
+00:06:44.319 --> 00:06:46.060
+player controllers.
+
+108
+00:06:46.060 --> 00:06:49.819
+They can be added to level script actors as well, as the level is, after all, an
+
+109
+00:06:49.819 --> 00:06:52.420
+actor in its own right.
+
+110
+00:06:52.420 --> 00:06:56.199
+The input component links the input mappings that we've just made to the actions that
+
+111
+00:06:56.199 --> 00:07:01.459
+we wish to see in our game, and this can be done both in native or in Blueprint.
+
+112
+00:07:01.459 --> 00:07:05.149
+Input processing in Unreal works from a stack.
+
+113
+00:07:05.149 --> 00:07:07.839
+The priority stack for input handling can be seen here.
+
+114
+00:07:07.839 --> 00:07:12.139
+Firstly, it handles any actors that have except input enabled, from the most recently
+
+115
+00:07:12.139 --> 00:07:15.819
+enabled to the least recently enabled.
+
+116
+00:07:15.819 --> 00:07:18.939
+Controllers are handled next, followed by the level blueprint, and lastly, we deal
+
+117
+00:07:18.939 --> 00:07:21.160
+with pawns.
+
+118
+00:07:21.160 --> 00:07:25.800
+If one input component consumes the input, then the input is not available further down
+
+119
+00:07:25.800 --> 00:07:28.279
+the input stack.
+
+120
+00:07:28.279 --> 00:07:32.259
+As a general tip, if you wish for a particular actor to always be considered ahead of the
+
+121
+00:07:32.259 --> 00:07:38.120
+others, re-enabling its except input will move it to the top of this stack.
+
+122
+00:07:38.120 --> 00:07:42.759
+Lastly, for projects that require more complex input features like complex input handling
+
+123
+00:07:42.759 --> 00:07:47.720
+or runtime control remapping, the enhanced input plugin implements such features as
+
+124
+00:07:47.720 --> 00:07:55.480
+radial dead zones, chorded actions, contextual input and prioritization, and finally it will
+
+125
+00:07:55.480 --> 00:08:02.259
+extend the bespoke filtering and processing of raw input data in an asset-based environment.
+
+126
+00:08:02.259 --> 00:08:04.519
+Let's talk about delegates and events.
+
+127
+00:08:04.519 --> 00:08:08.439
+Unreal provides a full suite of delegates and event macros for us to leverage into
+
+128
+00:08:08.439 --> 00:08:13.199
+performant sensibly structured code architectures, eliminating the need for constant condition
+
+129
+00:08:13.199 --> 00:08:14.360
+polling.
+
+130
+00:08:14.600 --> 00:08:19.670
+So let's take a look at what delegates are in Unreal and how we can go about declaring them.
+
+131
+00:08:19.670 --> 00:08:22.420
+So quick recap, what is a delegate?
+
+132
+00:08:22.420 --> 00:08:27.220
+A delegate is a data type that can reference and execute member functions on C++ objects
+
+133
+00:08:27.220 --> 00:08:31.209
+in a generic and type safe way.
+
+134
+00:08:31.209 --> 00:08:34.470
+Delegates can be bound dynamically to a member function of an object to call that
+
+135
+00:08:34.470 --> 00:08:37.000
+object in the future.
+
+136
+00:08:37.000 --> 00:08:40.639
+Delegates are safe to copy and can be passed around by value, however this process
+
+137
+00:08:40.639 --> 00:08:44.799
+will allocate memory on the heap, so instead it's highly recommended that you pass delegates
+
+138
+00:08:44.799 --> 00:08:47.909
+by reference whenever possible.
+
+139
+00:08:47.909 --> 00:08:52.720
+So let's take a look at what types of delegates Unreal actually offers.
+
+140
+00:08:52.720 --> 00:08:56.750
+The Unreal Engine offers the following types of delegates.
+
+141
+00:08:56.750 --> 00:08:59.789
+Firstly we have single delegates, and this is a one-to-one binding, and they can
+
+142
+00:08:59.789 --> 00:09:02.490
+be saved and loaded.
+
+143
+00:09:02.490 --> 00:09:05.889
+Next are multicast delegates, and this is a one-to-many binding, and these delegates
+
+144
+00:09:05.889 --> 00:09:09.590
+can be bound by both reflection types and raw lambdas.
+
+145
+00:09:09.590 --> 00:09:15.320
+It's important to note that multicast delegates cannot use return values.
+
+146
+00:09:15.320 --> 00:09:19.159
+Next we have dynamic delegates, and these again are a one-to-many binding, however these
+
+147
+00:09:19.159 --> 00:09:23.470
+delegates can only be bound by reflection types and are serializable.
+
+148
+00:09:23.470 --> 00:09:26.629
+It's also important to note that these delegates are slower than regular delegates,
+
+149
+00:09:26.629 --> 00:09:30.649
+and execution of a dynamic delegate must be paired with an isBound check prior to
+
+150
+00:09:30.649 --> 00:09:33.039
+calling execute.
+
+151
+00:09:33.039 --> 00:09:37.759
+Alternatively, we can make use of the executeIfBound function, which will both check if it
+
+152
+00:09:37.759 --> 00:09:41.440
+is bound and then execute for us.
+
+153
+00:09:41.440 --> 00:09:44.440
+Lastly we have events.
+
+154
+00:09:44.440 --> 00:09:47.679
+Events offer the same functionality as a multicast delegate.
+
+155
+00:09:47.679 --> 00:09:53.519
+However the broadcast functionality is retained exclusively by the class that declares the event.
+
+156
+00:09:53.519 --> 00:09:57.240
+Derived classes of the base class which declared this event in the first place do
+
+157
+00:09:57.240 --> 00:10:00.639
+not inherit access to that broadcast.
+
+158
+00:10:00.639 --> 00:10:04.820
+If a derived class wishes to make use of that functionality, then the base class
+
+159
+00:10:04.820 --> 00:10:10.820
+must expose some kind of protected function that will fire the broadcast for them.
+
+160
+00:10:10.820 --> 00:10:14.440
+Lastly we do have abstract events which can be inherited by derived classes, but we'll
+
+161
+00:10:14.440 --> 00:10:18.580
+explain more about those in the next few slides.
+
+162
+00:10:18.700 --> 00:10:23.779
+Unreal offers a wide range of macros that can be used to declare a delegate or event.
+
+163
+00:10:23.779 --> 00:10:27.379
+Each macro features parameters for your new delegate, as well as the function's return
+
+164
+00:10:27.379 --> 00:10:31.159
+type, however the declaration of this delegate differs from types that should simply
+
+165
+00:10:31.159 --> 00:10:33.639
+return void.
+
+166
+00:10:33.639 --> 00:10:36.039
+Delegate macros support the following combinations.
+
+167
+00:10:36.039 --> 00:10:40.500
+We have functions that return a value, functions that are declared as const, and
+
+168
+00:10:40.500 --> 00:10:45.870
+then we have up to four payload variables as well as eight function parameters.
+
+169
+00:10:45.870 --> 00:10:49.269
+To declare a delegate, we simply use the corresponding macro for our particular technical
+
+170
+00:10:49.269 --> 00:10:51.039
+design.
+
+171
+00:10:51.039 --> 00:10:54.600
+For example, in the top image we declare a dynamic multicast delegate that passes through
+
+172
+00:10:54.600 --> 00:10:57.960
+a float payload to the object that is bound to it.
+
+173
+00:10:57.960 --> 00:11:02.080
+And as you may have noticed, this example is accompanied by the uDelegate macro.
+
+174
+00:11:02.080 --> 00:11:06.080
+Delegate functions support the same specifiers as u functions, but you need to use the
+
+175
+00:11:06.080 --> 00:11:08.889
+uDelegate macro instead.
+
+176
+00:11:08.889 --> 00:11:12.370
+In the second example, we declare an event that is owned by the adventure component
+
+177
+00:11:12.370 --> 00:11:16.240
+and passes through a float payload to the object binding to it.
+
+178
+00:11:16.240 --> 00:11:19.519
+In the third example, we declare a delegate that returns a float and passes through an
+
+179
+00:11:19.559 --> 00:11:22.850
+f-string payload to the object that is bound to it.
+
+180
+00:11:22.850 --> 00:11:26.929
+Lastly, in the last two images, we can see the declaration of an abstract event in the
+
+181
+00:11:26.929 --> 00:11:28.850
+inventory interface.
+
+182
+00:11:28.850 --> 00:11:32.450
+This event passes through a float payload to the object that is bound to it, and then
+
+183
+00:11:32.450 --> 00:11:37.610
+in a derived class, in this case an inventory component, we declare a derived event that
+
+184
+00:11:37.610 --> 00:11:41.009
+is owned by the component instead, and thus can be fired by it.
