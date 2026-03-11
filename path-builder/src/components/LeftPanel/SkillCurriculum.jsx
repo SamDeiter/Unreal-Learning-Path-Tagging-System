@@ -295,8 +295,23 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       "2d",
       "3d",
     ]);
-    const queryWords = query.split(/\s+/).filter((w) => w.length > 2 || KEEP_SHORT.has(w));
+    // Strip common learning-intent words that aren't UE5 topic keywords
+    const STOP_WORDS = new Set([
+      "learn", "learning", "teach", "teaching", "how", "what", "why",
+      "getting", "started", "introduction", "intro", "beginner", "beginners",
+      "tutorial", "tutorials", "guide", "guides", "course", "courses",
+      "understand", "understanding", "master", "mastering", "explore",
+      "exploring", "basics", "fundamentals", "overview", "about",
+      "want", "need", "help", "using", "use", "with", "the", "and", "for",
+    ]);
+    let queryWords = query
+      .split(/\s+/)
+      .filter((w) => (w.length > 2 || KEEP_SHORT.has(w)) && !STOP_WORDS.has(w));
 
+    // If all words were stop-words, fall back to the original (unfiltered) words
+    if (queryWords.length === 0) {
+      queryWords = query.split(/\s+/).filter((w) => w.length > 2);
+    }
     if (queryWords.length === 0) return [];
 
     return courses
