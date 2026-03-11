@@ -146,7 +146,7 @@ const UE5_CONCEPT_MAP = {
  * - Tiered curriculum organization
  */
 function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
-  const { addCourse, courses: pathCourses, learningIntent } = usePath();
+  const { addCourse, courses: pathCourses, learningIntent, setLearningIntent } = usePath();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -563,8 +563,12 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     if (!curriculum) return;
     const toAdd = curriculum.allCourses.filter((c) => selectedCourses.has(c.code) && !c.isInPath);
     toAdd.forEach((course) => addCourse(course));
+    // Auto-set path title from search query if not already set
+    if (searchQuery && !learningIntent?.primaryGoal) {
+      setLearningIntent({ primaryGoal: searchQuery });
+    }
     setSelectedCourses(new Set());
-  }, [curriculum, selectedCourses, addCourse]);
+  }, [curriculum, selectedCourses, addCourse, searchQuery, learningIntent, setLearningIntent]);
 
   const selectSuggestion = useCallback((name) => {
     updateSearch(name);
