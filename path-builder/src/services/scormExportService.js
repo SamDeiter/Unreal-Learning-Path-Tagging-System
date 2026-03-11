@@ -18,6 +18,7 @@
 import JSZip from "jszip";
 import { cleanVideoTitle } from "../utils/cleanVideoTitle";
 import { cleanTranscriptText } from "../utils/cleanTranscriptText";
+import { markdownToHtml } from "../utils/markdownToHtml";
 import { devLog } from "../utils/logger";
 
 // ── SCORM 1.2 API Wrapper (embedded as string) ────────────────────
@@ -223,7 +224,7 @@ function generateScoHtml(step, index, totalSteps, bridge, pathTitle) {
       <span class="category-badge ${catClass}">${escapeHtml(category)}</span>
       ${source ? `<span>Source: ${escapeHtml(source)}</span>` : ""}
     </div>
-    <p>${escapeHtml(summary)}</p>
+    <div class="step-summary">${markdownToHtml(summary)}</div>
   </div>
   ${bridgeHtml}
   <button class="complete-btn" id="mark-complete" onclick="this.disabled=true;this.textContent='✅ Completed';completeSCORM();">
