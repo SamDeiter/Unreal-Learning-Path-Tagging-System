@@ -37,6 +37,11 @@ Object.assign(exports, require("./ai/searchVertexAIDocs"));
 // ============================================================================
 Object.assign(exports, require("./ai/vectorSearch"));
 Object.assign(exports, require("./ai/classifySegments"));
+
+// ============================================================================
+// Spoke Generator — Gap-filling mini-lessons (RAG → Gemini → structured JSON)
+// ============================================================================
+Object.assign(exports, require("./ai/generateSpoke"));
 Object.assign(exports, require("./ai/generateAudioBriefing"));
 
 // ============================================================================
