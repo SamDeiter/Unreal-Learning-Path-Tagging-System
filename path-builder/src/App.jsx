@@ -1,3 +1,4 @@
+/* global __BUILD_HASH__, __BUILD_TIME__ */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
@@ -465,6 +466,12 @@ function App() {
                       )}
                       <span className="sidebar-user-name">
                         {currentUser.displayName || currentUser.email}
+                      </span>
+                      <span
+                        className="build-info"
+                        title={`Build: ${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"} — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
+                      >
+                        v{typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"}
                       </span>
                     </div>
                     <div className="sidebar-user-actions">
