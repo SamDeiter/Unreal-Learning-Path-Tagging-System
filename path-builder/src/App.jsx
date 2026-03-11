@@ -469,9 +469,19 @@ function App() {
                       </span>
                       <span
                         className="build-info"
-                        title={`Build: ${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"} — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
+                        title={`Build ${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"} — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
                       >
-                        v{typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"}
+                        {typeof __BUILD_TIME__ !== "undefined"
+                          ? new Date(__BUILD_TIME__).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            }) +
+                            " " +
+                            new Date(__BUILD_TIME__).toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })
+                          : "dev"}
                       </span>
                     </div>
                     <div className="sidebar-user-actions">
