@@ -29,7 +29,7 @@ export { sequencePath, computeTopicOverlap } from "./pathSequencer";
 export { generateBridgeNarration } from "./pathNarration";
 export { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
 
-// ── Phase 0: UE5 Query Feasibility Gate ──
+// ── Phase 0: UE5 Query Feasibility Gate (Layer 1) ──
 // Prevents hallucinated paths for off-topic queries (e.g., "Horses in UE5")
 const UE5_DOMAINS = [
   'blueprint', 'material', 'landscape', 'niagara', 'animation',
@@ -62,6 +62,9 @@ const UE5_DOMAINS = [
   'game instance', 'player state', 'hism', 'instancing',
   'spline', 'cable', 'rope', 'chain',
   'verse', 'uefn', 'fortnite creative',
+  // Layer 1 additions: common "make X" verbs that imply game dev
+  'create', 'build', 'spawn', 'place', 'add', 'setup', 'configure',
+  'implement', 'design', 'prototype', 'iterate',
 ];
 
 const UE5_ENGINE_REGEX = /unreal|ue5|ue4|blueprint|editor|game\s*dev|level\s*design|game\s*engine/i;
@@ -77,6 +80,55 @@ export function isQueryUE5Relevant(query) {
   const hasDomainTerm = UE5_DOMAINS.some(d => queryLower.includes(d));
   const mentionsEngine = UE5_ENGINE_REGEX.test(query);
   return hasDomainTerm || mentionsEngine;
+}
+
+// ── Layer 2: Query Rewriter ──
+// Expands vague queries into UE5-specific search terms so embedding
+// search and hybrid generation produce relevant results.
+// e.g. "How to make a horse" → "How to set up a horse skeletal mesh
+// character in UE5 with animation blueprint and physics"
+async function rewriteQueryForUE5(userQuery) {
+  const prompt = `You are a UE5 search query optimizer. A student on an Unreal Engine 5 learning platform typed:
+"${userQuery}"
+
+This platform teaches UE5 via official video courses plus Epic documentation.
+The student wants to do this IN Unreal Engine 5 (not in Blender, Maya, etc.).
+
+Rewrite their query into a more specific UE5-focused form that would match relevant learning content.
+Assume they want the Blueprint-based workflow (not C++ unless they said C++).
+Assume assets come from FAB (Unreal Marketplace) or FBX import — NOT modeled from scratch.
+
+Rules:
+- Keep it as a natural search query (not a prompt)
+- Add relevant UE5 terms (Blueprint, Skeletal Mesh, Static Mesh, Material, Actor, etc.)
+- Max 20 words
+- Return ONLY the rewritten query text, nothing else
+
+Examples:
+"How to make a horse" → "Setting up a horse skeletal mesh character with animation blueprint in UE5"
+"sword" → "Creating a sword static mesh actor with collision and material in UE5"
+"weather" → "Dynamic weather system with Niagara particles volumetric clouds and post process in UE5"
+"cars" → "Vehicle blueprint setup with chaos vehicle movement component in UE5"`;
+
+  try {
+    const app = getFirebaseApp();
+    const functions = getFunctions(app, "us-central1");
+    const classifyFn = httpsCallable(functions, "classifySegments");
+    const result = await retryWithBackoff(() => classifyFn({ prompt }), {
+      maxRetries: 1,
+      baseDelayMs: 500,
+      label: "queryRewrite",
+    });
+    const rewritten = (result.data?.text || "").trim().replace(/^["']|["']$/g, "");
+    if (rewritten && rewritten.length > 5 && rewritten.length < 200) {
+      devLog(`[BespokePath] Query rewritten: "${userQuery}" → "${rewritten}"`);
+      recordTokenUsage("queryRewrite", Math.ceil(prompt.length / 4), Math.ceil(rewritten.length / 4));
+      return rewritten;
+    }
+  } catch (err) {
+    devWarn("[BespokePath] Query rewrite failed (non-fatal):", err.message);
+  }
+  return userQuery; // fallback: use original
 }
 
 // ── Phase 6: AI Content Quality Gate ──
@@ -131,29 +183,39 @@ async function generateHybridPath(userQuery, knowledgeProfile = null) {
     adaptiveContext = `\nThe learner's assessed level is: ${level.toUpperCase()}. Adjust complexity accordingly.${gapText}${knowsText}`;
   }
 
-  const prompt = `You are a UE5 curriculum designer. A learner asked: "${userQuery}"
+  // Layer 2: Rewrite the query for better UE5 specificity BEFORE generating
+  const rewrittenQuery = await rewriteQueryForUE5(userQuery);
 
-Our content library does not have strong matches for this topic, so generate a learning path from your own Unreal Engine 5 knowledge.
+  // Layer 3: Improved hybrid prompt with stronger UE5 grounding
+  const prompt = `You are a UE5 curriculum designer creating a learning path for a STUDENT.
+The student asked: "${userQuery}"
+Interpreted as UE5 topic: "${rewrittenQuery}"
+
+This is an Unreal Engine 5 learning platform. The student wants to achieve this IN the UE5 editor.
 
 Create a 4-6 step learning path with these categories:
-- prerequisite (1-2 steps): Background concepts the learner needs before tackling the main topic
-- core (1-2 steps): The main implementation — step-by-step workflow in the UE5 editor
-- practice (1-2 steps): Hands-on exercises or ways to apply and extend the knowledge
+- prerequisite (1-2 steps): UE5 editor concepts the student needs first
+- core (2-3 steps): The main implementation — specific step-by-step workflow in the UE5 editor
+- practice (1-2 steps): Hands-on exercises to apply the knowledge
 
-IMPORTANT RULES:
-- TITLE FORMAT: Each title must be a short, clear description (3-6 words max) that starts with a gerund. Examples: "Understanding Blueprint Variables", "Setting Up Time Dilation", "Applying Slow Motion Effects". Do NOT use generic titles like "Step 1" or "Assembly".
-- The title MUST directly relate to the learner's original question: "${userQuery}"
-- PRIORITIZE Blueprint-based approaches over C++ unless the query asks about C++
-- Be specific: include actual menu paths, property names, panel names, and node names
-- ASSET ASSUMPTION: Assume the learner already has a Static Mesh from FAB (Unreal Marketplace) or an FBX they imported. "Create" means setting up the asset in their project — NOT modeling from scratch or using Texture Graph.
-- For "create/make" queries: Start with importing the asset or downloading from FAB, then setting up materials, then creating a Blueprint actor with the mesh component, then configuring collision
-- Each summary should be 3-5 sentences teaching the concept directly in second person
-- Plain text only — no markdown, no asterisks, no code blocks
-- UE5 ONLY: This platform is exclusively for Unreal Engine 5. NEVER reference UE4 or Unreal Engine 4. All menu paths, features, and instructions must be UE5-specific.
+CRITICAL RULES:
+1. TITLE FORMAT: 3-6 word gerund phrases. Examples: "Importing a Skeletal Mesh", "Setting Up Animation Blueprints", "Configuring Physics Assets".
+2. Every title and summary MUST reference specific UE5 features: actual panel names (Details, Content Browser, Outliner), node names, property names, menu paths.
+3. PRIORITIZE Blueprint-based approaches over C++ unless the query explicitly mentions C++.
+4. ASSET ASSUMPTION: The student gets pre-made 3D assets from FAB (Unreal Marketplace) or imports FBX files. "Create/Make" means SETTING UP the asset in UE5 — NOT modeling from scratch. Never suggest Blender, Maya, or external modeling tools.
+5. For "create/make [object]" queries:
+   Step 1: Download from FAB or import an FBX of the object
+   Step 2: Set up Materials in the Material Editor
+   Step 3: Create a Blueprint Actor with the appropriate mesh component (Static Mesh or Skeletal Mesh)
+   Step 4: Configure collision, physics, and gameplay properties
+   Step 5: Place in the level and test
+6. Each summary: 3-5 sentences, second person ("you"), plain text only — no markdown.
+7. UE5 ONLY: Never reference UE4. All instructions must be UE5.5-specific.
+8. NEVER generate content about real-world events, shows, competitions, or venues. Stay focused on the UE5 editor workflow.
 ${adaptiveContext}
 
 Return a JSON array:
-[{"category": "prerequisite", "title": "Understanding Time Dilation", "summary": "Direct teaching content..."}]`;
+[{"category": "prerequisite", "title": "Importing the Horse Skeletal Mesh", "summary": "Open the Content Browser and use the Import button to bring in your FBX horse model..."}]`;
 
   try {
     const app = getFirebaseApp();
@@ -342,9 +404,9 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
     if (forceHybrid) {
       devLog(`[BespokePath] Hybrid fallback triggered (reason: ${hybridReason})`);
 
-      // ── Phase 0: Query Feasibility Gate ──
+      // ── Phase 0: Query Feasibility Gate (Layer 1) ──
       // Before generating from AI knowledge, verify the query is actually about UE5.
-      // This prevents hallucinated paths for off-topic queries like "Horses in UE5".
+      // This prevents hallucinated paths for completely off-topic queries.
       const queryIsRelevant = isQueryUE5Relevant(userQuery);
       if (!queryIsRelevant) {
         devWarn(`[BespokePath] Feasibility gate BLOCKED query: "${userQuery}" — not UE5-relevant`);
@@ -353,7 +415,7 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
           bestSimilarity,
           corpusSegments: segments.length,
         });
-        result.error = "This topic doesn't appear to be related to Unreal Engine 5. Try a UE5-specific query like 'lighting setup', 'Blueprint communication', or 'Niagara particle systems'.";
+        result.error = "This topic doesn't appear to be related to Unreal Engine 5. Try adding UE5 context, like 'How to create a horse character in UE5' or 'Blueprint communication'.";
         result.feasibilityFailed = true;
         return result;
       }
