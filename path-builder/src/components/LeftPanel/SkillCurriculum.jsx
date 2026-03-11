@@ -433,8 +433,10 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     const maxMinutes = timeBudget ? parseInt(timeBudget) : Infinity;
 
     // Boost "Introduction to Unreal Engine" for beginners
+    // Detect beginner context from intent OR common beginner phrases in query
+    const beginnerPhrases = /\b(intro(duction)?|beginner|new to|little experience|no experience|getting started|just started|first time|never used|learning)\b/i;
     const isBeginnerContext =
-      learningIntent?.skillLevel === "Beginner" || /\bintro(duction)?\b/i.test(debouncedQuery);
+      learningIntent?.skillLevel === "Beginner" || beginnerPhrases.test(debouncedQuery);
     const UE_INTRO_CODE = "100.01";
 
     // Inject intro course if not already in results (search may not find it)
