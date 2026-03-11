@@ -79,6 +79,28 @@ export function isQueryUE5Relevant(query) {
   return hasDomainTerm || mentionsEngine;
 }
 
+// ── Phase 6: AI Content Quality Gate ──
+// Validates hybrid AI-generated steps before showing to users.
+// Catches hallucinated content (e.g., "horse accessories") that has no UE5 substance.
+const UE5_CONTENT_REGEX = /blueprint|node|widget|material|actor|component|editor|viewport|content browser|details panel|niagara|lumen|nanite|sequencer|level|world|collision|physics|mesh|texture|shader|animation|skeletal|static mesh|game mode|pawn|character|player controller|event graph|variable|function|macro|interface|class|struct|enum|array|map/i;
+
+function validateHybridStep(step, originalQuery) {
+  const title = (step.segment?.title || '').toLowerCase();
+  const queryWords = originalQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+  // Check 1: Does the title contain at least one word from the original query?
+  const titleRelevance = queryWords.some(w => title.includes(w));
+
+  // Check 2: Is the title at least 3 words (not generic "Step 1" type)?
+  const titleQuality = title.split(/\s+/).length >= 3;
+
+  // Check 3: Does the summary mention UE5-specific terms?
+  const summary = (step.summary || step.segment?.text || '').toLowerCase();
+  const hasUE5Terms = UE5_CONTENT_REGEX.test(summary);
+
+  return (titleRelevance || hasUE5Terms) && titleQuality;
+}
+
 // Internal imports for orchestration
 import { findRelevantSegments } from "./pathSearch";
 import { SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
@@ -345,6 +367,15 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
       result.isAiGenerated = true;
       result.aiGeneratedWarning = "⚠️ Generated from AI knowledge — not from our verified course library";
 
+      // ── Phase 6: Quality Gate — filter out hallucinated steps ──
+      const preFilterCount = result.path.length;
+      result.path = result.path.filter(s => validateHybridStep(s, userQuery));
+      if (preFilterCount !== result.path.length) {
+        devLog(`[BespokePath] Quality gate filtered ${preFilterCount - result.path.length}/${preFilterCount} hybrid steps`);
+        // Re-index remaining steps
+        result.path = result.path.map((s, i) => ({ ...s, order: i }));
+      }
+
       if (result.path.length === 0) {
         result.error =
           "No relevant content found for your question. Try rephrasing or being more specific.";
@@ -522,11 +553,13 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
             similarity: 0,
             gapFillSource: fill.source,
           },
+          isAutoGapFill: true,
           category: "transfer",
           title: gapTopic,
           summary: fill.summary || fill.segments?.[0]?.text || `Learn about ${gapTopic}`,
           order: result.path.length,
         });
+        blindSpots[i].filled = true;
         filledCount++;
       }
       if (filledCount > 0) {

@@ -95,7 +95,7 @@ export default function AdaptiveSidebar({
                           onClick={() => setExpandedStep(substep.globalIndex)}
                           title={rawTitle}
                         >
-                          {i + 1}. {rawTitle}
+                          {i + 1}. {step?.isAutoGapFill ? "🔧 " : ""}{rawTitle}
                         </button>
                       </li>
                     );

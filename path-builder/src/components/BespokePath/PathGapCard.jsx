@@ -86,7 +86,8 @@ export default function PathGapCard({
   const assumedKnowledge = activeGaps?.assumedKnowledge || [];
   const suggestions = activeGaps?.suggestions || [];
   const painPoints = communityPainPoints || [];
-  const totalIssues = blindSpots.length + assumedKnowledge.length;
+  const unfilledBlindSpots = blindSpots.filter(g => !g.filled);
+  const totalIssues = unfilledBlindSpots.length + assumedKnowledge.length;
 
   return (
     <div className="gap-card" id="gap-analysis-card">
