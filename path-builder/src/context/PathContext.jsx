@@ -287,6 +287,7 @@ export function PathProvider({ children }) {
     setActivePathId(null);
     localStorage.removeItem("ue5_active_path_id");
     localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem("ue5_wizard_intent");
   };
 
   const loadPath = (courses) => {
@@ -348,6 +349,10 @@ export function PathProvider({ children }) {
   const deleteSavedPath = (pathId) => {
     const savedPaths = getSavedPaths().filter((p) => p.id !== pathId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPaths));
+    // If the deleted path was the active one, clear the current path state
+    if (activePathId === pathId) {
+      clearPath();
+    }
   };
 
   const value = {
