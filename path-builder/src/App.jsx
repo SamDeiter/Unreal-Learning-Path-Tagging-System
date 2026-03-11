@@ -604,6 +604,7 @@ function App() {
                   <PathCreationWizard
                     onComplete={(pathData) => {
                       setShowWizard(false);
+                      
                       // Save to storage
                       import("./utils/pathStorageUtils").then(
                         ({ savePathToStorage }) => {

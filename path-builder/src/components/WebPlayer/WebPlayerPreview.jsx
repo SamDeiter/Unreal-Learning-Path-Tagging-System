@@ -30,14 +30,13 @@ export default function WebPlayerPreview({
   // Stable path ID for progress tracking
   const pathId = useMemo(
     () => generatePathId(pathTitle),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pathTitle]
   );
 
   // Enrich steps with video data from course library (same as SCORM preview)
   const enrichedSteps = useMemo(() => {
     if (!pathResult?.path) return [];
-    const steps = pathResult.path.map((step, i) => {
+    const steps = pathResult.path.map((step) => {
       const seg = step.segment || {};
       if (seg.videoUrl || seg.drive_id) return step;
 

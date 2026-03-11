@@ -8,6 +8,7 @@
  */
 
 import tagGraphService from "../services/TagGraphService";
+import { classifySegment } from "../services/bloomClassifier";
 
 // Stable ID generator (hashing string) — Phase 8C: memoized
 const _idCache = new Map();
@@ -336,26 +337,124 @@ export const generateGoals = (intent, courses) => {
 };
 
 /**
- * Heuristic to optimize path order
+ * Multi-signal weighted scoring to optimize path order.
+ *
+ * Signals (weighted):
+ *   1. Tag depth & prerequisites  (40%) — shallower/foundational tags first
+ *   2. Bloom taxonomy level       (30%) — Remember → Create progression
+ *   3. Role metadata              (20%) — Prerequisite → Core → Supplemental
+ *   4. Difficulty level            (10%) — Beginner → Intermediate → Advanced
+ *
+ * After scoring, courses are sorted ascending (lowest score = earliest).
  */
+
+const BLOOM_ORDER = {
+  remember: 1, understand: 2, apply: 3,
+  analyze: 4, evaluate: 5, create: 6,
+};
+
+const ROLE_ORDER = { Prerequisite: 0, Core: 1, Supplemental: 2, "Next Step": 3 };
+const LEVEL_ORDER = { Beginner: 0, Foundation: 0, Intermediate: 1, Advanced: 2 };
+
+/**
+ * Collect all tag strings from a course, combining every available source.
+ */
+function collectCourseTags(course) {
+  const sources = [
+    course.extracted_tags,
+    course.gemini_system_tags,
+    course.canonical_tags,
+    course.ai_tags,
+    course.transcript_tags,
+  ];
+
+  const tags = [];
+  for (const src of sources) {
+    if (Array.isArray(src)) {
+      for (const t of src) {
+        if (typeof t === "string") tags.push(t);
+      }
+    }
+  }
+
+  // Legacy object tags
+  if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
+    if (typeof course.tags.topic === "string") tags.push(course.tags.topic);
+  }
+
+  return tags;
+}
+
+/**
+ * Compute average tag depth for a course.
+ * Shallower tags (e.g. "rendering") → lower depth → foundational.
+ * Deeper tags (e.g. "rendering.lumen.global_illumination") → higher depth → advanced.
+ * Returns 0-1 normalized score.
+ */
+function tagDepthScore(course) {
+  const tags = collectCourseTags(course);
+  if (tags.length === 0) return 0.5; // neutral default
+
+  let totalDepth = 0;
+  let count = 0;
+  for (const tagStr of tags) {
+    const tagData = tagGraphService.getTag(tagStr);
+    // Depth from dot segments: "rendering" = 1, "rendering.lumen" = 2
+    const depth = (tagStr.match(/\./g) || []).length + 1;
+    // Weight by global_weight so important tags matter more
+    const weight = tagData?.relevance?.global_weight || 0.5;
+    totalDepth += depth * weight;
+    count += weight;
+  }
+
+  const avgDepth = count > 0 ? totalDepth / count : 1.5;
+  // Normalize: depth 1 → 0.0, depth 4+ → 1.0
+  return Math.min(Math.max((avgDepth - 1) / 3, 0), 1);
+}
+
+/**
+ * Compute Bloom taxonomy score for a course.
+ * Returns 0-1 normalized (Remember=0.17, Create=1.0).
+ */
+function bloomScore(course) {
+  const bloom = classifySegment(
+    course.title || "",
+    course.gemini_enriched?.one_sentence_summary || ""
+  );
+  return (BLOOM_ORDER[bloom.level] || 3) / 6;
+}
+
+/**
+ * Compute role score. Returns 0-1 normalized.
+ */
+function roleScore(course) {
+  return (ROLE_ORDER[course.role || "Core"] ?? 1) / 3;
+}
+
+/**
+ * Compute difficulty level score. Returns 0-1 normalized.
+ */
+function levelScore(course) {
+  return (LEVEL_ORDER[course.tags?.level] ?? 1) / 2;
+}
+
 export const optimizePathOrder = (courses) => {
-  const rolePriority = { Prerequisite: 0, Core: 1, Supplemental: 2 };
-  const levelPriority = { Beginner: 0, Intermediate: 1, Advanced: 2 };
+  if (courses.length <= 1) return [...courses];
 
-  return [...courses].sort((a, b) => {
-    const roleA = rolePriority[a.role || "Core"];
-    const roleB = rolePriority[b.role || "Core"];
-    if (roleA !== roleB) return roleA - roleB;
+  // Compute weighted position score for each course
+  const scored = courses.map((course) => {
+    const td = tagDepthScore(course);
+    const bl = bloomScore(course);
+    const rl = roleScore(course);
+    const lv = levelScore(course);
 
-    const levelA = levelPriority[a.tags?.level] ?? 1;
-    const levelB = levelPriority[b.tags?.level] ?? 1;
-    if (levelA !== levelB) return levelA - levelB;
+    const score = (0.40 * td) + (0.30 * bl) + (0.20 * rl) + (0.10 * lv);
 
-    const weightPriority = { High: 0, Medium: 1, Low: 2 };
-    const weightA = weightPriority[a.weight || "Medium"] ?? 1;
-    const weightB = weightPriority[b.weight || "Medium"] ?? 1;
-    if (weightA !== weightB) return weightA - weightB;
-
-    return a.title.localeCompare(b.title);
+    return { course, score };
   });
+
+  // Sort ascending — lowest score comes first (foundational → advanced)
+  scored.sort((a, b) => a.score - b.score || a.course.title.localeCompare(b.course.title));
+
+  return scored.map(({ course }) => course);
 };
