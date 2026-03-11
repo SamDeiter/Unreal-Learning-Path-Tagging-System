@@ -35,6 +35,8 @@ export default function PathGapCard({
   onAddCourse,
   onAddSegment,
   onGenerateBespoke,
+  onGenerateSpoke,
+  spokeLoading,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [personaGaps, setPersonaGaps] = useState(null);
@@ -149,6 +151,16 @@ export default function PathGapCard({
                           >
                             {fillingTopic === bs.topic ? "Filling..." : "Fill This Gap"}
                           </button>
+                          {onGenerateSpoke && (
+                            <button
+                              className="gap-action-btn spoke"
+                              onClick={() => onGenerateSpoke(bs.topic)}
+                              disabled={spokeLoading === bs.topic}
+                              id={`spoke-btn-${i}`}
+                            >
+                              {spokeLoading === bs.topic ? "Generating..." : "✨ AI Lesson"}
+                            </button>
+                          )}
                           {onExplore && (
                             <button
                               className="gap-action-btn explore"

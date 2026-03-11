@@ -19,6 +19,7 @@ import PreSeededPaths from "./PreSeededPaths";
 import PathGapCard from "./PathGapCard";
 import PathWizard from "./PathWizard";
 import PathDiff from "./PathDiff";
+import SpokeViewer from "../SpokeViewer/SpokeViewer";
 import PrereqChain from "./PrereqChain";
 import {
   generateGapFillStep,
@@ -28,6 +29,8 @@ import {
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { generatePathNarration } from "../../services/stepBriefingService";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getApp } from "firebase/app";
 import "./BespokePath.css";
 
 import {
@@ -126,6 +129,8 @@ export default function BespokePath() {
   const [struggleBadges, setStruggleBadges] = useState(new Map());
   const [reviewTab, setReviewTab] = useState("checklist"); // "checklist" | "diff" | "dependencies"
   const [fillResults, setFillResults] = useState({});
+  const [activeSpoke, setActiveSpoke] = useState(null);
+  const [spokeLoading, setSpokeLoading] = useState(null);
 
   const isFollowUp = useRef(false);
 
@@ -238,6 +243,32 @@ export default function BespokePath() {
     const searchUrl = `https://www.google.com/search?q=site%3Adev.epicgames.com+unreal+engine+${encodeURIComponent(blind.topic || blind.title || "")}`;
     window.open(searchUrl, "_blank", "noopener,noreferrer");
   }, []);
+
+  // Spoke Generator — calls generateSpoke Cloud Function for AI mini-lesson
+  const handleGenerateSpoke = useCallback(
+    async (topic) => {
+      if (spokeLoading) return;
+      setSpokeLoading(topic);
+      try {
+        const functions = getFunctions(getApp(), "us-central1");
+        const callGenerateSpoke = httpsCallable(functions, "generateSpoke");
+        const result = await callGenerateSpoke({
+          gapTopic: topic,
+          difficulty: "intermediate",
+          pathContext: pathResult?.query || query,
+        });
+        setActiveSpoke(result.data);
+      } catch (err) {
+        console.error("[BespokePath] Spoke generation failed:", err);
+        // Fallback: open Google search
+        const searchUrl = `https://www.google.com/search?q=site%3Adev.epicgames.com+unreal+engine+${encodeURIComponent(topic)}`;
+        window.open(searchUrl, "_blank", "noopener,noreferrer");
+      } finally {
+        setSpokeLoading(null);
+      }
+    },
+    [spokeLoading, pathResult, query]
+  );
 
   const handleGenerate = useCallback(async () => {
     const trimmed = query.trim();
@@ -578,6 +609,8 @@ export default function BespokePath() {
                 onAddCourse={handleAddLibraryCourse}
                 onAddSegment={handleAddSegment}
                 onGenerateBespoke={handleBespokeGenerate}
+                onGenerateSpoke={handleGenerateSpoke}
+                spokeLoading={spokeLoading}
               />
             </aside>
 
@@ -769,6 +802,30 @@ export default function BespokePath() {
             </main>
           </div>
         </div>
+      )}
+
+      {/* Spoke Viewer Modal */}
+      {activeSpoke && (
+        <SpokeViewer
+          spoke={activeSpoke}
+          onClose={() => setActiveSpoke(null)}
+          onAddToPath={(spoke) => {
+            const newStep = {
+              category: "fix",
+              segment: {
+                id: `spoke-${Date.now()}`,
+                title: spoke.lesson_title,
+                text: spoke.markdown_notes,
+                source: "ai-spoke",
+              },
+            };
+            setPathResult((prev) => ({
+              ...prev,
+              path: insertAtPhasePosition(prev.path, newStep),
+            }));
+            setActiveSpoke(null);
+          }}
+        />
       )}
     </div>
   );
