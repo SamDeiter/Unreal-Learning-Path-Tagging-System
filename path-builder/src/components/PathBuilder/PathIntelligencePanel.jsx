@@ -287,9 +287,21 @@ const TABS = [
   { id: "export", icon: "📦", label: "Export" },
 ];
 
+// ── Workflow stage → visible tabs ──
+const STAGE_TABS = {
+  arrange:  ["coverage", "gaps"],
+  review:   ["coverage", "gaps", "quiz", "review"],
+  export:   ["quiz", "review", "export"],
+};
+const STAGE_DEFAULT_TAB = {
+  arrange: "coverage",
+  review:  "review",
+  export:  "export",
+};
+
 // ── Main ───────────────────────────────────────────────────
 export default function PathIntelligencePanel() {
-  const { courses, learningIntent, setLearningIntent, pathStats, addCourse } = usePath();
+  const { courses, learningIntent, setLearningIntent, pathStats, addCourse, workflowStage } = usePath();
   const { getCourseSummary } = useAugmentationData();
 
   const handleFieldChange = useCallback(
@@ -304,7 +316,19 @@ export default function PathIntelligencePanel() {
     return detectPersona(learningIntent.primaryGoal);
   }, [learningIntent?.primaryGoal]);
 
-  const [activeTab, setActiveTab] = useState("coverage");
+  const [activeTab, setActiveTab] = useState(STAGE_DEFAULT_TAB[workflowStage] || "coverage");
+
+  // Auto-select relevant tab when workflow stage changes
+  useEffect(() => {
+    const defaultTab = STAGE_DEFAULT_TAB[workflowStage];
+    if (defaultTab) setActiveTab(defaultTab);
+  }, [workflowStage]);
+
+  // Filter visible tabs by workflow stage
+  const visibleTabs = useMemo(() => {
+    const allowed = STAGE_TABS[workflowStage];
+    return allowed ? TABS.filter(t => allowed.includes(t.id)) : TABS;
+  }, [workflowStage]);
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState(null);
@@ -726,9 +750,50 @@ export default function PathIntelligencePanel() {
             </div>
           </div>
 
+          {/* Readiness Bar (Review + Export stages) */}
+          {(workflowStage === "review" || workflowStage === "export") && pathResult && (() => {
+            const checks = evaluateChecks(pathResult, analysis);
+            const passed = checks.filter(c => c.passed).length;
+            const total = checks.length;
+            const allPassed = passed === total;
+            const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
+            return (
+              <div
+                className="ip-readiness-bar"
+                onClick={() => setActiveTab("review")}
+                role="button"
+                tabIndex={0}
+                style={{
+                  display: "flex", alignItems: "center", gap: "0.5rem",
+                  padding: "0.5rem 0.75rem", borderRadius: 8, cursor: "pointer",
+                  background: allPassed ? "rgba(63,185,80,0.08)" : "rgba(210,153,34,0.08)",
+                  border: `1px solid ${allPassed ? "#3fb95040" : "#d2992240"}`,
+                  marginBottom: "0.5rem", transition: "all 0.2s",
+                }}
+              >
+                <span style={{ fontSize: "1rem" }}>{allPassed ? "✅" : "⚠️"}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: allPassed ? "#3fb950" : "#d29922" }}>
+                    {allPassed ? "Ready to Export" : `${passed}/${total} checks — Fix ${total - passed} issue${total - passed > 1 ? "s" : ""}`}
+                  </div>
+                  <div style={{
+                    height: 4, borderRadius: 2, marginTop: 4,
+                    background: "rgba(139,148,158,0.15)",
+                  }}>
+                    <div style={{
+                      height: "100%", borderRadius: 2, transition: "width 0.3s",
+                      width: `${pct}%`,
+                      background: allPassed ? "#3fb950" : "#d29922",
+                    }} />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Tab Bar */}
           <div className="ip-tabs">
-            {TABS.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`ip-tab ${activeTab === tab.id ? "active" : ""}`}
