@@ -21,7 +21,7 @@ import {
   enrichGuideWithBloom,
   generateFlashcards,
 } from "../../services/studyGuideGenerator";
-import { downloadScormPackage, previewScormPackage } from "../../services/scormPackager";
+import { previewScormPackage } from "../../services/scormPackager";
 import { exportScormPackage } from "../../services/scormExportService";
 import { evaluateChecks } from "../../services/pathChecks";
 import PathWizard from "../BespokePath/PathWizard";

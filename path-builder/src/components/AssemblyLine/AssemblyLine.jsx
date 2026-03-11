@@ -25,14 +25,27 @@ import "./AssemblyLine.css";
 // Determine content type from course properties
 function getContentType(course) {
   const code = course.code || "";
-  if (course.source === "ai_generated" || code.startsWith("ai-"))
+  const source = course.source || course.segment?.source || "";
+  const type = course.type || course.segment?.type || "";
+
+  // Explicit AI-generated
+  if (source === "ai_generated" || code.startsWith("ai-"))
     return { emoji: "🤖", label: "AI", cls: "ct-ai" };
+  // Explicit bespoke segment
   if (code.startsWith("bespoke-")) return { emoji: "🎞️", label: "Bespoke", cls: "ct-bespoke" };
-  if (code.startsWith("doc_") || code.startsWith("doc-"))
-    return { emoji: "📄", label: "Doc", cls: "ct-doc" };
+  // Has SCORM package
   if (course.has_scorm) return { emoji: "📦", label: "SCORM", cls: "ct-scorm" };
-  if ((course.videos?.length || 0) > 0 || course.video_count > 0)
+  // Check actual video data — prioritize data over code prefix
+  if (
+    (course.videos?.length || 0) > 0 ||
+    course.video_count > 0 ||
+    type === "video" ||
+    source === "video"
+  )
     return { emoji: "🎬", label: "Video", cls: "ct-video" };
+  // Doc prefix — only if no video signals found
+  if (code.startsWith("doc_") || code.startsWith("doc-") || source === "epic_docs")
+    return { emoji: "📄", label: "Doc", cls: "ct-doc" };
   return { emoji: "📄", label: "Course", cls: "ct-default" };
 }
 
@@ -80,8 +93,11 @@ function TagLegend() {
 }
 
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats } =
+  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats, learningIntent } =
     usePath();
+
+  // Dynamic title: use the learning intent query, fallback to generic
+  const pathTitle = learningIntent?.primaryGoal || "Your Learning Path";
   const { getCourseSummary, getVideoKeys } = useAugmentationData();
 
   // Handle drag start
@@ -230,7 +246,7 @@ function AssemblyLine() {
     <div className="assembly-line">
       <div className="assembly-header">
         <div className="assembly-title-group">
-          <h2 className="assembly-title">Your Learning Path</h2>
+          <h2 className="assembly-title">{pathTitle}</h2>
           {courses.length > 0 && (
             <span className="path-summary">
               {courses.length} course{courses.length !== 1 ? "s" : ""} •{" ~"}
@@ -355,7 +371,6 @@ function AssemblyLine() {
                             {/* Node Content */}
                             <div className="node-content">
                               <div className="node-title-row">
-                                <span className="node-code">{course.code}</span>
                                 {renderLoadDot(course)}
                               </div>
                               <span className="node-title" title={course.title}>

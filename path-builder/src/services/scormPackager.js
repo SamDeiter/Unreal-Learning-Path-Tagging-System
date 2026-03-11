@@ -423,7 +423,7 @@ export async function previewScormPackage(pathResult) {
     </div>
     <iframe id="viewer"></iframe>
   </div>
-  <script id="sco-data" type="application/json">${scosBase64}<\/script>
+  <script id="sco-data" type="application/json">${scosBase64}${'<'}/script>
   <script>
     var raw = document.getElementById('sco-data').textContent;
     var scos = JSON.parse(decodeURIComponent(escape(atob(raw))));
@@ -456,7 +456,7 @@ export async function previewScormPackage(pathResult) {
     });
 
     if (scos.length > 0) loadSco(0);
-  <\/script>
+  ${'<'}/script>
 </body>
 </html>`;
 
