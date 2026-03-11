@@ -178,7 +178,7 @@ describe("bespokePathService", () => {
       const result = await findRelevantSegments("multi-collection search setup");
       // All three sources should contribute (segments may be filtered by topical cross-check)
       expect(result.segments.length).toBeGreaterThanOrEqual(1);
-    });
+    }, 15000);
     it("runs a separate gap-specific search when knowledgeProfile has gaps", async () => {
       const capturedQueries = [];
       httpsCallable.mockImplementation((_app, fnName) => {

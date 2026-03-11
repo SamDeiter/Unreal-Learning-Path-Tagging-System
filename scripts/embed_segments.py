@@ -172,7 +172,7 @@ def main():
 
     # Load segment index
     print(f"Loading {SEGMENT_INDEX}...")
-    with open(SEGMENT_INDEX) as f:
+    with open(SEGMENT_INDEX, encoding="utf-8") as f:
         segment_index = json.load(f)
 
     print(f"  Courses: {len(segment_index)}")
