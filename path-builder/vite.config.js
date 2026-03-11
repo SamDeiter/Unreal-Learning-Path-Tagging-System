@@ -3,6 +3,7 @@ import { execSync } from "child_process";
 
 // Build-time constants injected into the app
 const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+const buildNumber = execSync("git rev-list --count HEAD").toString().trim();
 const buildTime = new Date().toISOString();
 import react from "@vitejs/plugin-react";
 
@@ -13,6 +14,7 @@ export default defineConfig({
   define: {
     __BUILD_HASH__: JSON.stringify(commitHash),
     __BUILD_TIME__: JSON.stringify(buildTime),
+    __BUILD_NUMBER__: JSON.stringify(buildNumber),
   },
   build: {
     rollupOptions: {
