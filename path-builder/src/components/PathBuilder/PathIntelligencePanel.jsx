@@ -1408,8 +1408,26 @@ export default function PathIntelligencePanel() {
                       const contentChecks = ["has-prerequisites", "has-core", "has-practice", "no-high-gaps", "coverage-threshold"];
                       if (contentChecks.includes(checkId)) {
                         setActiveTab("gaps");
+                        // Scroll the tab pane to the top so user sees the Gaps content
+                        requestAnimationFrame(() => {
+                          const pane = document.querySelector(".ip-tab-pane");
+                          if (pane) pane.scrollTop = 0;
+                          // Flash the Gaps tab button briefly
+                          const gapsBtn = document.querySelector('.ip-tab.active');
+                          if (gapsBtn) {
+                            gapsBtn.style.transition = "background 0.3s";
+                            gapsBtn.style.background = "rgba(245, 158, 11, 0.25)";
+                            setTimeout(() => { gapsBtn.style.background = ""; }, 800);
+                          }
+                        });
                       }
-                      // Structural checks are hint-only
+                      // Structural checks → just show a hint (no auto-action)
+                      const structureChecks = ["step-count", "video-duration", "has-bridges"];
+                      if (structureChecks.includes(checkId)) {
+                        // Scroll to the relevant step in the step list
+                        const stepList = document.querySelector(".ip-step-list, .path-steps");
+                        if (stepList) stepList.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
                     }}
                   />
                 ) : (
