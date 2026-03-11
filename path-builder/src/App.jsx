@@ -617,6 +617,7 @@ function App() {
                           primaryGoal: pathData.goal,
                           skillLevel: pathData.skillLevel,
                           timeBudget: pathData.timeBudget,
+                          industries: pathData.industries || [],
                         })
                       );
                       // Auto-populate course search with the goal

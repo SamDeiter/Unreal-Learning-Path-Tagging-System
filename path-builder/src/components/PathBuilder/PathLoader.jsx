@@ -29,6 +29,7 @@ export default function PathLoader({ pendingPath, onLoaded }) {
         primaryGoal: pendingPath.goal || "",
         skillLevel: pendingPath.skillLevel || "",
         timeBudget: pendingPath.timeBudget || "",
+        industries: pendingPath.industries || [],
       });
     }
 

@@ -72,22 +72,22 @@ const fakeSegment = (id, similarity = 0.8) => {
 const GOOD_HYBRID_JSON = JSON.stringify([
   {
     category: "foundation",
-    title: "Import Your Asset",
+    title: "Importing Your FBX Asset",
     summary: "Open the Content Browser and import your FBX.",
   },
   {
     category: "diagnosis",
-    title: "Check Materials",
+    title: "Checking Material Slot Assignments",
     summary: "Inspect the material slots on your Static Mesh.",
   },
   {
     category: "fix",
-    title: "Create a Blueprint Actor",
+    title: "Creating a Blueprint Actor",
     summary: "Add a Static Mesh component and assign the mesh.",
   },
   {
     category: "transfer",
-    title: "Reuse the Pattern",
+    title: "Reusing the Blueprint Pattern",
     summary: "Apply the same Blueprint pattern to other props.",
   },
 ]);
@@ -414,7 +414,7 @@ describe("bespokePathService", () => {
   describe("generateBespokePath — JSON sanitization resilience", () => {
     it("handles smart quotes in Gemini output", async () => {
       // Create proper smart-quote JSON
-      const json = `[{"category": \u201Cfoundation\u201D, "title": \u201CImport Asset\u201D, "summary": \u201COpen Content Browser.\u201D}]`;
+      const json = `[{"category": \u201Cfoundation\u201D, "title": \u201CImporting Your FBX Asset\u201D, "summary": \u201COpen the Content Browser and import your FBX.\u201D}]`;
 
       setupMocks({
         segmentResults: [],
@@ -440,8 +440,8 @@ describe("bespokePathService", () => {
 
     it("handles trailing commas in JSON", async () => {
       const trailingComma = `[
-        {"category": "foundation", "title": "Step 1", "summary": "Learn the basics.",},
-        {"category": "fix", "title": "Step 2", "summary": "Apply the fix.",},
+        {"category": "foundation", "title": "Setting Up Your Lighting", "summary": "Open the level editor and configure your light source.",},
+        {"category": "fix", "title": "Fixing the Light Build", "summary": "Rebuild lighting to resolve shadow artifacts.",},
       ]`;
 
       setupMocks({
