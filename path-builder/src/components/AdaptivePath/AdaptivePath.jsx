@@ -19,17 +19,17 @@ import { generateBespokePath } from "../../services/bespokePathService";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
 import { trackSessionCompleted } from "../../services/analyticsService";
 import PathStep from "../BespokePath/PathStep";
-import QuizEngine from "../BespokePath/QuizEngine";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-
-import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
-import { fixEpicUrl } from "../../utils/urlHelpers";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
 import "./AdaptivePath.css";
 import LevelPicker from "./LevelPicker";
+import AdaptiveSidebar from "./AdaptiveSidebar";
+import FurtherReading from "./FurtherReading";
+import PathFooter from "./PathFooter";
+import AdaptiveQuizPhase from "./AdaptiveQuizPhase";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -63,12 +63,7 @@ export default function AdaptivePath() {
     setRecentQueries(loadRecentQueries());
   }, []);
 
-  // Phase 3 state
-  const [originalSteps, setOriginalSteps] = useState(null);
-  const [originalCoverage, setOriginalCoverage] = useState(0);
-  const [prereqChain, setPrereqChain] = useState(null);
   const [struggleBadges, setStruggleBadges] = useState(new Map());
-  const [reviewTab, setReviewTab] = useState("checklist");
 
   const { knowledgeProfile, hasSavedProfile, clearProfile, setProfileDirect, STAGES } =
     useAdaptiveQuiz();
@@ -249,24 +244,13 @@ export default function AdaptivePath() {
     }
   }, [pendingGeneration, query, knowledgeProfile, pathLoading, handleGeneratePath]);
 
-  // Phase 3: Fetch prereq chain and struggle badges when path changes
+  // Fetch struggle badges when path changes
   useEffect(() => {
     if (!pathData || !pathData.path || pathData.path.length === 0) return;
-
-    // Snapshot original steps for PathDiff (only on first load)
-    if (!originalSteps) {
-      setOriginalSteps([...pathData.path]);
-      setOriginalCoverage(pathData.gaps?.coverageScore || 0);
-    }
-
-    buildPrereqChain(pathData.path).then((chain) => {
-      setPrereqChain(chain);
-    });
-
     getStruggleBadges(pathData.path).then((badges) => {
       setStruggleBadges(badges);
     });
-  }, [pathData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathData]);
 
   /**
    * Start over completely
@@ -293,9 +277,7 @@ export default function AdaptivePath() {
     }
   }, [expandedStep, pathData]);
 
-  // 3-tier gap fill state
-  const [fillResults, setFillResults] = useState({});
-
+
   // ── RENDER: Input Stage ──
   if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
     return (
@@ -447,120 +429,21 @@ export default function AdaptivePath() {
               <i className="fa-solid fa-xmark"></i>
             </button>
 
-            {/* Sidebar Navigation */}
-            <aside className="epic-sidebar">
-              <div className="sidebar-title">
-                🎯 Adaptive Path
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "0.65rem",
-                    color: "var(--accent-orange)",
-                    marginTop: "4px",
-                  }}
-                >
-                  {knowledgeProfile?.level} level
-                </span>
-                {hasSavedProfile && (
-                  <button
-                    onClick={() => {
-                      clearProfile();
-                      setShowLevelPicker(true);
-                      setPendingCleanedQuery(query);
-                    }}
-                    style={{
-                      display: "block",
-                      marginTop: "6px",
-                      background: "transparent",
-                      border: "none",
-                      color: "#64748b",
-                      fontSize: "0.6rem",
-                      cursor: "pointer",
-                      padding: 0,
-                      textDecoration: "underline",
-                    }}
-                  >
-                    ⚙️ Change Experience Level
-                  </button>
-                )}
-              </div>
-              <nav className="phase-nav">
-                {phases.map((phase) => (
-                  <div key={phase.key} className="phase-group">
-                    <button
-                      className={`phase-nav-item ${activePhaseKey === phase.key ? "active" : ""}`}
-                      onClick={() => {
-                        if (phase.key === "quiz") {
-                          setExpandedStep(-2);
-                        } else if (phase.key === "reading") {
-                          setExpandedStep(-3);
-                        } else if (phase.key === "review") {
-                          setExpandedStep(-4);
-                        } else {
-                          const idx = phase.steps[0]?.globalIndex ?? 0;
-                          setExpandedStep(idx);
-                        }
-                      }}
-                    >
-                      {phase.label}
-                    </button>
-                    {/* Substep list — only for real content phases */}
-                    {phase.key !== "quiz" &&
-                      phase.key !== "reading" &&
-                      phase.key !== "review" &&
-                      phase.steps.length > 0 && (
-                        <ul className="substep-list">
-                          {phase.steps.map((substep, i) => {
-                            const step = pathData.path[substep.globalIndex];
-                            // Prefer the AI-generated step title, then segment title, then summary excerpt
-                            let rawTitle =
-                              step?.title ||
-                              cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
-                              (step?.summary
-                                ? step.summary.split(".")[0].substring(0, 50)
-                                : null) ||
-                              `Part ${i + 1}`;
-                            return (
-                              <li key={substep.globalIndex}>
-                                <button
-                                  className={`substep-item ${(expandedStep ?? 0) === substep.globalIndex ? "active" : ""}`}
-                                  onClick={() => setExpandedStep(substep.globalIndex)}
-                                  title={rawTitle}
-                                >
-                                  {i + 1}. {rawTitle}
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                  </div>
-                ))}
-              </nav>
-              <div className="voice-selector">
-                <label className="voice-label" htmlFor="voice-select">
-                  🎤 Narrator Voice
-                </label>
-                <select
-                  id="voice-select"
-                  className="voice-dropdown"
-                  value={voiceName}
-                  onChange={(e) => setVoiceName(e.target.value)}
-                >
-                  <option value="Kore">Kore (Female)</option>
-                  <option value="Aoede">Aoede (Female)</option>
-                  <option value="Leda">Leda (Female)</option>
-                  <option value="Puck">Puck (Male)</option>
-                  <option value="Charon">Charon (Male)</option>
-                  <option value="Fenrir">Fenrir (Male)</option>
-                  <option value="Orus">Orus (Male)</option>
-                  <option value="Zephyr">Zephyr (Neutral)</option>
-                </select>
-              </div>
-
-              {/* Gap Analysis Card removed — gaps are now auto-filled
-                 into the path by the pipeline (Stage 3.5) */}
-            </aside>
+            <AdaptiveSidebar
+              phases={phases}
+              activePhaseKey={activePhaseKey}
+              pathData={pathData}
+              expandedStep={expandedStep}
+              setExpandedStep={setExpandedStep}
+              voiceName={voiceName}
+              setVoiceName={setVoiceName}
+              knowledgeProfile={knowledgeProfile}
+              hasSavedProfile={hasSavedProfile}
+              clearProfile={clearProfile}
+              setShowLevelPicker={setShowLevelPicker}
+              setPendingCleanedQuery={setPendingCleanedQuery}
+              query={query}
+            />
 
             {/* Main Content Area */}
             <main className="epic-main-content">
@@ -605,153 +488,16 @@ export default function AdaptivePath() {
                 )}
 
                 {expandedStep === -2 ? (
-                  <div className="quiz-phase-container">
-                    <div className="step-article">
-                      <h1>Knowledge Check</h1>
-                      <p>Test your understanding of the concepts covered in this path.</p>
-
-                      {(() => {
-                        const quizIdx = 0;
-
-                        if (showQuiz === quizIdx && quizzes.has(quizIdx)) {
-                          return (
-                            <QuizEngine
-                              questions={quizzes.get(quizIdx)}
-                              stepIndex={quizIdx}
-                              onComplete={handleQuizComplete}
-                            />
-                          );
-                        }
-
-                        if (quizScores.has(quizIdx)) {
-                          return (
-                            <div className="quiz-score-badge">
-                              ✅ Quiz: {quizScores.get(quizIdx).score}/
-                              {quizScores.get(quizIdx).total}
-                            </div>
-                          );
-                        }
-
-                        return (
-                          <button
-                            className="take-quiz-btn"
-                            onClick={() => handleTakeQuiz(quizIdx)}
-                            disabled={quizLoading === quizIdx}
-                          >
-                            {quizLoading === quizIdx ? "Generating quiz..." : "Take Quiz"}
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  </div>
+                  <AdaptiveQuizPhase
+                    quizzes={quizzes}
+                    quizScores={quizScores}
+                    showQuiz={showQuiz}
+                    quizLoading={quizLoading}
+                    handleTakeQuiz={handleTakeQuiz}
+                    handleQuizComplete={handleQuizComplete}
+                  />
                 ) : expandedStep === -3 ? (
-                  /* Further Reading phase */
-                  <div className="quiz-phase-container">
-                    <div className="step-article">
-                      <h1>📖 Further Reading</h1>
-                      <p>
-                        Dive deeper into the topics covered in this path with these source
-                        materials.
-                      </p>
-                      <div
-                        className="further-reading-list"
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "12px",
-                          marginTop: "20px",
-                        }}
-                      >
-                        {pathData.path.map((step, i) => {
-                          const isAiGenerated =
-                            step.segment?.type === "ai_generated" ||
-                            step.segment?.source === "ai_generated";
-                          const url = isAiGenerated
-                            ? null
-                            : fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
-                          const title =
-                            cleanVideoTitle(step.segment?.title || step.segment?.videoTitle) ||
-                            `Step ${i + 1}`;
-                          const sourceType = isAiGenerated
-                            ? "ai_generated"
-                            : step.segment?.type || step.segment?.source || "docs";
-                          const icon = isAiGenerated
-                            ? "fa-robot"
-                            : sourceType === "transcript"
-                              ? "fa-video"
-                              : "fa-book-open";
-                          const typeLabel = isAiGenerated
-                            ? "AI-Assisted"
-                            : sourceType === "transcript"
-                              ? "Video"
-                              : sourceType === "epic_learning"
-                                ? "Article"
-                                : "Docs";
-                          const Wrapper = url ? "a" : "div";
-                          const wrapperProps = url
-                            ? {
-                                href: url,
-                                target: "_blank",
-                                rel: "noopener noreferrer",
-                              }
-                            : {};
-                          return (
-                            <Wrapper
-                              key={i}
-                              {...wrapperProps}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "12px",
-                                padding: "14px 18px",
-                                background: "rgba(88, 166, 255, 0.06)",
-                                border: "1px solid var(--border-color, #30363d)",
-                                borderRadius: "10px",
-                                color: url
-                                  ? "var(--accent-blue, #58a6ff)"
-                                  : "var(--text-secondary, #8b949e)",
-                                textDecoration: "none",
-                                transition: "all 0.2s",
-                                fontSize: "0.9rem",
-                                cursor: url ? "pointer" : "default",
-                              }}
-                              onMouseEnter={(e) => {
-                                if (url)
-                                  e.currentTarget.style.background = "rgba(88, 166, 255, 0.12)";
-                              }}
-                              onMouseLeave={(e) => {
-                                if (url)
-                                  e.currentTarget.style.background = "rgba(88, 166, 255, 0.06)";
-                              }}
-                            >
-                              <i
-                                className={`fa-solid ${icon}`}
-                                style={{ fontSize: "1.1rem", width: "20px" }}
-                              />
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 500 }}>{title}</div>
-                                <div
-                                  style={{
-                                    fontSize: "0.75rem",
-                                    color: "var(--text-secondary)",
-                                    marginTop: "2px",
-                                  }}
-                                >
-                                  {typeLabel} • Step {i + 1}
-                                </div>
-                              </div>
-                              {url && (
-                                <i
-                                  className="fa-solid fa-arrow-up-right-from-square"
-                                  style={{ opacity: 0.5, fontSize: "0.8rem" }}
-                                />
-                              )}
-                            </Wrapper>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                  <FurtherReading steps={pathData.path} />
                 ) : (expandedStep ?? 0) >= 0 && (expandedStep ?? 0) < pathData.path.length ? (
                   <div className="step-content-container">
                     <PathStep
@@ -786,59 +532,11 @@ export default function AdaptivePath() {
                 ) : null}
               </div>
 
-              {/* Footer Navigation */}
-              <footer className="epic-footer">
-                <button
-                  className="nav-btn"
-                  onClick={() => {
-                    if (expandedStep === -4) {
-                      setExpandedStep(-3); // Review → Reading
-                    } else if (expandedStep === -3) {
-                      setExpandedStep(-2); // Reading → Quiz
-                    } else if (expandedStep === -2) {
-                      setExpandedStep(pathData.path.length - 1); // From quiz, go to last step
-                    } else {
-                      const cur = expandedStep ?? 0;
-                      if (cur > 0) setExpandedStep(cur - 1);
-                    }
-                  }}
-                  disabled={
-                    (expandedStep ?? 0) <= 0 &&
-                    expandedStep !== -2 &&
-                    expandedStep !== -3 &&
-                    expandedStep !== -4
-                  }
-                >
-                  <i className="fa-solid fa-chevron-left"></i>
-                </button>
-                <div className="footer-status">
-                  {expandedStep === -4
-                    ? "Review"
-                    : expandedStep === -2
-                      ? "Quiz"
-                      : expandedStep === -3
-                        ? "Further Reading"
-                        : `Step ${Math.min((expandedStep ?? 0) + 1, pathData.path.length)} of ${pathData.path.length}`}
-                </div>
-                <button
-                  className="nav-btn"
-                  onClick={() => {
-                    const cur = expandedStep ?? 0;
-                    if (cur < pathData.path.length - 1) {
-                      setExpandedStep(cur + 1);
-                    } else if (cur === pathData.path.length - 1) {
-                      setExpandedStep(-2); // Last step → quiz
-                    } else if (expandedStep === -2) {
-                      setExpandedStep(-3); // Quiz → further reading
-                    } else if (expandedStep === -3) {
-                      setExpandedStep(-4); // Further reading → review
-                    }
-                  }}
-disabled={expandedStep === -3}
-                >
-                  <i className="fa-solid fa-chevron-right"></i>
-                </button>
-              </footer>
+              <PathFooter
+                expandedStep={expandedStep}
+                setExpandedStep={setExpandedStep}
+                totalSteps={pathData.path.length}
+              />
             </main>
           </div>
         </div>
