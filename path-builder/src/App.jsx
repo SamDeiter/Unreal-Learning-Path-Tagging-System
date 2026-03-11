@@ -1,4 +1,4 @@
-/* global __BUILD_HASH__, __BUILD_TIME__ */
+/* global __BUILD_HASH__, __BUILD_TIME__, __BUILD_NUMBER__ */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider, usePath } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
