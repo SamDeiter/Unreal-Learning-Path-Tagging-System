@@ -11,6 +11,7 @@ import { useState, useRef, useEffect } from "react";
 import { submitStepFeedback } from "../../services/feedbackService";
 import { trackAIStepFeedback } from "../../services/analyticsService";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
+import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
 import { CATEGORY_STYLES } from "./pathConstants";
 import { fixEpicUrl } from "../../utils/urlHelpers";
 import DeepDiveSection from "./DeepDiveSection";
@@ -226,7 +227,7 @@ export default function PathStep({
     "Step Details";
 
   // Use narration script when available, otherwise fall back to raw segment text
-  const displayText = narrationScript || step.summary || cleanText(segment.text);
+  const displayText = narrationScript || step.summary || cleanText(cleanTranscriptText(segment.text));
 
   const filteredTakeaways = filterTakeaways(takeaways);
 

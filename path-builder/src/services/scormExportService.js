@@ -17,6 +17,7 @@
 
 import JSZip from "jszip";
 import { cleanVideoTitle } from "../utils/cleanVideoTitle";
+import { cleanTranscriptText } from "../utils/cleanTranscriptText";
 import { devLog } from "../utils/logger";
 
 // ── SCORM 1.2 API Wrapper (embedded as string) ────────────────────
@@ -184,7 +185,8 @@ function getCategoryClass(cat) {
 
 function generateScoHtml(step, index, totalSteps, bridge, pathTitle) {
   const title = cleanVideoTitle(step.segment?.title || step.title || `Step ${index + 1}`);
-  const summary = step.segment?.text || step.segment?.summary || "";
+  const rawSummary = step.segment?.text || step.segment?.summary || "";
+  const summary = cleanTranscriptText(rawSummary);
   const category = step.category || "core";
   const catClass = getCategoryClass(category);
   const source = step.segment?.source || step.segment?.type || "";
