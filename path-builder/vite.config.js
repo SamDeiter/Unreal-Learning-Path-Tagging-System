@@ -1,10 +1,19 @@
 import { defineConfig } from "vite";
+import { execSync } from "child_process";
+
+// Build-time constants injected into the app
+const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+const buildTime = new Date().toISOString();
 import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
   base: "/Unreal-Learning-Path-Tagging-System/",
   plugins: [react()],
+  define: {
+    __BUILD_HASH__: JSON.stringify(commitHash),
+    __BUILD_TIME__: JSON.stringify(buildTime),
+  },
   build: {
     rollupOptions: {
       output: {

@@ -80,9 +80,10 @@ export default function AdaptiveSidebar({
                 <ul className="substep-list">
                   {phase.steps.map((substep, i) => {
                     const step = pathData.path[substep.globalIndex];
+                    const cleanedTitle = cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle);
                     let rawTitle =
                       step?.title ||
-                      cleanVideoTitle(step?.segment?.title || step?.segment?.videoTitle) ||
+                      (cleanedTitle !== "Untitled Video" ? cleanedTitle : null) ||
                       (step?.summary
                         ? step.summary.split(".")[0].substring(0, 50)
                         : null) ||
