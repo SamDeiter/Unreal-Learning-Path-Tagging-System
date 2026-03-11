@@ -67,6 +67,7 @@ describe("PathLoader", () => {
       primaryGoal: "Master materials",
       skillLevel: "intermediate",
       timeBudget: "4h",
+      industries: [],
     });
   });
 
