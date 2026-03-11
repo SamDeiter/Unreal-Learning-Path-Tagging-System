@@ -393,6 +393,19 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
         return { course, score };
       })
       .filter((item) => item.score > 0)
+      // Boost courses with actual videos over doc-only entries
+      .map((item) => {
+        const vidCount = item.course.videos?.length || 0;
+        if (vidCount > 0) item.score *= 1.5;
+        if (vidCount >= 3) item.score *= 1.2;
+        // Penalize entries whose description is mostly version lists
+        const desc = item.course.description || '';
+        const versionMatches = (desc.match(/Unreal Engine \d/g) || []).length;
+        if (versionMatches >= 3 && desc.split(' ').length < 30) {
+          item.score *= 0.3;
+        }
+        return item;
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 30)
       .map((item) => item.course);
