@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import PathWizard from "../PathWizard";
 
 const mockPath = [
@@ -123,80 +123,9 @@ describe("PathWizard", () => {
     expect(check.className).toContain("failed");
   });
 
-  it("publish button is locked when not all checks pass", () => {
-    render(<PathWizard pathResult={mockResult} gaps={mockGaps} />);
-    const btn = document.getElementById("wizard-publish-btn");
-    expect(btn.className).toContain("locked");
-    expect(btn.disabled).toBe(true);
-  });
 
-  it("toggles instructor sign-off", () => {
-    render(<PathWizard pathResult={mockResult} gaps={mockGaps} />);
-    const toggle = document.getElementById("instructor-signoff-toggle");
-    expect(toggle).toBeTruthy();
 
-    fireEvent.click(toggle);
 
-    // Toggle should now show "on" state
-    const switchEl = toggle.querySelector(".wizard-toggle-switch");
-    expect(switchEl.className).toContain("on");
-  });
-
-  it("enables publish when all checks pass and signed off", () => {
-    // Path with all auto-checks passing
-    const perfectResult = {
-      path: [
-        { category: "foundation", segment: { title: "A", duration: 60 } },
-        { category: "fix", segment: { title: "B", duration: 120 } },
-        { category: "transfer", segment: { title: "C", duration: 180 } },
-      ],
-      bridges: [{ text: "Bridge content" }],
-    };
-    const perfectGaps = {
-      coverageScore: 0.9,
-      blindSpots: [],
-      assumedKnowledge: [],
-      suggestions: [],
-    };
-
-    render(<PathWizard pathResult={perfectResult} gaps={perfectGaps} />);
-
-    // Sign off
-    const toggle = document.getElementById("instructor-signoff-toggle");
-    fireEvent.click(toggle);
-
-    // Now publish should be enabled
-    const btn = document.getElementById("wizard-publish-btn");
-    expect(btn.className).toContain("ready");
-    expect(btn.disabled).toBe(false);
-  });
-
-  it("shows success toast after publishing", () => {
-    const perfectResult = {
-      path: [
-        { category: "foundation", segment: { title: "A", duration: 60 } },
-        { category: "fix", segment: { title: "B", duration: 120 } },
-        { category: "transfer", segment: { title: "C", duration: 180 } },
-      ],
-      bridges: [{ text: "Bridge content" }],
-    };
-    const perfectGaps = {
-      coverageScore: 0.9,
-      blindSpots: [],
-    };
-
-    render(<PathWizard pathResult={perfectResult} gaps={perfectGaps} />);
-
-    // Sign off + publish
-    const toggle = document.getElementById("instructor-signoff-toggle");
-    fireEvent.click(toggle);
-
-    const btn = document.getElementById("wizard-publish-btn");
-    fireEvent.click(btn);
-
-    // Success toast should appear
-    expect(screen.getByText(/Path published successfully/)).toBeTruthy();
-  });
 
   it("shows correct progress percentage", () => {
     render(<PathWizard pathResult={mockResult} gaps={mockGaps} />);

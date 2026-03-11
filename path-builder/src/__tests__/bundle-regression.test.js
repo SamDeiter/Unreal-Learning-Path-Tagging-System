@@ -53,7 +53,7 @@ describe("Production Build", () => {
 });
 
 describe("Bundle Size Regression", () => {
-  it("total bundle should be under 55 MB (data-heavy app with embeddings)", () => {
+  it("total bundle should be under 95 MB (data-heavy app with transcripts + embeddings)", () => {
     const assets = path.join(DIST, "assets");
     if (!fs.existsSync(assets)) return;
 
@@ -65,7 +65,7 @@ describe("Bundle Size Regression", () => {
     }
 
     const totalMB = totalBytes / (1024 * 1024);
-    expect(totalMB).toBeLessThan(55);
+    expect(totalMB).toBeLessThan(95);
   });
 
   it("no individual JS chunk should exceed 5 MB (excluding data chunks)", () => {
