@@ -26,6 +26,7 @@ import { exportScormPackage } from "../../services/scormExportService";
 import { evaluateChecks } from "../../services/pathChecks";
 import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
 import PathWizard from "../BespokePath/PathWizard";
+import WebPlayerPreview from "../WebPlayer/WebPlayerPreview";
 import "./PathIntelligencePanel.css";
 
 const INDUSTRIES = [
@@ -85,6 +86,7 @@ function ExportPanel({
   const [previewing, setPreviewing] = useState(false);
   const [scormExported, setScormExported] = useState(false);
   const [scormError, setScormError] = useState(null);
+  const [showWebPlayer, setShowWebPlayer] = useState(false);
 
   const checks = useMemo(() => evaluateChecks(pathResult, analysis), [pathResult, analysis]);
   const passedCount = checks.filter((c) => c.passed).length;
@@ -230,7 +232,17 @@ function ExportPanel({
           id="export-preview-btn"
           style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)", color: "#fff", border: "none", padding: "0.6rem 1rem", borderRadius: 8, cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, opacity: previewing ? 0.7 : 1, transition: "opacity 0.2s" }}
         >
-          {previewing ? "⏳ Building preview..." : "👁️ Preview SCORM (Learner View)"}
+          {previewing ? "⏳ Building preview..." : "👁️ Preview SCORM"}
+        </button>
+
+        {/* Web Player Preview */}
+        <button
+          className="export-action-btn"
+          onClick={() => setShowWebPlayer(true)}
+          id="export-webplayer-btn"
+          style={{ background: "linear-gradient(135deg, #06b6d4, #0891b2)", color: "#fff", border: "none", padding: "0.6rem 1rem", borderRadius: 8, cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, transition: "opacity 0.2s" }}
+        >
+          🌐 Web Player Preview
         </button>
 
         {/* Download */}
@@ -274,6 +286,15 @@ function ExportPanel({
         <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#f43f5e", marginTop: "0.5rem" }}>
           ❌ {scormError}
         </p>
+      )}
+
+      {/* Web Player Overlay */}
+      {showWebPlayer && (
+        <WebPlayerPreview
+          pathResult={pathResult}
+          courses={courses}
+          onClose={() => setShowWebPlayer(false)}
+        />
       )}
     </div>
   );
