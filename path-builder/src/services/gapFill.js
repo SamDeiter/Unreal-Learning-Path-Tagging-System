@@ -17,7 +17,10 @@ import { recordTokenUsage } from "./tokenTracker";
 import { devLog, devWarn } from "../utils/logger";
 import { parseGeminiJSON } from "./gapDetection";
 
-const GAP_FILL_TOP_K = 3; // Segments to fetch for gap context
+const GAP_FILL_TOP_K = 3;             // Segments to fetch for AI corpus context
+const GAP_FILL_LIBRARY_THRESHOLD = 0.55; // Min similarity for library course matches
+const GAP_FILL_SEGMENT_THRESHOLD = 0.50; // Min similarity for bespoke segment matches
+const GAP_FILL_MAX_RESULTS = 3;          // Max results returned per tier
 
 export async function generateGapFillStep(topic, query, steps, existingCodes = []) {
   try {
@@ -33,16 +36,17 @@ export async function generateGapFillStep(topic, query, steps, existingCodes = [
       const embedding = embedResult.data?.embedding;
 
       if (embedding) {
-        const courseMatches = await findSimilarCourses(embedding, 5);
-        // Filter out courses already in path + require decent similarity
-        const filtered = courseMatches.filter(
-          (c) => c.similarity >= 0.4 && !pathCodeSet.has(c.code)
-        );
+        const courseMatches = await findSimilarCourses(embedding, 8);
+        // Filter out courses already in path + require meaningful similarity
+        const filtered = courseMatches
+          .filter((c) => c.similarity >= GAP_FILL_LIBRARY_THRESHOLD && !pathCodeSet.has(c.code))
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, GAP_FILL_MAX_RESULTS);
         if (filtered.length > 0) {
           devLog(`[GapFill] Tier 1 HIT — ${filtered.length} library courses for "${topic}"`);
           return { source: "library", matchedCourses: filtered };
         }
-        devLog(`[GapFill] Tier 1 MISS — no library matches above 0.4 for "${topic}"`);
+        devLog(`[GapFill] Tier 1 MISS — no library matches above ${GAP_FILL_LIBRARY_THRESHOLD} for "${topic}"`);
       }
     } catch (err) {
       devWarn(`[GapFill] Tier 1 failed, falling through: ${err.message}`);
@@ -50,13 +54,27 @@ export async function generateGapFillStep(topic, query, steps, existingCodes = [
 
     // ── Tier 2: Bespoke Segments ───────────────────────────
     try {
-      const { segments } = await findRelevantSegments(topic, 5);
-      const relevant = segments.filter((s) => (s.similarity || 0) >= 0.35);
-      if (relevant.length > 0) {
-        devLog(`[GapFill] Tier 2 HIT — ${relevant.length} segments for "${topic}"`);
+      const { segments } = await findRelevantSegments(topic, 8);
+      const relevant = segments.filter((s) => (s.similarity || 0) >= GAP_FILL_SEGMENT_THRESHOLD);
+
+      // Deduplicate by source video — keep best segment per video
+      const bestByVideo = new Map();
+      for (const s of relevant) {
+        const videoKey = s.videoTitle || s.videoUrl || s.title || "unknown";
+        const existing = bestByVideo.get(videoKey);
+        if (!existing || (s.similarity || 0) > (existing.similarity || 0)) {
+          bestByVideo.set(videoKey, s);
+        }
+      }
+      const deduped = [...bestByVideo.values()]
+        .sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+        .slice(0, GAP_FILL_MAX_RESULTS);
+
+      if (deduped.length > 0) {
+        devLog(`[GapFill] Tier 2 HIT — ${deduped.length} segments (deduped from ${relevant.length}) for "${topic}"`);
         return {
           source: "bespoke",
-          segments: relevant.map((s) => ({
+          segments: deduped.map((s) => ({
             title: s.title || s.videoTitle || "Untitled",
             text: (s.text || "").substring(0, 300),
             videoTitle: s.videoTitle || "",
@@ -65,7 +83,7 @@ export async function generateGapFillStep(topic, query, steps, existingCodes = [
           })),
         };
       }
-      devLog(`[GapFill] Tier 2 MISS — no segments above 0.35 for "${topic}"`);
+      devLog(`[GapFill] Tier 2 MISS — no segments above ${GAP_FILL_SEGMENT_THRESHOLD} for "${topic}"`);
     } catch (err) {
       devWarn(`[GapFill] Tier 2 failed, falling through: ${err.message}`);
     }
