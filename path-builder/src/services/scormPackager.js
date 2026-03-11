@@ -241,6 +241,7 @@ export async function previewScormPackage(pathResult) {
     const title = step.segment?.title || step.title || `Step ${idx + 1}`;
     const rawSummary =
       step.gemini_enriched?.one_sentence_summary ||
+      step.summary ||              // AI-generated mini-lesson from pathSequencer
       step.segment?.summary ||
       step.segment?.text ||
       step.description ||

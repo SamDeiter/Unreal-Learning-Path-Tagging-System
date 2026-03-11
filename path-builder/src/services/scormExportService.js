@@ -186,7 +186,7 @@ function getCategoryClass(cat) {
 
 function generateScoHtml(step, index, totalSteps, bridge, pathTitle) {
   const title = cleanVideoTitle(step.segment?.title || step.title || `Step ${index + 1}`);
-  const rawSummary = step.segment?.text || step.segment?.summary || "";
+  const rawSummary = step.summary || step.segment?.text || step.segment?.summary || "";
   const summary = cleanTranscriptText(rawSummary);
   const category = step.category || "core";
   const catClass = getCategoryClass(category);
