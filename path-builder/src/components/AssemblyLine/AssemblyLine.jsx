@@ -31,16 +31,15 @@ function getContentType(course) {
   // Explicit AI-generated
   if (source === "ai_generated" || code.startsWith("ai-"))
     return { emoji: "🤖", label: "AI", cls: "ct-ai" };
-  // Explicit bespoke segment
-  if (code.startsWith("bespoke-")) return { emoji: "🎞️", label: "Bespoke", cls: "ct-bespoke" };
-  // Has SCORM package
-  if (course.has_scorm) return { emoji: "📦", label: "SCORM", cls: "ct-scorm" };
+  // Transcript clip (matched segment from corpus)
+  if (code.startsWith("bespoke-")) return { emoji: "🎯", label: "Clip", cls: "ct-clip" };
   // Check actual video data — prioritize data over code prefix
   if (
     (course.videos?.length || 0) > 0 ||
     course.video_count > 0 ||
     type === "video" ||
-    source === "video"
+    source === "video" ||
+    course.has_scorm
   )
     return { emoji: "🎬", label: "Video", cls: "ct-video" };
   // Doc prefix — only if no video signals found
@@ -49,13 +48,15 @@ function getContentType(course) {
   return { emoji: "📄", label: "Course", cls: "ct-default" };
 }
 
-// Clean up display titles — strip file extensions, underscores, numbering prefixes
+// Clean up display titles — strip file extensions, underscores, numbering prefixes, camelCase
 function cleanTitle(title) {
   if (!title) return "";
   return title
     .replace(/\.(mp4|mov|avi|mkv|webm|mp3|wav|pdf|docx?)$/i, "") // file extensions
     .replace(/^\d{1,3}[-_.\s]+/g, "")  // leading numbers like "01_", "001-", "1. "
     .replace(/[_]/g, " ")               // underscores → spaces
+    .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase → "camel Case"
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2") // ABCDef → ABC Def
     .replace(/\s{2,}/g, " ")            // collapse multiple spaces
     .trim();
 }
@@ -354,6 +355,14 @@ function AssemblyLine() {
                           >
                             <div className="node-header">
                               <div className="node-number">{globalIndex + 1}</div>
+                              {(() => {
+                                const ct = getContentType(course);
+                                return (
+                                  <span className={`node-type-label ${ct.cls}`}>
+                                    {ct.emoji} {ct.label}
+                                  </span>
+                                );
+                              })()}
                               <button
                                 className="node-remove-mini"
                                 onClick={(e) => {
@@ -365,31 +374,19 @@ function AssemblyLine() {
                               </button>
                             </div>
 
-                            {/* Augmentation Quality Badge */}
-                            {renderAugBadge(course)}
-
                             {/* Node Content */}
                             <div className="node-content">
-                              <div className="node-title-row">
-                                {renderLoadDot(course)}
-                              </div>
                               <span className="node-title" title={course.title}>
                                 {cleanTitle(course.title)}
                               </span>
-                              <div className="node-badges">
-                                {renderBloomBadge(course)}
-                                {(() => {
-                                  const ct = getContentType(course);
-                                  return (
-                                    <span className={`content-type-badge ${ct.cls}`}>
-                                      {ct.emoji} {ct.label}
-                                    </span>
-                                  );
-                                })()}
-                              </div>
                             </div>
 
-                            {/* Node Controls */}
+                            {/* Hover-reveal details */}
+                            <div className="node-details">
+                              {renderAugBadge(course)}
+                            </div>
+
+                            {/* Node Controls — hover-reveal */}
                             <div
                               className="node-controls"
                               onClick={(e) => e.stopPropagation()}
@@ -423,7 +420,7 @@ function AssemblyLine() {
                                 onChange={(e) =>
                                   updateCourseMeta(course.code, { weight: e.target.value })
                                 }
-                                title="Priority/Importance: High = Must-learn critical content, Medium = Should-learn standard content, Low = Nice-to-know optional content"
+                                title="Priority/Importance"
                               >
                                 <option value="Low">Low</option>
                                 <option value="Medium">Med</option>
