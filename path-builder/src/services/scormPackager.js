@@ -239,8 +239,25 @@ export async function previewScormPackage(pathResult) {
   // Build rich SCO pages using the same data the download export uses
   const scos = steps.map((step, idx) => {
     const title = step.segment?.title || step.title || `Step ${idx + 1}`;
-    const rawSummary = step.segment?.summary || step.segment?.text || step.description || "";
-    const summary = cleanTranscriptText(rawSummary);
+    const rawSummary =
+      step.gemini_enriched?.one_sentence_summary ||
+      step.segment?.summary ||
+      step.segment?.text ||
+      step.description ||
+      "";
+    let summary = cleanTranscriptText(rawSummary);
+
+    // If cleaning wiped the text (version-selector-only, truncated garbage, etc.)
+    // generate a useful fallback from the title + source metadata.
+    if (!summary) {
+      const docSection = step.doc_meta?.section || "";
+      const sourceLabel = step.source === "epic_docs"
+        ? "Official Unreal Engine documentation"
+        : "Reference material";
+      summary = docSection
+        ? `${sourceLabel} covering ${docSection.replace(/-/g, " ")}.`
+        : `${sourceLabel} for ${title}.`;
+    }
     const category = step.category || "core";
     const source = step.segment?.source || step.segment?.type || "";
     const bridge = bridges[idx] || null;
