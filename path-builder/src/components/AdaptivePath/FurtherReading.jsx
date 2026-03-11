@@ -23,18 +23,27 @@ export default function FurtherReading({ steps }) {
           }}
         >
           {steps.map((step, i) => {
+            const seg = step.segment || {};
             const isAiGen =
-              step.segment?.type === "ai_generated" ||
-              step.segment?.source === "ai_generated";
-            const url = isAiGen
+              seg.type === "ai_generated" || seg.source === "ai_generated";
+
+            // Chain through all possible URL sources
+            const rawUrl = isAiGen
               ? null
-              : fixEpicUrl(step.segment?.videoUrl || step.segment?.url);
+              : seg.videoUrl ||
+                seg.url ||
+                seg.corpusMatch?.videoUrl ||
+                (seg.slug
+                  ? `https://dev.epicgames.com/documentation/en-us/unreal-engine/${seg.slug}`
+                  : null);
+            const url = rawUrl ? fixEpicUrl(rawUrl) : null;
+
             const title =
-              cleanVideoTitle(step.segment?.title || step.segment?.videoTitle) ||
+              cleanVideoTitle(seg.title || seg.videoTitle) ||
               `Step ${i + 1}`;
             const sourceType = isAiGen
               ? "ai_generated"
-              : step.segment?.type || step.segment?.source || "docs";
+              : seg.type || seg.source || "docs";
             const icon = isAiGen
               ? "fa-robot"
               : sourceType === "transcript"
