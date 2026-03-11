@@ -448,7 +448,14 @@ export const optimizePathOrder = (courses) => {
     const rl = roleScore(course);
     const lv = levelScore(course);
 
-    const score = (0.40 * td) + (0.30 * bl) + (0.20 * rl) + (0.10 * lv);
+    let score = (0.40 * td) + (0.30 * bl) + (0.20 * rl) + (0.10 * lv);
+
+    // Intro boost: courses with "intro" / "introduction" / "getting started"
+    // in their title always sort first
+    const titleLower = (course.title || "").toLowerCase();
+    if (/\b(intro(duction)?|getting\s+started|overview|fundamentals)\b/.test(titleLower)) {
+      score -= 0.5;
+    }
 
     return { course, score };
   });
