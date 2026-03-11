@@ -13,7 +13,6 @@ import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
-import { SEARCH_STOPWORDS } from "../domain/constants";
 
 // ── Constants ──────────────────────────────────────────────────────────
 export const MAX_PATH_SEGMENTS = 8;
@@ -114,124 +113,6 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
     return segments;
   }
 
-  // ── Lazy-load full-text transcript segments ──────────────────────────
-  let _transcriptSegments = null;
-  async function getTranscriptSegments() {
-    if (!_transcriptSegments) {
-      try {
-        const mod = await import("../data/transcript_segments.json");
-        _transcriptSegments = mod.default || mod;
-      } catch {
-        devWarn("[pathSearch] Could not load transcript_segments.json");
-        _transcriptSegments = {};
-      }
-    }
-    return _transcriptSegments;
-  }
-
-  // ── Local keyword RAG search ──────────────────────────────────────────
-  // Searches the 75K+ transcript_segments.json for keyword matches.
-  // Uses FULL TEXT (not truncated previews) for best keyword recall.
-  // Runs in parallel with vector search for zero added latency.
-  async function localKeywordSearch(query) {
-    try {
-      const transcriptSegments = await getTranscriptSegments();
-      if (!transcriptSegments || Object.keys(transcriptSegments).length === 0) return [];
-
-      const keywords = query
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((w) => w.length > 2 && !SEARCH_STOPWORDS.has(w));
-      if (keywords.length === 0) return [];
-
-      const results = [];
-
-      // Helper: score a text against keywords
-      function scoreText(text) {
-        const textLower = (text || "").toLowerCase();
-        if (textLower.length < 20) return null;
-        let score = 0;
-        const matched = [];
-        for (const kw of keywords) {
-          if (textLower.includes(kw)) {
-            const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-            const hits = (textLower.match(regex) || []).length;
-            score += hits * 10;
-            matched.push(kw);
-          }
-        }
-        if (matched.length >= 2 || (matched.length === 1 && score >= 20)) {
-          const multiBonus = matched.length >= 2 ? matched.length * 5 : 0;
-          return { score: score + multiBonus, matched };
-        }
-        return null;
-      }
-
-      // transcript_segments.json has TWO formats:
-      // 1. VTT nested:  { courseKey: { videoKey: [{ text, start, end, startSec }] } }
-      // 2. TXT flat:    { segKey: { text: "...", segment_index: int, source: "..." } }
-      for (const [topKey, topVal] of Object.entries(transcriptSegments)) {
-        if (!topVal || typeof topVal !== "object") continue;
-
-        // Format 2: flat segment with a direct "text" property
-        if (typeof topVal.text === "string") {
-          const result = scoreText(topVal.text);
-          if (result) {
-            const normalizedSimilarity = Math.min(0.78, 0.55 + (result.score / 150));
-            results.push({
-              id: `rag_flat_${topKey}`,
-              type: "keyword_rag",
-              courseCode: topVal.source || topKey.split("_")[0] || topKey,
-              videoKey: topKey,
-              videoTitle: topKey,
-              text: topVal.text,
-              similarity: normalizedSimilarity,
-              matchedKeywords: result.matched,
-              source: "local_rag",
-            });
-          }
-          continue;
-        }
-
-        // Format 1: nested VTT — iterate video keys
-        for (const [videoKey, segments] of Object.entries(topVal)) {
-          if (!Array.isArray(segments)) continue;
-
-          for (const segment of segments) {
-            if (typeof segment !== "object" || !segment.text) continue;
-            const result = scoreText(segment.text);
-            if (result) {
-              const normalizedSimilarity = Math.min(0.78, 0.55 + (result.score / 150));
-              results.push({
-                id: `rag_${topKey}_${videoKey}_${results.length}`,
-                type: "keyword_rag",
-                courseCode: topKey,
-                videoKey: videoKey,
-                videoTitle: videoKey,
-                startTimestamp: segment.start || null,
-                endTimestamp: segment.end || null,
-                startSeconds: segment.startSec || null,
-                text: segment.text,
-                similarity: normalizedSimilarity,
-                matchedKeywords: result.matched,
-                source: "local_rag",
-              });
-            }
-          }
-        }
-      }
-
-      // Sort by score, take top results
-      results.sort((a, b) => b.similarity - a.similarity);
-      const topResults = results.slice(0, topK * 2);
-      devLog(`[pathSearch] Local keyword RAG: ${results.length} matches, returning top ${topResults.length}`);
-      return topResults;
-    } catch (err) {
-      devWarn("[pathSearch] Local keyword search failed (non-fatal):", err.message);
-      return [];
-    }
-  }
-
   // ── Primary search: user's original query ──
   let queryVector;
   try {
@@ -245,14 +126,11 @@ export async function findRelevantSegments(userQuery, topK = 5, knowledgeProfile
 
   const TRANSCRIPT_BOOST = 1.3;
 
-  // Run vector search + local keyword search IN PARALLEL (zero added latency)
-  const [vectorSegments, keywordSegments] = await Promise.all([
-    searchAllCollections(queryVector),
-    localKeywordSearch(userQuery),
-  ]);
+  // Run Firestore vector search (local keyword search removed — Firestore KNN replaces it)
+  const vectorSegments = await searchAllCollections(queryVector);
 
-  let segments = [...vectorSegments, ...keywordSegments];
-  devLog(`[pathSearch] Combined: ${vectorSegments.length} vector + ${keywordSegments.length} keyword RAG segments`);
+  let segments = [...vectorSegments];
+  devLog(`[pathSearch] Vector search returned ${vectorSegments.length} segments`);
 
   // ── Evaluate corpus quality from PRIMARY search only ──
   // This must happen BEFORE merging gap results, otherwise the gap boost

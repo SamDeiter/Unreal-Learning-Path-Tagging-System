@@ -86,6 +86,7 @@ function pathReducer(state, action) {
       return {
         ...state,
         courses: [],
+        learningIntent: initialState.learningIntent,
       };
 
     case ACTIONS.LOAD_PATH:
