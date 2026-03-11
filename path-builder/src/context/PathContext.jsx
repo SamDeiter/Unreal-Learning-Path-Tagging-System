@@ -250,6 +250,15 @@ export function PathProvider({ children }) {
     };
   }, [state.courses]);
 
+  // Verification stats — how many steps have been verified/rejected
+  const verificationStats = useMemo(() => {
+    const courses = state.courses;
+    const verified = courses.filter(c => c.verified === 'verified').length;
+    const rejected = courses.filter(c => c.verified === 'rejected').length;
+    const unverified = courses.length - verified - rejected;
+    return { verified, rejected, unverified, total: courses.length };
+  }, [state.courses]);
+
   // Action creators
   const addCourse = (course) => {
     dispatch({ type: ACTIONS.ADD_COURSE, payload: course });
@@ -344,6 +353,7 @@ export function PathProvider({ children }) {
     courses: state.courses,
     learningIntent: state.learningIntent,
     pathStats,
+    verificationStats,
     addCourse,
     removeCourse,
     reorderCourses,

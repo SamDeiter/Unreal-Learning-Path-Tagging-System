@@ -196,6 +196,8 @@ function AssemblyLine() {
     if (course.role) classes.push(course.role.toLowerCase().replace(/\s+/g, "-")); // e.g. "next-step"
     const ct = getContentType(course);
     classes.push(ct.cls); // e.g. "ct-video", "ct-doc", "ct-bespoke"
+    if (course.verified === "verified") classes.push("node-verified");
+    if (course.verified === "rejected") classes.push("node-rejected");
     return classes.join(" ");
   };
 
@@ -437,6 +439,44 @@ function AssemblyLine() {
                               <div className="node-review-badges">
                                 {renderBloomBadge(course)}
                                 {renderLoadDot(course)}
+                              </div>
+                            )}
+
+                            {/* Verification buttons — review stage only */}
+                            {workflowStage === "review" && (
+                              <div className="node-verify-actions" onClick={(e) => e.stopPropagation()}>
+                                {course.verified === "verified" ? (
+                                  <button
+                                    className="verify-label verified"
+                                    onClick={() => updateCourseMeta(course.code, { verified: "unverified" })}
+                                    title="Click to undo approval"
+                                  >
+                                    ✅ Approved
+                                  </button>
+                                ) : course.verified === "rejected" ? (
+                                  <button
+                                    className="verify-label rejected"
+                                    onClick={() => updateCourseMeta(course.code, { verified: "unverified" })}
+                                    title="Click to undo"
+                                  >
+                                    🚩 Flagged — Undo
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      className="verify-btn accept"
+                                      onClick={() => updateCourseMeta(course.code, { verified: "verified" })}
+                                    >
+                                      👍 Approve
+                                    </button>
+                                    <button
+                                      className="verify-btn reject"
+                                      onClick={() => updateCourseMeta(course.code, { verified: "rejected" })}
+                                    >
+                                      🚩 Flag
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>

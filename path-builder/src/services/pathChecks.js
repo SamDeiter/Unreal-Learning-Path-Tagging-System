@@ -115,5 +115,22 @@ export function evaluateChecks(pathResult, gaps) {
     group: "structure",
   });
 
+  // ── Verification Checks ────────────────────────────────
+  const unverified = path.filter((s) => !s.verified || s.verified === "unverified").length;
+  const rejected = path.filter((s) => s.verified === "rejected").length;
+  checks.push({
+    id: "all-verified",
+    label: "All steps reviewed",
+    passed: unverified === 0 && rejected === 0 && path.length > 0,
+    detail:
+      unverified === 0 && rejected === 0
+        ? "All steps have been approved"
+        : `${unverified} still need review, ${rejected} flagged`,
+    fix: unverified > 0 || rejected > 0
+      ? "Go to the Review tab and approve or flag each step in your path"
+      : null,
+    group: "verification",
+  });
+
   return checks;
 }
