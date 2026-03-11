@@ -271,7 +271,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
   }, [searchQuery, allSkills]);
 
   // Smart search: find courses matching the typed phrase
-  const matchingCourses = useMemo(() => {
+  const matchingCoursesRaw = useMemo(() => {
     if (!debouncedQuery.trim() || debouncedQuery.length < 2) return [];
 
     const query = debouncedQuery.toLowerCase().trim();
@@ -407,9 +407,19 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
         return item;
       })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 30)
-      .map((item) => item.course);
+      .slice(0, 30);
   }, [debouncedQuery, courses]);
+
+  // Normalize scores to 0-100 and attach to course objects
+  const scoredCourses = useMemo(() => {
+    if (matchingCoursesRaw.length === 0) return [];
+    const maxScore = matchingCoursesRaw[0]?.score || 1;
+    return matchingCoursesRaw.map((item) => ({
+      ...item.course,
+      _relevanceScore: item.score,
+      _relevancePct: Math.round((item.score / maxScore) * 100),
+    }));
+  }, [matchingCoursesRaw]);
 
   // Merge keyword results with vector search results (deduplicated)
   const mergedCourses = useMemo(() => {
@@ -421,8 +431,8 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
         seen.add(key);
         return true;
       });
-    return [...dedup(matchingCourses), ...dedup(vectorResults)];
-  }, [matchingCourses, vectorResults]);
+    return [...dedup(scoredCourses), ...dedup(vectorResults)];
+  }, [scoredCourses, vectorResults]);
 
   // Build curriculum with time filtering
   const curriculum = useMemo(() => {
@@ -465,7 +475,9 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       }
       const levelA = levelOrder[a.tags?.level] || 2;
       const levelB = levelOrder[b.tags?.level] || 2;
-      return levelA - levelB;
+      // Sort by tier first, then by relevance within tier
+      if (levelA !== levelB) return levelA - levelB;
+      return (b._relevanceScore || 0) - (a._relevanceScore || 0);
     });
 
     const tiers = { prerequisites: [], core: [], advanced: [] };
@@ -521,12 +533,22 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
     courses,
   ]);
 
-  // Reset selection when curriculum changes — start empty, let user choose
+  // Auto-select top recommended courses when curriculum changes
   const curriculumKey = curriculum ? curriculum.allCourses.map((c) => c.code).join(",") : "";
 
   useEffect(() => {
-    setSelectedCourses(new Set());
-  }, [curriculumKey]);
+    if (!curriculum) {
+      setSelectedCourses(new Set());
+      return;
+    }
+    // Pick the top 5 highest-scoring courses not already in path
+    const recommended = curriculum.allCourses
+      .filter((c) => !c.isInPath && c._relevanceScore > 0)
+      .sort((a, b) => (b._relevanceScore || 0) - (a._relevanceScore || 0))
+      .slice(0, 5)
+      .map((c) => c.code);
+    setSelectedCourses(new Set(recommended));
+  }, [curriculumKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleCourse = useCallback((code) => {
     setSelectedCourses((prev) => {
@@ -669,7 +691,7 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
       )}
 
       {/* No results message */}
-      {searchQuery && matchingCourses.length === 0 && (
+      {searchQuery && scoredCourses.length === 0 && (
         <div className="sc-no-results">
           <p>No courses found for "{searchQuery}"</p>
           <p className="hint">Try different keywords or select a topic above</p>
@@ -777,6 +799,9 @@ function SkillCurriculum({ courses, preSelectedSkill, onSkillUsed }) {
 
 // Course card subcomponent (memoized to avoid re-renders when parent state changes)
 const CourseCard = memo(function CourseCard({ course, isSelected, onToggle, formatTime }) {
+  const pct = course._relevancePct;
+  const matchTier = pct >= 80 ? "high" : pct >= 50 ? "mid" : "low";
+  const summary = course.gemini_enriched?.one_sentence_summary;
   return (
     <div
       className={`curriculum-course ${course.isInPath ? "in-path" : ""} ${isSelected ? "selected" : ""}`}
@@ -784,7 +809,15 @@ const CourseCard = memo(function CourseCard({ course, isSelected, onToggle, form
     >
       {!course.isInPath && <input type="checkbox" checked={isSelected} onChange={() => {}} />}
       <div className="course-info">
-        <div className="course-title">{course.title}</div>
+        <div className="course-title-row">
+          <div className="course-title">{course.title}</div>
+          {pct > 0 && (
+            <span className={`relevance-badge ${matchTier}`} title={`${pct}% relevance match`}>
+              {pct}%
+            </span>
+          )}
+        </div>
+        {summary && <div className="course-summary">{summary}</div>}
         <div className="course-meta">
           <span className="course-time">{formatTime(course.estimatedTime)}</span>
           <span className="course-level">{course.tags?.level}</span>

@@ -24,6 +24,7 @@ import {
 import { previewScormPackage } from "../../services/scormPackager";
 import { exportScormPackage } from "../../services/scormExportService";
 import { evaluateChecks } from "../../services/pathChecks";
+import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
 import PathWizard from "../BespokePath/PathWizard";
 import "./PathIntelligencePanel.css";
 
@@ -1091,9 +1092,9 @@ export default function PathIntelligencePanel() {
                                           </div>
                                         )}
 
-                                        {seg.text && (
-                                          <div className="ip-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
-                                            "{seg.text}"
+                                        {(seg.summary || seg.text) && (
+                                          <div className="ip-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: seg.summary ? "normal" : "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
+                                            {seg.summary || cleanTranscriptText(seg.text)}
                                           </div>
                                         )}
                                         <span className="ip-fill-sim">

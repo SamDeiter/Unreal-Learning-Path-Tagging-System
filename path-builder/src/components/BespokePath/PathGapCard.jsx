@@ -12,6 +12,7 @@
 
 import { useState, useCallback } from "react";
 import { simulatePersonaGaps } from "../../services/pathGapAnalyzer";
+import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
 
 /**
  * Get coverage tier for CSS class.
@@ -246,9 +247,9 @@ export default function PathGapCard({
                                     </div>
                                   )}
 
-                                  {seg.text && (
-                                    <div className="gap-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
-                                      "{seg.text}"
+                                  {(seg.summary || seg.text) && (
+                                    <div className="gap-fill-seg-snippet" style={{fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "6px", marginBottom: "6px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", fontStyle: seg.summary ? "normal" : "italic", borderLeft: "2px solid var(--border-muted)", paddingLeft: "8px"}}>
+                                      {seg.summary || cleanTranscriptText(seg.text)}
                                     </div>
                                   )}
                                   <span className="gap-fill-sim">
