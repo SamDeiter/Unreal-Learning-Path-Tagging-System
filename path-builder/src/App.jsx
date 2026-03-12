@@ -1,36 +1,30 @@
-/* global __BUILD_HASH__, __BUILD_TIME__, __BUILD_NUMBER__ */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider, usePath } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
-import { signOutUser } from "./services/googleAuthService";
 import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
 import { getFirebaseApp } from "./services/firebaseConfig";
 import { IS_E2E } from "./services/e2eBypass";
 import useIsMobile from "./hooks/useIsMobile";
 import { useAuth } from "./hooks/useAuth";
+import useAnalyticsData from "./hooks/useAnalyticsData";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
-import { fetchEvents } from "./services/analyticsQueryService";
+import AppSidebar from "./components/AppSidebar/AppSidebar";
 import { fetchJSON } from "./services/dataLoader";
-import "./App.css";
-
-// IS_E2E imported from services/e2eBypass.js (checks both env var and localStorage)
-
-// Import course data (video library is lazy-loaded for bundle optimization)
 import { precomputeTagsAndEdges } from "./utils/tagEdgePrecompute";
+import { BASE_TABS, MOBILE_TAB_ORDER } from "./domain/tabDefinitions";
+import "./App.css";
 
 // ── Lazy-loaded tab components (code-split per tab) ──────────────────
 const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
 const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLine"));
-const OutputPanel = lazy(() => import("./components/OutputPanel/OutputPanel"));
 const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
 const PathDashboard = lazy(() => import("./components/PathBuilder/PathDashboard"));
 const PathCreationWizard = lazy(() => import("./components/PathBuilder/PathCreationWizard"));
 const PathLoader = lazy(() => import("./components/PathBuilder/PathLoader"));
 const WorkflowStepper = lazy(() => import("./components/PathBuilder/WorkflowStepper"));
-const LearningIntentHeader = lazy(() => import("./components/LearningIntent/LearningIntentHeader"));
 const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
 const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
 const TagManager = lazy(() => import("./components/TagManager/TagManager"));
@@ -43,7 +37,6 @@ const AdaptivePath = lazy(() => import("./components/AdaptivePath/AdaptivePath")
 const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
 const AdminErrorLogs = lazy(() => import("./components/AdminErrorLogs/AdminErrorLogs"));
 const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
-const CollapsibleSection = lazy(() => import("./components/Visualizations/CollapsibleSection"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));
 const PersonaQuiz = lazy(() => import("./components/PersonaQuiz/PersonaQuiz"));
 
@@ -63,62 +56,6 @@ const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnaly
 const ContentGaps = lazy(() => import("./components/AdminAnalytics/ContentGaps"));
 const AnalyticsPipeline = lazy(() => import("./components/AdminAnalytics/AnalyticsPipeline"));
 const AnalyticsCosts = lazy(() => import("./components/AdminAnalytics/AnalyticsCosts"));
-
-// Tab definitions — split into student-facing and admin/builder
-// Newest mode always at the top of the list
-const PRIMARY_TABS = [
-  { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
-  { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
-  { key: "problem", label: "Learn Why", icon: "🧠" },
-  { key: "augmentation", label: "Augmentation", icon: "🔬" },
-  { key: "personas", label: "Onboarding", icon: "🚀" },
-  { key: "builder", label: "Path Builder", icon: "🏗️" },
-];
-
-const SECONDARY_TABS = [
-  { key: "dashboard", label: "Dashboard", icon: "📊" },
-  { key: "readiness", label: "Path Readiness", icon: "📚" },
-  { key: "tags", label: "Tags", icon: "🏷️" },
-  { key: "analytics", label: "Analytics", icon: "📈", expandable: true },
-];
-
-const ANALYTICS_SUBTABS = [
-  { key: "analytics-overview", label: "Overview", icon: "📊" },
-  { key: "analytics-insights", label: "Insights", icon: "💡" },
-  { key: "analytics-confidence", label: "Confidence", icon: "🧠" },
-  { key: "analytics-coverage", label: "Coverage", icon: "🎯" },
-  { key: "analytics-library", label: "Library", icon: "📚" },
-  { key: "analytics-paths", label: "Learning Paths", icon: "🛤️" },
-  { key: "analytics-graph", label: "Tag Graph", icon: "🔗" },
-  { key: "analytics-gaps", label: "Content Gaps", icon: "🕳️" },
-  { key: "analytics-pipeline", label: "Pipeline", icon: "⚙️" },
-  { key: "analytics-costs", label: "Costs", icon: "💰" },
-];
-
-const BASE_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
-
-// On mobile, surface the most useful tabs first
-const MOBILE_TAB_ORDER = [
-  "adaptive",
-  "bespoke",
-  "problem",
-  "personas",
-  "builder",
-  "dashboard",
-  "readiness",
-  "tags",
-  "analytics-overview",
-  "analytics-insights",
-  "analytics-confidence",
-  "analytics-coverage",
-  "analytics-library",
-  "analytics-paths",
-  "analytics-graph",
-  "analytics-gaps",
-  "analytics-pipeline",
-  "analytics-costs",
-  "augmentation",
-];
 
 // ── Builder Editor with Workflow Stepper ──────────────────────────────
 function BuilderEditor({
@@ -175,34 +112,15 @@ function App() {
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
-  const [analyticsEvents, setAnalyticsEvents] = useState([]);
-  const [analyticsTimeRange, setAnalyticsTimeRange] = useState("7d");
   // Path Builder dashboard vs editor view
   const [builderView, setBuilderView] = useState("dashboard"); // "dashboard" | "editor"
   const [showWizard, setShowWizard] = useState(false);
   const [pendingEditPath, setPendingEditPath] = useState(null);
-
-  // Analytics events are loaded inline in the effect below
-
-  useEffect(() => {
-    // Only admins see analytics tabs — skip expensive fetch for regular users
-    if (!userIsAdmin) return;
-    if (activeTab.startsWith("analytics-") && analyticsEvents.length === 0) {
-      let cancelled = false;
-      (async () => {
-        try {
-          const data = await fetchEvents(analyticsTimeRange);
-          if (!cancelled) setAnalyticsEvents(data);
-        } catch (err) {
-          console.error("[App] Failed to load analytics events:", err);
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }
-  }, [activeTab, analyticsEvents.length, analyticsTimeRange, userIsAdmin]);
   const { isMobile } = useIsMobile();
+
+  // Analytics state (extracted hook)
+  const { analyticsEvents, setAnalyticsEvents, analyticsTimeRange, setAnalyticsTimeRange } =
+    useAnalyticsData(activeTab, userIsAdmin);
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
   const tabs = useMemo(() => {
@@ -227,8 +145,10 @@ function App() {
     }
     return ordered;
   }, [isMobile, userIsAdmin]);
+
+  // Listen for new feedback count (admin only)
   useEffect(() => {
-    if (IS_E2E || !userIsAdmin) return; // No Firebase in E2E mode
+    if (IS_E2E || !userIsAdmin) return;
     const db = getFirestore(getFirebaseApp());
     const q = query(collection(db, "feedback"), where("status", "==", "new"));
     const unsub = onSnapshot(
@@ -260,12 +180,10 @@ function App() {
   // Process course data - deduplicate by code
   const courses = useMemo(() => {
     const raw = videoLibrary.courses || [];
-    // Deduplicate: keep first occurrence of each code
     const seen = new Set();
     return raw.filter((c) => {
       if (seen.has(c.code)) return false;
       seen.add(c.code);
-      // Exclude intro/outro clips — no meaningful learning content
       const title = (c.title || "").toLowerCase();
       if (title === "introduction" || title === "intro" || title === "outro") return false;
       return true;
@@ -273,7 +191,6 @@ function App() {
   }, [videoLibrary]);
 
   // Process tag data — extracted to tagEdgePrecompute.js for performance
-  // Uses inverted index for O(n+m) instead of O(n×m) tag counting
   const { tags, edges } = useMemo(() => precomputeTagsAndEdges(courses), [courses]);
 
   return (
@@ -316,130 +233,20 @@ function App() {
                 </div>
               </header>
             ) : (
-              /* ── Desktop: left sidebar ── */
-              <aside className="app-sidebar">
-                <div className="sidebar-header">
-                  <h1 className="app-title">UE5 LPB</h1>
-                </div>
-
-                <nav className="sidebar-nav">
-                  <div className="sidebar-section">
-                    <span className="sidebar-section-label">Learning</span>
-                    {PRIMARY_TABS.map((tab) => (
-                      <button
-                        key={tab.key}
-                        className={`sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
-                        onClick={() => setActiveTab(tab.key)}
-                      >
-                        <span className="sidebar-tab-icon">{tab.icon}</span>
-                        <span className="sidebar-tab-label">{tab.label}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="sidebar-divider" />
-
-                  <div className="sidebar-section">
-                    <span className="sidebar-section-label">Tools</span>
-                    {[...SECONDARY_TABS, ...tabs.filter((t) => t.adminOnly)].map((tab) => {
-                      // Analytics is expandable with sub-items
-                      if (tab.expandable && tab.key === "analytics") {
-                        const isAnyAnalyticsActive = activeTab.startsWith("analytics-");
-                        return (
-                          <div key={tab.key}>
-                            <button
-                              className={`sidebar-tab sidebar-tab-sm ${isAnyAnalyticsActive ? "active" : ""}`}
-                              onClick={() => {
-                                setAnalyticsExpanded(!analyticsExpanded);
-                                if (!isAnyAnalyticsActive) {
-                                  setActiveTab("analytics-overview");
-                                  setAnalyticsExpanded(true);
-                                }
-                              }}
-                            >
-                              <span className="sidebar-tab-icon">{tab.icon}</span>
-                              <span className="sidebar-tab-label">{tab.label}</span>
-                              <span
-                                className={`sidebar-expand-arrow ${analyticsExpanded ? "expanded" : ""}`}
-                              >
-                                ▸
-                              </span>
-                            </button>
-                            {analyticsExpanded && (
-                              <div className="sidebar-subtabs">
-                                {ANALYTICS_SUBTABS.map((sub) => (
-                                  <button
-                                    key={sub.key}
-                                    className={`sidebar-tab sidebar-tab-sub ${activeTab === sub.key ? "active" : ""}`}
-                                    onClick={() => setActiveTab(sub.key)}
-                                  >
-                                    <span className="sidebar-tab-icon">{sub.icon}</span>
-                                    <span className="sidebar-tab-label">{sub.label}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
-                      return (
-                        <button
-                          key={tab.key}
-                          className={`sidebar-tab sidebar-tab-sm ${activeTab === tab.key ? "active" : ""}`}
-                          onClick={() => setActiveTab(tab.key)}
-                        >
-                          <span className="sidebar-tab-icon">{tab.icon}</span>
-                          <span className="sidebar-tab-label">{tab.label}</span>
-                          {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
-                            <span className="feedback-badge">{newFeedbackCount}</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </nav>
-
-                {currentUser && (
-                  <div className="sidebar-user">
-                    <div className="sidebar-user-info">
-                      {currentUser.photoURL && (
-                        <img
-                          src={currentUser.photoURL}
-                          alt=""
-                          className="header-avatar"
-                          referrerPolicy="no-referrer"
-                        />
-                      )}
-                      <span className="sidebar-user-name" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {currentUser.displayName || currentUser.email}
-                      </span>
-                    </div>
-                    <div
-                      className="build-info"
-                      title={`Build #${typeof __BUILD_NUMBER__ !== "undefined" ? __BUILD_NUMBER__ : "?"} (${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"}) — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
-                      style={{ fontSize: "0.65rem", color: "var(--fg-muted, #636e7b)", padding: "0 0.5rem", marginTop: "-2px" }}
-                    >
-                      {typeof __BUILD_NUMBER__ !== "undefined"
-                        ? `Build #${__BUILD_NUMBER__} · ${new Date(__BUILD_TIME__).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-                        : "dev"}
-                    </div>
-                    <div className="sidebar-user-actions">
-                      <button
-                        className="retake-quiz-btn"
-                        onClick={() => {
-                          localStorage.removeItem("ue5_persona_id");
-                          setShowQuiz(true);
-                        }}
-                      >
-                        🔄 Change Role
-                      </button>
-                      <button className="header-signout-btn" onClick={() => signOutUser()}>
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </aside>
+              /* ── Desktop: left sidebar (extracted) ── */
+              <AppSidebar
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                analyticsExpanded={analyticsExpanded}
+                setAnalyticsExpanded={setAnalyticsExpanded}
+                newFeedbackCount={newFeedbackCount}
+                currentUser={currentUser}
+                onRetakeQuiz={() => {
+                  localStorage.removeItem("ue5_persona_id");
+                  setShowQuiz(true);
+                }}
+              />
             )}
 
             {/* Mobile Nav Drawer */}
@@ -550,15 +357,12 @@ function App() {
                 {activeTab === "analytics-overview" && (
                   <div className="analytics-layout">
                     <div className="analytics-grid">
-                      {/* Admin-only: Usage Overview */}
                       {userIsAdmin && (
                         <AdminAnalytics
                           onEventsLoaded={setAnalyticsEvents}
                           onTimeRangeChange={setAnalyticsTimeRange}
                         />
                       )}
-
-                      {/* Journey Heatmap */}
                       <JourneyHeatmap />
                     </div>
                   </div>
