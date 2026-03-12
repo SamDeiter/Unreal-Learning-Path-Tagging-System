@@ -140,18 +140,41 @@ export function adaptQueryPath(queryResult) {
 
   const sections = [];
   const query = queryResult.cart?.intent?.problem_description || "";
+  const diagnosis = queryResult.cart?.diagnosis;
+  const microLesson = queryResult.cart?.microLesson;
+  const objectives = queryResult.cart?.objectives;
+  const evidence = queryResult.evidence || [];
+
+  // Build evidence summary for howToVerify
+  const evidenceSummary = evidence.length > 0
+    ? evidence.slice(0, 3).map((e) => `See: "${e.videoTitle || e.title || 'source'}" — ${(e.text || '').substring(0, 80)}`)
+    : [];
 
   // Prerequisites: diagnosis root causes → prerequisite section
-  const diagnosis = queryResult.cart?.diagnosis;
   if (diagnosis) {
-    const prereqSteps = (diagnosis.root_causes || []).map((cause, i) =>
-      createV2Step({
+    const prereqSteps = (diagnosis.root_causes || []).map((cause, i) => {
+      const signals = (diagnosis.signals_to_watch_for || []).slice(0, 2);
+      return createV2Step({
         id: `query-prereq-${i}`,
         title: `Understanding: ${cause.substring(0, 50)}`,
         summary: cause,
         category: "diagnosis",
-      })
-    );
+        whyThisMatters: `This root cause is directly related to your issue: "${query.substring(0, 80)}".`,
+        whatToDo: [
+          `Identify whether ${cause.substring(0, 60)} applies to your project.`,
+          ...(signals.length > 0 ? [`Check for these signals: ${signals.join(", ")}`] : []),
+        ],
+        howToVerify: [
+          `You can confirm whether this root cause is present in your project.`,
+          ...evidenceSummary.slice(0, 1),
+        ],
+        commonMistake: (diagnosis.variables_that_do_not || [])[0]
+          ? `Don't focus on: ${(diagnosis.variables_that_do_not || [])[0]}`
+          : "",
+        takeaway: `Root cause: ${cause.substring(0, 50)}`,
+        completionType: "read",
+      });
+    });
     if (prereqSteps.length > 0) {
       sections.push(createV2Section("prerequisite", prereqSteps));
     }
@@ -161,26 +184,50 @@ export function adaptQueryPath(queryResult) {
   const coreSteps = [];
   if (queryResult.fixSteps && queryResult.fixSteps.length > 0) {
     queryResult.fixSteps.forEach((fixStep, i) => {
+      const relatedCheck = (queryResult.fastChecks || [])[i] || "";
       coreSteps.push(
         createV2Step({
           id: `query-fix-${i}`,
-          title: `Fix Step ${i + 1}`,
+          title: `Fix Step ${i + 1}: ${fixStep.substring(0, 40)}`,
           summary: fixStep,
           category: "fix",
+          whyThisMatters: queryResult.whyThisResult?.[i]
+            || `This step addresses the issue: "${query.substring(0, 60)}".`,
+          whatToDo: [fixStep],
+          howToVerify: relatedCheck
+            ? [relatedCheck, ...evidenceSummary.slice(0, 1)]
+            : evidenceSummary.slice(0, 2),
+          commonMistake: (queryResult.ifStillBrokenBranches || [])[i]
+            ? `If this doesn't work: ${queryResult.ifStillBrokenBranches[i].action || ""}`
+            : "",
+          takeaway: fixStep.substring(0, 60),
+          completionType: "do",
         })
       );
     });
   }
-  if (queryResult.cart?.microLesson) {
-    const ml = queryResult.cart.microLesson;
+  if (microLesson) {
+    const ml = microLesson;
     if (ml.quick_fix) {
+      const citationRefs = (ml.quick_fix.citations || []).map(
+        (c) => `${c.videoTitle || c.courseCode || "source"} (${c.timestamp || ""})`
+      );
       coreSteps.push(
         createV2Step({
           id: "query-quickfix",
           title: ml.quick_fix.title || "Quick Fix",
           summary: (ml.quick_fix.steps || []).join(" → "),
           whyThisMatters: ml.why_it_works?.explanation || "",
+          whatToDo: ml.quick_fix.steps || [],
+          howToVerify: citationRefs.length > 0
+            ? [`Verify using: ${citationRefs.join(", ")}`]
+            : [],
+          commonMistake: (ml.related_situations || [])[0]
+            ? `Watch out: ${ml.related_situations[0].scenario || ""}`
+            : "",
+          takeaway: ml.why_it_works?.key_concept || "",
           category: "fix",
+          completionType: "do",
         })
       );
     }
@@ -190,17 +237,43 @@ export function adaptQueryPath(queryResult) {
   }
 
   // Practice: transferable objectives
-  const objectives = queryResult.cart?.objectives;
   if (objectives?.transferable && objectives.transferable.length > 0) {
+    const fixContext = (objectives.fix_specific || []).slice(0, 2);
     const practiceSteps = objectives.transferable.map((obj, i) =>
       createV2Step({
         id: `query-transfer-${i}`,
         title: `Apply: ${obj.substring(0, 50)}`,
         summary: obj,
         category: "transfer",
+        whyThisMatters: `This skill transfers beyond the immediate fix${fixContext[0] ? `: "${fixContext[0].substring(0, 60)}"` : ""}.`,
+        whatToDo: [
+          `Apply ${obj.substring(0, 60)} to a different area of your project.`,
+          "Test with a fresh scenario to confirm understanding.",
+        ],
+        howToVerify: [
+          `You can solve a similar problem without referring back to this path.`,
+        ],
+        commonMistake: "Only applying this technique to the exact scenario you learned it in.",
+        takeaway: obj.substring(0, 60),
+        completionType: "apply",
       })
     );
     sections.push(createV2Section("practice", practiceSteps));
+  }
+
+  // Build intro fields from pipeline data
+  const introOverrides = {};
+  if (queryResult.mostLikelyCause) {
+    introOverrides.rootCause = queryResult.mostLikelyCause;
+  }
+  if (queryResult.fastChecks?.length > 0) {
+    introOverrides.quickWin = queryResult.fastChecks[0];
+  }
+  if (queryResult.learnPath?.topicsCovered?.length > 0) {
+    introOverrides.whatYouWillLearn = queryResult.learnPath.topicsCovered;
+  }
+  if (queryResult.learnPath?.pathSummary) {
+    introOverrides.quickAnswer = queryResult.learnPath.pathSummary;
   }
 
   return createV2Path({
@@ -211,6 +284,7 @@ export function adaptQueryPath(queryResult) {
     sections,
     _sourceFormat: "query",
     _originalQuery: query,
+    ...introOverrides,
   });
 }
 
@@ -231,18 +305,31 @@ export function adaptPreSeededPath(preSeeded) {
   }
 
   const sectionBuckets = { prerequisite: [], core: [], practice: [] };
+  const totalSteps = preSeeded.steps.length;
 
   preSeeded.steps.forEach((step, idx) => {
     const category = (step.category || "core").toLowerCase();
     const sectionPhase = CATEGORY_TO_SECTION[category] || "core";
+    const title = step.title || `Step ${idx + 1}`;
 
     sectionBuckets[sectionPhase].push(
       createV2Step({
         id: `${preSeeded.id}-step-${idx}`,
-        title: step.title || `Step ${idx + 1}`,
+        title,
         summary: step.summary || "",
         category,
         source: { type: step.sourceType || "preseeded" },
+        whyThisMatters: step.summary
+          ? `${title} builds your understanding of ${(preSeeded.query || "this topic").substring(0, 60)}.`
+          : "",
+        whatToDo: step.summary
+          ? [`Follow the guidance on ${title.toLowerCase()}.`, "Apply to your own project."]
+          : [],
+        howToVerify: [`Confirm that ${title.toLowerCase()} works correctly in your project.`],
+        commonMistake: "",
+        takeaway: title,
+        completionType: sectionPhase === "prerequisite" ? "read" : sectionPhase === "practice" ? "apply" : "do",
+        estimatedMinutes: Math.max(2, Math.round(15 / totalSteps)),
       })
     );
   });
