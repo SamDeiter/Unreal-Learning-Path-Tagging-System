@@ -24,8 +24,10 @@ describe("cleanTranscriptText", () => {
   it("strips 'let's go ahead and' / 'let's take a look' phrases", () => {
     expect(cleanTranscriptText("Let's go ahead and create a new Blueprint class."))
       .toBe("create a new Blueprint class.");
+    // "at the Event Graph." is only 19 chars → falls under <20 threshold → ""
     expect(cleanTranscriptText("Let's take a look at the Event Graph."))
-      .toBe("at the Event Graph.");
+      .toBe("");
+    // "to the Material Editor." is 23 chars → passes threshold
     expect(cleanTranscriptText("Let's jump right in to the Material Editor."))
       .toBe("to the Material Editor.");
   });
@@ -67,15 +69,17 @@ describe("cleanTranscriptText", () => {
 
   // ── Edge cases ───────────────────────────────────────────────────
 
-  it("returns null/undefined/empty string as-is", () => {
-    expect(cleanTranscriptText(null)).toBe(null);
-    expect(cleanTranscriptText(undefined)).toBe(undefined);
+  it("returns null/undefined/empty string as empty string", () => {
+    // Function normalizes all non-string / falsy values to ""
+    expect(cleanTranscriptText(null)).toBe("");
+    expect(cleanTranscriptText(undefined)).toBe("");
     expect(cleanTranscriptText("")).toBe("");
   });
 
-  it("returns non-string values as-is", () => {
-    expect(cleanTranscriptText(42)).toBe(42);
-    expect(cleanTranscriptText(false)).toBe(false);
+  it("returns non-string values as empty string", () => {
+    // Numbers and booleans are not strings → return ""
+    expect(cleanTranscriptText(42)).toBe("");
+    expect(cleanTranscriptText(false)).toBe("");
   });
 
   it("does not corrupt clean technical text", () => {

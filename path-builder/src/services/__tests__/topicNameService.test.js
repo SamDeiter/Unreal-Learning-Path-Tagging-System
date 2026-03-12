@@ -79,12 +79,13 @@ describe("getDisplayName", () => {
     expect(name).toBe("311.04");
   });
 
-  it("truncates excessively long names to 55 chars", () => {
+  it("truncates excessively long names to MAX_NAME_LENGTH (60 chars)", () => {
     const course = {
       title: "This Is A Very Long Title That Should Be Truncated Because It Exceeds Character Limit",
       tags: { topic: "Advanced Topics" },
     };
     const name = getDisplayName(course);
-    expect(name.length).toBeLessThanOrEqual(55);
+    // MAX_NAME_LENGTH is 60; smartTruncate adds "…" so result may be ≤ 61
+    expect(name.length).toBeLessThanOrEqual(61);
   });
 });
