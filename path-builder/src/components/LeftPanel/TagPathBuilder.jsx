@@ -114,7 +114,7 @@ function TagPathBuilder({ courses }) {
     }
 
     // Sort by popularity
-    const tagsToShow = filteredTags.sort((a, b) => b.count - a.count);
+    const tagsToShow = [...filteredTags].sort((a, b) => b.count - a.count);
 
     // Limit if needed
     const LIMIT = selectedIndustry === "All" && !showAllTags ? 50 : 1000;

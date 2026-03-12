@@ -1,9 +1,15 @@
 import { defineConfig } from "vite";
 import { execSync } from "child_process";
 
-// Build-time constants injected into the app
-const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
-const buildNumber = execSync("git rev-list --count HEAD").toString().trim();
+// Build-time constants — safe fallbacks when git is unavailable (CI, fresh clones)
+let commitHash = "unknown";
+let buildNumber = "0";
+try {
+  commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+  buildNumber = execSync("git rev-list --count HEAD").toString().trim();
+} catch {
+  // git unavailable — use defaults
+}
 const buildTime = new Date().toISOString();
 import react from "@vitejs/plugin-react";
 
