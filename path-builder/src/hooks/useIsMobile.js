@@ -1,34 +1,47 @@
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 /**
  * useIsMobile — detects mobile/tablet viewports via matchMedia.
- * Re-evaluates on window resize. SSR-safe (defaults to false).
+ * Uses useSyncExternalStore for tear-free reads that stay in sync
+ * across HMR reloads and React re-mounts.
  *
  * @returns {{ isMobile: boolean, isTablet: boolean }}
  */
+
+function createMediaQuery(query) {
+  const mql = typeof window !== "undefined" ? window.matchMedia(query) : null;
+
+  function subscribe(callback) {
+    if (!mql) return () => {};
+    mql.addEventListener("change", callback);
+    return () => mql.removeEventListener("change", callback);
+  }
+
+  function getSnapshot() {
+    return mql ? mql.matches : false;
+  }
+
+  function getServerSnapshot() {
+    return false;
+  }
+
+  return { subscribe, getSnapshot, getServerSnapshot };
+}
+
+const mobileStore = createMediaQuery("(max-width: 768px)");
+const tabletStore = createMediaQuery("(max-width: 1024px)");
+
 export default function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)").matches : false
+  const isMobile = useSyncExternalStore(
+    mobileStore.subscribe,
+    mobileStore.getSnapshot,
+    mobileStore.getServerSnapshot,
   );
-  const [isTablet, setIsTablet] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 1024px)").matches : false
+  const isTablet = useSyncExternalStore(
+    tabletStore.subscribe,
+    tabletStore.getSnapshot,
+    tabletStore.getServerSnapshot,
   );
-
-  useEffect(() => {
-    const mobileQuery = window.matchMedia("(max-width: 768px)");
-    const tabletQuery = window.matchMedia("(max-width: 1024px)");
-
-    const handleMobile = (e) => setIsMobile(e.matches);
-    const handleTablet = (e) => setIsTablet(e.matches);
-
-    mobileQuery.addEventListener("change", handleMobile);
-    tabletQuery.addEventListener("change", handleTablet);
-
-    return () => {
-      mobileQuery.removeEventListener("change", handleMobile);
-      tabletQuery.removeEventListener("change", handleTablet);
-    };
-  }, []);
 
   return { isMobile, isTablet };
 }
