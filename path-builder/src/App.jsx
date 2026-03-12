@@ -511,17 +511,18 @@ function App() {
                           referrerPolicy="no-referrer"
                         />
                       )}
-                      <span className="sidebar-user-name">
+                      <span className="sidebar-user-name" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {currentUser.displayName || currentUser.email}
                       </span>
-                      <span
-                        className="build-info"
-                        title={`Build #${typeof __BUILD_NUMBER__ !== "undefined" ? __BUILD_NUMBER__ : "?"} (${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"}) — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
-                      >
-                        {typeof __BUILD_NUMBER__ !== "undefined"
-                          ? `Build #${__BUILD_NUMBER__} · ${new Date(__BUILD_TIME__).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-                          : "dev"}
-                      </span>
+                    </div>
+                    <div
+                      className="build-info"
+                      title={`Build #${typeof __BUILD_NUMBER__ !== "undefined" ? __BUILD_NUMBER__ : "?"} (${typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : "dev"}) — ${typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : ""}`}
+                      style={{ fontSize: "0.65rem", color: "var(--fg-muted, #636e7b)", padding: "0 0.5rem", marginTop: "-2px" }}
+                    >
+                      {typeof __BUILD_NUMBER__ !== "undefined"
+                        ? `Build #${__BUILD_NUMBER__} · ${new Date(__BUILD_TIME__).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                        : "dev"}
                     </div>
                     <div className="sidebar-user-actions">
                       <button
