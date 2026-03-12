@@ -70,6 +70,7 @@ const PRIMARY_TABS = [
   { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
+  { key: "augmentation", label: "Augmentation", icon: "🔬" },
   { key: "personas", label: "Onboarding", icon: "🚀" },
   { key: "builder", label: "Path Builder", icon: "🏗️" },
 ];
@@ -79,7 +80,6 @@ const SECONDARY_TABS = [
   { key: "readiness", label: "Path Readiness", icon: "📚" },
   { key: "tags", label: "Tags", icon: "🏷️" },
   { key: "analytics", label: "Analytics", icon: "📈", expandable: true },
-  { key: "augmentation", label: "Augmentation", icon: "🔬" },
 ];
 
 const ANALYTICS_SUBTABS = [
