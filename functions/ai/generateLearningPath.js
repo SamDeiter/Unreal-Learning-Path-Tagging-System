@@ -11,6 +11,7 @@ const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 const { writePathCache } = require("../utils/pathCacheUtils");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
@@ -171,6 +172,8 @@ exports.generateLearningPath = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { query, tags = [] } = data;
 

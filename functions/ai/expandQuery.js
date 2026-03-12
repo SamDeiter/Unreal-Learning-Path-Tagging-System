@@ -12,6 +12,7 @@ const { normalizeQuery } = require("../pipeline/cache");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 // In-memory cache (per instance) to avoid redundant Gemini calls
 const _cache = new Map();
@@ -24,6 +25,8 @@ exports.expandQuery = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { query } = data;
 

@@ -17,6 +17,7 @@ const { FieldValue } = require("firebase-admin/firestore");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 const db = admin.firestore();
 
@@ -75,6 +76,8 @@ async function searchCollection(collectionName, queryVector, topK) {
  * Search epic_embeddings — main RAG search across all content
  */
 exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 

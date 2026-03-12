@@ -6,6 +6,7 @@ const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * PROMPT 3 — LEARNING OBJECTIVE DECOMPOSITION
@@ -65,6 +66,8 @@ exports.decomposeLearningObjectives = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { intent, diagnosis } = data;
 

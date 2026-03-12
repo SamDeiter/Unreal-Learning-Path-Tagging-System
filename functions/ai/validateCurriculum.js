@@ -5,6 +5,7 @@ const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * PROMPT 4 — CURRICULUM VALIDATION
@@ -49,6 +50,8 @@ exports.validateCurriculum = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { intent, diagnosis, objectives, learningPath } = data;
 

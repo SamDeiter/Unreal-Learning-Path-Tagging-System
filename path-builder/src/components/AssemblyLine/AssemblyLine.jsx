@@ -23,6 +23,7 @@ import {
 } from "../../services/cognitiveLoadEngine";
 import "./AssemblyLine.css";
 import SmartEmptyState from "./SmartEmptyState";
+import ModuleCard from "./ModuleCard";
 
 // Determine content type from course properties
 function getContentType(course) {
@@ -85,8 +86,20 @@ function TagLegend() {
 }
 
 function AssemblyLine() {
-  const { courses, removeCourse, reorderCourses, updateCourseMeta, clearPath, pathStats, learningIntent, workflowStage } =
-    usePath();
+  const {
+    courses,
+    modules,
+    ungroupedCourses,
+    removeCourse,
+    reorderCourses,
+    updateCourseMeta,
+    clearPath,
+    learningIntent,
+    pathStats,
+    workflowStage,
+    addModule,
+    moveCourseToModule,
+  } = usePath();
 
   // Dynamic title: use the learning intent query, fallback to generic
   const pathTitle = learningIntent?.primaryGoal || "Your Learning Path";
@@ -312,6 +325,77 @@ function AssemblyLine() {
         />
       ) : (
         <div className="path-container">
+          {/* ── Milestone Modules ───────────────────────────────────────── */}
+          {modules.length > 0 && workflowStage === "build" && (
+            <div className="assembly-modules">
+              <div className="assembly-modules__header">
+                <span className="assembly-modules__label">Milestones</span>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => addModule()}
+                  title="Add a new milestone group"
+                >
+                  + Add Milestone
+                </button>
+              </div>
+              {modules.map((mod, idx) => {
+                // Render course mini-cards for this module
+                const moduleCourses = mod.courseIds
+                  .map((code) => courses.find((c) => c.code === code))
+                  .filter(Boolean);
+                const courseCards = moduleCourses.map((course) => (
+                  <div
+                    key={course.code}
+                    className="module-course-chip"
+                    draggable
+                    onDragStart={(e) => e.dataTransfer.setData("text/plain", course.code)}
+                    title={course.title}
+                  >
+                    <span className="module-course-chip__title">{getDisplayName(course)}</span>
+                    <button
+                      className="module-course-chip__remove"
+                      onClick={() => moveCourseToModule(course.code, null)}
+                      title="Remove from milestone"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ));
+                return (
+                  <ModuleCard
+                    key={mod.id}
+                    module={mod}
+                    courseCards={courseCards}
+                    index={idx}
+                    onDropCourse={(courseCode, moduleId) => moveCourseToModule(courseCode, moduleId)}
+                  />
+                );
+              })}
+              {/* Ungrouped courses */}
+              {ungroupedCourses.length > 0 && (
+                <div className="assembly-modules__ungrouped">
+                  <span className="assembly-modules__ungrouped-label">
+                    Ungrouped ({ungroupedCourses.length})
+                  </span>
+                  <div className="assembly-modules__ungrouped-chips">
+                    {ungroupedCourses.map((course) => (
+                      <div
+                        key={course.code}
+                        className="module-course-chip module-course-chip--ungrouped"
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/plain", course.code)}
+                        title={`Drag to a milestone: ${course.title}`}
+                      >
+                        <span className="module-course-chip__title">{getDisplayName(course)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Tier-based course rendering ───────────────────────────── */}
           <div className="assembly-tiers">
             {["Beginner", "Intermediate", "Advanced"].map((level) => {
               // Filter courses for this tier

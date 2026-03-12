@@ -6,6 +6,7 @@
  * so the CI runner doesn't need VITE_FIREBASE_* secrets.
  */
 import { initializeApp, getApps } from "firebase/app";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import { IS_E2E } from "./e2eBypass";
 
 // ── E2E stub ──────────────────────────────────────────────────────────────
@@ -44,5 +45,23 @@ export function getFirebaseApp() {
   const existingApps = getApps();
   const app = existingApps.find((a) => a.name === "path-builder");
   if (app) return app;
-  return initializeApp(firebaseConfig, "path-builder");
+  const newApp = initializeApp(firebaseConfig, "path-builder");
+
+  // ── App Check ─────────────────────────────────────────────────────────
+  // Requires VITE_RECAPTCHA_SITE_KEY in .env.
+  // In dev mode, enable debug mode so localhost isn't blocked.
+  const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  if (siteKey) {
+    // Enable debug token in development
+    if (import.meta.env.DEV) {
+      // @ts-ignore — global flag for Firebase App Check debug mode
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    initializeAppCheck(newApp, {
+      provider: new ReCaptchaEnterpriseProvider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  }
+
+  return newApp;
 }

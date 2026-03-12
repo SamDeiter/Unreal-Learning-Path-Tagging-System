@@ -10,6 +10,8 @@ const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
 const { findCachedDiagnosis, cacheDiagnosis } = require("../utils/diagnosisCacheUtils");
 const { writePathCache } = require("../utils/pathCacheUtils");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * UNIFIED /query ENDPOINT
@@ -223,7 +225,7 @@ async function handleProblemFirst(data, context, apiKey) {
 
           const cacheResult = await findCachedDiagnosis(queryEmbedding);
           if (cacheResult.hit && cacheResult.result) {
-            console.log(
+            logger.info(
               JSON.stringify({
                 severity: "INFO",
                 message: "diagnosis_cache_hit_returning",
@@ -853,7 +855,7 @@ async function fetchOnboardingContext(queries, _data) {
 
   // TODO: Connect to your actual Vector Search logic
   // Example: const results = await vectorSearch(queries);
-  console.log(
+  logger.info(
     JSON.stringify({
       severity: "INFO",
       message: "onboarding_retriever_stub",
@@ -1099,7 +1101,7 @@ async function handleOnboarding(data, context, apiKey) {
         : "Generated a general path — retrieval had limited results.",
     };
   } catch (err) {
-    console.error(
+    logger.error(
       JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message })
     );
     return {
@@ -1125,6 +1127,8 @@ exports.queryLearningPath = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
 
     // Rate limiting
@@ -1153,7 +1157,7 @@ exports.queryLearningPath = functions
       }
 
       const mode = detectMode(data);
-      console.log(JSON.stringify({ severity: "INFO", message: "query_start", mode, user: userId }));
+      logger.info(JSON.stringify({ severity: "INFO", message: "query_start", mode, user: userId }));
 
       if (mode === "problem-first") {
         return await handleProblemFirst(data, context, apiKey);
@@ -1166,7 +1170,7 @@ exports.queryLearningPath = functions
         );
       }
     } catch (error) {
-      console.error(
+      logger.error(
         JSON.stringify({ severity: "ERROR", message: "query_error", error: error.message })
       );
       if (error.code) throw error;

@@ -3,6 +3,8 @@ const functions = require("firebase-functions");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * generateAudioBriefing - NotebookLM-style audio overview for a learning path.
@@ -20,6 +22,8 @@ exports.generateAudioBriefing = functions
     memory: "1GB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { query, steps } = data;
     const mode = data.mode || "overview";
@@ -153,7 +157,7 @@ IMPORTANT:
 
         if (!stepTtsResp.ok) {
           const errBody = await stepTtsResp.text();
-          console.log(
+          logger.info(
             JSON.stringify({
               severity: "ERROR",
               message: "step_tts_api_error",
@@ -189,7 +193,7 @@ IMPORTANT:
         hdr.writeUInt32LE(pcm.length, 40);
         const wav = Buffer.concat([hdr, pcm]);
 
-        console.log(
+        logger.info(
           JSON.stringify({
             severity: "INFO",
             message: "step_audio_ready",
@@ -661,7 +665,7 @@ Rules:
           .map((s) => s.trim())
           .filter((s) => s.length > 0);
 
-        console.log(
+        logger.info(
           JSON.stringify({
             severity: "INFO",
             message: "narration_script_generated",
@@ -723,7 +727,7 @@ Rules:
               if (ad?.data) return pcmToWav(ad.data);
             } else {
               const errText = await resp.text();
-              console.log(
+              logger.info(
                 JSON.stringify({
                   severity: "WARNING",
                   message: `tts_attempt_${attempt + 1}_failed`,
@@ -753,7 +757,7 @@ Rules:
           });
         }
 
-        console.log(
+        logger.info(
           JSON.stringify({
             severity: "INFO",
             message: "narration_complete",
@@ -826,7 +830,7 @@ Rules:
         throw new Error("Generated script too short");
       }
 
-      console.log(
+      logger.info(
         JSON.stringify({
           severity: "INFO",
           message: "audio_script_generated",
@@ -864,7 +868,7 @@ Rules:
       const audioData = firstPart?.inlineData || firstPart?.inline_data;
 
       if (!audioData?.data) {
-        console.error(
+        logger.error(
           JSON.stringify({
             severity: "ERROR",
             message: "tts_no_audio_detail",
@@ -877,7 +881,7 @@ Rules:
       const mimeType = audioData.mimeType || audioData.mime_type || "audio/L16;rate=24000";
       const rawBase64 = audioData.data;
 
-      console.log(
+      logger.info(
         JSON.stringify({
           severity: "INFO",
           message: "audio_synthesized",
@@ -913,7 +917,7 @@ Rules:
 
       const wavBuffer = Buffer.concat([wavHeader, pcmBuffer]);
 
-      console.log(
+      logger.info(
         JSON.stringify({
           severity: "INFO",
           message: "audio_ready",
@@ -938,7 +942,7 @@ Rules:
         script,
       };
     } catch (error) {
-      console.error(
+      logger.error(
         JSON.stringify({
           severity: "ERROR",
           message: "audio_briefing_error",

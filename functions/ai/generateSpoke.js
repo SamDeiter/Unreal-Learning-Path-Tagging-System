@@ -53,7 +53,7 @@ async function embedText(text, apiKey) {
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error(`[generateSpoke] Embed error ${response.status}:`, errText.substring(0, 200));
+    logger.error(`[generateSpoke] Embed error ${response.status}:`, errText.substring(0, 200));
     throw new HttpsError("internal", "Failed to embed gap topic");
   }
 
@@ -170,7 +170,7 @@ Rules:
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error(`[generateSpoke] Synth error ${response.status}:`, errText.substring(0, 300));
+    logger.error(`[generateSpoke] Synth error ${response.status}:`, errText.substring(0, 300));
     throw new HttpsError("internal", "Failed to generate lesson content");
   }
 
@@ -184,7 +184,7 @@ Rules:
   try {
     return JSON.parse(text);
   } catch (parseErr) {
-    console.error("[generateSpoke] JSON parse error:", text.substring(0, 200));
+    logger.error("[generateSpoke] JSON parse error:", text.substring(0, 200));
     throw new HttpsError("internal", "Failed to parse lesson JSON");
   }
 }
@@ -200,6 +200,8 @@ exports.generateSpoke = onCall(
     secrets: ["GEMINI_API_KEY"],
   },
   async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
     // 1. Auth check
     const userId = request.auth?.uid;
     if (!userId) {
@@ -241,7 +243,7 @@ exports.generateSpoke = onCall(
       // Use cache if less than 7 days old
       const cacheAge = Date.now() - (cacheData.created_at?.toMillis() || 0);
       if (cacheAge < 7 * 24 * 60 * 60 * 1000) {
-        console.log(`[generateSpoke] Cache hit for "${cleanTopic}"`);
+        logger.info(`[generateSpoke] Cache hit for "${cleanTopic}"`);
         logApiUsage(userId, { type: "generation", function: "generateSpoke", cached: true });
         return { ...cacheData.spoke, cached: true };
       }
@@ -251,6 +253,8 @@ exports.generateSpoke = onCall(
     let apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       const functions = require("firebase-functions");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
       apiKey = functions.config().gemini?.api_key;
     }
     if (!apiKey) {
@@ -258,14 +262,14 @@ exports.generateSpoke = onCall(
     }
 
     // 6. Embed the gap topic
-    console.log(`[generateSpoke] Embedding topic: "${cleanTopic}"`);
+    logger.info(`[generateSpoke] Embedding topic: "${cleanTopic}"`);
     const queryVector = await embedText(
       `Unreal Engine 5 tutorial about: ${cleanTopic}. Difficulty: ${difficulty}. ${pathContext}`,
       apiKey
     );
 
     // 7. Vector search — search both segments and epic embeddings
-    console.log("[generateSpoke] Searching segment_embeddings...");
+    logger.info("[generateSpoke] Searching segment_embeddings...");
     const [segmentResults, epicResults] = await Promise.all([
       vectorSearch("segment_embeddings", queryVector, 5),
       vectorSearch("epic_embeddings", queryVector, 3),
@@ -280,10 +284,10 @@ exports.generateSpoke = onCall(
       throw new HttpsError("not-found", "No relevant content found for this topic");
     }
 
-    console.log(`[generateSpoke] Found ${allResults.length} relevant chunks (top sim: ${allResults[0].similarity.toFixed(3)})`);
+    logger.info(`[generateSpoke] Found ${allResults.length} relevant chunks (top sim: ${allResults[0].similarity.toFixed(3)})`);
 
     // 8. Gemini synthesis
-    console.log("[generateSpoke] Synthesizing lesson with Gemini...");
+    logger.info("[generateSpoke] Synthesizing lesson with Gemini...");
     const lesson = await synthesizeLesson(cleanTopic, difficulty, allResults, apiKey);
 
     // 9. Build response
@@ -315,7 +319,7 @@ exports.generateSpoke = onCall(
       firestoreWrites: 2,
     });
 
-    console.log(`[generateSpoke] Done! "${spoke.lesson_title}"`);
+    logger.info(`[generateSpoke] Done! "${spoke.lesson_title}"`);
     return { ...spoke, cached: false };
   }
 );

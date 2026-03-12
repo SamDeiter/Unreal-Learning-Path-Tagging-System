@@ -9,8 +9,11 @@
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logApiUsage } = require("../utils/apiUsage");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 exports.logTelemetry = onCall(async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
   const { type, ...rest } = request.data || {};
 
   if (!type) {

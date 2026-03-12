@@ -7,6 +7,7 @@ const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 // Import existing sanitize functions (injection guard from security hardening)
 const INJECTION_PATTERNS = [
@@ -82,6 +83,8 @@ exports.generateDiagnosis = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { intent, detectedTags, retrievedContext, atomGraph } = data;
 

@@ -4,6 +4,8 @@ const functions = require("firebase-functions");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * Cloud Function: generateCourseMetadata
@@ -18,6 +20,8 @@ exports.generateCourseMetadata = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     // 1. Authentication check (optional - allow for testing)
     const userId = requireAuth(context);
 
@@ -53,14 +57,14 @@ exports.generateCourseMetadata = functions
       }
 
       if (!apiKey) {
-        console.error("[ERROR] GEMINI_API_KEY secret is not set.");
+        logger.error("[ERROR] GEMINI_API_KEY secret is not set.");
         throw new functions.https.HttpsError(
           "failed-precondition",
           "Server configuration error: API Key missing."
         );
       }
 
-      console.log("[DEBUG] API key found, calling Gemini API...");
+      logger.info("[DEBUG] API key found, calling Gemini API...");
 
       // 5. Call Gemini API
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -82,7 +86,7 @@ exports.generateCourseMetadata = functions
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(
+        logger.error(
           `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
           errorText
         );
@@ -93,7 +97,7 @@ exports.generateCourseMetadata = functions
       const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!generatedText) {
-        console.error("[ERROR] No content in Gemini response:", JSON.stringify(responseData));
+        logger.error("[ERROR] No content in Gemini response:", JSON.stringify(responseData));
         throw new Error("No content generated from Gemini");
       }
 
@@ -104,14 +108,14 @@ exports.generateCourseMetadata = functions
         firestoreReads: 3, firestoreWrites: 1,
       });
 
-      console.log("[DEBUG] Successfully generated course metadata");
+      logger.info("[DEBUG] Successfully generated course metadata");
 
       return {
         success: true,
         textResponse: generatedText,
       };
     } catch (error) {
-      console.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
+      logger.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
       throw new functions.https.HttpsError("internal", "Failed to generate course metadata. Please try again.");
     }
   });

@@ -2,6 +2,8 @@ const functions = require("firebase-functions");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * classifySegments — Lightweight Gemini relay for Bespoke Path Stage 2.
@@ -17,6 +19,8 @@ exports.classifySegments = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { prompt, grounded } = data;
 
@@ -84,7 +88,7 @@ exports.classifySegments = functions
       // ── Call 2 (optional): Google Search grounding verification ──
       let groundingMetadata = null;
       if (grounded && text) {
-        console.log(
+        logger.info(
           JSON.stringify({
             severity: "INFO",
             message: "grounding_start",
@@ -98,7 +102,7 @@ exports.classifySegments = functions
           const parsed = JSON.parse(text);
           const steps = parsed.steps || parsed.segments || [];
 
-          console.log(
+          logger.info(
             JSON.stringify({
               severity: "DEBUG",
               message: "grounding_parsed_steps",
@@ -115,7 +119,7 @@ exports.classifySegments = functions
 
             const verifyPrompt = `Verify these Unreal Engine 5 learning topics and provide accurate information with sources: ${summaries}`;
 
-            console.log(
+            logger.info(
               JSON.stringify({
                 severity: "DEBUG",
                 message: "grounding_verify_prompt",
@@ -138,7 +142,7 @@ exports.classifySegments = functions
               body: JSON.stringify(groundingBody),
             });
 
-            console.log(
+            logger.info(
               JSON.stringify({
                 severity: "DEBUG",
                 message: "grounding_api_response",
@@ -167,7 +171,7 @@ exports.classifySegments = functions
                   })),
                 };
 
-                console.log(
+                logger.info(
                   JSON.stringify({
                     severity: "INFO",
                     message: "grounding_success",
@@ -178,7 +182,7 @@ exports.classifySegments = functions
                   })
                 );
               } else {
-                console.log(
+                logger.info(
                   JSON.stringify({
                     severity: "WARNING",
                     message: "grounding_no_metadata",
@@ -198,7 +202,7 @@ exports.classifySegments = functions
           }
         } catch (groundErr) {
           // Grounding is best-effort — don't fail the main response
-          console.error(
+          logger.error(
             JSON.stringify({
               severity: "ERROR",
               message: "grounding_verification_failed",
@@ -211,7 +215,7 @@ exports.classifySegments = functions
 
       return { success: true, text, groundingMetadata };
     } catch (error) {
-      console.error(
+      logger.error(
         JSON.stringify({
           severity: "ERROR",
           message: "classifySegments_error",

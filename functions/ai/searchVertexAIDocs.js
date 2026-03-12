@@ -14,6 +14,7 @@ const { SearchServiceClient } = require("@google-cloud/discoveryengine").v1beta;
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 // ── Configuration ──────────────────────────────────────────────────────────────
 const PROJECT_ID = "development-317819";
@@ -39,6 +40,8 @@ function getClient() {
 exports.searchVertexAIDocs = onCall(
   { region: "us-central1", timeoutSeconds: 30, memory: "256MiB" },
   async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
     const userId = request.auth?.uid || "anonymous";
     const { query, pageSize = 5 } = request.data || {};
 

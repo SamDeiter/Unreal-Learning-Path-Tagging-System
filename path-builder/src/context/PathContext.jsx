@@ -24,6 +24,12 @@ const ACTIONS = {
   CLEAR_PATH: "CLEAR_PATH",
   LOAD_PATH: "LOAD_PATH",
   SET_WORKFLOW_STAGE: "SET_WORKFLOW_STAGE",
+  // Milestone modules
+  ADD_MODULE: "ADD_MODULE",
+  RENAME_MODULE: "RENAME_MODULE",
+  REMOVE_MODULE: "REMOVE_MODULE",
+  MOVE_COURSE_TO_MODULE: "MOVE_COURSE_TO_MODULE",
+  REORDER_MODULES: "REORDER_MODULES",
 };
 
 // Reducer for path state management
@@ -56,11 +62,19 @@ function pathReducer(state, action) {
       };
     }
 
-    case ACTIONS.REMOVE_COURSE:
+    case ACTIONS.REMOVE_COURSE: {
+      const removedCode = action.payload;
+      // Also remove from any module's courseIds
+      const cleanedModules = state.modules.map((m) => ({
+        ...m,
+        courseIds: m.courseIds.filter((id) => id !== removedCode),
+      }));
       return {
         ...state,
-        courses: state.courses.filter((c) => c.code !== action.payload),
+        courses: state.courses.filter((c) => c.code !== removedCode),
+        modules: cleanedModules,
       };
+    }
 
     case ACTIONS.REORDER_COURSES:
       return {
@@ -86,19 +100,78 @@ function pathReducer(state, action) {
       return {
         ...state,
         courses: [],
+        modules: [],
         learningIntent: initialState.learningIntent,
       };
 
     case ACTIONS.LOAD_PATH:
       return {
         ...state,
-        courses: action.payload,
+        courses: action.payload.courses || action.payload,
+        modules: action.payload.modules || [],
       };
 
     case ACTIONS.SET_WORKFLOW_STAGE:
       return {
         ...state,
         workflowStage: action.payload,
+      };
+
+    // ── Milestone Module Actions ────────────────────────────────────────
+    case ACTIONS.ADD_MODULE:
+      return {
+        ...state,
+        modules: [
+          ...state.modules,
+          {
+            id: `mod-${Date.now()}`,
+            title: action.payload.title || `Milestone ${state.modules.length + 1}`,
+            outcome: action.payload.outcome || "",
+            courseIds: action.payload.courseIds || [],
+          },
+        ],
+      };
+
+    case ACTIONS.RENAME_MODULE:
+      return {
+        ...state,
+        modules: state.modules.map((m) =>
+          m.id === action.payload.moduleId
+            ? { ...m, title: action.payload.title ?? m.title, outcome: action.payload.outcome ?? m.outcome }
+            : m
+        ),
+      };
+
+    case ACTIONS.REMOVE_MODULE:
+      return {
+        ...state,
+        modules: state.modules.filter((m) => m.id !== action.payload),
+      };
+
+    case ACTIONS.MOVE_COURSE_TO_MODULE: {
+      const { courseCode, targetModuleId } = action.payload;
+      // Remove course from all modules first, then add to target
+      const updatedModules = state.modules.map((m) => ({
+        ...m,
+        courseIds: m.courseIds.filter((id) => id !== courseCode),
+      }));
+      // If targetModuleId is null, course becomes ungrouped
+      if (targetModuleId) {
+        const targetIdx = updatedModules.findIndex((m) => m.id === targetModuleId);
+        if (targetIdx !== -1) {
+          updatedModules[targetIdx] = {
+            ...updatedModules[targetIdx],
+            courseIds: [...updatedModules[targetIdx].courseIds, courseCode],
+          };
+        }
+      }
+      return { ...state, modules: updatedModules };
+    }
+
+    case ACTIONS.REORDER_MODULES:
+      return {
+        ...state,
+        modules: action.payload,
       };
 
     default:
@@ -109,6 +182,7 @@ function pathReducer(state, action) {
 // Initial state
 const initialState = {
   courses: [],
+  modules: [], // Milestone grouping: [{ id, title, outcome, courseIds }]
   learningIntent: {
     primaryGoal: "",
     skillLevel: "",
@@ -119,6 +193,26 @@ const initialState = {
 
 const DRAFT_KEY = "ue5-path-draft";
 
+/**
+ * Auto-create milestone modules from a flat list of courses.
+ * Groups every 3-4 courses into a milestone for a sensible default.
+ */
+function autoCreateModules(courses) {
+  if (!courses || courses.length === 0) return [];
+  const groupSize = courses.length <= 6 ? 3 : 4;
+  const modules = [];
+  for (let i = 0; i < courses.length; i += groupSize) {
+    const chunk = courses.slice(i, i + groupSize);
+    modules.push({
+      id: `mod-${Date.now()}-${i}`,
+      title: `Milestone ${modules.length + 1}`,
+      outcome: "",
+      courseIds: chunk.map((c) => c.code),
+    });
+  }
+  return modules;
+}
+
 // Load draft from localStorage (for session restore)
 function loadDraft() {
   try {
@@ -128,8 +222,15 @@ function loadDraft() {
       // Migrate legacy stage names
       let stage = draft.workflowStage || "build";
       if (stage === "curate" || stage === "arrange") stage = "build";
+      const courses = Array.isArray(draft.courses) ? draft.courses : [];
+      // Migrate: if no modules exist, auto-create from courses
+      let modules = Array.isArray(draft.modules) ? draft.modules : [];
+      if (modules.length === 0 && courses.length > 0) {
+        modules = autoCreateModules(courses);
+      }
       return {
-        courses: Array.isArray(draft.courses) ? draft.courses : [],
+        courses,
+        modules,
         learningIntent: draft.learningIntent || initialState.learningIntent,
         workflowStage: stage,
       };
@@ -158,6 +259,7 @@ export function PathProvider({ children }) {
         DRAFT_KEY,
         JSON.stringify({
           courses: state.courses,
+          modules: state.modules,
           learningIntent: state.learningIntent,
           workflowStage: state.workflowStage,
         })
@@ -172,6 +274,7 @@ export function PathProvider({ children }) {
           const idx = paths.findIndex((p) => p.id === activePathId);
           if (idx !== -1) {
             paths[idx].courses = state.courses;
+            paths[idx].modules = state.modules;
             paths[idx].learningIntent = state.learningIntent;
             paths[idx].courseCount = state.courses.length;
             paths[idx].savedAt = new Date().toISOString();
@@ -182,7 +285,7 @@ export function PathProvider({ children }) {
     } catch {
       /* localStorage full or unavailable */
     }
-  }, [state.courses, state.learningIntent, activePathId]);
+  }, [state.courses, state.modules, state.learningIntent, activePathId]);
 
   // Persona state — persisted in localStorage
   const [activePersonaId, setActivePersonaIdState] = useState(
@@ -293,8 +396,13 @@ export function PathProvider({ children }) {
     localStorage.removeItem("ue5_wizard_intent");
   };
 
-  const loadPath = (courses) => {
-    dispatch({ type: ACTIONS.LOAD_PATH, payload: courses });
+  const loadPath = (coursesOrPayload) => {
+    // Accept either a plain array (legacy) or { courses, modules } object
+    if (Array.isArray(coursesOrPayload)) {
+      dispatch({ type: ACTIONS.LOAD_PATH, payload: { courses: coursesOrPayload, modules: autoCreateModules(coursesOrPayload) } });
+    } else {
+      dispatch({ type: ACTIONS.LOAD_PATH, payload: coursesOrPayload });
+    }
   };
 
   const setWorkflowStage = (stage) => {
@@ -358,8 +466,37 @@ export function PathProvider({ children }) {
     }
   };
 
+  // ── Module action creators ─────────────────────────────────────────────
+  const addModule = (title, outcome = "", courseIds = []) => {
+    dispatch({ type: ACTIONS.ADD_MODULE, payload: { title, outcome, courseIds } });
+  };
+
+  const renameModule = (moduleId, title, outcome) => {
+    dispatch({ type: ACTIONS.RENAME_MODULE, payload: { moduleId, title, outcome } });
+  };
+
+  const removeModule = (moduleId) => {
+    dispatch({ type: ACTIONS.REMOVE_MODULE, payload: moduleId });
+  };
+
+  const moveCourseToModule = (courseCode, targetModuleId) => {
+    dispatch({ type: ACTIONS.MOVE_COURSE_TO_MODULE, payload: { courseCode, targetModuleId } });
+  };
+
+  const reorderModules = (newModules) => {
+    dispatch({ type: ACTIONS.REORDER_MODULES, payload: newModules });
+  };
+
+  // Computed: courses not assigned to any module
+  const ungroupedCourses = useMemo(() => {
+    const assignedCodes = new Set(state.modules.flatMap((m) => m.courseIds));
+    return state.courses.filter((c) => !assignedCodes.has(c.code));
+  }, [state.courses, state.modules]);
+
   const value = {
     courses: state.courses,
+    modules: state.modules,
+    ungroupedCourses,
     learningIntent: state.learningIntent,
     pathStats,
     verificationStats,
@@ -370,6 +507,12 @@ export function PathProvider({ children }) {
     setLearningIntent,
     clearPath,
     loadPath,
+    // Module actions
+    addModule,
+    renameModule,
+    removeModule,
+    moveCourseToModule,
+    reorderModules,
     // Persistence
     savePath,
     getSavedPaths,

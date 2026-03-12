@@ -8,6 +8,7 @@ const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 const MODEL = "gemini-embedding-001";
 const DIMENSION = 768;
@@ -19,6 +20,8 @@ exports.embedQuery = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
     const { query } = data;
 

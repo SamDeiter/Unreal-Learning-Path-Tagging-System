@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const { logger } = require("firebase-functions");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 /**
  * Bootstrap admin list — used ONLY for initial claim seeding.
@@ -24,6 +26,8 @@ const BOOTSTRAP_ADMIN_EMAILS = [
 exports.setAdminClaim = functions
   .runWith({ memory: "256MB" })
   .https.onCall(async (data, context) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     // Must be authenticated
     if (!context.auth) {
       throw new functions.https.HttpsError(
@@ -67,7 +71,7 @@ exports.setAdminClaim = functions
     // Force token refresh by updating the user's metadata
     const targetUser = await admin.auth().getUser(targetUid);
 
-    console.log(
+    logger.info(
       JSON.stringify({
         severity: "INFO",
         message: "admin_claim_updated",
