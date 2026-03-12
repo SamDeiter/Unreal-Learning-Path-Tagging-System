@@ -3,6 +3,7 @@
  * Matches segments by keyword relevance to the user's problem.
  */
 import { useMemo, useCallback, useState, useEffect } from "react";
+import { fetchJSON } from "../../services/dataLoader";
 import PropTypes from "prop-types";
 import { SEARCH_STOPWORDS } from "../../domain/constants";
 
@@ -28,8 +29,8 @@ export default function TranscriptCards({ courseCode, videoTitle, problemSummary
   const [transcriptSegments, setTranscriptSegments] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    import("../../data/transcript_segments.json").then((mod) => {
-      if (!cancelled) setTranscriptSegments(mod.default || mod);
+    fetchJSON("transcript_segments").then((data) => {
+      if (!cancelled) setTranscriptSegments(data);
     });
     return () => { cancelled = true; };
   }, []);

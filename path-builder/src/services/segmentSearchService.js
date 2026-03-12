@@ -6,24 +6,24 @@
  * Semantic search: vectorSearchSegments + vectorSearchEpic Cloud Functions (Firestore)
  */
 
-// Lazy-loaded data (deferred from initial bundle)
+// Lazy-loaded data — fetched from public/data/ at runtime
+import { fetchJSON } from "./dataLoader";
+
 let _searchIndex = null;
 let _segmentIndex = null;
 
-/** Lazily load search_index.json (4.7MB). */
+/** Lazily load search_index.json (~4.7MB) from public/data/. */
 async function getSearchIndex() {
   if (!_searchIndex) {
-    const mod = await import("../data/search_index.json");
-    _searchIndex = mod.default || mod;
+    _searchIndex = await fetchJSON("search_index");
   }
   return _searchIndex;
 }
 
-/** Lazily load segment_index.json (3.7MB). */
+/** Lazily load segment_index.json (~9MB) from public/data/. */
 export async function getSegmentIndex() {
   if (!_segmentIndex) {
-    const mod = await import("../data/segment_index.json");
-    _segmentIndex = mod.default || mod;
+    _segmentIndex = await fetchJSON("segment_index");
   }
   return _segmentIndex;
 }

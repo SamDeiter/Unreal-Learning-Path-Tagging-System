@@ -17,6 +17,7 @@ import TranscriptCards from "./TranscriptCards";
 import learningObjectives from "../../data/learning_objectives.json";
 import { extractLearningTopics } from "../../utils/videoTopicExtractor";
 import "./GuidedPlayer.css";
+import { fetchJSON } from "../../services/dataLoader";
 
 /**
  * Convert inline markdown (**bold**, *italic*, `code`, [text](url)) to React elements.
@@ -389,8 +390,8 @@ function VideoStage({
   const [transcriptSegments, setTranscriptSegments] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    import("../../data/transcript_segments.json").then((mod) => {
-      if (!cancelled) setTranscriptSegments(mod.default || mod);
+    fetchJSON("transcript_segments").then((data) => {
+      if (!cancelled) setTranscriptSegments(data);
     });
     return () => {
       cancelled = true;
@@ -407,6 +408,7 @@ function VideoStage({
     .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
 
   // Match transcript segments for the current video using courseCode + videoName
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const ragFocusPoints = useMemo(() => {
     if (!transcriptSegments || !course?.code) return [];
     const courseTranscripts = transcriptSegments[course.code];
@@ -445,7 +447,7 @@ function VideoStage({
       }
     }
     return points;
-  }, [transcriptSegments, course?.code, currentVideo?.name, currentVideo?.title]);
+  }, [transcriptSegments, course?.code, currentVideo]);
 
   // Fallback: use gemini_outcomes + learningOutcome if no RAG data
   const focusPoints =
@@ -705,8 +707,8 @@ function ReadingStep({ course, stepNumber, totalSteps, onComplete, onExit }) {
   const [docLinks, setDocLinks] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    import("../../data/doc_links.json").then((mod) => {
-      if (!cancelled) setDocLinks(mod.default || mod);
+    fetchJSON("doc_links").then((data) => {
+      if (!cancelled) setDocLinks(data);
     });
     return () => {
       cancelled = true;

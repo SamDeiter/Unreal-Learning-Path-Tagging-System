@@ -13,6 +13,7 @@ import useIsMobile from "./hooks/useIsMobile";
 import { useAuth } from "./hooks/useAuth";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import { fetchEvents } from "./services/analyticsQueryService";
+import { fetchJSON } from "./services/dataLoader";
 import "./App.css";
 
 // IS_E2E imported from services/e2eBypass.js (checks both env var and localStorage)
@@ -251,8 +252,8 @@ function App() {
   // Lazy-load video library (3.8 MB) — splits into separate chunk
   const [videoLibrary, setVideoLibrary] = useState({ courses: [], generated_at: null });
   useEffect(() => {
-    import("./data/video_library_enriched.json").then((mod) => {
-      setVideoLibrary(mod.default || mod);
+    fetchJSON("video_library_enriched").then((data) => {
+      setVideoLibrary(data);
     });
   }, []);
 

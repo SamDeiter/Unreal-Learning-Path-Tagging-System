@@ -8,6 +8,7 @@
 
 import { devLog, devWarn } from "../utils/logger";
 import { stemMatch } from "../utils/stemmer";
+import { fetchJSON } from "./dataLoader";
 
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "./firebaseConfig";
@@ -102,13 +103,12 @@ export async function searchDocsSemantic(queryEmbedding, topK = 5, _threshold = 
 let _docLinks = null;
 
 /**
- * Lazily load doc_links.json.
+ * Lazily load doc_links.json from public/data/.
  */
 async function getDocLinks() {
   if (_docLinks) return _docLinks;
   try {
-    const mod = await import("../data/doc_links.json");
-    _docLinks = mod.default || mod;
+    _docLinks = await fetchJSON("doc_links");
     return _docLinks;
   } catch (err) {
     devWarn("⚠️ doc_links.json not available:", err.message);

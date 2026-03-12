@@ -6,14 +6,14 @@ import { applyFeedbackMultiplier } from "../services/feedbackService";
 import { cleanVideoTitle } from "../utils/cleanVideoTitle";
 import { getSegmentIndex } from "../services/segmentSearchService";
 import { stem } from "../utils/stemmer";
+import { fetchJSON } from "../services/dataLoader";
 import { DISPLAY_NOISE } from "./constants";
 
-// Lazy-loaded doc_links (0.1MB)
+// Lazy-loaded doc_links from public/data/
 let _docLinks = null;
 async function getDocLinks() {
   if (!_docLinks) {
-    const mod = await import("../data/doc_links.json");
-    _docLinks = mod.default || mod;
+    _docLinks = await fetchJSON("doc_links");
   }
   return _docLinks;
 }

@@ -5,6 +5,7 @@ import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/
 import prereqData from "../../data/course_prerequisites.json";
 import displayNames from "../../data/display_names.json";
 import "./VideoResultCard.css";
+import { fetchJSON } from "../../services/dataLoader";
 
 // Build code→title and code→versions lookups lazily (populated on first load)
 const courseTitles = {};
@@ -12,8 +13,7 @@ const courseVersions = {};
 let _lookupLoaded = false;
 
 // Lazy-load the video library for bundle optimization (~3.8 MB)
-import("../../data/video_library_enriched.json").then((mod) => {
-  const data = mod.default || mod;
+fetchJSON("video_library_enriched").then((data) => {
   (data.courses || []).forEach((c) => {
     courseTitles[c.code] = c.title;
     courseVersions[c.code] = c.versions || [];
