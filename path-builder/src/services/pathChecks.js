@@ -9,14 +9,29 @@
  * Run all checks and return results array.
  * Each check: { id, label, passed, detail, fix?, group }
  */
-/** Normalize step category: also accept doc-phase aliases. */
+/** Normalize step category from any available field. */
 function getStepCategory(step) {
-  if (step.category) return step.category;
-  // Doc/YT steps use 'phase' instead of 'category'
+  // 1. Explicit category (foundation/fix/transfer)
+  if (step.category && ["foundation", "fix", "transfer"].includes(step.category)) return step.category;
+
+  // 2. Doc/YT steps use 'phase' instead of 'category'
   const p = step.phase;
   if (p === "prerequisite") return "foundation";
   if (p === "core") return "fix";
   if (p === "supplemental") return "transfer";
+
+  // 3. Infer from tier (most common — video library steps have tier)
+  const tier = (step.tier || step.segment?.tier || "").toLowerCase();
+  if (tier === "beginner" || tier === "foundational") return "foundation";
+  if (tier === "intermediate" || tier === "core") return "fix";
+  if (tier === "advanced" || tier === "expert") return "transfer";
+
+  // 4. Infer from segment category
+  const cat = (step.category || step.segment?.category || "").toLowerCase();
+  if (cat === "foundation" || cat === "prerequisite") return "foundation";
+  if (cat === "core" || cat === "fix") return "fix";
+  if (cat === "practice" || cat === "transfer") return "transfer";
+
   return "";
 }
 
