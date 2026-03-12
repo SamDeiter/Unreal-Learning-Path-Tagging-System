@@ -1,5 +1,4 @@
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
@@ -8,28 +7,7 @@ const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
-
-// Import existing sanitize functions (injection guard from security hardening)
-const INJECTION_PATTERNS = [
-  /ignore\s+(all\s+)?previous\s+(instructions|prompts?)/gi,
-  /disregard\s+(all\s+)?above/gi,
-  /you\s+are\s+now\s+(a|an)\s+/gi,
-  /system\s*:\s*/gi,
-  /\bact\s+as\b/gi,
-  /\bnew\s+instructions?\b/gi,
-  /\boverride\s+(previous|system)\b/gi,
-  /\breset\s+(your\s+)?(context|instructions?|prompt)\b/gi,
-  /\bforget\s+(everything|all|your)\b/gi,
-];
-
-function sanitizeContent(text) {
-  if (!text || typeof text !== "string") return text || "";
-  let cleaned = text;
-  for (const pattern of INJECTION_PATTERNS) {
-    cleaned = cleaned.replace(pattern, "[FILTERED]");
-  }
-  return cleaned;
-}
+const { sanitizeQuery } = require("../utils/sanitizeInput");
 
 /**
  * PROMPT 2 — DIAGNOSIS
@@ -146,8 +124,8 @@ exports.generateDiagnosis = functions
 
 Intent:
 - Role: ${intent.user_role || "Unknown"}
-- Goal: ${sanitizeContent(intent.goal || "Solve the problem")}
-- Problem: ${sanitizeContent(intent.problem_description)}
+- Goal: ${sanitizeQuery(intent.goal || "Solve the problem")}
+- Problem: ${sanitizeQuery(intent.problem_description)}
 - Systems involved: ${(intent.systems || []).join(", ") || "Unknown"}
 
 ${detectedTags?.length > 0 ? `Detected tags: ${detectedTags.map((t) => t.display_name || t).join(", ")}` : ""}

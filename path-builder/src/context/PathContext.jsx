@@ -432,6 +432,7 @@ export function PathProvider({ children }) {
       id: `path-${Date.now()}`,
       name: name || state.learningIntent.primaryGoal || "Untitled Path",
       courses: state.courses,
+      modules: state.modules,
       learningIntent: state.learningIntent,
       savedAt: new Date().toISOString(),
       courseCount: state.courses.length,
@@ -448,8 +449,10 @@ export function PathProvider({ children }) {
     const savedPaths = getSavedPaths();
     const found = savedPaths.find((p) => p.id === pathId);
     if (found) {
-      dispatch({ type: ACTIONS.LOAD_PATH, payload: found.courses });
-      dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: found.learningIntent });
+      dispatch({ type: ACTIONS.LOAD_PATH, payload: { courses: found.courses, modules: found.modules || [] } });
+      if (found.learningIntent) {
+        dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: found.learningIntent });
+      }
       setActivePathId(pathId);
       localStorage.setItem("ue5_active_path_id", pathId);
       return true;

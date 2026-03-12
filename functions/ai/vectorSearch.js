@@ -100,6 +100,8 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
 exports.vectorSearchCourses = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 5 } = request.data;
 
@@ -120,6 +122,8 @@ exports.vectorSearchCourses = onCall(
 exports.vectorSearchSegments = onCall(
   { region: "us-central1", maxInstances: 10 },
   async (request) => {
+    // App Check enforcement (permissive during rollout)
+    requireAppCheck(request, { allowInvalid: true });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 10 } = request.data;
 
@@ -138,6 +142,8 @@ exports.vectorSearchSegments = onCall(
  * Search docs_embeddings — documentation similarity
  */
 exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+  // App Check enforcement (permissive during rollout)
+  requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
 

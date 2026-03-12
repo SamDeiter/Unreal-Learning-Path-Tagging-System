@@ -10,6 +10,43 @@ import { getAuth } from "firebase/auth";
 import { getFirebaseApp, firebaseConfig } from "./firebaseConfig";
 import { devWarn } from "../utils/logger";
 
+/**
+ * Safely parse a JSON response from an LLM.
+ * Tries JSON.parse on the raw text first, then falls back to regex extraction
+ * for responses wrapped in markdown code fences or containing preamble text.
+ * @param {string} text - Raw LLM response text
+ * @param {"object"|"array"} shape - Expected top-level shape (default "object")
+ * @returns {object|array} Parsed JSON
+ * @throws {Error} If no valid JSON can be extracted
+ */
+function safeParseJSON(text, shape = "object") {
+  // Fast path: response is already valid JSON
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Fall through to regex extraction
+  }
+
+  // Strip markdown code fences (```json ... ```)
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    try {
+      return JSON.parse(fenceMatch[1].trim());
+    } catch {
+      // Fall through
+    }
+  }
+
+  // Regex extraction: find outermost { } or [ ]
+  const pattern = shape === "array" ? /\[[\s\S]*\]/ : /\{[\s\S]*\}/;
+  const match = text.match(pattern);
+  if (match) {
+    return JSON.parse(match[0]);
+  }
+
+  throw new Error(`No valid JSON ${shape} found in response`);
+}
+
 /** Safely extract tags as an array. c.tags may be an object {topic, level} not an array. */
 function getTagsArray(item) {
   if (Array.isArray(item?.tags)) return item.tags;
@@ -19,7 +56,6 @@ function getTagsArray(item) {
 
 // Lazy initialization - only initialize when needed and API key is present
 let app = null;
-let auth = null;
 let functions = null;
 
 function initFirebase() {
@@ -33,8 +69,6 @@ function initFirebase() {
 
   try {
     app = getFirebaseApp();
-
-    auth = getAuth(app);
     functions = getFunctions(app, "us-central1");
     return true;
   } catch (error) {
@@ -48,7 +82,12 @@ function initFirebase() {
  */
 export function isUserAuthenticated() {
   if (!initFirebase()) return false;
-  return !!auth?.currentUser;
+  try {
+    const auth = getAuth(app);
+    return !!auth?.currentUser;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -110,11 +149,7 @@ Respond with ONLY valid JSON, no markdown.`;
 
     // Parse JSON from response
     const text = result.data.textResponse;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error("No JSON found in response");
+    return safeParseJSON(text, "object");
   } catch (error) {
     console.error("Gemini Cloud Function error:", error);
     return generateFallbackMetadata(videos);
@@ -170,11 +205,7 @@ Respond with ONLY valid JSON array, no markdown.`;
     }
 
     const text = result.data.textResponse;
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error("No JSON array found");
+    return safeParseJSON(text, "array");
   } catch (error) {
     console.error("Quiz generation error:", error);
     return generateFallbackQuiz(video, count);
@@ -256,11 +287,7 @@ Respond with ONLY valid JSON, no markdown.`;
     }
 
     const text = result.data.textResponse;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error("No JSON found in response");
+    return safeParseJSON(text, "object");
   } catch (error) {
     console.error("Learning Blueprint generation error:", error);
     return generateFallbackBlueprint(intent, courses);

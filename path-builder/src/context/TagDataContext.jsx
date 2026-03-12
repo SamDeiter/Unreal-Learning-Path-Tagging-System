@@ -9,7 +9,7 @@
  *
  * All views derive their data from this single source of truth.
  */
-import { createContext, useContext, useState, useMemo } from "react";
+import { createContext, useContext, useState, useMemo, useCallback } from "react";
 
 const TagDataContext = createContext(null);
 
@@ -129,14 +129,14 @@ export function TagDataProvider({
   }, [tags, derivedData]);
 
   // Get connections for a specific tag
-  const getTagConnections = (tagId) => {
+  const getTagConnections = useCallback((tagId) => {
     return derivedData.adjacencyMap.get(tagId) || [];
-  };
+  }, [derivedData]);
 
-  // Get related tags sorted by weight
-  const getRelatedTags = (tagId, limit = 20) => {
-    const connections = getTagConnections(tagId);
-    return connections
+  // Get related tags sorted by weight (copies array to avoid mutating shared data)
+  const getRelatedTags = useCallback((tagId, limit = 20) => {
+    const connections = derivedData.adjacencyMap.get(tagId) || [];
+    return [...connections]
       .sort((a, b) => b.weight - a.weight)
       .slice(0, limit)
       .map((conn) => ({
@@ -144,9 +144,9 @@ export function TagDataProvider({
         connectionWeight: conn.weight,
       }))
       .filter(Boolean);
-  };
+  }, [derivedData]);
 
-  const value = {
+  const value = useMemo(() => ({
     tags,
     edges,
     courses: validatedCourses,
@@ -157,7 +157,7 @@ export function TagDataProvider({
     derivedData,
     getTagConnections,
     getRelatedTags,
-  };
+  }), [tags, edges, validatedCourses, lastUpdated, enrichedTags, selectedTagId, derivedData, getTagConnections, getRelatedTags]);
 
   return <TagDataContext.Provider value={value}>{children}</TagDataContext.Provider>;
 }
