@@ -25,13 +25,19 @@ export async function fetchJSON(name) {
   if (cache.has(name)) return cache.get(name);
 
   const url = `${BASE}data/${name}.json`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`[dataLoader] Failed to fetch ${url}: ${res.status}`);
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.warn(`[dataLoader] ${url} returned ${res.status} — data unavailable`);
+      return null;
+    }
+    const data = await res.json();
+    cache.set(name, data);
+    return data;
+  } catch (err) {
+    console.warn(`[dataLoader] Failed to load ${url}:`, err.message);
+    return null;
   }
-  const data = await res.json();
-  cache.set(name, data);
-  return data;
 }
 
 /**

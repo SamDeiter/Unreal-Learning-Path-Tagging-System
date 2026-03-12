@@ -14,6 +14,7 @@ let _lookupLoaded = false;
 
 // Lazy-load the video library for bundle optimization (~3.8 MB)
 fetchJSON("video_library_enriched").then((data) => {
+  if (!data) return;
   (data.courses || []).forEach((c) => {
     courseTitles[c.code] = c.title;
     courseVersions[c.code] = c.versions || [];

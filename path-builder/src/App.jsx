@@ -253,7 +253,7 @@ function App() {
   const [videoLibrary, setVideoLibrary] = useState({ courses: [], generated_at: null });
   useEffect(() => {
     fetchJSON("video_library_enriched").then((data) => {
-      setVideoLibrary(data);
+      if (data) setVideoLibrary(data);
     });
   }, []);
 
