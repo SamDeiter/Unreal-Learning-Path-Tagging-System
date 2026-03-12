@@ -1442,13 +1442,33 @@ export default function PathIntelligencePanel() {
                             setTimeout(() => { gapsBtn.style.background = ""; }, 800);
                           }
                         });
+                        return;
                       }
-                      // Structural checks → just show a hint (no auto-action)
-                      const structureChecks = ["step-count", "video-duration", "has-bridges"];
-                      if (structureChecks.includes(checkId)) {
-                        // Scroll to the relevant step in the step list
-                        const stepList = document.querySelector(".ip-step-list, .path-steps");
-                        if (stepList) stepList.scrollIntoView({ behavior: "smooth", block: "start" });
+                      // Structural checks → show actionable hint via brief toast
+                      const hints = {
+                        "step-count": "Remove lower-priority steps from the Assembly Line to reduce step count below 7.",
+                        "no-long-videos": "Split videos over 6 minutes — shorter segments keep learner engagement high.",
+                        "has-bridges": "Click 'Re-Analyze' on the Coverage tab, then regenerate the path to include bridge narrations.",
+                        "all-verified": "Approve or flag each step in your learning path to complete verification.",
+                      };
+                      const hint = hints[checkId];
+                      if (hint) {
+                        // Create a brief floating toast
+                        const toast = document.createElement("div");
+                        toast.textContent = `💡 ${hint}`;
+                        Object.assign(toast.style, {
+                          position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+                          background: "#1c2128", color: "#e6edf3", border: "1px solid #d29922",
+                          borderRadius: "8px", padding: "12px 20px", fontSize: "0.85rem",
+                          maxWidth: "420px", zIndex: 9999, boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                          animation: "fadeIn 0.2s ease",
+                        });
+                        document.body.appendChild(toast);
+                        setTimeout(() => {
+                          toast.style.opacity = "0";
+                          toast.style.transition = "opacity 0.3s";
+                          setTimeout(() => toast.remove(), 300);
+                        }, 4000);
                       }
                     }}
                   />
