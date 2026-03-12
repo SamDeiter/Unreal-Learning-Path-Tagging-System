@@ -9,7 +9,7 @@
  * - TTL: localStorage 90 days, Firestore 7 days.
  */
 
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 
@@ -154,16 +154,11 @@ function findLocalCachedPath(query, threshold = 0.75) {
 }
 
 /**
- * Store a generated path in both localStorage and Firestore.
+ * Store a generated path in localStorage only.
+ * Firestore pathCache writes are now handled by the backend (Admin SDK).
  */
 export async function cachePath(query, result) {
-  // Layer 1: localStorage (sync)
   cachePathLocal(query, result);
-
-  // Layer 2: Firestore (async, fire-and-forget)
-  cachePathFirestore(query, result).catch((err) =>
-    devWarn("[PathCache] Firestore write failed:", err.message)
-  );
 }
 
 /**
@@ -227,44 +222,8 @@ async function findFirestoreCachedPath(query) {
   }
 }
 
-/**
- * Write a generated path to Firestore for cross-user reuse.
- * Strips audio data and large embeddings to keep Firestore docs small.
- */
-async function cachePathFirestore(query, result) {
-  const app = getFirebaseApp();
-  const db = getFirestore(app);
-  const cacheKey = generateCacheKey(query);
-  const docRef = doc(db, FIRESTORE_COLLECTION, cacheKey);
-
-  // Strip large fields that shouldn't be cached cross-user
-  const stripped = {
-    ...result,
-    // Keep path steps but strip raw segment text to save space
-    path: result.path?.map((step) => ({
-      ...step,
-      segment: step.segment
-        ? {
-            ...step.segment,
-            text: (step.segment.text || "").substring(0, 500), // Truncate for space
-          }
-        : step.segment,
-    })),
-    // Remove embedding vectors (huge)
-    segments: undefined,
-  };
-
-  await setDoc(docRef, {
-    query: query,
-    normalizedQuery: normalizeQuery(query),
-    resultJson: JSON.stringify(stripped),
-    cachedAt: serverTimestamp(),
-    cachedAtMs: Date.now(),
-    stepCount: result.path?.length || 0,
-  });
-
-  devLog(`[PathCache] Wrote to Firestore: ${cacheKey}`);
-}
+// Firestore pathCache writes removed — now handled by backend via Admin SDK.
+// Client can still READ from Firestore pathCache (see findFirestoreCachedPath above).
 
 // ── User History ───────────────────────────────────────
 

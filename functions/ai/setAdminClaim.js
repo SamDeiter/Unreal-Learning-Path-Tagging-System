@@ -1,0 +1,90 @@
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+
+/**
+ * Bootstrap admin list — used ONLY for initial claim seeding.
+ * Once claims are set, this list is irrelevant; future admins
+ * are managed by existing admins calling this function.
+ */
+const BOOTSTRAP_ADMIN_EMAILS = [
+  "sam.deiter@epicgames.com",
+  "samdeiter@gmail.com",
+];
+
+/**
+ * setAdminClaim — Callable Cloud Function to grant or revoke admin claims.
+ *
+ * Can be called by:
+ *   1. A user whose email is in BOOTSTRAP_ADMIN_EMAILS (first-time setup)
+ *   2. A user who already has the `admin: true` custom claim
+ *
+ * Request body:
+ *   { targetUid: string, admin: boolean }
+ */
+exports.setAdminClaim = functions
+  .runWith({ memory: "256MB" })
+  .https.onCall(async (data, context) => {
+    // Must be authenticated
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "Must be signed in."
+      );
+    }
+
+    // Check caller is admin (custom claim) or in bootstrap list
+    const callerEmail = context.auth.token?.email || "";
+    const callerIsAdmin =
+      context.auth.token?.admin === true ||
+      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail.toLowerCase());
+
+    if (!callerIsAdmin) {
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "Only admins can manage admin claims."
+      );
+    }
+
+    const { targetUid, admin: grantAdmin } = data;
+
+    if (!targetUid || typeof targetUid !== "string") {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "targetUid is required."
+      );
+    }
+
+    if (typeof grantAdmin !== "boolean") {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "admin must be a boolean."
+      );
+    }
+
+    // Set or revoke the custom claim
+    await admin.auth().setCustomUserClaims(targetUid, { admin: grantAdmin });
+
+    // Force token refresh by updating the user's metadata
+    const targetUser = await admin.auth().getUser(targetUid);
+
+    console.log(
+      JSON.stringify({
+        severity: "INFO",
+        message: "admin_claim_updated",
+        caller: context.auth.uid,
+        target: targetUid,
+        targetEmail: targetUser.email,
+        admin: grantAdmin,
+      })
+    );
+
+    return {
+      success: true,
+      targetUid,
+      targetEmail: targetUser.email,
+      admin: grantAdmin,
+      note: grantAdmin
+        ? "User must sign out and back in for the claim to take effect."
+        : "Admin access revoked. User must sign out and back in.",
+    };
+  });

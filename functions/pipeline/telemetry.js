@@ -120,14 +120,16 @@ function createTrace(userId, mode) {
 
 /**
  * Check if the calling user is an admin.
- * Admin = email ending in @epicgames.com OR UID in ADMIN_UID env var.
+ * Primary: Firebase custom claim `admin: true`
+ * Fallback: UID in ADMIN_UID env var (for migration period)
  */
 function isAdmin(context) {
   if (!context?.auth) return false;
 
-  const email = context.auth.token?.email || "";
-  if (email.endsWith("@epicgames.com")) return true;
+  // Custom claim check (primary — set via setAdminClaim Cloud Function)
+  if (context.auth.token?.admin === true) return true;
 
+  // UID fallback (for migration period before claims are seeded)
   const adminUids = (process.env.ADMIN_UID || "").split(",").map((s) => s.trim()).filter(Boolean);
   if (adminUids.length > 0 && adminUids.includes(context.auth.uid)) return true;
 

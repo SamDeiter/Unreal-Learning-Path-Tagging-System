@@ -3,16 +3,22 @@ import PropTypes from "prop-types";
 import { PlayCircle, Check, Plus } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
 import prereqData from "../../data/course_prerequisites.json";
-import libraryData from "../../data/video_library_enriched.json";
 import displayNames from "../../data/display_names.json";
 import "./VideoResultCard.css";
 
-// Build code→title and code→versions lookups once
+// Build code→title and code→versions lookups lazily (populated on first load)
 const courseTitles = {};
 const courseVersions = {};
-(libraryData.courses || []).forEach((c) => {
-  courseTitles[c.code] = c.title;
-  courseVersions[c.code] = c.versions || [];
+let _lookupLoaded = false;
+
+// Lazy-load the video library for bundle optimization (~3.8 MB)
+import("../../data/video_library_enriched.json").then((mod) => {
+  const data = mod.default || mod;
+  (data.courses || []).forEach((c) => {
+    courseTitles[c.code] = c.title;
+    courseVersions[c.code] = c.versions || [];
+  });
+  _lookupLoaded = true;
 });
 
 /** Returns true if ALL course versions are 4.x (UE4 era) */

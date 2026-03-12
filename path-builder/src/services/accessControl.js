@@ -26,6 +26,8 @@ import {
   orderBy,
 } from "firebase/firestore";
 
+import { getAuth } from "firebase/auth";
+
 // In E2E mode getFirebaseApp() returns null, so skip Firestore init
 // to avoid "Cannot read properties of null (reading 'container')".
 const app = IS_E2E ? null : getFirebaseApp();
@@ -34,27 +36,53 @@ const db = IS_E2E ? null : getFirestore(app);
 // ── Domain & Admin Check ─────────────────────────────────────────────
 
 const ALLOWED_DOMAINS = ["epicgames.com"];
-const ADMIN_EMAILS = ["sam.deiter@epicgames.com", "samdeiter@gmail.com"];
+
+// TTL cache for admin claim checks (avoids refetching token on every call)
+let _adminCacheResult = null;
+let _adminCacheExpiry = 0;
+const ADMIN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Check if an email is an admin.
- * @param {string} email
- * @returns {boolean}
+ * Check if the current user has the admin custom claim.
+ * Uses Firebase ID token claims (set via setAdminClaim Cloud Function).
+ * @returns {Promise<boolean>}
  */
-export function isAdmin(email) {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+export async function isAdmin() {
+  if (IS_E2E) return true;
+
+  const now = Date.now();
+  if (_adminCacheResult !== null && now < _adminCacheExpiry) {
+    return _adminCacheResult;
+  }
+
+  try {
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+    if (!user) {
+      _adminCacheResult = false;
+      _adminCacheExpiry = now + ADMIN_CACHE_TTL;
+      return false;
+    }
+
+    const idTokenResult = await user.getIdTokenResult();
+    const result = idTokenResult.claims.admin === true;
+    _adminCacheResult = result;
+    _adminCacheExpiry = now + ADMIN_CACHE_TTL;
+    return result;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Check if an email belongs to an auto-admitted domain.
+ * (Admin status is now separate — handled by custom claims via isAdmin())
  * @param {string} email
  * @returns {boolean}
  */
 export function isEpicEmployee(email) {
   if (!email) return false;
   const lower = email.toLowerCase();
-  if (ADMIN_EMAILS.includes(lower)) return true;
   const domain = lower.split("@")[1];
   return ALLOWED_DOMAINS.includes(domain);
 }

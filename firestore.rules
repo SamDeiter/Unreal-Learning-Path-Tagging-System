@@ -44,9 +44,10 @@ service cloud.firestore {
       allow write: if false;
     }
     
-    // Helper: check if user is admin
+    // Helper: check if user is admin (via Firebase custom claims)
+    // Set claims using the setAdminClaim Cloud Function
     function isAdmin() {
-      return request.auth != null && request.auth.token.email in ['sam.deiter@epicgames.com', 'samdeiter@gmail.com'];
+      return request.auth != null && request.auth.token.admin == true;
     }
     
     // Invite codes — admin creates/lists/revokes, users read + consume
@@ -90,17 +91,10 @@ service cloud.firestore {
     }
 
     // Path cache — cross-user cache for generated learning paths
-    // Public read (cache hits benefit all users), authenticated write with validation
+    // Public read (cache hits benefit all users), backend-only write via Admin SDK
     match /pathCache/{cacheId} {
       allow read: if true;
-      allow create, update: if request.auth != null
-        && request.resource.data.keys().hasAll(['query', 'normalizedQuery', 'resultJson', 'cachedAtMs', 'stepCount'])
-        && request.resource.data.query is string
-        && request.resource.data.query.size() <= 500
-        && request.resource.data.resultJson is string
-        && request.resource.data.resultJson.size() <= 50000
-        && request.resource.data.keys().size() <= 8;
-      allow delete: if false;
+      allow write: if false; // Backend Cloud Functions only (Admin SDK bypasses rules)
     }
 
     // Feedback submissions — authenticated users can create, admin reads/manages

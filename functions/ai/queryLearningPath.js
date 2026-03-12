@@ -8,6 +8,7 @@ const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
 const { findCachedDiagnosis, cacheDiagnosis } = require("../utils/diagnosisCacheUtils");
+const { writePathCache } = require("../utils/pathCacheUtils");
 
 /**
  * UNIFIED /query ENDPOINT
@@ -779,6 +780,9 @@ JSON:{
   if (data._queryEmbedding && response.success) {
     cacheDiagnosis(data._queryEmbedding, query, response).catch(() => {});
   }
+
+  // Write to shared pathCache for cross-user reuse (backend-owned)
+  writePathCache(query, response).catch(() => {});
 
   return response;
 }

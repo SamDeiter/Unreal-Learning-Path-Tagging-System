@@ -9,6 +9,7 @@ const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
+const { writePathCache } = require("../utils/pathCacheUtils");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
@@ -358,6 +359,9 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
           })
         );
       }
+
+      // Write to shared pathCache for cross-user reuse (backend-owned)
+      writePathCache(query, { path: pathData.steps, ...pathData }).catch(() => {});
 
       const response = {
         success: true,

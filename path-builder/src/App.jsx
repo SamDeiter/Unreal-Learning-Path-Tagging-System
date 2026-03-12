@@ -5,20 +5,19 @@ import { TagDataProvider } from "./context/TagDataContext";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
-import { onAuthChange, signOutUser } from "./services/googleAuthService";
-import { isAdmin } from "./services/accessControl";
+import { signOutUser } from "./services/googleAuthService";
 import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
 import { getFirebaseApp } from "./services/firebaseConfig";
 import { IS_E2E } from "./services/e2eBypass";
 import useIsMobile from "./hooks/useIsMobile";
+import { useAuth } from "./hooks/useAuth";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import { fetchEvents } from "./services/analyticsQueryService";
 import "./App.css";
 
 // IS_E2E imported from services/e2eBypass.js (checks both env var and localStorage)
 
-// Import course data
-import videoLibrary from "./data/video_library_enriched.json";
+// Import course data (video library is lazy-loaded for bundle optimization)
 import tagsData from "./data/tags.json";
 import edgesData from "./data/edges.json";
 
@@ -170,8 +169,7 @@ function BuilderEditor({
 function App() {
   const [activeTab, setActiveTab] = useState("adaptive");
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userIsAdmin, setUserIsAdmin] = useState(false);
+  const { currentUser, userIsAdmin } = useAuth();
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -226,18 +224,6 @@ function App() {
     }
     return ordered;
   }, [isMobile, userIsAdmin]);
-
-  // Check if current user is admin for showing invite tab
-  useEffect(() => {
-    if (IS_E2E) return; // No Firebase in E2E mode
-    const unsub = onAuthChange((u) => {
-      setCurrentUser(u);
-      setUserIsAdmin(u ? isAdmin(u.email) : false);
-    });
-    return unsub;
-  }, []);
-
-  // Real-time listener for "new" feedback count (admin only)
   useEffect(() => {
     if (IS_E2E || !userIsAdmin) return; // No Firebase in E2E mode
     const db = getFirestore(getFirebaseApp());
@@ -260,6 +246,14 @@ function App() {
     }
   };
 
+  // Lazy-load video library (3.8 MB) — splits into separate chunk
+  const [videoLibrary, setVideoLibrary] = useState({ courses: [], generated_at: null });
+  useEffect(() => {
+    import("./data/video_library_enriched.json").then((mod) => {
+      setVideoLibrary(mod.default || mod);
+    });
+  }, []);
+
   // Process course data - deduplicate by code
   const courses = useMemo(() => {
     const raw = videoLibrary.courses || [];
@@ -273,7 +267,7 @@ function App() {
       if (title === "introduction" || title === "intro" || title === "outro") return false;
       return true;
     });
-  }, []);
+  }, [videoLibrary]);
 
   // Process tag data - either use pre-defined or extract from courses
   const { tags, edges } = useMemo(() => {
