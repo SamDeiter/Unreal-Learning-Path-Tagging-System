@@ -71,7 +71,7 @@ describe("ContentGapDashboard", () => {
     expect(screen.getAllByText(/Alex the Actor/).length).toBeGreaterThanOrEqual(1);
     // Verify we have exactly 9 persona chip buttons
     const chips = document.querySelectorAll(".gap-chip");
-    expect(chips.length).toBe(9);
+    expect(chips.length).toBe(10);
   });
 
   it("renders gap stat cards", () => {

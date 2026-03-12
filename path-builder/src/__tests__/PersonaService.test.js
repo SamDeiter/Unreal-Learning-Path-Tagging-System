@@ -13,7 +13,7 @@ describe("getAllPersonas", () => {
   it("returns an array of 9 personas", () => {
     const personas = getAllPersonas();
     expect(Array.isArray(personas)).toBe(true);
-    expect(personas.length).toBe(9);
+    expect(personas.length).toBe(10);
   });
 
   it("every persona has required schema fields", () => {
