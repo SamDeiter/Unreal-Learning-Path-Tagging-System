@@ -8,6 +8,16 @@
  * via a local heuristic — no Gemini call needed.
  */
 
+const MAX_NAME_LENGTH = 60;
+
+/** Truncate at the nearest word boundary without clipping mid-word. */
+function smartTruncate(str, max = MAX_NAME_LENGTH) {
+  if (!str || str.length <= max) return str;
+  const truncated = str.substring(0, max);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return lastSpace > max * 0.6 ? truncated.substring(0, lastSpace) + "…" : truncated + "…";
+}
+
 // ── Canonical tag → human label mapping ────────────────────────────
 const CANONICAL_LABELS = {
   "scripting.blueprint": "Blueprints",
@@ -132,9 +142,9 @@ export function getDisplayName(item) {
   if (prefix && focus) {
     // Avoid redundancy: if focus already contains the prefix, just show focus
     if (focus.toLowerCase().includes(prefix.toLowerCase())) {
-      return titleCase(focus).substring(0, 55);
+      return titleCase(focus);
     }
-    return `${titleCase(prefix)} - ${titleCase(focus)}`.substring(0, 55);
+    return `${titleCase(prefix)} - ${titleCase(focus)}`;
   }
 
   if (prefix && !focus) {
@@ -143,7 +153,7 @@ export function getDisplayName(item) {
   }
 
   if (!prefix && focus) {
-    return titleCase(focus).substring(0, 55);
+    return titleCase(focus);
   }
 
   // Absolute fallback
@@ -181,24 +191,24 @@ function getDocDisplayName(item) {
   if (label && section) {
     // Use section as the differentiator within the same doc
     const cleanSection = titleCase(section.replace(/[-_]/g, " "));
-    return `${cleanLabel(label)} — ${cleanSection}`.substring(0, 55);
+    return `${cleanLabel(label)} — ${cleanSection}`;
   }
 
   // If we have label only, try to enrich it with subsystem
   if (label) {
     if (subsystem && !label.toLowerCase().includes(subsystem.toLowerCase())) {
-      return `${titleCase(subsystem)} - ${cleanLabel(label)}`.substring(0, 55);
+      return `${titleCase(subsystem)} - ${cleanLabel(label)}`;
     }
-    return cleanLabel(label).substring(0, 55);
+    return cleanLabel(label);
   }
 
   // If we have key (e.g., "lumen-global-illumination"), format it
   if (key) {
     const formatted = titleCase(key.replace(/[-_]/g, " "));
     if (section) {
-      return `${formatted} — ${titleCase(section.replace(/[-_]/g, " "))}`.substring(0, 55);
+      return `${formatted} — ${titleCase(section.replace(/[-_]/g, " "))}`;
     }
-    return formatted.substring(0, 55);
+    return formatted;
   }
 
   // Fallback: use cleaned title + extract first unique phrase from description
@@ -206,12 +216,12 @@ function getDocDisplayName(item) {
   if (cleaned && description) {
     const descFocus = extractDescFocus(description, cleaned);
     if (descFocus) {
-      return `${titleCase(cleaned)} — ${titleCase(descFocus)}`.substring(0, 55);
+      return `${titleCase(cleaned)} — ${titleCase(descFocus)}`;
     }
   }
 
   if (cleaned) {
-    return titleCase(cleaned).substring(0, 55);
+    return titleCase(cleaned);
   }
 
   return "Documentation Step";
