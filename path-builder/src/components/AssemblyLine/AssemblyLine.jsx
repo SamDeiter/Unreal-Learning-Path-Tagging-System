@@ -15,6 +15,7 @@ import { usePath } from "../../context/PathContext";
 import { optimizePathOrder } from "../../utils/generationEngine";
 import { useAugmentationData } from "../../hooks/useAugmentationData";
 import { classifySegment, getBloomBadge } from "../../services/bloomClassifier";
+import { getDisplayName } from "../../services/topicNameService";
 import {
   estimateCognitiveLoad,
   getLoadSummary,
@@ -381,7 +382,7 @@ function AssemblyLine() {
                             {/* Node Content */}
                             <div className="node-content">
                               <span className="node-title" title={course.title}>
-                                {cleanTitle(course.title)}
+                                {getDisplayName(course)}
                               </span>
                             </div>
 
@@ -543,7 +544,7 @@ function AssemblyLine() {
                                 {renderLoadDot(course)}
                               </div>
                               <span className="node-title" title={course.title}>
-                                {cleanTitle(course.title)}
+                                {getDisplayName(course)}
                               </span>
                               {renderBloomBadge(course)}
                             </div>

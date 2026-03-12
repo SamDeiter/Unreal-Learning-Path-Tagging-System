@@ -7,6 +7,7 @@
  */
 
 import { cleanTranscriptText } from "../utils/cleanTranscriptText";
+import { getDisplayName } from "./topicNameService";
 
 /**
  * Strip markdown artifacts from text, producing clean plain text.
@@ -40,7 +41,7 @@ function stripMarkdown(text) {
  */
 export function prepareStepData(steps, bridges = []) {
   return steps.map((step, idx) => {
-    const title = step.segment?.title || step.title || `Step ${idx + 1}`;
+    const title = getDisplayName(step) || step.segment?.title || step.title || `Step ${idx + 1}`;
 
     // Summary resolution — same priority chain as scormPackager
     const rawSummary =

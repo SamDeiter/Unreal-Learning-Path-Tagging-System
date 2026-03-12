@@ -20,6 +20,7 @@ import { cleanVideoTitle } from "../utils/cleanVideoTitle";
 import { cleanTranscriptText } from "../utils/cleanTranscriptText";
 import { markdownToHtml } from "../utils/markdownToHtml";
 import { devLog } from "../utils/logger";
+import { getDisplayName } from "./topicNameService";
 
 // ── SCORM 1.2 API Wrapper (embedded as string) ────────────────────
 const SCORM_API_JS = `
@@ -185,7 +186,7 @@ function getCategoryClass(cat) {
 // ── SCO HTML Generator ─────────────────────────────────────────────
 
 function generateScoHtml(step, index, totalSteps, bridge, pathTitle) {
-  const title = cleanVideoTitle(step.segment?.title || step.title || `Step ${index + 1}`);
+  const title = getDisplayName(step) || cleanVideoTitle(step.segment?.title || step.title || `Step ${index + 1}`);
   const rawSummary = step.summary || step.segment?.text || step.segment?.summary || "";
   const summary = cleanTranscriptText(rawSummary);
   const category = step.category || "core";

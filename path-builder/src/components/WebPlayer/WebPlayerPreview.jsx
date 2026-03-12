@@ -2,7 +2,7 @@
  * WebPlayerPreview — In-app preview of a web-playable learning path.
  *
  * Renders a full-screen overlay with sidebar navigation and step content.
- * Mirrors the SCORM viewer experience but runs as a React component.
+ * Organized into 3 sections: Intro → Lessons (grouped) → Quiz.
  * Tracks progress via localStorage for resume capability.
  */
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -15,7 +15,114 @@ import {
   formatTime,
   getCategoryClass,
 } from "../../services/webPlayerService";
+import { generateQuizForPath } from "../../services/quizService";
 import "./WebPlayerPreview.css";
+
+// ── Section Classification ─────────────────────────────────────────
+
+const SECTION_CONFIG = [
+  {
+    id: "prerequisites",
+    label: "📘 Prerequisites",
+    match: (cat) => {
+      const c = (cat || "").toLowerCase();
+      return c.includes("foundation") || c.includes("prerequisite") || c.includes("diagnosis");
+    },
+  },
+  {
+    id: "core",
+    label: "📗 Core Lessons",
+    match: (cat) => {
+      const c = (cat || "").toLowerCase();
+      return c.includes("core") || c.includes("fix") || !c; // default bucket
+    },
+  },
+  {
+    id: "practice",
+    label: "📙 Practice",
+    match: (cat) => {
+      const c = (cat || "").toLowerCase();
+      return c.includes("practice") || c.includes("transfer");
+    },
+  },
+];
+
+/** Group steps into sections by category. */
+function groupStepsBySection(steps) {
+  const groups = SECTION_CONFIG.map((cfg) => ({
+    ...cfg,
+    steps: [],
+  }));
+
+  steps.forEach((step, idx) => {
+    const placed = groups.find((g) => g.match(step.category));
+    // fallback to core
+    const target = placed || groups[1];
+    target.steps.push({ ...step, globalIndex: idx });
+  });
+
+  // Only return non-empty sections
+  return groups.filter((g) => g.steps.length > 0);
+}
+
+// ── Quiz Question Component ────────────────────────────────────────
+
+function QuizCard({ question, index, selectedAnswer, onSelect }) {
+  const choices = question.choices || {};
+  const choiceEntries = Object.entries(choices).slice(0, 4);
+
+  return (
+    <div className="wp-quiz-card">
+      <p className="wp-quiz-stem">
+        <strong>Q{index + 1}:</strong> {question.stem}
+      </p>
+      <div className="wp-quiz-choices">
+        {choiceEntries.map(([key, text]) => (
+          <label
+            key={key}
+            className={`wp-quiz-choice ${selectedAnswer === key ? "wp-quiz-selected" : ""} ${
+              selectedAnswer && key === question.correct ? "wp-quiz-correct" : ""
+            } ${
+              selectedAnswer && selectedAnswer === key && key !== question.correct
+                ? "wp-quiz-wrong"
+                : ""
+            }`}
+          >
+            <input
+              type="radio"
+              name={`quiz-q-${index}`}
+              value={key}
+              checked={selectedAnswer === key}
+              onChange={() => onSelect(key)}
+              disabled={!!selectedAnswer}
+            />
+            <span className="wp-quiz-letter">{key}</span>
+            <span className="wp-quiz-text">{text}</span>
+          </label>
+        ))}
+      </div>
+      {selectedAnswer && (
+        <div
+          className={`wp-quiz-feedback ${
+            selectedAnswer === question.correct ? "wp-quiz-fb-correct" : "wp-quiz-fb-wrong"
+          }`}
+        >
+          {selectedAnswer === question.correct ? "✅ Correct!" : `❌ Incorrect — the answer is ${question.correct}.`}
+          {question.explanation && <p className="wp-quiz-explanation">{question.explanation}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+QuizCard.propTypes = {
+  question: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
+  selectedAnswer: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+};
+
+// ── Main Component ─────────────────────────────────────────────────
 
 export default function WebPlayerPreview({
   pathResult,
@@ -32,7 +139,7 @@ export default function WebPlayerPreview({
     [pathTitle]
   );
 
-  // Enrich steps with video data from course library (same as SCORM preview)
+  // Enrich steps with video data from course library
   const enrichedSteps = useMemo(() => {
     if (!pathResult?.path) return [];
     const steps = pathResult.path.map((step) => {
@@ -58,6 +165,10 @@ export default function WebPlayerPreview({
       return {
         ...step,
         videos: step.videos || matchedCourse.videos,
+        // Carry over tags for display name generation
+        tags: step.tags || matchedCourse.tags,
+        canonical_tags: step.canonical_tags || matchedCourse.canonical_tags,
+        ai_tags: step.ai_tags || matchedCourse.ai_tags,
         segment: {
           ...seg,
           videoUrl,
@@ -80,10 +191,19 @@ export default function WebPlayerPreview({
     [enrichedSteps, pathResult?.bridges]
   );
 
+  // Group steps by section for sidebar
+  const sections = useMemo(() => groupStepsBySection(stepData), [stepData]);
+
   // State
+  const [viewMode, setViewMode] = useState("intro"); // "intro" | "lesson" | "quiz"
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Quiz state
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});
 
   // Load saved progress on mount
   useEffect(() => {
@@ -91,6 +211,7 @@ export default function WebPlayerPreview({
     setCompleted(progress.completedSteps);
     if (progress.lastStep > 0 && progress.lastStep < stepData.length) {
       setActiveStep(progress.lastStep);
+      setViewMode("lesson");
     }
   }, [pathId, stepData.length]);
 
@@ -98,23 +219,28 @@ export default function WebPlayerPreview({
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight" && activeStep < stepData.length - 1) {
-        handleNext();
-      }
-      if (e.key === "ArrowLeft" && activeStep > 0) {
-        setActiveStep((prev) => prev - 1);
+      if (viewMode === "lesson") {
+        if (e.key === "ArrowRight" && activeStep < stepData.length - 1) {
+          handleNext();
+        }
+        if (e.key === "ArrowLeft" && activeStep > 0) {
+          setActiveStep((prev) => prev - 1);
+        }
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeStep, stepData.length]);
+  }, [activeStep, stepData.length, viewMode]);
 
   const handleNext = useCallback(() => {
     const progress = markStepComplete(pathId, activeStep);
     setCompleted(new Set(progress.completedSteps));
     if (activeStep < stepData.length - 1) {
       setActiveStep((prev) => prev + 1);
+    } else {
+      // Completed final lesson → go to quiz
+      setViewMode("quiz");
     }
   }, [pathId, activeStep, stepData.length]);
 
@@ -124,16 +250,68 @@ export default function WebPlayerPreview({
 
   const handleStepClick = useCallback((idx) => {
     setActiveStep(idx);
+    setViewMode("lesson");
   }, []);
 
-  // Current step data
+  const handleStartLearning = useCallback(() => {
+    setActiveStep(0);
+    setViewMode("lesson");
+  }, []);
+
+  // Load quiz questions
+  const handleLoadQuiz = useCallback(async () => {
+    setQuizLoading(true);
+    try {
+      const quizMap = await generateQuizForPath(
+        pathResult?.path || [],
+        pathResult?.query || "",
+        5
+      );
+      // Flatten all questions into a single array
+      const allQuestions = [];
+      for (const [, questions] of quizMap) {
+        allQuestions.push(...questions);
+      }
+      setQuizQuestions(allQuestions);
+    } catch {
+      // Fallback: no quiz
+      setQuizQuestions([]);
+    }
+    setQuizLoading(false);
+  }, [pathResult]);
+
+  const handleQuizAnswer = useCallback((questionIdx, answer) => {
+    setQuizAnswers((prev) => ({ ...prev, [questionIdx]: answer }));
+  }, []);
+
+  // Current step data (for lesson mode)
   const current = stepData[activeStep];
-  if (!current) return null;
 
   const completedCount = completed.size;
   const progressPct = stepData.length
     ? Math.round((completedCount / stepData.length) * 100)
     : 0;
+
+  // Quiz score
+  const quizScore = useMemo(() => {
+    if (quizQuestions.length === 0) return null;
+    const answered = Object.keys(quizAnswers).length;
+    if (answered < quizQuestions.length) return null;
+    const correct = quizQuestions.filter(
+      (q, i) => quizAnswers[i] === q.correct
+    ).length;
+    return {
+      correct,
+      total: quizQuestions.length,
+      pct: Math.round((correct / quizQuestions.length) * 100),
+    };
+  }, [quizQuestions, quizAnswers]);
+
+  // Estimated time
+  const estimatedMinutes = useMemo(() => {
+    // ~3 min per step as estimate
+    return stepData.length * 3;
+  }, [stepData.length]);
 
   return (
     <div className="wp-overlay">
@@ -165,20 +343,51 @@ export default function WebPlayerPreview({
               </span>
             </div>
 
-            {/* Step list */}
+            {/* Sidebar Navigation */}
             <nav className="wp-nav">
-              {stepData.map((step, idx) => (
-                <button
-                  key={idx}
-                  className={`wp-nav-item ${idx === activeStep ? "wp-nav-active" : ""} ${completed.has(idx) ? "wp-nav-done" : ""}`}
-                  onClick={() => handleStepClick(idx)}
-                >
-                  <span className="wp-nav-num">
-                    {completed.has(idx) ? "✓" : idx + 1}
-                  </span>
-                  <span className="wp-nav-label">{step.title}</span>
-                </button>
+              {/* Intro link */}
+              <button
+                className={`wp-nav-item wp-nav-intro ${viewMode === "intro" ? "wp-nav-active" : ""}`}
+                onClick={() => setViewMode("intro")}
+              >
+                <span className="wp-nav-num">🏠</span>
+                <span className="wp-nav-label">Introduction</span>
+              </button>
+
+              {/* Grouped lesson sections */}
+              {sections.map((section) => (
+                <div key={section.id} className="wp-nav-section">
+                  <div className="wp-nav-section-header">
+                    <span>{section.label}</span>
+                    <span className="wp-nav-section-count">{section.steps.length}</span>
+                  </div>
+                  {section.steps.map((step) => (
+                    <button
+                      key={step.globalIndex}
+                      className={`wp-nav-item ${
+                        viewMode === "lesson" && step.globalIndex === activeStep
+                          ? "wp-nav-active"
+                          : ""
+                      } ${completed.has(step.globalIndex) ? "wp-nav-done" : ""}`}
+                      onClick={() => handleStepClick(step.globalIndex)}
+                    >
+                      <span className="wp-nav-num">
+                        {completed.has(step.globalIndex) ? "✓" : step.globalIndex + 1}
+                      </span>
+                      <span className="wp-nav-label">{step.title}</span>
+                    </button>
+                  ))}
+                </div>
               ))}
+
+              {/* Quiz link */}
+              <button
+                className={`wp-nav-item wp-nav-quiz ${viewMode === "quiz" ? "wp-nav-active" : ""}`}
+                onClick={() => setViewMode("quiz")}
+              >
+                <span className="wp-nav-num">📝</span>
+                <span className="wp-nav-label">Knowledge Check</span>
+              </button>
             </nav>
           </>
         )}
@@ -193,115 +402,244 @@ export default function WebPlayerPreview({
               ← Back to Builder
             </button>
             <span className="wp-badge">🌐 Web Player</span>
-            <span className="wp-breadcrumb">
-              Step {activeStep + 1} of {stepData.length}
-            </span>
+            {viewMode === "lesson" && (
+              <span className="wp-breadcrumb">
+                Step {activeStep + 1} of {stepData.length}
+              </span>
+            )}
           </div>
           <button className="wp-close-btn" onClick={onClose} title="Close preview">
             ✕
           </button>
         </div>
 
-        {/* Step content */}
-        <div className="wp-content">
-          <h1 className="wp-step-title">{current.title}</h1>
-
-          {/* Bridge narration */}
-          {current.bridgeText && (
-            <div className="wp-bridge">
-              <strong>Connection:</strong> {current.bridgeText}
-            </div>
-          )}
-
-          {/* Video embed */}
-          {current.video && (
-            <div className="wp-video-section">
-              <h2>🎬 Video Reference</h2>
-              <div className="wp-video-embed">
-                {current.video.driveId ? (
-                  <iframe
-                    src={`https://drive.google.com/file/d/${current.video.driveId}/preview`}
-                    allow="autoplay"
-                    allowFullScreen
-                    title={current.video.videoTitle || current.title}
-                  />
-                ) : current.video.youtubeId ? (
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${current.video.youtubeId}?rel=0&modestbranding=1${current.video.startSec ? `&start=${current.video.startSec}` : ""}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={current.video.videoTitle || current.title}
-                  />
-                ) : null}
-              </div>
-              <div className="wp-video-meta">
-                {current.video.videoTitle && (
-                  <span>{current.video.videoTitle}</span>
-                )}
-                {(current.video.startSec > 0 || current.video.endSec > 0) && (
-                  <span className="wp-timestamp">
-                    ⏱ {formatTime(current.video.startSec)} –{" "}
-                    {formatTime(current.video.endSec)}
-                  </span>
-                )}
-                {current.video.driveId && (
-                  <a
-                    href={`https://drive.google.com/file/d/${current.video.driveId}/view`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open in Drive ↗
-                  </a>
-                )}
-                {current.video.youtubeId && (
-                  <a
-                    href={`https://www.youtube.com/watch?v=${current.video.youtubeId}${current.video.startSec ? `&t=${current.video.startSec}` : ""}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Watch on YouTube ↗
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Step card */}
-          <div className="wp-step-card">
-            <div className="wp-step-meta">
-              <span className={`wp-category-badge ${getCategoryClass(current.category)}`}>
-                {current.category}
-              </span>
-              {current.source && <span>Source: {current.source}</span>}
-            </div>
-            {current.summary ? (
-              <p className="wp-step-summary">{current.summary}</p>
-            ) : (
-              <p className="wp-no-content">
-                <em>No content summary available for this step.</em>
+        {/* ── INTRO VIEW ── */}
+        {viewMode === "intro" && (
+          <div className="wp-content wp-intro-content">
+            <div className="wp-intro-hero">
+              <h1 className="wp-intro-title">{pathTitle}</h1>
+              <p className="wp-intro-subtitle">
+                {pathResult?.query
+                  ? `A structured learning path covering ${pathResult.query}`
+                  : "A curated learning experience in Unreal Engine 5"}
               </p>
+            </div>
+
+            <div className="wp-intro-stats">
+              <div className="wp-intro-stat">
+                <span className="wp-intro-stat-value">{stepData.length}</span>
+                <span className="wp-intro-stat-label">Lessons</span>
+              </div>
+              <div className="wp-intro-stat">
+                <span className="wp-intro-stat-value">~{estimatedMinutes}m</span>
+                <span className="wp-intro-stat-label">Estimated Time</span>
+              </div>
+              <div className="wp-intro-stat">
+                <span className="wp-intro-stat-value">{sections.length}</span>
+                <span className="wp-intro-stat-label">Sections</span>
+              </div>
+            </div>
+
+            {/* Section overview */}
+            <div className="wp-intro-sections">
+              <h2>What You'll Learn</h2>
+              {sections.map((section) => (
+                <div key={section.id} className="wp-intro-section-card">
+                  <h3>{section.label}</h3>
+                  <ul>
+                    {section.steps.slice(0, 5).map((step) => (
+                      <li key={step.globalIndex}>{step.title}</li>
+                    ))}
+                    {section.steps.length > 5 && (
+                      <li className="wp-intro-more">
+                        +{section.steps.length - 5} more lessons
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <button className="wp-intro-cta" onClick={handleStartLearning}>
+              🚀 Begin Learning
+            </button>
+          </div>
+        )}
+
+        {/* ── LESSON VIEW ── */}
+        {viewMode === "lesson" && current && (
+          <div className="wp-content">
+            <h1 className="wp-step-title">{current.title}</h1>
+
+            {/* Bridge narration */}
+            {current.bridgeText && (
+              <div className="wp-bridge">
+                <strong>Connection:</strong> {current.bridgeText}
+              </div>
+            )}
+
+            {/* Video embed */}
+            {current.video && (
+              <div className="wp-video-section">
+                <h2>🎬 Video Reference</h2>
+                <div className="wp-video-embed">
+                  {current.video.driveId ? (
+                    <iframe
+                      src={`https://drive.google.com/file/d/${current.video.driveId}/preview`}
+                      allow="autoplay"
+                      allowFullScreen
+                      title={current.video.videoTitle || current.title}
+                    />
+                  ) : current.video.youtubeId ? (
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${current.video.youtubeId}?rel=0&modestbranding=1${current.video.startSec ? `&start=${current.video.startSec}` : ""}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={current.video.videoTitle || current.title}
+                    />
+                  ) : null}
+                </div>
+                <div className="wp-video-meta">
+                  {current.video.videoTitle && (
+                    <span>{current.video.videoTitle}</span>
+                  )}
+                  {(current.video.startSec > 0 || current.video.endSec > 0) && (
+                    <span className="wp-timestamp">
+                      ⏱ {formatTime(current.video.startSec)} –{" "}
+                      {formatTime(current.video.endSec)}
+                    </span>
+                  )}
+                  {current.video.driveId && (
+                    <a
+                      href={`https://drive.google.com/file/d/${current.video.driveId}/view`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open in Drive ↗
+                    </a>
+                  )}
+                  {current.video.youtubeId && (
+                    <a
+                      href={`https://www.youtube.com/watch?v=${current.video.youtubeId}${current.video.startSec ? `&t=${current.video.startSec}` : ""}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Watch on YouTube ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step card */}
+            <div className="wp-step-card">
+              <div className="wp-step-meta">
+                <span className={`wp-category-badge ${getCategoryClass(current.category)}`}>
+                  {current.category}
+                </span>
+                {current.source && <span>Source: {current.source}</span>}
+              </div>
+              {current.summary ? (
+                <p className="wp-step-summary">{current.summary}</p>
+              ) : (
+                <p className="wp-no-content">
+                  <em>No content summary available for this step.</em>
+                </p>
+              )}
+            </div>
+
+            {/* Navigation buttons */}
+            <div className="wp-nav-buttons">
+              <button
+                className="wp-nav-btn wp-nav-secondary"
+                onClick={handlePrev}
+                disabled={activeStep === 0}
+              >
+                ← Previous
+              </button>
+              <button
+                className="wp-nav-btn wp-nav-primary"
+                onClick={handleNext}
+              >
+                {activeStep === stepData.length - 1
+                  ? "✅ Complete & Take Quiz →"
+                  : "Complete & Continue →"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── QUIZ VIEW ── */}
+        {viewMode === "quiz" && (
+          <div className="wp-content wp-quiz-content">
+            <h1 className="wp-step-title">📝 Knowledge Check</h1>
+            <p className="wp-quiz-intro">
+              Test your understanding of the concepts covered in this learning path.
+              You need 70% or higher to pass.
+            </p>
+
+            {quizQuestions.length === 0 && !quizLoading && (
+              <div className="wp-quiz-start">
+                <button className="wp-intro-cta" onClick={handleLoadQuiz}>
+                  🧠 Generate Quiz Questions
+                </button>
+                <p className="wp-quiz-note">
+                  Quiz questions are generated based on the lesson content using AI.
+                </p>
+              </div>
+            )}
+
+            {quizLoading && (
+              <div className="wp-quiz-loading">
+                <div className="wp-spinner" />
+                <p>Generating quiz questions from lesson content...</p>
+              </div>
+            )}
+
+            {quizQuestions.length > 0 && (
+              <>
+                {quizQuestions.map((q, i) => (
+                  <QuizCard
+                    key={i}
+                    question={q}
+                    index={i}
+                    selectedAnswer={quizAnswers[i]}
+                    onSelect={(answer) => handleQuizAnswer(i, answer)}
+                  />
+                ))}
+
+                {quizScore && (
+                  <div
+                    className={`wp-quiz-score ${
+                      quizScore.pct >= 70 ? "wp-quiz-passed" : "wp-quiz-failed"
+                    }`}
+                  >
+                    <h2>
+                      {quizScore.pct >= 70 ? "🎉 Congratulations!" : "📚 Keep Studying"}
+                    </h2>
+                    <p className="wp-quiz-score-text">
+                      Score: {quizScore.correct}/{quizScore.total} ({quizScore.pct}%)
+                    </p>
+                    <p>
+                      {quizScore.pct >= 70
+                        ? "You passed the knowledge check! Great work."
+                        : "You need 70% to pass. Review the lessons and try again."}
+                    </p>
+                    <button
+                      className="wp-nav-btn wp-nav-secondary"
+                      onClick={() => {
+                        setQuizAnswers({});
+                        setQuizQuestions([]);
+                      }}
+                    >
+                      🔄 Retake Quiz
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
-
-          {/* Navigation buttons */}
-          <div className="wp-nav-buttons">
-            <button
-              className="wp-nav-btn wp-nav-secondary"
-              onClick={handlePrev}
-              disabled={activeStep === 0}
-            >
-              ← Previous
-            </button>
-            <button
-              className="wp-nav-btn wp-nav-primary"
-              onClick={handleNext}
-            >
-              {activeStep === stepData.length - 1
-                ? "✅ Complete Path"
-                : "Complete & Continue →"}
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
