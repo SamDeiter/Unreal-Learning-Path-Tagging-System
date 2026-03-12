@@ -113,7 +113,7 @@ export function getDisplayName(item) {
 
   // ── Doc-sourced steps: use doc-specific fields ──
   if (isDocItem(item)) {
-    return getDocDisplayName(item);
+    return smartTruncate(getDocDisplayName(item));
   }
 
   // ── 1. Determine the topic/category prefix ──
@@ -133,31 +133,84 @@ export function getDisplayName(item) {
     prefix = "AI Guide";
   }
 
-  // ── 2. Determine the specific focus from title ──
-  const rawTitle = item.segment?.title || item.title || "";
-  const cleaned = stripTitleNoise(rawTitle);
-  const focus = extractFocus(cleaned);
+  // ── 2. Determine the specific focus ──
+  // Priority: AI summary > step summary > cleaned title
+  let focus = "";
+
+  // Try AI-generated summary first (best quality)
+  const aiSummary = item.gemini_enriched?.one_sentence_summary || "";
+  if (aiSummary) {
+    focus = extractShortPhrase(aiSummary);
+  }
+
+  // Try step summary (set by pathSequencer)
+  if (!focus) {
+    const stepSummary = item.summary || "";
+    if (stepSummary && stepSummary.length > 10) {
+      focus = extractShortPhrase(stepSummary);
+    }
+  }
+
+  // Fallback to cleaned title
+  if (!focus) {
+    const rawTitle = item.segment?.title || item.title || "";
+    const cleaned = stripTitleNoise(rawTitle);
+    focus = extractFocus(cleaned);
+  }
 
   // ── 3. Build the display name ──
   if (prefix && focus) {
-    // Avoid redundancy: if focus already contains the prefix, just show focus
     if (focus.toLowerCase().includes(prefix.toLowerCase())) {
-      return titleCase(focus);
+      return smartTruncate(titleCase(focus));
     }
-    return `${titleCase(prefix)} - ${titleCase(focus)}`;
+    return smartTruncate(`${titleCase(prefix)} - ${titleCase(focus)}`);
   }
 
   if (prefix && !focus) {
-    // Have a topic but title is generic (e.g. "Intro" or "Overview")
     return titleCase(prefix);
   }
 
   if (!prefix && focus) {
-    return titleCase(focus);
+    return smartTruncate(titleCase(focus));
   }
 
   // Absolute fallback
   return item.code || "Untitled Step";
+}
+
+/**
+ * Extract a short, descriptive phrase from a summary sentence.
+ * E.g. "This video covers how to set up VSM receiver masks for lights"
+ * → "Setting Up VSM Receiver Masks"
+ */
+function extractShortPhrase(summary) {
+  if (!summary || summary.length < 10) return "";
+
+  // Strip common filler prefixes
+  let cleaned = summary
+    .replace(/^(this\s+(video|lesson|step|section|module|tutorial|guide)\s+(covers?|explains?|demonstrates?|shows?|teaches?|walks?\s+through)\s+(how\s+to\s+)?)/i, "")
+    .replace(/^(learn(ing)?\s+(how\s+to\s+|about\s+)?)/i, "")
+    .replace(/^(how\s+to\s+)/i, "")
+    .replace(/^(in\s+this\s+(video|lesson|step|section),?\s*)/i, "")
+    .replace(/^(an?\s+overview\s+of\s+)/i, "")
+    .replace(/^(introduction\s+to\s+)/i, "")
+    .trim();
+
+  if (!cleaned) return "";
+
+  // Take first meaningful clause (before comma, period, semicolon, or "and")
+  const clause = cleaned.split(/[,;.]|\band\b/)[0]?.trim() || cleaned;
+
+  // Take 3-6 words
+  const words = clause.split(/\s+/).slice(0, 6);
+  const phrase = words.join(" ");
+
+  // Skip if too short or too generic
+  if (phrase.length < 5) return "";
+  const generic = ["the", "a", "an", "unreal", "engine"];
+  if (generic.includes(phrase.toLowerCase())) return "";
+
+  return phrase;
 }
 
 // ── Doc-specific naming ────────────────────────────────────────────
