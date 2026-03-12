@@ -22,6 +22,7 @@ import {
   interleaveCourses,
 } from "../../services/cognitiveLoadEngine";
 import "./AssemblyLine.css";
+import SmartEmptyState from "./SmartEmptyState";
 
 // Determine content type from course properties
 function getContentType(course) {
@@ -299,12 +300,16 @@ function AssemblyLine() {
       )}
 
       {courses.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📚</div>
-          <h3>Start Building Your Path</h3>
-          <p>Add courses from the library to create your learning sequence.</p>
-          <p className="hint">Courses will appear here as a visual timeline.</p>
-        </div>
+        <SmartEmptyState
+          goal={learningIntent?.primaryGoal}
+          skillLevel={learningIntent?.skillLevel}
+          onBrowseLibrary={() => {
+            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "browse" } }));
+          }}
+          onBuildBySkill={(skill) => {
+            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "skill", skill } }));
+          }}
+        />
       ) : (
         <div className="path-container">
           <div className="assembly-tiers">
@@ -338,12 +343,12 @@ function AssemblyLine() {
                           {/* Course Node */}
                           <div
                             className={getNodeClasses(course)}
-                            draggable={workflowStage === "arrange"}
-                            onDragStart={workflowStage === "arrange" ? (e) => handleDragStart(e, globalIndex) : undefined}
-                            onDragEnd={workflowStage === "arrange" ? handleDragEnd : undefined}
-                            onDragOver={workflowStage === "arrange" ? handleDragOver : undefined}
-                            onDragLeave={workflowStage === "arrange" ? handleDragLeave : undefined}
-                            onDrop={workflowStage === "arrange" ? (e) => handleDrop(e, globalIndex) : undefined}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, globalIndex)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, globalIndex)}
                           >
                             <div className="node-header">
                               <div className="node-number">{globalIndex + 1}</div>
@@ -355,7 +360,7 @@ function AssemblyLine() {
                                   </span>
                                 );
                               })()}
-                              {(workflowStage === "curate" || workflowStage === "arrange") && (
+                              {workflowStage !== "export" && (
                                 <button
                                   className="node-remove-mini"
                                   onClick={(e) => {
@@ -380,8 +385,8 @@ function AssemblyLine() {
                               {renderAugBadge(course)}
                             </div>
 
-                            {/* Node Controls — hover-reveal, arrange stage only */}
-                            {workflowStage === "arrange" && (
+                            {/* Node Controls — always visible during Build, hidden during Export */}
+                            {workflowStage !== "export" && (
                               <div
                                 className="node-controls"
                                 onClick={(e) => e.stopPropagation()}

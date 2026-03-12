@@ -8,8 +8,7 @@ import { usePath } from "../../context/PathContext";
 import "./WorkflowStepper.css";
 
 const STAGES = [
-  { key: "curate", icon: "🛒", label: "Curate", desc: "Add courses to your path" },
-  { key: "arrange", icon: "📐", label: "Arrange", desc: "Order and assign roles" },
+  { key: "build", icon: "🏗️", label: "Build", desc: "Add, order, and refine courses" },
   { key: "review", icon: "✅", label: "Review", desc: "Verify and check quality" },
   { key: "export", icon: "📦", label: "Export", desc: "Download SCORM package" },
 ];

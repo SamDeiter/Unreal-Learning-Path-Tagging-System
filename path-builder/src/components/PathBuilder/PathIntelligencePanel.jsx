@@ -311,12 +311,12 @@ const TABS = [
 
 // ── Workflow stage → visible tabs ──
 const STAGE_TABS = {
-  arrange:  ["coverage", "gaps"],
+  build:    ["coverage", "gaps"],
   review:   ["coverage", "gaps", "quiz", "review"],
   export:   ["quiz", "review", "export"],
 };
 const STAGE_DEFAULT_TAB = {
-  arrange: "coverage",
+  build:  "coverage",
   review:  "review",
   export:  "export",
 };

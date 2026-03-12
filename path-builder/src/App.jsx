@@ -130,9 +130,9 @@ function BuilderEditor({
 }) {
   const { workflowStage } = usePath();
 
-  // Panel visibility per stage
-  const showLeftPanel = !isMobile && (workflowStage === "curate");
-  const showRightPanel = !isMobile && workflowStage !== "curate";
+  // Both panels always visible on desktop (no stage-gating)
+  const showLeftPanel = !isMobile;
+  const showRightPanel = !isMobile;
 
   return (
     <div className="builder-editor-container">
@@ -574,7 +574,6 @@ function App() {
                         setBuilderView("editor");
                       }}
                       onCreateNew={() => setShowWizard(true)}
-                      onLegacyMode={() => setBuilderView("editor")}
                     />
                   </div>
                 )}

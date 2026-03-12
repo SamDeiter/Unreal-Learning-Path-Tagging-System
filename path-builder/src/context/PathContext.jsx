@@ -11,8 +11,8 @@ import { getCourseDurationMinutes } from "../utils/courseDuration";
 
 const PathContext = createContext(null);
 
-// Workflow stages
-const WORKFLOW_STAGES = ["curate", "arrange", "review", "export"];
+// Workflow stages (Curate+Arrange merged into "build")
+const WORKFLOW_STAGES = ["build", "review", "export"];
 
 // Action types
 const ACTIONS = {
@@ -114,7 +114,7 @@ const initialState = {
     skillLevel: "",
     timeBudget: "",
   },
-  workflowStage: "curate",
+  workflowStage: "build",
 };
 
 const DRAFT_KEY = "ue5-path-draft";
@@ -125,10 +125,13 @@ function loadDraft() {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (raw) {
       const draft = JSON.parse(raw);
+      // Migrate legacy stage names
+      let stage = draft.workflowStage || "build";
+      if (stage === "curate" || stage === "arrange") stage = "build";
       return {
         courses: Array.isArray(draft.courses) ? draft.courses : [],
         learningIntent: draft.learningIntent || initialState.learningIntent,
-        workflowStage: draft.workflowStage || "curate",
+        workflowStage: stage,
       };
     }
   } catch {
@@ -283,7 +286,7 @@ export function PathProvider({ children }) {
 
   const clearPath = () => {
     dispatch({ type: ACTIONS.CLEAR_PATH });
-    dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: "curate" });
+    dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: "build" });
     setActivePathId(null);
     localStorage.removeItem("ue5_active_path_id");
     localStorage.removeItem(DRAFT_KEY);

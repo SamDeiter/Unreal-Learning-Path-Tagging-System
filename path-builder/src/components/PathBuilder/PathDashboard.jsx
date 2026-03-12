@@ -12,7 +12,7 @@ import { useState, useCallback } from "react";
 import { loadSavedPaths, savePaths } from "../../utils/pathStorageUtils";
 import "./PathDashboard.css";
 
-function PathDashboard({ onEditPath, onCreateNew, onLegacyMode }) {
+function PathDashboard({ onEditPath, onCreateNew }) {
   const [paths, setPaths] = useState(loadSavedPaths);
 
   const handleDelete = useCallback((id) => {
@@ -57,15 +57,7 @@ function PathDashboard({ onEditPath, onCreateNew, onLegacyMode }) {
           <h2 className="pd-title">🏗️ Learning Paths</h2>
           <p className="pd-subtitle">Build, manage, and publish your UE5 course paths</p>
         </div>
-        <div className="pd-header-right">
-          <button
-            className="pd-btn pd-btn-ghost"
-            onClick={onLegacyMode}
-            title="Switch to classic editor"
-          >
-            ⚡ Classic Editor
-          </button>
-        </div>
+
       </div>
 
       <div className="pd-grid">
