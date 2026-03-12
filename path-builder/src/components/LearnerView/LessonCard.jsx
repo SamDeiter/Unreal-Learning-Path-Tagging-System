@@ -84,6 +84,40 @@ const LessonCard = forwardRef(function LessonCard(
       {/* ── Body ── */}
       {isExpanded && (
         <div className="lesson-card__body">
+          {/* Inline Video — FIRST for watch steps */}
+          {hasVideo && isVideoStep && (
+            <section className="lesson-card__section lesson-card__section--video">
+              <h4 className="lesson-card__section-title">🎬 Video</h4>
+              <div className="lesson-card__video">
+                {video.driveId ? (
+                  <iframe
+                    src={`https://drive.google.com/file/d/${video.driveId}/preview`}
+                    allow="autoplay"
+                    allowFullScreen
+                    title={video.videoTitle || step.title}
+                    className="lesson-card__video-frame"
+                  />
+                ) : video.youtubeId ? (
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0&modestbranding=1${video.startSec ? `&start=${video.startSec}` : ""}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={video.videoTitle || step.title}
+                    className="lesson-card__video-frame"
+                  />
+                ) : null}
+                <div className="lesson-card__video-meta">
+                  {video.videoTitle && <span>{video.videoTitle}</span>}
+                  {(video.startSec > 0 || video.endSec > 0) && (
+                    <span className="lesson-card__video-timestamp">
+                      ⏱ {formatTime(video.startSec)} – {formatTime(video.endSec)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Why This Matters */}
           {step.whyThisMatters && (
             <section className="lesson-card__section lesson-card__section--why">
@@ -139,8 +173,8 @@ const LessonCard = forwardRef(function LessonCard(
             </section>
           )}
 
-          {/* Inline Video */}
-          {hasVideo && (
+          {/* Inline Video — AFTER content for non-watch steps */}
+          {hasVideo && !isVideoStep && (
             <section className="lesson-card__section lesson-card__section--video">
               <h4 className="lesson-card__section-title">🎬 Video</h4>
               <div className="lesson-card__video">
