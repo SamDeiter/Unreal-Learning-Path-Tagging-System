@@ -24,12 +24,27 @@ import {
   trackPathSequenced,
   trackAICoverageReport,
 } from "./analyticsService";
+import { findRelevantSegments, SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
+import { sequencePath } from "./pathSequencer";
+import { generateBridgeNarration } from "./pathNarration";
+import { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
+import { CATEGORY_TO_SECTION } from "../schemas/LearningPathV2";
 
 // Re-export extracted modules so existing consumer imports stay valid
 export { findRelevantSegments, SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
 export { sequencePath, computeTopicOverlap } from "./pathSequencer";
 export { generateBridgeNarration } from "./pathNarration";
 export { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
+
+// ── Category sort order (derived from CATEGORY_TO_SECTION + explicit ordering) ──
+// Maps each category to a numeric order for sorting hybrid path steps.
+const SECTION_PHASE_ORDER = { prerequisite: 0, core: 1, practice: 2 };
+const CATEGORY_ORDER = Object.fromEntries(
+  Object.entries(CATEGORY_TO_SECTION).map(([cat, phase]) => [
+    cat,
+    SECTION_PHASE_ORDER[phase] ?? 99,
+  ])
+);
 
 // ── Phase 0: UE5 Query Feasibility Gate (Layer 1) ──
 // Prevents hallucinated paths for off-topic queries (e.g., "Horses in UE5")
@@ -155,12 +170,7 @@ function validateHybridStep(step, originalQuery) {
   return (titleRelevance || hasUE5Terms) && titleQuality;
 }
 
-// Internal imports for orchestration
-import { findRelevantSegments } from "./pathSearch";
-import { SIMILARITY_THRESHOLD, MIN_PATH_SEGMENTS } from "./pathSearch";
-import { sequencePath } from "./pathSequencer";
-import { generateBridgeNarration } from "./pathNarration";
-import { analyzePathGaps, searchCommunityPainPoints, generateGapFillStep } from "./pathGapAnalyzer";
+
 
 /**
  * Hybrid Fallback: Generate a learning path from Gemini's own knowledge
@@ -263,15 +273,6 @@ Return a JSON array:
         return [];
       }
     }
-    const CATEGORY_ORDER = {
-      prerequisite: 0,
-      core: 1,
-      practice: 2,
-      foundation: 3,
-      diagnosis: 4,
-      fix: 5,
-      transfer: 6,
-    };
 
     const sequenced = steps
       .sort((a, b) => (CATEGORY_ORDER[a.category] ?? 99) - (CATEGORY_ORDER[b.category] ?? 99))
