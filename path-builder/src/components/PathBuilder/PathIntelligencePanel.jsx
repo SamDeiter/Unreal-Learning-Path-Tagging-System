@@ -1444,13 +1444,21 @@ export default function PathIntelligencePanel() {
                         });
                         return;
                       }
-                      // Structural checks → show actionable hint via brief toast
+                      // Structural checks → take action + show toast
                       const hints = {
                         "step-count": "Remove lower-priority steps from the Assembly Line to reduce step count below 7.",
                         "no-long-videos": "Split videos over 6 minutes — shorter segments keep learner engagement high.",
-                        "has-bridges": "Click 'Re-Analyze' on the Coverage tab, then regenerate the path to include bridge narrations.",
+                        "has-bridges": "Re-analyze your path on the Coverage tab to generate bridge narrations.",
                         "all-verified": "Approve or flag each step in your learning path to complete verification.",
                       };
+
+                      // Navigate to the appropriate tab for actionable checks
+                      if (checkId === "has-bridges") {
+                        setActiveTab("coverage");
+                      } else if (checkId === "all-verified") {
+                        setActiveTab("review");
+                      }
+
                       const hint = hints[checkId];
                       if (hint) {
                         // Create a brief floating toast
@@ -1461,7 +1469,6 @@ export default function PathIntelligencePanel() {
                           background: "#1c2128", color: "#e6edf3", border: "1px solid #d29922",
                           borderRadius: "8px", padding: "12px 20px", fontSize: "0.85rem",
                           maxWidth: "420px", zIndex: 9999, boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-                          animation: "fadeIn 0.2s ease",
                         });
                         document.body.appendChild(toast);
                         setTimeout(() => {
