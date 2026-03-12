@@ -285,7 +285,7 @@ export function PathProvider({ children }) {
     } catch {
       /* localStorage full or unavailable */
     }
-  }, [state.courses, state.modules, state.learningIntent, activePathId]);
+  }, [state.courses, state.modules, state.learningIntent, state.workflowStage, activePathId]);
 
   // Persona state — persisted in localStorage
   const [activePersonaId, setActivePersonaIdState] = useState(

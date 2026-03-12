@@ -8,13 +8,22 @@
  *   - Common Mistake
  *   - Key Takeaway
  *   - Go Deeper (links)
+ *   - Inline video embed (YouTube/Drive) with graceful fallback
  *
- * Replaces the single-summary-paragraph rendering with a structured
- * learn/do/check/apply layout based on research principles.
+ * Supports focused-step mode via `isFocused` prop for the unified
+ * V2 learner flow (auto-expand, visual emphasis, scroll target).
  */
 
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import "./LessonCard.css";
+
+/** Format seconds → mm:ss */
+function formatTime(sec) {
+  if (!sec || sec <= 0) return "0:00";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
 // ── Completion type badges ─────────────────────────────────────────
 const COMPLETION_BADGES = {
@@ -25,18 +34,31 @@ const COMPLETION_BADGES = {
   apply: { icon: "🚀", label: "Apply" },
 };
 
-export default function LessonCard({ step, index, isCompleted, onToggleComplete }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+const LessonCard = forwardRef(function LessonCard(
+  { step, index, isCompleted, onToggleComplete, isFocused = false },
+  ref
+) {
+  const [manualExpand, setManualExpand] = useState(true);
+
+  // When focused, always expanded; otherwise user-controlled
+  const isExpanded = isFocused || manualExpand;
 
   if (!step) return null;
 
   const badge = COMPLETION_BADGES[step.completionType] || COMPLETION_BADGES.do;
   const hasStructuredContent = step.whatToDo?.length > 0 || step.howToVerify?.length > 0;
 
+  const video = step.video || null;
+  const hasVideo = video && (video.driveId || video.youtubeId);
+  const isVideoStep = step.completionType === "watch" || step.source === "video" || !!step.video;
+
   return (
-    <div className={`lesson-card ${isCompleted ? "lesson-card--completed" : ""}`}>
+    <div
+      ref={ref}
+      className={`lesson-card ${isCompleted ? "lesson-card--completed" : ""} ${isFocused ? "lesson-card--focused" : ""}`}
+    >
       {/* ── Header ── */}
-      <div className="lesson-card__header" onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="lesson-card__header" onClick={() => setManualExpand(!manualExpand)}>
         <div className="lesson-card__header-left">
           <button
             className="lesson-card__checkbox"
@@ -117,6 +139,50 @@ export default function LessonCard({ step, index, isCompleted, onToggleComplete 
             </section>
           )}
 
+          {/* Inline Video */}
+          {hasVideo && (
+            <section className="lesson-card__section lesson-card__section--video">
+              <h4 className="lesson-card__section-title">🎬 Video</h4>
+              <div className="lesson-card__video">
+                {video.driveId ? (
+                  <iframe
+                    src={`https://drive.google.com/file/d/${video.driveId}/preview`}
+                    allow="autoplay"
+                    allowFullScreen
+                    title={video.videoTitle || step.title}
+                    className="lesson-card__video-frame"
+                  />
+                ) : video.youtubeId ? (
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0&modestbranding=1${video.startSec ? `&start=${video.startSec}` : ""}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={video.videoTitle || step.title}
+                    className="lesson-card__video-frame"
+                  />
+                ) : null}
+                <div className="lesson-card__video-meta">
+                  {video.videoTitle && <span>{video.videoTitle}</span>}
+                  {(video.startSec > 0 || video.endSec > 0) && (
+                    <span className="lesson-card__video-timestamp">
+                      ⏱ {formatTime(video.startSec)} – {formatTime(video.endSec)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Video fallback for video-marked steps with no playable URL */}
+          {!hasVideo && isVideoStep && (
+            <section className="lesson-card__section lesson-card__section--video-fallback">
+              <p className="lesson-card__video-fallback">
+                🎬 This step references a video resource. Follow the instructions
+                above, then check the "Go Deeper" links for related video content.
+              </p>
+            </section>
+          )}
+
           {/* Go Deeper */}
           {step.goDeeper?.length > 0 && (
             <section className="lesson-card__section lesson-card__section--deeper">
@@ -136,4 +202,6 @@ export default function LessonCard({ step, index, isCompleted, onToggleComplete 
       )}
     </div>
   );
-}
+});
+
+export default LessonCard;

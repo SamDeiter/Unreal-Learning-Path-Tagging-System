@@ -493,105 +493,135 @@ export default function WebPlayerPreview({
         )}
 
         {/* ── LESSON VIEW ── */}
-        {viewMode === "lesson" && current && (
+        {viewMode === "lesson" && (
           <div className="wp-content">
-            <h1 className="wp-step-title">{current.title}</h1>
+            {/* V2 paths → unified LearnerView with focused-step navigation */}
+            {pathResult?.v2Path?.schemaVersion === 2 ? (
+              <LearnerView
+                v2Path={pathResult.v2Path}
+                focusedStepIndex={activeStep}
+                showIntro={false}
+                externalProgress={completed}
+                onStepChange={(idx) => {
+                  // Mark current step complete before advancing
+                  if (idx > activeStep) {
+                    const progress = markStepComplete(pathId, activeStep);
+                    setCompleted(new Set(progress.completedSteps));
+                  }
+                  setActiveStep(idx);
+                }}
+                onComplete={() => {
+                  const progress = markStepComplete(pathId, activeStep);
+                  setCompleted(new Set(progress.completedSteps));
+                  setViewMode("quiz");
+                }}
+              />
+            ) : (
+              /* Legacy lesson renderer for non-V2 paths */
+              <>
+                {current && (
+                  <>
+                    <h1 className="wp-step-title">{current.title}</h1>
 
-            {/* Bridge narration */}
-            {current.bridgeText && (
-              <div className="wp-bridge">
-                <strong>Connection:</strong> {current.bridgeText}
-              </div>
+                    {/* Bridge narration */}
+                    {current.bridgeText && (
+                      <div className="wp-bridge">
+                        <strong>Connection:</strong> {current.bridgeText}
+                      </div>
+                    )}
+
+                    {/* Video embed */}
+                    {current.video && (
+                      <div className="wp-video-section">
+                        <h2>🎬 Video Reference</h2>
+                        <div className="wp-video-embed">
+                          {current.video.driveId ? (
+                            <iframe
+                              src={`https://drive.google.com/file/d/${current.video.driveId}/preview`}
+                              allow="autoplay"
+                              allowFullScreen
+                              title={current.video.videoTitle || current.title}
+                            />
+                          ) : current.video.youtubeId ? (
+                            <iframe
+                              src={`https://www.youtube-nocookie.com/embed/${current.video.youtubeId}?rel=0&modestbranding=1${current.video.startSec ? `&start=${current.video.startSec}` : ""}`}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              title={current.video.videoTitle || current.title}
+                            />
+                          ) : null}
+                        </div>
+                        <div className="wp-video-meta">
+                          {current.video.videoTitle && (
+                            <span>{current.video.videoTitle}</span>
+                          )}
+                          {(current.video.startSec > 0 || current.video.endSec > 0) && (
+                            <span className="wp-timestamp">
+                              ⏱ {formatTime(current.video.startSec)} –{" "}
+                              {formatTime(current.video.endSec)}
+                            </span>
+                          )}
+                          {current.video.driveId && (
+                            <a
+                              href={`https://drive.google.com/file/d/${current.video.driveId}/view`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Open in Drive ↗
+                            </a>
+                          )}
+                          {current.video.youtubeId && (
+                            <a
+                              href={`https://www.youtube.com/watch?v=${current.video.youtubeId}${current.video.startSec ? `&t=${current.video.startSec}` : ""}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Watch on YouTube ↗
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step card */}
+                    <div className="wp-step-card">
+                      <div className="wp-step-meta">
+                        <span className={`wp-category-badge ${getCategoryClass(current.category)}`}>
+                          {current.category}
+                        </span>
+                        {current.source && <span>Source: {current.source}</span>}
+                      </div>
+                      {current.summary ? (
+                        <p className="wp-step-summary">{current.summary}</p>
+                      ) : (
+                        <p className="wp-no-content">
+                          <em>No content summary available for this step.</em>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Navigation buttons */}
+                    <div className="wp-nav-buttons">
+                      <button
+                        className="wp-nav-btn wp-nav-secondary"
+                        onClick={handlePrev}
+                        disabled={activeStep === 0}
+                      >
+                        ← Previous
+                      </button>
+                      <button
+                        className="wp-nav-btn wp-nav-primary"
+                        onClick={handleNext}
+                      >
+                        {activeStep === stepData.length - 1
+                          ? "✅ Complete & Take Quiz →"
+                          : "Complete & Continue →"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
             )}
-
-            {/* Video embed */}
-            {current.video && (
-              <div className="wp-video-section">
-                <h2>🎬 Video Reference</h2>
-                <div className="wp-video-embed">
-                  {current.video.driveId ? (
-                    <iframe
-                      src={`https://drive.google.com/file/d/${current.video.driveId}/preview`}
-                      allow="autoplay"
-                      allowFullScreen
-                      title={current.video.videoTitle || current.title}
-                    />
-                  ) : current.video.youtubeId ? (
-                    <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${current.video.youtubeId}?rel=0&modestbranding=1${current.video.startSec ? `&start=${current.video.startSec}` : ""}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={current.video.videoTitle || current.title}
-                    />
-                  ) : null}
-                </div>
-                <div className="wp-video-meta">
-                  {current.video.videoTitle && (
-                    <span>{current.video.videoTitle}</span>
-                  )}
-                  {(current.video.startSec > 0 || current.video.endSec > 0) && (
-                    <span className="wp-timestamp">
-                      ⏱ {formatTime(current.video.startSec)} –{" "}
-                      {formatTime(current.video.endSec)}
-                    </span>
-                  )}
-                  {current.video.driveId && (
-                    <a
-                      href={`https://drive.google.com/file/d/${current.video.driveId}/view`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Open in Drive ↗
-                    </a>
-                  )}
-                  {current.video.youtubeId && (
-                    <a
-                      href={`https://www.youtube.com/watch?v=${current.video.youtubeId}${current.video.startSec ? `&t=${current.video.startSec}` : ""}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Watch on YouTube ↗
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Step card */}
-            <div className="wp-step-card">
-              <div className="wp-step-meta">
-                <span className={`wp-category-badge ${getCategoryClass(current.category)}`}>
-                  {current.category}
-                </span>
-                {current.source && <span>Source: {current.source}</span>}
-              </div>
-              {current.summary ? (
-                <p className="wp-step-summary">{current.summary}</p>
-              ) : (
-                <p className="wp-no-content">
-                  <em>No content summary available for this step.</em>
-                </p>
-              )}
-            </div>
-
-            {/* Navigation buttons */}
-            <div className="wp-nav-buttons">
-              <button
-                className="wp-nav-btn wp-nav-secondary"
-                onClick={handlePrev}
-                disabled={activeStep === 0}
-              >
-                ← Previous
-              </button>
-              <button
-                className="wp-nav-btn wp-nav-primary"
-                onClick={handleNext}
-              >
-                {activeStep === stepData.length - 1
-                  ? "✅ Complete & Take Quiz →"
-                  : "Complete & Continue →"}
-              </button>
-            </div>
           </div>
         )}
 
