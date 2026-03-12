@@ -67,8 +67,8 @@ function BuilderEditor({
 }) {
   const { workflowStage } = usePath();
 
-  // Left panel: always visible on desktop
-  const showLeftPanel = !isMobile;
+  // Left panel: visible on desktop during Build/Curate (grid has "library" area in those stages)
+  const showLeftPanel = !isMobile && (workflowStage === "build" || workflowStage === "curate");
   // Right panel: only mount during review/export (saves 68KB component on build stage)
   const showRightPanel = !isMobile && (workflowStage === "review" || workflowStage === "export");
 
