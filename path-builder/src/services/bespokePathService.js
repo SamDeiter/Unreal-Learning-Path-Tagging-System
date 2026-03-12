@@ -12,6 +12,7 @@
  */
 
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { adaptBespokePath } from "../schemas/pathAdapter";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
@@ -492,6 +493,9 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
 
       devLog(`[BespokePath] Hybrid pipeline complete: ${result.path.length} AI-generated steps`);
 
+      // ── Adapt to V2 schema ──
+      result.v2Path = adaptBespokePath(result);
+
       // ── Track metrics for hybrid fallback path ──
       trackPathSequenced({
         stepCount: result.path.length,
@@ -637,6 +641,9 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
     devLog(
       `[BespokePath] Pipeline complete: ${result.path.length} steps, ${result.bridges.length} bridges, gaps: ${blindSpots.length} (filled: ${blindSpots.length > 0 ? result.path.length - corpusSteps : 0})`
     );
+
+    // ── Adapt to V2 schema ──
+    result.v2Path = adaptBespokePath(result);
 
     return result;
   } catch (err) {

@@ -10,10 +10,12 @@
 import { useState, useRef, useEffect } from "react";
 import { submitStepFeedback } from "../../services/feedbackService";
 import { trackAIStepFeedback } from "../../services/analyticsService";
-import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
+// cleanVideoTitle import removed — title resolution centralized in resolveStepTitle.js
 import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
 import { CATEGORY_STYLES } from "./pathConstants";
 import { fixEpicUrl } from "../../utils/urlHelpers";
+import { resolveStepTitle } from "../../utils/resolveStepTitle";
+import { ensureQualitySummary } from "../../utils/summaryQualityGate";
 import DeepDiveSection from "./DeepDiveSection";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -39,12 +41,7 @@ function cleanText(raw) {
   return text;
 }
 
-/** Strip conference / brand suffixes from video titles — delegates to cleanVideoTitle
- *  for consistent formatting across the app. */
-function cleanTitle(raw) {
-  if (!raw) return raw;
-  return cleanVideoTitle(raw);
-}
+// cleanTitle removed — title resolution now centralized in resolveStepTitle.js
 
 function filterTakeaways(items) {
   if (!items || !items.length) return items;
@@ -221,13 +218,12 @@ export default function PathStep({
   if (!step) return null;
   const { segment, category } = step;
 
-  const displayTitle =
-    step.title ||
-    cleanTitle(decodeEntities(segment.title || segment.videoTitle || "Step Details")) ||
-    "Step Details";
+  const displayTitle = resolveStepTitle(step);
 
-  // Use narration script when available, otherwise fall back to raw segment text
-  const displayText = narrationScript || step.summary || cleanText(cleanTranscriptText(segment.text));
+  // Use narration script when available; otherwise route through quality gate
+  const rawFallback = step.summary || cleanText(cleanTranscriptText(segment.text));
+  const { text: safeSummary } = ensureQualitySummary(rawFallback, displayTitle, category);
+  const displayText = narrationScript || safeSummary;
 
   const filteredTakeaways = filterTakeaways(takeaways);
 

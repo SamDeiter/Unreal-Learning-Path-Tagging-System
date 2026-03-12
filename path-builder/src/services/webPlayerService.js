@@ -8,6 +8,8 @@
 
 import { cleanTranscriptText } from "../utils/cleanTranscriptText";
 import { getDisplayName } from "./topicNameService";
+import { ensureQualitySummary } from "../utils/summaryQualityGate";
+import { resolveStepTitle } from "../utils/resolveStepTitle";
 
 /**
  * Strip markdown artifacts from text, producing clean plain text.
@@ -41,9 +43,10 @@ function stripMarkdown(text) {
  */
 export function prepareStepData(steps, bridges = []) {
   return steps.map((step, idx) => {
-    const title = getDisplayName(step) || step.segment?.title || step.title || `Step ${idx + 1}`;
+    const title = getDisplayName(step) || resolveStepTitle(step, idx);
 
-    // Summary resolution — same priority chain as scormPackager
+    // Summary resolution — routed through quality gate to prevent
+    // raw transcript from reaching learners.
     const rawSummary =
       step.gemini_enriched?.one_sentence_summary ||
       step.summary ||
@@ -51,19 +54,12 @@ export function prepareStepData(steps, bridges = []) {
       step.segment?.text ||
       step.description ||
       "";
-    let summary = stripMarkdown(cleanTranscriptText(rawSummary));
-
-    // Fallback for empty summaries
-    if (!summary) {
-      const docSection = step.doc_meta?.section || "";
-      const sourceLabel =
-        step.source === "epic_docs"
-          ? "Official Unreal Engine documentation"
-          : "Reference material";
-      summary = docSection
-        ? `${sourceLabel} covering ${docSection.replace(/-/g, " ")}.`
-        : `${sourceLabel} for ${title}.`;
-    }
+    const cleaned = stripMarkdown(cleanTranscriptText(rawSummary));
+    const { text: summary } = ensureQualitySummary(
+      cleaned,
+      title,
+      step.category || "core"
+    );
 
     const category = step.category || "";
     const phase = step.phase || "";
