@@ -493,7 +493,7 @@ export function PathProvider({ children }) {
     return state.courses.filter((c) => !assignedCodes.has(c.code));
   }, [state.courses, state.modules]);
 
-  const value = {
+  const value = useMemo(() => ({
     courses: state.courses,
     modules: state.modules,
     ungroupedCourses,
@@ -528,7 +528,13 @@ export function PathProvider({ children }) {
     workflowStage: state.workflowStage,
     setWorkflowStage,
     WORKFLOW_STAGES,
-  };
+  /* eslint-disable react-hooks/exhaustive-deps -- action creators are stable (dispatch-based) */
+  }), [
+    state.courses, state.modules, state.learningIntent, state.workflowStage,
+    ungroupedCourses, pathStats, verificationStats,
+    activePersonaId, activePathId,
+  ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;
 }

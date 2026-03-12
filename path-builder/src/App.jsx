@@ -18,8 +18,7 @@ import "./App.css";
 // IS_E2E imported from services/e2eBypass.js (checks both env var and localStorage)
 
 // Import course data (video library is lazy-loaded for bundle optimization)
-import tagsData from "./data/tags.json";
-import edgesData from "./data/edges.json";
+import { precomputeTagsAndEdges } from "./utils/tagEdgePrecompute";
 
 // ── Lazy-loaded tab components (code-split per tab) ──────────────────
 const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
@@ -130,9 +129,10 @@ function BuilderEditor({
 }) {
   const { workflowStage } = usePath();
 
-  // Both panels always visible on desktop (no stage-gating)
+  // Left panel: always visible on desktop
   const showLeftPanel = !isMobile;
-  const showRightPanel = !isMobile;
+  // Right panel: only mount during review/export (saves 68KB component on build stage)
+  const showRightPanel = !isMobile && (workflowStage === "review" || workflowStage === "export");
 
   return (
     <div className="builder-editor-container">
@@ -184,6 +184,8 @@ function App() {
   // Analytics events are loaded inline in the effect below
 
   useEffect(() => {
+    // Only admins see analytics tabs — skip expensive fetch for regular users
+    if (!userIsAdmin) return;
     if (activeTab.startsWith("analytics-") && analyticsEvents.length === 0) {
       let cancelled = false;
       (async () => {
@@ -198,7 +200,7 @@ function App() {
         cancelled = true;
       };
     }
-  }, [activeTab, analyticsEvents.length, analyticsTimeRange]);
+  }, [activeTab, analyticsEvents.length, analyticsTimeRange, userIsAdmin]);
   const { isMobile } = useIsMobile();
 
   // Build ordered tab list (mobile reorders, admin tabs appended)
@@ -269,107 +271,9 @@ function App() {
     });
   }, [videoLibrary]);
 
-  // Process tag data - either use pre-defined or extract from courses
-  const { tags, edges } = useMemo(() => {
-    // Use the rich tag data from tags.json, deduplicated by tag_id
-    const rawTags = tagsData.tags || [];
-    const seenTagIds = new Set();
-    const processedTags = rawTags
-      .filter((tag) => {
-        if (seenTagIds.has(tag.tag_id)) return false;
-        seenTagIds.add(tag.tag_id);
-        return true;
-      })
-      .map((tag) => {
-        // Compute actual course count for this tag
-        const tagIdLower = tag.tag_id.toLowerCase();
-        const tagNameLower = tag.display_name.toLowerCase();
-        const courseCount = courses.filter((c) => {
-          const allTags = [
-            ...(c.canonical_tags || []),
-            ...(c.ai_tags || []),
-            ...(c.gemini_system_tags || []),
-            ...(c.transcript_tags || []),
-            ...(c.extracted_tags || []),
-          ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
-          return allTags.some((ct) => ct === tagIdLower || ct === tagNameLower);
-        }).length;
-
-        return {
-          id: tag.tag_id,
-          label: tag.display_name,
-          name: tag.display_name,
-          count: courseCount,
-          description: tag.description,
-          tag_id: tag.tag_id,
-          categoryPath: tag.category_path,
-          category: tag.category,
-          synonyms: tag.synonyms,
-        };
-      });
-
-    // Use edges from edges.json - handle both array and wrapped formats
-    const rawEdges = Array.isArray(edgesData) ? edgesData : edgesData.edges || [];
-    const curatedEdges = rawEdges.map((edge) => ({
-      sourceTagId: edge.sourceTagId || edge.source,
-      targetTagId: edge.targetTagId || edge.target,
-      weight: edge.weight || 5,
-      relation: edge.type || edge.relation || "related",
-    }));
-
-    // Compute co-occurrence edges from courses — tags that appear together
-    // This supplements the sparse curated edges with real course data
-    // Build display name → tag ID lookup (course tags often use display names)
-    const nameToId = new Map();
-    processedTags.forEach((t) => {
-      nameToId.set(t.id.toLowerCase(), t.id);
-      if (t.label) nameToId.set(t.label.toLowerCase(), t.id);
-    });
-    const coOccurrenceWeights = new Map();
-    courses.forEach((course) => {
-      const rawTags = [
-        ...(course.canonical_tags || []),
-        ...(course.ai_tags || []),
-        ...(course.gemini_system_tags || []),
-        ...(course.transcript_tags || []),
-        ...(course.extracted_tags || []),
-      ]
-        .map((t) => (typeof t === "string" ? t.toLowerCase().trim() : ""))
-        .filter(Boolean);
-      // Normalize to tag IDs using the lookup (matches both IDs and display names)
-      const resolvedIds = rawTags.map((t) => nameToId.get(t)).filter(Boolean);
-      // Dedupe within this course
-      const uniqueTags = [...new Set(resolvedIds)];
-      for (let i = 0; i < uniqueTags.length; i++) {
-        for (let j = i + 1; j < uniqueTags.length; j++) {
-          const [a, b] = [uniqueTags[i], uniqueTags[j]].sort();
-          const key = `${a}|${b}`;
-          coOccurrenceWeights.set(key, (coOccurrenceWeights.get(key) || 0) + 1);
-        }
-      }
-    });
-
-    // Merge: curated edges indexed by key, co-occurrence fills gaps
-    const edgeMap = new Map();
-    // Add curated edges first (they take priority)
-    curatedEdges.forEach((e) => {
-      const [a, b] = [e.sourceTagId, e.targetTagId].sort();
-      const key = `${a}|${b}`;
-      edgeMap.set(key, e);
-    });
-    // Add co-occurrence edges where no curated edge exists
-    coOccurrenceWeights.forEach((weight, key) => {
-      if (!edgeMap.has(key) && weight >= 25) {
-        // need 25+ co-occurrences for visible edge
-        const [sourceTagId, targetTagId] = key.split("|");
-        edgeMap.set(key, { sourceTagId, targetTagId, weight, relation: "co-occurrence" });
-      }
-    });
-
-    const processedEdges = [...edgeMap.values()];
-
-    return { tags: processedTags, edges: processedEdges };
-  }, [courses]);
+  // Process tag data — extracted to tagEdgePrecompute.js for performance
+  // Uses inverted index for O(n+m) instead of O(n×m) tag counting
+  const { tags, edges } = useMemo(() => precomputeTagsAndEdges(courses), [courses]);
 
   return (
     <AuthGate>
