@@ -2,53 +2,96 @@
  * routing.js — Query mode detection for the unified /query endpoint.
  *
  * Determines whether an incoming request is:
- *   - "onboarding" (persona-based First Hour flows)
+ *   - "goal-build"    (broad learner goals → roadmap of milestone micro-paths)
+ *   - "onboarding"    (persona-based First Hour flows)
  *   - "problem-first" (natural-language troubleshooting)
- *   - "unknown" (needs more info)
+ *   - "unknown"       (needs more info)
  *
  * Extracted from queryLearningPath.js for testability.
  */
 
+// ── Indicator lists ─────────────────────────────────────────────────
+
+const PROBLEM_INDICATORS = [
+  "error",
+  "crash",
+  "bug",
+  "broken",
+  "not working",
+  "fails",
+  "doesn't",
+  "won't",
+  "can't",
+  "issue",
+  "problem",
+  "help",
+  "fix",
+  "debug",
+  "null",
+  "none",
+  "access violation",
+  "flicker",
+  "artifact",
+  "won't compile",
+];
+
+const GOAL_BUILD_INDICATORS = [
+  "new to ue5",
+  "new to unreal",
+  "beginner",
+  "from scratch",
+  "first game",
+  "first project",
+  "want to make",
+  "want to build",
+  "want to create",
+  "want to learn",
+  "learn unreal",
+  "learn ue5",
+  "just starting",
+  "getting started",
+  "how do i start",
+  "where do i start",
+  "roadmap",
+  "learning path for",
+  "complete beginner",
+  "never used unreal",
+  "teach me",
+];
+
 /**
- * Detect whether this is an onboarding request or a problem-first request.
+ * Detect query mode from incoming request data.
  *
  * @param {object} data - Raw request data
- * @returns {"onboarding" | "problem-first" | "unknown"} Detected mode
+ * @returns {"goal-build" | "onboarding" | "problem-first" | "unknown"} Detected mode
  */
 function detectMode(data) {
   const { query, mode, persona, isOnboarding } = data;
 
+  // ── Explicit mode override ──
+  if (mode === "goal-build") return "goal-build";
   if (mode === "onboarding" || isOnboarding) return "onboarding";
   if (mode === "problem-first" || mode === "problem") return "problem-first";
 
-  if (persona && query) {
+  if (query) {
     const queryLower = query.toLowerCase();
-    const problemIndicators = [
-      "error",
-      "crash",
-      "bug",
-      "broken",
-      "not working",
-      "fails",
-      "doesn't",
-      "won't",
-      "can't",
-      "issue",
-      "problem",
-      "help",
-      "fix",
-      "debug",
-      "null",
-      "none",
-      "access violation",
-    ];
-    const isProblem = problemIndicators.some((ind) => queryLower.includes(ind));
-    return isProblem ? "problem-first" : "onboarding";
+
+    const isProblem = PROBLEM_INDICATORS.some((ind) => queryLower.includes(ind));
+    const isGoalBuild = GOAL_BUILD_INDICATORS.some((ind) => queryLower.includes(ind));
+
+    // Goal-build wins if goal indicators are present AND no problem indicators
+    if (isGoalBuild && !isProblem) return "goal-build";
+    if (isProblem) return "problem-first";
+
+    // Persona + query but no strong signals → onboarding
+    if (persona) return "onboarding";
+
+    // Fallback for long queries without indicators
+    if (query.length > 10) return "problem-first";
   }
 
-  if (query && query.length > 10) return "problem-first";
   if (persona) return "onboarding";
   return "unknown";
 }
 
-module.exports = { detectMode };
+module.exports = { detectMode, PROBLEM_INDICATORS, GOAL_BUILD_INDICATORS };

@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { generateBespokePath } from "../../services/bespokePathService";
+import { isGoalBuildQuery, generateRoadmap } from "../../services/roadmapService";
 import usePathQuiz from "../../hooks/usePathQuiz";
 import usePathStepActions from "../../hooks/usePathStepActions";
 import { findCachedPath, cachePath, addToHistory } from "../../services/pathCacheService";
@@ -21,6 +22,7 @@ import PathWizard from "./PathWizard";
 import PathDiff from "./PathDiff";
 import SpokeViewer from "../SpokeViewer/SpokeViewer";
 import PrereqChain from "./PrereqChain";
+import RoadmapView from "../RoadmapView/RoadmapView";
 import {
   generateGapFillStep,
   generateBespokeGapStep,
@@ -131,6 +133,9 @@ export default function BespokePath() {
   const [fillResults, setFillResults] = useState({});
   const [activeSpoke, setActiveSpoke] = useState(null);
   const [spokeLoading, setSpokeLoading] = useState(null);
+
+  // Goal-Build Roadmap state
+  const [roadmapResult, setRoadmapResult] = useState(null);
 
   const isFollowUp = useRef(false);
 
@@ -299,8 +304,34 @@ export default function BespokePath() {
     isFollowUp.current = true;
     setIsLoading(true);
     setPathResult(null);
+    setRoadmapResult(null);
     setCurrentStep(-1);
     resetQuiz();
+
+    // ── Goal-Build branch: detect broad goals and route to roadmap ──
+    if (isGoalBuildQuery(sanitized)) {
+      setPipelineStage("Planning your learning roadmap...");
+      try {
+        const roadmap = await generateRoadmap(sanitized, {
+          onMilestoneReady: (_idx, _milestone, partial) => {
+            setRoadmapResult({ ...partial });
+          },
+        });
+        setRoadmapResult(roadmap);
+        trackEvent(EVENTS.LEARNING_PATH_GENERATED, {
+          query: sanitized,
+          mode: "goal-build",
+          milestone_count: roadmap.roadmap?.length || 0,
+        });
+      } catch (err) {
+        setPathResult({ error: err.message || "Failed to generate roadmap. Please try again." });
+      }
+      setIsLoading(false);
+      setPipelineStage("");
+      return;
+    }
+
+    // ── Problem-first branch (existing flow) ──
 
     // 1. Check cache first (zero cost)
     setPipelineStage("Checking cache...");
@@ -802,6 +833,14 @@ export default function BespokePath() {
             </main>
           </div>
         </div>
+      )}
+
+      {/* ── Goal-Build Roadmap View ── */}
+      {roadmapResult && !isLoading && (
+        <RoadmapView
+          roadmapResult={roadmapResult}
+          onClose={() => setRoadmapResult(null)}
+        />
       )}
 
       {/* Spoke Viewer Modal */}

@@ -8,6 +8,7 @@ const { requireAppCheck } = require("../utils/appCheckMiddleware");
 const { detectMode } = require("./routing");
 const { handleProblemFirst } = require("./handleProblemFirst");
 const { handleOnboarding } = require("./handleOnboarding");
+const { handleGoalBuild } = require("./handleGoalBuild");
 
 // ============ Main Export ============
 
@@ -50,7 +51,9 @@ exports.queryLearningPath = functions
       const mode = detectMode(data);
       logger.info(JSON.stringify({ severity: "INFO", message: "query_start", mode, user: userId }));
 
-      if (mode === "problem-first") {
+      if (mode === "goal-build") {
+        return await handleGoalBuild(data, context, apiKey);
+      } else if (mode === "problem-first") {
         return await handleProblemFirst(data, context, apiKey);
       } else if (mode === "onboarding") {
         return await handleOnboarding(data, context, apiKey);
