@@ -49,18 +49,7 @@ function getContentType(course) {
   return { emoji: "📄", label: "Course", cls: "ct-default" };
 }
 
-// Clean up display titles — strip file extensions, underscores, numbering prefixes, camelCase
-function cleanTitle(title) {
-  if (!title) return "";
-  return title
-    .replace(/\.(mp4|mov|avi|mkv|webm|mp3|wav|pdf|docx?)$/i, "") // file extensions
-    .replace(/^\d{1,3}[-_.\s]+/g, "")  // leading numbers like "01_", "001-", "1. "
-    .replace(/[_]/g, " ")               // underscores → spaces
-    .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase → "camel Case"
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2") // ABCDef → ABC Def
-    .replace(/\s{2,}/g, " ")            // collapse multiple spaces
-    .trim();
-}
+
 
 // Collapsible tag legend explaining Bloom levels and content types
 function TagLegend() {
