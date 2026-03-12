@@ -13,14 +13,12 @@ import { IS_E2E } from "../services/e2eBypass";
 
 export function useAuth() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userIsAdmin, setUserIsAdmin] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [userIsAdmin, setUserIsAdmin] = useState(IS_E2E);
+  // In E2E mode, skip the auth flow entirely — start as "loaded"
+  const [authLoading, setAuthLoading] = useState(!IS_E2E);
 
   useEffect(() => {
-    if (IS_E2E) {
-      setAuthLoading(false);
-      return;
-    }
+    if (IS_E2E) return;
 
     const unsub = onAuthChange(async (u) => {
       setCurrentUser(u);
