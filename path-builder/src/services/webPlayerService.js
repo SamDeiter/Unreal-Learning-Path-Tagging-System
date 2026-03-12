@@ -65,8 +65,10 @@ export function prepareStepData(steps, bridges = []) {
         : `${sourceLabel} for ${title}.`;
     }
 
-    const category = step.category || "core";
-    const source = step.segment?.source || step.segment?.type || "";
+    const category = step.category || "";
+    const phase = step.phase || "";
+    const tier = step.tier || step.segment?.tier || "";
+    const source = step.segment?.source || step.segment?.type || step.source || "";
     const bridge = bridges[idx] || null;
     const bridgeText = bridge?.text || bridge?.narration || "";
 
@@ -77,6 +79,8 @@ export function prepareStepData(steps, bridges = []) {
       title,
       summary,
       category,
+      phase,
+      tier,
       source,
       bridgeText,
       video,

@@ -9,6 +9,17 @@
  * Run all checks and return results array.
  * Each check: { id, label, passed, detail, fix?, group }
  */
+/** Normalize step category: also accept doc-phase aliases. */
+function getStepCategory(step) {
+  if (step.category) return step.category;
+  // Doc/YT steps use 'phase' instead of 'category'
+  const p = step.phase;
+  if (p === "prerequisite") return "foundation";
+  if (p === "core") return "fix";
+  if (p === "supplemental") return "transfer";
+  return "";
+}
+
 export function evaluateChecks(pathResult, gaps) {
   const path = pathResult?.path || [];
   const bridges = pathResult?.bridges || [];
@@ -18,9 +29,9 @@ export function evaluateChecks(pathResult, gaps) {
   checks.push({
     id: "has-prerequisites",
     label: "Has prerequisite steps",
-    passed: path.some((s) => s.category === "foundation"),
-    detail: `${path.filter((s) => s.category === "foundation").length} foundation step(s)`,
-    fix: !path.some((s) => s.category === "foundation")
+    passed: path.some((s) => getStepCategory(s) === "foundation"),
+    detail: `${path.filter((s) => getStepCategory(s) === "foundation").length} foundation step(s)`,
+    fix: !path.some((s) => getStepCategory(s) === "foundation")
       ? "Go to the Gaps tab and add a Beginner-level foundation step"
       : null,
     group: "content",
@@ -29,9 +40,9 @@ export function evaluateChecks(pathResult, gaps) {
   checks.push({
     id: "has-core",
     label: "Has core solution steps",
-    passed: path.some((s) => s.category === "fix"),
-    detail: `${path.filter((s) => s.category === "fix").length} fix step(s)`,
-    fix: !path.some((s) => s.category === "fix")
+    passed: path.some((s) => getStepCategory(s) === "fix"),
+    detail: `${path.filter((s) => getStepCategory(s) === "fix").length} fix step(s)`,
+    fix: !path.some((s) => getStepCategory(s) === "fix")
       ? "Go to the Gaps tab and use Fill This Gap to add a core solution step"
       : null,
     group: "content",
@@ -40,9 +51,9 @@ export function evaluateChecks(pathResult, gaps) {
   checks.push({
     id: "has-practice",
     label: "Has practice / transfer steps",
-    passed: path.some((s) => s.category === "transfer"),
-    detail: `${path.filter((s) => s.category === "transfer").length} transfer step(s)`,
-    fix: !path.some((s) => s.category === "transfer")
+    passed: path.some((s) => getStepCategory(s) === "transfer"),
+    detail: `${path.filter((s) => getStepCategory(s) === "transfer").length} transfer step(s)`,
+    fix: !path.some((s) => getStepCategory(s) === "transfer")
       ? "Go to the Gaps tab and add a hands-on exercise or project step"
       : null,
     group: "content",

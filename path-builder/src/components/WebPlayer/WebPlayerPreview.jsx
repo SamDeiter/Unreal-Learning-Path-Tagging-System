@@ -24,30 +24,48 @@ const SECTION_CONFIG = [
   {
     id: "prerequisites",
     label: "📘 Prerequisites",
-    match: (cat) => {
-      const c = (cat || "").toLowerCase();
-      return c.includes("foundation") || c.includes("prerequisite") || c.includes("diagnosis");
+    match: (step) => {
+      const cat = (step.category || "").toLowerCase();
+      const phase = (step.phase || "").toLowerCase();
+      const tier = (step.tier || "").toLowerCase();
+      return (
+        cat.includes("foundation") || cat.includes("prerequisite") || cat.includes("diagnosis") ||
+        phase === "prerequisite" ||
+        tier === "beginner"
+      );
     },
   },
   {
     id: "core",
     label: "📗 Core Lessons",
-    match: (cat) => {
-      const c = (cat || "").toLowerCase();
-      return c.includes("core") || c.includes("fix") || !c; // default bucket
+    match: (step) => {
+      const cat = (step.category || "").toLowerCase();
+      const phase = (step.phase || "").toLowerCase();
+      const tier = (step.tier || "").toLowerCase();
+      return (
+        cat.includes("core") || cat.includes("fix") ||
+        phase === "core" ||
+        tier === "intermediate"
+      );
     },
   },
   {
     id: "practice",
-    label: "📙 Practice",
-    match: (cat) => {
-      const c = (cat || "").toLowerCase();
-      return c.includes("practice") || c.includes("transfer");
+    label: "📙 Practice & Reference",
+    match: (step) => {
+      const cat = (step.category || "").toLowerCase();
+      const phase = (step.phase || "").toLowerCase();
+      const tier = (step.tier || "").toLowerCase();
+      return (
+        cat.includes("practice") || cat.includes("transfer") ||
+        phase === "supplemental" ||
+        tier === "advanced"
+      );
     },
   },
 ];
 
-/** Group steps into sections by category. */
+/** Group steps into sections by category/phase/tier. */
 function groupStepsBySection(steps) {
   const groups = SECTION_CONFIG.map((cfg) => ({
     ...cfg,
@@ -55,7 +73,7 @@ function groupStepsBySection(steps) {
   }));
 
   steps.forEach((step, idx) => {
-    const placed = groups.find((g) => g.match(step.category));
+    const placed = groups.find((g) => g.match(step));
     // fallback to core
     const target = placed || groups[1];
     target.steps.push({ ...step, globalIndex: idx });

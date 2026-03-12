@@ -92,8 +92,6 @@ function extractFocus(cleanedTitle) {
   return cleanedTitle;
 }
 
-// ── Main export ────────────────────────────────────────────────────
-
 /**
  * Generate a descriptive display name for a course or step.
  *
@@ -102,6 +100,11 @@ function extractFocus(cleanedTitle) {
  */
 export function getDisplayName(item) {
   if (!item) return "Untitled Step";
+
+  // ── Doc-sourced steps: use doc-specific fields ──
+  if (isDocItem(item)) {
+    return getDocDisplayName(item);
+  }
 
   // ── 1. Determine the topic/category prefix ──
   let prefix = "";
@@ -115,10 +118,7 @@ export function getDisplayName(item) {
     const firstTag = item.canonical_tags[0];
     prefix = CANONICAL_LABELS[firstTag] || formatCanonicalTag(firstTag);
   }
-  // Priority C: segment category for bespoke path steps
-  else if (item.segment?.source === "epic_docs") {
-    prefix = "Documentation";
-  }
+  // Priority C: AI-generated content
   else if (item.source === "ai_generated" || item.code?.startsWith?.("ai-")) {
     prefix = "AI Guide";
   }
@@ -148,6 +148,93 @@ export function getDisplayName(item) {
 
   // Absolute fallback
   return item.code || "Untitled Step";
+}
+
+// ── Doc-specific naming ────────────────────────────────────────────
+
+/** Check if item is from the docs pipeline. */
+function isDocItem(item) {
+  return (
+    item.source === "epic_docs" ||
+    item.segment?.source === "epic_docs" ||
+    item.type === "doc" ||
+    item.code?.startsWith?.("doc_") ||
+    item.code?.startsWith?.("doc-")
+  );
+}
+
+/**
+ * Generate a unique name for documentation items.
+ * Uses: label > key > section + title to differentiate segments.
+ */
+function getDocDisplayName(item) {
+  // Try doc-specific fields first (from docsSearchService / coverageAnalyzer)
+  const label = item.label || "";
+  const key = item.key || "";
+  const section = item.section || item.segment?.section || "";
+  const subsystem = item.subsystem || item.segment?.subsystem || "";
+  const rawTitle = item.segment?.title || item.title || "";
+  const description = item.description || item.segment?.description || "";
+
+  // Best case: label is the doc page title (e.g., "Lumen Global Illumination and Reflections")
+  // + section differentiates within it (e.g., "Performance Settings")
+  if (label && section) {
+    // Use section as the differentiator within the same doc
+    const cleanSection = titleCase(section.replace(/[-_]/g, " "));
+    return `${cleanLabel(label)} — ${cleanSection}`.substring(0, 55);
+  }
+
+  // If we have label only, try to enrich it with subsystem
+  if (label) {
+    if (subsystem && !label.toLowerCase().includes(subsystem.toLowerCase())) {
+      return `${titleCase(subsystem)} - ${cleanLabel(label)}`.substring(0, 55);
+    }
+    return cleanLabel(label).substring(0, 55);
+  }
+
+  // If we have key (e.g., "lumen-global-illumination"), format it
+  if (key) {
+    const formatted = titleCase(key.replace(/[-_]/g, " "));
+    if (section) {
+      return `${formatted} — ${titleCase(section.replace(/[-_]/g, " "))}`.substring(0, 55);
+    }
+    return formatted.substring(0, 55);
+  }
+
+  // Fallback: use cleaned title + extract first unique phrase from description
+  const cleaned = stripTitleNoise(rawTitle);
+  if (cleaned && description) {
+    const descFocus = extractDescFocus(description, cleaned);
+    if (descFocus) {
+      return `${titleCase(cleaned)} — ${titleCase(descFocus)}`.substring(0, 55);
+    }
+  }
+
+  if (cleaned) {
+    return titleCase(cleaned).substring(0, 55);
+  }
+
+  return "Documentation Step";
+}
+
+/** Clean a doc label (remove "UE5" prefix noise, trim). */
+function cleanLabel(label) {
+  return label
+    .replace(/^(Unreal Engine \d+(\.\d+)?|UE\d+)\s*[-:–]\s*/i, "")
+    .trim();
+}
+
+/** Extract a short differentiating phrase from description text. */
+function extractDescFocus(description, titleUsed) {
+  if (!description) return "";
+  // Take first sentence or first 40 chars
+  const firstSentence = description.split(/[.!?]/)[0]?.trim() || "";
+  if (!firstSentence) return "";
+  // Skip if it just repeats the title
+  if (firstSentence.toLowerCase().includes(titleUsed.toLowerCase())) return "";
+  // Take first 3-4 meaningful words
+  const words = firstSentence.split(/\s+/).slice(0, 4).join(" ");
+  return words.length > 5 ? words : "";
 }
 
 /**
