@@ -6,27 +6,28 @@
  *
  * Schema (cached_diagnoses collection):
  *   {
- *     embedding: number[],    // 768-dim query embedding
- *     query: string,          // original query text
- *     result: object,         // full diagnosis response payload
- *     hitCount: number,       // how many times this cache entry has been used
+ *     embedding: FieldValue.vector(),  // 768-dim query embedding (Firestore Vector)
+ *     query: string,                   // original query text
+ *     result: object,                  // full diagnosis response payload
+ *     hitCount: number,                // how many times this cache entry has been used
  *     createdAt: Timestamp,
  *     lastHitAt: Timestamp
  *   }
  *
- * Strategy: On each new query, embed it, then scan all cached embeddings
- * for cosine similarity > threshold. If found, return cached result.
- * Post-v1 optimization: use Firestore Vector Search or an in-memory index.
+ * Strategy: Uses Firestore findNearest() for native vector KNN search.
+ * Falls back to linear scan if vector index is not provisioned.
  */
 
 const admin = require("firebase-admin");
+const { FieldValue } = require("firebase-admin/firestore");
 
 const COLLECTION = "cached_diagnoses";
 const DEFAULT_THRESHOLD = 0.92;
-const MAX_CACHE_SCAN = 200; // Max docs to scan (controls read cost)
+const MAX_CACHE_SCAN = 200; // Fallback linear scan limit
 
 /**
  * Compute cosine similarity between two vectors.
+ * Kept for fallback path and unit tests.
  * @param {number[]} a
  * @param {number[]} b
  * @returns {number} Similarity score between -1 and 1
@@ -51,7 +52,8 @@ function cosineSimilarity(a, b) {
 }
 
 /**
- * Find a cached diagnosis that is semantically similar to the query embedding.
+ * Find a cached diagnosis using Firestore native vector KNN (findNearest).
+ * Falls back to linear scan if the vector index is not available.
  *
  * @param {number[]} queryEmbedding - 768-dim embedding of the user's query
  * @param {number} threshold - Minimum cosine similarity to count as a hit (default 0.92)
@@ -62,8 +64,68 @@ async function findCachedDiagnosis(queryEmbedding, threshold = DEFAULT_THRESHOLD
     return { hit: false };
   }
 
+  const db = admin.firestore();
+
+  // --- Primary path: Firestore vector KNN ---
   try {
-    const db = admin.firestore();
+    const distanceThreshold = 1 - threshold;
+    const snapshot = await db
+      .collection(COLLECTION)
+      .findNearest({
+        vectorField: "embedding",
+        queryVector: FieldValue.vector(queryEmbedding),
+        limit: 1,
+        distanceMeasure: "COSINE",
+        distanceResultField: "vector_distance",
+        distanceThreshold,
+      })
+      .get();
+
+    if (snapshot.empty) {
+      return { hit: false };
+    }
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+    const rawDist = data.vector_distance;
+    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist : 0;
+
+    // Remove transient field before returning
+    delete data.vector_distance;
+
+    // Increment hit count (fire-and-forget)
+    db.collection(COLLECTION)
+      .doc(doc.id)
+      .update({
+        hitCount: admin.firestore.FieldValue.increment(1),
+        lastHitAt: admin.firestore.FieldValue.serverTimestamp(),
+      })
+      .catch(() => {}); // Non-blocking
+
+    console.log(
+      JSON.stringify({
+        severity: "INFO",
+        message: "diagnosis_cache_hit",
+        method: "findNearest",
+        similarity: similarity.toFixed(4),
+        docId: doc.id,
+      })
+    );
+
+    return { hit: true, result: data.result, docId: doc.id, similarity };
+  } catch (knnErr) {
+    // Vector index may not be provisioned — fall back to linear scan
+    console.warn(
+      JSON.stringify({
+        severity: "WARNING",
+        message: "diagnosis_cache_knn_fallback",
+        error: knnErr.message,
+      })
+    );
+  }
+
+  // --- Fallback: linear scan (original behavior) ---
+  try {
     const snapshot = await db
       .collection(COLLECTION)
       .orderBy("lastHitAt", "desc")
@@ -89,19 +151,19 @@ async function findCachedDiagnosis(queryEmbedding, threshold = DEFAULT_THRESHOLD
     }
 
     if (bestMatch && bestSimilarity >= threshold) {
-      // Increment hit count (fire-and-forget)
       db.collection(COLLECTION)
         .doc(bestMatch.docId)
         .update({
           hitCount: admin.firestore.FieldValue.increment(1),
           lastHitAt: admin.firestore.FieldValue.serverTimestamp(),
         })
-        .catch(() => {}); // Non-blocking
+        .catch(() => {});
 
       console.log(
         JSON.stringify({
           severity: "INFO",
           message: "diagnosis_cache_hit",
+          method: "linear_scan",
           similarity: bestSimilarity.toFixed(4),
           docId: bestMatch.docId,
         })

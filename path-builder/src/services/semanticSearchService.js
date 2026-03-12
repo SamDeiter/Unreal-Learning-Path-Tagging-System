@@ -78,8 +78,18 @@ export async function getEmbeddingDimension() {
 
 /**
  * Get the total number of embedded courses.
- * @returns {number}
+ * Dynamically derived from the search index course_words keys.
+ * @returns {Promise<number>}
  */
+let _embeddedCourseCount = null;
 export async function getEmbeddedCourseCount() {
-  return 61; // Known count from Firestore upload
+  if (_embeddedCourseCount !== null) return _embeddedCourseCount;
+  try {
+    const { fetchJSON } = await import("./dataLoader");
+    const searchIndex = await fetchJSON("search_index");
+    _embeddedCourseCount = Object.keys(searchIndex?.course_words || {}).length || 61;
+  } catch {
+    _embeddedCourseCount = 61; // fallback
+  }
+  return _embeddedCourseCount;
 }

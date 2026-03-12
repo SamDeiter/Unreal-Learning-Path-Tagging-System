@@ -1,54 +1,77 @@
 /**
  * Utility: Rate limiting helper function
  * Extracted from index.js during modularization
+ *
+ * Optimized: single Firestore query checks both per-type and global limits.
  */
 
 const admin = require("firebase-admin");
 
+// Rate limits per function type (per user, per minute)
+// A single adaptive path generation fires 6+ Cloud Function calls
+// (classifySegments x2-3, generateAutoQuiz x1, generateAutoOrdering x1)
+// so per-function limits must be generous enough to avoid blocking a
+// single user flow.
+const RATE_LIMITS = {
+  generation: 15,
+  classifySegments: 30,
+  autoQuiz: 20,
+  autoOrdering: 20,
+  objectives: 15,
+  intentExtraction: 15,
+  audioBriefing: 15,
+  courseMetadata: 15,
+  diagnosis: 15,
+  learningPath: 15,
+  query: 15,
+  validation: 15,
+  critique: 20,
+};
+
+const GLOBAL_LIMIT = 60; // max 60 total AI calls per user per minute
+
 /**
- * Rate limiting helper
- * Checks if user has exceeded rate limits
+ * Consolidated rate limit check — single Firestore query for both per-type and global limits.
+ *
+ * Fetches all recent API calls for the user (last 60s), then checks:
+ *   1. Per-type limit (filtered in-memory by `type`)
+ *   2. Global limit (total count)
+ *
+ * @param {string} userId
+ * @param {string} type - Function type (e.g., "generation", "classifySegments")
+ * @returns {Promise<{allowed: boolean, message?: string}>}
  */
-async function checkRateLimit(userId, type = "generation") {
+async function checkRateLimits(userId, type = "generation") {
   const db = admin.firestore();
-  const now = Date.now();
-  const oneMinuteAgo = now - 60 * 1000;
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
 
   try {
-    // Get user's recent API calls for THIS specific function type
     const recentCalls = await db
       .collection("apiUsage")
       .where("userId", "==", userId)
-      .where("type", "==", type)
-      .where("timestamp", ">", new Date(oneMinuteAgo))
+      .where("timestamp", ">", oneMinuteAgo)
       .get();
 
-    const callCount = recentCalls.size;
+    const totalCount = recentCalls.size;
 
-    // Rate limits per function type (per user, per minute)
-    // A single adaptive path generation fires 6+ Cloud Function calls
-    // (classifySegments x2-3, generateAutoQuiz x1, generateAutoOrdering x1)
-    // so per-function limits must be generous enough to avoid blocking a
-    // single user flow.
-    const RATE_LIMITS = {
-      generation: 15, // generic generation (embedQuery, vectorSearch)
-      classifySegments: 30, // sequencing + hybrid fallback can fire 3-4x per path
-      autoQuiz: 20, // quiz gen per step
-      autoOrdering: 20, // category ordering
-      objectives: 15, // decomposeLearningObjectives
-      intentExtraction: 15, // extractIntent
-      audioBriefing: 15, // generateAudioBriefing
-      courseMetadata: 15, // generateCourseMetadata
-      diagnosis: 15, // generateDiagnosis
-      learningPath: 15, // generateLearningPath
-      query: 15, // queryLearningPath
-      validation: 15, // validateCurriculum
-      critique: 20, // critique/feedback calls
-    };
+    // Global limit check
+    if (totalCount >= GLOBAL_LIMIT) {
+      return {
+        allowed: false,
+        message: `Global rate limit exceeded (${GLOBAL_LIMIT} calls/minute). Please wait.`,
+      };
+    }
 
+    // Per-type limit check (filter in-memory)
     const limit = RATE_LIMITS[type] || 15;
+    let typeCount = 0;
+    for (const doc of recentCalls.docs) {
+      if (doc.data().type === type) {
+        typeCount++;
+      }
+    }
 
-    if (callCount >= limit) {
+    if (typeCount >= limit) {
       return {
         allowed: false,
         message: `You can make ${limit} ${type} requests per minute. Please wait.`,
@@ -64,33 +87,19 @@ async function checkRateLimit(userId, type = "generation") {
 }
 
 /**
- * Global aggregate rate limit — caps TOTAL calls per user across all functions.
- * Prevents distributed abuse (e.g., spamming 10 different endpoints simultaneously).
+ * Legacy per-type rate limit check.
+ * @deprecated Use checkRateLimits() instead.
  */
-async function checkGlobalRateLimit(userId) {
-  const db = admin.firestore();
-  const now = Date.now();
-  const oneMinuteAgo = now - 60 * 1000;
-  const GLOBAL_LIMIT = 60; // max 60 total AI calls per user per minute
-
-  try {
-    const recentCalls = await db
-      .collection("apiUsage")
-      .where("userId", "==", userId)
-      .where("timestamp", ">", new Date(oneMinuteAgo))
-      .get();
-
-    if (recentCalls.size >= GLOBAL_LIMIT) {
-      return {
-        allowed: false,
-        message: `Global rate limit exceeded (${GLOBAL_LIMIT} calls/minute). Please wait.`,
-      };
-    }
-    return { allowed: true };
-  } catch (error) {
-    console.log("Global rate limit check skipped:", error.message);
-    return { allowed: true };
-  }
+async function checkRateLimit(userId, type = "generation") {
+  return checkRateLimits(userId, type);
 }
 
-module.exports = { checkRateLimit, checkGlobalRateLimit };
+/**
+ * Legacy global rate limit check.
+ * @deprecated Use checkRateLimits() instead.
+ */
+async function checkGlobalRateLimit(userId) {
+  return checkRateLimits(userId, "generation");
+}
+
+module.exports = { checkRateLimit, checkGlobalRateLimit, checkRateLimits };

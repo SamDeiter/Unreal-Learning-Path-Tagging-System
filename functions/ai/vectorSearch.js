@@ -14,7 +14,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
-const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { checkRateLimits } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
@@ -26,13 +26,9 @@ const db = admin.firestore();
  */
 async function enforceRateLimit(request) {
   const userId = request.auth?.uid || "anonymous";
-  const rateLimitCheck = await checkRateLimit(userId, "generation");
+  const rateLimitCheck = await checkRateLimits(userId, "generation");
   if (!rateLimitCheck.allowed) {
-    throw new HttpsError("resource-exhausted", `Rate limit exceeded. ${rateLimitCheck.message}`);
-  }
-  const globalCheck = await checkGlobalRateLimit(userId);
-  if (!globalCheck.allowed) {
-    throw new HttpsError("resource-exhausted", `${globalCheck.message}`);
+    throw new HttpsError("resource-exhausted", rateLimitCheck.message);
   }
   return userId;
 }

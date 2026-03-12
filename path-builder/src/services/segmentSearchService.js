@@ -40,6 +40,30 @@ import { SEARCH_STOPWORDS } from "../domain/constants";
  * @param {Array} courses - Optional array of course objects to search within
  * @returns {Array} Matched segments with timestamps
  */
+// Cached prefix index for fast prefix/stem matching
+let _prefixIndex = null;
+
+/**
+ * Build a prefix index from courseWords for O(1) prefix lookups.
+ * Maps 4-char prefixes → [{courseCode, word, count}].
+ * @param {Object} courseWords - { courseCode: { word: count } }
+ */
+function buildPrefixIndex(courseWords) {
+  const index = new Map();
+  for (const [courseCode, wordFreq] of Object.entries(courseWords)) {
+    for (const [word, count] of Object.entries(wordFreq)) {
+      if (word.length >= 4) {
+        const prefix = word.slice(0, 4);
+        if (!index.has(prefix)) {
+          index.set(prefix, []);
+        }
+        index.get(prefix).push({ courseCode, word, count });
+      }
+    }
+  }
+  return index;
+}
+
 export async function searchSegments(query, courses = []) {
   if (!query || query.length < 3) return [];
 
@@ -50,42 +74,57 @@ export async function searchSegments(query, courses = []) {
   if (keywords.length === 0) return [];
 
   const searchIndex = await getSearchIndex();
-  const results = [];
   const courseWords = searchIndex?.course_words || {};
 
-  // Score each course by keyword matches
-  for (const [courseCode, wordFreq] of Object.entries(courseWords)) {
-    let score = 0;
-    const matchedKeywords = [];
+  // Build prefix index on first use (cached for subsequent calls)
+  if (!_prefixIndex) {
+    _prefixIndex = buildPrefixIndex(courseWords);
+  }
 
-    for (const keyword of keywords) {
-      // Check exact match
+  // Score each course by keyword matches
+  const courseScores = new Map(); // courseCode → { score, matchedKeywords }
+
+  for (const keyword of keywords) {
+    // Exact matches across all courses
+    for (const [courseCode, wordFreq] of Object.entries(courseWords)) {
       if (wordFreq[keyword]) {
-        score += wordFreq[keyword] * 10;
-        matchedKeywords.push(keyword);
-      }
-      // Check prefix/stem matches (must share 4+ char prefix)
-      if (keyword.length >= 4) {
-        for (const [word, count] of Object.entries(wordFreq)) {
-          if (
-            word !== keyword &&
-            word.length >= 4 &&
-            (word.startsWith(keyword) || keyword.startsWith(word))
-          ) {
-            score += count * 3;
-            if (!matchedKeywords.includes(word)) {
-              matchedKeywords.push(word);
-            }
-          }
+        if (!courseScores.has(courseCode)) {
+          courseScores.set(courseCode, { score: 0, matchedKeywords: [] });
+        }
+        const entry = courseScores.get(courseCode);
+        entry.score += wordFreq[keyword] * 10;
+        if (!entry.matchedKeywords.includes(keyword)) {
+          entry.matchedKeywords.push(keyword);
         }
       }
     }
 
-    if (score >= 30 && matchedKeywords.length > 0) {
-      // Find the course object if provided
-      const course = courses.find((c) => c.code === courseCode);
+    // Prefix matches via index — O(1) lookup instead of O(m) scan
+    if (keyword.length >= 4) {
+      const prefix = keyword.slice(0, 4);
+      const matches = _prefixIndex.get(prefix) || [];
+      for (const { courseCode, word, count } of matches) {
+        if (
+          word !== keyword &&
+          (word.startsWith(keyword) || keyword.startsWith(word))
+        ) {
+          if (!courseScores.has(courseCode)) {
+            courseScores.set(courseCode, { score: 0, matchedKeywords: [] });
+          }
+          const entry = courseScores.get(courseCode);
+          entry.score += count * 3;
+          if (!entry.matchedKeywords.includes(word)) {
+            entry.matchedKeywords.push(word);
+          }
+        }
+      }
+    }
+  }
 
-      // Find real segments with timestamps
+  const results = [];
+  for (const [courseCode, { score, matchedKeywords }] of courseScores) {
+    if (score >= 30 && matchedKeywords.length > 0) {
+      const course = courses.find((c) => c.code === courseCode);
       const topSegments = await findTopSegments(courseCode, matchedKeywords);
 
       results.push({
@@ -93,7 +132,6 @@ export async function searchSegments(query, courses = []) {
         courseTitle: course?.title || courseCode,
         score,
         matchedKeywords,
-        // Real segment data from VTT transcripts
         topSegments,
         estimatedSegment: topSegments.length > 0 ? topSegments[0] : null,
         videoCount: course?.video_count || 0,

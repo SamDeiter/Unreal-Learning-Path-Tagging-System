@@ -6,7 +6,7 @@
  * - addCourse/removeCourse/reorderCourses: Path manipulation
  * - pathStats: Computed stats (total time, level range, etc.)
  */
-import { createContext, useContext, useReducer, useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useReducer, useMemo, useCallback, useState, useEffect } from "react";
 import { getCourseDurationMinutes } from "../utils/courseDuration";
 
 const PathContext = createContext(null);
@@ -292,14 +292,14 @@ export function PathProvider({ children }) {
     () => localStorage.getItem("ue5_persona_id") || null
   );
 
-  const setActivePersonaId = (id) => {
+  const setActivePersonaId = useCallback((id) => {
     setActivePersonaIdState(id);
     if (id) {
       localStorage.setItem("ue5_persona_id", id);
     } else {
       localStorage.removeItem("ue5_persona_id");
     }
-  };
+  }, []);
 
   // Computed path statistics
   const pathStats = useMemo(() => {
@@ -366,55 +366,55 @@ export function PathProvider({ children }) {
     return { verified, rejected, unverified, total: courses.length };
   }, [state.courses]);
 
-  // Action creators
-  const addCourse = (course) => {
+  // Action creators — wrapped in useCallback for referential stability
+  const addCourse = useCallback((course) => {
     dispatch({ type: ACTIONS.ADD_COURSE, payload: course });
-  };
+  }, [dispatch]);
 
-  const removeCourse = (courseCode) => {
+  const removeCourse = useCallback((courseCode) => {
     dispatch({ type: ACTIONS.REMOVE_COURSE, payload: courseCode });
-  };
+  }, [dispatch]);
 
-  const reorderCourses = (newOrder) => {
+  const reorderCourses = useCallback((newOrder) => {
     dispatch({ type: ACTIONS.REORDER_COURSES, payload: newOrder });
-  };
+  }, [dispatch]);
 
-  const updateCourseMeta = (code, meta) => {
+  const updateCourseMeta = useCallback((code, meta) => {
     dispatch({ type: ACTIONS.UPDATE_COURSE_META, payload: { code, meta } });
-  };
+  }, [dispatch]);
 
-  const setLearningIntent = (intent) => {
+  const setLearningIntent = useCallback((intent) => {
     dispatch({ type: ACTIONS.SET_LEARNING_INTENT, payload: intent });
-  };
+  }, [dispatch]);
 
-  const clearPath = () => {
+  const clearPath = useCallback(() => {
     dispatch({ type: ACTIONS.CLEAR_PATH });
     dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: "build" });
     setActivePathId(null);
     localStorage.removeItem("ue5_active_path_id");
     localStorage.removeItem(DRAFT_KEY);
     localStorage.removeItem("ue5_wizard_intent");
-  };
+  }, [dispatch, setActivePathId]);
 
-  const loadPath = (coursesOrPayload) => {
+  const loadPath = useCallback((coursesOrPayload) => {
     // Accept either a plain array (legacy) or { courses, modules } object
     if (Array.isArray(coursesOrPayload)) {
       dispatch({ type: ACTIONS.LOAD_PATH, payload: { courses: coursesOrPayload, modules: autoCreateModules(coursesOrPayload) } });
     } else {
       dispatch({ type: ACTIONS.LOAD_PATH, payload: coursesOrPayload });
     }
-  };
+  }, [dispatch]);
 
-  const setWorkflowStage = (stage) => {
+  const setWorkflowStage = useCallback((stage) => {
     if (WORKFLOW_STAGES.includes(stage)) {
       dispatch({ type: ACTIONS.SET_WORKFLOW_STAGE, payload: stage });
     }
-  };
+  }, [dispatch]);
 
   // --- localStorage Persistence ---
   const STORAGE_KEY = "ue5_saved_paths";
 
-  const getSavedPaths = () => {
+  const getSavedPaths = useCallback(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
@@ -422,9 +422,9 @@ export function PathProvider({ children }) {
       console.error("Error loading saved paths:", e);
       return [];
     }
-  };
+  }, []);
 
-  const savePath = (name) => {
+  const savePath = useCallback((name) => {
     if (state.courses.length === 0) return false;
 
     const savedPaths = getSavedPaths();
@@ -443,9 +443,9 @@ export function PathProvider({ children }) {
     setActivePathId(newPath.id);
     localStorage.setItem("ue5_active_path_id", newPath.id);
     return true;
-  };
+  }, [state.courses, state.modules, state.learningIntent, getSavedPaths, setActivePathId]);
 
-  const loadSavedPath = (pathId) => {
+  const loadSavedPath = useCallback((pathId) => {
     const savedPaths = getSavedPaths();
     const found = savedPaths.find((p) => p.id === pathId);
     if (found) {
@@ -458,37 +458,37 @@ export function PathProvider({ children }) {
       return true;
     }
     return false;
-  };
+  }, [dispatch, getSavedPaths, setActivePathId]);
 
-  const deleteSavedPath = (pathId) => {
+  const deleteSavedPath = useCallback((pathId) => {
     const savedPaths = getSavedPaths().filter((p) => p.id !== pathId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPaths));
     // If the deleted path was the active one, clear the current path state
     if (activePathId === pathId) {
       clearPath();
     }
-  };
+  }, [activePathId, clearPath, getSavedPaths]);
 
   // ── Module action creators ─────────────────────────────────────────────
-  const addModule = (title, outcome = "", courseIds = []) => {
+  const addModule = useCallback((title, outcome = "", courseIds = []) => {
     dispatch({ type: ACTIONS.ADD_MODULE, payload: { title, outcome, courseIds } });
-  };
+  }, [dispatch]);
 
-  const renameModule = (moduleId, title, outcome) => {
+  const renameModule = useCallback((moduleId, title, outcome) => {
     dispatch({ type: ACTIONS.RENAME_MODULE, payload: { moduleId, title, outcome } });
-  };
+  }, [dispatch]);
 
-  const removeModule = (moduleId) => {
+  const removeModule = useCallback((moduleId) => {
     dispatch({ type: ACTIONS.REMOVE_MODULE, payload: moduleId });
-  };
+  }, [dispatch]);
 
-  const moveCourseToModule = (courseCode, targetModuleId) => {
+  const moveCourseToModule = useCallback((courseCode, targetModuleId) => {
     dispatch({ type: ACTIONS.MOVE_COURSE_TO_MODULE, payload: { courseCode, targetModuleId } });
-  };
+  }, [dispatch]);
 
-  const reorderModules = (newModules) => {
+  const reorderModules = useCallback((newModules) => {
     dispatch({ type: ACTIONS.REORDER_MODULES, payload: newModules });
-  };
+  }, [dispatch]);
 
   // Computed: courses not assigned to any module
   const ungroupedCourses = useMemo(() => {
@@ -531,13 +531,15 @@ export function PathProvider({ children }) {
     workflowStage: state.workflowStage,
     setWorkflowStage,
     WORKFLOW_STAGES,
-  /* eslint-disable react-hooks/exhaustive-deps -- action creators are stable (dispatch-based) */
   }), [
     state.courses, state.modules, state.learningIntent, state.workflowStage,
     ungroupedCourses, pathStats, verificationStats,
-    activePersonaId, activePathId,
+    addCourse, removeCourse, reorderCourses, updateCourseMeta, setLearningIntent,
+    clearPath, loadPath, addModule, renameModule, removeModule,
+    moveCourseToModule, reorderModules, savePath, getSavedPaths, loadSavedPath,
+    deleteSavedPath, activePersonaId, setActivePersonaId, activePathId,
+    setActivePathId, setWorkflowStage,
   ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   return <PathContext.Provider value={value}>{children}</PathContext.Provider>;
 }
