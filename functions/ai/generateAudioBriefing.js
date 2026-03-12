@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 
 /**
@@ -19,7 +20,7 @@ exports.generateAudioBriefing = functions
     memory: "1GB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { query, steps } = data;
     const mode = data.mode || "overview";
 
@@ -945,9 +946,6 @@ Rules:
         })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to generate audio briefing: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to generate audio briefing. Please try again.");
     }
   });

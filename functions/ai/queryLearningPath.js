@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { runStage } = require("../pipeline/llmStage");
@@ -171,7 +172,7 @@ async function handleProblemFirst(data, context, apiKey) {
     caseReport,
     conversationHistory: rawHistory,
   } = data;
-  const userId = context.auth?.uid || "anonymous";
+  const userId = requireAuth(context);
   const trace = createTrace(userId, "problem-first");
 
   // Sanitize conversation history (max 6 entries = 3 Q&A rounds)
@@ -905,7 +906,7 @@ const FALLBACK_CURRICULUM = {
  */
 async function handleOnboarding(data, context, apiKey) {
   const { persona, onboardingStep } = data;
-  const userId = context.auth?.uid || "anonymous";
+  const userId = requireAuth(context);
   const trace = createTrace(userId, "onboarding_gen");
 
   if (!persona || String(persona).trim().length < 5) {
@@ -1124,7 +1125,7 @@ exports.queryLearningPath = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
 
     // Rate limiting
     const rateLimitCheck = await checkRateLimit(userId, "query");
@@ -1169,6 +1170,6 @@ exports.queryLearningPath = functions
         JSON.stringify({ severity: "ERROR", message: "query_error", error: error.message })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError("internal", `Failed to process query: ${error.message}`);
+      throw new functions.https.HttpsError("internal", "Failed to process query. Please try again.");
     }
   });

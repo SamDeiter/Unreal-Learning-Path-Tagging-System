@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 
 // Import utility functions
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 
 /**
@@ -18,7 +19,7 @@ exports.generateCourseMetadata = functions
   })
   .https.onCall(async (data, context) => {
     // 1. Authentication check (optional - allow for testing)
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
 
     const { systemPrompt, userPrompt, temperature = 0.3, model = "gemini-1.5-flash" } = data;
 
@@ -111,9 +112,6 @@ exports.generateCourseMetadata = functions
       };
     } catch (error) {
       console.error("[ERROR] Error details:", JSON.stringify(error, null, 2));
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to generate course metadata: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to generate course metadata. Please try again.");
     }
   });

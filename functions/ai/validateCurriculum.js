@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
@@ -48,7 +49,7 @@ exports.validateCurriculum = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { intent, diagnosis, objectives, learningPath } = data;
 
     if (!objectives) {
@@ -150,9 +151,6 @@ Does this curriculum meet the anti-tutorial-hell requirements?
         JSON.stringify({ severity: "ERROR", message: "validation_error", error: error.message })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to validate curriculum: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to validate curriculum. Please try again.");
     }
   });

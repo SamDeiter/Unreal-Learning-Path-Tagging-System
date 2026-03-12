@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 
 /**
@@ -16,7 +17,7 @@ exports.classifySegments = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { prompt, grounded } = data;
 
     if (!prompt || prompt.trim().length < 20) {
@@ -218,9 +219,6 @@ exports.classifySegments = functions
         })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to classify segments: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to classify segments. Please try again.");
     }
   });

@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 
 // Import utility functions
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { getVideoCatalog } = require("../utils/lazyData");
 const { runStage } = require("../pipeline/llmStage");
@@ -170,7 +171,7 @@ exports.generateLearningPath = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { query, tags = [] } = data;
 
     if (!query || query.trim().length < 3) {
@@ -379,9 +380,6 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
         JSON.stringify({ severity: "ERROR", message: "learning_path_error", error: error.message })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to generate learning path: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to generate learning path. Please try again.");
     }
   });

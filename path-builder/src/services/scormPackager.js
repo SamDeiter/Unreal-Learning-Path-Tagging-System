@@ -466,7 +466,13 @@ export async function previewScormPackage(pathResult) {
     scos.forEach(function(sco, idx) {
       var item = document.createElement('div');
       item.className = 'nav-item' + (idx === 0 ? ' active' : '');
-      item.innerHTML = '<span class="num">' + (idx + 1) + '</span><span>' + sco.title + '</span>';
+      var numSpan = document.createElement('span');
+      numSpan.className = 'num';
+      numSpan.textContent = idx + 1;
+      var titleSpan = document.createElement('span');
+      titleSpan.textContent = sco.title;
+      item.appendChild(numSpan);
+      item.appendChild(titleSpan);
       item.onclick = function() { loadSco(idx); };
       nav.appendChild(item);
     });

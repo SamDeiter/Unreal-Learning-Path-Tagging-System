@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { runStage } = require("../pipeline/llmStage");
 const { createTrace, isAdmin } = require("../pipeline/telemetry");
@@ -81,7 +82,7 @@ exports.generateDiagnosis = functions
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { intent, detectedTags, retrievedContext, atomGraph } = data;
 
     if (!intent) {
@@ -198,9 +199,6 @@ This diagnosis should teach the developer to recognize and solve similar problem
         JSON.stringify({ severity: "ERROR", message: "diagnosis_error", error: error.message })
       );
       if (error.code) throw error;
-      throw new functions.https.HttpsError(
-        "internal",
-        `Failed to generate diagnosis: ${error.message}`
-      );
+      throw new functions.https.HttpsError("internal", "Failed to generate diagnosis. Please try again.");
     }
   });

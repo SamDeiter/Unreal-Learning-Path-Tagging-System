@@ -10,6 +10,7 @@ const functions = require("firebase-functions");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { normalizeQuery } = require("../pipeline/cache");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 
 // In-memory cache (per instance) to avoid redundant Gemini calls
@@ -23,7 +24,7 @@ exports.expandQuery = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { query } = data;
 
     // Rate limit check

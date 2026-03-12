@@ -6,6 +6,7 @@ const functions = require("firebase-functions");
 const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
+const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 
 const MODEL = "gemini-embedding-001";
@@ -18,7 +19,7 @@ exports.embedQuery = functions
     memory: "256MB",
   })
   .https.onCall(async (data, context) => {
-    const userId = context.auth?.uid || "anonymous";
+    const userId = requireAuth(context);
     const { query } = data;
 
     // Rate limit check
