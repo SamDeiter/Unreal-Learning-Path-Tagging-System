@@ -37,6 +37,10 @@ const db = IS_E2E ? null : getFirestore(app);
 
 const ALLOWED_DOMAINS = ["epicgames.com"];
 
+// Temporary fallback until all admins have custom claims set via setAdminClaim.
+// Once claims are provisioned, this list becomes a no-op safety net.
+const ADMIN_EMAILS_FALLBACK = ["sam.deiter@epicgames.com", "samdeiter@gmail.com"];
+
 // TTL cache for admin claim checks (avoids refetching token on every call)
 let _adminCacheResult = null;
 let _adminCacheExpiry = 0;
@@ -45,6 +49,7 @@ const ADMIN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 /**
  * Check if the current user has the admin custom claim.
  * Uses Firebase ID token claims (set via setAdminClaim Cloud Function).
+ * Falls back to a hardcoded email list as a safety net until claims are provisioned.
  * @returns {Promise<boolean>}
  */
 export async function isAdmin() {
@@ -65,7 +70,10 @@ export async function isAdmin() {
     }
 
     const idTokenResult = await user.getIdTokenResult();
-    const result = idTokenResult.claims.admin === true;
+    // Prefer custom claim; fall back to email list until claims are provisioned
+    const result =
+      idTokenResult.claims.admin === true ||
+      ADMIN_EMAILS_FALLBACK.includes(user.email?.toLowerCase());
     _adminCacheResult = result;
     _adminCacheExpiry = now + ADMIN_CACHE_TTL;
     return result;
