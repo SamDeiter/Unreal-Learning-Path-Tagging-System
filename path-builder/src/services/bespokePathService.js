@@ -13,6 +13,7 @@
 
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { adaptBespokePath } from "../schemas/pathAdapter";
+import { runEditorialPass } from "./editorialPass";
 import { getFirebaseApp } from "./firebaseConfig";
 import { devLog, devWarn } from "../utils/logger";
 import { recordTokenUsage } from "./tokenTracker";
@@ -495,6 +496,13 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
 
       // ── Adapt to V2 schema ──
       result.v2Path = adaptBespokePath(result);
+      result.v2Path.learnerGoal = userQuery;
+      result.v2Path._originalQuery = userQuery;
+
+      // ── Stage 5: Editorial enrichment ──
+      devLog("[BespokePath] Stage 5: Running editorial pass...");
+      result.v2Path = await runEditorialPass(result.v2Path)
+        .catch((err) => { devWarn("[BespokePath] Editorial pass failed:", err.message); return result.v2Path; });
 
       // ── Track metrics for hybrid fallback path ──
       trackPathSequenced({
@@ -644,6 +652,13 @@ export async function generateBespokePath(userQuery, knowledgeProfile = null) {
 
     // ── Adapt to V2 schema ──
     result.v2Path = adaptBespokePath(result);
+    result.v2Path.learnerGoal = userQuery;
+    result.v2Path._originalQuery = userQuery;
+
+    // ── Stage 5: Editorial enrichment ──
+    devLog("[BespokePath] Stage 5: Running editorial pass...");
+    result.v2Path = await runEditorialPass(result.v2Path)
+      .catch((err) => { devWarn("[BespokePath] Editorial pass failed:", err.message); return result.v2Path; });
 
     return result;
   } catch (err) {

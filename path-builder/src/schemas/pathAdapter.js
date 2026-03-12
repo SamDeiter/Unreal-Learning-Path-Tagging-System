@@ -69,6 +69,14 @@ export function adaptBespokePath(bespokeResult) {
       title: resolveStepTitle(step, idx),
       summary: cleanSummary,
       category,
+      // Extract teaching fields from existing pipeline enrichment
+      whyThisMatters: step.gemini_enriched?.one_sentence_summary || "",
+      whatToDo: extractWhatToDo(step),
+      howToVerify: [],
+      commonMistake: extractCommonMistake(step),
+      takeaway: step.gemini_enriched?.takeaway || step.takeaway || "",
+      completionType: step.video || step.segment?.videoUrl ? "watch" : "do",
+      goDeeper: extractGoDeeper(step),
       source: {
         type: step.segment?.type || step.segment?.source || "unknown",
         url: step.segment?.videoUrl || step.segment?.url || "",
@@ -76,7 +84,9 @@ export function adaptBespokePath(bespokeResult) {
         timestamp: step.segment?.startTimestamp || "",
       },
       video: extractVideoFromStep(step),
-      estimatedMinutes: 3,
+      estimatedMinutes: step.segment?.durationSeconds
+        ? Math.ceil(step.segment.durationSeconds / 60)
+        : 3,
       _originalSegment: step.segment || null,
       _bridgeText: bridgeText,
     });
@@ -251,6 +261,59 @@ export function adaptPreSeededPath(preSeeded) {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────
+
+// ── Teaching Field Extractors ───────────────────────────────────────
+
+/**
+ * Extract actionable "what to do" steps from pipeline enrichment data.
+ */
+function extractWhatToDo(step) {
+  const gemini = step.gemini_enriched || {};
+  const actions = [];
+  if (gemini.key_properties?.length) {
+    actions.push(...gemini.key_properties.slice(0, 3).map(
+      (p) => `Learn about ${p.toLowerCase()}`
+    ));
+  }
+  if (gemini.deep_dive) {
+    actions.push(gemini.deep_dive);
+  }
+  return actions;
+}
+
+/**
+ * Extract a common mistake/pitfall from pipeline enrichment data.
+ */
+function extractCommonMistake(step) {
+  const gemini = step.gemini_enriched || {};
+  if (gemini.common_pitfalls?.length) return gemini.common_pitfalls[0];
+  if (gemini.pitfalls?.length) return gemini.pitfalls[0];
+  return "";
+}
+
+/**
+ * Extract "go deeper" resource links from step data.
+ */
+function extractGoDeeper(step) {
+  const links = [];
+  const seg = step.segment || {};
+
+  if (seg.videoUrl || seg.url) {
+    links.push({
+      label: seg.videoTitle || "Source video",
+      url: seg.videoUrl || seg.url,
+      type: "video",
+    });
+  }
+  if (seg.doc_url) {
+    links.push({
+      label: "Official docs",
+      url: seg.doc_url,
+      type: "docs",
+    });
+  }
+  return links;
+}
 
 /**
  * Extract video info from a bespoke path step (mirrors logic in webPlayerService).

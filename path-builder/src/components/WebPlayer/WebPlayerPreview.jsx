@@ -16,6 +16,7 @@ import {
   getCategoryClass,
 } from "../../services/webPlayerService";
 import { generateQuizForPath } from "../../services/quizService";
+import LearnerView from "../LearnerView/LearnerView";
 import "./WebPlayerPreview.css";
 
 // ── Section Classification ─────────────────────────────────────────
@@ -325,11 +326,11 @@ export default function WebPlayerPreview({
     };
   }, [quizQuestions, quizAnswers]);
 
-  // Estimated time
+  // Estimated time — prefer authored V2 estimate over heuristic
   const estimatedMinutes = useMemo(() => {
-    // ~3 min per step as estimate
+    if (pathResult?.v2Path?.estimatedMinutes) return pathResult.v2Path.estimatedMinutes;
     return stepData.length * 3;
-  }, [stepData.length]);
+  }, [stepData.length, pathResult]);
 
   return (
     <div className="wp-overlay">
@@ -434,49 +435,56 @@ export default function WebPlayerPreview({
         {/* ── INTRO VIEW ── */}
         {viewMode === "intro" && (
           <div className="wp-content wp-intro-content">
-            <div className="wp-intro-hero">
-              <h1 className="wp-intro-title">{pathTitle}</h1>
-              <p className="wp-intro-subtitle">
-                {pathResult?.query
-                  ? `A structured learning path covering ${pathResult.query}`
-                  : "A curated learning experience in Unreal Engine 5"}
-              </p>
-            </div>
-
-            <div className="wp-intro-stats">
-              <div className="wp-intro-stat">
-                <span className="wp-intro-stat-value">{stepData.length}</span>
-                <span className="wp-intro-stat-label">Lessons</span>
-              </div>
-              <div className="wp-intro-stat">
-                <span className="wp-intro-stat-value">~{estimatedMinutes}m</span>
-                <span className="wp-intro-stat-label">Estimated Time</span>
-              </div>
-              <div className="wp-intro-stat">
-                <span className="wp-intro-stat-value">{sections.length}</span>
-                <span className="wp-intro-stat-label">Sections</span>
-              </div>
-            </div>
-
-            {/* Section overview */}
-            <div className="wp-intro-sections">
-              <h2>What You'll Learn</h2>
-              {sections.map((section) => (
-                <div key={section.id} className="wp-intro-section-card">
-                  <h3>{section.label}</h3>
-                  <ul>
-                    {section.steps.slice(0, 5).map((step) => (
-                      <li key={step.globalIndex}>{step.title}</li>
-                    ))}
-                    {section.steps.length > 5 && (
-                      <li className="wp-intro-more">
-                        +{section.steps.length - 5} more lessons
-                      </li>
-                    )}
-                  </ul>
+            {/* V2 LearnerView when available */}
+            {pathResult?.v2Path?.schemaVersion === 2 ? (
+              <LearnerView v2Path={pathResult.v2Path} />
+            ) : (
+              /* Legacy intro */
+              <>
+                <div className="wp-intro-hero">
+                  <h1 className="wp-intro-title">{pathTitle}</h1>
+                  <p className="wp-intro-subtitle">
+                    {pathResult?.query
+                      ? `A structured learning path covering ${pathResult.query}`
+                      : "A curated learning experience in Unreal Engine 5"}
+                  </p>
                 </div>
-              ))}
-            </div>
+
+                <div className="wp-intro-stats">
+                  <div className="wp-intro-stat">
+                    <span className="wp-intro-stat-value">{stepData.length}</span>
+                    <span className="wp-intro-stat-label">Lessons</span>
+                  </div>
+                  <div className="wp-intro-stat">
+                    <span className="wp-intro-stat-value">~{estimatedMinutes}m</span>
+                    <span className="wp-intro-stat-label">Estimated Time</span>
+                  </div>
+                  <div className="wp-intro-stat">
+                    <span className="wp-intro-stat-value">{sections.length}</span>
+                    <span className="wp-intro-stat-label">Sections</span>
+                  </div>
+                </div>
+
+                <div className="wp-intro-sections">
+                  <h2>What You'll Learn</h2>
+                  {sections.map((section) => (
+                    <div key={section.id} className="wp-intro-section-card">
+                      <h3>{section.label}</h3>
+                      <ul>
+                        {section.steps.slice(0, 5).map((step) => (
+                          <li key={step.globalIndex}>{step.title}</li>
+                        ))}
+                        {section.steps.length > 5 && (
+                          <li className="wp-intro-more">
+                            +{section.steps.length - 5} more lessons
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             <button className="wp-intro-cta" onClick={handleStartLearning}>
               🚀 Begin Learning

@@ -8,7 +8,8 @@
  * Design goals:
  * - No raw transcript text ever reaches the learner
  * - Explicit section ordering (prerequisite → core → practice)
- * - Every step has a pedagogical summary, not a content description
+ * - Every step has structured teaching fields, not just a summary
+ * - Closed learning loops: learn → do → verify → apply
  * - Backward-compatible via adapter layer (existing generators untouched)
  */
 
@@ -16,14 +17,12 @@
 export const SECTION_PHASES = ["prerequisite", "core", "practice"];
 
 export const SECTION_LABELS = {
-  prerequisite: "📘 Prerequisites",
-  core: "📗 Core Lessons",
-  practice: "📙 Practice & Transfer",
+  prerequisite: "📘 Understand",
+  core: "📗 Implement",
+  practice: "📙 Apply & Verify",
 };
 
 // ── Category → Section mapping ─────────────────────────────────────
-// Maps the categories produced by pathSequencer and hybridPath
-// into the 3 canonical sections.
 export const CATEGORY_TO_SECTION = {
   foundation: "prerequisite",
   diagnosis: "prerequisite",
@@ -34,48 +33,51 @@ export const CATEGORY_TO_SECTION = {
   practice: "practice",
 };
 
+// ── Completion types ───────────────────────────────────────────────
+export const COMPLETION_TYPES = ["read", "watch", "do", "verify", "apply"];
+
 // ── Transcript artifact patterns ───────────────────────────────────
-// Used to detect text that is raw transcript, not pedagogical content.
 const TRANSCRIPT_ARTIFACTS = [
-  /^\[?\d{1,2}:\d{2}/m,               // Timestamps like "0:42" or "[1:30"
-  /\b(um|uh|okay so|you know|like)\b/i, // Filler words
-  /^>>\s/m,                             // Speaker labels ">> "
-  /^[A-Z]{2,}:\s/m,                     // Speaker labels "SPEAKER: "
-  /\bversion selector\b/i,              // Epic docs boilerplate
-  /^\s*\n\s*\n\s*\n/,                   // Triple blank lines (bad formatting)
+  /^\[?\d{1,2}:\d{2}/m,
+  /\b(um|uh|okay so|you know|like)\b/i,
+  /^>>\s/m,
+  /^[A-Z]{2,}:\s/m,
+  /\bversion selector\b/i,
+  /^\s*\n\s*\n\s*\n/,
 ];
 
 const MIN_SUMMARY_LENGTH = 30;
 
-// ── Schema Factory ─────────────────────────────────────────────────
+// ── Schema Factories ───────────────────────────────────────────────
 
 /**
- * Create an empty LearningPathV2 object.
- * @param {Object} overrides — partial fields to set
- * @returns {Object} LearningPathV2
+ * Create a LearningPathV2 object.
  */
 export function createV2Path(overrides = {}) {
   return {
     schemaVersion: 2,
     title: "",
     learnerGoal: "",
+    // Intro fields (Phase 6)
+    quickAnswer: "",        // One-line answer to the learner's question
+    rootCause: "",          // Most likely root cause of the problem
+    whatYouWillLearn: [],   // Array of learning outcomes
+    quickWin: "",           // A quick thing to try right now
     difficulty: "intermediate",
     estimatedMinutes: 0,
+    prerequisites: [],      // What the learner should already know
     isAiGenerated: false,
     generatedAt: new Date().toISOString(),
     sections: [],
     // Metadata
-    _sourceFormat: "", // "bespoke" | "query" | "preseeded" | "hybrid"
+    _sourceFormat: "",
     _originalQuery: "",
     ...overrides,
   };
 }
 
 /**
- * Create a V2 section.
- * @param {string} phase — "prerequisite" | "core" | "practice"
- * @param {Array} steps — V2 step objects
- * @returns {Object} V2 section
+ * Create a V2 section with authored purpose.
  */
 export function createV2Section(phase, steps = []) {
   return {
@@ -92,43 +94,57 @@ function getSectionPurpose(phase) {
     case "prerequisite":
       return "Background concepts and context you need before diving in.";
     case "core":
-      return "The main implementation — step-by-step guidance to solve the problem.";
+      return "Step-by-step guidance to implement the solution.";
     case "practice":
-      return "Apply and transfer your new knowledge to related scenarios.";
+      return "Apply what you learned and verify it works in your own project.";
     default:
       return "";
   }
 }
 
 /**
- * Create a V2 step.
- * @param {Object} fields — step fields
- * @returns {Object} V2 step
+ * Create a V2 step with full teaching fields.
+ *
+ * The step has a structured layout:
+ *   - title: what this step covers
+ *   - whyThisMatters: connection to the learner's goal
+ *   - whatToDo: ordered learner actions
+ *   - howToVerify: concrete success checks
+ *   - commonMistake: one likely pitfall
+ *   - takeaway: concise memory anchor
+ *   - goDeeper: links to docs/videos/examples
+ *   - completionType: read | watch | do | verify | apply
  */
 export function createV2Step(fields = {}) {
   return {
     id: fields.id || `step-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     title: fields.title || "Untitled Step",
-    summary: fields.summary || "",
+    // Structured teaching fields
     whyThisMatters: fields.whyThisMatters || "",
+    whatToDo: fields.whatToDo || [],         // string[] — ordered actions
+    howToVerify: fields.howToVerify || [],    // string[] — success checks
+    commonMistake: fields.commonMistake || "",
     takeaway: fields.takeaway || "",
+    // Legacy summary — kept for backward compat, but UI prefers structured fields
+    summary: fields.summary || "",
+    // Classification
     category: fields.category || "core",
+    completionType: fields.completionType || "do",
+    estimatedMinutes: fields.estimatedMinutes || 3,
+    // Source / media
     source: fields.source || {},
     video: fields.video || null,
-    estimatedMinutes: fields.estimatedMinutes || 3,
-    // Pass-through fields for backward compat
+    goDeeper: fields.goDeeper || [],         // { label, url, type }[]
+    // Pass-through for backward compat
     _originalSegment: fields._originalSegment || null,
     _bridgeText: fields._bridgeText || "",
+    // Editorial pass metadata
+    _editorialStatus: fields._editorialStatus || "raw", // "raw" | "enriched" | "failed"
   };
 }
 
 // ── Validation ─────────────────────────────────────────────────────
 
-/**
- * Check if text looks like raw transcript rather than pedagogical content.
- * @param {string} text
- * @returns {{ isTranscript: boolean, reasons: string[] }}
- */
 export function detectTranscriptArtifacts(text) {
   if (!text) return { isTranscript: false, reasons: [] };
   const reasons = [];
@@ -141,11 +157,16 @@ export function detectTranscriptArtifacts(text) {
 }
 
 /**
- * Validate a LearningPathV2 object.
- * Returns warnings (non-blocking) and errors (blocking).
+ * Validate a LearningPathV2 object — Phase 7 quality gates.
  *
- * @param {Object} v2Path — LearningPathV2 object
- * @returns {{ valid: boolean, errors: string[], warnings: string[] }}
+ * Checks structure AND content quality:
+ * - Missing teaching fields (whyThisMatters, whatToDo, howToVerify, commonMistake)
+ * - Transcript artifacts in any text field
+ * - No early micro-win (first core step should be actionable)
+ * - No verification step
+ * - No transfer/application step
+ * - Repeated adjacent concepts
+ * - Short/empty summaries
  */
 export function validateV2Path(v2Path) {
   const errors = [];
@@ -155,24 +176,30 @@ export function validateV2Path(v2Path) {
     return { valid: false, errors: ["Path is null or undefined"], warnings };
   }
 
-  // Schema version
   if (v2Path.schemaVersion !== 2) {
     warnings.push(`Unexpected schemaVersion: ${v2Path.schemaVersion}`);
   }
 
-  // Title
   if (!v2Path.title || v2Path.title.length < 5) {
     warnings.push("Path title is missing or too short");
   }
 
-  // Sections
+  // Phase 6: Intro quality
+  if (!v2Path.quickAnswer) warnings.push("Missing quickAnswer in path intro");
+  if (!v2Path.whatYouWillLearn || v2Path.whatYouWillLearn.length === 0) {
+    warnings.push("Missing whatYouWillLearn outcomes");
+  }
+
   if (!v2Path.sections || v2Path.sections.length === 0) {
     errors.push("Path has no sections");
     return { valid: false, errors, warnings };
   }
 
-  // Per-section checks
   let totalSteps = 0;
+  let hasVerifyStep = false;
+  let hasTransferStep = false;
+  let previousTitle = "";
+
   for (const section of v2Path.sections) {
     if (!section.steps || section.steps.length === 0) {
       warnings.push(`Section "${section.phase}" has no steps`);
@@ -180,32 +207,61 @@ export function validateV2Path(v2Path) {
     }
     totalSteps += section.steps.length;
 
-    // Per-step checks
     for (const step of section.steps) {
       // Title quality
       if (!step.title || step.title === "Untitled Step") {
         warnings.push(`Step "${step.id}" has no title`);
       }
 
-      // Summary quality
-      if (!step.summary) {
-        warnings.push(`Step "${step.title}" has no summary`);
-      } else if (step.summary.length < MIN_SUMMARY_LENGTH) {
-        warnings.push(`Step "${step.title}" summary is very short (${step.summary.length} chars)`);
+      // Phase 7: Teaching field quality
+      if (!step.whyThisMatters) {
+        warnings.push(`Step "${step.title}" missing whyThisMatters`);
+      }
+      if (!step.whatToDo || step.whatToDo.length === 0) {
+        warnings.push(`Step "${step.title}" missing whatToDo actions`);
+      }
+      if (!step.howToVerify || step.howToVerify.length === 0) {
+        warnings.push(`Step "${step.title}" missing howToVerify checks`);
+      }
+      if (!step.commonMistake) {
+        warnings.push(`Step "${step.title}" missing commonMistake`);
       }
 
-      // Transcript leak check
-      const { isTranscript, reasons } = detectTranscriptArtifacts(step.summary);
-      if (isTranscript) {
-        warnings.push(
-          `Step "${step.title}" summary may contain raw transcript (${reasons.length} artifacts detected)`
-        );
+      // Summary quality
+      if (step.summary && step.summary.length < MIN_SUMMARY_LENGTH) {
+        warnings.push(`Step "${step.title}" summary very short (${step.summary.length} chars)`);
       }
+
+      // Transcript leak
+      const allText = [step.summary, step.whyThisMatters, step.commonMistake]
+        .filter(Boolean).join(" ");
+      const { isTranscript } = detectTranscriptArtifacts(allText);
+      if (isTranscript) {
+        warnings.push(`Step "${step.title}" may contain raw transcript`);
+      }
+
+      // Repeated adjacent concepts
+      if (previousTitle && step.title === previousTitle) {
+        warnings.push(`Repeated adjacent step: "${step.title}"`);
+      }
+      previousTitle = step.title;
+
+      // Track step types
+      if (step.completionType === "verify") hasVerifyStep = true;
+      if (step.category === "transfer" || step.category === "practice") hasTransferStep = true;
     }
   }
 
   if (totalSteps === 0) {
     errors.push("Path has sections but no steps");
+  }
+
+  // Structural quality
+  if (!hasVerifyStep && totalSteps > 2) {
+    warnings.push("Path has no verification step — learners can't confirm success");
+  }
+  if (!hasTransferStep && totalSteps > 3) {
+    warnings.push("Path has no transfer/apply step — knowledge may not stick");
   }
 
   return { valid: errors.length === 0, errors, warnings };
