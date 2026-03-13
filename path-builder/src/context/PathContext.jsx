@@ -193,25 +193,7 @@ const initialState = {
 
 const DRAFT_KEY = "ue5-path-draft";
 
-/**
- * Auto-create milestone modules from a flat list of courses.
- * Groups every 3-4 courses into a milestone for a sensible default.
- */
-function autoCreateModules(courses) {
-  if (!courses || courses.length === 0) return [];
-  const groupSize = courses.length <= 6 ? 3 : 4;
-  const modules = [];
-  for (let i = 0; i < courses.length; i += groupSize) {
-    const chunk = courses.slice(i, i + groupSize);
-    modules.push({
-      id: `mod-${Date.now()}-${i}`,
-      title: `Milestone ${modules.length + 1}`,
-      outcome: "",
-      courseIds: chunk.map((c) => c.code),
-    });
-  }
-  return modules;
-}
+
 
 // Load draft from localStorage (for session restore)
 function loadDraft() {
@@ -223,11 +205,8 @@ function loadDraft() {
       let stage = draft.workflowStage || "build";
       if (stage === "curate" || stage === "arrange") stage = "build";
       const courses = Array.isArray(draft.courses) ? draft.courses : [];
-      // Migrate: if no modules exist, auto-create from courses
-      let modules = Array.isArray(draft.modules) ? draft.modules : [];
-      if (modules.length === 0 && courses.length > 0) {
-        modules = autoCreateModules(courses);
-      }
+      // Only load modules that were explicitly created by the user
+      const modules = Array.isArray(draft.modules) ? draft.modules : [];
       return {
         courses,
         modules,
@@ -399,7 +378,7 @@ export function PathProvider({ children }) {
   const loadPath = useCallback((coursesOrPayload) => {
     // Accept either a plain array (legacy) or { courses, modules } object
     if (Array.isArray(coursesOrPayload)) {
-      dispatch({ type: ACTIONS.LOAD_PATH, payload: { courses: coursesOrPayload, modules: autoCreateModules(coursesOrPayload) } });
+      dispatch({ type: ACTIONS.LOAD_PATH, payload: { courses: coursesOrPayload, modules: [] } });
     } else {
       dispatch({ type: ACTIONS.LOAD_PATH, payload: coursesOrPayload });
     }
