@@ -328,6 +328,21 @@ Rules:
       }
     }
 
+    // ── PIN: "Introduction to Unreal Engine" always goes first ──
+    // If this course is in the path, it must be step 0 regardless of category.
+    const introIdx = sequenced.findIndex((s) => {
+      const t = (s.title || s.segment?.title || s.segment?.videoTitle || "").toLowerCase();
+      return t.includes("introduction to unreal engine") || t.includes("introduction to unreal editor") || t.includes("intro to unreal");
+    });
+    if (introIdx > 0) {
+      const [intro] = sequenced.splice(introIdx, 1);
+      intro.category = "foundation"; // Ensure correct category
+      sequenced.unshift(intro);
+      // Re-number orders
+      sequenced.forEach((s, i) => { s.order = i; });
+      devLog(`[BespokePath] Pinned "Introduction to Unreal Engine" to position 0`);
+    }
+
     devLog(`[BespokePath] Sequenced ${sequenced.length} segments into learning path`);
 
     // ── POST-GENERATION QUALITY GATE ──
