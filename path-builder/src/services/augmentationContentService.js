@@ -119,27 +119,14 @@ function findAugKey(step, idx, index) {
       }
     }
 
-    // Try partial word overlap (at least 3 significant words match)
+    // Try partial word overlap (at least 3 significant words must match)
     const stepWords = normStep.match(/.{3,}/g) || [];
-    if (stepWords.length >= 2) {
+    if (stepWords.length >= 3) {
       for (const [normCT, code] of byTitle.entries()) {
         const matchCount = stepWords.filter((w) => normCT.includes(w)).length;
-        if (matchCount >= 2) {
+        if (matchCount >= 3) {
           entries = byCode.get(code);
           if (entries?.length) return entries[0].key;
-        }
-      }
-    }
-  }
-
-  // ── Strategy 3: Match step title against ALL video titles globally ──
-  if (stepTitle) {
-    const normStep = normalize(stepTitle);
-    for (const [, courseEntries] of byCode.entries()) {
-      for (const entry of courseEntries) {
-        const normET = normalize(entry.title);
-        if (normET.includes(normStep) || normStep.includes(normET)) {
-          return entry.key;
         }
       }
     }

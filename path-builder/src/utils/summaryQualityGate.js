@@ -20,6 +20,20 @@ const TRANSCRIPT_PATTERNS = [
   { pattern: /\btranscript\b.*\bgenerated\b/i, reason: "transcript_meta" },
 ];
 
+// ── Conversational speech patterns (instant reject) ────────────────
+const CONVERSATIONAL_PATTERNS = [
+  { pattern: /\b(I'm going to|I'm gonna|I was going to|I'll go ahead)\b/i, reason: "first_person_speech" },
+  { pattern: /\b(we're going to|we're gonna|let's go ahead|let's go)\b/i, reason: "first_person_plural" },
+  { pattern: /\b(so to start with|so we can|so what we)\b/i, reason: "verbal_transition" },
+  { pattern: /\bgoing to come on to\b/i, reason: "verbal_direction" },
+  { pattern: /\b(right no\b|right here|over here)\b/i, reason: "spatial_reference" },
+  { pattern: /\.\s+(And|But|So|OK|Okay)\s+/g, reason: "run_on_speech" },
+  { pattern: /\b(Maybe double check|make sure that's working)\b/i, reason: "verbal_hedging" },
+  { pattern: /\bAll of this can be\b/i, reason: "verbal_demonstration" },
+  { pattern: /\bwe set our\b.*\bto\b/i, reason: "verbal_walkthrough" },
+  { pattern: /\bI'm going to call this\b/i, reason: "narrated_action" },
+];
+
 const MIN_QUALITY_LENGTH = 30;
 
 // ── Category display labels for placeholders ───────────────────────
@@ -60,7 +74,18 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
     };
   }
 
-  // Step 3: Check for remaining transcript artifacts
+  // Step 3: Check for conversational speech (instant reject — single match)
+  for (const { pattern, reason } of CONVERSATIONAL_PATTERNS) {
+    if (pattern.test(cleaned)) {
+      return {
+        text: generatePlaceholder(stepTitle, category),
+        wasReplaced: true,
+        reason: `conversational_speech: ${reason}`,
+      };
+    }
+  }
+
+  // Step 4: Check for remaining transcript artifacts
   const detectedArtifacts = [];
   for (const { pattern, reason } of TRANSCRIPT_PATTERNS) {
     if (pattern.test(cleaned)) {
@@ -77,7 +102,7 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
     };
   }
 
-  // Step 4: Check minimum length
+  // Step 5: Check minimum length
   if (cleaned.trim().length < MIN_QUALITY_LENGTH) {
     return {
       text: generatePlaceholder(stepTitle, category),
