@@ -4,6 +4,24 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.3.0-monorepo-audit] - 2026-03-12
+
+### Added
+
+- **`TabRouter.jsx`** — [NEW] Extracted all 22 tab conditional render blocks and 30+ lazy imports from `App.jsx` into a dedicated routing component. App.jsx reduced from ~472 to ~300 lines
+
+### Changed
+
+- **Path Builder Layout Fix** — Fixed desktop layout bug where the course library panel appeared at the bottom during Review/Export stages:
+  - Rewrote `useIsMobile` hook using `useSyncExternalStore` to eliminate stale viewport state
+  - Updated CSS grid layout to include `library` area in mobile templates
+  - Gated `showLeftPanel` on `workflowStage` (only visible during `build`/`curate`)
+- **`geminiService.js` DRY Refactor** — Extracted `callGeminiFunction()` helper encapsulating auth check → `httpsCallable` → `retryWithBackoff` → `safeParseJSON` → fallback. Each of the 3 callers reduced from ~25 lines to ~8 lines (~60 lines removed)
+- **`externalContentService.js` Bundle Migration** — Migrated `youtube_curated.json` from `import()` (Vite-bundled) to runtime `fetchJSON()` via `dataLoader.js`. File moved from `src/data/` to `public/data/`
+- **`App.jsx` Simplified** — Removed 30+ lazy imports and 190-line tab rendering block, replaced with single `<TabRouter>` component
+
+---
+
 ## [7.2.0-feasibility-gate] - 2026-03-10
 
 ### Added

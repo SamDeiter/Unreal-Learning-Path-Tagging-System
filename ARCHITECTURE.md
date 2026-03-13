@@ -134,20 +134,22 @@ sequenceDiagram
 
 ## Data Flow
 
-### Static Data (Build-Time)
+### Static Data (Build-Time + Runtime Fetch)
 
-These JSON files are bundled into the app at build time. No runtime fetching required.
+Small JSON files are bundled at build time; large data files live in `public/data/` and are fetched at runtime via `dataLoader.js` (`fetchJSON()`) with in-memory caching.
 
 ```mermaid
 graph LR
-    subgraph "Source Data (JSON)"
-        C["courses_enriched.json<br/>(course catalog)"]
+    subgraph "Bundled (Build-Time)"
         T["tags.json<br/>(tag taxonomy)"]
         E["edges.json<br/>(tag relationships)"]
-        V["video_registry.json<br/>(video metadata)"]
+    end
+
+    subgraph "Runtime Fetch (public/data/)"
+        C["video_library_enriched.json<br/>(course catalog)"]
         D["doc_links.json<br/>(Epic docs)"]
         Y["youtube_curated.json<br/>(curated YT)"]
-        EM["course_embeddings.float16.bin<br/>(semantic vectors)"]
+        TS["transcript_segments.json<br/>(7k+ segments)"]
     end
 
     subgraph "Context Providers"
@@ -155,10 +157,10 @@ graph LR
         PC["PathContext<br/>(user state, cart, path)"]
     end
 
-    C & T & E & V --> TDC
+    T & E --> TDC
+    C -->|fetchJSON| TDC
     TDC --> PC
-    D & Y --> SVC["Service Layer"]
-    EM --> SVC
+    D & Y & TS -->|fetchJSON| SVC["Service Layer"]
 ```
 
 ### Runtime Data (Firestore)
