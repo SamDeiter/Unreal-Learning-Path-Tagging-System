@@ -15,6 +15,7 @@ import {
   formatTime,
   getCategoryClass,
 } from "../../services/webPlayerService";
+import { fetchAugmentationsForSteps } from "../../services/augmentationContentService";
 import { generateQuizForPath } from "../../services/quizService";
 import LearnerView from "../LearnerView/LearnerView";
 import "./WebPlayerPreview.css";
@@ -204,10 +205,22 @@ export default function WebPlayerPreview({
     return steps;
   }, [pathResult, courses]);
 
-  // Process steps into display-ready data
+  // Process steps into display-ready data, enriched with augmentation content.
+  // Renders immediately with basic data, then re-renders once augmentations load.
+  const [augmentations, setAugmentations] = useState([]);
+
+  useEffect(() => {
+    if (!enrichedSteps.length) return;
+    let cancelled = false;
+    fetchAugmentationsForSteps(enrichedSteps).then((augs) => {
+      if (!cancelled) setAugmentations(augs);
+    });
+    return () => { cancelled = true; };
+  }, [enrichedSteps]);
+
   const stepData = useMemo(
-    () => prepareStepData(enrichedSteps, pathResult?.bridges || []),
-    [enrichedSteps, pathResult?.bridges]
+    () => prepareStepData(enrichedSteps, pathResult?.bridges || [], augmentations),
+    [enrichedSteps, pathResult?.bridges, augmentations]
   );
 
   // Group steps by section for sidebar
@@ -583,6 +596,18 @@ export default function WebPlayerPreview({
                       </div>
                     )}
 
+                    {/* ── Prerequisites (shown first) ── */}
+                    {current.prerequisites?.length > 0 && (
+                      <details className="wp-aug-section wp-aug-prereqs">
+                        <summary className="wp-aug-toggle">📋 Prerequisites</summary>
+                        <ul>
+                          {current.prerequisites.map((p, i) => (
+                            <li key={i}>{p}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
+
                     {/* Step card */}
                     <div className="wp-step-card">
                       <div className="wp-step-meta">
@@ -599,6 +624,40 @@ export default function WebPlayerPreview({
                         </p>
                       )}
                     </div>
+
+                    {/* ── Augmentation Content (collapsible) ── */}
+
+                    {current.whyThisMatters && (
+                      <details className="wp-aug-section wp-aug-why" open>
+                        <summary className="wp-aug-toggle">💡 Why This Matters</summary>
+                        <p>{current.whyThisMatters}</p>
+                      </details>
+                    )}
+
+                    {current.whatToDo?.length > 0 && (
+                      <details className="wp-aug-section wp-aug-do">
+                        <summary className="wp-aug-toggle">🔧 Key Concepts</summary>
+                        <ol>
+                          {current.whatToDo.map((item, i) => (
+                            <li key={i}>{item}</li>
+                          ))}
+                        </ol>
+                      </details>
+                    )}
+
+                    {current.commonMistake && (
+                      <details className="wp-aug-section wp-aug-mistake">
+                        <summary className="wp-aug-toggle">⚠️ Common Mistake</summary>
+                        <p>{current.commonMistake}</p>
+                      </details>
+                    )}
+
+                    {current.takeaway && (
+                      <details className="wp-aug-section wp-aug-takeaway">
+                        <summary className="wp-aug-toggle">🎯 Key Takeaway</summary>
+                        <p>{current.takeaway}</p>
+                      </details>
+                    )}
 
                     {/* Navigation buttons */}
                     <div className="wp-nav-buttons">

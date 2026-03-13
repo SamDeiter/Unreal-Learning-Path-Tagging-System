@@ -39,9 +39,11 @@ function stripMarkdown(text) {
  *
  * @param {Array} steps — Raw path steps from pathSequencer
  * @param {Array} bridges — Bridge narration objects
+ * @param {Array} [augmentations] — Optional augmentation data per step
+ *   (from augmentationContentService.fetchAugmentationsForSteps)
  * @returns {Array<Object>} — Processed steps ready for rendering
  */
-export function prepareStepData(steps, bridges = []) {
+export function prepareStepData(steps, bridges = [], augmentations = []) {
   return steps.map((step, idx) => {
     const title = getDisplayName(step) || resolveStepTitle(step, idx);
 
@@ -71,6 +73,11 @@ export function prepareStepData(steps, bridges = []) {
     // Video extraction — mirrors scormPackager logic
     const video = extractVideoInfo(step);
 
+    // Merge augmentation data if available for this step.
+    // Augmentation fields (whyThisMatters, whatToDo, commonMistake, takeaway,
+    // prerequisites) are the exact keys LessonCard already renders.
+    const aug = augmentations[idx] || {};
+
     return {
       title,
       summary,
@@ -81,6 +88,13 @@ export function prepareStepData(steps, bridges = []) {
       bridgeText,
       video,
       index: idx,
+      // Augmentation-enriched fields — only set when augmentation data exists
+      ...(aug.whyThisMatters && { whyThisMatters: aug.whyThisMatters }),
+      ...(aug.whatToDo?.length && { whatToDo: aug.whatToDo }),
+      ...(aug.commonMistake && { commonMistake: aug.commonMistake }),
+      ...(aug.takeaway && { takeaway: aug.takeaway }),
+      ...(aug.prerequisites?.length && { prerequisites: aug.prerequisites }),
+      ...(aug.additionalTheoryBreaks?.length && { additionalTheoryBreaks: aug.additionalTheoryBreaks }),
     };
   });
 }
