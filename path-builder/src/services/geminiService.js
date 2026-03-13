@@ -91,6 +91,43 @@ export function isUserAuthenticated() {
 }
 
 /**
+ * Generic Cloud Function caller — DRY helper for all Gemini operations.
+ * Handles: auth check → httpsCallable → retryWithBackoff → safeParseJSON → fallback.
+ *
+ * @param {Object} opts
+ * @param {string} opts.systemPrompt
+ * @param {string} opts.userPrompt
+ * @param {"object"|"array"} opts.shape - Expected JSON shape (default "object")
+ * @param {number} opts.temperature - Model temperature (default 0.3)
+ * @param {string} opts.label - Label for retry logging
+ * @param {Function} opts.fallback - Fallback function to call on failure
+ * @returns {Promise<object|array>}
+ */
+async function callGeminiFunction({ systemPrompt, userPrompt, shape = "object", temperature = 0.3, label, fallback }) {
+  if (!isUserAuthenticated()) {
+    devWarn(`User not authenticated. Using fallback for ${label}.`);
+    return fallback();
+  }
+
+  try {
+    const fn = httpsCallable(functions, "generateCourseMetadata");
+    const result = await retryWithBackoff(
+      () => fn({ systemPrompt, userPrompt, temperature, model: "gemini-1.5-flash" }),
+      { maxRetries: 2, baseDelayMs: 1500, label },
+    );
+
+    if (!result.data.success) {
+      throw new Error(result.data.error || `${label} failed`);
+    }
+
+    return safeParseJSON(result.data.textResponse, shape);
+  } catch (error) {
+    console.error(`${label} error:`, error);
+    return fallback();
+  }
+}
+
+/**
  * Generate course metadata from selected videos via Cloud Function
  * @param {Array} videos - Selected video objects with transcripts
  * @returns {Object} Generated course metadata
@@ -124,36 +161,14 @@ Generate a JSON response with:
 
 Respond with ONLY valid JSON, no markdown.`;
 
-  // Check auth and call Cloud Function
-  if (!isUserAuthenticated()) {
-    devWarn("User not authenticated. Using fallback generation.");
-    return generateFallbackMetadata(videos);
-  }
-
-  try {
-    const generateCourse = httpsCallable(functions, "generateCourseMetadata");
-    const result = await retryWithBackoff(
-      () =>
-        generateCourse({
-          systemPrompt,
-          userPrompt,
-          temperature: 0.3,
-          model: "gemini-1.5-flash",
-        }),
-      { maxRetries: 2, baseDelayMs: 1500, label: "generateCourseMetadata" }
-    );
-
-    if (!result.data.success) {
-      throw new Error(result.data.error || "Cloud Function failed");
-    }
-
-    // Parse JSON from response
-    const text = result.data.textResponse;
-    return safeParseJSON(text, "object");
-  } catch (error) {
-    console.error("Gemini Cloud Function error:", error);
-    return generateFallbackMetadata(videos);
-  }
+  return callGeminiFunction({
+    systemPrompt,
+    userPrompt,
+    shape: "object",
+    temperature: 0.3,
+    label: "generateCourseMetadata",
+    fallback: () => generateFallbackMetadata(videos),
+  });
 }
 
 /**
@@ -182,34 +197,14 @@ Generate a JSON array with questions, each having:
 
 Respond with ONLY valid JSON array, no markdown.`;
 
-  if (!isUserAuthenticated()) {
-    devWarn("User not authenticated. Using fallback quiz.");
-    return generateFallbackQuiz(video, count);
-  }
-
-  try {
-    const generateQuiz = httpsCallable(functions, "generateCourseMetadata");
-    const result = await retryWithBackoff(
-      () =>
-        generateQuiz({
-          systemPrompt,
-          userPrompt,
-          temperature: 0.4,
-          model: "gemini-1.5-flash",
-        }),
-      { maxRetries: 2, baseDelayMs: 1500, label: "generateQuiz" }
-    );
-
-    if (!result.data.success) {
-      throw new Error(result.data.error || "Quiz generation failed");
-    }
-
-    const text = result.data.textResponse;
-    return safeParseJSON(text, "array");
-  } catch (error) {
-    console.error("Quiz generation error:", error);
-    return generateFallbackQuiz(video, count);
-  }
+  return callGeminiFunction({
+    systemPrompt,
+    userPrompt,
+    shape: "array",
+    temperature: 0.4,
+    label: "generateQuiz",
+    fallback: () => generateFallbackQuiz(video, count),
+  });
 }
 
 /**
@@ -264,34 +259,14 @@ Be SPECIFIC to the actual tags and content. Reference real UE5 concepts like Nia
 
 Respond with ONLY valid JSON, no markdown.`;
 
-  if (!isUserAuthenticated()) {
-    devWarn("User not authenticated. Using fallback blueprint.");
-    return generateFallbackBlueprint(intent, courses);
-  }
-
-  try {
-    const generateBlueprint = httpsCallable(functions, "generateCourseMetadata");
-    const result = await retryWithBackoff(
-      () =>
-        generateBlueprint({
-          systemPrompt,
-          userPrompt,
-          temperature: 0.4,
-          model: "gemini-1.5-flash",
-        }),
-      { maxRetries: 2, baseDelayMs: 1500, label: "generateBlueprint" }
-    );
-
-    if (!result.data.success) {
-      throw new Error(result.data.error || "Blueprint generation failed");
-    }
-
-    const text = result.data.textResponse;
-    return safeParseJSON(text, "object");
-  } catch (error) {
-    console.error("Learning Blueprint generation error:", error);
-    return generateFallbackBlueprint(intent, courses);
-  }
+  return callGeminiFunction({
+    systemPrompt,
+    userPrompt,
+    shape: "object",
+    temperature: 0.4,
+    label: "generateBlueprint",
+    fallback: () => generateFallbackBlueprint(intent, courses),
+  });
 }
 
 /**
