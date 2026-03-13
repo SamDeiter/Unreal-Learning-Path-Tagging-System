@@ -463,5 +463,15 @@ export const optimizePathOrder = (courses) => {
   // Sort ascending — lowest score comes first (foundational → advanced)
   scored.sort((a, b) => a.score - b.score || a.course.title.localeCompare(b.course.title));
 
-  return scored.map(({ course }) => course);
+  const result = scored.map(({ course }) => course);
+
+  // ── Post-sort pin: "Introduction to Unreal Engine/Editor" is ALWAYS first ──
+  const introPattern = /\bintroduction\s+to\s+unreal\s*(engine|editor)?\b/i;
+  const introIdx = result.findIndex((c) => introPattern.test(c.title || ""));
+  if (introIdx > 0) {
+    const [intro] = result.splice(introIdx, 1);
+    result.unshift(intro);
+  }
+
+  return result;
 };

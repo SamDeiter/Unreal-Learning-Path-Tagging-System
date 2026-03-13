@@ -146,13 +146,21 @@ function AssemblyLine() {
     // Step 1: Legacy sort by role/weight (always produces visible change)
     const baseSorted = optimizePathOrder(courses);
     // Step 2: Layer on cognitive load interleaving
+    let finalOrder;
     try {
       const interleaved = interleaveCourses(baseSorted);
-      const cleaned = interleaved.map(({ cognitiveLoad: _cl, ...rest }) => rest);
-      reorderCourses(cleaned);
+      finalOrder = interleaved.map(({ cognitiveLoad: _cl, ...rest }) => rest);
     } catch {
-      reorderCourses(baseSorted);
+      finalOrder = baseSorted;
     }
+    // Step 3: Pin "Introduction to Unreal Engine/Editor" to position 0
+    const introPattern = /\bintroduction\s+to\s+unreal\s*(engine|editor)?\b/i;
+    const introIdx = finalOrder.findIndex((c) => introPattern.test(c.title || ""));
+    if (introIdx > 0) {
+      const [intro] = finalOrder.splice(introIdx, 1);
+      finalOrder.unshift(intro);
+    }
+    reorderCourses(finalOrder);
   };
 
   // Compute cognitive load summary for entire path

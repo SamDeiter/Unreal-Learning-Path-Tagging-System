@@ -226,6 +226,16 @@ export function buildLearningPath(rankedCourses, matchedTagIds, options = {}) {
     diversityScore = 1 - totalOverlap / selected.length;
   }
 
+  // ── Pin "Introduction to Unreal Engine/Editor" to first position ──
+  const introPattern = /\bintroduction\s+to\s+unreal\s*(engine|editor)?\b/i;
+  const introIdx = selected.findIndex((item) =>
+    introPattern.test(item.course?.title || "")
+  );
+  if (introIdx > 0) {
+    const [intro] = selected.splice(introIdx, 1);
+    selected.unshift(intro);
+  }
+
   return {
     path: selected,
     metadata: {
