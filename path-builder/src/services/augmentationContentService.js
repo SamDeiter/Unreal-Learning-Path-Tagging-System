@@ -10,6 +10,7 @@
  *   - prerequisites    (from missing_prerequisites)
  *
  * Uses augmentation_summary.json video keys for matching steps to files.
+ * Supports matching by course code, video title, OR course title (fuzzy).
  */
 
 // ── In-memory cache ────────────────────────────────────────────────
@@ -18,8 +19,8 @@ let summaryPromise = null;
 let summaryData = null;
 
 /**
- * Load the augmentation summary (video key index) once.
- * Returns Map<dotCourseCode, Array<{ key, title }>>
+ * Load the augmentation summary data once.
+ * Returns { byCode, byTitle } for dual-path matching.
  */
 async function loadSummaryIndex() {
   if (summaryData) return summaryData;
@@ -30,18 +31,33 @@ async function loadSummaryIndex() {
   }
   const raw = await summaryPromise;
   if (!raw?.videos) {
-    summaryData = new Map();
+    summaryData = { byCode: new Map(), byTitle: new Map() };
     return summaryData;
   }
 
-  // Group videos by course code → [{ key, title }, ...]
-  const map = new Map();
+  // Index 1: courseCode → [{ key, title, courseTitle }, ...]
+  const byCode = new Map();
+  // Index 2: normalized courseTitle → { code, entries }  (for title-based matching)
+  const byTitle = new Map();
+
   for (const v of raw.videos) {
-    const code = v.course; // e.g. "100.01"
-    if (!map.has(code)) map.set(code, []);
-    map.get(code).push({ key: v.key, title: v.title });
+    const code = v.course;       // e.g. "100.01"
+    const ct = v.course_title;   // e.g. "Introduction to Unreal Engine"
+
+    const entry = { key: v.key, title: v.title, courseTitle: ct };
+
+    // By code
+    if (!byCode.has(code)) byCode.set(code, []);
+    byCode.get(code).push(entry);
+
+    // By normalized course title → course code (first match wins)
+    const normCT = normalize(ct);
+    if (normCT && !byTitle.has(normCT)) {
+      byTitle.set(normCT, code);
+    }
   }
-  summaryData = map;
+
+  summaryData = { byCode, byTitle };
   return summaryData;
 }
 
@@ -54,35 +70,79 @@ function normalize(s) {
 
 /**
  * Find the best augmentation key for a step.
+ * Tries multiple matching strategies in order:
+ *   1. Direct course code match + video title match within course
+ *   2. Step title fuzzy-match against course titles (when code is missing)
+ *   3. Step title fuzzy-match against ALL video titles globally
  *
- * @param {string} courseCode — Dot-separated code (e.g. "100.01") or underscore (e.g. "100_01")
- * @param {string} videoTitle — Video title from the step
- * @param {number} videoIndex — Index of the video in the course (fallback)
- * @param {Map} index — Summary index from loadSummaryIndex()
+ * @param {Object} step — The step object
+ * @param {number} idx — Step index (fallback)
+ * @param {{ byCode: Map, byTitle: Map }} index — Summary index
  * @returns {string|null} — Augmentation key like "100_01/21_NiagaraEditor" or null
  */
-function findAugKey(courseCode, videoTitle, videoIndex, index) {
-  // Normalize course code to dot format for index lookup
-  const dotCode = (courseCode || "").replace(/_/g, ".");
-  const entries = index.get(dotCode);
-  if (!entries?.length) return null;
+function findAugKey(step, idx, index) {
+  const { byCode, byTitle } = index;
 
-  // Try exact title match first
-  if (videoTitle) {
-    const normTitle = normalize(videoTitle);
-    const exact = entries.find((e) => normalize(e.title) === normTitle);
-    if (exact) return exact.key;
+  const courseCode = step.code || step.courseCode || step.segment?.courseCode || "";
+  const videoTitle = step.segment?.videoTitle || step.videos?.[0]?.title || step.videos?.[0]?.name || "";
+  const stepTitle = step.title || "";
 
-    // Fuzzy: title contains or is contained
-    const fuzzy = entries.find(
-      (e) => normalize(e.title).includes(normTitle) || normTitle.includes(normalize(e.title))
-    );
-    if (fuzzy) return fuzzy.key;
+  // ── Strategy 1: Direct course code lookup ──
+  const dotCode = courseCode.replace(/_/g, ".");
+  let entries = byCode.get(dotCode);
+
+  if (entries?.length) {
+    // Try exact video title match within course
+    if (videoTitle) {
+      const normVT = normalize(videoTitle);
+      const exact = entries.find((e) => normalize(e.title) === normVT);
+      if (exact) return exact.key;
+
+      const fuzzy = entries.find(
+        (e) => normalize(e.title).includes(normVT) || normVT.includes(normalize(e.title))
+      );
+      if (fuzzy) return fuzzy.key;
+    }
+    // No video match → return first video in course (best available)
+    return entries[0].key;
   }
 
-  // Fallback: use video index
-  if (typeof videoIndex === "number" && videoIndex >= 0 && videoIndex < entries.length) {
-    return entries[videoIndex].key;
+  // ── Strategy 2: Match step title against course titles ──
+  if (stepTitle) {
+    const normStep = normalize(stepTitle);
+
+    // Try direct course title match
+    for (const [normCT, code] of byTitle.entries()) {
+      if (normCT === normStep || normCT.includes(normStep) || normStep.includes(normCT)) {
+        entries = byCode.get(code);
+        if (entries?.length) return entries[0].key;
+      }
+    }
+
+    // Try partial word overlap (at least 3 significant words match)
+    const stepWords = normStep.match(/.{3,}/g) || [];
+    if (stepWords.length >= 2) {
+      for (const [normCT, code] of byTitle.entries()) {
+        const matchCount = stepWords.filter((w) => normCT.includes(w)).length;
+        if (matchCount >= 2) {
+          entries = byCode.get(code);
+          if (entries?.length) return entries[0].key;
+        }
+      }
+    }
+  }
+
+  // ── Strategy 3: Match step title against ALL video titles globally ──
+  if (stepTitle) {
+    const normStep = normalize(stepTitle);
+    for (const [, courseEntries] of byCode.entries()) {
+      for (const entry of courseEntries) {
+        const normET = normalize(entry.title);
+        if (normET.includes(normStep) || normStep.includes(normET)) {
+          return entry.key;
+        }
+      }
+    }
   }
 
   return null;
@@ -91,9 +151,6 @@ function findAugKey(courseCode, videoTitle, videoIndex, index) {
 /**
  * Fetch a single augmentation JSON file.
  * Key format: "100_01/21_NiagaraEditor" → /augmentation_data/100_01/21_NiagaraEditor.json
- *
- * @param {string} augKey — e.g. "100_01/21_NiagaraEditor"
- * @returns {Promise<Object|null>}
  */
 async function fetchAugFile(augKey) {
   if (cache.has(augKey)) return cache.get(augKey);
@@ -116,9 +173,6 @@ async function fetchAugFile(augKey) {
 
 /**
  * Transform raw augmentation JSON into step-friendly fields.
- *
- * @param {Object} aug — Raw augmentation JSON
- * @returns {Object} — Fields ready to merge into a step
  */
 function transformAugmentation(aug) {
   if (!aug) return {};
@@ -133,9 +187,9 @@ function transformAugmentation(aug) {
       .join(" ");
   }
 
-  // 🔧 Do This Now — from why_annotations (procedural step + why)
+  // 🔧 Key Concepts — from why_annotations (procedural step + why)
   if (aug.why_annotations?.length > 0) {
-    result.whatToDo = aug.why_annotations.slice(0, 5).map((wa) => {
+    result.whatToDo = aug.why_annotations.slice(0, 3).map((wa) => {
       const step = wa.procedural_step || "";
       const why = wa.why || "";
       return `${step}${why ? ` — ${why}` : ""}`;
@@ -149,7 +203,6 @@ function transformAugmentation(aug) {
       ? warnings[0]
       : warnings[0].warning || warnings[0].description || JSON.stringify(warnings[0]);
   } else {
-    // Check why_annotations for antipattern_warnings
     const warnAnnotation = (aug.why_annotations || []).find((wa) => wa.antipattern_warning);
     if (warnAnnotation) {
       result.commonMistake = warnAnnotation.antipattern_warning;
@@ -167,48 +220,19 @@ function transformAugmentation(aug) {
     result.prerequisites = aug.missing_prerequisites;
   }
 
-  // Grade and score
-  if (aug.evaluation_matrix_score) {
-    result.augGrade = aug.evaluation_matrix_score.grade;
-    result.augScore = aug.evaluation_matrix_score.total;
-  }
-
-  // Additional theory breaks beyond the first 2 (for "Go Deeper" or expandable sections)
-  if (aug.theory_breaks?.length > 2) {
-    result.additionalTheoryBreaks = aug.theory_breaks.slice(2).map((tb) => ({
-      title: tb.title,
-      concept: tb.concept,
-      timestamp: tb.insert_after_timestamp,
-    }));
-  }
-
   return result;
 }
 
 /**
  * Batch-fetch augmentation content for an array of steps.
- *
- * Each step should have: { code, segment: { videoTitle }, videos: [...] }
  * Returns a parallel array of augmentation field objects (or {} if not found).
- *
- * @param {Array} steps — Path steps
- * @returns {Promise<Array<Object>>} — Augmentation fields per step
  */
 export async function fetchAugmentationsForSteps(steps) {
   const index = await loadSummaryIndex();
-  if (!index.size) return steps.map(() => ({}));
+  if (!index.byCode.size) return steps.map(() => ({}));
 
   const promises = steps.map(async (step, i) => {
-    const courseCode = step.code || step.courseCode || step.segment?.courseCode || "";
-    const videoTitle =
-      step.segment?.videoTitle ||
-      step.videos?.[0]?.title ||
-      step.videos?.[0]?.name ||
-      step.title ||
-      "";
-    const videoIndex = step.videoIndex ?? i;
-
-    const augKey = findAugKey(courseCode, videoTitle, videoIndex, index);
+    const augKey = findAugKey(step, i, index);
     if (!augKey) return {};
 
     const augData = await fetchAugFile(augKey);
