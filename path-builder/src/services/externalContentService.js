@@ -6,20 +6,21 @@
  */
 
 import { devWarn } from "../utils/logger";
+import { fetchJSON } from "./dataLoader";
 
 // Lazy-loaded
 let _ytData = null;
 
 /**
- * Lazily load youtube_curated.json.
+ * Lazily load youtube_curated.json from public/data/.
  * Returns null gracefully if file is missing.
  */
 async function getYouTubeData() {
   if (_ytData !== undefined && _ytData !== null) return _ytData;
 
   try {
-    const mod = await import("../data/youtube_curated.json");
-    _ytData = mod.default || mod;
+    const data = await fetchJSON("youtube_curated");
+    _ytData = data || { channels: {}, resources: [] };
     return _ytData;
   } catch {
     devWarn("[ExternalContent] youtube_curated.json not found — Epic YouTube content unavailable");
