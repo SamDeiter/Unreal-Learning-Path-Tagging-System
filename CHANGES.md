@@ -4,6 +4,37 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.4.0-quality-polish] - 2026-03-12
+
+### Changed
+
+- **Context-Aware Fallback Summaries** — Upgraded `generatePlaceholder()` in `summaryQualityGate.js` to produce richer summaries when raw transcript text is rejected:
+  - Priority 1: Uses `gemini_outcomes` directly as the summary when available
+  - Priority 2: Weaves extracted/canonical tags into the description
+  - Priority 3: Varies template text via title hash (eliminates identical generic summaries)
+  - `webPlayerService.js` now passes step metadata hints (outcomes, tags, videoTitle) to `ensureQualitySummary`
+- **Intro-to-UE5 Pinning** — "Introduction to Unreal Engine/Editor" is now pinned to index 0 across all path generation and ordering flows:
+  - `pathSequencer.js` — post-sequencing pin
+  - `generationEngine.js` — post-sort pin in `optimizePathOrder`
+  - `AssemblyLine.jsx` — post-interleaving pin in `handleOptimize`
+  - `PathBuilder.js` — output pin in `buildLearningPath`
+
+### Fixed
+
+- **"(Bespoke)" Label Leak** — Stripped internal labels (`(Bespoke)`, `(AI Generated)`, `(Gap Fill)`) from all display surfaces:
+  - `resolveStepTitle.js` — safety-net strip before display
+  - `topicNameService.js` — all `getDisplayName()` return paths wrapped with `stripInternalLabels()`
+  - `gapFill.js` — removed `(Bespoke)` from generated step titles and replaced raw transcript descriptions with clean summaries
+- **Auto-Generated Milestones** — Removed `autoCreateModules()` that randomly created milestone groups:
+  - `PathContext.jsx` `loadDraft()` no longer auto-generates milestones on page load
+  - `PathContext.jsx` `loadPath()` no longer auto-generates milestones when loading from array
+  - Milestones now only appear when user explicitly clicks "+ Add Milestone"
+- **Conversational Speech Detection** — Added 14 new speech patterns to `summaryQualityGate.js` for instant rejection of transcript-like text (first-person narration, verbal transitions, spatial references)
+- **Augmentation Matching Accuracy** — Removed overly-broad Strategy 3 (global video title search) from `augmentationContentService.js`; tightened Strategy 2 word overlap to require 3+ matching words
+- **Duplicate Step Removal** — `pathQualityValidator.js` now actively removes duplicate titles instead of only warning
+
+---
+
 ## [7.3.0-monorepo-audit] - 2026-03-12
 
 ### Added
