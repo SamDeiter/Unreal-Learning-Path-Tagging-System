@@ -110,6 +110,9 @@ function extractVideoInfo(step) {
     step._url,
     step.url,
     step.code,
+    // Bespoke gap-fill steps store video in sourceSegments
+    step.sourceSegments?.[0]?.videoUrl,
+    step.segment?.sourceSegments?.[0]?.videoUrl,
   ].filter(Boolean);
 
   const firstVideo = step.videos?.[0] || step.segment?.videos?.[0];

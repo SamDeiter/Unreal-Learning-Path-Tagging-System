@@ -161,21 +161,27 @@ export function getDisplayName(item) {
   // ── 3. Build the display name ──
   if (prefix && focus) {
     if (focus.toLowerCase().includes(prefix.toLowerCase())) {
-      return smartTruncate(titleCase(focus));
+      return stripInternalLabels(smartTruncate(titleCase(focus)));
     }
-    return smartTruncate(`${titleCase(prefix)} - ${titleCase(focus)}`);
+    return stripInternalLabels(smartTruncate(`${titleCase(prefix)} - ${titleCase(focus)}`));
   }
 
   if (prefix && !focus) {
-    return titleCase(prefix);
+    return stripInternalLabels(titleCase(prefix));
   }
 
   if (!prefix && focus) {
-    return smartTruncate(titleCase(focus));
+    return stripInternalLabels(smartTruncate(titleCase(focus)));
   }
 
   // Absolute fallback
-  return item.code || "Untitled Step";
+  const result = item.code || "Untitled Step";
+  return stripInternalLabels(result);
+}
+
+/** Strip internal pipeline labels that should never reach learners. */
+function stripInternalLabels(title) {
+  return title.replace(/\s*\((?:Bespoke|AI[- ]?Generated|Gap[- ]?Fill)\)\s*/gi, "").trim();
 }
 
 /**
