@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { PathProvider, usePath } from "./context/PathContext";
 import { TagDataProvider } from "./context/TagDataContext";
-import Dashboard from "./components/Dashboard/Dashboard";
 import AuthGate from "./components/AuthGate/AuthGate";
 import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
@@ -12,50 +11,19 @@ import { useAuth } from "./hooks/useAuth";
 import useAnalyticsData from "./hooks/useAnalyticsData";
 import MobileNavDrawer from "./components/MobileNav/MobileNavDrawer";
 import AppSidebar from "./components/AppSidebar/AppSidebar";
+import TabRouter from "./components/TabRouter";
 import { fetchJSON } from "./services/dataLoader";
 import { precomputeTagsAndEdges } from "./utils/tagEdgePrecompute";
 import { BASE_TABS, MOBILE_TAB_ORDER } from "./domain/tabDefinitions";
 import "./App.css";
 
-// ── Lazy-loaded tab components (code-split per tab) ──────────────────
+// ── Lazy-loaded components kept in App (used outside TabRouter) ──────
 const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
 const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLine"));
 const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
-const PathDashboard = lazy(() => import("./components/PathBuilder/PathDashboard"));
-const PathCreationWizard = lazy(() => import("./components/PathBuilder/PathCreationWizard"));
-const PathLoader = lazy(() => import("./components/PathBuilder/PathLoader"));
 const WorkflowStepper = lazy(() => import("./components/PathBuilder/WorkflowStepper"));
-const TagGraph = lazy(() => import("./components/TagGraph/TagGraph"));
-const PathReadiness = lazy(() => import("./components/PathReadiness/PathReadiness"));
-const TagManager = lazy(() => import("./components/TagManager/TagManager"));
-const Personas = lazy(() => import("./components/Personas/Personas"));
-const ProblemFirst = lazy(() =>
-  import("./components/ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
-);
-const BespokePath = lazy(() => import("./components/BespokePath/BespokePath"));
-const AdaptivePath = lazy(() => import("./components/AdaptivePath/AdaptivePath"));
-const AdminFeedback = lazy(() => import("./components/AdminFeedback/AdminFeedback"));
-const AdminErrorLogs = lazy(() => import("./components/AdminErrorLogs/AdminErrorLogs"));
-const InsightsPanel = lazy(() => import("./components/Visualizations/InsightsPanel"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));
 const PersonaQuiz = lazy(() => import("./components/PersonaQuiz/PersonaQuiz"));
-
-// Analytics visualizations — import directly (not via barrel) for proper code-splitting
-const JourneyHeatmap = lazy(() => import("./components/Visualizations/JourneyHeatmap"));
-const TagTimeline = lazy(() => import("./components/Visualizations/TagTimeline"));
-const TagTrends = lazy(() => import("./components/Visualizations/TagTrends"));
-const PrereqFlow = lazy(() => import("./components/Visualizations/PrereqFlow"));
-const InstructorMap = lazy(() => import("./components/Visualizations/InstructorMap"));
-const TagHeatmap = lazy(() => import("./components/Visualizations/TagHeatmap"));
-const SkillRadar = lazy(() => import("./components/Visualizations/SkillRadar"));
-const SkillGapAnalysis = lazy(() => import("./components/Visualizations/SkillGapAnalysis"));
-const ConfidenceAnalytics = lazy(() => import("./components/Visualizations/ConfidenceAnalytics"));
-const TagHistorySparkline = lazy(() => import("./components/Visualizations/TagHistorySparkline"));
-const InviteManager = lazy(() => import("./components/InviteManager/InviteManager"));
-const AdminAnalytics = lazy(() => import("./components/AdminAnalytics/AdminAnalytics"));
-const ContentGaps = lazy(() => import("./components/AdminAnalytics/ContentGaps"));
-const AnalyticsPipeline = lazy(() => import("./components/AdminAnalytics/AnalyticsPipeline"));
-const AnalyticsCosts = lazy(() => import("./components/AdminAnalytics/AnalyticsCosts"));
 
 // ── Builder Editor with Workflow Stepper ──────────────────────────────
 function BuilderEditor({
@@ -262,34 +230,26 @@ function App() {
 
             {/* Main Content */}
             <main className="app-main" id="main-content" tabIndex="-1">
-              <Suspense fallback={<LoadingSpinner />}>
-                {activeTab === "dashboard" && (
-                  <div className="dashboard-layout">
-                    <Dashboard />
-                  </div>
-                )}
-                {activeTab === "readiness" && (
-                  <div className="dashboard-layout">
-                    <PathReadiness />
-                  </div>
-                )}
-                {activeTab === "tags" && (
-                  <div className="dashboard-layout">
-                    <TagManager />
-                  </div>
-                )}
-                {activeTab === "builder" && builderView === "dashboard" && (
-                  <div className="dashboard-layout">
-                    <PathDashboard
-                      onEditPath={(path) => {
-                        setPendingEditPath(path);
-                        setBuilderView("editor");
-                      }}
-                      onCreateNew={() => setShowWizard(true)}
-                    />
-                  </div>
-                )}
-                {activeTab === "builder" && builderView === "editor" && (
+              <TabRouter
+                activeTab={activeTab}
+                userIsAdmin={userIsAdmin}
+                builderView={builderView}
+                setBuilderView={setBuilderView}
+                showWizard={showWizard}
+                setShowWizard={setShowWizard}
+                pendingEditPath={pendingEditPath}
+                setPendingEditPath={setPendingEditPath}
+                setPreSelectedSkill={setPreSelectedSkill}
+                isMobile={isMobile}
+                courses={courses}
+                tags={tags}
+                edges={edges}
+                analyticsEvents={analyticsEvents}
+                setAnalyticsEvents={setAnalyticsEvents}
+                analyticsTimeRange={analyticsTimeRange}
+                setAnalyticsTimeRange={setAnalyticsTimeRange}
+                onInsightNavigate={handleInsightNavigate}
+                builderEditor={
                   <BuilderEditor
                     courses={courses}
                     isMobile={isMobile}
@@ -297,160 +257,8 @@ function App() {
                     setPreSelectedSkill={setPreSelectedSkill}
                     onBackToDashboard={() => setBuilderView("dashboard")}
                   />
-                )}
-                {/* PathLoader: bridges saved path data into PathContext */}
-                {pendingEditPath && (
-                  <PathLoader
-                    pendingPath={pendingEditPath}
-                    onLoaded={() => setPendingEditPath(null)}
-                  />
-                )}
-                {/* Path Creation Wizard Modal */}
-                {showWizard && (
-                  <PathCreationWizard
-                    onComplete={(pathData) => {
-                      setShowWizard(false);
-                      
-                      // Save to storage
-                      import("./utils/pathStorageUtils").then(
-                        ({ savePathToStorage }) => {
-                          savePathToStorage(pathData);
-                        }
-                      );
-                      // Store wizard intent so PathIntelligencePanel can read it
-                      localStorage.setItem(
-                        "ue5_wizard_intent",
-                        JSON.stringify({
-                          primaryGoal: pathData.goal,
-                          skillLevel: pathData.skillLevel,
-                          timeBudget: pathData.timeBudget,
-                          industries: pathData.industries || [],
-                        })
-                      );
-                      // Auto-populate course search with the goal
-                      setPreSelectedSkill(pathData.goal);
-                      setBuilderView("editor");
-                    }}
-                    onCancel={() => setShowWizard(false)}
-                  />
-                )}
-                {activeTab === "personas" && (
-                  <div className="dashboard-layout">
-                    <Personas />
-                  </div>
-                )}
-                {activeTab === "problem" && (
-                  <div className="dashboard-layout">
-                    <ProblemFirst />
-                  </div>
-                )}
-                {activeTab === "adaptive" && (
-                  <div className="dashboard-layout">
-                    <AdaptivePath />
-                  </div>
-                )}
-                {activeTab === "bespoke" && (
-                  <div className="dashboard-layout">
-                    <BespokePath />
-                  </div>
-                )}
-                {activeTab === "analytics-overview" && (
-                  <div className="analytics-layout">
-                    <div className="analytics-grid">
-                      {userIsAdmin && (
-                        <AdminAnalytics
-                          onEventsLoaded={setAnalyticsEvents}
-                          onTimeRangeChange={setAnalyticsTimeRange}
-                        />
-                      )}
-                      <JourneyHeatmap />
-                    </div>
-                  </div>
-                )}
-                {activeTab === "analytics-insights" && (
-                  <div className="analytics-layout">
-                    <InsightsPanel onNavigate={handleInsightNavigate} />
-                  </div>
-                )}
-                {activeTab === "analytics-confidence" && (
-                  <div className="analytics-layout">
-                    <ConfidenceAnalytics />
-                  </div>
-                )}
-                {activeTab === "analytics-coverage" && (
-                  <div className="analytics-layout">
-                    <div className="coverage-grid">
-                      <SkillRadar />
-                      <SkillGapAnalysis />
-                    </div>
-                  </div>
-                )}
-                {activeTab === "analytics-library" && (
-                  <div className="analytics-layout">
-                    <TagTrends />
-                    <TagHistorySparkline />
-                    <TagHeatmap />
-                    <TagTimeline />
-                    <InstructorMap />
-                  </div>
-                )}
-                {activeTab === "analytics-paths" && (
-                  <div className="analytics-layout">
-                    <PrereqFlow />
-                  </div>
-                )}
-                {activeTab === "analytics-graph" && (
-                  <div className="analytics-layout">
-                    <div className="tag-graph-wrapper">
-                      <TagGraph tags={tags} edges={edges} courses={courses} />
-                    </div>
-                  </div>
-                )}
-                {activeTab === "analytics-gaps" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <ContentGaps events={analyticsEvents} />
-                  </div>
-                )}
-                {activeTab === "analytics-pipeline" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <AnalyticsPipeline events={analyticsEvents} />
-                  </div>
-                )}
-                {activeTab === "analytics-costs" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <AnalyticsCosts timeRange={analyticsTimeRange} />
-                  </div>
-                )}
-                {activeTab === "augmentation" && (
-                  <div className="augmentation-layout">
-                    {isMobile && (
-                      <div className="mobile-desktop-banner">
-                        💻 This tool works best on a desktop browser for the full experience.
-                      </div>
-                    )}
-                    <iframe
-                      className="augmentation-frame"
-                      src={`${import.meta.env.BASE_URL}augmentation_index.html`}
-                      title="Augmentation Dashboard"
-                    />
-                  </div>
-                )}
-                {activeTab === "invites" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <InviteManager />
-                  </div>
-                )}
-                {activeTab === "admin-feedback" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <AdminFeedback />
-                  </div>
-                )}
-                {activeTab === "admin-errors" && userIsAdmin && (
-                  <div className="dashboard-layout">
-                    <AdminErrorLogs />
-                  </div>
-                )}
-              </Suspense>
+                }
+              />
             </main>
 
             <FeedbackButton user={currentUser} />
