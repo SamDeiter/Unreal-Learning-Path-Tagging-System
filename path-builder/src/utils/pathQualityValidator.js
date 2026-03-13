@@ -124,23 +124,27 @@ export function validatePathQuality(pathSteps, sourceSegments = []) {
     }
   }
 
-  // ── 4. TITLE DEDUP CHECK: Warn if same title appears in multiple categories ──
-  const titleToCategories = new Map();
+  // ── 4. TITLE DEDUP: Remove steps with duplicate titles (keep first) ──
+  const seenTitles = new Set();
+  const dedupedPath = [];
   for (const step of cleanedPath) {
     const title = (step.segment?.title || step.segment?.videoTitle || "").toLowerCase().trim();
-    if (!title) continue;
-    if (!titleToCategories.has(title)) {
-      titleToCategories.set(title, []);
+    if (!title) {
+      dedupedPath.push(step);
+      continue;
     }
-    titleToCategories.get(title).push(step.category);
-  }
-  for (const [title, categories] of titleToCategories) {
-    if (categories.length > 1) {
-      warnings.push(
-        `⚠️ Title "${title}" appears in ${categories.length} categories: [${categories.join(", ")}]`
+    if (seenTitles.has(title)) {
+      autoFixes.push(
+        `Removed duplicate titled step: "${title}" (category: ${step.category})`
       );
+      continue; // Skip duplicate
     }
+    seenTitles.add(title);
+    dedupedPath.push(step);
   }
 
-  return { cleanedPath, warnings, autoFixes };
+  // Re-number orders after dedup
+  dedupedPath.forEach((s, i) => { s.order = i; });
+
+  return { cleanedPath: dedupedPath, warnings, autoFixes };
 }

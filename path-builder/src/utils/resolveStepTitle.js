@@ -40,6 +40,9 @@ export function resolveStepTitle(step, index = 0) {
   // Clean conference/brand suffixes and decode HTML entities
   let cleaned = cleanVideoTitle(rawTitle);
 
+  // Strip internal pipeline labels that should never reach learners
+  cleaned = cleaned.replace(/\s*\((?:Bespoke|AI[- ]?Generated|Gap[- ]?Fill)\)\s*/gi, "");
+
   // Decode HTML entities
   cleaned = cleaned
     .replace(/&amp;/g, "&")

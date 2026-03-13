@@ -230,16 +230,11 @@ RULES:
 
 export function generateBespokeGapStep(topic, segments) {
   const bestSegment = segments[0];
-  const combinedText = segments
-    .slice(0, 3)
-    .map((s) => s.text || "")
-    .filter(Boolean)
-    .join("\n\n");
 
   return {
     code: `bespoke-${Date.now()}`,
-    title: `${topic} (Bespoke)`,
-    description: combinedText.substring(0, 500) || `Bespoke step covering ${topic}`,
+    title: topic,
+    description: `This lesson covers ${topic} using key concepts from Unreal Engine 5.`,
     type: "bespoke_segment",
     role: "core",
     duration_seconds: segments.length * 300, // ~5 min per segment
