@@ -59,16 +59,20 @@ const CATEGORY_LABELS = {
  * @param {string} rawText — raw summary/text from any pipeline
  * @param {string} stepTitle — the step's display title (for placeholder generation)
  * @param {string} category — step category (for placeholder context)
+ * @param {object} [hints] — optional extra context for better placeholders
+ * @param {string[]} [hints.outcomes] — gemini_outcomes for the course
+ * @param {string[]} [hints.tags] — extracted or canonical tags
+ * @param {string} [hints.videoTitle] — title of the first video
  * @returns {{ text: string, wasReplaced: boolean, reason: string }}
  */
-export function ensureQualitySummary(rawText, stepTitle = "this topic", category = "core") {
+export function ensureQualitySummary(rawText, stepTitle = "this topic", category = "core", hints = {}) {
   // Step 1: Clean transcript artifacts
   let cleaned = cleanTranscriptText(rawText || "");
 
   // Step 2: If empty after cleaning, generate placeholder directly
   if (!cleaned || cleaned.trim().length === 0) {
     return {
-      text: generatePlaceholder(stepTitle, category),
+      text: generatePlaceholder(stepTitle, category, hints),
       wasReplaced: true,
       reason: "empty_after_cleaning",
     };
@@ -78,7 +82,7 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
   for (const { pattern, reason } of CONVERSATIONAL_PATTERNS) {
     if (pattern.test(cleaned)) {
       return {
-        text: generatePlaceholder(stepTitle, category),
+        text: generatePlaceholder(stepTitle, category, hints),
         wasReplaced: true,
         reason: `conversational_speech: ${reason}`,
       };
@@ -96,7 +100,7 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
   // If 2+ transcript patterns detected, it's raw transcript
   if (detectedArtifacts.length >= 2) {
     return {
-      text: generatePlaceholder(stepTitle, category),
+      text: generatePlaceholder(stepTitle, category, hints),
       wasReplaced: true,
       reason: `transcript_artifacts: ${detectedArtifacts.join(", ")}`,
     };
@@ -105,7 +109,7 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
   // Step 5: Check minimum length
   if (cleaned.trim().length < MIN_QUALITY_LENGTH) {
     return {
-      text: generatePlaceholder(stepTitle, category),
+      text: generatePlaceholder(stepTitle, category, hints),
       wasReplaced: true,
       reason: "too_short",
     };
@@ -121,12 +125,46 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
 
 /**
  * Generate a clean placeholder summary when source text is unusable.
+ * Uses available metadata to produce a context-aware description.
  * @param {string} stepTitle
  * @param {string} category
+ * @param {object} [hints]
  * @returns {string}
  */
-function generatePlaceholder(stepTitle, category) {
-  const catLabel = CATEGORY_LABELS[category] || "core";
+function generatePlaceholder(stepTitle, category, hints = {}) {
   const title = stepTitle || "this topic";
-  return `Learn about ${title} — this ${catLabel} lesson covers key concepts and techniques in Unreal Engine 5.`;
+
+  // 1. If we have a Gemini outcome, use the first one directly
+  if (hints.outcomes?.length > 0) {
+    const outcome = hints.outcomes[0];
+    // Make sure the outcome is a clean sentence, not transcript
+    if (outcome.length > 15 && outcome.length < 300 && !/\b(um|uh|gonna)\b/i.test(outcome)) {
+      return outcome.endsWith(".") ? outcome : `${outcome}.`;
+    }
+  }
+
+  // 2. If we have meaningful tags, weave them into the description
+  if (hints.tags?.length >= 2) {
+    const cleanTags = hints.tags
+      .filter((t) => typeof t === "string" && t.length > 2)
+      .map((t) => t.split(".").pop().replace(/_/g, " "))
+      .slice(0, 3);
+    if (cleanTags.length >= 2) {
+      return `Explore ${title}, covering ${cleanTags.join(", ")} within Unreal Engine 5.`;
+    }
+  }
+
+  // 3. Category-varied templates
+  const catLabel = CATEGORY_LABELS[category] || "core";
+  const templates = [
+    `This ${catLabel} lesson explores ${title} concepts and workflows in Unreal Engine 5.`,
+    `Gain hands-on experience with ${title} through guided examples and practical exercises.`,
+    `Build your understanding of ${title} — a ${catLabel} part of this learning path.`,
+  ];
+
+  // Pick a template based on title hash for consistency
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = ((hash << 5) - hash + title.charCodeAt(i)) | 0;
+  return templates[Math.abs(hash) % templates.length];
 }
+

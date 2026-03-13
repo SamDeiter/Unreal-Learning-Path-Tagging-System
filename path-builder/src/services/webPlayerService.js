@@ -57,10 +57,21 @@ export function prepareStepData(steps, bridges = [], augmentations = []) {
       step.description ||
       "";
     const cleaned = stripMarkdown(cleanTranscriptText(rawSummary));
+    // Build hints for richer fallback placeholders
+    const hints = {
+      outcomes: step.gemini_outcomes || step.gemini_enriched?.outcomes || [],
+      tags: [
+        ...(Array.isArray(step.extracted_tags) ? step.extracted_tags : []),
+        ...(Array.isArray(step.canonical_tags) ? step.canonical_tags : []),
+        ...(Array.isArray(step.gemini_system_tags) ? step.gemini_system_tags : []),
+      ],
+      videoTitle: step.videos?.[0]?.title || step.segment?.videoTitle || "",
+    };
     const { text: summary } = ensureQualitySummary(
       cleaned,
       title,
-      step.category || "core"
+      step.category || "core",
+      hints
     );
 
     const category = step.category || "";
