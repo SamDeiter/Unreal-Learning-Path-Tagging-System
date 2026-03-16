@@ -130,7 +130,7 @@ describe("PathContext", () => {
     expect(result.current.workflowStage).toBe("build");
   });
 
-  it("loadPath with plain array auto-creates modules", () => {
+  it("loadPath with plain array loads courses without auto-creating modules", () => {
     const { result } = renderHook(() => usePath(), { wrapper });
 
     const courses = [mockCourse("C1"), mockCourse("C2"), mockCourse("C3"), mockCourse("C4")];
@@ -140,11 +140,8 @@ describe("PathContext", () => {
     });
 
     expect(result.current.courses).toHaveLength(4);
-    // Auto-created modules should group courses
-    expect(result.current.modules.length).toBeGreaterThanOrEqual(1);
-    // All course codes should be in some module
-    const allModuleIds = result.current.modules.flatMap((m) => m.courseIds);
-    expect(allModuleIds).toContain("C1");
+    // loadPath with a plain array no longer auto-creates modules (intentional change)
+    expect(result.current.modules).toHaveLength(0);
   });
 
   it("deleteSavedPath on active path clears state", () => {

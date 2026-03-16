@@ -163,8 +163,10 @@ describe("pathQualityValidator", () => {
         },
       ];
 
-      const { warnings } = validatePathQuality(steps);
-      expect(warnings.some((w) => w.includes("what are blueprints"))).toBe(true);
+      const { cleanedPath, autoFixes } = validatePathQuality(steps);
+      // Title dedup removes the duplicate and logs to autoFixes
+      expect(cleanedPath).toHaveLength(1);
+      expect(autoFixes.some((f) => f.includes("what are blueprints"))).toBe(true);
     });
   });
 
