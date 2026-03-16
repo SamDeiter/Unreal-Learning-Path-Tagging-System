@@ -19,7 +19,7 @@ import "./App.css";
 
 // ── Lazy-loaded components kept in App (used outside TabRouter) ──────
 const LeftPanel = lazy(() => import("./components/LeftPanel/LeftPanel"));
-const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLine"));
+const AssemblyLine = lazy(() => import("./components/AssemblyLine/AssemblyLineV2"));
 const PathIntelligencePanel = lazy(() => import("./components/PathBuilder/PathIntelligencePanel"));
 const WorkflowStepper = lazy(() => import("./components/PathBuilder/WorkflowStepper"));
 const FeedbackButton = lazy(() => import("./components/Feedback/FeedbackButton"));

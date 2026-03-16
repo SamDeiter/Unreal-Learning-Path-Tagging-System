@@ -22,6 +22,16 @@ const POPULAR_TOPICS = [
 ];
 
 function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill }) {
+  // Safe-call wrapper
+  const handleBuildBySkill = (skill) => {
+
+    if (typeof onBuildBySkill === "function") {
+      onBuildBySkill(skill);
+    } else {
+      console.error("SmartEmptyState: onBuildBySkill is not a function", onBuildBySkill);
+    }
+  };
+
   return (
     <div className="ses-container">
       {/* Goal Display */}
@@ -55,7 +65,7 @@ function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill }) 
       <div className="ses-actions">
         <button
           className="ses-action ses-action-skill"
-          onClick={() => onBuildBySkill(goal || "")}
+          onClick={() => handleBuildBySkill(goal || "")}
           title="Search courses by skill or topic"
         >
           <span className="ses-action-icon">🎯</span>
@@ -81,7 +91,7 @@ function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill }) 
             <button
               key={topic}
               className="ses-topic-pill"
-              onClick={() => onBuildBySkill(topic)}
+              onClick={() => handleBuildBySkill(topic)}
             >
               {topic}
             </button>

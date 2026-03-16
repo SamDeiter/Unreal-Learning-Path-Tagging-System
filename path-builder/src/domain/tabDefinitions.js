@@ -7,11 +7,12 @@
 // Newest mode always at the top of the list
 export const PRIMARY_TABS = [
   { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
+  { key: "builder-v2", label: "Path Builder V2", icon: "✨" },
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
   { key: "personas", label: "Onboarding", icon: "🚀" },
-  { key: "builder", label: "Path Builder", icon: "🏗️" },
+  { key: "builder", label: "Path Builder (V1)", icon: "🏗️" },
 ];
 
 export const SECONDARY_TABS = [

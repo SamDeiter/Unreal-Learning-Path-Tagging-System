@@ -384,6 +384,11 @@ function generateManifest(pathTitle, scoFiles, includeQuiz) {
 export async function exportScormPackage(pathResult, options = {}) {
   const { includeQuiz = true } = options;
 
+  // Auto-route to V2 exporter if V2 structured data is present
+  if (pathResult?.v2Path) {
+    return exportV2ScormPackage(pathResult.v2Path, { includeQuiz, query: pathResult.query });
+  }
+
   if (!pathResult?.path?.length) {
     throw new Error("Cannot export empty path");
   }

@@ -739,42 +739,37 @@ export default function PathIntelligencePanel() {
         </div>
       ) : (
         <>
-          {/* Compact summary of setup */}
-          <div className="ip-summary">
-            <span className="ip-summary-goal">{learningIntent.primaryGoal}</span>
-            <span className="ip-summary-meta">
-              {learningIntent.skillLevel} ·{" "}
-              {learningIntent.timeBudget === "none" ? "No Limit" : `~${learningIntent.timeBudget}h`}
-              {learningIntent.industries?.length > 0 && (
-                <> · {learningIntent.industries.join(", ")}</>
-              )}
-            </span>
-            <div className="ip-industry-chips ip-industry-chips-compact">
-              <button
-                type="button"
-                className={`ip-industry-chip ${!learningIntent.industries?.length ? "selected" : ""}`}
-                onClick={() => handleFieldChange("industries", [])}
-              >
-                All
-              </button>
-              {INDUSTRIES.filter((i) => i !== "All").map((ind) => (
-                <button
-                  key={ind}
-                  type="button"
-                  className={`ip-industry-chip ${learningIntent.industries?.includes(ind) ? "selected" : ""}`}
-                  onClick={() => {
-                    const prev = learningIntent.industries || [];
-                    const next = prev.includes(ind)
-                      ? prev.filter((i) => i !== ind)
-                      : [...prev, ind];
-                    handleFieldChange("industries", next);
-                  }}
-                >
-                  {ind}
-                </button>
-              ))}
+        <div className="intelligence-content">
+          {/* V2 Specs Style Summary */}
+          <div className="spec-group">
+            <label>Primary Goal</label>
+            <div className="read-only-box">{learningIntent.primaryGoal}</div>
+          </div>
+          
+          <div style={{display: 'flex', gap: '8px', marginBottom: '20px'}}>
+            <div className="spec-group" style={{flex: 1, marginBottom: 0}}>
+              <label>Target Audience</label>
+              <div className="read-only-box" style={{fontSize: '0.8rem'}}>{learningIntent.skillLevel}</div>
+            </div>
+            <div className="spec-group" style={{flex: 1, marginBottom: 0}}>
+              <label>Time Budget</label>
+              <div className="read-only-box" style={{fontSize: '0.8rem'}}>
+                {learningIntent.timeBudget === "none" ? "No Limit" : `~${learningIntent.timeBudget}h`}
+              </div>
             </div>
           </div>
+
+          {learningIntent.industries?.length > 0 && (
+            <div className="spec-group">
+              <label>Industries</label>
+              <div className="read-only-box" style={{fontSize: '0.8rem'}}>
+                {learningIntent.industries.join(", ")}
+              </div>
+            </div>
+          )}
+          
+          <hr className="divider" />
+        </div>
 
           {/* Readiness Bar (Review + Export stages) */}
           {(workflowStage === "review" || workflowStage === "export") && pathResult && (() => {
