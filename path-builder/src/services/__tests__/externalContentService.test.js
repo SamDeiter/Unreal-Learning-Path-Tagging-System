@@ -1,16 +1,55 @@
 /**
  * externalContentService — Unit tests
  *
- * Tests the YouTube curated content service. All functions load
- * from youtube_curated.json (lazy import) — no external APIs.
+ * Tests the YouTube curated content service.
+ * Mocks fetchJSON since the test environment has no HTTP server
+ * to serve public/data/ files.
  */
-import { describe, it, expect } from "vitest";
-import {
-  getResourcesForTopics,
-  getResourcesForTagIds,
-  getAllByChannel,
-  getStats,
-} from "../externalContentService";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { readFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load the real youtube_curated.json data for realistic tests
+const ytData = JSON.parse(
+  readFileSync(resolve(__dirname, "../../../public/data/youtube_curated.json"), "utf-8")
+);
+
+// Mock the dataLoader module so fetchJSON returns our local data
+vi.mock("../dataLoader", () => ({
+  fetchJSON: vi.fn(async (name) => {
+    if (name === "youtube_curated") return ytData;
+    return null;
+  }),
+  preloadJSON: vi.fn(),
+  clearDataCache: vi.fn(),
+}));
+
+// Must dynamically import AFTER mocking to pick up the mock
+let getResourcesForTopics, getResourcesForTagIds, getAllByChannel, getStats;
+
+beforeEach(async () => {
+  // Reset the module-level _ytData cache by re-importing
+  vi.resetModules();
+
+  // Re-mock after resetModules
+  vi.doMock("../dataLoader", () => ({
+    fetchJSON: vi.fn(async (name) => {
+      if (name === "youtube_curated") return ytData;
+      return null;
+    }),
+    preloadJSON: vi.fn(),
+    clearDataCache: vi.fn(),
+  }));
+
+  const mod = await import("../externalContentService");
+  getResourcesForTopics = mod.getResourcesForTopics;
+  getResourcesForTagIds = mod.getResourcesForTagIds;
+  getAllByChannel = mod.getAllByChannel;
+  getStats = mod.getStats;
+});
 
 describe("externalContentService", () => {
   // -- getResourcesForTopics --
