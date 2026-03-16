@@ -227,7 +227,7 @@ export default function WebPlayerPreview({
   const sections = useMemo(() => groupStepsBySection(stepData), [stepData]);
 
   // State
-  const [viewMode, setViewMode] = useState("intro"); // "intro" | "lesson" | "quiz"
+  const [viewMode, setViewMode] = useState("intro"); // "intro" | "lesson" | "complete" | "quiz"
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -271,8 +271,8 @@ export default function WebPlayerPreview({
     if (activeStep < stepData.length - 1) {
       setActiveStep((prev) => prev + 1);
     } else {
-      // Completed final lesson → go to quiz
-      setViewMode("quiz");
+      // Completed final lesson → celebration screen first
+      setViewMode("complete");
     }
   }, [pathId, activeStep, stepData.length]);
 
@@ -526,7 +526,7 @@ export default function WebPlayerPreview({
                 onComplete={() => {
                   const progress = markStepComplete(pathId, activeStep);
                   setCompleted(new Set(progress.completedSteps));
-                  setViewMode("quiz");
+                  setViewMode("complete");
                 }}
               />
             ) : (
@@ -681,6 +681,53 @@ export default function WebPlayerPreview({
                 )}
               </>
             )}
+          </div>
+        )}
+
+        {/* ── COMPLETION CELEBRATION ── */}
+        {viewMode === "complete" && (
+          <div className="wp-content wp-complete-content">
+            <div className="wp-complete-particles" aria-hidden="true">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <span key={i} className="wp-complete-particle" style={{ animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+
+            <div className="wp-complete-badge">🎓</div>
+            <h1 className="wp-complete-title">Path Complete!</h1>
+            <p className="wp-complete-subtitle">
+              You've finished all the lessons in this learning path. Great work!
+            </p>
+
+            <div className="wp-complete-stats">
+              <div className="wp-complete-stat">
+                <span className="wp-complete-stat-value">{stepData.length}</span>
+                <span className="wp-complete-stat-label">Lessons Completed</span>
+              </div>
+              <div className="wp-complete-stat">
+                <span className="wp-complete-stat-value">{sections.length}</span>
+                <span className="wp-complete-stat-label">Sections Covered</span>
+              </div>
+              <div className="wp-complete-stat">
+                <span className="wp-complete-stat-value">~{estimatedMinutes}m</span>
+                <span className="wp-complete-stat-label">Learning Time</span>
+              </div>
+            </div>
+
+            <div className="wp-complete-actions">
+              <button
+                className="wp-intro-cta"
+                onClick={() => setViewMode("quiz")}
+              >
+                🧠 Take the Knowledge Check
+              </button>
+              <button
+                className="wp-nav-btn wp-nav-secondary"
+                onClick={onClose}
+              >
+                ← Back to Builder
+              </button>
+            </div>
           </div>
         )}
 
