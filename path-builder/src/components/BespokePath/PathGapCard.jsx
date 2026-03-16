@@ -38,6 +38,9 @@ export default function PathGapCard({
   onGenerateBespoke,
   onGenerateSpoke,
   spokeLoading,
+  onFillAllGaps,
+  bulkFilling,
+  bulkProgress,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [personaGaps, setPersonaGaps] = useState(null);
@@ -123,7 +126,21 @@ export default function PathGapCard({
           {/* 1. Blind Spots */}
           {blindSpots.length > 0 && (
             <div id="blind-spots-section">
-              <h4 className="gap-section-title">📋 Blind Spots</h4>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <h4 className="gap-section-title" style={{ margin: 0 }}>📋 Blind Spots</h4>
+                {onFillAllGaps && unfilledBlindSpots.length > 1 && (
+                  <button
+                    className="gap-action-btn bulk-fill"
+                    onClick={() => onFillAllGaps(blindSpots)}
+                    disabled={bulkFilling}
+                    id="auto-fill-all-btn"
+                  >
+                    {bulkFilling
+                      ? `⏳ Filling ${bulkProgress?.done || 0}/${bulkProgress?.total || 0}...`
+                      : `⚡ Auto-Fill All (${unfilledBlindSpots.length})`}
+                  </button>
+                )}
+              </div>
               {blindSpots.map((bs, i) => (
                 <div key={i} className="blind-spot-item" data-severity={bs.severity}>
                   <div className="blind-spot-header">

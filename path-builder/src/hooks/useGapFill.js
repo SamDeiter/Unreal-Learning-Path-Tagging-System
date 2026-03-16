@@ -6,6 +6,7 @@
  */
 import { useState, useCallback, useMemo } from "react";
 import { generateGapFillStep, generateBespokeGapStep } from "../services/pathGapAnalyzer";
+import { trackGapFillCompleted } from "../services/analyticsService";
 
 export default function useGapFill(courses, addCourse, learningIntent) {
   const [fillResults, setFillResults] = useState({});
@@ -38,8 +39,16 @@ export default function useGapFill(courses, addCourse, learningIntent) {
           existingCodes
         );
         setFillResults((prev) => ({ ...prev, [topic]: result }));
+        // Track completion with tier info
+        trackGapFillCompleted(
+          topic,
+          result?.source || "error",
+          false, // not yet accepted — user still needs to click Add
+          learningIntent?.primaryGoal
+        );
       } catch {
         setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+        trackGapFillCompleted(topic, "error", false, learningIntent?.primaryGoal);
       } finally {
         setFillingGap(null);
       }
@@ -61,8 +70,9 @@ export default function useGapFill(courses, addCourse, learningIntent) {
         ...prev,
         [topic]: { ...prev[topic], addedCode: courseMatch.code },
       }));
+      trackGapFillCompleted(topic, "library", true, learningIntent?.primaryGoal);
     },
-    [addCourse]
+    [addCourse, learningIntent]
   );
 
   // ── Generate a bespoke step from video segments ──
@@ -74,8 +84,9 @@ export default function useGapFill(courses, addCourse, learningIntent) {
         ...prev,
         [topic]: { ...prev[topic], bespokeGenerated: true },
       }));
+      trackGapFillCompleted(topic, "bespoke", true, learningIntent?.primaryGoal);
     },
-    [addCourse]
+    [addCourse, learningIntent]
   );
 
   // ── Add a single video segment as a path step ──
@@ -98,8 +109,53 @@ export default function useGapFill(courses, addCourse, learningIntent) {
           addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
         },
       }));
+      trackGapFillCompleted(topic, "bespoke", true, learningIntent?.primaryGoal);
     },
-    [addCourse]
+    [addCourse, learningIntent]
+  );
+
+  // ── Bulk fill all unfilled gaps ──
+  const [bulkFilling, setBulkFilling] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+
+  const handleFillAllGaps = useCallback(
+    async (blindSpots = []) => {
+      const unfilled = blindSpots.filter((bs) => !fillResults[bs.topic]);
+      if (unfilled.length === 0 || bulkFilling) return;
+
+      setBulkFilling(true);
+      setBulkProgress({ done: 0, total: unfilled.length });
+
+      for (let i = 0; i < unfilled.length; i++) {
+        const topic = unfilled[i].topic;
+        try {
+          const steps = courses.map((c) => ({
+            category: "core",
+            segment: { title: c.title || "", text: c.description || "" },
+          }));
+          const existingCodes = courses.map((c) => c.code).filter(Boolean);
+          const result = await generateGapFillStep(
+            topic,
+            learningIntent?.primaryGoal || "",
+            steps,
+            existingCodes
+          );
+          setFillResults((prev) => ({ ...prev, [topic]: result }));
+          trackGapFillCompleted(
+            topic,
+            result?.source || "error",
+            false,
+            learningIntent?.primaryGoal
+          );
+        } catch {
+          setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+        }
+        setBulkProgress({ done: i + 1, total: unfilled.length });
+      }
+
+      setBulkFilling(false);
+    },
+    [courses, learningIntent, fillResults, bulkFilling]
   );
 
   return {
@@ -110,5 +166,8 @@ export default function useGapFill(courses, addCourse, learningIntent) {
     handleAddLibraryCourse,
     handleBespokeGenerate,
     handleAddSegment,
+    handleFillAllGaps,
+    bulkFilling,
+    bulkProgress,
   };
 }

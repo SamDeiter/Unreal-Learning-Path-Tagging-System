@@ -54,6 +54,7 @@ export const EVENTS = {
   // Content Gap Intelligence
   AI_COVERAGE_REPORT: "ai_coverage_report",
   GAP_FILL_ACTION: "gap_fill_action",
+  GAP_FILL_COMPLETED: "gap_fill_completed",
   GAP_EXPLORE_ACTION: "gap_explore_action",
 
   // Step-level Feedback
@@ -388,6 +389,22 @@ export function trackGapExploreAction(topic, queryPreview) {
   });
 }
 
+/**
+ * Track the outcome of a gap fill attempt: which tier was used and whether accepted.
+ * @param {string} topic - The blind spot topic
+ * @param {string} tier - "library" | "bespoke" | "ai" | "error"
+ * @param {boolean} accepted - Whether the user accepted the fill
+ * @param {string} queryPreview - First 100 chars of user query
+ */
+export function trackGapFillCompleted(topic, tier, accepted, queryPreview) {
+  return trackEvent(EVENTS.GAP_FILL_COMPLETED, {
+    topic: topic?.substring(0, 80),
+    tier: tier || "unknown",
+    accepted: !!accepted,
+    query_preview: queryPreview?.substring(0, 100),
+  });
+}
+
 // ── Step-Level Feedback ────────────────────────────────────────────
 
 /**
@@ -431,5 +448,6 @@ export default {
   trackAICoverageReport,
   trackAIStepFeedback,
   trackGapFillAction,
+  trackGapFillCompleted,
   trackGapExploreAction,
 };

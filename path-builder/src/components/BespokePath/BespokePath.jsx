@@ -34,6 +34,7 @@ import { generatePathNarration } from "../../services/stepBriefingService";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getApp } from "firebase/app";
 import { exportScormPackage } from "../../services/scormExportService";
+import { trackGapFillCompleted } from "../../services/analyticsService";
 import "./BespokePath.css";
 
 import {
@@ -134,6 +135,8 @@ export default function BespokePath() {
   const [fillResults, setFillResults] = useState({});
   const [activeSpoke, setActiveSpoke] = useState(null);
   const [spokeLoading, setSpokeLoading] = useState(null);
+  const [bulkFilling, setBulkFilling] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
 
   // Goal-Build Roadmap state
   const [roadmapResult, setRoadmapResult] = useState(null);
@@ -174,9 +177,11 @@ export default function BespokePath() {
           existingCodes
         );
         setFillResults((prev) => ({ ...prev, [topic]: result }));
+        trackGapFillCompleted(topic, result?.source || "error", false, pathResult.query || query);
       } catch (err) {
         console.warn("[BespokePath] Fill gap failed:", err.message);
         setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+        trackGapFillCompleted(topic, "error", false, pathResult.query || query);
       }
     },
     [pathResult, query]
@@ -201,7 +206,8 @@ export default function BespokePath() {
       ...prev,
       [topic]: { ...prev[topic], addedCode: courseMatch.code },
     }));
-  }, []);
+    trackGapFillCompleted(topic, "library", true, pathResult?.query || query);
+  }, [pathResult, query]);
 
   // Add a single video segment to the path
   const handleAddSegment = useCallback((segment, topic, segIndex) => {
@@ -225,7 +231,8 @@ export default function BespokePath() {
         addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
       },
     }));
-  }, []);
+    trackGapFillCompleted(topic, "bespoke", true, pathResult?.query || query);
+  }, [pathResult, query]);
 
   // Generate a combined bespoke step from segments
   const handleBespokeGenerate = useCallback((segments, topic) => {
@@ -242,7 +249,41 @@ export default function BespokePath() {
       ...prev,
       [topic]: { ...prev[topic], bespokeGenerated: true },
     }));
-  }, []);
+    trackGapFillCompleted(topic, "bespoke", true, pathResult?.query || query);
+  }, [pathResult, query]);
+
+  // Bulk fill all unfilled gaps sequentially
+  const handleFillAllGaps = useCallback(
+    async (blindSpots = []) => {
+      if (!pathResult || bulkFilling) return;
+      const unfilled = blindSpots.filter((bs) => !fillResults[bs.topic]);
+      if (unfilled.length === 0) return;
+
+      setBulkFilling(true);
+      setBulkProgress({ done: 0, total: unfilled.length });
+
+      for (let i = 0; i < unfilled.length; i++) {
+        const topic = unfilled[i].topic;
+        try {
+          const existingCodes = pathResult.path.map((s) => s.segment?.id || s.code).filter(Boolean);
+          const result = await generateGapFillStep(
+            topic,
+            pathResult.query || query,
+            pathResult.path,
+            existingCodes
+          );
+          setFillResults((prev) => ({ ...prev, [topic]: result }));
+          trackGapFillCompleted(topic, result?.source || "error", false, pathResult.query || query);
+        } catch {
+          setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+        }
+        setBulkProgress({ done: i + 1, total: unfilled.length });
+      }
+
+      setBulkFilling(false);
+    },
+    [pathResult, query, fillResults, bulkFilling]
+  );
 
   // Explore gap callback — opens search for the blind spot topic
   const handleExploreGap = useCallback((blind) => {
@@ -643,6 +684,9 @@ export default function BespokePath() {
                 onGenerateBespoke={handleBespokeGenerate}
                 onGenerateSpoke={handleGenerateSpoke}
                 spokeLoading={spokeLoading}
+                onFillAllGaps={handleFillAllGaps}
+                bulkFilling={bulkFilling}
+                bulkProgress={bulkProgress}
               />
             </aside>
 
