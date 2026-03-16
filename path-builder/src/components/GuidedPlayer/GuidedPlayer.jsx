@@ -14,9 +14,12 @@ import CompletionCard from "./CompletionCard";
 import CourseSidebar from "./CourseSidebar";
 import QuizCard from "./QuizCard";
 import TranscriptCards from "./TranscriptCards";
+import ModuleCheckpointCard from "./ModuleCheckpointCard";
+import EffectivenessReport from "./EffectivenessReport";
 import learningObjectives from "../../data/learning_objectives.json";
 import { extractLearningTopics } from "../../utils/videoTopicExtractor";
 import "./GuidedPlayer.css";
+import "./ModuleCheckpointCard.css";
 import { fetchJSON } from "../../services/dataLoader";
 
 /**
@@ -159,24 +162,50 @@ export default function GuidedPlayer(props) {
         />
       )}
 
-      {/* Stage: Complete */}
-      {gp.stage === STAGES.COMPLETE && (
-        <CompletionCard
-          courses={gp.courses}
-          totalDuration={gp.introContent.totalDuration}
-          reflectionText={gp.reflectionText}
-          onReflectionChange={gp.setReflectionText}
-          wordCount={gp.wordCount}
-          onFinish={gp.handleFinish}
-          onBackToPath={gp.handleBackToPath}
-          problemSummary={props.problemSummary}
-          fixRecipe={props.fixRecipe}
-          microLesson={props.microLesson}
+      {/* Stage: Checkpoint — Module verification */}
+      {gp.stage === STAGES.CHECKPOINT && gp.currentCheckpoint && (
+        <ModuleCheckpointCard
+          checkpoint={gp.currentCheckpoint}
+          quizQuestions={gp.checkpointQuiz}
+          moduleName={gp.currentCourse?._moduleName || gp.currentCourse?.title}
+          onSubmit={gp.handleCheckpointSubmit}
+          onSkip={gp.handleCheckpointSkip}
         />
       )}
 
-      {/* Side panel (hidden during intro and complete) */}
-      {gp.stage !== STAGES.INTRO && gp.stage !== STAGES.COMPLETE && (
+      {/* Stage: Complete */}
+      {gp.stage === STAGES.COMPLETE && (
+        <>
+          {/* Show effectiveness report if checkpoints were collected */}
+          {gp.checkpoints && gp.checkpoints.length > 0 && (
+            <EffectivenessReport
+              checkpoints={gp.checkpoints}
+              replanHistory={gp.replanState?.replanHistory || []}
+              originalProblem={props.problemSummary}
+              pathTitle={gp.introContent?.title}
+              onFinish={gp.handleFinish}
+            />
+          )}
+          {/* Fallback to standard completion card if no checkpoints */}
+          {(!gp.checkpoints || gp.checkpoints.length === 0) && (
+            <CompletionCard
+              courses={gp.courses}
+              totalDuration={gp.introContent.totalDuration}
+              reflectionText={gp.reflectionText}
+              onReflectionChange={gp.setReflectionText}
+              wordCount={gp.wordCount}
+              onFinish={gp.handleFinish}
+              onBackToPath={gp.handleBackToPath}
+              problemSummary={props.problemSummary}
+              fixRecipe={props.fixRecipe}
+              microLesson={props.microLesson}
+            />
+          )}
+        </>
+      )}
+
+      {/* Side panel (hidden during intro, checkpoint, and complete) */}
+      {gp.stage !== STAGES.INTRO && gp.stage !== STAGES.COMPLETE && gp.stage !== STAGES.CHECKPOINT && (
         <div className="sidebar-column">
           <CourseSidebar
             courses={gp.courses}
