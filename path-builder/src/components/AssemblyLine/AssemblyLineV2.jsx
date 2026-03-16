@@ -6,6 +6,8 @@ import { classifySegment, getBloomBadge } from "../../services/bloomClassifier";
 import { getDisplayName } from "../../services/topicNameService";
 import { getLoadSummary, interleaveCourses } from "../../services/cognitiveLoadEngine";
 import SmartEmptyState from "./SmartEmptyState";
+import StepInspector from "./StepInspector";
+import AssemblyTrace from "./AssemblyTrace";
 
 import "../PathBuilderV2Mockup/PathBuilderV2Mockup.css"; // Reuse V2 layout styles directly
 
@@ -28,6 +30,7 @@ export default function AssemblyLineV2() {
     courses,
     modules,
     ungroupedCourses,
+    addCourse,
     removeCourse,
     reorderCourses,
     clearPath,
@@ -44,6 +47,8 @@ export default function AssemblyLineV2() {
   } = usePath();
 
   const [activeModule, setActiveModule] = useState(modules[0]?.id || "ungrouped");
+  const [selectedStepCode, setSelectedStepCode] = useState(null);
+  const [activePanel, setActivePanel] = useState("inspector"); // "inspector" or "trace"
 
   // Basic drag functionality (to move between modules or reorder)
   const handleDragStart = (e, courseCode, sourceModuleId) => {
@@ -58,9 +63,60 @@ export default function AssemblyLineV2() {
   const handleDropOnModule = (e, targetModuleId) => {
     e.preventDefault();
     e.currentTarget.classList.remove("drag-over");
-    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-    if (data.sourceModuleId !== targetModuleId) {
-      moveCourseToModule(data.courseCode, targetModuleId);
+    // Check if this is a new course from the library
+    const courseData = e.dataTransfer.getData("application/x-course-data");
+    if (courseData) {
+      try {
+        const course = JSON.parse(courseData);
+        addCourse(course);
+        if (targetModuleId) {
+          // Small delay since addCourse + moveCourseToModule are separate dispatches
+          setTimeout(() => moveCourseToModule(course.code, targetModuleId), 0);
+        }
+      } catch { /* ignore malformed data */ }
+      return;
+    }
+    // Otherwise it's an internal reorder between modules
+    const internalData = e.dataTransfer.getData("text/plain");
+    if (internalData) {
+      const data = JSON.parse(internalData);
+      if (data.sourceModuleId !== targetModuleId) {
+        moveCourseToModule(data.courseCode, targetModuleId);
+      }
+    }
+  };
+
+  // Handle drop on the dropzone elements ("+ Drop Course Here")
+  const handleDropzoneOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.add("drag-over");
+  };
+  const handleDropzoneLeave = (e) => {
+    e.currentTarget.classList.remove("drag-over");
+  };
+  const handleDropOnZone = (e, targetModuleId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove("drag-over");
+    const courseData = e.dataTransfer.getData("application/x-course-data");
+    if (courseData) {
+      try {
+        const course = JSON.parse(courseData);
+        addCourse(course);
+        if (targetModuleId) {
+          setTimeout(() => moveCourseToModule(course.code, targetModuleId), 0);
+        }
+      } catch { /* ignore malformed data */ }
+      return;
+    }
+    // Internal reorder
+    const internalData = e.dataTransfer.getData("text/plain");
+    if (internalData) {
+      const data = JSON.parse(internalData);
+      if (data.sourceModuleId !== targetModuleId) {
+        moveCourseToModule(data.courseCode, targetModuleId);
+      }
     }
   };
 
@@ -82,6 +138,11 @@ export default function AssemblyLineV2() {
     reorderCourses(finalOrder);
   };
 
+  const selectedCourse = useMemo(() => 
+    courses.find(c => c.code === selectedStepCode), 
+    [courses, selectedStepCode]
+  );
+
   const loadSummary = useMemo(() => courses.length > 0 ? getLoadSummary(courses) : null, [courses]);
 
   if (courses.length === 0) {
@@ -90,7 +151,12 @@ export default function AssemblyLineV2() {
         <SmartEmptyState
           goal={learningIntent?.primaryGoal}
           skillLevel={learningIntent?.skillLevel}
-          onBrowseLibrary={() => window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "browse" } }))}
+          onBrowseLibrary={() => {
+            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "browse" } }));
+          }}
+          onBuildBySkill={(skill) => {
+            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "skill", skill } }));
+          }}
         />
       </div>
     );
@@ -110,10 +176,14 @@ export default function AssemblyLineV2() {
     return (
       <div 
         key={course.code} 
-        className={`step-card type-${ct.typeStr}`}
+        className={`step-card type-${ct.typeStr} ${selectedStepCode === course.code ? 'selected' : ''}`}
         draggable
         onDragStart={(e) => handleDragStart(e, course.code, modId)}
         onDragEnd={handleDragEnd}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedStepCode(course.code);
+        }}
       >
         <div className="step-drag-handle">⋮⋮</div>
         <div className="step-number">{index + 1}</div>
@@ -184,25 +254,10 @@ export default function AssemblyLineV2() {
     );
   };
 
-  if (courses.length === 0) {
-    return (
-      <div className="pb-v2-canvas">
-        <SmartEmptyState
-          goal={learningIntent?.primaryGoal}
-          skillLevel={learningIntent?.skillLevel}
-          onBrowseLibrary={() => {
-            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "browse" } }));
-          }}
-          onBuildBySkill={(skill) => {
-            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "skill", skill } }));
-          }}
-        />
-      </div>
-    );
-  }
 
   return (
-    <div className="pb-v2-canvas">
+    <div className="pb-v2-canvas-wrapper" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className="pb-v2-canvas">
       <div className="canvas-toolbar">
         <button className="btn-epic-secondary" onClick={addModule}>+ Add Module</button>
         {courses.length > 1 && <button className="btn-epic-secondary" onClick={handleOptimize}>⚡ Smart Order</button>}
@@ -289,7 +344,11 @@ export default function AssemblyLineV2() {
               <div className="module-steps">
                 {modCourses.map((c, i) => renderStep(c, i, mod.id))}
                 <div className="module-footer-actions">
-                  <div className="add-step-dropzone">+ Drop Course Here</div>
+                  <div className="add-step-dropzone"
+                    onDragOver={handleDropzoneOver}
+                    onDragLeave={handleDropzoneLeave}
+                    onDrop={(e) => handleDropOnZone(e, mod.id)}
+                  >+ Drop Course Here</div>
                   <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                     <button className="btn-epic-secondary" style={{fontSize: '0.8rem', padding: '6px 12px'}} onClick={() => addTransition(mod.id)}>+ Add Transition</button>
                     <button className="btn-epic-secondary" style={{fontSize: '0.8rem', padding: '6px 12px'}} onClick={() => addAssessment(mod.id)}>+ Add Assessment</button>
@@ -318,7 +377,11 @@ export default function AssemblyLineV2() {
             <div className="module-steps">
               {ungroupedCourses.map((c, i) => renderStep(c, i, null))}
               <div className="module-footer-actions">
-                <div className="add-step-dropzone">+ Drop Course Here</div>
+                <div className="add-step-dropzone"
+                  onDragOver={handleDropzoneOver}
+                  onDragLeave={handleDropzoneLeave}
+                  onDrop={(e) => handleDropOnZone(e, null)}
+                >+ Drop Course Here</div>
                 <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                   <button className="btn-epic-secondary" style={{fontSize: '0.8rem', padding: '6px 12px'}} onClick={() => addTransition(null)}>+ Add Transition</button>
                   <button className="btn-epic-secondary" style={{fontSize: '0.8rem', padding: '6px 12px'}} onClick={() => addAssessment(null)}>+ Add Assessment</button>
@@ -327,6 +390,44 @@ export default function AssemblyLineV2() {
             </div>
           </div>
         )}
+      </div>
+      </div>
+
+      {/* Right Sidebar - Phase 5 Panels */}
+      <div className="pb-v2-right-sidebar">
+        <div className="panel-tabs">
+          <button 
+            className={`tab-btn ${activePanel === 'inspector' ? 'active' : ''}`}
+            onClick={() => setActivePanel('inspector')}
+          >
+            INSPECTOR
+          </button>
+          <button 
+            className={`tab-btn ${activePanel === 'trace' ? 'active' : ''}`}
+            onClick={() => setActivePanel('trace')}
+          >
+            TRACE
+          </button>
+        </div>
+        
+        <div className="panel-container">
+          {activePanel === 'inspector' ? (
+            <StepInspector 
+              course={selectedCourse} 
+              onClose={() => setSelectedStepCode(null)}
+              onPin={(code) => updateCourseMeta(code, { isPinned: !selectedCourse?.isPinned })}
+              onReplace={(code) => {
+                // Placeholder for Phase 6 replacement logic
+                window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "search", replaceCode: code } }));
+              }}
+            />
+          ) : (
+            <AssemblyTrace 
+              course={selectedCourse} 
+              onClose={() => setSelectedStepCode(null)}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

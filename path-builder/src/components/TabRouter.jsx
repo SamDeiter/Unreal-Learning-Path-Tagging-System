@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { usePath } from "../context/PathContext";
 import LoadingSpinner from "./LoadingSpinner/LoadingSpinner";
 
 // ── Lazy-loaded tab components (code-split per tab) ──────────────────
@@ -8,6 +9,7 @@ const TagManager = lazy(() => import("./TagManager/TagManager"));
 const PathDashboard = lazy(() => import("./PathBuilder/PathDashboard"));
 const PathCreationWizard = lazy(() => import("./PathBuilder/PathCreationWizard"));
 const PathLoader = lazy(() => import("./PathBuilder/PathLoader"));
+const PathBuilderV2Mockup = lazy(() => import("./PathBuilderV2Mockup/PathBuilderV2Mockup"));
 const Personas = lazy(() => import("./Personas/Personas"));
 const ProblemFirst = lazy(() =>
   import("./ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
@@ -82,6 +84,8 @@ export default function TabRouter({
   onInsightNavigate,
   builderEditor,
 }) {
+  const { clearPath } = usePath();
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       {/* ── Simple 1:1 tabs ── */}
@@ -107,7 +111,12 @@ export default function TabRouter({
         <div className="dashboard-layout"><BespokePath /></div>
       )}
 
-      {/* ── Path Builder (dashboard / editor subviews + wizard) ── */}
+      {/* ── Path Builder V2 Mockup ── */}
+      {activeTab === "builder-v2" && (
+        <div className="dashboard-layout"><PathBuilderV2Mockup /></div>
+      )}
+
+      {/* ── Path Builder (V1) (dashboard / editor subviews + wizard) ── */}
       {activeTab === "builder" && builderView === "dashboard" && (
         <div className="dashboard-layout">
           <PathDashboard
@@ -129,6 +138,8 @@ export default function TabRouter({
       {showWizard && (
         <PathCreationWizard
           onComplete={(pathData) => {
+            // Clear any stale draft so the canvas starts empty
+            clearPath();
             setShowWizard(false);
             import("../utils/pathStorageUtils").then(({ savePathToStorage }) => {
               savePathToStorage(pathData);

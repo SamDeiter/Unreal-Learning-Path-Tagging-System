@@ -153,8 +153,7 @@
 }
 
 /* Shared Panel Styles */
-.pb-v2-library,
-.pb-v2-intelligence {
+.pb-v2-library {
   width: 320px;
   background-color: #1a1a1a;
   border-right: 1px solid #2a2a2a;
@@ -163,9 +162,21 @@
   flex-shrink: 0;
 }
 
-.pb-v2-intelligence {
-  border-right: none;
+/* Assembly Line Wrapper (Canvas + Right Sidebar) */
+.pb-v2-canvas-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pb-v2-right-sidebar {
+  width: 350px;
+  background-color: #1a1a1a;
   border-left: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
 }
 
 .panel-header {
@@ -182,7 +193,7 @@
 }
 
 .library-content,
-.intelligence-content {
+.panel-container {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
@@ -536,6 +547,16 @@
   background-color: rgba(0, 120, 212, 0.05);
 }
 
+.add-step-dropzone.drag-over {
+  border-color: #3fb950;
+  color: #3fb950;
+  background-color: rgba(63, 185, 80, 0.12);
+  border-style: solid;
+  box-shadow: 0 0 8px rgba(63, 185, 80, 0.2);
+  transform: scale(1.02);
+  transition: all 0.15s ease;
+}
+
 /* --- Right Panel Specs --- */
 .spec-group {
   margin-bottom: 20px;
@@ -796,4 +817,232 @@
 .field-select:focus {
   outline: none;
   border-color: #58a6ff;
+}
+/* ── Step Inspector & Assembly Trace (Phase 5) ── */
+
+.step-inspector, .assembly-trace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1a1a1a;
+  border-left: 1px solid #333;
+}
+
+.inspector-header, .trace-header {
+  padding: 16px;
+  background-color: #1f1f1f;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inspector-header h3, .trace-header h3 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b949e;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.inspector-content, .trace-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.inspector-section, .trace-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  color: #8b949e;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.clean-title-box, .raw-title-box {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px;
+  position: relative;
+}
+
+.raw-title-box {
+  background: #161b22;
+  margin-top: 8px;
+}
+
+.badge {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  font-size: 0.65rem;
+  background: #30363d;
+  color: #8b949e;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 1px solid #444;
+}
+
+.lineage-card, .outcome-card, .rationale-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.lineage-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.lineage-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.lineage-badge.ai { background: rgba(163, 51, 200, 0.2); color: #d670ff; border: 1px solid #a333c8; }
+.lineage-badge.source { background: rgba(35, 134, 54, 0.2); color: #3fb950; border: 1px solid #238636; }
+
+.bloom-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.inspector-footer {
+  padding: 16px;
+  background: #141414;
+  border-top: 1px solid #333;
+  display: flex;
+  gap: 12px;
+}
+
+.inspector-footer button {
+  flex: 1;
+}
+
+/* Trace List */
+.constraints-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.constraints-list li {
+  font-size: 0.85rem;
+  color: #c9d1d9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.check { color: #3fb950; font-weight: bold; }
+
+.candidates-table {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table-header {
+  background: #21262d;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  justify-content: space-between;
+}
+
+.candidate-row {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #30363d;
+}
+
+.candidate-row.selected {
+  background: rgba(35, 134, 54, 0.1);
+  border-left: 3px solid #3fb950;
+}
+
+.candidate-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.candidate-score { width: 50px; text-align: right; color: #8b949e; font-family: monospace; }
+.verdict { font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 12px; }
+
+.selected .verdict { color: #3fb950; background: rgba(35, 134, 54, 0.2); }
+.rejected .verdict { color: #f85149; background: rgba(248, 81, 73, 0.1); }
+
+.lineage-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tree-node {
+  background: #21262d;
+  border: 1px solid #30363d;
+  padding: 8px 12px;
+  border-radius: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+.tree-node .node-type {
+  display: block;
+  font-size: 0.6rem;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.tree-node .node-val {
+  font-size: 0.82rem;
+  color: #c9d1d9;
+}
+
+.tree-connector {
+  width: 2px;
+  height: 12px;
+  background: #30363d;
+}
+
+.empty-inspector, .empty-trace {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #666;
+  padding: 40px;
+}
+
+.empty-inspector .icon, .empty-trace .icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.3;
 }

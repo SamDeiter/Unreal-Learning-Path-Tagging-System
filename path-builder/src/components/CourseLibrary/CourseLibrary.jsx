@@ -116,6 +116,17 @@ function CourseLibrary({ courses }) {
     }
   };
 
+  // Handle drag start for drag-and-drop to assembly line
+  const handleDragStart = (e, course) => {
+    e.dataTransfer.setData("application/x-course-data", JSON.stringify(course));
+    e.dataTransfer.effectAllowed = "copy";
+    e.currentTarget.classList.add("dragging");
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.classList.remove("dragging");
+  };
+
   // Handle add all suggested courses
   const handleAddAllSuggested = () => {
     availableSuggestions.forEach((course) => {
@@ -264,6 +275,9 @@ function CourseLibrary({ courses }) {
             key={`${course.code}-${index}`}
             className={`course-card ${isInPath(course.code) ? "in-path" : ""}`}
             title={`${course.title}\n\nCode: ${course.code}\nLevel: ${course.tags?.level || "N/A"}\nDuration: ${course.duration ? `${course.duration.toFixed(1)} hours` : "Unknown"}\nVideos: ${course.video_count || 0}\nVersions: ${course.versions?.join(", ") || "N/A"}`}
+            draggable={!isInPath(course.code)}
+            onDragStart={(e) => handleDragStart(e, course)}
+            onDragEnd={handleDragEnd}
           >
             <div className="card-content">
               <div className="card-header">
