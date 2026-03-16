@@ -12,11 +12,17 @@ function LeftPanel({ courses, preSelectedSkill, onSkillUsed, onBackToDashboard }
       const { mode: requestedMode, skill } = e.detail || {};
       if (requestedMode === "browse") {
         setMode("browse");
+        if (skill) {
+          // Dispatch search event to CourseLibrary after tab switch
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent("course-library-search", { detail: { query: skill } }));
+          }, 50);
+        }
       } else if (requestedMode === "skill") {
         setMode("skill");
-        // If a skill topic was passed, trigger skill selection via onSkillUsed
+        // If a skill topic was passed, trigger skill selection
         if (skill && onSkillUsed) {
-          setTimeout(() => onSkillUsed(null), 50);
+          setTimeout(() => onSkillUsed(skill), 50);
         }
       }
     };

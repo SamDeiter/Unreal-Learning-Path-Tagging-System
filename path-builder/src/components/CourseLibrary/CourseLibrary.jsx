@@ -45,6 +45,19 @@ function CourseLibrary({ courses }) {
   const [levelFilter, setLevelFilter] = useState(null);
   const searchInputRef = useRef(null);
 
+  // Listen for external search requests (from SmartEmptyState topic pills)
+  useEffect(() => {
+    const handler = (e) => {
+      const query = e.detail?.query;
+      if (query) {
+        setSearch(query);
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("course-library-search", handler);
+    return () => window.removeEventListener("course-library-search", handler);
+  }, []);
+
   // Get suggested courses based on learning goal
   const suggestedCourses = useMemo(() => {
     const goal = learningIntent?.primaryGoal;

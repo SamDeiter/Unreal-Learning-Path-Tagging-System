@@ -21,7 +21,7 @@ const POPULAR_TOPICS = [
   "MetaSounds",
 ];
 
-function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill }) {
+function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill, onSearchLibrary }) {
   // Safe-call wrapper
   const handleBuildBySkill = (skill) => {
 
@@ -91,7 +91,13 @@ function SmartEmptyState({ goal, skillLevel, onBrowseLibrary, onBuildBySkill }) 
             <button
               key={topic}
               className="ses-topic-pill"
-              onClick={() => handleBuildBySkill(topic)}
+              onClick={() => {
+                if (typeof onSearchLibrary === "function") {
+                  onSearchLibrary(topic);
+                } else {
+                  handleBuildBySkill(topic);
+                }
+              }}
             >
               {topic}
             </button>

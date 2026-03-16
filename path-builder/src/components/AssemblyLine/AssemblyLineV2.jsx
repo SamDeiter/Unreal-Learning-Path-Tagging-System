@@ -157,6 +157,9 @@ export default function AssemblyLineV2() {
           onBuildBySkill={(skill) => {
             window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "skill", skill } }));
           }}
+          onSearchLibrary={(topic) => {
+            window.dispatchEvent(new CustomEvent("focus-left-panel", { detail: { mode: "browse", skill: topic } }));
+          }}
         />
       </div>
     );
