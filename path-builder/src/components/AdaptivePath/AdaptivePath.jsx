@@ -16,8 +16,10 @@ import usePathQuiz from "../../hooks/usePathQuiz";
 import usePathStepActions from "../../hooks/usePathStepActions";
 import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/securityGuardrails";
 import { generateBespokePath } from "../../services/bespokePathService";
+import { generateGapFillStep, generateBespokeGapStep } from "../../services/pathGapAnalyzer";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
-import { trackSessionCompleted } from "../../services/analyticsService";
+import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted } from "../../services/analyticsService";
+import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
@@ -66,6 +68,12 @@ export default function AdaptivePath() {
   }, []);
 
   const [struggleBadges, setStruggleBadges] = useState(new Map());
+
+  // ── Gap fill state ──
+  const [fillResults, setFillResults] = useState({});
+  const [fillingGap, setFillingGap] = useState(null);
+  const [bulkFilling, setBulkFilling] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
 
   const { knowledgeProfile, hasSavedProfile, clearProfile, setProfileDirect, STAGES } =
     useAdaptiveQuiz();
@@ -233,6 +241,18 @@ export default function AdaptivePath() {
         setFeasibilityFailed(!!result.feasibilityFailed);
         setAiWarning(result.aiGeneratedWarning || null);
         cachePath(profileKey, result);
+
+        // ── Track auto-filled gaps for analytics ──
+        const autoFilledSteps = (result.path || []).filter((s) => s.isAutoGapFill);
+        for (const step of autoFilledSteps) {
+          trackGapAutoFillCompleted(
+            step.title || step.segment?.title || "unknown",
+            step.segment?.gapFillSource || "unknown",
+            autoFilledSteps.length,
+            query?.substring(0, 100),
+            "adaptive"
+          );
+        }
       }
     } catch (err) {
       setPathError(err.message || "Failed to generate learning path.");
@@ -282,6 +302,147 @@ export default function AdaptivePath() {
       setExpandedStep(cur + 1);
     }
   }, [expandedStep, pathData]);
+
+  // ── Gap fill handlers ──
+  const handleFillGap = useCallback(
+    async (topic) => {
+      if (fillingGap || !pathData) return;
+      setFillingGap(topic);
+      try {
+        const existingCodes = pathData.path.map((s) => s.segment?.id || s.code).filter(Boolean);
+        const result = await generateGapFillStep(
+          topic,
+          pathData.query || query,
+          pathData.path,
+          existingCodes
+        );
+        setFillResults((prev) => ({ ...prev, [topic]: result }));
+        trackGapFillCompleted(topic, result?.source || "error", false, query);
+      } catch {
+        setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+      } finally {
+        setFillingGap(null);
+      }
+    },
+    [fillingGap, pathData, query]
+  );
+
+  const handleAddLibraryCourse = useCallback(
+    (courseMatch, topic) => {
+      const wrappedStep = {
+        category: "core",
+        segment: {
+          id: courseMatch.code,
+          title: courseMatch.title,
+          type: "gap_fill",
+          gapFillSource: "library",
+        },
+        isAutoGapFill: true,
+        title: courseMatch.title,
+        summary: `Library course added to fill gap: ${topic}`,
+      };
+      setPathData((prev) => ({
+        ...prev,
+        path: insertAtPhasePosition(prev.path, wrappedStep),
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], addedCode: courseMatch.code },
+      }));
+      trackGapFillCompleted(topic, "library", true, query);
+    },
+    [query]
+  );
+
+  const handleAddSegment = useCallback(
+    (segment, topic, segIndex) => {
+      const wrappedStep = {
+        category: "core",
+        segment: {
+          id: `gap-seg-${Date.now()}-${segIndex}`,
+          title: segment.title || `${topic} Segment`,
+          text: segment.text || "",
+          type: "gap_fill",
+          videoTitle: segment.videoTitle || "",
+          gapFillSource: "bespoke",
+        },
+        isAutoGapFill: true,
+        title: segment.title || topic,
+        summary: segment.text || "",
+      };
+      setPathData((prev) => ({
+        ...prev,
+        path: insertAtPhasePosition(prev.path, wrappedStep),
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: {
+          ...prev[topic],
+          addedSegments: [...(prev[topic]?.addedSegments || []), segIndex],
+        },
+      }));
+      trackGapFillCompleted(topic, "bespoke", true, query);
+    },
+    [query]
+  );
+
+  const handleBespokeGenerate = useCallback(
+    (segments, topic) => {
+      const bespokeStep = generateBespokeGapStep(topic, segments);
+      const wrappedStep = {
+        category: "core",
+        segment: bespokeStep,
+        isAutoGapFill: true,
+      };
+      setPathData((prev) => ({
+        ...prev,
+        path: insertAtPhasePosition(prev.path, wrappedStep),
+      }));
+      setFillResults((prev) => ({
+        ...prev,
+        [topic]: { ...prev[topic], bespokeGenerated: true },
+      }));
+      trackGapFillCompleted(topic, "bespoke", true, query);
+    },
+    [query]
+  );
+
+  const handleExploreGap = useCallback((topic) => {
+    const searchUrl = `https://www.google.com/search?q=site%3Adev.epicgames.com+unreal+engine+${encodeURIComponent(topic || "")}`;
+    window.open(searchUrl, "_blank", "noopener,noreferrer");
+  }, []);
+
+  const handleFillAllGaps = useCallback(
+    async (blindSpots = []) => {
+      if (!pathData || bulkFilling) return;
+      const unfilled = blindSpots.filter((bs) => !fillResults[bs.topic]);
+      if (unfilled.length === 0) return;
+
+      setBulkFilling(true);
+      setBulkProgress({ done: 0, total: unfilled.length });
+
+      for (let i = 0; i < unfilled.length; i++) {
+        const topic = unfilled[i].topic;
+        try {
+          const existingCodes = pathData.path.map((s) => s.segment?.id || s.code).filter(Boolean);
+          const result = await generateGapFillStep(
+            topic,
+            pathData.query || query,
+            pathData.path,
+            existingCodes
+          );
+          setFillResults((prev) => ({ ...prev, [topic]: result }));
+          trackGapFillCompleted(topic, result?.source || "error", false, query);
+        } catch {
+          setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
+        }
+        setBulkProgress({ done: i + 1, total: unfilled.length });
+      }
+
+      setBulkFilling(false);
+    },
+    [pathData, query, fillResults, bulkFilling]
+  );
 
 
   // ── RENDER: Input Stage ──
@@ -513,6 +674,16 @@ export default function AdaptivePath() {
               setShowLevelPicker={setShowLevelPicker}
               setPendingCleanedQuery={setPendingCleanedQuery}
               query={query}
+              gapData={pathData.gaps}
+              fillResults={fillResults}
+              onFillGap={handleFillGap}
+              onExplore={handleExploreGap}
+              onAddCourse={handleAddLibraryCourse}
+              onAddSegment={handleAddSegment}
+              onGenerateBespoke={handleBespokeGenerate}
+              onFillAllGaps={handleFillAllGaps}
+              bulkFilling={bulkFilling}
+              bulkProgress={bulkProgress}
             />
 
             {/* Main Content Area */}

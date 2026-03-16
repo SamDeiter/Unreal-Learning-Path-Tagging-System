@@ -56,6 +56,7 @@ export const EVENTS = {
   GAP_FILL_ACTION: "gap_fill_action",
   GAP_FILL_COMPLETED: "gap_fill_completed",
   GAP_EXPLORE_ACTION: "gap_explore_action",
+  GAP_AUTO_FILL_COMPLETED: "gap_auto_fill_completed",
 
   // Step-level Feedback
   AI_STEP_FEEDBACK: "ai_step_feedback",
@@ -405,6 +406,25 @@ export function trackGapFillCompleted(topic, tier, accepted, queryPreview) {
   });
 }
 
+/**
+ * Track when a gap is automatically filled during path generation.
+ * Distinct from manual fills — tracks the pipeline auto-fill feature.
+ * @param {string} topic - The blind spot topic
+ * @param {string} tier - "library" | "bespoke" | "ai"
+ * @param {number} gapCount - Total auto-filled gaps in this path
+ * @param {string} queryPreview - First 100 chars of user query
+ * @param {string} pathType - "adaptive" | "bespoke"
+ */
+export function trackGapAutoFillCompleted(topic, tier, gapCount, queryPreview, pathType) {
+  return trackEvent(EVENTS.GAP_AUTO_FILL_COMPLETED, {
+    topic: topic?.substring(0, 80),
+    tier: tier || "unknown",
+    gap_count: gapCount || 0,
+    query_preview: queryPreview?.substring(0, 100),
+    path_type: pathType || "unknown",
+  });
+}
+
 // ── Step-Level Feedback ────────────────────────────────────────────
 
 /**
@@ -450,4 +470,5 @@ export default {
   trackGapFillAction,
   trackGapFillCompleted,
   trackGapExploreAction,
+  trackGapAutoFillCompleted,
 };

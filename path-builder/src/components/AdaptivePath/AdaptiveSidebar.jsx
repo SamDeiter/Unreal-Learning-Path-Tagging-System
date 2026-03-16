@@ -1,7 +1,8 @@
 /**
- * AdaptiveSidebar — Phase navigation + voice selector for adaptive path
+ * AdaptiveSidebar — Phase navigation + gap analysis + voice selector for adaptive path
  */
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
+import PathGapCard from "../BespokePath/PathGapCard";
 
 export default function AdaptiveSidebar({
   phases,
@@ -17,6 +18,17 @@ export default function AdaptiveSidebar({
   setShowLevelPicker,
   setPendingCleanedQuery,
   query,
+  // Gap fill props
+  gapData,
+  fillResults,
+  onFillGap,
+  onExplore,
+  onAddCourse,
+  onAddSegment,
+  onGenerateBespoke,
+  onFillAllGaps,
+  bulkFilling,
+  bulkProgress,
 }) {
   return (
     <aside className="epic-sidebar">
@@ -105,6 +117,24 @@ export default function AdaptiveSidebar({
           </div>
         ))}
       </nav>
+
+      {/* Gap Analysis Card — below navigation */}
+      <PathGapCard
+        gaps={gapData}
+        communityPainPoints={pathData?.communityPainPoints}
+        query={query}
+        steps={pathData?.path}
+        onFillGap={onFillGap}
+        onExplore={onExplore}
+        fillResults={fillResults}
+        onAddCourse={onAddCourse}
+        onAddSegment={onAddSegment}
+        onGenerateBespoke={onGenerateBespoke}
+        onFillAllGaps={onFillAllGaps}
+        bulkFilling={bulkFilling}
+        bulkProgress={bulkProgress}
+      />
+
       <div className="voice-selector">
         <label className="voice-label" htmlFor="voice-select">
           🎤 Narrator Voice
