@@ -1,0 +1,178 @@
+{
+  "course_code": "204.07",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:07",
+      "title": "Niagara Baking Process",
+      "concept": "The Niagara baking tool renders a sequence of particle states into a texture atlas. This atlas can then be used in a material as a flipbook animation, providing a performant alternative to simulating the particles in real-time, especially for distant or static effects.",
+      "diagram_suggestion": "Diagram illustrating the process: Niagara simulation -> Baker Tool (camera positioning, resolution settings) -> Texture Atlas -> Material (flipbook animation) -> Rendered Scene."
+    },
+    {
+      "insert_after_timestamp": "5:00",
+      "title": "Texture Atlas Dimensions and Power of Two",
+      "concept": "Unreal Engine 5 benefits from texture dimensions that are powers of two (e.g., 256, 512, 1024) due to how the GPU processes textures. Using non-power-of-two textures can lead to reduced performance because the engine may need to perform additional calculations or padding to accommodate them.",
+      "diagram_suggestion": "A visual comparison of power-of-two vs. non-power-of-two texture memory layout and access patterns on the GPU."
+    },
+    {
+      "insert_after_timestamp": "8:16",
+      "title": "Niagara Determinism",
+      "concept": "Determinism in Niagara ensures that a particle simulation produces the same results every time it is run, given the same inputs. This is crucial for baking effects because variations in the simulation would result in inconsistencies in the baked texture atlas. Determinism is achieved by controlling the random number generation within the Niagara system.",
+      "diagram_suggestion": "Flowchart showing the deterministic vs. non-deterministic paths in a Niagara system, highlighting the role of random number generators and seed values."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:14",
+      "procedural_step": "Baking keeps things lighter.",
+      "why": "Baking pre-calculates the particle simulation and stores it in a texture, reducing the runtime computational cost of simulating the effect every frame. This improves performance, especially when many instances of the effect are present in the scene.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:56",
+      "procedural_step": "Consider the bounding box and scale.",
+      "why": "The bounding box defines the spatial extent of the Niagara effect. If the bounding box is too small, particles may be clipped during baking, resulting in an incomplete or visually incorrect texture atlas. A larger bounding box ensures all particles are captured, but it can also impact texture resolution if the atlas size remains constant.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:00",
+      "procedural_step": "Position your camera correctly.",
+      "why": "The camera position determines the perspective from which the Niagara effect is baked. Incorrect camera placement can lead to skewed or distorted results in the texture atlas, making the baked effect appear unnatural or misaligned when used in a material.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:13",
+      "procedural_step": "Set texture size to a power of two.",
+      "why": "Using power-of-two texture sizes optimizes memory usage and GPU performance. GPUs are designed to efficiently process textures with dimensions that are powers of two. Non-power-of-two textures can lead to increased memory overhead and slower rendering times.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:10",
+      "procedural_step": "Determinism warnings.",
+      "why": "Non-deterministic Niagara systems produce different results each time they are simulated. This is problematic for baking because the resulting texture atlas will not represent a consistent, repeatable effect. Enabling determinism ensures that the baked texture accurately reflects the intended particle behavior.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:12",
+      "prompt": "Why is knowing the exact duration of a shot crucial when baking Niagara effects for cinematics?",
+      "expected_insight": "If the baked effect's duration doesn't match the shot length, the loop will be visibly jarring. Understanding the shot's timing allows for a seamless integration of the baked effect, avoiding noticeable loop transitions."
+    },
+    {
+      "insert_after_timestamp": "4:52",
+      "prompt": "How does the choice between perspective and orthographic projection affect the appearance of the baked Niagara effect, and when would you choose one over the other?",
+      "expected_insight": "Perspective projection simulates depth, making it suitable for effects where depth perception is important. Orthographic projection lacks perspective, which might be preferable for stylized or UI-related effects where a flat appearance is desired."
+    },
+    {
+      "insert_after_timestamp": "6:02",
+      "prompt": "Why does increasing the Atlas texture size dramatically increase resolution, and what are the trade-offs involved?",
+      "expected_insight": "A larger texture size allows for more detail to be captured in the baked effect, but it also increases memory usage and potentially rendering time. The trade-off is between visual fidelity and performance."
+    },
+    {
+      "insert_after_timestamp": "7:54",
+      "prompt": "Explain the relationship between frames per dimension, texture resolution, and the smoothness of the final baked effect.",
+      "expected_insight": "Higher frames per dimension capture more intermediate states of the particle simulation, resulting in a smoother animation. However, if the texture resolution is too low, increasing frames per dimension can lead to pixelation. A balance must be struck to achieve both smoothness and clarity."
+    },
+    {
+      "insert_after_timestamp": "12:01",
+      "prompt": "Why is it important to set the source binding to 'none' when baking Niagara effects?",
+      "expected_insight": "Source binding might link the baked texture to a specific Niagara system or asset. Setting it to 'none' ensures that the texture can be used independently in other materials or systems without unintended dependencies or conflicts."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "0:14",
+      "warning": "Over-reliance on baked effects can lead to a 'baked-in' content pipeline, making iteration slower and more difficult. Changes to the effect require re-baking, impacting artist workflows.",
+      "severity": "MEDIUM",
+      "fix": "Use a hybrid approach, baking only elements that are performance bottlenecks and keeping key parameters dynamic for flexibility."
+    },
+    {
+      "timestamp": "2:15",
+      "warning": "Increasing the scale of the Niagara effect without adjusting the texture resolution can lead to noticeable pixelation, especially on high-resolution displays. This reduces visual fidelity and can break immersion.",
+      "severity": "MEDIUM",
+      "fix": "Increase the texture resolution proportionally to the scale of the effect to maintain visual quality. Consider using mipmaps to mitigate aliasing artifacts."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Niagara system creation and particle parameters.",
+    "Familiarity with material creation and texture sampling in Unreal Engine 5.",
+    "Knowledge of texture atlas concepts and UV mapping."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it beneficial to bake Niagara effects for distant objects?",
+      "options": [
+        "Reduces runtime computational cost.",
+        "Increases visual fidelity.",
+        "Simplifies the Niagara system.",
+        "Allows for more complex particle interactions."
+      ],
+      "correct_index": 0,
+      "explanation": "Baking pre-calculates the effect, reducing the need for real-time simulation and improving performance, especially for distant objects where detail is less critical."
+    },
+    {
+      "question": "What is the primary reason for using power-of-two texture dimensions when baking Niagara effects?",
+      "options": [
+        "Optimizes memory usage and GPU performance.",
+        "Simplifies UV mapping.",
+        "Reduces file size.",
+        "Improves texture compression."
+      ],
+      "correct_index": 0,
+      "explanation": "GPUs are optimized for processing textures with power-of-two dimensions, leading to better memory access and rendering efficiency."
+    },
+    {
+      "question": "Why is determinism important when baking Niagara effects?",
+      "options": [
+        "Ensures consistent results in the baked texture.",
+        "Reduces baking time.",
+        "Simplifies the Niagara system.",
+        "Allows for more complex particle interactions."
+      ],
+      "correct_index": 0,
+      "explanation": "Determinism guarantees that the Niagara system produces the same output every time, which is essential for creating a consistent and repeatable baked texture."
+    },
+    {
+      "question": "How does camera positioning affect the outcome of a baked Niagara effect?",
+      "options": [
+        "Determines the perspective and appearance of the baked texture.",
+        "Affects the baking time.",
+        "Changes the particle behavior.",
+        "Controls the texture resolution."
+      ],
+      "correct_index": 0,
+      "explanation": "The camera position defines the viewpoint from which the Niagara effect is rendered into the texture atlas, influencing the final look of the baked effect."
+    },
+    {
+      "question": "What happens if the bounding box of a Niagara effect is too small during baking?",
+      "options": [
+        "Particles may be clipped, resulting in an incomplete texture.",
+        "The texture resolution will be reduced.",
+        "The baking process will fail.",
+        "The particle simulation will be altered."
+      ],
+      "correct_index": 0,
+      "explanation": "If the bounding box is smaller than the spatial extent of the particle simulation, particles that fall outside the box will be cut off during baking, leading to an incomplete or inaccurate texture."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "course_code": "105.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:24",
+      "title": "Actor Persistence and Level Streaming",
+      "concept": "Explain the difference between actors placed directly in the level (persistent actors) and those spawned at runtime. Discuss how level streaming affects actor persistence and Sequencer's ability to control them.",
+      "diagram_suggestion": "A diagram illustrating the level streaming system, showing how actors can be loaded/unloaded and how this impacts Sequencer tracks."
+    },
+    {
+      "insert_after_timestamp": "0:35",
+      "title": "Sequencer's Relationship to the Director Track",
+      "concept": "Elaborate on how Sequencer's structure mirrors film production, particularly the role of the Director Track (Camera Cuts) in defining the final output. Explain how this track orchestrates different camera perspectives and animations.",
+      "diagram_suggestion": "A visual analogy comparing Sequencer tracks to film production roles (Director, Cinematographer, Editor)."
+    },
+    {
+      "insert_after_timestamp": "0:44",
+      "title": "Understanding Camera Components and Post-Processing",
+      "concept": "Detail the core components of an Unreal Camera Actor (e.g., CameraComponent, PostProcessComponent) and how they influence the final cinematic look. Explain how to manipulate post-processing settings within Sequencer for stylistic control.",
+      "diagram_suggestion": "A breakdown of the Camera Actor's components, highlighting the CameraComponent and PostProcessComponent, and their respective properties."
+    },
+    {
+      "insert_after_timestamp": "1:09",
+      "title": "Sequencer's Data Model and Asset Management",
+      "concept": "Explain how Sequencer stores animation data and references assets. Discuss the implications of using relative vs. absolute paths for asset references within a Level Sequence, especially in collaborative projects.",
+      "diagram_suggestion": "A diagram illustrating the data flow within Sequencer, from asset references to animation data storage."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:18",
+      "procedural_step": "Discussing actor persistence types.",
+      "why": "Understanding actor persistence is crucial because Sequencer interacts differently with actors spawned at runtime versus those placed directly in the level. Runtime-spawned actors require special handling within Sequencer tracks to ensure proper animation and control.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:57",
+      "procedural_step": "Setting up a level sequence assembly and camera cuts track.",
+      "why": "The Camera Cuts track is the 'director' of your scene. It determines which camera's view is active at any given time. Incorrect setup leads to jarring transitions and a lack of cinematic control, undermining the entire purpose of Sequencer.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:54",
+      "procedural_step": "Using a single level sequence vs. nested level sequences.",
+      "why": "Using a single level sequence for simple shots is efficient, but for complex scenes, nested level sequences promote modularity and reusability. This prevents a single sequence from becoming unwieldy and difficult to manage, improving collaboration and iteration speed.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:50",
+      "procedural_step": "Locating the example level sequence.",
+      "why": "Examining the example sequence allows you to reverse-engineer the setup and understand best practices. This accelerates your learning by providing a concrete reference point for your own projects, reducing trial and error.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:37",
+      "procedural_step": "Observing camera blends in the Camera Cuts track.",
+      "why": "Camera blends create smooth transitions between shots, enhancing the cinematic feel. Understanding how to control the blend duration and easing functions is essential for achieving professional-looking results. Abrupt cuts can disorient the viewer and detract from the story.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:24",
+      "prompt": "How does the concept of 'actor persistence' influence your approach to animating characters that are spawned dynamically during gameplay?",
+      "expected_insight": "Dynamically spawned actors require explicit binding to Sequencer tracks, often through Blueprint scripting, as they don't exist in the level at editor time."
+    },
+    {
+      "insert_after_timestamp": "0:44",
+      "prompt": "Why is understanding camera components crucial for achieving a specific cinematic style in Sequencer?",
+      "expected_insight": "Camera components like the PostProcessComponent allow fine-grained control over visual effects (e.g., color grading, bloom) directly within Sequencer, enabling a consistent and stylized look across shots."
+    },
+    {
+      "insert_after_timestamp": "1:09",
+      "prompt": "How might a poorly organized level structure impact your ability to efficiently create and manage cinematic sequences?",
+      "expected_insight": "Disorganized levels make it difficult to locate and manipulate actors within Sequencer, increasing the time and effort required to create even simple shots. Consistent naming conventions and folder structures are essential."
+    },
+    {
+      "insert_after_timestamp": "1:58",
+      "prompt": "In what scenarios would using nested level sequences be more advantageous than using a single, monolithic level sequence?",
+      "expected_insight": "Nested level sequences are beneficial for complex scenes with multiple characters and animations, allowing for modularity, reusability, and easier collaboration among team members."
+    },
+    {
+      "insert_after_timestamp": "4:41",
+      "prompt": "How can you use camera blends to enhance the storytelling impact of your cinematic sequences?",
+      "expected_insight": "Camera blends can create smooth transitions between shots, guiding the viewer's eye and creating a more immersive and engaging experience. Different blend types (e.g., linear, ease-in-out) can evoke different emotions and emphasize specific moments in the story."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Editor interface",
+    "Familiarity with actor placement and manipulation",
+    "Knowledge of basic animation principles"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is understanding actor persistence important when working with Sequencer?",
+      "options": [
+        "Because Sequencer treats persistent and non-persistent actors differently.",
+        "Because persistent actors are always animated, while non-persistent actors are not.",
+        "Because only persistent actors can be recorded in Sequencer.",
+        "Because non-persistent actors are automatically deleted when the sequence ends."
+      ],
+      "correct_index": 0,
+      "explanation": "Sequencer handles actors placed directly in the level (persistent) differently than those spawned at runtime (non-persistent). Non-persistent actors require explicit binding."
+    },
+    {
+      "question": "What is the primary function of the Camera Cuts track in Sequencer?",
+      "options": [
+        "To define the active camera view at any given time.",
+        "To control the animation of the camera actor.",
+        "To adjust the post-processing settings of the scene.",
+        "To manage the audio track associated with the sequence."
+      ],
+      "correct_index": 0,
+      "explanation": "The Camera Cuts track acts as the 'director,' determining which camera's perspective is visible at each point in the sequence."
+    },
+    {
+      "question": "In what way do nested level sequences contribute to better project organization?",
+      "options": [
+        "They promote modularity and reusability of cinematic elements.",
+        "They automatically optimize the performance of the sequence.",
+        "They reduce the file size of the project.",
+        "They simplify the process of adding audio to the sequence."
+      ],
+      "correct_index": 0,
+      "explanation": "Nested sequences allow you to break down complex scenes into smaller, manageable components, improving organization and collaboration."
+    },
+    {
+      "question": "How do camera blends enhance the cinematic quality of a sequence?",
+      "options": [
+        "By creating smooth transitions between different camera angles.",
+        "By automatically adjusting the focus settings of the camera.",
+        "By adding visual effects to the scene.",
+        "By synchronizing the camera movement with the audio track."
+      ],
+      "correct_index": 0,
+      "explanation": "Camera blends create seamless transitions, guiding the viewer's eye and enhancing the overall cinematic experience."
+    },
+    {
+      "question": "Why is a well-organized level structure important for efficient Sequencer work?",
+      "options": [
+        "It makes it easier to locate and manipulate actors within Sequencer.",
+        "It automatically improves the rendering performance of the scene.",
+        "It reduces the likelihood of encountering bugs in Sequencer.",
+        "It simplifies the process of exporting the final cinematic sequence."
+      ],
+      "correct_index": 0,
+      "explanation": "A well-organized level allows you to quickly find and modify actors, streamlining the cinematic creation process."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 25,
+    "grade": "D"
+  }
+}

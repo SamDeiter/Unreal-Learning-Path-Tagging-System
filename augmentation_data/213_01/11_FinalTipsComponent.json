@@ -1,0 +1,172 @@
+{
+  "course_code": "213.01",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "3:24",
+      "title": "Subsurface Scattering and Material Properties",
+      "concept": "Subsurface scattering (SSS) simulates light transport within translucent materials. The 'Mean Free Path' parameters control the distance and color light travels before being scattered. Understanding SSS is crucial for realistic material appearance, especially in skin, teeth, and hair.",
+      "diagram_suggestion": "A diagram illustrating light rays entering a translucent object, scattering within, and exiting at different points, highlighting the Mean Free Path."
+    },
+    {
+      "insert_after_timestamp": "5:56",
+      "title": "Hair Shading Model",
+      "concept": "Unreal Engine's hair shading model uses specialized parameters like Melanin and Roughness to simulate realistic hair appearance. Melanin affects the base color, while roughness controls specular highlights and light scattering. The interaction of these parameters creates the final look.",
+      "diagram_suggestion": "A diagram showing the hair shading model with inputs for Melanin, Roughness, and specular highlights, demonstrating how they combine to create the final hair appearance."
+    },
+    {
+      "insert_after_timestamp": "8:32",
+      "title": "Level of Detail (LOD) System",
+      "concept": "The LOD system automatically adjusts mesh complexity based on distance from the camera. Forcing a specific LOD level bypasses this optimization, potentially impacting performance. Understanding LODs is critical for balancing visual fidelity and performance.",
+      "diagram_suggestion": "A diagram illustrating different LOD levels of a mesh, showing how the polygon count decreases with distance from the camera."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:33",
+      "procedural_step": "Adjusting roughness in the skin material instance.",
+      "why": "Modifying roughness affects specular highlights and perceived surface smoothness. Lowering roughness increases the size and intensity of specular highlights, making the skin appear more oily or wet. This is because a smoother surface reflects light more directly.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:21",
+      "procedural_step": "Unchecking Baked Roughness Modulation.",
+      "why": "Disabling baked roughness modulation unlocks per-area control, allowing for fine-tuning of surface properties. This is useful for creating realistic skin variations, such as oily foreheads or dry cheeks. However, it increases material complexity and shader instructions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:11",
+      "procedural_step": "Adjusting the subsurface profile of teeth.",
+      "why": "Modifying the subsurface profile affects how light scatters within the teeth, influencing their translucency and perceived depth. Increasing the Mean Free Path Distance makes the teeth appear more translucent, simulating the effect of light penetrating the surface and scattering within.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:41",
+      "procedural_step": "Adjusting the Hair Melanin parameter.",
+      "why": "Changing the Hair Melanin parameter directly alters the base color of the hair strands. Melanin controls the amount of pigment in the hair, with higher values resulting in darker hair colors and lower values resulting in lighter hair colors. This affects the overall perceived color and tone of the hair.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:32",
+      "procedural_step": "Forcing the LOD to something like 3.",
+      "why": "Forcing a specific LOD level overrides the engine's automatic LOD selection. While useful for debugging or specific artistic needs, it can negatively impact performance if a high LOD is forced on a distant object, or cause visual popping if a low LOD is forced on a close object. The engine normally balances visual fidelity and rendering cost.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:59",
+      "prompt": "Why is it important to understand the material instance parameters for the face?",
+      "expected_insight": "Understanding the material instance parameters allows for fine-grained control over the appearance of the face, enabling artists to create realistic and stylized characters. It allows for adjustments to skin tone, roughness, and other details that contribute to the overall look of the character."
+    },
+    {
+      "insert_after_timestamp": "4:59",
+      "prompt": "How does the subsurface profile affect the realism of the teeth?",
+      "expected_insight": "The subsurface profile simulates the way light interacts with translucent materials, such as teeth. By adjusting the Mean Free Path Color and Distance, artists can control the amount of light that scatters within the teeth, making them appear more or less translucent. This adds depth and realism to the teeth, making them look more natural."
+    },
+    {
+      "insert_after_timestamp": "6:09",
+      "prompt": "Why use child blueprints for MetaHumans?",
+      "expected_insight": "Child blueprints allow for non-destructive editing of MetaHumans. Changes made to the child blueprint do not affect the original MetaHuman asset, preserving the original for reuse or comparison. This is crucial for maintaining a clean and organized project."
+    },
+    {
+      "insert_after_timestamp": "7:31",
+      "prompt": "How does roughness affect hair rendering?",
+      "expected_insight": "Roughness controls the specular highlights and light scattering on hair strands. Lower roughness values create sharper, more intense highlights, making the hair appear shinier. Higher roughness values diffuse the highlights, making the hair appear softer and more matte. Adjusting roughness is essential for achieving the desired hair look."
+    },
+    {
+      "insert_after_timestamp": "9:56",
+      "prompt": "What are the limitations of using child blueprints for MetaHumans?",
+      "expected_insight": "Shared assets, such as materials, must be duplicated to avoid affecting the original MetaHuman. Changes to a shared material will affect all instances that use that material, including the original MetaHuman. Duplicating the material ensures that changes are isolated to the child blueprint."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "8:55",
+      "warning": "Modifying shared assets (like materials) directly will affect all instances using that asset, violating the principle of non-destructive editing. This can lead to unintended visual changes across the project.",
+      "severity": "MEDIUM",
+      "fix": "Duplicate the shared asset before making modifications to isolate changes to the specific MetaHuman instance."
+    }
+  ],
+  "missing_prerequisites": [
+    "Understanding of Material Instances and their relationship to Master Materials.",
+    "Familiarity with the Unreal Engine Material Editor.",
+    "Basic knowledge of Level of Detail (LOD) systems."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use a child blueprint instead of directly modifying a MetaHuman blueprint?",
+      "options": [
+        "To preserve the original MetaHuman asset and avoid unintended changes.",
+        "Child blueprints are more performant than parent blueprints.",
+        "The engine requires all MetaHumans to be child blueprints.",
+        "It's easier to rename a child blueprint."
+      ],
+      "correct_index": 0,
+      "explanation": "Child blueprints allow for non-destructive editing, ensuring that changes made to the child do not affect the original MetaHuman asset. This is crucial for maintaining a clean and organized project."
+    },
+    {
+      "question": "What is the primary function of the 'Mean Free Path' parameters in a subsurface profile?",
+      "options": [
+        "To control the distance and color light travels within a translucent material.",
+        "To define the surface roughness of a material.",
+        "To determine the base color of a material.",
+        "To control the specular highlights on a material."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Mean Free Path' parameters control the distance and color light travels before being scattered within a translucent material, influencing its translucency and perceived depth."
+    },
+    {
+      "question": "How does adjusting the 'Roughness' parameter in a material instance affect the appearance of a surface?",
+      "options": [
+        "It controls the size and intensity of specular highlights.",
+        "It changes the base color of the surface.",
+        "It affects the transparency of the surface.",
+        "It modifies the normal map of the surface."
+      ],
+      "correct_index": 0,
+      "explanation": "Roughness affects specular highlights and perceived surface smoothness. Lowering roughness increases the size and intensity of specular highlights, making the surface appear more shiny."
+    },
+    {
+      "question": "What is the purpose of Level of Detail (LOD) in Unreal Engine 5?",
+      "options": [
+        "To automatically adjust mesh complexity based on distance from the camera.",
+        "To manually adjust the texture resolution of a mesh.",
+        "To force a specific material onto a mesh.",
+        "To create a simplified version of a mesh for collision detection."
+      ],
+      "correct_index": 0,
+      "explanation": "The LOD system automatically adjusts mesh complexity based on distance from the camera, balancing visual fidelity and performance."
+    },
+    {
+      "question": "Why should you duplicate a shared material before modifying it for a specific MetaHuman child blueprint?",
+      "options": [
+        "To avoid affecting all other instances that use the same material.",
+        "Duplicated materials render faster.",
+        "The engine requires materials to be duplicated for child blueprints.",
+        "It's easier to rename a duplicated material."
+      ],
+      "correct_index": 0,
+      "explanation": "Modifying a shared material directly will affect all instances using that material. Duplicating the material ensures that changes are isolated to the specific MetaHuman instance."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "course_code": "213.02",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:13",
+      "title": "Understanding the Role of Rigs in Unreal Engine",
+      "concept": "The script builds a rig in Maya, but the critical concept is how this rig translates to a Control Rig asset within Unreal Engine. Control Rigs in UE5 provide a non-destructive way to animate and pose MetaHumans, driving skeletal mesh deformation through Blueprint logic.",
+      "diagram_suggestion": "A diagram showing the data flow from Maya rig -> FBX export -> Control Rig asset in UE5 -> Skeletal Mesh, highlighting the Control Rig's role as a runtime animation driver."
+    },
+    {
+      "insert_after_timestamp": "1:31",
+      "title": "DNA Calibration and Morph Targets",
+      "concept": "DNA calibration fundamentally relies on morph targets (blend shapes) within the skeletal mesh. The calibration process adjusts the weights of these morph targets to achieve the desired shape and pose. Understanding how morph targets are stored and accessed in UE5's skeletal mesh is crucial.",
+      "diagram_suggestion": "A visual representation of a skeletal mesh with labeled morph targets, illustrating how their weights are adjusted to deform the mesh. Show the connection to the DNA calibration data."
+    },
+    {
+      "insert_after_timestamp": "2:41",
+      "title": "Texture Application and Material Instances",
+      "concept": "Applying textures in Maya is a setup step. The core UE5 concept is how these textures are used within Material Instances to control the visual appearance of the MetaHuman. Understanding Material Instances and their relationship to Parent Materials is key to customization.",
+      "diagram_suggestion": "A diagram showing the relationship between a Parent Material, Material Instances, and the Skeletal Mesh, highlighting how textures are applied and parameters are controlled through Material Instances."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:13",
+      "procedural_step": "Generate a functional rig in Maya",
+      "why": "The Maya rig serves as an intermediate step for creating animation controls. The ultimate goal is to translate this rig's functionality into a Control Rig asset within Unreal Engine, enabling runtime pose adjustments and animation. Without a clear understanding of Control Rigs, the Maya step seems disconnected.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:35",
+      "procedural_step": "Ensure that DirectX11 has been enabled.",
+      "why": "DirectX11 impacts the viewport rendering in Maya, which affects how textures and shaders are displayed during the rigging process. While important for visual fidelity in Maya, the *real* concern is ensuring that the exported assets are compatible with the rendering pipeline in Unreal Engine. Mismatched rendering settings can lead to visual discrepancies when importing the rigged MetaHuman.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:07",
+      "procedural_step": "Assign the paths for the DNA file and the maps folder.",
+      "why": "Correctly assigning paths ensures that the Maya script can locate the necessary data for building the rig. However, the deeper reason is to understand how this data translates into morph target adjustments and material parameter changes within Unreal Engine. Incorrect paths lead to a broken pipeline and a MetaHuman that doesn't reflect the intended customizations.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:14",
+      "procedural_step": "This will load a fully functional rig with textures.",
+      "why": "Loading the rig with textures in Maya is a visual confirmation step. The critical understanding is how these textures and rig controls will be represented and manipulated within Unreal Engine's material system and animation tools. Without this context, the Maya rig feels like an isolated deliverable.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:20",
+      "prompt": "Why is the data folder structured the way it is? What kind of data is stored there, and how does it relate to the MetaHuman's appearance and animation?",
+      "expected_insight": "The data folder contains the DNA file (defining morph target weights) and texture maps (controlling surface appearance). Understanding this structure is key to customizing the MetaHuman beyond the provided examples."
+    },
+    {
+      "insert_after_timestamp": "2:19",
+      "prompt": "Imagine you want to automate this entire process within Unreal Engine. What UE5 systems would you need to leverage to replicate the functionality of this Maya script?",
+      "expected_insight": "You would need to use the Python scripting plugin to interact with the Unreal Engine asset pipeline, potentially creating custom editor tools to streamline the DNA calibration and material assignment process."
+    },
+    {
+      "insert_after_timestamp": "3:05",
+      "prompt": "How does the concept of a 'root directory' in this Maya script relate to the way Unreal Engine manages asset paths and dependencies?",
+      "expected_insight": "The root directory establishes a relative path for accessing assets. Unreal Engine uses a similar system with its Content Browser and asset referencing, ensuring that assets can be located even when the project is moved to a different location."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's Material Editor and Material Instances.",
+    "Familiarity with Skeletal Meshes and Morph Targets in Unreal Engine.",
+    "Knowledge of Control Rigs and their role in animation within Unreal Engine."
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary purpose of a Control Rig in Unreal Engine 5?",
+      "options": [
+        "To provide a runtime, non-destructive way to animate and pose Skeletal Meshes.",
+        "To bake animation data directly onto the Skeletal Mesh.",
+        "To create static poses for character customization.",
+        "To optimize the performance of physics simulations."
+      ],
+      "correct_index": 0,
+      "explanation": "Control Rigs offer a flexible and non-destructive method for manipulating Skeletal Meshes at runtime, enabling dynamic animation and posing."
+    },
+    {
+      "question": "How does DNA calibration primarily affect a MetaHuman's appearance in Unreal Engine 5?",
+      "options": [
+        "By directly modifying the vertex positions of the Skeletal Mesh.",
+        "By adjusting the weights of morph targets (blend shapes).",
+        "By changing the textures applied to the Material Instances.",
+        "By altering the bone transforms in the Skeletal Hierarchy."
+      ],
+      "correct_index": 1,
+      "explanation": "DNA calibration manipulates the weights of morph targets, allowing for nuanced control over the MetaHuman's shape and expression."
+    },
+    {
+      "question": "What is the role of Material Instances in the context of MetaHuman customization in Unreal Engine 5?",
+      "options": [
+        "They define the base appearance of the MetaHuman and cannot be modified.",
+        "They allow for customized variations of a Parent Material without recompilation.",
+        "They are used to create static meshes for the environment.",
+        "They control the physics properties of the MetaHuman."
+      ],
+      "correct_index": 1,
+      "explanation": "Material Instances provide a flexible way to create variations of a base Material, allowing for customization of textures, colors, and other parameters without impacting performance."
+    },
+    {
+      "question": "Why is understanding asset paths and dependencies important when working with MetaHumans in Unreal Engine 5?",
+      "options": [
+        "To ensure that the MetaHuman can be easily shared between different projects.",
+        "To guarantee that all required assets are correctly loaded and referenced at runtime.",
+        "To reduce the size of the project's content directory.",
+        "To improve the performance of the animation system."
+      ],
+      "correct_index": 1,
+      "explanation": "Correctly managing asset paths and dependencies ensures that all textures, materials, and skeletal meshes are properly linked, preventing errors and ensuring the MetaHuman renders correctly."
+    },
+    {
+      "question": "What is the significance of the Python scripting plugin in Unreal Engine 5 for MetaHuman customization?",
+      "options": [
+        "It allows for direct manipulation of the Unreal Engine source code.",
+        "It enables the automation of tasks and the creation of custom editor tools.",
+        "It provides a visual scripting interface for creating gameplay logic.",
+        "It is used to create custom shaders and materials."
+      ],
+      "correct_index": 1,
+      "explanation": "The Python scripting plugin allows developers to automate repetitive tasks, create custom tools, and extend the functionality of the Unreal Engine editor, streamlining the MetaHuman customization workflow."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 2,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 23,
+    "grade": "D"
+  }
+}

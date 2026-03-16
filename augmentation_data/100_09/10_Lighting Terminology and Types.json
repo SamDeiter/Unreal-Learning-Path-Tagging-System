@@ -1,0 +1,179 @@
+{
+  "course_code": "100.09",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "2:05",
+      "title": "Lightmass Global Illumination",
+      "concept": "Lightmass is Unreal Engine's precomputed lighting system. It leverages radiosity algorithms to simulate how light bounces around a scene, creating realistic indirect lighting. Understanding its limitations (static geometry, build times) is crucial for performance optimization.",
+      "diagram_suggestion": "A diagram illustrating the light transport process in Lightmass, showing direct lighting, diffuse reflections, and specular reflections, culminating in the final baked lighting result."
+    },
+    {
+      "insert_after_timestamp": "3:21",
+      "title": "Ray Tracing Global Illumination (RTGI)",
+      "concept": "RTGI is a real-time global illumination technique that uses ray tracing to simulate light transport. It provides more accurate and dynamic lighting than traditional screen space techniques, but at a higher performance cost. Understanding the trade-offs between RTGI and other GI methods (Lumen, Lightmass) is essential for choosing the right lighting solution.",
+      "diagram_suggestion": "A comparison diagram showing the different global illumination methods in Unreal Engine (Lightmass, Lumen, RTGI), highlighting their strengths, weaknesses, and performance characteristics."
+    },
+    {
+      "insert_after_timestamp": "5:36",
+      "title": "Skylight and Environment Probes",
+      "concept": "Skylights capture ambient lighting from a specified environment (often an HDR image) and contribute to the overall scene illumination. Reflection probes capture the surrounding environment and are used to create realistic reflections on surfaces. Understanding how these systems interact is crucial for creating believable outdoor environments.",
+      "diagram_suggestion": "A diagram illustrating how Skylights and Reflection Probes work together to create realistic ambient lighting and reflections in a scene."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:34",
+      "procedural_step": "Unreal Engine takes a snapshot of a mesh actor from the light's point of view and projects that information onto another mesh on the opposite side.",
+      "why": "This 'snapshot' is a shadow map. Shadow maps are depth images rendered from the light's perspective. The engine compares the distance from the light to a surface with the depth stored in the shadow map to determine if the surface is in shadow. Incorrect shadow map settings can lead to shadow acne or peter-panning artifacts.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:23",
+      "procedural_step": "Baked lighting cannot be altered at runtime and it has little impact on the real-time performance.",
+      "why": "Baked lighting is pre-calculated and stored in lightmaps. This eliminates the need to calculate lighting every frame, resulting in significant performance gains. However, it also means that any changes to the scene's geometry or lighting require a re-bake, increasing iteration time.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:46",
+      "procedural_step": "Real-time lighting has no global illumination component, only the direct light and it's also expensive to use because it affects the real-time performance because we're rendering each frame.",
+      "why": "Without global illumination, dynamic lights only contribute direct lighting, resulting in less realistic and flatter-looking scenes. Calculating lighting every frame requires significant GPU resources, especially with multiple dynamic lights and complex materials. This can lead to performance bottlenecks, especially on lower-end hardware.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:03",
+      "procedural_step": "If you're using dynamic lighting, make sure the dynamic point lights are spaced apart and they're not all too crumped together and overlapping each other with their radiuses.",
+      "why": "Overlapping dynamic lights increase the rendering cost because the engine has to calculate the lighting contribution from each light for every overlapping pixel. This can lead to significant performance drops, especially with complex materials and shadows. Spacing out lights reduces the number of overlapping pixels and improves performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:49",
+      "procedural_step": "It basically says to Unreal, control this scene and just only focus on the lighting within this box, and everything else can just be rendered usually.",
+      "why": "The Lightmass Importance Volume prioritizes lighting calculations within its bounds during the baking process. This allows you to focus computational resources on the most visually important areas of the scene, improving bake times and lightmap quality. Areas outside the volume will receive lower-quality lighting.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:38",
+      "prompt": "Why is understanding the interplay between direct and indirect lighting crucial for achieving realistic visuals in Unreal Engine?",
+      "expected_insight": "Direct lighting defines the primary illumination, while indirect lighting simulates the bounced light, contributing to the overall mood and realism. A balanced combination of both creates a more natural and believable lighting environment."
+    },
+    {
+      "insert_after_timestamp": "2:31",
+      "prompt": "Why is baked lighting often preferred for static elements in a scene, and what are the trade-offs involved?",
+      "expected_insight": "Baked lighting offers significant performance advantages by pre-calculating lighting information. However, it sacrifices flexibility as it cannot be changed at runtime and requires re-baking for any scene modifications."
+    },
+    {
+      "insert_after_timestamp": "3:30",
+      "prompt": "How does setting lights to 'movable' impact global illumination and overall scene performance?",
+      "expected_insight": "Movable lights enable dynamic lighting and real-time global illumination updates, but they come at a higher performance cost due to the continuous calculations required each frame. Careful optimization is necessary to maintain smooth frame rates."
+    },
+    {
+      "insert_after_timestamp": "7:58",
+      "prompt": "Why is the rotation of a directional light so important, and how does it affect the shadows in the scene?",
+      "expected_insight": "The rotation of a directional light directly influences the angle and direction of the sun or moon, affecting the length and position of shadows. Adjusting the rotation allows for creating different moods and times of day."
+    },
+    {
+      "insert_after_timestamp": "10:18",
+      "prompt": "What are the key differences between static, stationary, and movable lights, and how do these differences impact performance and flexibility?",
+      "expected_insight": "Static lights are pre-computed and offer the best performance but cannot be changed at runtime. Movable lights are fully dynamic but are the most performance-intensive. Stationary lights offer a balance by allowing some dynamic changes while still leveraging baked lighting for static elements."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "4:55",
+      "warning": "Excessive overlapping dynamic point lights or spotlights can lead to significant performance degradation due to increased rendering costs.",
+      "severity": "HIGH",
+      "fix": "Optimize light placement to minimize overlap, reduce light radius, use static lighting where possible, or implement light culling techniques."
+    },
+    {
+      "timestamp": "9:41",
+      "warning": "Using 'Movable' lights indiscriminately can severely impact performance, especially on lower-end hardware, due to the real-time shadow calculations.",
+      "severity": "HIGH",
+      "fix": "Profile the scene to identify performance bottlenecks, use static or stationary lights where appropriate, and optimize shadow settings."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of linear algebra (vectors, matrices)",
+    "Familiarity with the concept of Physically Based Rendering (PBR)",
+    "Knowledge of color spaces (sRGB, linear)",
+    "Understanding of texture mapping and UV coordinates"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to use a Lightmass Importance Volume when baking lighting in Unreal Engine?",
+      "options": [
+        "To prioritize lighting calculations in specific areas, improving bake times and lightmap quality.",
+        "To automatically generate lightmaps for the entire scene.",
+        "To disable baked lighting in certain areas.",
+        "To increase the intensity of dynamic lights."
+      ],
+      "correct_index": 0,
+      "explanation": "The Lightmass Importance Volume focuses computational resources on key areas, optimizing bake times and lightmap quality."
+    },
+    {
+      "question": "What is the primary advantage of using baked lighting over dynamic lighting in Unreal Engine?",
+      "options": [
+        "It allows for real-time changes to lighting.",
+        "It provides more accurate shadows.",
+        "It improves performance by pre-calculating lighting.",
+        "It automatically adjusts lighting based on the time of day."
+      ],
+      "correct_index": 2,
+      "explanation": "Baked lighting pre-calculates lighting information, resulting in significant performance gains compared to dynamic lighting."
+    },
+    {
+      "question": "Which type of light in Unreal Engine offers a balance between dynamic changes and baked lighting for static elements?",
+      "options": [
+        "Static Light",
+        "Movable Light",
+        "Stationary Light",
+        "Directional Light"
+      ],
+      "correct_index": 2,
+      "explanation": "Stationary lights allow for some dynamic changes (e.g., color, intensity) while still leveraging baked lighting for static geometry."
+    },
+    {
+      "question": "What is the main purpose of a Skylight in an Unreal Engine scene?",
+      "options": [
+        "To simulate direct sunlight.",
+        "To create dynamic shadows.",
+        "To provide HDR image based ambient light and overall lift to the scene.",
+        "To generate real-time reflections."
+      ],
+      "correct_index": 2,
+      "explanation": "Skylights capture ambient lighting from a specified environment (often an HDR image) and contribute to the overall scene illumination."
+    },
+    {
+      "question": "Why can excessive overlapping dynamic lights negatively impact performance in Unreal Engine?",
+      "options": [
+        "They increase the intensity of shadows.",
+        "They require the engine to calculate lighting contributions for each overlapping pixel, increasing rendering costs.",
+        "They reduce the accuracy of lightmaps.",
+        "They interfere with global illumination calculations."
+      ],
+      "correct_index": 1,
+      "explanation": "Overlapping dynamic lights force the engine to perform more lighting calculations, leading to performance bottlenecks."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 27,
+    "grade": "D"
+  }
+}

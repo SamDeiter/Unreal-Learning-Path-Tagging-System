@@ -1,0 +1,163 @@
+{
+  "course_code": "227.08",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:28",
+      "title": "Unreal Insights Architecture",
+      "concept": "Unreal Insights is a separate application that connects to the running Unreal Engine instance via a trace server. This allows non-invasive performance monitoring without significantly impacting the game's performance. It captures trace events related to CPU, GPU, memory, and networking.",
+      "diagram_suggestion": "Diagram showing the Unreal Engine instance, the Unreal Trace Server, and the Unreal Insights application as separate but connected components, highlighting the flow of trace data."
+    },
+    {
+      "insert_after_timestamp": "3:36",
+      "title": "Size Map Deep Dive",
+      "concept": "The Size Map visualizes asset sizes and their dependencies within the Unreal Engine project. It helps identify large assets that contribute significantly to the overall package size. Understanding asset compression settings and LOD usage is crucial for effective size reduction.",
+      "diagram_suggestion": "A hierarchical treemap visualization of the Size Map, showing how different asset types (textures, meshes, blueprints) contribute to the total project size."
+    },
+    {
+      "insert_after_timestamp": "5:15",
+      "title": "Draw Call Batching",
+      "concept": "Draw calls represent the number of rendering commands sent to the GPU. Reducing draw calls is crucial for optimizing rendering performance. Techniques like static mesh merging and material instancing can significantly reduce draw call count.",
+      "diagram_suggestion": "A before-and-after diagram showing how merging static meshes reduces the number of draw calls, improving rendering efficiency."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:14",
+      "procedural_step": "Ensure engine content isn't unnecessarily packaged",
+      "why": "Packaging unused engine content bloats the final build, increasing download size and memory footprint. This impacts load times and overall performance, especially on lower-end hardware.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:32",
+      "procedural_step": "Cook everything in the project content folder directly",
+      "why": "Cooking converts assets into a platform-specific format optimized for runtime. Cooking directly from the content folder ensures all necessary assets are processed, preventing missing dependencies and runtime errors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:05",
+      "procedural_step": "Balance normal maps vs. high vertex meshes",
+      "why": "Normal maps simulate surface detail without increasing vertex count, improving rendering performance. However, in VR, the parallax effect is less pronounced, making high-poly meshes a potentially better choice despite the increased GPU load. This is because VR rendering relies heavily on accurate geometry for stereoscopic vision.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:08",
+      "procedural_step": "Same static mesh with different material is a new draw call",
+      "why": "Each unique material applied to a mesh requires a separate draw call because the GPU needs to switch rendering states. Reducing material variations and using material instances can minimize draw calls and improve rendering efficiency.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:30",
+      "prompt": "Why is tracking hitches important, and what kind of events would cause them?",
+      "expected_insight": "Hitches are sudden performance drops that negatively impact user experience. They can be caused by garbage collection, asset loading, or complex calculations on the main thread. Identifying these events allows targeted optimization."
+    },
+    {
+      "insert_after_timestamp": "3:51",
+      "prompt": "How does the Size Map help optimize game size, and what are some strategies for reducing the size of identified assets?",
+      "expected_insight": "The Size Map visualizes asset sizes, allowing developers to identify large contributors to the overall package size. Strategies for reducing size include texture compression, LODs, and removing unused assets."
+    },
+    {
+      "insert_after_timestamp": "5:30",
+      "prompt": "Why is it important to bake textures into one texture?",
+      "expected_insight": "Baking textures into one reduces draw calls, which improves performance. It's important because each texture switch requires the GPU to load new data, which is costly."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:21",
+      "warning": "Relying solely on individual asset size analysis without considering dependencies can lead to inefficient optimization. Large textures might be shared across multiple assets; optimizing them requires careful consideration to avoid visual degradation elsewhere.",
+      "severity": "MEDIUM",
+      "fix": "Use the Size Map in conjunction with dependency analysis tools to understand the impact of asset optimization on the entire project."
+    },
+    {
+      "timestamp": "5:08",
+      "warning": "Over-reliance on unique materials can lead to excessive draw calls, especially with instanced meshes. This can severely impact performance, particularly on mobile platforms.",
+      "severity": "HIGH",
+      "fix": "Utilize material instances and parameter collections to share material properties across multiple meshes, reducing the number of unique materials and draw calls."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's asset pipeline",
+    "Familiarity with the Unreal Editor interface",
+    "Knowledge of material creation and usage",
+    "Experience with blueprint scripting"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to minimize the package size of an HMI application?",
+      "options": [
+        "To reduce download and installation times, and to conserve storage space on the target device.",
+        "To make the application look more visually appealing.",
+        "To increase the complexity of the application's code.",
+        "To make the application easier to debug."
+      ],
+      "correct_index": 0,
+      "explanation": "A smaller package size results in faster download and installation times, and reduces the storage space required on the target device, improving the user experience."
+    },
+    {
+      "question": "What is the primary purpose of Unreal Insights?",
+      "options": [
+        "To identify areas of the project that require optimization by capturing and analyzing telemetry data.",
+        "To create visually stunning effects in the game.",
+        "To write complex C++ code for the game.",
+        "To design user interfaces for the game."
+      ],
+      "correct_index": 0,
+      "explanation": "Unreal Insights is a telemetry capture and analysis suite that helps identify performance bottlenecks and areas for optimization in the project."
+    },
+    {
+      "question": "What is a draw call, and why is it important to minimize them?",
+      "options": [
+        "A rendering command sent to the GPU; minimizing them improves rendering performance.",
+        "A function call in C++ code; minimizing them improves CPU performance.",
+        "A request to load an asset; minimizing them reduces load times.",
+        "A command to play a sound effect; minimizing them reduces audio latency."
+      ],
+      "correct_index": 0,
+      "explanation": "A draw call is a command sent to the GPU to render an object. Minimizing draw calls reduces the overhead on the GPU, improving rendering performance."
+    },
+    {
+      "question": "In the context of rendering optimization, what is the trade-off between using normal maps and high vertex meshes?",
+      "options": [
+        "Normal maps are more performant but may lose effectiveness in VR, while high vertex meshes are more accurate but more expensive.",
+        "Normal maps are more accurate but more expensive, while high vertex meshes are more performant but may lose effectiveness in VR.",
+        "Normal maps are only useful for static objects, while high vertex meshes are only useful for dynamic objects.",
+        "Normal maps are easier to create, while high vertex meshes are harder to create."
+      ],
+      "correct_index": 0,
+      "explanation": "Normal maps simulate surface detail without increasing vertex count, improving performance. However, in VR, the parallax effect is less pronounced, making high-poly meshes a potentially better choice despite the increased GPU load."
+    },
+    {
+      "question": "Why should test maps and unnecessary data be excluded from the cooked package?",
+      "options": [
+        "To reduce the package size and improve boot time.",
+        "To make the application more visually appealing.",
+        "To increase the complexity of the application's code.",
+        "To make the application easier to debug."
+      ],
+      "correct_index": 0,
+      "explanation": "Excluding test maps and unnecessary data reduces the package size, leading to faster boot times and reduced storage requirements."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 2,
+    "content_first_language": 2,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 2,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 2,
+    "total": 21,
+    "grade": "F"
+  }
+}
