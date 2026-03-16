@@ -20,6 +20,8 @@ import { generateChallenge } from "../services/challengeService";
 import { signInWithGoogle, onAuthChange } from "../services/googleAuthService";
 import { recordPathCompletion, getStreakInfo } from "../services/learningProgressService";
 import { detectPersona, getPersonaMessaging } from "../services/PersonaService";
+import { createCheckpoint, generateModuleQuiz } from "../services/checkpointService";
+import { determineAction, applyReplan } from "../services/replanEngine";
 import quizData from "../data/quiz_questions.json";
 import { logVideoFeedback } from "../services/feedbackService";
 
@@ -30,6 +32,7 @@ export const STAGES = {
   QUIZ: "quiz",
   CHALLENGE: "challenge",
   BRIDGE: "bridge",
+  CHECKPOINT: "checkpoint",
   COMPLETE: "complete",
 };
 
@@ -46,6 +49,12 @@ export default function useGuidedPlayer({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [videoIndex, setVideoIndex] = useState(0);
   const [reflectionText, setReflectionText] = useState("");
+
+  // ── Checkpoint state ──
+  const [checkpoints, setCheckpoints] = useState([]);
+  const [currentCheckpoint, setCurrentCheckpoint] = useState(null);
+  const [checkpointQuiz, setCheckpointQuiz] = useState([]);
+  const [replanState, setReplanState] = useState({ replanHistory: [], _optionalModules: [], _suggestExit: false });
 
   // Track video start time for skip detection (set when learning actually starts)
   const vidStartRef = useRef(0);
@@ -218,6 +227,31 @@ export default function useGuidedPlayer({
   }, []);
 
   const handleChallengeComplete = useCallback(() => {
+    // Check if this is the last course in a module boundary
+    // If so, trigger a checkpoint before advancing
+    const isLastInModule = !hasMoreVideos && currentCourse;
+
+    if (isLastInModule && currentCourse?._moduleId) {
+      // Prepare checkpoint for this module
+      const cp = createCheckpoint(
+        currentCourse._moduleId,
+        problemSummary || ""
+      );
+      setCurrentCheckpoint(cp);
+
+      // Generate quiz questions asynchronously
+      const moduleData = {
+        title: currentCourse._moduleName || currentCourse.title,
+        steps: courses.filter((c) => c._moduleId === currentCourse._moduleId),
+      };
+      generateModuleQuiz(moduleData, problemSummary || "")
+        .then((questions) => setCheckpointQuiz(questions))
+        .catch(() => setCheckpointQuiz([]));
+
+      setStage(STAGES.CHECKPOINT);
+      return;
+    }
+
     if (nextCourse) {
       // Auto-advance to next course (bridge card removed)
       setCurrentIndex((prev) => prev + 1);
@@ -227,6 +261,51 @@ export default function useGuidedPlayer({
       setStage(STAGES.COMPLETE);
       onComplete?.();
     }
+  }, [nextCourse, onComplete, hasMoreVideos, currentCourse, courses, problemSummary]);
+
+  // ── Checkpoint handlers ──
+  const handleCheckpointSubmit = useCallback((completedCheckpoint) => {
+    // Store checkpoint
+    setCheckpoints((prev) => [...prev, completedCheckpoint]);
+
+    // Run replanning engine
+    const remainingModules = courses
+      .slice(currentIndex + 1)
+      .filter((c) => c._moduleId)
+      .map((c) => ({ id: c._moduleId, title: c._moduleName || c.title }));
+
+    const action = determineAction(completedCheckpoint, remainingModules, checkpoints);
+    const newReplanState = applyReplan(action, replanState);
+    setReplanState(newReplanState);
+
+    // Advance to next course or complete
+    if (nextCourse) {
+      setCurrentIndex((prev) => prev + 1);
+      setVideoIndex(0);
+      setStage(STAGES.PLAYING);
+    } else {
+      setStage(STAGES.COMPLETE);
+      onComplete?.();
+    }
+
+    setCurrentCheckpoint(null);
+    setCheckpointQuiz([]);
+  }, [courses, currentIndex, checkpoints, replanState, nextCourse, onComplete]);
+
+  const handleCheckpointSkip = useCallback((skippedCheckpoint) => {
+    setCheckpoints((prev) => [...prev, skippedCheckpoint]);
+
+    if (nextCourse) {
+      setCurrentIndex((prev) => prev + 1);
+      setVideoIndex(0);
+      setStage(STAGES.PLAYING);
+    } else {
+      setStage(STAGES.COMPLETE);
+      onComplete?.();
+    }
+
+    setCurrentCheckpoint(null);
+    setCheckpointQuiz([]);
   }, [nextCourse, onComplete]);
 
   const handleContinue = useCallback(() => {
@@ -261,6 +340,12 @@ export default function useGuidedPlayer({
     user,
     authLoading,
 
+    // Checkpoint state
+    checkpoints,
+    currentCheckpoint,
+    checkpointQuiz,
+    replanState,
+
     // Derived
     currentCourse,
     nextCourse,
@@ -289,6 +374,8 @@ export default function useGuidedPlayer({
     handleBackToPath,
     handleQuizComplete,
     handleChallengeComplete,
+    handleCheckpointSubmit,
+    handleCheckpointSkip,
     handleContinue,
     handleSkipTo,
     handleFinish,

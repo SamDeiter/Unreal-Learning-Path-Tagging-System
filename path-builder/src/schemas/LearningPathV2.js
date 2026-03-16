@@ -69,6 +69,9 @@ export function createV2Path(overrides = {}) {
     isAiGenerated: false,
     generatedAt: new Date().toISOString(),
     sections: [],
+    // Module verification & replanning (Phase 4 extension)
+    checkpoints: [],        // ModuleCheckpoint[] — populated at runtime during player
+    replanHistory: [],      // { timestamp, action, moduleId, reason }[] — audit trail
     // Metadata
     _sourceFormat: "",
     _originalQuery: "",
@@ -86,6 +89,10 @@ export function createV2Section(phase, steps = []) {
     purpose: getSectionPurpose(phase),
     phase,
     steps,
+    // Module verification fields (Phase 4 extension)
+    outcome: "",                 // Expected learning outcome for this section/module
+    verificationPrompt: "",      // "Can you explain X?" / "Did this fix Y?"
+    exitCondition: "quiz",       // 'quiz' | 'self-report' | 'ue-test' | 'none'
   };
 }
 

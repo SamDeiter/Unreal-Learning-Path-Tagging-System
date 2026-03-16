@@ -30,6 +30,7 @@ const ACTIONS = {
   REMOVE_MODULE: "REMOVE_MODULE",
   MOVE_COURSE_TO_MODULE: "MOVE_COURSE_TO_MODULE",
   REORDER_MODULES: "REORDER_MODULES",
+  SET_MODULE_VERIFICATION: "SET_MODULE_VERIFICATION",
 };
 
 // Reducer for path state management
@@ -128,6 +129,10 @@ function pathReducer(state, action) {
             title: action.payload.title || `Milestone ${state.modules.length + 1}`,
             outcome: action.payload.outcome || "",
             courseIds: action.payload.courseIds || [],
+            kstEnabled: false,
+            bktEnabled: false,
+            verificationPrompt: action.payload.verificationPrompt || "",
+            exitCondition: action.payload.exitCondition || "quiz",
           },
         ],
       };
@@ -138,6 +143,30 @@ function pathReducer(state, action) {
         modules: state.modules.map((m) =>
           m.id === action.payload.moduleId
             ? { ...m, title: action.payload.title ?? m.title, outcome: action.payload.outcome ?? m.outcome }
+            : m
+        ),
+      };
+
+    case ACTIONS.SET_MODULE_VERIFICATION:
+      return {
+        ...state,
+        modules: state.modules.map((m) =>
+          m.id === action.payload.moduleId
+            ? {
+                ...m,
+                verificationPrompt: action.payload.verificationPrompt ?? m.verificationPrompt,
+                exitCondition: action.payload.exitCondition ?? m.exitCondition,
+              }
+            : m
+        ),
+      };
+
+    case ACTIONS.TOGGLE_MODULE_FLAG:
+      return {
+        ...state,
+        modules: state.modules.map((m) =>
+          m.id === action.payload.moduleId
+            ? { ...m, [action.payload.flag]: !m[action.payload.flag] }
             : m
         ),
       };
@@ -469,6 +498,65 @@ export function PathProvider({ children }) {
     dispatch({ type: ACTIONS.REORDER_MODULES, payload: newModules });
   }, [dispatch]);
 
+  const toggleModuleFlag = useCallback((moduleId, flag) => {
+    dispatch({ type: ACTIONS.TOGGLE_MODULE_FLAG, payload: { moduleId, flag } });
+  }, [dispatch]);
+  
+  const addAssessment = useCallback((moduleId = null) => {
+    const id = `assess-${Date.now()}`;
+    const assessment = {
+      code: id,
+      title: "Practical Assessment",
+      type: "assessment",
+      tags: { level: "Core", topics: ["Testing"], duration: 30 },
+      duration: "30 mins",
+      outcome: "Verify practical skills via Unreal Automation Framework",
+      role: "Core",
+      weight: "High",
+      why: "Evaluate learner mastery of module objectives.",
+      ueTestPath: ""
+    };
+    
+    dispatch({ type: ACTIONS.ADD_COURSE, payload: assessment });
+    
+    if (moduleId) {
+      // Need a slight timeout to ensure the course is added before moving it
+      // but in useReducer it's synchronous so we can't dispatch twice back-to-back cleanly
+      // within the same tick if state depends on previous state. Wait, we can.
+      dispatch({ type: ACTIONS.MOVE_COURSE_TO_MODULE, payload: { courseCode: id, targetModuleId: moduleId } });
+    }
+  }, [dispatch]);
+
+  const addTransition = useCallback((moduleId = null) => {
+    const id = `transition-${Date.now()}`;
+    const transition = {
+      code: id,
+      title: "AI Narrative Transition",
+      type: "ai_generation",
+      tags: { level: "Core", topics: ["Transition"], duration: 5 },
+      duration: "5 mins",
+      outcome: "Tie topics together conceptually",
+      role: "Transition",
+      weight: "Medium",
+      source: "ai",
+      why: "Generated narrative to connect prior learning with upcoming concepts.",
+      description: "This is an AI-generated transitional element to bridge the gap between concepts."
+    };
+    
+    dispatch({ type: ACTIONS.ADD_COURSE, payload: transition });
+    
+    if (moduleId) {
+      dispatch({ type: ACTIONS.MOVE_COURSE_TO_MODULE, payload: { courseCode: id, targetModuleId: moduleId } });
+    }
+  }, [dispatch]);
+
+  const setModuleVerification = useCallback((moduleId, { verificationPrompt, exitCondition }) => {
+    dispatch({
+      type: ACTIONS.SET_MODULE_VERIFICATION,
+      payload: { moduleId, verificationPrompt, exitCondition },
+    });
+  }, [dispatch]);
+
   // Computed: courses not assigned to any module
   const ungroupedCourses = useMemo(() => {
     const assignedCodes = new Set(state.modules.flatMap((m) => m.courseIds));
@@ -495,6 +583,10 @@ export function PathProvider({ children }) {
     removeModule,
     moveCourseToModule,
     reorderModules,
+    toggleModuleFlag,
+    addAssessment,
+    addTransition,
+    setModuleVerification,
     // Persistence
     savePath,
     getSavedPaths,
@@ -515,7 +607,7 @@ export function PathProvider({ children }) {
     ungroupedCourses, pathStats, verificationStats,
     addCourse, removeCourse, reorderCourses, updateCourseMeta, setLearningIntent,
     clearPath, loadPath, addModule, renameModule, removeModule,
-    moveCourseToModule, reorderModules, savePath, getSavedPaths, loadSavedPath,
+    moveCourseToModule, reorderModules, toggleModuleFlag, addAssessment, addTransition, setModuleVerification, savePath, getSavedPaths, loadSavedPath,
     deleteSavedPath, activePersonaId, setActivePersonaId, activePathId,
     setActivePathId, setWorkflowStage,
   ]);
