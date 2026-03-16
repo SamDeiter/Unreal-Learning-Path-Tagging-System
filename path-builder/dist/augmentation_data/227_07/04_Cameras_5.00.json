@@ -1,0 +1,156 @@
+{
+  "course_code": "227.07",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "2:03",
+      "title": "Actor Iteration Order",
+      "concept": "The order in which `GetAllActorsOfClass` returns actors is undefined and depends on internal engine data structures. Relying on this order is fragile.",
+      "diagram_suggestion": "A flowchart illustrating the non-deterministic nature of actor enumeration in Unreal Engine, emphasizing that the order is not guaranteed to be consistent across different runs or platforms."
+    },
+    {
+      "insert_after_timestamp": "5:30",
+      "title": "View Target Blending",
+      "concept": "Understanding how `SetViewTargetWithBlend` interacts with the camera stack and player controller is crucial for smooth transitions. The blend time and blend function affect the user experience.",
+      "diagram_suggestion": "A diagram showing the camera stack within the PlayerController, illustrating how SetViewTargetWithBlend manipulates the active camera and the blending process between different cameras."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "2:31",
+      "procedural_step": "Using 'Get All Actors of Class'",
+      "why": "This retrieves all actors of a specific class in the current level. It's useful for finding all cameras, but inefficient for large levels due to the engine iterating through all loaded actors. Consider using a more targeted approach if performance becomes an issue.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:06",
+      "procedural_step": "Creating a 'List of Cameras' variable",
+      "why": "Storing the cameras in an array allows for easy iteration and management within the UMG widget. However, holding references to Actors in UMG can lead to memory leaks if not handled carefully, especially during level transitions.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:25",
+      "procedural_step": "Using 'Get Player Controller'",
+      "why": "The PlayerController is responsible for controlling the player's input and viewpoint. Setting the view target on the PlayerController directly manipulates the player's current camera. Incorrectly referencing the PlayerController can lead to input and camera control issues.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:32",
+      "procedural_step": "Using 'Set View Target with Blend'",
+      "why": "This function smoothly transitions the player's view from one actor (camera) to another. The blend time affects the smoothness of the transition, but excessively long blend times can feel unresponsive to the user. The blend function (Ease In/Out) affects the perceived acceleration during the transition.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:08",
+      "procedural_step": "Getting a specific camera from the array",
+      "why": "Accessing array elements directly by index is fast, but can cause crashes if the index is out of bounds. The modulo operator ensures the index wraps around, preventing out-of-bounds access and creating a looping camera system.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "2:44",
+      "prompt": "Why is it important to specify the correct Actor class when using 'Get All Actors of Class'?",
+      "expected_insight": "Specifying the correct class ensures that only actors of the desired type are returned, preventing errors and improving performance. Using the base 'Actor' class would return all actors, requiring further filtering."
+    },
+    {
+      "insert_after_timestamp": "4:55",
+      "prompt": "Why is the modulo operator (%) used when calculating the next camera index?",
+      "expected_insight": "The modulo operator ensures that the camera index wraps around to the beginning of the array when it reaches the end, creating a seamless looping effect. Without it, the index would eventually exceed the array bounds, causing an error."
+    },
+    {
+      "insert_after_timestamp": "5:38",
+      "prompt": "What are the trade-offs when choosing a longer or shorter blend time for 'Set View Target with Blend'?",
+      "expected_insight": "A longer blend time creates a smoother transition but can feel less responsive. A shorter blend time is more responsive but can feel jarring. The ideal blend time depends on the specific game and desired user experience."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:06",
+      "warning": "Storing direct actor references in UMG widgets can lead to memory leaks if the widget outlives the level containing the actors. This is a form of Hard-Reference Casting.",
+      "severity": "MEDIUM",
+      "fix": "Use WeakObjectPtr to store the camera references, or implement a system to invalidate the references when the level is unloaded."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine's Actor system.",
+    "Familiarity with UMG widget creation and event handling.",
+    "Knowledge of Blueprint scripting fundamentals, including variables, arrays, and functions."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use 'Get All Actors Of Class' sparingly in a large open-world game?",
+      "options": [
+        "It iterates through all loaded actors, which can be slow.",
+        "It only works in the editor, not in packaged builds.",
+        "It requires a physics simulation, which is performance-intensive.",
+        "It can only find actors placed directly in the level, not those spawned dynamically."
+      ],
+      "correct_index": 0,
+      "explanation": "'Get All Actors Of Class' iterates through every loaded actor in the level, making it inefficient for large worlds with many actors. More targeted methods are preferable."
+    },
+    {
+      "question": "What is the purpose of the 'Blend Time' parameter in the 'Set View Target with Blend' function?",
+      "options": [
+        "To specify the duration of the transition between cameras.",
+        "To set the priority of the new camera view.",
+        "To determine the field of view of the new camera.",
+        "To control the audio volume during the camera transition."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Blend Time' parameter controls the duration of the smooth transition between the current camera and the new target camera."
+    },
+    {
+      "question": "Why should you avoid storing direct, hard references to Actors within UMG widgets?",
+      "options": [
+        "It can lead to memory leaks if the widget outlives the Actor.",
+        "It prevents the Actor from being garbage collected.",
+        "It causes the UMG widget to be constantly redrawn.",
+        "It makes the UMG widget incompatible with mobile platforms."
+      ],
+      "correct_index": 0,
+      "explanation": "Hard references prevent garbage collection, leading to memory leaks if the widget persists after the Actor is destroyed. Use WeakObjectPtr instead."
+    },
+    {
+      "question": "What does the modulo operator (%) do in the context of cycling through an array of cameras?",
+      "options": [
+        "It returns the remainder of a division, ensuring the index stays within the array bounds.",
+        "It multiplies the index by a scaling factor.",
+        "It calculates the distance between two cameras.",
+        "It clamps the index to a specific range."
+      ],
+      "correct_index": 0,
+      "explanation": "The modulo operator returns the remainder of a division. This is used to wrap the camera index around to the beginning of the array when it reaches the end, creating a looping effect."
+    },
+    {
+      "question": "What is the role of the PlayerController in the 'Set View Target with Blend' function?",
+      "options": [
+        "It manages the player's input and viewpoint, allowing the camera to be changed.",
+        "It controls the physics simulation of the camera.",
+        "It renders the UMG widget on the screen.",
+        "It handles network replication of the camera position."
+      ],
+      "correct_index": 0,
+      "explanation": "The PlayerController manages the player's input and viewpoint. 'Set View Target with Blend' is called on the PlayerController to change the active camera."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 26,
+    "grade": "D"
+  }
+}

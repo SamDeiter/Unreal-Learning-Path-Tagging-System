@@ -1,0 +1,208 @@
+{
+  "course_code": "203.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:29",
+      "title": "Lumen Global Illumination",
+      "concept": "Lumen is Unreal Engine 5's fully dynamic global illumination and reflections system. It reacts to scene and light changes in real time, eliminating the need for precomputed lighting.",
+      "diagram_suggestion": "A diagram illustrating the Lumen scene representation (Surface Cache, Software Ray Tracing) and how it interacts with the Global Illumination and Reflection pipelines."
+    },
+    {
+      "insert_after_timestamp": "0:43",
+      "title": "Lightmass Baking (Legacy)",
+      "concept": "Lightmass is a static lighting system that precomputes lighting data and stores it in lightmaps. While offering high quality, it doesn't react to dynamic changes and requires baking.",
+      "diagram_suggestion": "A comparison diagram showing the workflow differences between Lightmass baking and Lumen's real-time global illumination."
+    },
+    {
+      "insert_after_timestamp": "3:01",
+      "title": "Hardware Ray Tracing",
+      "concept": "Hardware Ray Tracing leverages dedicated GPU cores to accelerate ray tracing calculations, enabling more realistic reflections, shadows, and global illumination.",
+      "diagram_suggestion": "A diagram showing the ray tracing pipeline and how it intersects with Lumen, highlighting the performance benefits of hardware acceleration."
+    },
+    {
+      "insert_after_timestamp": "3:17",
+      "title": "Virtual Shadow Maps",
+      "concept": "Virtual Shadow Maps (VSM) provide high-resolution shadow detail for large and complex scenes by dynamically allocating shadow map resources based on camera proximity.",
+      "diagram_suggestion": "A diagram illustrating how VSMs divide the scene into tiles and allocate shadow map resolution based on view frustum and distance."
+    },
+    {
+      "insert_after_timestamp": "3:23",
+      "title": "Mesh Distance Fields",
+      "concept": "Mesh Distance Fields (MDFs) are volumetric representations of meshes that enable efficient ray marching and collision detection, used extensively by Lumen and other rendering features.",
+      "diagram_suggestion": "A visual representation of a mesh and its corresponding distance field, highlighting how the distance field stores the distance to the nearest surface."
+    },
+    {
+      "insert_after_timestamp": "7:14",
+      "title": "Atmospheric Lighting System",
+      "concept": "The Atmospheric Lighting system simulates realistic atmospheric scattering and fog effects, contributing to the overall mood and depth of the scene.",
+      "diagram_suggestion": "A diagram illustrating the different components of the atmospheric lighting system (Sky Light, Atmospheric Light, Sky Atmosphere, Volumetric Clouds, Height Fog) and their interactions."
+    },
+    {
+      "insert_after_timestamp": "12:21",
+      "title": "Photon Mapping Analogy",
+      "concept": "Lumen, while not strictly photon mapping, simulates the behavior of light photons bouncing around the scene to achieve global illumination. This involves tracing rays and accumulating light energy.",
+      "diagram_suggestion": "A simplified diagram illustrating the concept of photon tracing and energy accumulation in a global illumination system."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "3:01",
+      "procedural_step": "Enable Hardware Ray Tracing",
+      "why": "Enabling hardware ray tracing offloads ray tracing calculations to dedicated GPU cores, significantly improving performance for features like Lumen reflections and global illumination. Without it, Lumen falls back to software ray tracing, which is much slower.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:17",
+      "procedural_step": "Enable Virtual Shadow Maps",
+      "why": "VSMs provide consistent shadow resolution across large scenes, preventing shadow aliasing and improving visual fidelity. Disabling VSMs can lead to noticeable shadow artifacts, especially with Nanite geometry.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:23",
+      "procedural_step": "Enable Mesh Distance Fields",
+      "why": "Mesh Distance Fields are crucial for Lumen's surface cache and software ray tracing, enabling accurate global illumination and reflections. Disabling them will severely impact Lumen's performance and quality.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:35",
+      "procedural_step": "Enable Real Time Capture on Skylight",
+      "why": "Real-time capture allows the skylight to dynamically update based on changes in the environment, ensuring accurate ambient lighting. Disabling it results in a static skylight, which won't reflect changes in the scene.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "9:00",
+      "procedural_step": "Set Lights to Movable",
+      "why": "Movable lights are required for Lumen to dynamically update global illumination and shadows in real-time. Static or Stationary lights will not contribute to Lumen's dynamic lighting calculations.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "10:23",
+      "procedural_step": "Adjust Material Roughness to Reduce Noise",
+      "why": "Lowering roughness increases specular reflections, which can help to mask noise artifacts in Lumen's global illumination. However, excessively low roughness can lead to unrealistic, overly shiny surfaces.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "11:52",
+      "procedural_step": "Set Post Process Volume to Infinite Extent",
+      "why": "Setting the post-process volume to infinite extent ensures that the post-processing effects are applied to the entire scene, regardless of camera position. Failing to do so can result in inconsistent visual quality as the camera moves.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:37",
+      "prompt": "Why might you choose baked lighting over Lumen in certain situations, even though Lumen is dynamic?",
+      "expected_insight": "Baked lighting can offer higher quality and performance for static scenes, as the lighting is precomputed. Lumen, while dynamic, has a performance cost and may not always match the quality of baked lighting for static elements."
+    },
+    {
+      "insert_after_timestamp": "3:52",
+      "prompt": "Why is it important to check project settings when importing assets from the marketplace, especially regarding lighting?",
+      "expected_insight": "Marketplace assets may be configured for older rendering pipelines (e.g., baked lighting) and may have settings that conflict with Lumen. Ensuring compatibility is crucial for visual consistency and performance."
+    },
+    {
+      "insert_after_timestamp": "7:53",
+      "prompt": "Why is the HDR backdrop's realism more important for exterior shots than interior shots?",
+      "expected_insight": "In exterior shots, the HDR backdrop directly contributes to the perceived environment. In interior shots, the backdrop is less prominent, allowing for more suspension of disbelief."
+    },
+    {
+      "insert_after_timestamp": "10:57",
+      "prompt": "How does material roughness affect the appearance of noise in Lumen global illumination?",
+      "expected_insight": "Rougher surfaces scatter light more diffusely, which can amplify noise artifacts. Smoother surfaces exhibit more specular reflections, which can mask noise."
+    },
+    {
+      "insert_after_timestamp": "12:31",
+      "prompt": "Why is Lumen considered 'trimmer' than traditional ray tracing, and what are the implications for performance?",
+      "expected_insight": "Lumen uses a combination of screen-space and ray tracing techniques, making it more efficient than full ray tracing. This allows for dynamic global illumination and reflections at a lower performance cost."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "3:52",
+      "warning": "Importing assets with baked lighting setups can lead to conflicts with Lumen, potentially causing performance issues and visual inconsistencies. Ensure assets are configured for dynamic lighting.",
+      "severity": "MEDIUM",
+      "fix": "Review the asset's materials and lighting settings, and adjust them to be compatible with Lumen. Disable any baked lighting components."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of Unreal Engine 5 editor interface",
+    "Familiarity with material creation and editing",
+    "Knowledge of basic lighting concepts (e.g., directional lights, skylights)"
+  ],
+  "quiz_questions": [
+    {
+      "question": "What is the primary advantage of using Lumen for global illumination compared to Lightmass?",
+      "options": [
+        "Lumen provides dynamic, real-time global illumination, while Lightmass requires pre-computation.",
+        "Lightmass offers higher visual fidelity than Lumen.",
+        "Lumen is only suitable for outdoor environments.",
+        "Lightmass is easier to set up than Lumen."
+      ],
+      "correct_index": 0,
+      "explanation": "Lumen's dynamic nature allows for real-time updates to global illumination based on scene changes, unlike Lightmass which requires baking."
+    },
+    {
+      "question": "Why are Mesh Distance Fields important for Lumen's functionality?",
+      "options": [
+        "They enable efficient ray marching and collision detection for Lumen's surface cache and software ray tracing.",
+        "They are used for generating lightmaps in baked lighting scenarios.",
+        "They control the level of detail of Nanite geometry.",
+        "They are only used for physics simulations."
+      ],
+      "correct_index": 0,
+      "explanation": "Mesh Distance Fields provide a volumetric representation of meshes, enabling efficient ray tracing and collision detection, which are crucial for Lumen's global illumination and reflections."
+    },
+    {
+      "question": "What is the impact of setting a light to 'Static' when using Lumen?",
+      "options": [
+        "The light will not contribute to Lumen's dynamic global illumination calculations.",
+        "The light will cast higher quality shadows.",
+        "The light will be more performant than a 'Movable' light.",
+        "The light will only affect static objects in the scene."
+      ],
+      "correct_index": 0,
+      "explanation": "Static lights do not update dynamically with Lumen, meaning their contribution to global illumination will be precomputed and will not react to scene changes."
+    },
+    {
+      "question": "How does increasing the 'Source Angle' of a directional light affect shadows in a Lumen scene?",
+      "options": [
+        "It softens the shadows by increasing the light source's apparent size.",
+        "It sharpens the shadows by decreasing the light source's apparent size.",
+        "It has no effect on shadows in a Lumen scene.",
+        "It increases the intensity of the light."
+      ],
+      "correct_index": 0,
+      "explanation": "Increasing the source angle effectively makes the light source larger, resulting in softer, less defined shadows."
+    },
+    {
+      "question": "What is the purpose of a Post Process Volume in the context of Lumen lighting?",
+      "options": [
+        "It allows for global adjustments to lighting and post-processing effects, ensuring consistent visual quality across the scene.",
+        "It is used to bake lighting data into lightmaps.",
+        "It controls the level of detail of Nanite geometry.",
+        "It is only used for creating visual effects like bloom and lens flares."
+      ],
+      "correct_index": 0,
+      "explanation": "The Post Process Volume provides a centralized location for adjusting global illumination settings, exposure, and other post-processing effects, ensuring consistent visual quality throughout the scene."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

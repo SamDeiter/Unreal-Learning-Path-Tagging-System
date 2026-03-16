@@ -1,0 +1,165 @@
+{
+  "course_code": "208.01",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:05",
+      "title": "Control Rig Function Architecture",
+      "concept": "Control Rig functions encapsulate reusable logic within the Control Rig graph. They promote modularity and reduce visual complexity by hiding implementation details. Understanding their internal structure and input/output dependencies is crucial for efficient rig design.",
+      "diagram_suggestion": "A diagram showing a Control Rig graph with a function node. Zoom into the function node to reveal its internal node network. Highlight input and output pins."
+    },
+    {
+      "insert_after_timestamp": "0:39",
+      "title": "IK Solver Constraints",
+      "concept": "IK solvers in Control Rig operate by iteratively adjusting bone rotations to satisfy a target position. The 'IK 2 Bone' solver simplifies this for two-bone chains, but understanding its limitations (specifically, the assumption of a single bend) is essential for avoiding unexpected behavior in more complex scenarios.",
+      "diagram_suggestion": "A visual representation of the IK 2 Bone solver showing the two bones, the target, and the pole vector. Illustrate how the solver adjusts the bone rotations to reach the target while respecting the pole vector constraint."
+    },
+    {
+      "insert_after_timestamp": "4:46",
+      "title": "Control Rig Graph Compilation",
+      "concept": "The Control Rig graph is compiled into bytecode that is executed at runtime. Optimizing the graph's structure, including the use of functions, directly impacts performance. Overly complex graphs can lead to performance bottlenecks, especially in complex scenes with multiple rigged characters.",
+      "diagram_suggestion": "A flowchart illustrating the Control Rig graph compilation process, from node connections to bytecode generation. Highlight the performance implications of different graph structures."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:09",
+      "procedural_step": "Using IK 2 bone function",
+      "why": "IK 2 Bone reduces node count, improving graph readability and compilation time. This translates to faster iteration and potentially better runtime performance, especially on complex rigs.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:22",
+      "procedural_step": "Using IK 2 bone for 3 joint chains",
+      "why": "IK 2 Bone is optimized for two-bone chains, providing a performance advantage over generic IK solvers. Using it outside this context can lead to inaccurate results or instability.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:00",
+      "procedural_step": "Setting primary and secondary axes",
+      "why": "Incorrect axis orientation will cause the IK solver to produce unpredictable rotations. This is because the solver relies on these axes to define the bone's local space and calculate the correct bending direction.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:49",
+      "procedural_step": "Connecting IK2 bone to AIM node",
+      "why": "Connecting the IK2 bone output to the AIM node allows the character's mesh to follow the IK solution. Disconnecting this link would result in the rig solving correctly, but the mesh would not reflect the changes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:37",
+      "procedural_step": "Wrapping logic in a function",
+      "why": "Functions reduce visual clutter and improve graph organization, making the rig easier to understand and maintain. This also allows for easier reuse of common rigging setups across different parts of the character or even different characters.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:50",
+      "prompt": "Why does the IK 2 Bone function require both a primary and secondary axis? What happens if these are misaligned with the bone's actual orientation?",
+      "expected_insight": "The primary axis defines the direction of the bone, while the secondary axis defines the 'up' direction. Misalignment will cause twisting or incorrect bending."
+    },
+    {
+      "insert_after_timestamp": "1:30",
+      "prompt": "Imagine you need to adapt this IK setup for a character with digitigrade legs (like a dog). What modifications would be necessary, and why might the IK 2 Bone function be insufficient?",
+      "expected_insight": "Digitigrade legs have more complex joint structures. The IK 2 Bone function, designed for two-bone chains, would likely be inadequate, requiring a more general IK solver or a custom function."
+    },
+    {
+      "insert_after_timestamp": "3:43",
+      "prompt": "What are the performance implications of using complex functions within a Control Rig? How can you balance the benefits of modularity with the need for efficient execution?",
+      "expected_insight": "Complex functions can increase compilation time and runtime overhead. Optimization strategies include minimizing node count within functions, caching intermediate results, and profiling performance."
+    },
+    {
+      "insert_after_timestamp": "4:10",
+      "prompt": "How does the concept of 'local space' relate to the correct setup of the primary and secondary axes in the IK 2 Bone function?",
+      "expected_insight": "The primary and secondary axes define the bone's local coordinate system. The IK solver uses this local space to calculate rotations relative to the parent bone."
+    },
+    {
+      "insert_after_timestamp": "5:05",
+      "prompt": "If you create a custom IK function and make it public, what are the potential benefits and drawbacks of reusing it across multiple Control Rigs in your project?",
+      "expected_insight": "Benefits include code reuse and consistency. Drawbacks include potential dependencies and the risk of unintended consequences if the function is modified."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of coordinate systems and transforms.",
+    "Familiarity with Control Rig's node-based graph editor.",
+    "Knowledge of skeletal mesh hierarchies and bone orientations."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to correctly define the primary and secondary axes when using the IK 2 Bone function?",
+      "options": [
+        "To ensure the IK solver calculates rotations in the correct local space.",
+        "To optimize the compilation time of the Control Rig graph.",
+        "To reduce the number of nodes in the IK 2 Bone function.",
+        "To enable the use of the IK 2 Bone function with any bone chain length."
+      ],
+      "correct_index": 0,
+      "explanation": "The primary and secondary axes define the bone's local coordinate system, which the IK solver uses to calculate rotations."
+    },
+    {
+      "question": "What is the primary benefit of using Control Rig functions in your rigging workflow?",
+      "options": [
+        "Improved graph organization and code reuse.",
+        "Automatic bone orientation correction.",
+        "Simplified animation retargeting.",
+        "Increased runtime performance of skeletal meshes."
+      ],
+      "correct_index": 0,
+      "explanation": "Functions promote modularity, reduce visual complexity, and allow for the reuse of common rigging setups."
+    },
+    {
+      "question": "The IK 2 Bone function is specifically designed for what type of bone chains?",
+      "options": [
+        "Two-bone chains with a single bend.",
+        "Any bone chain length.",
+        "Chains with multiple pole vectors.",
+        "Chains that require precise joint angle control."
+      ],
+      "correct_index": 0,
+      "explanation": "The IK 2 Bone function is optimized for two-bone chains, such as arms and legs, where you primarily control the end effector and bend the chain at one point."
+    },
+    {
+      "question": "What is the potential impact of using overly complex Control Rig graphs on performance?",
+      "options": [
+        "Increased compilation time and runtime overhead.",
+        "Reduced memory usage.",
+        "Improved animation blending.",
+        "Simplified debugging."
+      ],
+      "correct_index": 0,
+      "explanation": "Overly complex graphs can lead to performance bottlenecks due to increased compilation time and runtime overhead."
+    },
+    {
+      "question": "How does making a custom Control Rig function 'public' affect its usability?",
+      "options": [
+        "It allows the function to be used across all Control Rigs within the project.",
+        "It restricts the function's use to the current Control Rig.",
+        "It automatically optimizes the function for runtime performance.",
+        "It prevents the function from being modified by other users."
+      ],
+      "correct_index": 0,
+      "explanation": "Making a function public allows it to be reused across multiple Control Rigs within the same project, promoting code reuse and consistency."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 4,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 4,
+    "total": 29,
+    "grade": "D"
+  }
+}

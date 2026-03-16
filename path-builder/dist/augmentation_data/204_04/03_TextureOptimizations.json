@@ -1,0 +1,165 @@
+{
+  "course_code": "204.04",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "1:17",
+      "title": "Texture Streaming Deep Dive",
+      "concept": "Explain how the Texture Streaming system in UE5 dynamically loads and unloads different MIP levels of textures based on camera distance and memory constraints. Detail the interaction between the Texture Streaming pool size, texture priorities, and the impact on visual quality and memory usage.",
+      "diagram_suggestion": "A flowchart illustrating the Texture Streaming process: Camera distance -> MIP level selection -> Streaming pool check -> Load/Unload decision -> Render."
+    },
+    {
+      "insert_after_timestamp": "4:26",
+      "title": "Texture Group Configuration",
+      "concept": "Elaborate on how Texture Groups influence the LOD bias and filtering methods applied to textures. Explain how the engine determines the appropriate MIP level based on the assigned group and the viewing angle. Discuss the trade-offs between performance and visual quality for different group settings.",
+      "diagram_suggestion": "A table comparing different Texture Groups (World, Character, UI) and their default LOD bias, filtering settings, and intended use cases."
+    },
+    {
+      "insert_after_timestamp": "8:11",
+      "title": "MIP Mapping and Rendering Pipeline Integration",
+      "concept": "Explain how the GPU utilizes MIP maps during rendering. Detail the process of trilinear filtering and anisotropic filtering and how they blend between different MIP levels to reduce aliasing artifacts. Discuss the performance implications of different filtering methods.",
+      "diagram_suggestion": "A diagram showing how trilinear filtering interpolates between MIP levels during texture sampling."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:38",
+      "procedural_step": "Using power of two textures",
+      "why": "Power-of-two textures align with the GPU's memory architecture, enabling faster data access and more efficient memory utilization. This directly impacts rendering performance, especially on mobile platforms.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:06",
+      "procedural_step": "Importing textures as power of two",
+      "why": "Texture streaming relies on power-of-two textures to generate a complete MIP map chain. Without it, the engine cannot dynamically adjust texture resolution based on distance, leading to wasted memory and reduced performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:50",
+      "procedural_step": "Using specific texture compression methods for HMI",
+      "why": "Different compression methods optimize textures for specific data types (e.g., normal maps, UI elements). Choosing the correct compression reduces memory footprint and improves rendering speed by minimizing the amount of data the GPU needs to process.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:35",
+      "procedural_step": "Knocking back LOD bias",
+      "why": "Adjusting the LOD bias forces the engine to use a lower-resolution MIP map, effectively reducing the texture's memory footprint and improving rendering performance, especially when textures are viewed from a distance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:24",
+      "procedural_step": "Using RGB mask packing",
+      "why": "RGB mask packing reduces draw calls and memory bandwidth usage by combining multiple grayscale textures into a single texture. This optimization is crucial for HMI applications where performance is paramount.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:31",
+      "prompt": "Why does using non-power-of-two textures negate texture streaming and MIP mapping benefits in Unreal Engine 5?",
+      "expected_insight": "The texture streaming system and MIP map generation are optimized for power-of-two textures. Non-power-of-two textures require special handling that bypasses these optimizations, leading to performance penalties."
+    },
+    {
+      "insert_after_timestamp": "3:49",
+      "prompt": "Explain why UI textures need to have dimensions divisible by four for optimal compression. What happens if they don't?",
+      "expected_insight": "Certain texture compression algorithms, especially those used for UI, operate on blocks of 4x4 pixels. If the dimensions are not divisible by four, the texture cannot be efficiently compressed, leading to increased memory usage."
+    },
+    {
+      "insert_after_timestamp": "7:16",
+      "prompt": "Why is disabling sRGB important when using RGB packed textures?",
+      "expected_insight": "sRGB gamma correction is intended for color textures. When using RGB packed textures for storing masks or other non-color data, applying gamma correction will distort the data, leading to incorrect material results."
+    },
+    {
+      "insert_after_timestamp": "9:10",
+      "prompt": "Why does Unreal Engine 5 automatically handle MIP mapping behind the scenes?",
+      "expected_insight": "Automated MIP mapping simplifies the development workflow and ensures that textures are rendered efficiently at different distances, optimizing performance without requiring manual intervention."
+    },
+    {
+      "insert_after_timestamp": "10:30",
+      "prompt": "How does the screen real estate of an object influence the choice of MIP level, and why is this important for performance?",
+      "expected_insight": "Objects occupying less screen space require lower-resolution MIP levels. Using unnecessarily high-resolution textures wastes memory and processing power, reducing overall performance."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of texture compression algorithms (DXT, BC formats)",
+    "Familiarity with the Unreal Engine 5 material editor",
+    "Knowledge of memory management principles in game development"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it important to use power-of-two textures in Unreal Engine 5?",
+      "options": [
+        "They pack into memory more efficiently, improving performance.",
+        "They are easier to edit in image editing software.",
+        "They are required by the Unreal Engine 5 editor.",
+        "They have better visual quality."
+      ],
+      "correct_index": 0,
+      "explanation": "Power-of-two textures align with the GPU's memory architecture, enabling faster data access and more efficient memory utilization. This directly impacts rendering performance."
+    },
+    {
+      "question": "What is the primary benefit of using texture compression in Unreal Engine 5?",
+      "options": [
+        "Reduces the memory footprint of the project.",
+        "Improves the visual quality of textures.",
+        "Simplifies the texture import process.",
+        "Increases the loading speed of textures."
+      ],
+      "correct_index": 0,
+      "explanation": "Texture compression reduces the memory footprint of the project by storing textures in a more compact format, which is crucial for performance, especially on mobile platforms."
+    },
+    {
+      "question": "What is the purpose of Texture Groups in Unreal Engine 5?",
+      "options": [
+        "To determine the MIP or LOD resolution shown for textures.",
+        "To organize textures in the content browser.",
+        "To apply post-processing effects to textures.",
+        "To control the import settings of textures."
+      ],
+      "correct_index": 0,
+      "explanation": "Texture Groups help determine what MIP or LOD resolution will be shown, what type of filter should be applied, and how the GPU should blend between MIP levels, optimizing performance and visual quality."
+    },
+    {
+      "question": "Why should sRGB be disabled on RGB packed textures?",
+      "options": [
+        "To prevent gamma correction from distorting the data.",
+        "To improve the compression ratio of the texture.",
+        "To enable texture streaming for the texture.",
+        "To reduce the file size of the texture."
+      ],
+      "correct_index": 0,
+      "explanation": "sRGB gamma correction is intended for color textures. When using RGB packed textures for storing masks or other non-color data, applying gamma correction will distort the data, leading to incorrect material results."
+    },
+    {
+      "question": "What is the main function of MIP mapping in Unreal Engine 5?",
+      "options": [
+        "To use smaller MIP maps as a texture gets further away.",
+        "To increase the resolution of textures.",
+        "To apply sharpening filters to textures.",
+        "To reduce the number of draw calls."
+      ],
+      "correct_index": 0,
+      "explanation": "MIP mapping creates multiple levels of the same image at different resolutions, allowing the engine to use smaller MIP maps as a texture gets further away, optimizing performance and reducing aliasing."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 25,
+    "grade": "D"
+  }
+}

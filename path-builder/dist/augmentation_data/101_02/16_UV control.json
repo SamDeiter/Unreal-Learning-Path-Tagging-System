@@ -1,0 +1,165 @@
+{
+  "course_code": "101.02",
+  "conceptual_score": {
+    "procedural_pct": 80,
+    "conceptual_pct": 20,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:09",
+      "title": "Material Instance Parameters",
+      "concept": "Material Instances allow modification of material properties without recompiling the base material. This is crucial for performance and workflow, enabling artists to tweak appearances without engine overhead.",
+      "diagram_suggestion": "Diagram showing a base material and multiple material instances, each with different parameter values, all referencing the same base material."
+    },
+    {
+      "insert_after_timestamp": "0:31",
+      "title": "UV Transformations and Texture Samplers",
+      "concept": "UV transformations within a material manipulate how a texture is sampled. Understanding texture coordinate spaces and how they interact with texture samplers is fundamental to achieving desired visual effects.",
+      "diagram_suggestion": "Diagram illustrating UV coordinate space, texture sampler, and the effect of UV transformations (scaling, rotation) on the final texture output."
+    },
+    {
+      "insert_after_timestamp": "2:50",
+      "title": "Material Editor Graph Compilation",
+      "concept": "The Material Editor compiles the node graph into shader code executed on the GPU. Understanding the compilation process helps optimize material complexity and performance.",
+      "diagram_suggestion": "Simplified flowchart of the material compilation process: Node graph -> HLSL code -> GPU shader."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:00",
+      "procedural_step": "Controlling UVs through the material editor.",
+      "why": "Modifying UVs in the material editor allows dynamic texture manipulation at runtime, enabling effects like animated textures, detail mapping, and procedural wear. This avoids baking UV changes into static meshes, offering greater flexibility.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:20",
+      "procedural_step": "Multiplying texture coordinates for UV scaling.",
+      "why": "Multiplying UV coordinates scales the texture. Values greater than 1 compress the texture, creating tiling. Values less than 1 stretch the texture. This is a fundamental technique for adjusting texture density and repetition.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:33",
+      "procedural_step": "Adding a custom rotator node.",
+      "why": "The Custom Rotator node rotates the UV coordinates, creating a spinning texture effect. This is useful for simulating motion or adding visual interest to static surfaces. The rotation is performed in texture space, not world space.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:30",
+      "procedural_step": "Dividing the rotation angle by 360.",
+      "why": "Normalizing the rotation angle to a 0-1 range allows for easier control and predictable results. The rotator node expects a normalized input, representing a fraction of a full rotation.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "6:41",
+      "procedural_step": "Applying UV transformations to all texture maps.",
+      "why": "Applying consistent UV transformations across all texture maps (albedo, normal, roughness) ensures visual coherence. Mismatched UVs can lead to artifacts and incorrect lighting calculations, breaking the material's physical plausibility.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:43",
+      "prompt": "Why is the rotation angle divided by 360?",
+      "expected_insight": "The rotator node likely expects a normalized angle (0-1) rather than degrees. Dividing by 360 converts degrees to this normalized range, ensuring correct rotation behavior."
+    },
+    {
+      "insert_after_timestamp": "1:36",
+      "prompt": "How does the UV scale parameter affect the texture's appearance?",
+      "expected_insight": "Values greater than 1 will cause the texture to repeat more frequently, effectively shrinking the visible texture elements. Values less than 1 will stretch the texture, making the elements larger and less frequent."
+    },
+    {
+      "insert_after_timestamp": "2:09",
+      "prompt": "What are the performance implications of using custom rotator nodes?",
+      "expected_insight": "Custom rotator nodes perform calculations per-pixel, which can be expensive. Overuse can impact frame rate, especially on lower-end hardware. Consider using pre-rotated textures or simpler techniques where possible."
+    },
+    {
+      "insert_after_timestamp": "3:21",
+      "prompt": "Why is it important to maintain consistent UV scaling across different texture maps?",
+      "expected_insight": "Inconsistent UV scaling will cause the textures to misalign, leading to visual artifacts and incorrect lighting. For example, a normal map with a different scale than the albedo will produce incorrect surface normals, affecting how light interacts with the material."
+    },
+    {
+      "insert_after_timestamp": "5:52",
+      "prompt": "What are the limitations of manipulating UVs within the material editor?",
+      "expected_insight": "While flexible, material-based UV manipulation can be computationally expensive. Complex UV transformations should ideally be handled during mesh creation to reduce runtime overhead."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of UV mapping principles.",
+    "Familiarity with the Unreal Engine 5 material editor interface.",
+    "Knowledge of common texture map types (albedo, normal, roughness)."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally better to use Material Instances instead of directly modifying the base Material?",
+      "options": [
+        "Material Instances allow for parameter changes without recompiling the base material, improving performance and workflow.",
+        "Base Materials cannot be modified after creation.",
+        "Material Instances offer more features than Base Materials.",
+        "It is not better; modifying the Base Material is the preferred method."
+      ],
+      "correct_index": 0,
+      "explanation": "Material Instances provide a non-destructive way to adjust material properties, avoiding costly recompilations of the base material."
+    },
+    {
+      "question": "What is the primary function of multiplying texture coordinates in a material?",
+      "options": [
+        "To scale the texture, controlling its repetition.",
+        "To rotate the texture.",
+        "To change the texture's color.",
+        "To offset the texture's position."
+      ],
+      "correct_index": 0,
+      "explanation": "Multiplying UV coordinates scales the texture. Values greater than 1 compress the texture, creating tiling. Values less than 1 stretch the texture."
+    },
+    {
+      "question": "What is the purpose of normalizing the rotation angle (dividing by 360) before inputting it into a UV rotator node?",
+      "options": [
+        "To convert the angle from degrees to a 0-1 range, which is expected by the rotator node.",
+        "To increase the rotation speed.",
+        "To prevent the texture from distorting.",
+        "To improve the performance of the rotation."
+      ],
+      "correct_index": 0,
+      "explanation": "The rotator node expects a normalized angle (0-1) rather than degrees. Dividing by 360 converts degrees to this normalized range, ensuring correct rotation behavior."
+    },
+    {
+      "question": "What is a potential consequence of using inconsistent UV scales across different texture maps (e.g., albedo and normal map)?",
+      "options": [
+        "Visual artifacts and incorrect lighting calculations.",
+        "Improved performance.",
+        "Brighter colors.",
+        "Smoother surfaces."
+      ],
+      "correct_index": 0,
+      "explanation": "Inconsistent UV scaling will cause the textures to misalign, leading to visual artifacts and incorrect lighting. A normal map with a different scale than the albedo will produce incorrect surface normals."
+    },
+    {
+      "question": "Why should complex UV transformations ideally be handled during mesh creation rather than within the material editor?",
+      "options": [
+        "To reduce runtime overhead and improve performance.",
+        "Because it is impossible to do UV transformations in the material editor.",
+        "To simplify the material graph.",
+        "To allow for more dynamic control over the UVs."
+      ],
+      "correct_index": 0,
+      "explanation": "While flexible, material-based UV manipulation can be computationally expensive. Complex UV transformations should ideally be handled during mesh creation to reduce runtime overhead."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 4,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 3,
+    "affective_tone": 4,
+    "total": 28,
+    "grade": "D"
+  }
+}

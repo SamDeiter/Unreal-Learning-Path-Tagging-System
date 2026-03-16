@@ -1,0 +1,171 @@
+{
+  "course_code": "103.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:26",
+      "title": "Understanding Unlit Mode",
+      "concept": "Unlit mode bypasses Lumen's global illumination and reflections, displaying only the base color of materials. This is useful for debugging texture data and isolating material properties from lighting influences.",
+      "diagram_suggestion": "A diagram showing the rendering pipeline with a clear indication of where 'Unlit Mode' cuts off the lighting calculations."
+    },
+    {
+      "insert_after_timestamp": "3:10",
+      "title": "Color Calibration and Linear Workflow",
+      "concept": "The Color Calibration tool helps establish a consistent linear color space workflow. Understanding sRGB and its impact on HDR values is crucial for accurate color representation and avoiding banding artifacts.",
+      "diagram_suggestion": "A graph illustrating the difference between sRGB and linear color spaces, highlighting the gamma correction curve."
+    },
+    {
+      "insert_after_timestamp": "6:27",
+      "title": "Auto-Exposure and Eye Adaptation",
+      "concept": "Auto-exposure simulates the human eye's adaptation to varying light levels. The histogram-based method analyzes the scene's luminance distribution to dynamically adjust exposure, impacting perceived brightness and contrast.",
+      "diagram_suggestion": "A visual representation of the 64-bin histogram used in auto-exposure, showing how luminance values are distributed and used to calculate exposure."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:22",
+      "procedural_step": "Changing to Unlit mode",
+      "why": "Unlit mode disables all lighting calculations, allowing you to isolate and inspect the base color and texture data of your materials. This is crucial for debugging material properties independently of lighting.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "1:16",
+      "procedural_step": "Setting Engine Scalability to Cinematic",
+      "why": "Setting scalability to Cinematic maximizes rendering quality by enabling features like high-resolution shadow maps and detailed material effects. This impacts GPU load and memory consumption, but is suitable for high-end workstations.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "2:16",
+      "procedural_step": "Setting G-Buffer format to High Precision Normals",
+      "why": "High Precision Normals increase the bit depth used to store normal vectors, reducing banding artifacts and improving the accuracy of lighting calculations, especially with complex material effects. This increases memory usage per pixel.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:13",
+      "procedural_step": "Setting the Calibrator to face the sun",
+      "why": "Aligning the Color Calibrator with the dominant light source ensures accurate color matching between the virtual scene and real-world references. This minimizes discrepancies caused by lighting direction and intensity.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:41",
+      "procedural_step": "Adjusting exposure settings in the Post Process Volume",
+      "why": "Post Process Volumes provide global control over exposure, affecting the final rendered image. Changes here impact the entire scene's brightness and contrast, influencing the overall visual mood and realism.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "7:20",
+      "procedural_step": "Locking exposure by setting min/max brightness to 1",
+      "why": "Locking exposure disables auto-exposure, preventing the scene's brightness from dynamically adjusting based on the camera's view. This provides a consistent baseline for lighting adjustments but sacrifices dynamic range.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "0:52",
+      "prompt": "Why might different view modes be essential for debugging specific rendering issues?",
+      "expected_insight": "Different view modes isolate specific aspects of the rendering pipeline, allowing you to identify whether a problem originates from lighting, materials, or post-processing."
+    },
+    {
+      "insert_after_timestamp": "2:23",
+      "prompt": "How does increasing the precision of normals affect the visual quality of reflections and shading?",
+      "expected_insight": "Higher precision normals reduce banding artifacts and improve the accuracy of surface orientation data, resulting in smoother and more realistic reflections and shading, especially on curved surfaces."
+    },
+    {
+      "insert_after_timestamp": "4:32",
+      "prompt": "Why is it important to calibrate the scene's lighting before adjusting exposure settings?",
+      "expected_insight": "Calibrating the lighting establishes a consistent baseline for luminance values, ensuring that exposure adjustments are based on accurate light levels rather than compensating for incorrect lighting setups."
+    },
+    {
+      "insert_after_timestamp": "6:49",
+      "prompt": "What are the trade-offs between using auto-exposure and manual exposure control?",
+      "expected_insight": "Auto-exposure dynamically adjusts brightness based on the scene's content, providing a natural eye-adaptation effect. Manual exposure offers precise control but requires manual adjustments to maintain consistent brightness across different scenes."
+    },
+    {
+      "insert_after_timestamp": "8:02",
+      "prompt": "How does locking the exposure affect the perceived realism of a scene, and when might this be a desirable effect?",
+      "expected_insight": "Locking the exposure removes the eye-adaptation effect, which can make the scene feel less dynamic but provides a consistent brightness level, which is useful for achieving a specific artistic look or for technical reasons like comparing lighting setups."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of color theory",
+    "Familiarity with the Unreal Engine interface",
+    "Knowledge of rendering pipelines"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it beneficial to use 'Unlit' view mode when debugging materials?",
+      "options": [
+        "To isolate the base color and texture data from lighting influences.",
+        "To see the final rendered image with all lighting effects.",
+        "To optimize performance by disabling lighting calculations.",
+        "To view the scene's wireframe."
+      ],
+      "correct_index": 0,
+      "explanation": "Unlit mode disables lighting, allowing you to inspect the material's base color and textures without the influence of lighting."
+    },
+    {
+      "question": "What is the primary benefit of using High Precision Normals in the G-Buffer?",
+      "options": [
+        "Improved performance due to reduced memory usage.",
+        "Reduced banding artifacts and more accurate lighting calculations.",
+        "Simplified material creation process.",
+        "Faster compilation times for shaders."
+      ],
+      "correct_index": 1,
+      "explanation": "High Precision Normals increase the bit depth for storing normal vectors, reducing banding and improving lighting accuracy."
+    },
+    {
+      "question": "What is the purpose of the Color Calibration tool in Unreal Engine?",
+      "options": [
+        "To automatically adjust the scene's lighting based on real-world data.",
+        "To establish a consistent linear color space workflow for accurate color representation.",
+        "To optimize the scene's performance by reducing color variations.",
+        "To create stylized color palettes for the scene."
+      ],
+      "correct_index": 1,
+      "explanation": "The Color Calibration tool helps establish a consistent linear color space workflow, ensuring accurate color representation."
+    },
+    {
+      "question": "How does the auto-exposure histogram method determine the scene's exposure?",
+      "options": [
+        "By averaging the luminance values of all pixels in the scene.",
+        "By analyzing the scene's luminance distribution using a 64-bin histogram.",
+        "By using a pre-defined exposure value set by the user.",
+        "By randomly adjusting the exposure until a visually pleasing result is achieved."
+      ],
+      "correct_index": 1,
+      "explanation": "The histogram-based auto-exposure analyzes the scene's luminance distribution to dynamically adjust the exposure."
+    },
+    {
+      "question": "What is the effect of locking the exposure by setting the minimum and maximum brightness to the same value?",
+      "options": [
+        "It creates a more dynamic and realistic lighting effect.",
+        "It disables auto-exposure, providing a consistent brightness level.",
+        "It optimizes the scene's performance by reducing the number of lighting calculations.",
+        "It enhances the contrast and saturation of the scene."
+      ],
+      "correct_index": 1,
+      "explanation": "Locking the exposure disables auto-exposure, preventing the scene's brightness from dynamically adjusting."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

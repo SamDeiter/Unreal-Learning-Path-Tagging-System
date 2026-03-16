@@ -1,0 +1,177 @@
+{
+  "course_code": "100.01",
+  "conceptual_score": {
+    "procedural_pct": 85,
+    "conceptual_pct": 15,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:08",
+      "title": "Niagara Data Interfaces",
+      "concept": "Niagara's ability to interact with gameplay without engineers relies on Data Interfaces. These allow Niagara systems to read and write data to game objects, enabling dynamic effects driven by game logic.",
+      "diagram_suggestion": "Diagram showing a Niagara System connected to a Game Object via a Data Interface, illustrating data flow in both directions."
+    },
+    {
+      "insert_after_timestamp": "0:31",
+      "title": "Niagara's Modular Scripting Architecture",
+      "concept": "Niagara's modularity stems from its scripting architecture, where effects are built from reusable modules. This allows users to extend functionality by creating custom modules without modifying the core engine code.",
+      "diagram_suggestion": "Diagram showing the hierarchy of a Niagara system: System -> Emitter -> Modules, highlighting the modular nature and reusability."
+    },
+    {
+      "insert_after_timestamp": "3:26",
+      "title": "GPU Particles and Fixed Bounds",
+      "concept": "GPU particles require fixed bounds because they are processed in parallel on the GPU. The engine needs to allocate memory for the particles upfront, and this requires knowing the maximum possible extent of the particle system.",
+      "diagram_suggestion": "A visual representation of GPU memory allocation for particles, showing how fixed bounds enable parallel processing."
+    },
+    {
+      "insert_after_timestamp": "5:41",
+      "title": "Niagara Emitter Timing and Sequencing",
+      "concept": "Niagara Systems can contain multiple emitters, each with its own timeline. This allows for complex, sequenced effects where different particle behaviors are triggered at specific times.",
+      "diagram_suggestion": "A timeline diagram showing multiple Niagara emitters with different start and end times, illustrating how they can be sequenced to create complex effects."
+    },
+    {
+      "insert_after_timestamp": "8:49",
+      "title": "Exposing User Parameters for Dynamic Control",
+      "concept": "Exposing user parameters allows designers to tweak Niagara effects directly in the level editor without needing to modify the underlying system. This promotes iteration and allows for context-specific adjustments.",
+      "diagram_suggestion": "Screenshot of the details panel of a Niagara system instance in the level editor, highlighting the exposed user parameters and their impact on the effect."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "0:08",
+      "procedural_step": "Niagara can be used for gameplay interactions",
+      "why": "Because Niagara's modules can read and react to game state variables, enabling visual effects to respond dynamically to gameplay events. This avoids hard-coded visual triggers and promotes emergent gameplay.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "0:16",
+      "procedural_step": "Add your own modules to Niagara",
+      "why": "Because Niagara's modular design allows for extending its functionality without modifying core engine code. This ensures engine stability and allows for custom behaviors tailored to specific project needs.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:23",
+      "procedural_step": "Bounds shows us the rendering bounds of this object.",
+      "why": "Because GPU particles require pre-allocated memory based on a fixed bounding box. Incorrect bounds can lead to particle clipping or wasted memory, impacting performance.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "5:17",
+      "procedural_step": "Expose various parameters inside of our effects",
+      "why": "Because exposing parameters allows designers to adjust effects directly in the level editor without modifying the core Niagara system. This promotes rapid iteration and context-specific customization, avoiding hard-coded values.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "8:16",
+      "procedural_step": "Read from new user parameters",
+      "why": "Because user parameters create a direct link between the Niagara system and the level editor, allowing designers to dynamically adjust effect properties without opening the Niagara editor. This streamlines the workflow and promotes iteration.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "1:24",
+      "prompt": "Why would choosing a 'lightweight' template be important for mobile games?",
+      "expected_insight": "Lightweight templates use fewer rendering resources, which is crucial for maintaining performance on mobile devices with limited processing power and memory."
+    },
+    {
+      "insert_after_timestamp": "2:16",
+      "prompt": "How does the Niagara editor's layout promote discoverability for new users?",
+      "expected_insight": "The familiar layout, similar to other Unreal Engine editors, reduces the initial cognitive load and allows users to leverage their existing knowledge to navigate the interface."
+    },
+    {
+      "insert_after_timestamp": "3:56",
+      "prompt": "Why is baking a Niagara particle effect beneficial for performance?",
+      "expected_insight": "Baking pre-calculates the particle effect, reducing the real-time computational cost. This is useful for effects that don't need to be dynamically updated, freeing up resources for other tasks."
+    },
+    {
+      "insert_after_timestamp": "6:24",
+      "prompt": "Why is the timeline limited to emitter timing and not material properties?",
+      "expected_insight": "The timeline is designed for sequencing emitter events, while material properties are typically controlled through material parameters and dynamic material instances for greater flexibility and performance."
+    },
+    {
+      "insert_after_timestamp": "7:31",
+      "prompt": "How does the module selection process in Niagara reduce cognitive overload?",
+      "expected_insight": "By allowing users to focus on specific modules within the system, the editor reduces the amount of information displayed at once, making it easier to understand and modify individual components."
+    }
+  ],
+  "architectural_warnings": [],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine editor interface",
+    "Familiarity with the concept of particle systems",
+    "Basic knowledge of node-based editors"
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why are fixed bounds important for GPU particles in Niagara?",
+      "options": [
+        "To pre-allocate memory on the GPU for parallel processing.",
+        "To allow for dynamic resizing of the particle system.",
+        "To improve the visual fidelity of the particles.",
+        "To simplify the particle simulation calculations."
+      ],
+      "correct_index": 0,
+      "explanation": "Fixed bounds allow the engine to pre-allocate memory on the GPU, enabling efficient parallel processing of particles. Without fixed bounds, dynamic memory allocation would introduce significant performance overhead."
+    },
+    {
+      "question": "What is the primary benefit of using Niagara's user parameters?",
+      "options": [
+        "Allowing designers to adjust effect properties directly in the level editor.",
+        "Improving the performance of the Niagara system.",
+        "Simplifying the creation of complex particle effects.",
+        "Enabling communication between different Niagara systems."
+      ],
+      "correct_index": 0,
+      "explanation": "User parameters expose properties of the Niagara system to the level editor, enabling designers to tweak the effect without needing to modify the core system. This promotes iteration and context-specific customization."
+    },
+    {
+      "question": "How does Niagara's modular design contribute to its flexibility?",
+      "options": [
+        "It allows users to extend functionality by creating custom modules.",
+        "It simplifies the process of importing particle effects from other software.",
+        "It improves the stability of the Unreal Engine editor.",
+        "It reduces the memory footprint of the particle system."
+      ],
+      "correct_index": 0,
+      "explanation": "Niagara's modularity allows users to create custom modules that extend the system's functionality without modifying core engine code. This ensures engine stability and allows for tailored behaviors."
+    },
+    {
+      "question": "What is the purpose of the 'Compile' button in the Niagara editor?",
+      "options": [
+        "To check for errors and ensure the system is working correctly.",
+        "To optimize the particle effect for specific hardware.",
+        "To generate a thumbnail image for the content browser.",
+        "To export the Niagara system to a different file format."
+      ],
+      "correct_index": 0,
+      "explanation": "The 'Compile' button checks the Niagara system for errors and ensures that all values are valid. This helps identify and resolve issues before deploying the effect in the game."
+    },
+    {
+      "question": "Why is it important to consider the rendering resources when choosing a Niagara template?",
+      "options": [
+        "To ensure optimal performance on the target hardware.",
+        "To maximize the visual fidelity of the particle effect.",
+        "To simplify the creation of complex particle systems.",
+        "To reduce the file size of the Niagara system."
+      ],
+      "correct_index": 0,
+      "explanation": "Choosing a template that aligns with the target hardware's capabilities is crucial for maintaining performance. Lightweight templates are particularly important for mobile devices with limited resources."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 1,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 1,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 1,
+    "self_explanation_prompting": 2,
+    "affective_tone": 3,
+    "total": 24,
+    "grade": "D"
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "course_code": "103.02",
+  "conceptual_score": {
+    "procedural_pct": 75,
+    "conceptual_pct": 25,
+    "verdict": "NEEDS_AUGMENTATION"
+  },
+  "theory_breaks": [
+    {
+      "insert_after_timestamp": "0:46",
+      "title": "IES Profiles Deep Dive",
+      "concept": "IES profiles define the distribution of light intensity from a light source. They are crucial for realistic lighting because they accurately represent how real-world lights emit light, influencing the shape and falloff of shadows and highlights.",
+      "diagram_suggestion": "A visual comparison of different IES profiles and their resulting light patterns on a surface, highlighting the impact on realism."
+    },
+    {
+      "insert_after_timestamp": "3:08",
+      "title": "Attenuation and Inverse Square Law",
+      "concept": "Light attenuation in Unreal Engine 5 is based on the inverse square law, where light intensity decreases proportionally to the square of the distance from the light source. Understanding this is crucial for setting realistic attenuation radii and intensities.",
+      "diagram_suggestion": "A graph illustrating the inverse square law, showing how light intensity drops off with distance. Include examples of different attenuation settings and their visual impact."
+    },
+    {
+      "insert_after_timestamp": "11:14",
+      "title": "Emissive Materials vs. Direct Lighting",
+      "concept": "Emissive materials contribute to global illumination but are less efficient than direct lights. They should be used sparingly for subtle effects, as they can increase rendering cost without providing the same level of control as dedicated light sources.",
+      "diagram_suggestion": "A side-by-side comparison of a scene lit with emissive materials and direct lights, showing the difference in performance and visual quality. Highlight the impact on ray tracing and global illumination calculations."
+    }
+  ],
+  "why_annotations": [
+    {
+      "timestamp": "1:28",
+      "procedural_step": "Emissive materials contribute to lighting.",
+      "why": "Emissive materials act as light sources by emitting light during the rendering process. This affects global illumination and can influence the overall scene lighting, but at a higher performance cost compared to dedicated light actors.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "3:14",
+      "procedural_step": "Bringing down the attenuation on a point light.",
+      "why": "Attenuation controls the distance light travels before its intensity diminishes to zero. Reducing the attenuation radius focuses the light's effect, improving performance by limiting the number of surfaces the light affects.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "4:19",
+      "procedural_step": "Spotlight is more directional.",
+      "why": "Spotlights are more efficient than point lights because they only illuminate a specific cone of space. This reduces the number of ray tracing calculations, improving rendering performance, especially in complex scenes.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "9:57",
+      "procedural_step": "Using a source texture for a rect light.",
+      "why": "Using a source texture allows the rectangular light to project a complex light pattern based on the texture's luminance values. This creates more realistic and nuanced lighting effects, simulating the light emitted from a textured surface like a TV screen.",
+      "antipattern_warning": null
+    },
+    {
+      "timestamp": "11:07",
+      "procedural_step": "Emissive material quality isn't as good as using actual lights.",
+      "why": "Emissive materials have limitations in terms of shadow quality and global illumination accuracy compared to dedicated light sources. Relying heavily on emissive materials can lead to visual artifacts and increased rendering times due to the indirect lighting calculations.",
+      "antipattern_warning": null
+    }
+  ],
+  "self_explanation_prompts": [
+    {
+      "insert_after_timestamp": "4:55",
+      "prompt": "Why does the inner cone angle of a spotlight affect the hardness of the light?",
+      "expected_insight": "The inner cone angle defines the region where the light is at its full intensity. A smaller angle creates a sharper, more defined light, while a larger angle results in a softer, more gradual transition to darkness."
+    },
+    {
+      "insert_after_timestamp": "8:50",
+      "prompt": "How do barn doors on a rectangular light affect the light's distribution and shape?",
+      "expected_insight": "Barn doors allow you to selectively block and shape the light emitted from a rectangular light. Adjusting the angle and length of the barn doors can create focused beams of light or prevent light from spilling into unwanted areas."
+    },
+    {
+      "insert_after_timestamp": "10:16",
+      "prompt": "Why is a blurred texture preferred over the original texture for a rectangular light source?",
+      "expected_insight": "A blurred texture softens the light emitted from the rectangular light, creating a more realistic and diffused glow. This avoids harsh edges and artifacts that can occur when using a sharp, detailed texture as a light source."
+    },
+    {
+      "insert_after_timestamp": "12:46",
+      "prompt": "Why might you need a rectangular light in addition to an emissive material?",
+      "expected_insight": "Emissive materials alone may not provide sufficient light or accurate shadows. A rectangular light can supplement the emissive material, adding more direct light and improving the overall lighting effect."
+    },
+    {
+      "insert_after_timestamp": "13:03",
+      "prompt": "Why are decals useful for augmenting emissive material lighting?",
+      "expected_insight": "Decals with emissive materials can project light onto surfaces, simulating the effect of light bouncing off objects. This can add subtle highlights and shadows, enhancing the realism of the scene."
+    }
+  ],
+  "architectural_warnings": [
+    {
+      "timestamp": "1:28",
+      "warning": "Over-reliance on emissive materials for primary lighting can lead to increased rendering costs and potential performance bottlenecks.",
+      "severity": "MEDIUM",
+      "fix": "Use dedicated light sources (Point Lights, Spot Lights, Rect Lights) for primary illumination and reserve emissive materials for subtle accent lighting."
+    },
+    {
+      "timestamp": "11:14",
+      "warning": "Using emissive materials without proper attenuation control can lead to excessive light bleeding and inaccurate global illumination.",
+      "severity": "LOW",
+      "fix": "Carefully adjust the emissive strength and use post-processing volumes to control light bleeding and improve the overall lighting quality."
+    }
+  ],
+  "missing_prerequisites": [
+    "Basic understanding of the Unreal Engine 5 editor interface.",
+    "Familiarity with material creation and editing in Unreal Engine 5.",
+    "Knowledge of global illumination concepts and Lumen settings."
+  ],
+  "quiz_questions": [
+    {
+      "question": "Why is it generally more performant to use a spotlight over a point light for directional lighting effects?",
+      "options": [
+        "Spotlights only calculate lighting within a defined cone, reducing the number of ray tracing calculations.",
+        "Point lights have more detailed shadow rendering.",
+        "Spotlights automatically optimize material shaders.",
+        "Point lights require pre-computed lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Spotlights are more efficient because they limit light calculations to a specific cone, reducing the computational load compared to point lights that emit light in all directions."
+    },
+    {
+      "question": "What is the primary function of an IES profile in Unreal Engine 5 lighting?",
+      "options": [
+        "To define the distribution and intensity of light emitted from a light source.",
+        "To control the color temperature of a light source.",
+        "To adjust the attenuation radius of a light source.",
+        "To enable real-time shadow casting."
+      ],
+      "correct_index": 0,
+      "explanation": "IES profiles accurately represent the light distribution of real-world light fixtures, influencing the shape and falloff of shadows and highlights."
+    },
+    {
+      "question": "When using rectangular lights, what is the advantage of using a blurred source texture instead of a sharp, detailed texture?",
+      "options": [
+        "It creates a more realistic and diffused light emission, avoiding harsh edges and artifacts.",
+        "It reduces the memory footprint of the light source.",
+        "It allows for more accurate shadow casting.",
+        "It increases the intensity of the light."
+      ],
+      "correct_index": 0,
+      "explanation": "A blurred texture softens the light emitted from the rectangular light, creating a more realistic and diffused glow, avoiding harsh edges and artifacts."
+    },
+    {
+      "question": "What is the main drawback of relying heavily on emissive materials for lighting in a scene?",
+      "options": [
+        "Emissive materials are computationally expensive and can negatively impact performance.",
+        "Emissive materials do not cast shadows.",
+        "Emissive materials cannot be used with Lumen.",
+        "Emissive materials require pre-computed lighting."
+      ],
+      "correct_index": 0,
+      "explanation": "Emissive materials require more complex calculations for global illumination, leading to increased rendering times and potential performance bottlenecks."
+    },
+    {
+      "question": "How do barn doors on a Rect Light affect the lighting?",
+      "options": [
+        "They allow for shaping and controlling the light emitted from the source.",
+        "They increase the intensity of the light.",
+        "They change the color temperature of the light.",
+        "They enable ray tracing."
+      ],
+      "correct_index": 0,
+      "explanation": "Barn doors allow you to selectively block and shape the light emitted from a rectangular light. Adjusting the angle and length of the barn doors can create focused beams of light or prevent light from spilling into unwanted areas."
+    }
+  ],
+  "evaluation_matrix_score": {
+    "concept_clarification": 2,
+    "misconception_addressing": 2,
+    "narrative_logic": 3,
+    "content_first_language": 3,
+    "dynamic_visualizations": 2,
+    "explicit_signaling": 2,
+    "strict_segmentation": 3,
+    "extraneous_load_reduction": 3,
+    "worked_example_fading": 2,
+    "self_explanation_prompting": 2,
+    "affective_tone": 4,
+    "total": 28,
+    "grade": "D"
+  }
+}
