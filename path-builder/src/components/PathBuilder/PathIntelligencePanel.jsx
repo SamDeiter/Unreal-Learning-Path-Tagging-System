@@ -25,6 +25,7 @@ import { previewScormPackage } from "../../services/scormPackager";
 import { exportScormPackage } from "../../services/scormExportService";
 import { evaluateChecks } from "../../services/pathChecks";
 import { cleanTranscriptText } from "../../utils/cleanTranscriptText";
+import { trackGapFillCompleted } from "../../services/analyticsService";
 import PathWizard from "../BespokePath/PathWizard";
 import WebPlayerPreview from "../WebPlayer/WebPlayerPreview";
 import "./PathIntelligencePanel.css";
@@ -501,6 +502,7 @@ export default function PathIntelligencePanel() {
           existingCodes
         );
         setFillResults((prev) => ({ ...prev, [topic]: result }));
+        trackGapFillCompleted(topic, result.source || 'unknown', 1, learningIntent.primaryGoal, 'path_builder');
       } catch {
         setFillResults((prev) => ({ ...prev, [topic]: { error: true } }));
       } finally {
@@ -524,8 +526,9 @@ export default function PathIntelligencePanel() {
         ...prev,
         [topic]: { ...prev[topic], addedCode: courseMatch.code },
       }));
+      trackGapFillCompleted(topic, 'library', 1, learningIntent?.primaryGoal, 'path_builder');
     },
-    [addCourse]
+    [addCourse, learningIntent]
   );
 
   // ── Generate bespoke step from segments ──
@@ -537,8 +540,9 @@ export default function PathIntelligencePanel() {
         ...prev,
         [topic]: { ...prev[topic], bespokeGenerated: true },
       }));
+      trackGapFillCompleted(topic, 'bespoke', 1, learningIntent?.primaryGoal, 'path_builder');
     },
-    [addCourse]
+    [addCourse, learningIntent]
   );
 
   // ── Add a single video segment as a path step ──
