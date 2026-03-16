@@ -380,7 +380,7 @@ All Cloud Functions enforce **server-side rate limiting** (per-user, per-functio
 The **Adaptive Path** (`AdaptivePath.jsx`) extends the Bespoke Path with a diagnostic quiz that calibrates content to the user's knowledge level:
 
 ```
-User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Path] -> [Quiz] -> UI
+User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Path] -> [Gap Fill] -> [Quiz] -> UI
 ```
 
 | Stage                    | Purpose                                                 | Backend                                   |
@@ -388,6 +388,7 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | **Diagnostic Quiz**      | Adaptive multi-question flow calibrating user knowledge | `useAdaptiveQuiz` hook + Cloud Function   |
 | **Knowledge Profile**    | Maps strengths/weaknesses across UE5 domains            | Client-side aggregation                   |
 | **Depth-Adjusted Path**  | Generates path biased by knowledge profile              | Gemini 2.0 Flash (Blueprint-first bias)   |
+| **Gap Fill (Stage 3.5)** | Auto-inserts up to 3 steps for blind spots in coverage  | 3-tier: library → bespoke → AI-generated  |
 | **Knowledge Check Quiz** | End-of-path MCQs testing conceptual understanding       | `quizService.js` + `QuizEngine` component |
 
 ### Key Components
@@ -398,6 +399,8 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | `useAdaptiveQuiz.js`     | Hook managing diagnostic quiz state, scoring, knowledge profile                      |
 | `usePathStepActions.js`  | Shared hook for step audio, takeaways, and deep dives (used by both path components) |
 | `usePathQuiz.js`         | Shared hook for quiz generation and scoring (used by both path components)           |
+| `PathGapCard.jsx`        | Admin sidebar card showing blind spots with severity dots and fill/dismiss actions   |
+| `AdaptiveSidebar.jsx`    | Left sidebar with path stats, gap analysis card, and step navigation                 |
 | `QuizEngine.jsx`         | Reusable quiz component (shared with BespokePath)                                    |
 | `quizService.js`         | Generates MCQs from path content via Gemini                                          |
 | `stepBriefingService.js` | AI-generated audio briefings with auto-advance                                       |
@@ -422,7 +425,7 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 | `narratorService.js`       | AI narration generation                             | Cloud Functions (Gemini)                                  |
 | `PersonaService.js`        | Persona detection + messaging                       | None (pure logic)                                         |
 | `feedbackService.js`       | User feedback + video signals                       | Firestore                                                 |
-| `analyticsService.js`      | Event logging + RAG pipeline + content gap tracking | Firestore                                                 |
+| `analyticsService.js`      | Event logging + RAG pipeline + content gap + gap fill tracking | Firestore                                          |
 | `analyticsQueryService.js` | Analytics aggregation + RAG health metrics          | Firestore                                                 |
 | `bespokePathService.js`    | Pipeline orchestrator (delegates to 3 sub-modules)  | pathSearch, pathSequencer, pathNarration                  |
 | `pathSearch.js`            | Segment search + workflow intent filtering          | Cloud Functions (embedQuery, vectorSearch\*)              |

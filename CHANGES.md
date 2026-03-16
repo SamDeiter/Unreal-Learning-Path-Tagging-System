@@ -4,6 +4,27 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.5.0-gap-fill-integration] - 2026-03-16
+
+### Added
+
+- **Universal Gap Fill Integration (Phase 4a)** — Wired gap analysis into the Adaptive Path pipeline:
+  - Auto-fills up to 3 gap steps during path generation (Stage 3.5 in the pipeline)
+  - `PathGapCard` component in `AdaptiveSidebar.jsx` shows blind spots with severity indicators
+  - 6 admin actions: search fills, add library courses, generate bespoke segments, dismiss, and fill-all
+  - `GAP_AUTO_FILL_COMPLETED` analytics event tracks automatic gap fills (topic, count, source)
+- **Gap Fill Analytics (Phase 4b)** — Added `trackGapFillCompleted` calls to 3 handlers in `PathIntelligencePanel.jsx`:
+  - `handleFillGap` (all tiers), `handleAddLibraryCourse` (library), `handleBespokeGenerate` (bespoke)
+  - Each call tracks topic, tier source, count, query, and `source: "path_builder"`
+
+### Fixed
+
+- **Sidebar Scroll** — Added `overflow-y: auto` to `.epic-sidebar` in `BespokePath.css`; gap analysis content was clipped
+- **CI Test: Title Dedup** — `pathQualityValidator.test.js` assertion corrected from `warnings` to `autoFixes` (title dedup logs to `autoFixes`, not `warnings`)
+- **CI Test: Module Auto-Creation** — `PathContext.test.jsx` updated to expect `modules: []` on plain-array `loadPath` (auto-module creation was intentionally removed in v7.4.0)
+
+---
+
 ## [7.4.0-quality-polish] - 2026-03-12
 
 ### Changed
