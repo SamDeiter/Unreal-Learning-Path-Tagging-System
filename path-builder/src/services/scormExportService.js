@@ -435,3 +435,222 @@ export async function exportScormPackage(pathResult, options = {}) {
 
   devLog(`[SCORM] Package downloaded: ${filename} (${scoFiles.length} SCOs)`);
 }
+
+// ── V2 SCO HTML Generator (rich fields) ────────────────────────────
+
+function generateV2ScoHtml(step, index, totalSteps, sectionTitle, pathTitle) {
+  const title = step.title || `Step ${index + 1}`;
+  const completionType = step.completionType || "watch";
+  const completionLabel = { watch: "📺 Watch", do: "🔧 Do", apply: "🎯 Apply", check: "✅ Check" }[completionType] || "✅ Complete";
+
+  let bodyHtml = "";
+
+  // Why This Matters
+  if (step.whyThisMatters) {
+    bodyHtml += `<div class="v2-section v2-why"><h3>💡 Why This Matters</h3><p>${escapeHtml(step.whyThisMatters)}</p></div>`;
+  }
+
+  // What To Do (checklist rendered as static list for SCORM 1.2)
+  if (step.whatToDo?.length) {
+    const items = step.whatToDo.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    bodyHtml += `<div class="v2-section v2-do"><h3>🔧 What To Do</h3><ol>${items}</ol></div>`;
+  }
+
+  // How To Verify
+  if (step.howToVerify) {
+    bodyHtml += `<div class="v2-section v2-verify"><h3>✅ How To Verify</h3><p>${escapeHtml(step.howToVerify)}</p></div>`;
+  }
+
+  // Common Mistake
+  if (step.commonMistake) {
+    bodyHtml += `<div class="v2-section v2-mistake"><h3>⚠️ Common Mistake</h3><p>${escapeHtml(step.commonMistake)}</p></div>`;
+  }
+
+  // Key Takeaway
+  if (step.takeaway) {
+    bodyHtml += `<div class="v2-section v2-takeaway"><h3>🎯 Key Takeaway</h3><p>${escapeHtml(step.takeaway)}</p></div>`;
+  }
+
+  // Fallback: summary if no rich fields
+  if (!bodyHtml && step.summary) {
+    bodyHtml = `<div class="step-summary">${markdownToHtml(step.summary)}</div>`;
+  }
+
+  const prevLink = index > 0 ? `<a class="nav-link" href="sco_${index - 1}.html">← Previous</a>` : "<span></span>";
+  const nextLink = index < totalSteps - 1
+    ? `<a class="nav-link" href="sco_${index + 1}.html">Next →</a>`
+    : "<span></span>";
+
+  return (
+    `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <script src="shared/scormapi.js"></` +
+    `script>
+</head>
+<body>
+  <p style="font-size:0.8rem;color:var(--text-secondary)">
+    ${escapeHtml(pathTitle)} — ${escapeHtml(sectionTitle)} — Step ${index + 1} of ${totalSteps}
+  </p>
+  <h1>${escapeHtml(title)}</h1>
+  <div class="step-meta">
+    <span class="category-badge cat-${escapeHtml(completionType)}">${completionLabel}</span>
+  </div>
+  ${bodyHtml}
+  <button class="complete-btn" id="mark-complete" onclick="this.disabled=true;this.textContent='✅ Completed';completeSCORM();">
+    Mark Step Complete
+  </button>
+  <div class="nav-row">
+    ${prevLink}
+    ${nextLink}
+  </div>
+</body>
+</html>`
+  );
+}
+
+// V2 section header SCO
+function generateSectionHeaderHtml(section, sectionIndex, totalSections, pathTitle) {
+  const title = section.title || section.phase || `Section ${sectionIndex + 1}`;
+  const purpose = section.purpose || "";
+  const stepCount = section.steps?.length || 0;
+
+  return (
+    `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${escapeHtml(title)}</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <script src="shared/scormapi.js"></` +
+    `script>
+</head>
+<body>
+  <p style="font-size:0.8rem;color:var(--text-secondary)">
+    ${escapeHtml(pathTitle)} — Section ${sectionIndex + 1} of ${totalSections}
+  </p>
+  <h1>${escapeHtml(title)}</h1>
+  ${purpose ? `<p style="font-size:1.05rem;color:var(--text);margin:16px 0;">${escapeHtml(purpose)}</p>` : ""}
+  <div class="step-card">
+    <p>This section contains <strong>${stepCount}</strong> step${stepCount !== 1 ? "s" : ""}.</p>
+    <p>Click "Continue" to begin.</p>
+  </div>
+  <button class="complete-btn" onclick="this.disabled=true;this.textContent='✅ Ready';completeSCORM();">
+    Continue →
+  </button>
+</body>
+</html>`
+  );
+}
+
+// V2 CSS extensions
+const V2_CSS_EXTENSION = `
+.v2-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  border-left: 4px solid var(--border);
+}
+.v2-section h3 { font-size: 1rem; margin: 0 0 8px; }
+.v2-section p { margin: 0; line-height: 1.6; }
+.v2-section ol { padding-left: 1.5rem; margin: 8px 0 0; }
+.v2-section li { margin-bottom: 6px; color: var(--text); }
+.v2-why { border-left-color: var(--accent); }
+.v2-why h3 { color: var(--accent); }
+.v2-do { border-left-color: var(--accent-green); }
+.v2-do h3 { color: var(--accent-green); }
+.v2-verify { border-left-color: #8b5cf6; }
+.v2-verify h3 { color: #8b5cf6; }
+.v2-mistake { border-left-color: var(--accent-orange); background: rgba(210,153,34,0.04); }
+.v2-mistake h3 { color: var(--accent-orange); }
+.v2-takeaway { border-left-color: #f97583; }
+.v2-takeaway h3 { color: #f97583; }
+.cat-watch { background: rgba(88,166,255,0.15); color: #58a6ff; }
+.cat-do { background: rgba(63,185,80,0.15); color: #3fb950; }
+.cat-apply { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+.cat-check { background: rgba(210,153,34,0.15); color: #d29922; }
+`;
+
+/**
+ * Generates and downloads a SCORM 1.2 zip package from a V2 learning path.
+ *
+ * @param {Object} v2Path - The V2 LearningPath object (sections[].steps[])
+ * @param {Object} [options]
+ * @param {boolean} [options.includeQuiz=true] - Include quiz SCO
+ * @param {string} [options.query] - Original query for title generation
+ * @returns {Promise<void>} - Triggers browser download
+ */
+export async function exportV2ScormPackage(v2Path, options = {}) {
+  const { includeQuiz = true, query = "" } = options;
+
+  if (!v2Path?.sections?.length) {
+    throw new Error("Cannot export empty V2 path");
+  }
+
+  devLog("[SCORM V2] Starting package generation...");
+
+  const pathTitle = v2Path.title || (query ? `UE5 Learning Path: ${query.substring(0, 60)}` : "UE5 Learning Path");
+
+  const zip = new JSZip();
+
+  // 1. Shared resources (base + V2 extension)
+  zip.file("shared/scormapi.js", SCORM_API_JS);
+  zip.file("shared/style.css", SHARED_CSS + V2_CSS_EXTENSION);
+
+  // 2. Flatten sections into SCOs with section headers
+  const scoFiles = [];
+  let globalIndex = 0;
+
+  // Count total SCOs for navigation (section headers + steps)
+  const totalSections = v2Path.sections.length;
+  const totalSteps = v2Path.sections.reduce((sum, s) => sum + (s.steps?.length || 0), 0) + totalSections;
+
+  v2Path.sections.forEach((section, sIdx) => {
+    // Section header SCO
+    const headerFile = `sco_${globalIndex}.html`;
+    zip.file(headerFile, generateSectionHeaderHtml(section, sIdx, totalSections, pathTitle));
+    scoFiles.push(headerFile);
+    globalIndex++;
+
+    // Step SCOs
+    (section.steps || []).forEach((step) => {
+      const stepFile = `sco_${globalIndex}.html`;
+      const sectionTitle = section.title || section.phase || "";
+      zip.file(stepFile, generateV2ScoHtml(step, globalIndex, totalSteps, sectionTitle, pathTitle));
+      scoFiles.push(stepFile);
+      globalIndex++;
+    });
+  });
+
+  // 3. Optional quiz SCO (reuse flat steps for question generation)
+  const flatSteps = v2Path.sections.flatMap((s) => s.steps || []);
+  if (includeQuiz && flatSteps.length >= 2) {
+    zip.file("quiz.html", generateQuizHtml(flatSteps, pathTitle));
+  }
+
+  // 4. imsmanifest.xml
+  zip.file(
+    "imsmanifest.xml",
+    generateManifest(pathTitle, scoFiles, includeQuiz && flatSteps.length >= 2)
+  );
+
+  // 5. Generate & download
+  const blob = await zip.generateAsync({ type: "blob" });
+  const filename = `scorm_v2_${sanitizeFilename(query || v2Path.title || "path")}_${Date.now()}.zip`;
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  devLog(`[SCORM V2] Package downloaded: ${filename} (${scoFiles.length} SCOs)`);
+}

@@ -33,6 +33,7 @@ import { getStruggleBadges } from "../../services/struggleBadgeService";
 import { generatePathNarration } from "../../services/stepBriefingService";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getApp } from "firebase/app";
+import { exportScormPackage } from "../../services/scormExportService";
 import "./BespokePath.css";
 
 import {
@@ -813,6 +814,20 @@ export default function BespokePath() {
                     : currentStep === -2
                       ? "Quiz"
                       : `Step ${Math.min(currentStep + 1, pathResult.path.length)} of ${pathResult.path.length}`}
+                  <button
+                    className="scorm-export-btn"
+                    title="Download SCORM 1.2 package for your LMS"
+                    onClick={async () => {
+                      try {
+                        await exportScormPackage(pathResult, { includeQuiz: true });
+                      } catch (err) {
+                        console.error("SCORM export failed:", err);
+                        alert("Export failed: " + err.message);
+                      }
+                    }}
+                  >
+                    📦 Export SCORM
+                  </button>
                 </div>
                 <button
                   className="nav-btn"

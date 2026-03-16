@@ -654,6 +654,7 @@ export default function AdaptivePath() {
                 expandedStep={expandedStep}
                 setExpandedStep={setExpandedStep}
                 totalSteps={pathData.path.length}
+                pathData={pathData}
               />
             </main>
           </div>

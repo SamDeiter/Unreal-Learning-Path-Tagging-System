@@ -1,7 +1,9 @@
 /**
  * PathFooter — Prev/next navigation + step status for adaptive path
  */
-export default function PathFooter({ expandedStep, setExpandedStep, totalSteps }) {
+import { exportScormPackage } from "../../services/scormExportService";
+
+export default function PathFooter({ expandedStep, setExpandedStep, totalSteps, pathData }) {
   return (
     <footer className="epic-footer">
       <button
@@ -30,6 +32,22 @@ export default function PathFooter({ expandedStep, setExpandedStep, totalSteps }
           : expandedStep === -3
             ? "Further Reading"
             : `Step ${Math.min((expandedStep ?? 0) + 1, totalSteps)} of ${totalSteps}`}
+        {pathData && (
+          <button
+            className="scorm-export-btn"
+            title="Download SCORM 1.2 package for your LMS"
+            onClick={async () => {
+              try {
+                await exportScormPackage(pathData, { includeQuiz: true });
+              } catch (err) {
+                console.error("SCORM export failed:", err);
+                alert("Export failed: " + err.message);
+              }
+            }}
+          >
+            📦 Export SCORM
+          </button>
+        )}
       </div>
       <button
         className="nav-btn"
