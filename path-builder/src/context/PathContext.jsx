@@ -31,6 +31,7 @@ const ACTIONS = {
   MOVE_COURSE_TO_MODULE: "MOVE_COURSE_TO_MODULE",
   REORDER_MODULES: "REORDER_MODULES",
   SET_MODULE_VERIFICATION: "SET_MODULE_VERIFICATION",
+  REPLACE_COURSE: "REPLACE_COURSE",
 };
 
 // Reducer for path state management
@@ -202,6 +203,21 @@ function pathReducer(state, action) {
         ...state,
         modules: action.payload,
       };
+
+    case ACTIONS.REPLACE_COURSE: {
+      const { oldCode, newCourse } = action.payload;
+      // Replace the course in-place at the same index
+      const newCourses = state.courses.map((c) =>
+        c.code === oldCode ? { ...newCourse, code: newCourse.code || oldCode } : c
+      );
+      // Update module references: swap oldCode → newCourse.code in courseIds
+      const newCode = newCourse.code || oldCode;
+      const newModules = state.modules.map((m) => ({
+        ...m,
+        courseIds: m.courseIds.map((id) => (id === oldCode ? newCode : id)),
+      }));
+      return { ...state, courses: newCourses, modules: newModules };
+    }
 
     default:
       return state;
@@ -498,6 +514,10 @@ export function PathProvider({ children }) {
     dispatch({ type: ACTIONS.REORDER_MODULES, payload: newModules });
   }, [dispatch]);
 
+  const replaceCourse = useCallback((oldCode, newCourse) => {
+    dispatch({ type: ACTIONS.REPLACE_COURSE, payload: { oldCode, newCourse } });
+  }, [dispatch]);
+
   const toggleModuleFlag = useCallback((moduleId, flag) => {
     dispatch({ type: ACTIONS.TOGGLE_MODULE_FLAG, payload: { moduleId, flag } });
   }, [dispatch]);
@@ -583,6 +603,7 @@ export function PathProvider({ children }) {
     removeModule,
     moveCourseToModule,
     reorderModules,
+    replaceCourse,
     toggleModuleFlag,
     addAssessment,
     addTransition,
@@ -607,7 +628,7 @@ export function PathProvider({ children }) {
     ungroupedCourses, pathStats, verificationStats,
     addCourse, removeCourse, reorderCourses, updateCourseMeta, setLearningIntent,
     clearPath, loadPath, addModule, renameModule, removeModule,
-    moveCourseToModule, reorderModules, toggleModuleFlag, addAssessment, addTransition, setModuleVerification, savePath, getSavedPaths, loadSavedPath,
+    moveCourseToModule, reorderModules, replaceCourse, toggleModuleFlag, addAssessment, addTransition, setModuleVerification, savePath, getSavedPaths, loadSavedPath,
     deleteSavedPath, activePersonaId, setActivePersonaId, activePathId,
     setActivePathId, setWorkflowStage,
   ]);

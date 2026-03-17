@@ -188,6 +188,7 @@ export default function AssemblyLineV2() {
           setSelectedStepCode(course.code);
         }}
       >
+        {course.isPinned && <span className="step-pin-badge" title="Pinned — won't be replaced during regeneration">📌</span>}
         <div className="step-drag-handle">⋮⋮</div>
         <div className="step-number">{index + 1}</div>
         <div className="step-icon-wrapper" title={ct.typeStr}>
@@ -292,7 +293,14 @@ export default function AssemblyLineV2() {
                 <div className="module-drag-handle">⋮⋮</div>
                 <div className="module-info">
                   <h3>{mod.title || `Module ${mod.id}`}</h3>
-                  <p>{mod.description || "Organize related learning steps."}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <p style={{ margin: 0 }}>{mod.description || "Organize related learning steps."}</p>
+                    <button
+                      className="module-regen-btn"
+                      title="Regenerate unpinned steps in this module with AI"
+                      onClick={(e) => { e.stopPropagation(); /* TODO: wire to bespokePathService */ }}
+                    >🔄 Regenerate</button>
+                  </div>
                   
                   <div className="module-flags">
                     <label className="toggle-label">
