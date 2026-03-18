@@ -105,25 +105,31 @@ function renderProgressBar() {
   const ch = getChapter();
   const total = ch.steps.length;
 
+  // Each dot-group takes up 1/total of the track width.
+  // The line should start/end at dot centers, so inset by half a group width on each side.
+  const insetPct = total > 1 ? (100 / total / 2) : 0;
+
   let dots = '';
   for (let i = 0; i < total; i++) {
     const step = ch.steps[i];
     const done = isStepDone(ch, step) || i < state.stepIndex;
     const active = i === state.stepIndex;
     const cls = active ? 'active' : (done ? 'completed' : '');
+    // Only show label under quiz steps
+    const showLabel = active && step.type === 'QUIZ';
     dots += '<div class="progress-dot-group">' +
       '<div class="progress-dot ' + cls + '">' + (done && !active ? '' : (i + 1)) + '</div>' +
-      '<div class="progress-dot-label">' + (active ? shortStepLabel(step) : '') + '</div>' +
+      '<div class="progress-dot-label">' + (showLabel ? shortStepLabel(step) : '') + '</div>' +
       '</div>';
   }
 
-  // The track goes from dot 0 center to dot N center.
-  // Fill runs inside the track which is already inset by 24px on each side via CSS.
-  const trackFillPct = total > 1 ? (state.stepIndex / (total - 1)) * 100 : 0;
+  // Fill spans from first dot center to current dot center
+  const trackRange = total > 1 ? (100 - insetPct * 2) : 0;
+  const fillPct = total > 1 ? insetPct + (state.stepIndex / (total - 1)) * trackRange : 0;
 
   return '<div class="progress-bar"><div class="progress-track">' +
-    '<div class="progress-line"></div>' +
-    '<div class="progress-line-fill" style="width:' + trackFillPct + '%"></div>' +
+    '<div class="progress-line" style="left:' + insetPct + '%;right:' + insetPct + '%"></div>' +
+    '<div class="progress-line-fill" style="left:' + insetPct + '%;width:' + (fillPct - insetPct) + '%"></div>' +
     dots + '</div></div>';
 }
 
