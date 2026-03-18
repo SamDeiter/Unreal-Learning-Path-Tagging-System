@@ -304,7 +304,8 @@ function renderQuiz(step) {
       '<div class="quiz-options">' + options + '</div>' +
       '<div class="btn-center"><button class="btn btn-primary" id="btn-submit-answer" ' + (qs.selectedIndex === null ? 'disabled style="opacity:0.5"' : '') + '>Submit Answer</button></div>' +
     '</div>' +
-    '<div class="quiz-score-tracker">Score: ' + correctSoFar + '/' + qs.currentQuestion + ' so far <span class="correct-icon">✓</span></div>';
+    '<div class="quiz-score-tracker">Score: ' + correctSoFar + '/' + qs.currentQuestion + ' so far <span class="correct-icon">✓</span></div>' +
+    '<div class="btn-center mt-16"><button class="btn-skip" id="btn-skip-quiz">Skip Quiz →</button></div>';
 }
 
 function renderQuizResults(step) {
@@ -465,6 +466,7 @@ function bindEvents() {
   bind('btn-skip', skipStep);
   bind('btn-next-chapter', nextChapter);
   bind('btn-return', goToOverview);
+  bind('btn-skip-quiz', function() { nextStep(); });
 
   // Quiz: continue after pass
   bind('btn-continue-chapter', function() {
