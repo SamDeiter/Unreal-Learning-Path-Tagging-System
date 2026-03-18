@@ -378,7 +378,7 @@ function renderChapterComplete() {
     renderProgressBar() +
     '<div class="celebration-card">' +
       '<div class="celebration-title">Chapter ' + ch.number + '<br>Complete!</div>' +
-      '<h3 style="color:#fff;font-size:16px;margin-bottom:12px">What You Accomplished</h3>' +
+      '<h3 style="color:#fff;font-size:16px;margin-bottom:20px">What You Accomplished</h3>' +
       '<ul class="accomplishment-list">' + accList + '</ul>' +
       '<div class="chapter-stats">' + videoCount + ' videos watched • ' + quizCount + ' quiz passed • ~12 minutes</div>' +
       (nextCh ? '<div class="up-next-preview"><h3>Up Next: Chapter ' + nextCh.number + ' — ' + nextCh.title + '</h3><p>' + nextCh.description + '</p></div>' : '') +
