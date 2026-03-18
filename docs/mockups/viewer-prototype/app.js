@@ -183,7 +183,7 @@ function renderAITransition(step) {
   return renderProgressBar() +
     '<div class="chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
     '<div class="transition-card">' +
-      '<div class="transition-icon"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:80px;height:auto;filter:brightness(1.5);"></div>' +
+      '<div class="transition-icon"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:160px;height:auto;filter:brightness(1.5);"></div>' +
       '<div class="transition-title">What You\'ll Learn</div>' +
       '<ul class="transition-objectives">' + objectives + '</ul>' +
       '<div class="expected-outcome">' +
