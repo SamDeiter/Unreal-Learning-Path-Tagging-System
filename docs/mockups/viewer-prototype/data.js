@@ -34,7 +34,7 @@ const PATH_DATA = {
           id: "ch1-s2", type: "CONTENT_VIDEO",
           title: "NavMesh Setup Tutorial",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "Without a NavMesh, AI characters have no concept of where they can walk. This is the absolute foundation — every AI behavior in UE5 depends on having a properly configured navigation mesh. Getting this right first prevents hours of debugging later.",
+          whyThisMatters: "Without a NavMesh, AI characters have no concept of where they can walk. This is the absolute foundation  -  every AI behavior in UE5 depends on having a properly configured navigation mesh. Getting this right first prevents hours of debugging later.",
           keyTakeaways: [
             "Place a NavMesh Bounds Volume from the Volumes panel",
             "Scale it to cover your entire playable area",
@@ -59,7 +59,7 @@ const PATH_DATA = {
             },
             {
               text: "What happens if you modify the level geometry after placing a NavMesh?",
-              options: ["It updates automatically", "You need to rebuild navigation paths", "The NavMesh is deleted", "Nothing — geometry doesn't affect NavMesh"],
+              options: ["It updates automatically", "You need to rebuild navigation paths", "The NavMesh is deleted", "Nothing  -  geometry doesn't affect NavMesh"],
               correctIndex: 1,
               explanation: "After modifying geometry, you need to rebuild paths (Build > Build Paths) to update the walkable areas."
             },
@@ -100,7 +100,7 @@ const PATH_DATA = {
           id: "ch2-s2", type: "CONTENT_VIDEO",
           title: "AI Character & Controller Setup",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "In Unreal Engine, the Controller is the 'brain' and the Pawn is the 'body.' This separation is fundamental — it lets you swap brains (player vs AI) on the same body, or reuse the same brain across different body types. Understanding this architecture prevents a common beginner mistake: putting AI logic directly on the character.",
+          whyThisMatters: "In Unreal Engine, the Controller is the 'brain' and the Pawn is the 'body.' This separation is fundamental  -  it lets you swap brains (player vs AI) on the same body, or reuse the same brain across different body types. Understanding this architecture prevents a common beginner mistake: putting AI logic directly on the character.",
           keyTakeaways: [
             "Create a new Character Blueprint (not just an Actor)",
             "Add a Skeletal Mesh for visual representation",
@@ -117,7 +117,7 @@ const PATH_DATA = {
           aiNotes: [
             "Set 'Auto Possess AI' to 'Placed in World or Spawned'",
             "Never put movement logic directly on the Character",
-            "One Controller per Pawn — they are 1:1"
+            "One Controller per Pawn  -  they are 1:1"
           ]
         },
         {
@@ -139,7 +139,7 @@ const PATH_DATA = {
               text: "What does 'Auto Possess AI' control?",
               options: ["Whether the AI attacks automatically", "When the AI Controller takes control of the Pawn", "Whether the AI uses the NavMesh", "The AI's movement speed"],
               correctIndex: 1,
-              explanation: "'Auto Possess AI' determines when the AI Controller automatically possesses (takes control of) the pawn — either when placed in the world, when spawned, or both."
+              explanation: "'Auto Possess AI' determines when the AI Controller automatically possesses (takes control of) the pawn  -  either when placed in the world, when spawned, or both."
             },
             {
               text: "Which Blueprint type should you use for an AI enemy?",
@@ -149,7 +149,7 @@ const PATH_DATA = {
             },
             {
               text: "How many Controllers can possess a single Pawn at once?",
-              options: ["Unlimited", "Two — one AI and one Player", "One", "It depends on the Pawn type"],
+              options: ["Unlimited", "Two  -  one AI and one Player", "One", "It depends on the Pawn type"],
               correctIndex: 2,
               explanation: "The relationship is strictly 1:1. Only one Controller can possess a Pawn at any given time."
             }
@@ -172,13 +172,13 @@ const PATH_DATA = {
             "Understand how State Trees differ from Behavior Trees",
             "Create and assign a State Tree asset to your AI"
           ],
-          expectedOutcome: "The State Tree plugin is active, you have a new State Tree asset, and it's assigned to your AI Controller — ready for states."
+          expectedOutcome: "The State Tree plugin is active, you have a new State Tree asset, and it's assigned to your AI Controller  -  ready for states."
         },
         {
           id: "ch3-s2", type: "CONTENT_VIDEO",
           title: "State Tree Plugin & Setup",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "State Trees are Epic's modern replacement for Behavior Trees. They offer a cleaner, more visual approach to AI decision-making with built-in support for transitions, conditions, and evaluators. Learning State Trees now positions you for the future — Epic is actively developing them as the primary AI behavior system.",
+          whyThisMatters: "State Trees are Epic's modern replacement for Behavior Trees. They offer a cleaner, more visual approach to AI decision-making with built-in support for transitions, conditions, and evaluators. Learning State Trees now positions you for the future  -  Epic is actively developing them as the primary AI behavior system.",
           keyTakeaways: [
             "Enable 'State Tree' and 'Gameplay State Tree' plugins",
             "Restart the editor after enabling plugins",
@@ -197,7 +197,7 @@ const PATH_DATA = {
             },
             {
               text: "What must you do after enabling the plugin?",
-              options: ["Rebuild the NavMesh", "Restart the editor", "Recompile all Blueprints", "Nothing — it's instant"],
+              options: ["Rebuild the NavMesh", "Restart the editor", "Recompile all Blueprints", "Nothing  -  it's instant"],
               correctIndex: 1,
               explanation: "Plugin changes require an editor restart to take effect. You'll see a 'Restart Required' prompt."
             },
@@ -244,7 +244,7 @@ const PATH_DATA = {
           id: "ch4-s2", type: "CONTENT_VIDEO",
           title: "AI Perception Configuration",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "AI Perception is how your AI 'senses' the game world. Without it, the AI is blind — it can walk around but has no idea where the player is. The Perception system is event-driven, meaning it only notifies your AI when something changes (player enters sight, player leaves sight). This is far more efficient than checking every frame.",
+          whyThisMatters: "AI Perception is how your AI 'senses' the game world. Without it, the AI is blind  -  it can walk around but has no idea where the player is. The Perception system is event-driven, meaning it only notifies your AI when something changes (player enters sight, player leaves sight). This is far more efficient than checking every frame.",
           keyTakeaways: [
             "Add 'AI Perception Component' to the AI Controller",
             "Configure a 'Sight' sense with radius (~1500) and angle (~90°)",
@@ -263,7 +263,7 @@ const PATH_DATA = {
             },
             {
               text: "Why is event-driven perception better than checking every frame?",
-              options: ["It's not — frame checks are better", "Events are more performant and only fire when something changes", "Events look better in Blueprints", "Frame checks aren't possible in UE5"],
+              options: ["It's not  -  frame checks are better", "Events are more performant and only fire when something changes", "Events look better in Blueprints", "Frame checks aren't possible in UE5"],
               correctIndex: 1,
               explanation: "Event-driven perception avoids the CPU cost of checking distances every frame. It only fires callbacks when a stimulus enters, updates, or leaves the perception radius."
             },
@@ -313,9 +313,9 @@ const PATH_DATA = {
             "Evaluators run every tick and can update State Tree parameters based on external data",
             "Parameters are typed variables accessible from any state in the tree",
             "The 'AI Perception Evaluator' bridges the Perception system with State Tree parameters",
-            "Evaluators are the 'sensors' of your State Tree — they observe the world and feed data into the decision system"
+            "Evaluators are the 'sensors' of your State Tree  -  they observe the world and feed data into the decision system"
           ],
-          commonMistakes: "A common mistake is trying to set State Tree parameters directly from the AI Controller Blueprint. Instead, use Evaluators — they're designed specifically for this purpose and run within the State Tree's update cycle, ensuring data consistency.",
+          commonMistakes: "A common mistake is trying to set State Tree parameters directly from the AI Controller Blueprint. Instead, use Evaluators  -  they're designed specifically for this purpose and run within the State Tree's update cycle, ensuring data consistency.",
           tryItYourself: "Create a State Tree parameter called 'TargetActor' of type Actor. Then add an Evaluator that uses AI Perception to populate this parameter whenever a hostile actor enters the AI's sight radius."
         },
         {
@@ -377,7 +377,7 @@ const PATH_DATA = {
           id: "ch6-s2", type: "CONTENT_VIDEO",
           title: "Building the Roam Behavior",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "The Roam state is your AI's 'idle' behavior — what it does when nothing interesting is happening. This teaches the core pattern of State Tree tasks: atomic units of work that execute in sequence. Once you understand how to chain 'Find Random Point' → 'Move To', you can build any behavior by combining tasks.",
+          whyThisMatters: "The Roam state is your AI's 'idle' behavior  -  what it does when nothing interesting is happening. This teaches the core pattern of State Tree tasks: atomic units of work that execute in sequence. Once you understand how to chain 'Find Random Point' → 'Move To', you can build any behavior by combining tasks.",
           keyTakeaways: [
             "Add a new State called 'Roam' to your State Tree",
             "Use the 'Find Random Reachable Point' task to get a NavMesh location",
@@ -416,7 +416,7 @@ const PATH_DATA = {
               text: "What is the Roam state's role in the overall AI behavior?",
               options: ["It's the attack behavior", "It's the default/idle behavior when no threats are detected", "It only runs once at startup", "It handles player input"],
               correctIndex: 1,
-              explanation: "Roam is the AI's baseline behavior — what it does when no player is detected. It keeps the AI looking 'alive' in the game world."
+              explanation: "Roam is the AI's baseline behavior  -  what it does when no player is detected. It keeps the AI looking 'alive' in the game world."
             }
           ]
         }
@@ -443,7 +443,7 @@ const PATH_DATA = {
           id: "ch7-s2", type: "CONTENT_VIDEO",
           title: "Chase State Implementation",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "The Chase state demonstrates a crucial concept: the difference between moving to a static point (Roam) and dynamically tracking a moving target (Chase). The 'Move To' task behaves differently when given an Actor reference vs. a Vector — with an Actor, it continuously updates the destination. This is the pattern you'll use for any 'follow' or 'pursue' behavior.",
+          whyThisMatters: "The Chase state demonstrates a crucial concept: the difference between moving to a static point (Roam) and dynamically tracking a moving target (Chase). The 'Move To' task behaves differently when given an Actor reference vs. a Vector  -  with an Actor, it continuously updates the destination. This is the pattern you'll use for any 'follow' or 'pursue' behavior.",
           keyTakeaways: [
             "Create a 'Chase' state alongside the existing 'Roam' state",
             "Use 'Move To' with the TargetActor parameter (not a location)",
@@ -474,9 +474,9 @@ const PATH_DATA = {
             },
             {
               text: "Can the Roam and Chase states exist simultaneously?",
-              options: ["Yes, they run in parallel", "No — the AI is in exactly one state at a time", "Only in C++", "Only with Behavior Trees"],
+              options: ["Yes, they run in parallel", "No  -  the AI is in exactly one state at a time", "Only in C++", "Only with Behavior Trees"],
               correctIndex: 1,
-              explanation: "In a State Tree, the AI is always in exactly one state. Transitions swap between states — you're either Roaming or Chasing, never both."
+              explanation: "In a State Tree, the AI is always in exactly one state. Transitions swap between states  -  you're either Roaming or Chasing, never both."
             },
             {
               text: "Why does the AI re-pathfind when chasing?",
@@ -509,11 +509,11 @@ const PATH_DATA = {
           id: "ch8-s2", type: "CONTENT_VIDEO",
           title: "State Transitions & Final Testing",
           videoUrl: "https://www.youtube.com/embed/Ht1JkaG780o",
-          whyThisMatters: "Transitions are the glue that turns isolated states into intelligent behavior. The condition 'if TargetActor is valid → Chase, else → Roam' is the simplest form of reactive AI. This same pattern scales to complex systems — add more states (Attack, Flee, Investigate) and more conditions. The transition logic IS the AI's decision-making.",
+          whyThisMatters: "Transitions are the glue that turns isolated states into intelligent behavior. The condition 'if TargetActor is valid → Chase, else → Roam' is the simplest form of reactive AI. This same pattern scales to complex systems  -  add more states (Attack, Flee, Investigate) and more conditions. The transition logic IS the AI's decision-making.",
           keyTakeaways: [
             "Add a transition from Roam → Chase: condition is 'TargetActor Is Valid'",
             "Add a transition from Chase → Roam: condition is 'TargetActor Is NOT Valid'",
-            "Keep transition priorities in mind — higher-priority transitions are checked first",
+            "Keep transition priorities in mind  -  higher-priority transitions are checked first",
             "Test by pressing Play and walking into/out of the AI's vision cone"
           ]
         },
@@ -521,8 +521,8 @@ const PATH_DATA = {
           id: "ch8-s3", type: "CONTENT_DOC",
           title: "Debugging State Trees",
           content: "State Trees have a built-in visual debugger that shows the active state, running tasks, and parameter values in real-time during Play-In-Editor.\n\nTo use it: open your State Tree asset, press Play in the editor, then select your AI character. The State Tree editor will highlight the currently active state in green and show evaluator outputs live.",
-          relevantSnippet: "Use the State Tree debugger during PIE to watch transitions fire in real-time. Select the AI actor, then open the State Tree asset — active states highlight green.",
-          codeBlock: "// Common debugging pattern — log state changes\nvoid UMyStateTreeTask::EnterState(\n    FStateTreeExecutionContext& Context)\n{\n    UE_LOG(LogTemp, Warning,\n        TEXT(\"Entering state: %s\"),\n        *GetNameSafe(this));\n}",
+          relevantSnippet: "Use the State Tree debugger during PIE to watch transitions fire in real-time. Select the AI actor, then open the State Tree asset  -  active states highlight green.",
+          codeBlock: "// Common debugging pattern  -  log state changes\nvoid UMyStateTreeTask::EnterState(\n    FStateTreeExecutionContext& Context)\n{\n    UE_LOG(LogTemp, Warning,\n        TEXT(\"Entering state: %s\"),\n        *GetNameSafe(this));\n}",
           aiNotes: [
             "Use Print String nodes in State Tree tasks for quick debugging",
             "Check the Output Log for transition messages",
@@ -546,13 +546,13 @@ const PATH_DATA = {
             },
             {
               text: "How do you debug which state the AI is currently in?",
-              options: ["Check the console", "Open the State Tree asset during PIE — active states highlight green", "Add breakpoints to the Character Blueprint", "Use the NavMesh visualizer"],
+              options: ["Check the console", "Open the State Tree asset during PIE  -  active states highlight green", "Add breakpoints to the Character Blueprint", "Use the NavMesh visualizer"],
               correctIndex: 1,
               explanation: "The State Tree visual debugger highlights the active state in green during Play-In-Editor, letting you watch transitions in real-time."
             },
             {
               text: "What is a transition priority?",
-              options: ["How fast the transition happens", "The order in which conditions are evaluated — higher priority transitions are checked first", "The animation blend time", "How much CPU the transition uses"],
+              options: ["How fast the transition happens", "The order in which conditions are evaluated  -  higher priority transitions are checked first", "The animation blend time", "How much CPU the transition uses"],
               correctIndex: 1,
               explanation: "When multiple transitions could fire simultaneously, priority determines which one is evaluated first. Higher-priority conditions take precedence."
             },
@@ -560,7 +560,7 @@ const PATH_DATA = {
               text: "You now have a complete AI behavior loop. What pattern does it follow?",
               options: ["Linear sequence", "Reactive state machine: Roam ↔ Chase based on perception", "Random behavior", "Scripted cutscene"],
               correctIndex: 1,
-              explanation: "The AI follows a reactive state machine pattern — it reacts to perception events by transitioning between states, creating emergent behavior from simple rules."
+              explanation: "The AI follows a reactive state machine pattern  -  it reacts to perception events by transitioning between states, creating emergent behavior from simple rules."
             }
           ]
         }
