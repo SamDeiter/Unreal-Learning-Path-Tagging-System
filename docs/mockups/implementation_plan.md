@@ -27,6 +27,37 @@ Feedback requires a fundamentally new approach to how learning paths are **autho
 
 ---
 
+## Pedagogical Design Principles
+
+> [!IMPORTANT]
+> These principles are drawn from the research in `/research/` and underpin every authoring decision. They are not optional flavor — they are the reason this system exists.
+
+### 1. "Why" Before "How" (Cognitive Load Theory)
+
+Every module must explain **why** a concept matters before showing **how** to implement it. Research shows that tutorials teaching only procedural steps produce learners who can replicate but cannot adapt when something breaks. The AI Transition step exists specifically to front-load conceptual framing before any video or doc step.
+
+**Author rule**: Every chapter must open with an AI Transition that explains *why this chapter matters* and *what problem it solves*, not just "what you'll build."
+
+### 2. Scaffold, Then Release (Vygotsky)
+
+Beginner paths should provide maximum hand-holding (step-by-step video + AI augmentation + quiz). Intermediate and advanced paths should progressively remove scaffolding — replacing prescriptive videos with doc references, RAG explorations, and open-ended challenges.
+
+| Skill Level | Scaffolding Strategy |
+|---|---|
+| **Beginner** | Video-first + AI "Why & How" panel + guided quiz |
+| **Intermediate** | Doc/RAG-first + video as supplemental + diagnostic quiz |
+| **Advanced** | RAG + source-code references + project-based challenges (no hand-holding) |
+
+### 3. Combat "Tutorial Hell" Through Active Recall
+
+Quiz steps are not optional gatekeeping — they are the mechanism that forces learners to retrieve knowledge rather than passively consume. Research benchmarks show that active recall improves retention by 50% over re-watching. Quizzes should test *understanding* ("Why would you use an AI Controller instead of possessing the pawn directly?") not *memory* ("What menu do you click?").
+
+### 4. Respect Cognitive Bandwidth
+
+Research shows learners lose focus after ~6 minutes of video and ~4 steps in a multi-step tutorial. Content guidelines below enforce these limits to maximize completion rates.
+
+---
+
 ## Content Architecture: Chapters → Steps
 
 Paths are **chapter-based**, not flat lists. Each chapter is a teachable module. Inside each chapter, authors arrange steps from the step-type palette in any order.
@@ -78,6 +109,46 @@ The building blocks authors can arrange **in any order** within a chapter:
 
 > [!NOTE]
 > **Skippability**: Learners can skip any step or entire chapter. The viewer needs skip controls, not just "Next." Progress still tracks what was skipped vs. completed.
+
+---
+
+## Author Content Guidelines
+
+> [!IMPORTANT]
+> These guardrails are backed by empirical research on learner engagement, scroll depth, and completion rates (see `/research/Optimizing Tutorial Length and Structure.sty`). Violating them directly correlates with learner drop-off.
+
+### Per-Step Limits
+
+| Step Type | Maximum Length | Rationale |
+|---|---|---|
+| **Content Video** | **≤ 6 minutes** per segment | Engagement drops 50% after 6 min; use `startTime`/`endTime` to clip longer videos |
+| **Content Doc Page** | **≤ 800 words** of highlighted content | >75% scroll depth target; longer docs should be split across steps |
+| **Content RAG** | **≤ 500 words** generated | AI-generated walls of text kill engagement; be concise |
+| **AI Transition** | **≤ 150 words** | Bridge, not a lecture — 3-4 bullet points max |
+| **Quiz** | **5 questions**, 80% pass | More than 5 causes fatigue; fewer than 3 has no diagnostic value |
+
+### Per-Chapter Limits
+
+| Constraint | Limit | Rationale |
+|---|---|---|
+| Steps per chapter | **3–5 steps** | Research shows 3-4 step tutorials have highest completion rates |
+| Estimated time per chapter | **10–20 minutes** | Aligns with "one focused learning session" |
+| Must include at minimum | 1 AI Transition + 1 content step | Bare minimum for a teachable unit |
+
+### Per-Path Limits
+
+| Skill Level | Max Chapters | Max Total Time | Rationale |
+|---|---|---|---|
+| **Beginner** | 6–8 chapters | < 2 hours | Short wins build momentum; "Time to Fun" < 30 min for first chapter |
+| **Intermediate** | 8–12 chapters | 2–5 hours | Deeper dives but still completable in a weekend |
+| **Advanced** | 10–15 chapters | 5–10 hours | Assumed motivated; can handle longer arcs |
+
+### Version Tagging (Required)
+
+Every path must specify the **minimum UE5 version** it targets. "Versioning anxiety" is a top-3 community complaint — learners abandon tutorials they suspect are outdated.
+
+- The `engineVersion` field in the schema is **required** at path level, **optional** at chapter level (for chapters that need a specific plugin or feature)
+- Builder should display a ⚠️ staleness warning if a path targets a version > 2 minor releases behind current
 
 ---
 
@@ -251,6 +322,8 @@ flowchart LR
     "skillLevel": "intermediate",
     "estimatedHours": "5-15",
     "industryFocus": ["games"],
+    "engineVersion": "5.5",
+    "prerequisites": ["path-uuid-basics"],
     "tags": ["AI", "State Tree", "NavMesh", "AI Perception"]
   },
 
@@ -259,6 +332,7 @@ flowchart LR
       "id": "ch-uuid",
       "title": "Setting Up the NavMesh Bounds Volume",
       "description": "Define the walkable area in your level so the AI can move",
+      "engineVersion": null,
       "skippable": true,
       "steps": [
         {
@@ -329,6 +403,68 @@ flowchart LR
 ## Remaining Open Question
 
 1. **Hosting** — Firebase-hosted URL loaded in UE5, or local HTML files bundled with a UE5 plugin, or either?
+
+---
+
+## Content Priority Roadmap
+
+> [!IMPORTANT]
+> This roadmap answers **"Which 100 paths do we actually build?"** — prioritized by severity of the gap in the current UE5 ecosystem. Derived from 11 research documents analyzing community complaints, forum data, and industry trends.
+
+### Tier 1 — Critical Gaps (Build First)
+
+These topics have the highest demand and the worst existing tutorial quality. They directly address the "Intermediate Void" — the biggest structural failure in UE5 education.
+
+| # | Topic Area | Example Path Titles | Why It's Critical |
+|---|---|---|---|
+| 1 | **Software Architecture** | "Building Decoupled Game Systems with Interfaces" / "Data-Driven Design with GameplayTags and Data Assets" | Community's #1 complaint — tutorials teach naive, unscalable patterns |
+| 2 | **Blueprint ↔ C++ Dual Workflow** | "Exposing C++ Systems to Blueprint" / "When to Use C++ vs Blueprint" | Industry standard, almost never taught correctly |
+| 3 | **UI Architecture (MVVM)** | "Event-Driven UI with Common UI" / "Decoupling UI from Game Logic" | Current UI tutorials actively teach circular dependencies |
+| 4 | **Gameplay Ability System (GAS)** | "GAS from Scratch" / "Networked Abilities with GAS" | Most requested advanced topic; very few quality resources |
+| 5 | **AI & State Trees** | "AI Patrol and Chase" (Phase 0 example) / "Mass Entity Crowds" | State Trees replacing Behavior Trees; Mass ECS is almost undocumented |
+
+### Tier 2 — High Demand (Build After Tier 1)
+
+| # | Topic Area | Example Path Titles | Gap Severity |
+|---|---|---|---|
+| 6 | **Animation: Motion Matching** | "Motion Matching from Scratch" / "GASP Integration" | New system, very few tutorials |
+| 7 | **Optimization & Profiling** | "Profiling with Unreal Insights" / "Nanite & Lumen Budget Management" | Treated as afterthought; indie games suffer |
+| 8 | **Networking & Iris** | "Multiplayer Fundamentals" / "Migrating to Iris Replication" | Iris is experimental with almost no docs |
+| 9 | **PCG Advanced Workflows** | "Grammar-Based Building Generation" / "Runtime PCG" | Huge interest, only basic tutorials exist |
+| 10 | **Rendering: Substrate & MegaLights** | "Substrate Materials Deep Dive" / "High-Density Dynamic Lighting" | Production-ready in 5.7, zero mainstream tutorials |
+
+### Tier 3 — Emerging & Enterprise (Build for Scale)
+
+| # | Topic Area | Example Path Titles | Audience |
+|---|---|---|---|
+| 11 | **Virtual Production** | "LED Volume Setup with nDisplay" / "Color Science for VP" | Film/TV studios |
+| 12 | **Automotive HMI** | "Building a Digital Dashboard" / "CAN Bus Telemetry in UE5" | Automotive engineers |
+| 13 | **Digital Twins & Simulation** | "Datasmith Pipeline for ArchViz" / "Robotics Sim with AirGen" | Architecture, manufacturing |
+| 14 | **Nanite Assemblies & USD** | "Houdini → USD → Nanite Foliage Pipeline" | Environment artists |
+| 15 | **Verse Language** | "Functional Programming for UE Developers" / "Verse Beyond UEFN" | Future-proofing for UE6 |
+
+### Tier 4 — Beginner Onboarding (Parallel Track)
+
+These run alongside the main roadmap to address the "10-Hour Churn" — the massive drop-off in the first hours.
+
+| # | Topic | Purpose |
+|---|---|---|
+| B1 | **"Your First 30 Minutes in UE5"** | Time-to-Fun < 30 min, visual payoff immediately |
+| B2 | **"Troubleshooting Your UE5 Setup"** | Addresses top 10 hardware/IDE/shader friction points |
+| B3 | **"Blueprint Fundamentals: Think Like a Programmer"** | Teaches logic patterns, not just node connections |
+| B4 | **"Understanding the UE5 Framework Classes"** | GameMode, GameState, PlayerController — the "why" |
+
+---
+
+## Adaptive Learning — Future Phases
+
+> [!NOTE]
+> These features are **not in scope for Phases 0–2** but the schema supports them. Documenting here so we don't paint ourselves into a corner.
+
+- **`prerequisites` field** (schema, added): Enables dependency graphs between paths. The viewer can eventually warn "You should complete X before starting this path."
+- **Skill profiling**: A future pre-path diagnostic quiz that routes learners to the right difficulty level.
+- **Dynamic path adjustment**: If a learner aces all quizzes, skip scaffolding steps automatically. If they fail, inject remediation modules.
+- **Knowledge persistence**: Track completed topics across paths so returning learners don't repeat content.
 
 ---
 
