@@ -199,7 +199,7 @@ function renderVideoStep(step) {
           '<iframe src="' + step.videoUrl + '?rel=0&modestbranding=1" allowfullscreen></iframe>' +
         '</div>' +
         '<div class="why-section">' +
-          '<h3>Why This Matters</h3>' +
+          '<h3>Video Overview</h3>' +
           '<p>' + step.whyThisMatters + '</p>' +
         '</div>' +
       '</div>' +
