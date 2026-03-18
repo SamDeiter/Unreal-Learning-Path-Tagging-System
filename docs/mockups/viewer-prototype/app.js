@@ -77,6 +77,9 @@ function prevStep() {
     state.stepIndex = prevCh.steps.length - 1;
     state.quizState = null;
     render();
+  } else {
+    // First step of first chapter — go back to overview
+    goToOverview();
   }
 }
 
