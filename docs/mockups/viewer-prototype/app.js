@@ -104,7 +104,6 @@ function goToOverview() {
 function renderProgressBar() {
   const ch = getChapter();
   const total = ch.steps.length;
-  const fillPct = (state.stepIndex / (total - 1)) * 100;
 
   let dots = '';
   for (let i = 0; i < total; i++) {
@@ -118,9 +117,13 @@ function renderProgressBar() {
       '</div>';
   }
 
+  // The track goes from dot 0 center to dot N center.
+  // Fill runs inside the track which is already inset by 24px on each side via CSS.
+  const trackFillPct = total > 1 ? (state.stepIndex / (total - 1)) * 100 : 0;
+
   return '<div class="progress-bar"><div class="progress-track">' +
     '<div class="progress-line"></div>' +
-    '<div class="progress-line-fill" style="width:' + fillPct + '%"></div>' +
+    '<div class="progress-line-fill" style="width:' + trackFillPct + '%"></div>' +
     dots + '</div></div>';
 }
 
