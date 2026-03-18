@@ -233,9 +233,9 @@ function renderDocStep(step) {
   const paragraphs = step.content.split('\n\n').map(function(p) { return '<p>' + p + '</p>'; }).join('');
 
   return renderProgressBar() +
-    '<div class="chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
     '<div class="two-col">' +
       '<div class="col-main">' +
+        '<div class="chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
         '<div class="doc-content">' +
           '<h3 style="color:#fff;margin-bottom:12px">' + step.title + '</h3>' +
           paragraphs +
