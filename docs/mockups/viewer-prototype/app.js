@@ -285,16 +285,6 @@ function renderQuiz(step) {
   const q = step.questions[qs.currentQuestion];
   const correctSoFar = qs.answers.filter(function(a) { return a.correct; }).length;
 
-  // Chapter tabs
-  let tabs = '';
-  PATH_DATA.chapters.forEach(function(ch, i) {
-    const active = i === state.chapterIndex ? ' active' : '';
-    tabs += '<div class="chapter-tab' + active + '">CH ' + (i + 1) + '</div>';
-  });
-
-  const totalDone = Object.keys(state.completedChapters).length;
-  const progressPct = Math.round((totalDone / PATH_DATA.chapters.length) * 100);
-
   let options = '';
   q.options.forEach(function(opt, i) {
     const letter = String.fromCharCode(65 + i);
@@ -305,9 +295,8 @@ function renderQuiz(step) {
       '</div>';
   });
 
-  return '<div class="chapter-tabs">' + tabs + '</div>' +
-    '<div class="quiz-progress">Progress: ' + progressPct + '% , ' + totalDone + '/' + PATH_DATA.chapters.length + ' Chapters complete</div>' +
-    '<div class="quiz-chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + ' • Quiz</div>' +
+  return renderProgressBar() +
+    '<div class="chapter-title text-center">Chapter ' + getChapter().number + ': ' + getChapter().title + ' • Quiz</div>' +
     '<div class="quiz-card">' +
       '<div class="quiz-counter"><span>Question ' + (qs.currentQuestion + 1) + ' of ' + step.questions.length + '</span><span>' + (qs.currentQuestion + 1) + '/' + step.questions.length + '</span></div>' +
       '<div class="quiz-question">' + q.text + '</div>' +
