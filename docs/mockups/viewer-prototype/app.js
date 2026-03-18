@@ -404,7 +404,7 @@ function renderPathComplete() {
     nextPaths += '<div class="next-path-card"><h4>' + p.title + '</h4><p>' + p.description + '</p><div class="next-path-progress">' + p.progress + '%</div></div>';
   });
 
-  return '<div class="ue5-window" style="max-width:720px">' +
+  return '<div class="ue5-window">' +
     '<div class="path-complete-banner">PATH COMPLETE!</div>' +
     '<div class="ue5-content">' +
       '<div class="trophy-area"><div class="trophy">🏆</div></div>' +
@@ -440,7 +440,7 @@ function renderChapterStep() {
 function ue5Window(content) {
   return '<div class="ue5-window">' +
     '<div class="ue5-titlebar">' +
-      '<span class="ue5-titlebar-logo">U</span>' +
+      '<span class="ue5-titlebar-logo"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:20px;height:auto;filter:brightness(1.5);vertical-align:middle;"></span>' +
       '<div class="ue5-titlebar-controls"><span>—</span><span>□</span><span>✕</span></div>' +
     '</div>' +
     '<div class="ue5-content">' + content + '</div>' +
