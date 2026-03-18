@@ -104,32 +104,31 @@ function goToOverview() {
 function renderProgressBar() {
   const ch = getChapter();
   const total = ch.steps.length;
+  let html = '<div class="progress-bar">';
 
-  // Each dot-group takes up 1/total of the track width.
-  // The line should start/end at dot centers, so inset by half a group width on each side.
-  const insetPct = total > 1 ? (100 / total / 2) : 0;
-
-  let dots = '';
   for (let i = 0; i < total; i++) {
     const step = ch.steps[i];
     const done = isStepDone(ch, step) || i < state.stepIndex;
     const active = i === state.stepIndex;
-    const cls = active ? 'active' : (done ? 'completed' : '');
-    // Show label under every dot
-    dots += '<div class="progress-dot-group">' +
-      '<div class="progress-dot ' + cls + '">' + (done && !active ? '' : (i + 1)) + '</div>' +
-      '<div class="progress-dot-label">' + shortStepLabel(step) + '</div>' +
-      '</div>';
+    const cls = active ? 'active' : (done ? 'completed' : 'future');
+    const numContent = done && !active ? '&#10003;' : (i + 1);
+
+    html += '<div class="progress-step-wrapper">' +
+      '<div class="progress-step ' + cls + '">' +
+        '<span class="step-num">' + numContent + '</span>' +
+        '<span class="step-label">' + shortStepLabel(step) + '</span>' +
+      '</div>' +
+    '</div>';
+
+    // Add connector between steps (not after last)
+    if (i < total - 1) {
+      const connDone = i < state.stepIndex;
+      html += '<div class="progress-connector' + (connDone ? ' done' : '') + '"></div>';
+    }
   }
 
-  // Fill spans from first dot center to current dot center
-  const trackRange = total > 1 ? (100 - insetPct * 2) : 0;
-  const fillPct = total > 1 ? insetPct + (state.stepIndex / (total - 1)) * trackRange : 0;
-
-  return '<div class="progress-bar"><div class="progress-track">' +
-    '<div class="progress-line" style="left:' + insetPct + '%;right:' + insetPct + '%"></div>' +
-    '<div class="progress-line-fill" style="left:' + insetPct + '%;width:' + (fillPct - insetPct) + '%"></div>' +
-    dots + '</div></div>';
+  html += '</div>';
+  return html;
 }
 
 function shortStepLabel(step) {

@@ -65,93 +65,94 @@ body {
   flex-direction: column;
 }
 
-/* ── Progress Bar (Chapter Dots) ──────────────────────── */
+/* ── Progress Bar (WorkflowStepper-style) ─────────────── */
 .progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
   margin-bottom: 24px;
 }
 
-.progress-track {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
-}
-
-/* The connecting line sits behind all dots */
-.progress-line {
-  position: absolute;
-  top: 11px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: #3a3a3a;
-  z-index: 0;
-}
-
-.progress-line-fill {
-  position: absolute;
-  top: 11px;
-  left: 0;
-  height: 3px;
-  background: #0078D4;
-  z-index: 1;
-  transition: width 0.3s ease;
-}
-
-.progress-dot-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-  position: relative;
-}
-
-.progress-dot {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #1e1e1e;
-  border: 3px solid #3a3a3a;
+.progress-step-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  background: rgba(30, 30, 30, 0.6);
   color: #888;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
-.progress-dot.active {
-  background: #0078D4;
-  border-color: #0078D4;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(0,120,212,0.4);
-}
-
-.progress-dot.completed {
-  background: #0078D4;
-  border-color: #0078D4;
-  color: #fff;
-}
-
-.progress-dot.completed::after {
-  content: '✓';
-  font-size: 11px;
-}
-
-.progress-dot-label {
+.progress-step .step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  color: #888;
   font-size: 10px;
-  color: #777;
-  margin-top: 6px;
-  text-align: center;
-  max-width: 80px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.progress-dot.active + .progress-dot-label {
+.progress-step .step-label {
+  letter-spacing: 0.02em;
+}
+
+/* Active step */
+.progress-step.active {
+  border-color: #0078D4;
+  background: rgba(0, 120, 212, 0.12);
   color: #0078D4;
+  box-shadow: 0 0 12px rgba(0, 120, 212, 0.15);
+}
+
+.progress-step.active .step-num {
+  background: #0078D4;
+  color: #fff;
+}
+
+/* Completed step */
+.progress-step.completed {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.08);
+  color: #4CAF50;
+}
+
+.progress-step.completed .step-num {
+  background: #4CAF50;
+  color: #fff;
+}
+
+/* Future step */
+.progress-step.future {
+  opacity: 0.5;
+}
+
+/* Connector line between steps */
+.progress-connector {
+  flex: 1;
+  height: 2px;
+  min-width: 12px;
+  background: #3a3a3a;
+  margin: 0 2px;
+}
+
+.progress-connector.done {
+  background: rgba(76, 175, 80, 0.5);
 }
 
 /* ── Chapter Tab Bar (Quiz variant) ───────────────────── */
