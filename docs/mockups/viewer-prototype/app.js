@@ -394,7 +394,8 @@ function renderPathComplete() {
 
   let badges = '';
   c.skillsMastered.forEach(function(skill) {
-    const icon = skill === 'NavMesh' ? '🗺️' : skill === 'AI Controller' ? '🧠' : skill === 'State Trees' ? '🌳' : '👁️';
+    const plainSkill = skill.replace(/<\/?strong>/g, '');
+    const icon = plainSkill === 'NavMesh' ? '▦' : plainSkill === 'AI Controller' ? '⚙' : plainSkill === 'State Trees' ? '⑃' : '◎';
     badges += '<div class="skill-badge"><div class="skill-badge-icon">' + icon + '</div><div class="skill-badge-label">' + skill + '</div></div>';
   });
 
