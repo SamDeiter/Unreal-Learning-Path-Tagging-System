@@ -183,7 +183,7 @@ function renderAITransition(step) {
   return renderProgressBar() +
     '<div class="chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
     '<div class="transition-card">' +
-      '<div class="transition-icon">🤖</div>' +
+      '<div class="transition-icon"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:48px;height:auto;filter:brightness(1.5);"></div>' +
       '<div class="transition-title">What You\'ll Learn</div>' +
       '<ul class="transition-objectives">' + objectives + '</ul>' +
       '<div class="expected-outcome">' +
@@ -262,7 +262,7 @@ function renderRAGStep(step) {
 
   return '<div class="simple-progress"><div class="simple-progress-fill" style="width:' + ((state.stepIndex + 1) / getChapter().steps.length * 100) + '%"></div></div>' +
     '<div class="chapter-title text-center">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
-    '<div class="rag-header"><span class="icon">🤖</span><h2>AI-Generated Study Material</h2></div>' +
+    '<div class="rag-header"><span class="icon"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:24px;height:auto;filter:brightness(1.5);"></span><h2>AI-Generated Study Material</h2></div>' +
     '<div class="card"><h3 class="card-title" style="margin-bottom:12px">Key Concepts</h3><ul style="padding-left:20px;color:#ccc;font-size:14px;line-height:1.7">' + concepts + '</ul></div>' +
     '<div class="warning-card"><h3>⚠ Common Mistakes</h3><p>' + step.commonMistakes + '</p></div>' +
     '<div class="exercise-card"><h3>Try It Yourself</h3><p>' + step.tryItYourself + '</p></div>' +
