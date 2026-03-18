@@ -47,31 +47,31 @@ const PATH_DATA = {
           questions: [
             {
               text: "What does a <strong>NavMesh Bounds Volume</strong> define?",
-              options: ["The area where the player can walk", "The area where AI can pathfind", "The collision boundaries of the level", "The rendering bounds of the level"],
+              options: ["The area where the player character can walk and run", "The region where AI agents can calculate pathfinding routes", "The collision boundaries that define the level's edges", "The rendering bounds that control what the camera can see"],
               correctIndex: 1,
               explanation: "The NavMesh Bounds Volume defines the area where Unreal's navigation system generates walkable data for AI pathfinding."
             },
             {
               text: "How do you visualize the <strong>NavMesh</strong> in the editor?",
-              options: ["Press N", "Press P", "Press M", "View > Show NavMesh"],
+              options: ["Press the N key to toggle navigation display", "Press the P key to toggle the NavMesh overlay", "Press the M key to open the map view", "Go to View > Show NavMesh in the editor menu bar"],
               correctIndex: 1,
               explanation: "Pressing 'P' toggles the NavMesh visualization, showing green areas where AI can walk."
             },
             {
               text: "What happens if you modify the level geometry after placing a <strong>NavMesh</strong>?",
-              options: ["It updates automatically", "You need to rebuild navigation paths", "The NavMesh is deleted", "Nothing  -  geometry doesn't affect NavMesh"],
+              options: ["The NavMesh updates automatically in real time", "You need to manually rebuild navigation paths for the changes to take effect", "The existing NavMesh is deleted and must be recreated from scratch", "Nothing happens — level geometry doesn't affect NavMesh data"],
               correctIndex: 1,
               explanation: "After modifying geometry, you need to rebuild paths (Build > Build Paths) to update the walkable areas."
             },
             {
-              text: "Where do you find the <strong>NavMesh Bounds Volume</strong>?",
-              options: ["The Modes panel under Geometry", "The Volumes section in Place Actors", "The AI section in the toolbar", "Project Settings > Navigation"],
+              text: "Where do you find the <strong>NavMesh Bounds Volume</strong> in the editor?",
+              options: ["In the Modes panel under the Geometry category", "In the Place Actors panel under the Volumes category", "In the AI section of the main toolbar", "Under Project Settings > Navigation System"],
               correctIndex: 1,
               explanation: "NavMesh Bounds Volume is found in the Place Actors panel under the Volumes category."
             },
             {
               text: "Why is <strong>NavMesh</strong> the first step in AI setup?",
-              options: ["It's alphabetically first", "AI controllers require it to compile", "AI needs walkable data before it can execute any movement", "It generates the AI character automatically"],
+              options: ["It comes first alphabetically in the documentation", "AI Controllers require a NavMesh reference to compile successfully", "AI needs walkable navigation data before it can execute any movement commands", "Placing a NavMesh automatically generates the AI character Blueprint"],
               correctIndex: 2,
               explanation: "Movement tasks like 'Move To' rely on navigation data. Without a NavMesh, the AI has no pathfinding data and cannot move intelligently."
             }
