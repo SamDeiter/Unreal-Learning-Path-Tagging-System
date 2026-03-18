@@ -46,31 +46,31 @@ const PATH_DATA = {
           id: "ch1-s3", type: "QUIZ",
           questions: [
             {
-              text: "What does a NavMesh Bounds Volume define?",
+              text: "What does a <strong>NavMesh Bounds Volume</strong> define?",
               options: ["The area where the player can walk", "The area where AI can pathfind", "The collision boundaries of the level", "The rendering bounds of the level"],
               correctIndex: 1,
               explanation: "The NavMesh Bounds Volume defines the area where Unreal's navigation system generates walkable data for AI pathfinding."
             },
             {
-              text: "How do you visualize the NavMesh in the editor?",
+              text: "How do you visualize the <strong>NavMesh</strong> in the editor?",
               options: ["Press N", "Press P", "Press M", "View > Show NavMesh"],
               correctIndex: 1,
               explanation: "Pressing 'P' toggles the NavMesh visualization, showing green areas where AI can walk."
             },
             {
-              text: "What happens if you modify the level geometry after placing a NavMesh?",
+              text: "What happens if you modify the level geometry after placing a <strong>NavMesh</strong>?",
               options: ["It updates automatically", "You need to rebuild navigation paths", "The NavMesh is deleted", "Nothing  -  geometry doesn't affect NavMesh"],
               correctIndex: 1,
               explanation: "After modifying geometry, you need to rebuild paths (Build > Build Paths) to update the walkable areas."
             },
             {
-              text: "Where do you find the NavMesh Bounds Volume?",
+              text: "Where do you find the <strong>NavMesh Bounds Volume</strong>?",
               options: ["The Modes panel under Geometry", "The Volumes section in Place Actors", "The AI section in the toolbar", "Project Settings > Navigation"],
               correctIndex: 1,
               explanation: "NavMesh Bounds Volume is found in the Place Actors panel under the Volumes category."
             },
             {
-              text: "Why is NavMesh the first step in AI setup?",
+              text: "Why is <strong>NavMesh</strong> the first step in AI setup?",
               options: ["It's alphabetically first", "AI controllers require it to compile", "AI needs walkable data before it can execute any movement", "It generates the AI character automatically"],
               correctIndex: 2,
               explanation: "Movement tasks like 'Move To' rely on navigation data. Without a NavMesh, the AI has no pathfinding data and cannot move intelligently."
@@ -124,19 +124,19 @@ const PATH_DATA = {
           id: "ch2-s4", type: "QUIZ",
           questions: [
             {
-              text: "What is the relationship between a Controller and a Pawn?",
+              text: "What is the relationship between a <strong>Controller</strong> and a <strong>Pawn</strong>?",
               options: ["They are the same thing", "The Controller is the 'brain', the Pawn is the 'body'", "The Pawn controls the Controller", "Controllers are only for player characters"],
               correctIndex: 1,
               explanation: "Controllers act as the decision-making 'brain' while Pawns are the physical 'body' in the world. This separation allows flexible AI architecture."
             },
             {
-              text: "Why should you NOT put AI logic directly on the Character Blueprint?",
+              text: "Why should you NOT put AI logic directly on the <strong>Character Blueprint</strong>?",
               options: ["It causes compile errors", "It violates the Controller-Pawn separation pattern, making code harder to maintain", "Characters can't run AI functions", "It's slower at runtime"],
               correctIndex: 1,
               explanation: "Putting AI logic on the Character breaks the Controller-Pawn architecture, making it impossible to swap behaviors or reuse characters."
             },
             {
-              text: "What does 'Auto Possess AI' control?",
+              text: "What does '<strong>Auto Possess AI</strong>' control?",
               options: ["Whether the AI attacks automatically", "When the AI Controller takes control of the Pawn", "Whether the AI uses the NavMesh", "The AI's movement speed"],
               correctIndex: 1,
               explanation: "'Auto Possess AI' determines when the AI Controller automatically possesses (takes control of) the pawn  -  either when placed in the world, when spawned, or both."
@@ -148,7 +148,7 @@ const PATH_DATA = {
               explanation: "Character Blueprints include a Character Movement Component which provides built-in walking, jumping, and NavMesh-based pathfinding."
             },
             {
-              text: "How many Controllers can possess a single Pawn at once?",
+              text: "How many Controllers can possess a single <strong>Pawn</strong> at once?",
               options: ["Unlimited", "Two  -  one AI and one Player", "One", "It depends on the Pawn type"],
               correctIndex: 2,
               explanation: "The relationship is strictly 1:1. Only one Controller can possess a Pawn at any given time."
@@ -190,7 +190,7 @@ const PATH_DATA = {
           id: "ch3-s3", type: "QUIZ",
           questions: [
             {
-              text: "Where do you enable the State Tree plugin?",
+              text: "Where do you enable the <strong>State Tree</strong> plugin?",
               options: ["Project Settings > Plugins", "Edit > Plugins", "The Content Browser", "The AI Controller Blueprint"],
               correctIndex: 1,
               explanation: "Navigate to Edit > Plugins and search for 'State Tree'. Enable both the State Tree and Gameplay State Tree plugins."
@@ -202,19 +202,19 @@ const PATH_DATA = {
               explanation: "Plugin changes require an editor restart to take effect. You'll see a 'Restart Required' prompt."
             },
             {
-              text: "How do State Trees differ from Behavior Trees?",
+              text: "How do <strong>State Trees</strong> differ from Behavior Trees?",
               options: ["They are identical", "State Trees use state-based logic with explicit transitions", "Behavior Trees are newer", "State Trees only work in C++"],
               correctIndex: 1,
               explanation: "State Trees use a state machine approach with explicit transitions between states, whereas Behavior Trees use a tree of tasks evaluated from root to leaf."
             },
             {
-              text: "How do you create a new State Tree asset?",
+              text: "How do you create a new <strong>State Tree</strong> asset?",
               options: ["File > New", "Right-Click in Content Browser > AI > State Tree", "It's created automatically with the AI Controller", "Import from marketplace"],
               correctIndex: 1,
               explanation: "Right-Click in the Content Browser, navigate to the AI category, and select State Tree to create a new asset."
             },
             {
-              text: "Where do you assign the State Tree to your AI?",
+              text: "Where do you assign the <strong>State Tree</strong> to your AI?",
               options: ["On the Character Blueprint directly", "On the AI Controller via a State Tree Component", "In Project Settings", "In the State Tree asset itself"],
               correctIndex: 1,
               explanation: "Add a 'State Tree Component' to your AI Controller Blueprint and set its 'State Tree' property to your new State Tree asset."
@@ -256,7 +256,7 @@ const PATH_DATA = {
           id: "ch4-s3", type: "QUIZ",
           questions: [
             {
-              text: "Which component must be added to the AI Controller for the AI to detect the player?",
+              text: "Which component must be added to the <strong>AI Controller</strong> for the AI to detect the player?",
               options: ["NavMesh Component", "AI Perception Component", "Character Movement Component", "Scene Component"],
               correctIndex: 1,
               explanation: "The AI Perception Component handles all sensory input (sight, hearing, damage) for the AI Controller."
@@ -322,31 +322,31 @@ const PATH_DATA = {
           id: "ch5-s3", type: "QUIZ",
           questions: [
             {
-              text: "What is the role of an Evaluator in a State Tree?",
+              text: "What is the role of an <strong>Evaluator</strong> in a <strong>State Tree</strong>?",
               options: ["It defines state transitions", "It runs tasks on the AI character", "It continuously updates parameters based on external data", "It handles animation blending"],
               correctIndex: 2,
               explanation: "Evaluators run every tick to read external data (like perception results) and write it into State Tree parameters that states and transitions can use."
             },
             {
-              text: "What type should the 'TargetActor' parameter be?",
+              text: "What type should the '<strong>TargetActor</strong>' parameter be?",
               options: ["Boolean", "Vector", "Actor Object Reference", "String"],
               correctIndex: 2,
               explanation: "The TargetActor parameter needs to hold a reference to an Actor in the world, so it should be an Actor Object Reference."
             },
             {
-              text: "When do Evaluators execute?",
+              text: "When do <strong>Evaluators</strong> execute?",
               options: ["Only when a state changes", "Every tick (continuously)", "Only during transitions", "Only once at startup"],
               correctIndex: 1,
               explanation: "Evaluators tick continuously, running their logic every frame to keep parameters up to date with the game world."
             },
             {
-              text: "Why shouldn't you set State Tree parameters directly from the AI Controller?",
+              text: "Why shouldn't you set <strong>State Tree</strong> parameters directly from the <strong>AI Controller</strong>?",
               options: ["It's not technically possible", "It bypasses the State Tree's update cycle, risking data inconsistency", "It's slower", "It causes compile errors"],
               correctIndex: 1,
               explanation: "Setting parameters outside the State Tree's update loop can cause race conditions where states read stale data. Evaluators ensure synchronized updates."
             },
             {
-              text: "What bridges AI Perception and the State Tree?",
+              text: "What bridges <strong>AI Perception</strong> and the <strong>State Tree</strong>?",
               options: ["A custom event", "The AI Perception Evaluator", "The NavMesh", "The Character Blueprint"],
               correctIndex: 1,
               explanation: "The AI Perception Evaluator reads perception events and writes the results into State Tree parameters, creating a clean bridge between the two systems."
@@ -455,7 +455,7 @@ const PATH_DATA = {
           id: "ch7-s3", type: "QUIZ",
           questions: [
             {
-              text: "What's the difference between Move To with a location vs. an Actor?",
+              text: "What's the difference between <strong>Move To</strong> with a location vs. an Actor?",
               options: ["No difference", "Actor targets update dynamically as the target moves; locations are static", "Locations are faster", "Actor targets only work in C++"],
               correctIndex: 1,
               explanation: "When targeting an Actor, Move To continuously updates its destination as the actor moves. With a static Vector location, it walks to that one point and stops."
