@@ -115,11 +115,10 @@ function renderProgressBar() {
     const done = isStepDone(ch, step) || i < state.stepIndex;
     const active = i === state.stepIndex;
     const cls = active ? 'active' : (done ? 'completed' : '');
-    // Only show label under quiz steps
-    const showLabel = active && step.type === 'QUIZ';
+    // Show label under every dot
     dots += '<div class="progress-dot-group">' +
       '<div class="progress-dot ' + cls + '">' + (done && !active ? '' : (i + 1)) + '</div>' +
-      '<div class="progress-dot-label">' + (showLabel ? shortStepLabel(step) : '') + '</div>' +
+      '<div class="progress-dot-label">' + shortStepLabel(step) + '</div>' +
       '</div>';
   }
 
