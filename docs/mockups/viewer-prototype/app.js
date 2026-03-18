@@ -203,22 +203,22 @@ function renderVideoStep(step) {
 
   return renderProgressBar() +
     '<div class="chapter-title">Chapter ' + getChapter().number + ': ' + getChapter().title + '</div>' +
-    '<div class="two-col">' +
+    '<div class="two-col two-col-stretch">' +
       '<div class="col-main">' +
         '<div class="video-container">' +
           '<iframe src="' + step.videoUrl + '?rel=0&modestbranding=1" allowfullscreen></iframe>' +
         '</div>' +
-        '<div class="why-section">' +
-          '<h3>Video Overview</h3>' +
-          '<p>' + step.whyThisMatters + '</p>' +
-        '</div>' +
       '</div>' +
       '<div class="col-side">' +
-        '<div class="side-panel">' +
+        '<div class="side-panel side-panel-stretch">' +
           '<h3>Key Takeaways</h3>' +
           '<ul>' + takeaways + '</ul>' +
         '</div>' +
       '</div>' +
+    '</div>' +
+    '<div class="why-section">' +
+      '<h3>Video Overview</h3>' +
+      '<p>' + step.whyThisMatters + '</p>' +
     '</div>' +
     renderNavBar(true);
 }
