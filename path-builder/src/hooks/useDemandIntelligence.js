@@ -27,12 +27,15 @@ export function useDemandIntelligence() {
   const [error, setError] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const abortRef = useRef(false);
+  const lockRef = useRef(false);
 
   /**
    * Generate (or re-use cached) demand report.
+   * Uses a ref-based lock to prevent double-invocation from React StrictMode.
    */
   const generate = useCallback(async ({ skipCache = false } = {}) => {
-    if (loading) return;
+    if (lockRef.current) return;
+    lockRef.current = true;
     setLoading(true);
     setError(null);
     abortRef.current = false;
@@ -52,8 +55,9 @@ export function useDemandIntelligence() {
       }
     } finally {
       if (!abortRef.current) setLoading(false);
+      lockRef.current = false;
     }
-  }, [courses, loading]);
+  }, [courses]);
 
   /**
    * Force-refresh — clears cache and regenerates.
