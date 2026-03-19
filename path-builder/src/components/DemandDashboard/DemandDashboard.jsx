@@ -361,13 +361,13 @@ function DemandDashboard() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStartBrief = (suggestion) => {
-    // Navigate to Adaptive Path with the topic pre-filled
+    // Navigate to Authoring Workbench with the topic pre-filled
     const query = `${suggestion.topic} in ${suggestion.category}`;
-    window.location.hash = `adaptive`;
-    // Dispatch a custom event so the Adaptive Path picks up the query
+    window.location.hash = "authoring";
+    // Dispatch event so the Authoring Workbench picks up the topic
     setTimeout(() => {
       window.dispatchEvent(
-        new CustomEvent("demand-start-brief", { detail: { query, suggestion } })
+        new CustomEvent("demand-start-authoring", { detail: { query, suggestion } })
       );
     }, 300);
   };

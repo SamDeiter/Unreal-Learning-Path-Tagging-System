@@ -9,7 +9,7 @@
  *   5. Export — Download SCORM or V3 viewer
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useAuthoringWorkbench, { AUTHORING_STAGES } from "../../hooks/useAuthoringWorkbench";
 import "./AuthoringWorkbench.css";
 
@@ -26,6 +26,18 @@ const STAGE_META = {
 export default function AuthoringWorkbench() {
   const wb = useAuthoringWorkbench();
   const [topicInput, setTopicInput] = useState("");
+  const [demandContext, setDemandContext] = useState(null);
+
+  // Listen for "Start Brief" navigation from Demand Dashboard
+  useEffect(() => {
+    const handler = (e) => {
+      const { query, suggestion } = e.detail || {};
+      if (query) setTopicInput(query);
+      if (suggestion) setDemandContext(suggestion);
+    };
+    window.addEventListener("demand-start-authoring", handler);
+    return () => window.removeEventListener("demand-start-authoring", handler);
+  }, []);
 
   // ── Stepper Header ───────────────────────────────────────
 
@@ -72,6 +84,16 @@ export default function AuthoringWorkbench() {
     <div className="aw-plan-stage">
       <h2>What should we teach?</h2>
       <p className="aw-subtitle">Enter a topic and we'll generate a structured course outline using AI.</p>
+
+      {demandContext && (
+        <div className="aw-demand-banner">
+          <span className="aw-demand-badge">🔥 High Demand</span>
+          <span className="aw-demand-detail">
+            Score: {demandContext.demandScore}/100 · Gap: −{demandContext.gap}% · {demandContext.category}
+          </span>
+          <button className="aw-demand-dismiss" onClick={() => setDemandContext(null)} title="Dismiss">✕</button>
+        </div>
+      )}
 
       <div className="aw-topic-input-row">
         <input

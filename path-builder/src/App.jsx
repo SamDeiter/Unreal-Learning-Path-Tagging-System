@@ -102,7 +102,29 @@ function App() {
     if (["builder-v3", "builder-v2", "builder"].includes(tab)) {
       setBuildersExpanded(true);
     }
+    // Auto-expand analytics group when an analytics sub-tab is selected
+    if (tab.startsWith("analytics-")) {
+      setAnalyticsExpanded(true);
+    }
   };
+
+  // Sync React state when hash changes externally (e.g. from Demand Dashboard "Start Brief")
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        setActiveTabRaw(hash);
+        if (["builder-v3", "builder-v2", "builder"].includes(hash)) {
+          setBuildersExpanded(true);
+        }
+        if (hash.startsWith("analytics-")) {
+          setAnalyticsExpanded(true);
+        }
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   // Analytics state (extracted hook)
   const { analyticsEvents, setAnalyticsEvents, analyticsTimeRange, setAnalyticsTimeRange } =
