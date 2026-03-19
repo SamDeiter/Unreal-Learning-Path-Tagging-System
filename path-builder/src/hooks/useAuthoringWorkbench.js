@@ -103,32 +103,27 @@ export default function useAuthoringWorkbench() {
 
     setLoading(true);
     setError(null);
-    setProgress({ current: 0, total: 3, label: "Generating outline..." });
+    setProgress({ current: 0, total: 2, label: "Generating outline..." });
 
     try {
       // Lazy-load to avoid bundling on mount
-      const { searchAndBuild } = await import("../services/bespokePathService");
+      const { generateBespokePath } = await import("../services/bespokePathService");
 
-      setProgress({ current: 1, total: 3, label: "Searching for relevant content..." });
+      setProgress({ current: 1, total: 2, label: "Searching & sequencing content..." });
 
-      const result = await searchAndBuild(inputTopic);
+      const result = await generateBespokePath(inputTopic);
 
       if (!result?.v2Path) {
-        throw new Error("Failed to generate learning path outline");
+        throw new Error(result?.error || "Failed to generate learning path outline");
       }
 
-      setProgress({ current: 2, total: 3, label: "Enriching with editorial context..." });
-
-      // Run editorial pass for structured fields
-      const { runEditorialPass } = await import("../services/editorialPass");
-      const enriched = await runEditorialPass(result.v2Path);
-
-      setV2Path(enriched || result.v2Path);
+      // generateBespokePath already runs editorialPass internally
+      setV2Path(result.v2Path);
       setTopic(inputTopic);
       setStage(AUTHORING_STAGES.REVIEW);
 
-      setProgress({ current: 3, total: 3, label: "Plan ready!" });
-      devLog(`[Authoring] Plan generated: "${inputTopic}" → ${(enriched || result.v2Path).sections?.length} sections`);
+      setProgress({ current: 2, total: 2, label: "Plan ready!" });
+      devLog(`[Authoring] Plan generated: "${inputTopic}" → ${result.v2Path.sections?.length} sections`);
     } catch (err) {
       devWarn("[Authoring] Plan generation failed:", err.message);
       setError(`Failed to generate plan: ${err.message}`);

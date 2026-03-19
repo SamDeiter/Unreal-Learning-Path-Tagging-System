@@ -6,8 +6,8 @@
 // Tab definitions — split into student-facing and admin/builder
 // Newest mode always at the top of the list
 export const PRIMARY_TABS = [
-  { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
   { key: "authoring", label: "Authoring", icon: "✍️" },
+  { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
   { key: "path-builders", label: "Path Builders", icon: "🛤️", expandable: true },
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
