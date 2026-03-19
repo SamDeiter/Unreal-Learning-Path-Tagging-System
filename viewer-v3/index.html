@@ -9,24 +9,27 @@
 </head>
 <body>
   <div id="app"></div>
-  <!-- Load course data from localStorage if available, otherwise fall back to data.js -->
+  <!-- Load default course data (full library) -->
+  <script src="data.js"></script>
+  <!-- Override with localStorage data if available (from Authoring Workbench preview) -->
   <script>
     (function() {
       var stored = localStorage.getItem('v3_viewer_course_data');
       if (stored) {
         try {
-          window.COURSE_LIBRARY = JSON.parse(stored);
-          // Update page title with course name
-          if (window.COURSE_LIBRARY[0] && window.COURSE_LIBRARY[0].title) {
-            document.title = window.COURSE_LIBRARY[0].title + ' — UE5 Learning Path Viewer';
+          var parsed = JSON.parse(stored);
+          if (parsed && parsed.length > 0) {
+            COURSE_LIBRARY = parsed;
+            if (parsed[0].title) {
+              document.title = parsed[0].title + ' — UE5 Learning Path Viewer';
+            }
           }
         } catch(e) {
-          console.warn('[Viewer] Failed to parse localStorage data, falling back to data.js');
+          console.warn('[Viewer] Failed to parse localStorage data, using default library');
         }
       }
     })();
   </script>
-  <script src="data.js" onerror="console.log('[Viewer] No data.js found, using localStorage data')"></script>
   <script src="app.js"></script>
 </body>
 </html>
