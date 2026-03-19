@@ -247,26 +247,18 @@ export default function useAuthoringWorkbench() {
     setError(null);
 
     try {
-      // Use window.__exportV3Package attached in scormExportService
-      if (typeof window.__exportV3Package === "function") {
-        await window.__exportV3Package(v2Path);
-      } else {
-        // Fallback: direct adapter call
-        const { convertV2ToV3Package, renderV3DataFile } = await import("../schemas/v3Adapter");
-        const courseLibrary = convertV2ToV3Package(v2Path);
-        const dataJs = renderV3DataFile(courseLibrary);
+      // Convert V2 path to V3 COURSE_LIBRARY format
+      const { convertV2ToV3Package } = await import("../schemas/v3Adapter");
+      const courseLibrary = convertV2ToV3Package(v2Path);
 
-        const blob = new Blob([dataJs], { type: "application/javascript" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `data_v3_${Date.now()}.js`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-      devLog("[Authoring] V3 package exported");
+      // Save to localStorage for the viewer to read
+      localStorage.setItem("v3_viewer_course_data", JSON.stringify(courseLibrary));
+
+      // Open the viewer in a new tab
+      const viewerUrl = `${window.location.origin}/Unreal-Learning-Path-Tagging-System/viewer-v3/index.html`;
+      window.open(viewerUrl, "_blank");
+
+      devLog("[Authoring] V3 viewer opened in new tab");
     } catch (err) {
       setError(`V3 export failed: ${err.message}`);
     } finally {

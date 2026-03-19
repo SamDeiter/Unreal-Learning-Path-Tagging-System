@@ -332,8 +332,8 @@ export default function AuthoringWorkbench() {
             disabled={wb.loading}
           >
             <span className="aw-export-icon">🌐</span>
-            <span className="aw-export-title">V3 Viewer Package</span>
-            <span className="aw-export-desc">Standalone web viewer with chapters and quizzes</span>
+            <span className="aw-export-title">Preview in Viewer</span>
+            <span className="aw-export-desc">Opens your course in the V3 viewer in a new tab</span>
           </button>
 
           {wb.briefMarkdown && (
