@@ -25,6 +25,7 @@ const ContentGaps = lazy(() => import("./AdminAnalytics/ContentGaps"));
 const AnalyticsPipeline = lazy(() => import("./AdminAnalytics/AnalyticsPipeline"));
 const AnalyticsCosts = lazy(() => import("./AdminAnalytics/AnalyticsCosts"));
 const DemandDashboard = lazy(() => import("./DemandDashboard/DemandDashboard"));
+const AuthoringWorkbench = lazy(() => import("./AuthoringWorkbench/AuthoringWorkbench"));
 
 // Analytics visualizations — import directly for proper code-splitting
 const JourneyHeatmap = lazy(() => import("./Visualizations/JourneyHeatmap"));
@@ -126,6 +127,11 @@ export default function TabRouter({
             title="Path Builder V3"
           />
         </div>
+      )}
+
+      {/* ── Authoring Workbench ── */}
+      {activeTab === "authoring" && (
+        <div className="dashboard-layout"><AuthoringWorkbench /></div>
       )}
 
       {/* ── Demand Intelligence ── */}
