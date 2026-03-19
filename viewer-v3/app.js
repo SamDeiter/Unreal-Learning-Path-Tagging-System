@@ -612,5 +612,12 @@ function escapeHtml(str) {
 
 // ── Init ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-  render();
+  // If there's exactly one course with chapters (e.g. preview from Path Builder),
+  // auto-select it and show the overview directly
+  if (typeof COURSE_LIBRARY !== 'undefined' && COURSE_LIBRARY.length === 1 &&
+      COURSE_LIBRARY[0].chapters && COURSE_LIBRARY[0].chapters.length > 0) {
+    selectCourse(0);
+  } else {
+    render();
+  }
 });
