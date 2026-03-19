@@ -7,12 +7,18 @@
 // Newest mode always at the top of the list
 export const PRIMARY_TABS = [
   { key: "adaptive", label: "Adaptive Path", icon: "🎯" },
-  { key: "builder-v2", label: "Path Builder V2", icon: "✨" },
+  { key: "path-builders", label: "Path Builders", icon: "🛤️", expandable: true },
   { key: "bespoke", label: "Fix a Problem", icon: "🔧" },
   { key: "problem", label: "Learn Why", icon: "🧠" },
   { key: "augmentation", label: "Augmentation", icon: "🔬" },
   { key: "personas", label: "Onboarding", icon: "🚀" },
-  { key: "builder", label: "Path Builder (V1)", icon: "🏗️" },
+];
+
+// Path Builder subtabs — newest first
+export const PATH_BUILDER_TABS = [
+  { key: "builder-v3", label: "V3 (Viewer)", icon: "🚀" },
+  { key: "builder-v2", label: "V2", icon: "✨" },
+  { key: "builder", label: "V1", icon: "🏗️" },
 ];
 
 export const SECONDARY_TABS = [
@@ -35,11 +41,13 @@ export const ANALYTICS_SUBTABS = [
   { key: "analytics-costs", label: "Costs", icon: "💰" },
 ];
 
-export const BASE_TABS = [...PRIMARY_TABS, ...SECONDARY_TABS];
+export const BASE_TABS = [...PRIMARY_TABS, ...PATH_BUILDER_TABS, ...SECONDARY_TABS];
 
 // On mobile, surface the most useful tabs first
 export const MOBILE_TAB_ORDER = [
   "adaptive",
+  "builder-v3",
+  "builder-v2",
   "bespoke",
   "problem",
   "personas",

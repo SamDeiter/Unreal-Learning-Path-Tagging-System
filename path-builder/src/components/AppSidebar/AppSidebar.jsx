@@ -5,7 +5,7 @@
  */
 /* global __BUILD_HASH__, __BUILD_TIME__, __BUILD_NUMBER__ */
 import { signOutUser } from "../../services/googleAuthService";
-import { PRIMARY_TABS, SECONDARY_TABS, ANALYTICS_SUBTABS } from "../../domain/tabDefinitions";
+import { PRIMARY_TABS, SECONDARY_TABS, ANALYTICS_SUBTABS, PATH_BUILDER_TABS } from "../../domain/tabDefinitions";
 
 export default function AppSidebar({
   tabs,
@@ -13,10 +13,14 @@ export default function AppSidebar({
   setActiveTab,
   analyticsExpanded,
   setAnalyticsExpanded,
+  buildersExpanded,
+  setBuildersExpanded,
   newFeedbackCount,
   currentUser,
   onRetakeQuiz,
 }) {
+  const isAnyBuilderActive = ["builder-v3", "builder-v2", "builder"].includes(activeTab);
+
   return (
     <aside className="app-sidebar">
       <div className="sidebar-header">
@@ -26,16 +30,57 @@ export default function AppSidebar({
       <nav className="sidebar-nav">
         <div className="sidebar-section">
           <span className="sidebar-section-label">Learning</span>
-          {PRIMARY_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              className={`sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              <span className="sidebar-tab-icon">{tab.icon}</span>
-              <span className="sidebar-tab-label">{tab.label}</span>
-            </button>
-          ))}
+          {PRIMARY_TABS.map((tab) => {
+            // Path Builders is expandable with sub-items
+            if (tab.expandable && tab.key === "path-builders") {
+              return (
+                <div key={tab.key}>
+                  <button
+                    className={`sidebar-tab ${isAnyBuilderActive ? "active" : ""}`}
+                    onClick={() => {
+                      setBuildersExpanded(!buildersExpanded);
+                      if (!isAnyBuilderActive) {
+                        setActiveTab("builder-v3");
+                        setBuildersExpanded(true);
+                      }
+                    }}
+                  >
+                    <span className="sidebar-tab-icon">{tab.icon}</span>
+                    <span className="sidebar-tab-label">{tab.label}</span>
+                    <span
+                      className={`sidebar-expand-arrow ${buildersExpanded ? "expanded" : ""}`}
+                    >
+                      ▸
+                    </span>
+                  </button>
+                  {buildersExpanded && (
+                    <div className="sidebar-subtabs">
+                      {PATH_BUILDER_TABS.map((sub) => (
+                        <button
+                          key={sub.key}
+                          className={`sidebar-tab sidebar-tab-sub ${activeTab === sub.key ? "active" : ""}`}
+                          onClick={() => setActiveTab(sub.key)}
+                        >
+                          <span className="sidebar-tab-icon">{sub.icon}</span>
+                          <span className="sidebar-tab-label">{sub.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <button
+                key={tab.key}
+                className={`sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                <span className="sidebar-tab-icon">{tab.icon}</span>
+                <span className="sidebar-tab-label">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="sidebar-divider" />
@@ -140,3 +185,4 @@ export default function AppSidebar({
     </aside>
   );
 }
+

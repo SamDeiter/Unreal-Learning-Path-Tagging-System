@@ -73,18 +73,36 @@ function BuilderEditor({
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState("adaptive");
+  // Deep-link: read initial tab from URL hash
+  const [activeTab, setActiveTabRaw] = useState(() => {
+    const hash = window.location.hash.slice(1);
+    return hash || "adaptive";
+  });
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
   const { currentUser, userIsAdmin } = useAuth();
   const [newFeedbackCount, setNewFeedbackCount] = useState(0);
   const [showQuiz, setShowQuiz] = useState(() => !localStorage.getItem("ue5_persona_id"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [analyticsExpanded, setAnalyticsExpanded] = useState(false);
+  const [buildersExpanded, setBuildersExpanded] = useState(() => {
+    const hash = window.location.hash.slice(1);
+    return ["builder-v3", "builder-v2", "builder"].includes(hash);
+  });
   // Path Builder dashboard vs editor view
   const [builderView, setBuilderView] = useState("dashboard"); // "dashboard" | "editor"
   const [showWizard, setShowWizard] = useState(false);
   const [pendingEditPath, setPendingEditPath] = useState(null);
   const { isMobile } = useIsMobile();
+
+  // Deep-link: wrap setActiveTab to sync hash & auto-expand builders
+  const setActiveTab = (tab) => {
+    setActiveTabRaw(tab);
+    window.location.hash = tab;
+    // Auto-expand builders group when a builder tab is selected
+    if (["builder-v3", "builder-v2", "builder"].includes(tab)) {
+      setBuildersExpanded(true);
+    }
+  };
 
   // Analytics state (extracted hook)
   const { analyticsEvents, setAnalyticsEvents, analyticsTimeRange, setAnalyticsTimeRange } =
@@ -208,6 +226,8 @@ function App() {
                 setActiveTab={setActiveTab}
                 analyticsExpanded={analyticsExpanded}
                 setAnalyticsExpanded={setAnalyticsExpanded}
+                buildersExpanded={buildersExpanded}
+                setBuildersExpanded={setBuildersExpanded}
                 newFeedbackCount={newFeedbackCount}
                 currentUser={currentUser}
                 onRetakeQuiz={() => {

@@ -116,6 +116,17 @@ export default function TabRouter({
         <div className="dashboard-layout"><PathBuilderV2Mockup /></div>
       )}
 
+      {/* ── Path Builder V3 (Viewer) — iframe embed ── */}
+      {activeTab === "builder-v3" && (
+        <div className="augmentation-layout">
+          <iframe
+            className="augmentation-frame"
+            src={`${import.meta.env.BASE_URL}viewer-v3/index.html`}
+            title="Path Builder V3"
+          />
+        </div>
+      )}
+
       {/* ── Path Builder (V1) (dashboard / editor subviews + wizard) ── */}
       {activeTab === "builder" && builderView === "dashboard" && (
         <div className="dashboard-layout">
