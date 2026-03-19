@@ -659,3 +659,72 @@ export async function exportV2ScormPackage(v2Path, options = {}) {
 
   devLog(`[SCORM V2] Package downloaded: ${filename} (${scoFiles.length} SCOs)`);
 }
+
+// ── V3 Package Export ──────────────────────────────────────────────
+
+/**
+ * Export a V2 learning path as a standalone V3 viewer package.
+ * Converts V2 → V3 format and bundles with viewer-v3 HTML/CSS/JS.
+ *
+ * Downloads a .zip containing:
+ *   - index.html (V3 viewer)
+ *   - styles.css (V3 styles)
+ *   - viewer.js (V3 viewer logic)
+ *   - data.js (COURSE_LIBRARY with converted data)
+ *
+ * @param {Object} v2Path — V2 LearningPath object
+ * @param {Object} [options]
+ * @param {Object} [options.quizzes] — Map of sectionId → quiz data
+ */
+async function exportV3Package(v2Path, { quizzes = {} } = {}) {
+  const { convertV2ToV3Package, renderV3DataFile } = await import("../schemas/v3Adapter");
+
+  devLog("[V3 Export] Converting V2 path to V3 format...");
+
+  // 1. Convert V2 → V3
+  const courseLibrary = convertV2ToV3Package(v2Path, { quizzes });
+  const dataJs = renderV3DataFile(courseLibrary);
+
+  // 2. Fetch V3 viewer static assets
+  const basePath = (import.meta.env.BASE_URL || "/") + "viewer-v3/";
+
+  let indexHtml, stylesCss, viewerJs;
+  try {
+    [indexHtml, stylesCss, viewerJs] = await Promise.all([
+      fetch(`${basePath}index.html`).then((r) => r.text()),
+      fetch(`${basePath}styles.css`).then((r) => r.text()),
+      fetch(`${basePath}viewer.js`).then((r) => r.text()),
+    ]);
+  } catch (err) {
+    devLog("[V3 Export] Failed to fetch viewer assets:", err.message);
+    throw new Error("V3 viewer assets not found. Ensure viewer-v3/ is in public/.");
+  }
+
+  // 3. Bundle into zip
+  const zip = new JSZip();
+  zip.file("index.html", indexHtml);
+  zip.file("styles.css", stylesCss);
+  zip.file("viewer.js", viewerJs);
+  zip.file("data.js", dataJs);
+
+  // 4. Download
+  const blob = await zip.generateAsync({ type: "blob" });
+  const title = v2Path.title || v2Path.query || "course";
+  const filename = `v3_viewer_${sanitizeFilename(title)}_${Date.now()}.zip`;
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  devLog(`[V3 Export] Package downloaded: ${filename}`);
+}
+
+// Make exportV3Package available alongside existing exports
+// (This file uses non-module pattern, so we attach to window for access)
+if (typeof window !== "undefined") {
+  window.__exportV3Package = exportV3Package;
+}
