@@ -351,8 +351,15 @@ function DemandDashboard() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStartBrief = (suggestion) => {
-    // TODO: Phase 1 — wire to videoBriefService
-    alert(`Video Brief Generator coming soon!\n\nTopic: ${suggestion.topic}\nCategory: ${suggestion.category}\nDemand: ${suggestion.demandScore}%`);
+    // Navigate to Adaptive Path with the topic pre-filled
+    const query = `${suggestion.topic} in ${suggestion.category}`;
+    window.location.hash = `adaptive`;
+    // Dispatch a custom event so the Adaptive Path picks up the query
+    setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent("demand-start-brief", { detail: { query, suggestion } })
+      );
+    }, 300);
   };
 
   return (

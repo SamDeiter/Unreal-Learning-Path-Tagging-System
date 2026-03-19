@@ -363,11 +363,22 @@ export function calculateGranularCoverage(courses) {
         ].map((t) => t.toLowerCase());
 
         const tagText = allTags.join(" ");
-        const matched = keywords.some((kw) => tagText.includes(kw));
+
+        // For multi-word subtopics, require ALL keywords to match (prevents
+        // "world" alone from matching 122 courses for "World Partition")
+        const matched =
+          keywords.length > 1
+            ? keywords.every((kw) => tagText.includes(kw))
+            : keywords.some((kw) => tagText.includes(kw));
         if (matched) matchCount++;
       }
 
-      const coveragePct = Math.min(100, Math.round((matchCount / courses.length) * 200));
+      // Threshold-based coverage: 15+ courses on a subtopic = 100% coverage.
+      // This is more meaningful than dividing by total library size.
+      const FULL_COVERAGE_THRESHOLD = 15;
+      const coveragePct = matchCount === 0
+        ? 0
+        : Math.min(100, Math.round((matchCount / FULL_COVERAGE_THRESHOLD) * 100));
       coverage[category][subtopic] = {
         coverage: coveragePct,
         courseCount: matchCount,
