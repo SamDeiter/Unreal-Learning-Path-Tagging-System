@@ -68,7 +68,7 @@ function getMatchers(keywords) {
  * @param {string[]} keywords - Keywords to match against
  * @param {Object} [options] - Options
  * @param {boolean} [options.includeTranscriptTags] - Include transcript_tags (default: false)
- * @param {boolean} [options.includeTagKeys] - Include Object.keys(course.tags) (default: false)
+ * @param {boolean} [options.includeTagValues] - Include Object.values(course.tags) (default: true)
  * @param {Object} [options.keywordHits] - Optional object to accumulate per-keyword hit counts
  * @returns {boolean} Whether the course matches
  */
@@ -79,7 +79,7 @@ export function courseMatchesKeywords(course, keywords, options = {}) {
     ...(course.gemini_system_tags || []),
     ...(course.ai_tags || []),
     ...(options.includeTranscriptTags ? course.transcript_tags || [] : []),
-    ...(options.includeTagKeys ? Object.keys(course.tags || {}) : []),
+    ...(options.includeTagValues !== false ? Object.values(course.tags || {}).filter((v) => typeof v === "string") : []),
     course.title || "",
   ].map((t) => t.toLowerCase());
 

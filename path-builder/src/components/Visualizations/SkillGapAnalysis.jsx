@@ -37,7 +37,7 @@ function SkillGapAnalysis() {
       const matchingCourses = courses.filter((course) => {
         return courseMatchesKeywords(course, cat.keywords, {
           includeTranscriptTags: true,
-          includeTagKeys: true,
+          includeTagValues: true,
           keywordHits,
         });
       });

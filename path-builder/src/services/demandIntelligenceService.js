@@ -358,7 +358,7 @@ export function calculateGranularCoverage(courses) {
           ...(course.gemini_system_tags || []),
           ...(course.ai_tags || []),
           ...(course.transcript_tags || []),
-          ...Object.keys(course.tags || {}),
+          ...Object.values(course.tags || {}).filter((v) => typeof v === "string"),
           course.title || "",
         ].map((t) => t.toLowerCase());
 
