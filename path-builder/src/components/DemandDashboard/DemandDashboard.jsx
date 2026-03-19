@@ -75,10 +75,16 @@ function SourceChip({ source }) {
 function ConfidenceBadge({ confidence }) {
   const colors = { high: "#22c55e", medium: "#f59e0b", low: "#94a3b8" };
   const labels = { high: "HIGH", medium: "MED", low: "LOW" };
+  const tips = {
+    high: "High confidence — strong demand signal from multiple sources",
+    medium: "Medium confidence — moderate demand, fewer confirming sources",
+    low: "Low confidence — early signal, needs more data to confirm",
+  };
   return (
     <span
       className="confidence-badge"
       style={{ "--badge-color": colors[confidence] || colors.low }}
+      title={tips[confidence] || "Confidence level of this opportunity"}
     >
       {labels[confidence] || "?"}
     </span>
@@ -93,27 +99,27 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
   return (
     <div className={`suggestion-card confidence-${suggestion.confidence}`}>
       <div className="suggestion-header" onClick={() => setExpanded(!expanded)}>
-        <span className="suggestion-rank">#{rank}</span>
+        <span className="suggestion-rank" title={`Ranked #${rank} by opportunity score (gap × demand)`}>#{rank}</span>
         <div className="suggestion-info">
           <h4 className="suggestion-topic">{suggestion.topic}</h4>
-          <span className="suggestion-category">{suggestion.category}</span>
+          <span className="suggestion-category" title="UE5 content category">{suggestion.category}</span>
         </div>
         <div className="suggestion-metrics">
-          <div className="metric">
+          <div className="metric" title={`Gap: ${suggestion.gap}% — the difference between community demand and your library's coverage. Higher gap = bigger opportunity.`}>
             <span className="metric-value gap-value">−{suggestion.gap}%</span>
             <span className="metric-label">Gap</span>
           </div>
-          <div className="metric">
+          <div className="metric" title={`Demand: ${suggestion.demandScore}/100 — how actively the community is searching for and asking about this topic (from Google Trends + forums).`}>
             <span className="metric-value">{suggestion.demandScore}</span>
             <span className="metric-label">Demand</span>
           </div>
-          <div className="metric">
+          <div className="metric" title={`Coverage: ${suggestion.coverageInLibrary}% — how well your existing video library covers this topic. 0% = no content yet.`}>
             <span className="metric-value">{suggestion.coverageInLibrary}%</span>
             <span className="metric-label">Coverage</span>
           </div>
           <ConfidenceBadge confidence={suggestion.confidence} />
         </div>
-        <span className="expand-arrow">{expanded ? "▾" : "▸"}</span>
+        <span className="expand-arrow" title={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
       </div>
 
       {expanded && (
@@ -198,7 +204,7 @@ function GranularCoverageChart({ demandData, coverageData }) {
 
   return (
     <div className="granular-coverage">
-      <h3>📈 Coverage vs Demand <span className="chart-subtitle">(click to expand)</span></h3>
+      <h3 title="Compares your library's topic coverage (green bar) against community demand (blue marker). Click any category to see subtopic breakdown.">📈 Coverage vs Demand <span className="chart-subtitle">(click to expand)</span></h3>
       {categories.map((cat) => {
         const catData = demandData[cat];
         const isExpanded = expandedCategory === cat;
@@ -353,12 +359,13 @@ function DemandDashboard() {
     <div className="demand-dashboard">
       {/* Header */}
       <div className="dashboard-header">
-        <h2>📊 Demand Intelligence</h2>
+        <h2 title="Demand Intelligence scans community forums, Google Trends, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
         <div className="header-actions">
           <button
             className="refresh-btn"
             onClick={refresh}
             disabled={loading}
+            title="Clear cached data and re-scan all sources for fresh demand signals (takes 30–60 seconds)"
           >
             {loading ? "⏳ Scanning..." : "🔄 Refresh"}
           </button>
@@ -387,19 +394,19 @@ function DemandDashboard() {
         <>
           {/* Summary Stats Bar */}
           <div className="stats-bar">
-            <div className="stat">
+            <div className="stat" title="Total number of content opportunities identified by cross-referencing demand signals against your library's existing coverage.">
               <span className="stat-value">{stats?.totalSuggestions || 0}</span>
               <span className="stat-label">Opportunities</span>
             </div>
-            <div className="stat">
+            <div className="stat" title="Questions actively being asked in UE5 communities — sourced from Reddit, Epic Forums, Stack Overflow, and YouTube comments.">
               <span className="stat-value">{stats?.trendingQuestions || 0}</span>
               <span className="stat-label">Trending Questions</span>
             </div>
-            <div className="stat">
+            <div className="stat" title="Specific frustrations and struggles identified from community posts — topics where learners are getting stuck.">
               <span className="stat-value">{stats?.painPointCount || 0}</span>
               <span className="stat-label">Pain Points</span>
             </div>
-            <div className="stat">
+            <div className="stat" title="Number of UE5 topic categories scanned (e.g. Blueprints, AI, Animation, Niagara, etc.)">
               <span className="stat-value">{stats?.categoriesScanned || 0}</span>
               <span className="stat-label">Categories</span>
             </div>
@@ -410,7 +417,7 @@ function DemandDashboard() {
             {/* Left: Suggestions */}
             <div className="column-suggestions">
               <div className="column-header">
-                <h3>🎯 Top Course Opportunities</h3>
+                <h3 title="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
                 <div className="category-filters">
                   <button
                     className={`filter-chip ${!categoryFilter ? "active" : ""}`}
@@ -451,8 +458,8 @@ function DemandDashboard() {
             {/* Right: Trending Questions */}
             <div className="column-trending">
               <div className="column-header">
-                <h3>💬 Live Community Questions</h3>
-                <span className="source-badge">Gemini Grounded Search</span>
+                <h3 title="Real questions being asked right now in UE5 developer communities — sourced via AI-powered web search">💬 Live Community Questions</h3>
+                <span className="source-badge" title="These questions are discovered using Google Gemini's grounded search, which scans live web content from forums and Q&A sites">Gemini Grounded Search</span>
               </div>
               <div className="trending-list">
                 {(report.trendingQuestions || []).map((q, i) => (
