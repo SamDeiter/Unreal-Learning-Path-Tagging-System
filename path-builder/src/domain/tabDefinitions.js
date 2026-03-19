@@ -30,6 +30,7 @@ export const SECONDARY_TABS = [
 
 export const ANALYTICS_SUBTABS = [
   { key: "analytics-overview", label: "Overview", icon: "📊" },
+  { key: "analytics-demand", label: "Demand Intelligence", icon: "🔥" },
   { key: "analytics-insights", label: "Insights", icon: "💡" },
   { key: "analytics-confidence", label: "Confidence", icon: "🧠" },
   { key: "analytics-coverage", label: "Coverage", icon: "🎯" },
@@ -55,6 +56,7 @@ export const MOBILE_TAB_ORDER = [
   "dashboard",
   "readiness",
   "tags",
+  "analytics-demand",
   "analytics-overview",
   "analytics-insights",
   "analytics-confidence",
