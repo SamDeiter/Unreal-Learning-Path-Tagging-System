@@ -4,6 +4,43 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.6.0-demand-authoring] - 2026-03-19
+
+### Added
+
+- **Demand Intelligence Dashboard** — New tab (`DemandDashboard.jsx`) with community demand analysis:
+  - `demandIntelligenceService.js` — Batch trending question lookups, pain point analysis, source-attributed demand scoring
+  - `demand_benchmarks.json` — 100+ granular subtopics across 13 UE5 categories with community activity benchmarks
+  - `useDemandIntelligence.js` — Hook for demand data management and analysis state
+  - Two-column layout: opportunity-ranked suggestion cards (left) + demand insights panel (right)
+  - Category filter chips for drilling into specific UE5 domains
+  - Clickable source links with external URL attribution
+- **Authoring Workbench** — New tab (`AuthoringWorkbench.jsx`) with 5-stage course creation pipeline:
+  - Plan → Review → Brief → Link → Export workflow via `useAuthoringWorkbench.js` hook
+  - AI-powered outline generation from topic input (Plan stage)
+  - Chapter and step editing with teaching fields (Review stage)
+  - Recording brief generation for instructors (Brief stage)
+  - Video URL linking per step (Link stage)
+  - SCORM 1.2 and V3 viewer export (Export stage)
+  - `videoBriefService.js` — Generates structured recording briefs from course outlines
+  - `v3Adapter.js` — Converts authoring data to V3 viewer format
+- **Demand → Authoring Integration** — "Start Brief" button on demand suggestions navigates to Authoring tab:
+  - `App.jsx` — `hashchange` event listener syncs URL hash with React tab state
+  - `DemandDashboard.jsx` — Start Brief dispatches `demand-start-authoring` custom event
+  - `AuthoringWorkbench.jsx` — Listens for event, pre-fills topic, shows demand context banner (score/gap/category)
+
+### Fixed
+
+- **Tag Data Processing** — Fixed `Object.keys(course.tags)` → `Object.values(course.tags)` across 5 files:
+  - `demandIntelligenceService.js`, `TagTrends.jsx`, `skillMatchUtils.js`, `SkillGapAnalysis.jsx`, `SkillRadar.jsx`
+- **Coverage Calculation** — Replaced broken formula with threshold-based coverage scale in `demandIntelligenceService.js`
+- **Keyword Matching** — Changed `.some()` → `.every()` for multi-word subtopic matching to prevent false positives
+- **Source Labeling** — Renamed "Google Trends" → "Community Activity Index" for honest data provenance
+- **Start Brief Navigation** — Fixed button doing nothing: URL hash changes now sync with React state via `hashchange` listener
+- **Confidence Scoring** — Only includes sources with verified URLs in confidence calculations
+
+---
+
 ## [7.5.0-gap-fill-integration] - 2026-03-16
 
 ### Added

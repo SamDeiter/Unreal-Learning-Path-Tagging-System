@@ -452,3 +452,58 @@ Path Generation → trackAICoverageReport() → Firestore analytics_events → C
 
 > [!IMPORTANT]
 > The `AI_COVERAGE_REPORT` event fires in **both** code paths: the normal corpus pipeline (line ~755) and the hybrid fallback path (line ~700). Both paths must include tracking to avoid data gaps.
+
+---
+
+## Demand Intelligence Dashboard
+
+The **Demand Intelligence** tab (`DemandDashboard.jsx`) analyzes community demand signals to surface content authoring opportunities.
+
+```
+demand_benchmarks.json → demandIntelligenceService.js → DemandDashboard.jsx
+                              ↕                              ↕
+                     video_library.json              SuggestionCard.jsx
+                     (tag coverage scan)             (Start Brief → Authoring)
+```
+
+| Component                          | Responsibility                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| `demand_benchmarks.json`           | 100+ subtopics across 13 UE5 categories with community activity scores   |
+| `demandIntelligenceService.js`     | Batch analysis: trending questions, pain points, coverage gaps, scoring   |
+| `useDemandIntelligence.js`         | React hook managing demand analysis state and category filtering          |
+| `DemandDashboard.jsx`             | Two-column layout: suggestion cards (left) + demand insights panel (right) |
+| `DemandDashboard.css`             | Styling for cards, category chips, source links, demand meter             |
+
+### Demand → Authoring Integration
+
+The "Start Brief" button on each suggestion card bridges Demand Intelligence to the Authoring Workbench:
+
+1. `DemandDashboard.jsx` sets `window.location.hash = "authoring"` and dispatches a `demand-start-authoring` CustomEvent with topic + demand metadata
+2. `App.jsx` `hashchange` listener updates React tab state to match the URL hash
+3. `AuthoringWorkbench.jsx` listens for the `demand-start-authoring` event, pre-fills the topic input, and shows a demand context banner
+
+---
+
+## Authoring Workbench
+
+The **Authoring** tab (`AuthoringWorkbench.jsx`) provides a 5-stage course creation pipeline:
+
+```
+Plan → Review → Brief → Link → Export
+```
+
+| Stage      | Description                                                         | Service                    |
+| ---------- | ------------------------------------------------------------------- | -------------------------- |
+| **Plan**   | Enter topic → AI generates chapter/step outline via Gemini          | `useAuthoringWorkbench.js` |
+| **Review** | Edit chapters, steps, and teaching fields (key takeaways, pitfalls) | (inline editing)           |
+| **Brief**  | Generate recording briefs for each video step                       | `videoBriefService.js`     |
+| **Link**   | Attach video URLs to each step                                      | (inline editing)           |
+| **Export** | Export as SCORM 1.2 package or V3 viewer format                     | `v3Adapter.js`             |
+
+| Component                      | Responsibility                                                    |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `AuthoringWorkbench.jsx`       | Main UI — stage navigation, demand context banner, form rendering |
+| `AuthoringWorkbench.css`       | Styling for all 5 stages and demand banner                        |
+| `useAuthoringWorkbench.js`     | Hook managing outline state, stage transitions, AI generation     |
+| `videoBriefService.js`         | Generates structured recording briefs from course outlines        |
+| `v3Adapter.js`                 | Converts authoring data to V3 viewer format for export            |

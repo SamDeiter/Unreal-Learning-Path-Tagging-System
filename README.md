@@ -53,12 +53,14 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 ```
 ├── path-builder/                  # React app (main UI)
 │   ├── src/
-│   │   ├── components/            # 25 component modules
+│   │   ├── components/            # 27 component modules
 │   │   │   ├── MobileNav/         # Adaptive hamburger drawer navigation
 │   │   │   ├── ProblemFirst/      # "Fix a Problem" — main user-facing flow
 │   │   │   ├── GuidedPlayer/      # AI-narrated learning experience
 │   │   │   ├── PersonaQuiz/       # Role-detection onboarding quiz
 │   │   │   ├── AdaptivePath/      # Diagnostic quiz → depth-adjusted learning path
+│   │   │   ├── DemandDashboard/   # Community demand analysis + authoring suggestions
+│   │   │   ├── AuthoringWorkbench/ # 5-stage course creation pipeline (Plan→Export)
 │   │   │   ├── BespokePath/       # On-demand AI-generated learning paths
 │   │   │   ├── TagGraph/          # Interactive Cytoscape tag relationship graph
 │   │   │   ├── Visualizations/    # Analytics charts (heatmaps, radar, trends)
@@ -70,7 +72,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   └── ...               # AuthGate, InviteManager, Feedback, etc.
 │   │   ├── context/               # PathContext, TagDataContext, constants
 │   │   ├── hooks/                 # 9 custom hooks (useIsMobile, useProblemFirst, etc.)
-│   │   ├── services/              # 25 service modules
+│   │   ├── services/              # 29 service modules
 │   │   │   ├── searchPipeline.js          # Orchestrates search strategies
 │   │   │   ├── segmentSearchService.js    # TF-IDF transcript segment search
 │   │   │   ├── semanticSearchService.js   # Embedding-based semantic search
@@ -79,7 +81,9 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   │   │   ├── PersonaService.js          # Persona detection & personalization
 │   │   │   ├── accessControl.js           # Invite-based access + admin roles
 │   │   │   ├── analyticsService.js        # Usage analytics
-│   │   │   └── ...                        # feedbackService, TagGraphService, etc.
+│   │   │   ├── demandIntelligenceService.js # Community demand analysis + scoring
+│   │   │   ├── videoBriefService.js         # Recording brief generation for authoring
+│   │   │   └── ...                          # feedbackService, TagGraphService, etc.
 │   │   ├── data/                  # 20+ static JSON data files (~22MB after Firestore vector migration)
 │   │   │   ├── video_library_enriched.json  # Core course + video catalog
 │   │   │   ├── segment_embeddings.json      # Semantic vectors (~6MB)
@@ -195,6 +199,8 @@ python scripts/run_enrichment_pipeline.py
 | **🔬 Augmentation**   | Embedded dashboard for transcript augmentation quality monitoring                                                       |
 | **🎟️ Invites**        | Admin-only invite code management                                                                                       |
 | **📋 Feedback**       | Admin-only user feedback review and triage                                                                              |
+| **📊 Demand Intel**   | Community demand analysis: opportunity-ranked suggestions, category filters, source-linked insights, Start Brief flow   |
+| **✍️ Authoring**       | 5-stage course creation: Plan → Review → Brief → Link → Export with SCORM 1.2 packaging and V3 viewer export           |
 
 ---
 
