@@ -556,6 +556,18 @@ export async function getDemandSuggestions(courses = [], topN = 10) {
 }
 
 /**
+ * Return the in-memory cached report synchronously (or null if stale/empty).
+ * This lets React hooks seed their initial state without an async call,
+ * preventing a loading-spinner flash when the data is already available.
+ */
+export function getCachedReport() {
+  if (_cachedReport && Date.now() - _cachedAt < CACHE_TTL_MS) {
+    return _cachedReport;
+  }
+  return null;
+}
+
+/**
  * Force-clear the report cache (e.g., when user clicks Refresh).
  */
 export function clearDemandCache() {

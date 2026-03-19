@@ -13,6 +13,7 @@ import { useTagData } from "../context/TagDataContext";
 import {
   generateDemandReport,
   clearDemandCache,
+  getCachedReport,
 } from "../services/demandIntelligenceService";
 import { devLog, devWarn } from "../utils/logger";
 
@@ -22,7 +23,8 @@ import { devLog, devWarn } from "../utils/logger";
 export function useDemandIntelligence() {
   const { courses } = useTagData();
 
-  const [report, setReport] = useState(null);
+  // Seed from synchronous cache so we never flash a spinner if data exists
+  const [report, setReport] = useState(() => getCachedReport());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
