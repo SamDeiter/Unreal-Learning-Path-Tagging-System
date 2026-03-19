@@ -1,9 +1,12 @@
 // ============================================================
-// Hardcoded Learning Path: "Set up an Unreal AI to patrol and chase the player"
-// 8 Chapters, each with 3–4 steps (AI Transition, Video, Doc/RAG, Quiz)
+// Course Library — All available learning paths
+// Each entry has metadata for the landing page cards.
+// Only the first course has full chapter data (the rest are "Coming Soon").
 // ============================================================
 
-const PATH_DATA = {
+const COURSE_LIBRARY = [
+  // ── Course 1: Full data ───────────────────────────────────
+  {
   id: "path-ai-patrol",
   title: "Set up an Unreal AI to patrol and chase the player",
   metadata: {
@@ -586,4 +589,50 @@ const PATH_DATA = {
       }
     ]
   }
-};
+  },
+
+  // ── Course 2: Placeholder (Coming Soon) ────────────────────
+  {
+    id: "path-lumen-lighting",
+    title: "Master Lumen Lighting in UE5",
+    metadata: {
+      skillLevel: "Intermediate",
+      estimatedHours: "8-12 Hours",
+      industryFocus: "Games & Film",
+      engineVersion: "5.5",
+      tags: ["Lumen", "Lighting", "Rendering", "Post Process"]
+    },
+    chapters: [],
+    completion: { skillsMastered: ["Lumen", "Light Types", "Post Processing", "Reflections"], totalSteps: 0, totalHours: 0, suggestedNext: [] }
+  },
+
+  // ── Course 3: Placeholder (Coming Soon) ────────────────────
+  {
+    id: "path-blueprint-comms",
+    title: "How do Blueprints communicate with each other?",
+    metadata: {
+      skillLevel: "Beginner",
+      estimatedHours: "3-6 Hours",
+      industryFocus: "Games",
+      engineVersion: "5.5",
+      tags: ["Blueprints", "Interfaces", "Event Dispatch", "Casting"]
+    },
+    chapters: [],
+    completion: { skillsMastered: ["Interfaces", "Event Dispatchers", "Casting", "Component Refs"], totalSteps: 0, totalHours: 0, suggestedNext: [] }
+  },
+
+  // ── Course 4: Placeholder (Coming Soon) ────────────────────
+  {
+    id: "path-nanite-geometry",
+    title: "Use Nanite for high-detail environments",
+    metadata: {
+      skillLevel: "Advanced",
+      estimatedHours: "10-15 Hours",
+      industryFocus: "Games & Arch-Viz",
+      engineVersion: "5.5",
+      tags: ["Nanite", "Geometry", "LOD", "Optimization"]
+    },
+    chapters: [],
+    completion: { skillsMastered: ["Nanite Meshes", "LOD Pipeline", "Virtual Geometry", "Performance Budgets"], totalSteps: 0, totalHours: 0, suggestedNext: [] }
+  }
+];
