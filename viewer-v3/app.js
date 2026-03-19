@@ -3,9 +3,12 @@
 // Navigation state machine + screen renderers
 // ============================================================
 
+// ── Active course (set when user picks from library) ─────
+var PATH_DATA = null;
+
 // ── State ────────────────────────────────────────────────
 const state = {
-  screen: 'PATH_OVERVIEW', // PATH_OVERVIEW | CHAPTER_STEP | CHAPTER_COMPLETE | PATH_COMPLETE
+  screen: 'COURSE_LIBRARY', // COURSE_LIBRARY | PATH_OVERVIEW | CHAPTER_STEP | CHAPTER_COMPLETE | PATH_COMPLETE
   chapterIndex: 0,
   stepIndex: 0,
   completedSteps: {},      // "ch-1:ch1-s1" → true
@@ -28,6 +31,7 @@ function markChapterDone() { state.completedChapters[getChapter().id] = true; }
 function render() {
   const container = document.getElementById('app');
   switch (state.screen) {
+    case 'COURSE_LIBRARY':  container.innerHTML = renderCourseLibrary(); break;
     case 'PATH_OVERVIEW':   container.innerHTML = renderPathOverview(); break;
     case 'CHAPTER_STEP':    container.innerHTML = renderChapterStep(); break;
     case 'CHAPTER_COMPLETE': container.innerHTML = renderChapterComplete(); break;
@@ -100,6 +104,24 @@ function goToOverview() {
   render();
 }
 
+function goToLibrary() {
+  state.screen = 'COURSE_LIBRARY';
+  render();
+}
+
+function selectCourse(index) {
+  const course = COURSE_LIBRARY[index];
+  if (!course.chapters || course.chapters.length === 0) return; // Coming Soon
+  PATH_DATA = course;
+  state.screen = 'PATH_OVERVIEW';
+  state.chapterIndex = 0;
+  state.stepIndex = 0;
+  state.completedSteps = {};
+  state.completedChapters = {};
+  state.quizState = null;
+  render();
+}
+
 // ── Progress Bar Renderer ────────────────────────────────
 function renderProgressBar() {
   const ch = getChapter();
@@ -142,6 +164,47 @@ function shortStepLabel(step) {
   }
 }
 
+// ── Screen 0: Course Library ─────────────────────────────
+function renderCourseLibrary() {
+  var cards = '';
+  COURSE_LIBRARY.forEach(function(course, i) {
+    var available = course.chapters && course.chapters.length > 0;
+    var chCount = course.chapters ? course.chapters.length : 0;
+    var levelClass = course.metadata.skillLevel.toLowerCase();
+
+    var tags = '';
+    course.metadata.tags.forEach(function(t) {
+      tags += '<span class="course-tag">' + t + '</span>';
+    });
+
+    cards += '<div class="course-card' + (available ? '' : ' coming-soon') + '" data-course="' + i + '">' +
+      '<div class="course-card-header">' +
+        '<span class="course-level ' + levelClass + '">' + course.metadata.skillLevel.toUpperCase() + '</span>' +
+        '<span class="course-hours">⏱ ' + course.metadata.estimatedHours + '</span>' +
+      '</div>' +
+      '<h3 class="course-card-title">' + course.title + '</h3>' +
+      '<div class="course-card-meta">' +
+        '<span>' + course.metadata.industryFocus + '</span>' +
+        '<span>UE ' + course.metadata.engineVersion + '</span>' +
+        (chCount > 0 ? '<span>' + chCount + ' chapters</span>' : '') +
+      '</div>' +
+      '<div class="course-tags">' + tags + '</div>' +
+      (available
+        ? '<div class="course-card-action">Start Learning →</div>'
+        : '<div class="course-card-badge">Coming Soon</div>') +
+    '</div>';
+  });
+
+  return '<div class="library-page">' +
+    '<div class="library-header">' +
+      '<div class="library-logo"><img src="https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" alt="UE5" style="width:36px;height:auto;filter:brightness(1.5);"></div>' +
+      '<h1>Learning Path Library</h1>' +
+      '<p class="library-subtitle">Choose a guided path to level up your Unreal Engine skills</p>' +
+    '</div>' +
+    '<div class="course-grid">' + cards + '</div>' +
+  '</div>';
+}
+
 // ── Screen 1: Path Overview ──────────────────────────────
 function renderPathOverview() {
   const d = PATH_DATA;
@@ -162,6 +225,7 @@ function renderPathOverview() {
   });
 
   return ue5Window(
+    '<div class="library-back"><a id="btn-library">← Back to Library</a></div>' +
     '<div class="path-title">Learning Path: ' + d.title + '</div>' +
     '<div class="metadata-pills">' +
       '<span class="meta-pill">' + d.metadata.skillLevel + '</span>' +
@@ -465,7 +529,16 @@ function bindEvents() {
   bind('btn-back', prevStep);
   bind('btn-skip', skipStep);
   bind('btn-next-chapter', nextChapter);
-  bind('btn-return', goToOverview);
+  bind('btn-return', goToLibrary);
+  bind('btn-library', goToLibrary);
+
+  // Course cards — click to select
+  document.querySelectorAll('.course-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-course'));
+      selectCourse(idx);
+    });
+  });
   bind('btn-skip-quiz', function() { nextStep(); });
 
   // Quiz: continue after pass
