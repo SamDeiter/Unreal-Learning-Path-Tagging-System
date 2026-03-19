@@ -5,7 +5,7 @@
  * what tutorials people are searching for and asking about.
  *
  * Three data layers (all with source provenance):
- *   Layer 1: Google Trends — granular subtopics via demand_benchmarks.json
+ *   Layer 1: Community Activity Index — granular subtopics via demand_benchmarks.json
  *   Layer 2: Community questions — batch grounded search (extends communityPainPoints)
  *   Layer 3: Gap-weighted ranking — cross-references against video library coverage
  *
@@ -83,7 +83,7 @@ export const SOURCE_TYPES = {
   REDDIT: "reddit",
   EPIC_FORUM: "epic_forum",
   STACKOVERFLOW: "stackoverflow",
-  GOOGLE_TRENDS: "google_trends",
+  COMMUNITY_INDEX: "community_index",
   YOUTUBE_COMMENTS: "youtube_comments",
   EPIC_DEV_COMMUNITY: "epic_dev_community",
 };
@@ -429,11 +429,11 @@ export async function generateDemandReport(courses = [], { skipCache = false } =
       // Collect all sources mentioning this subtopic
       const sources = [];
 
-      // Google Trends source
+      // Community Activity Index source
       sources.push({
-        type: SOURCE_TYPES.GOOGLE_TRENDS,
+        type: SOURCE_TYPES.COMMUNITY_INDEX,
         url: "",
-        title: `Google Trends: "${subtopic}"`,
+        title: `Community Activity Index: "${subtopic}"`,
         interestScore: demandScore,
         trend: demandScore > (data.overall || 50) ? "rising" : "stable",
       });
@@ -467,12 +467,12 @@ export async function generateDemandReport(courses = [], { skipCache = false } =
         });
       }
 
-      // Confidence based on source count
-      const sourceCount = sources.filter((s) => s.type !== SOURCE_TYPES.GOOGLE_TRENDS).length;
+      // Confidence based on source count — only count sources with actual URLs
+      const verifiedSourceCount = sources.filter((s) => s.type !== SOURCE_TYPES.COMMUNITY_INDEX && s.url).length;
       const confidence =
-        sourceCount >= 3 ? "high" : sourceCount >= 1 ? "medium" : "low";
+        verifiedSourceCount >= 3 ? "high" : verifiedSourceCount >= 1 ? "medium" : "low";
 
-      if (gap > 0 || sourceCount > 0) {
+      if (gap > 0 || sources.length > 0) {
         suggestions.push({
           topic: subtopic,
           category,
@@ -482,8 +482,8 @@ export async function generateDemandReport(courses = [], { skipCache = false } =
           gap: Math.max(0, gap),
           confidence,
           sourceCount: sources.length,
-          // Composite ranking: (demand × sourceCount) - coverage
-          rankScore: (demandScore * Math.max(1, sourceCount)) - coverageInfo.coverage,
+          // Composite ranking: (demand × verified sources) - coverage
+          rankScore: (demandScore * Math.max(1, verifiedSourceCount + 1)) - coverageInfo.coverage,
           sources,
           existingContent: [], // TODO: populate with matching video library entries
         });
@@ -498,9 +498,10 @@ export async function generateDemandReport(courses = [], { skipCache = false } =
     generatedAt: new Date().toISOString(),
     generationTimeMs: Date.now() - startTime,
     provenance: {
-      googleTrends: {
+      communityIndex: {
         version: demandBenchmarks.version || "unknown",
         source: demandBenchmarks.source || "manual",
+        methodology: demandBenchmarks.methodology || "",
         subtopicCount: Object.values(GRANULAR_TAXONOMY).flat().length,
       },
       communitySearch: {

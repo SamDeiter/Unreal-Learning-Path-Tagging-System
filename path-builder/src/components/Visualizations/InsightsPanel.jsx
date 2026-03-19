@@ -138,7 +138,7 @@ function InsightsPanel({ onNavigate }) {
       });
     }
 
-    // Add external sources (Google Trends, YouTube, etc.)
+    // Add external sources (community activity, YouTube, etc.)
     if (externalData?.insights) {
       externalData.insights.forEach((insight) => {
         results.push({

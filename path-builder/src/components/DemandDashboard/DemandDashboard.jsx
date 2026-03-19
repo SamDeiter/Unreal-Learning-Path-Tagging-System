@@ -21,7 +21,7 @@ const SOURCE_ICONS = {
   [SOURCE_TYPES.REDDIT]: "🟠",
   [SOURCE_TYPES.EPIC_FORUM]: "🔵",
   [SOURCE_TYPES.STACKOVERFLOW]: "🟡",
-  [SOURCE_TYPES.GOOGLE_TRENDS]: "📈",
+  [SOURCE_TYPES.COMMUNITY_INDEX]: "📊",
   [SOURCE_TYPES.YOUTUBE_COMMENTS]: "▶️",
   [SOURCE_TYPES.EPIC_DEV_COMMUNITY]: "🟣",
 };
@@ -30,7 +30,7 @@ const SOURCE_LABELS = {
   [SOURCE_TYPES.REDDIT]: "Reddit",
   [SOURCE_TYPES.EPIC_FORUM]: "Epic Forum",
   [SOURCE_TYPES.STACKOVERFLOW]: "Stack Overflow",
-  [SOURCE_TYPES.GOOGLE_TRENDS]: "Google Trends",
+  [SOURCE_TYPES.COMMUNITY_INDEX]: "Community Index",
   [SOURCE_TYPES.YOUTUBE_COMMENTS]: "YouTube",
   [SOURCE_TYPES.EPIC_DEV_COMMUNITY]: "Dev Community",
 };
@@ -109,7 +109,7 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
             <span className="metric-value gap-value">−{suggestion.gap}%</span>
             <span className="metric-label">Gap</span>
           </div>
-          <div className="metric" title={`Demand: ${suggestion.demandScore}/100 — how actively the community is searching for and asking about this topic (from Google Trends + forums).`}>
+          <div className="metric" title={`Demand: ${suggestion.demandScore}/100 — curated community activity score based on Reddit, Epic Forums, StackOverflow, and YouTube tutorial engagement.`}>
             <span className="metric-value">{suggestion.demandScore}</span>
             <span className="metric-label">Demand</span>
           </div>
@@ -295,8 +295,8 @@ function ProvenanceFooter({ provenance, generatedAt }) {
       <h4>🔍 Data Provenance</h4>
       <div className="provenance-items">
         <span className="provenance-item">
-          📈 Google Trends: {provenance.googleTrends?.subtopicCount || 0} subtopics
-          · {provenance.googleTrends?.version || "?"}
+          📊 Community Activity Index: {provenance.communityIndex?.subtopicCount || 0} subtopics
+          · {provenance.communityIndex?.version || "?"}
         </span>
         <span className="provenance-item">
           💬 Community Scan: {provenance.communitySearch?.totalPainPoints || 0} pain
@@ -359,7 +359,7 @@ function DemandDashboard() {
     <div className="demand-dashboard">
       {/* Header */}
       <div className="dashboard-header">
-        <h2 title="Demand Intelligence scans community forums, Google Trends, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
+        <h2 title="Demand Intelligence scans community forums, StackOverflow, Reddit, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
         <div className="header-actions">
           <button
             className="refresh-btn"
@@ -384,7 +384,7 @@ function DemandDashboard() {
       {loading && !report && (
         <div className="dashboard-loading">
           <div className="loading-spinner" />
-          <p>Scanning community sites, Google Trends, and your library...</p>
+          <p>Scanning community sites and your library...</p>
           <p className="loading-subtitle">This may take 30–60 seconds</p>
         </div>
       )}
