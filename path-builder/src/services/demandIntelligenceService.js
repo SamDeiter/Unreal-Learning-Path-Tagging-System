@@ -32,11 +32,50 @@ import demandBenchmarks from "../data/demand_benchmarks.json";
 const TRENDING_QUESTION_LIMIT = 15;
 const BATCH_CONCURRENCY = 3;          // Parallel AI calls at once
 const CACHE_TTL_MS = 30 * 60 * 1000;  // 30-minute cache for demand reports
+const STORAGE_KEY = "demandIntel_report";
 
-// ── In-memory report cache ─────────────────────────────────
+// ── Persistent + in-memory report cache ───────────────────
 
 let _cachedReport = null;
 let _cachedAt = 0;
+
+/**
+ * Try to load a cached report from localStorage.
+ * Populates the in-memory cache if found and still fresh.
+ */
+function _loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const { report, cachedAt } = JSON.parse(raw);
+    if (report && cachedAt && Date.now() - cachedAt < CACHE_TTL_MS) {
+      _cachedReport = report;
+      _cachedAt = cachedAt;
+      devLog("[DemandIntel] Loaded cached report from localStorage");
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // localStorage unavailable or corrupt — ignore
+  }
+}
+
+/**
+ * Persist the current report to localStorage.
+ */
+function _saveToStorage(report) {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ report, cachedAt: Date.now() })
+    );
+  } catch {
+    // Storage full or unavailable — degrade gracefully
+  }
+}
+
+// Bootstrap: try to restore from localStorage on module load
+_loadFromStorage();
 
 // ── Source Type Constants ──────────────────────────────────
 
@@ -490,9 +529,10 @@ export async function generateDemandReport(courses = [], { skipCache = false } =
     coverageData,
   };
 
-  // Cache the report
+  // Cache the report (in-memory + persistent)
   _cachedReport = report;
   _cachedAt = Date.now();
+  _saveToStorage(report);
 
   devLog(
     `[DemandIntel] Report complete: ${suggestions.length} suggestions, ` +
@@ -521,7 +561,8 @@ export async function getDemandSuggestions(courses = [], topN = 10) {
 export function clearDemandCache() {
   _cachedReport = null;
   _cachedAt = 0;
-  devLog("[DemandIntel] Cache cleared");
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+  devLog("[DemandIntel] Cache cleared (memory + localStorage)");
 }
 
 export default {
