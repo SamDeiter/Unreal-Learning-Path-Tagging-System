@@ -131,15 +131,25 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
                 <div key={i} className="source-row">
                   <SourceChip source={src} />
                   {src.title && (
-                    <span className="source-title">{src.title}</span>
+                    src.url ? (
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="source-title source-link">{src.title}</a>
+                    ) : (
+                      <span className="source-title">{src.title}</span>
+                    )
                   )}
                   {src.date && (
                     <span className="source-date">{src.date}</span>
                   )}
                   {src.relatedQuestion && (
-                    <span className="source-question">
-                      &ldquo;{src.relatedQuestion}&rdquo;
-                    </span>
+                    src.url ? (
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="source-question source-link">
+                        &ldquo;{src.relatedQuestion}&rdquo;
+                      </a>
+                    ) : (
+                      <span className="source-question">
+                        &ldquo;{src.relatedQuestion}&rdquo;
+                      </span>
+                    )
                   )}
                   {src.painPoint && (
                     <span className="source-pain-point">
