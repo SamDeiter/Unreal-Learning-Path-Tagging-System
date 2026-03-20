@@ -79,17 +79,16 @@ function autoAddQuizzes(path) {
     const steps = section.steps || [];
     const hasQuiz = steps.some((s) => s.lessonType === "Quiz");
     if (!hasQuiz) {
-      const moduleTitle = section.title || "this module";
       steps.push({
         id: `quiz-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        title: `${moduleTitle} — Knowledge Check`,
+        title: "Knowledge Check",
         lessonType: "Quiz",
-        whyThisMatters: `Test your understanding of the concepts covered in this module.`,
+        whyThisMatters: "Test your understanding of the concepts covered in this module.",
         whatToDo: [],
         howToVerify: [],
         commonMistake: "",
         takeaway: "",
-        summary: `A short quiz to reinforce what you learned about ${moduleTitle}.`,
+        summary: "A short quiz to reinforce what you learned in this module.",
         category: section.phase || "core",
         completionType: "verify",
         estimatedMinutes: 3,
