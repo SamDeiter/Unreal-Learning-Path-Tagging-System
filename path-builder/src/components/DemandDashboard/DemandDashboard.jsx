@@ -580,8 +580,8 @@ function DemandDashboard() {
             </div>
           </div>
 
-          {/* Two-column layout */}
-          <div className="dashboard-columns">
+          {/* Two-column layout — collapses to single column when no questions */}
+          <div className={`dashboard-columns ${(report.trendingQuestions || []).length === 0 ? 'single-column' : ''}`}>
             {/* Left: Suggestions */}
             <div className="column-suggestions">
               <div className="column-header">
