@@ -58,3 +58,8 @@ Object.assign(exports, require("./scheduled/cleanupCache"));
 // Admin Management
 // ============================================================================
 Object.assign(exports, require("./ai/setAdminClaim"));
+
+// ============================================================================
+// Demand Intelligence — trigger GitHub Action scrape from dashboard
+// ============================================================================
+Object.assign(exports, require("./ai/triggerDemandScrape"));

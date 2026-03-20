@@ -13,6 +13,7 @@
 import { useState, useEffect } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import "./DemandDashboard.css";
 
 // ── Source chip rendering ──────────────────────────────────
@@ -67,6 +68,55 @@ function SourceChip({ source }) {
       )}
       {source.trend === "rising" && <span className="trend-arrow">⬆</span>}
     </span>
+  );
+}
+
+// ── Re-scrape trigger button ──────────────────────────────
+
+function ScrapeButton({ onComplete }) {
+  const [status, setStatus] = useState("idle"); // idle | triggering | success | error
+  const [message, setMessage] = useState("");
+
+  const handleTrigger = async () => {
+    setStatus("triggering");
+    setMessage("");
+    try {
+      const functions = getFunctions();
+      const trigger = httpsCallable(functions, "triggerDemandScrape");
+      const result = await trigger();
+      setStatus("success");
+      setMessage(result.data.message || "Scrape triggered!");
+      // Auto-refresh data after ~90 seconds (workflow takes ~1-2 min)
+      setTimeout(() => {
+        onComplete?.();
+        setStatus("idle");
+        setMessage("");
+      }, 90000);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err.message || "Failed to trigger scrape");
+      setTimeout(() => { setStatus("idle"); setMessage(""); }, 5000);
+    }
+  };
+
+  const labels = {
+    idle: "🚀 Re-scrape",
+    triggering: "⏳ Triggering...",
+    success: "✅ Triggered!",
+    error: "❌ Failed",
+  };
+
+  return (
+    <button
+      className={`refresh-btn scrape-btn scrape-${status}`}
+      onClick={handleTrigger}
+      disabled={status === "triggering" || status === "success"}
+      title={status === "success"
+        ? message
+        : "Trigger a fresh scrape via GitHub Action (~2 min). Data will auto-refresh."}
+    >
+      {labels[status]}
+    </button>
   );
 }
 
@@ -404,6 +454,7 @@ function DemandDashboard() {
           >
             {loading ? "⏳ Scanning..." : "🔄 Refresh"}
           </button>
+          <ScrapeButton onComplete={refresh} />
         </div>
       </div>
 
