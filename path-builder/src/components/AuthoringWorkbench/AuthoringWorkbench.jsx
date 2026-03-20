@@ -12,6 +12,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import useAuthoringWorkbench, { AUTHORING_STAGES } from "../../hooks/useAuthoringWorkbench";
 import CoursePreview from "./CoursePreview";
+import ReusePanel from "./ReusePanel";
 import "./AuthoringWorkbench.css";
 
 // ── Stage Labels ───────────────────────────────────────────
@@ -506,6 +507,15 @@ export default function AuthoringWorkbench() {
           >
             + Add Module
           </button>
+
+          {/* Content Reuse Analysis */}
+          <ReusePanel
+            report={wb.reuseReport}
+            analyzing={wb.analyzingReuse}
+            progress={wb.reuseProgress}
+            onReAnalyze={() => wb.runReuseAnalysis(true)}
+            onAutoLink={wb.autoLinkReusableSteps}
+          />
 
           <div className="aw-review-footer">
             <button className="aw-btn aw-btn-secondary" onClick={wb.saveDraft}>

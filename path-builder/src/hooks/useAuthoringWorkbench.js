@@ -16,8 +16,9 @@
  *   - v3Adapter → V3 viewer export
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { devLog, devWarn } from "../utils/logger";
+import { analyzeReuse } from "../services/reuseAnalyzer";
 import { DIFFICULTY_LEVELS, LESSON_TYPES } from "../schemas/LearningPathV2";
 
 // ── Workflow Stages ────────────────────────────────────────
@@ -140,6 +141,12 @@ export default function useAuthoringWorkbench() {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState({ current: 0, total: 0, label: "" });
   const [savedDrafts, setSavedDrafts] = useState(loadDrafts);
+
+  // ── Reuse Analysis State ─────────────────────────────────
+  const [reuseReport, setReuseReport] = useState(null);
+  const [analyzingReuse, setAnalyzingReuse] = useState(false);
+  const [reuseProgress, setReuseProgress] = useState({ current: 0, total: 0 });
+  const reuseTriggeredRef = useRef(false);
 
   // ── Auto-save to localStorage ───────────────────────────
 
@@ -781,6 +788,65 @@ Constraints:
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  // ── Reuse Analysis ───────────────────────────────────────
+
+  const runReuseAnalysis = useCallback(async (skipCache = false) => {
+    if (!v2Path || analyzingReuse) return;
+    setAnalyzingReuse(true);
+    setReuseProgress({ current: 0, total: 0 });
+    setError(null);
+    try {
+      const report = await analyzeReuse(v2Path, {
+        skipCache,
+        onProgress: (current, total) => setReuseProgress({ current, total }),
+      });
+      setReuseReport(report);
+      devLog("[Workbench] Reuse analysis complete:", report.summary);
+    } catch (err) {
+      devWarn("[Workbench] Reuse analysis failed:", err.message);
+      setError("Reuse analysis failed: " + err.message);
+    } finally {
+      setAnalyzingReuse(false);
+    }
+  }, [v2Path, analyzingReuse]);
+
+  const autoLinkReusableSteps = useCallback(() => {
+    if (!reuseReport?.steps?.length || !v2Path) return;
+    const updated = structuredClone(v2Path);
+    let linked = 0;
+    for (const rs of reuseReport.steps) {
+      if (rs.status !== "reuse" || !rs.match?.videoKey) continue;
+      const section = updated.sections[rs.sectionIdx];
+      if (!section) continue;
+      const step = section.steps?.[rs.stepIdx];
+      if (!step || step.video?.youtubeId) continue; // don't overwrite existing
+      step.video = {
+        youtubeId: rs.match.videoKey,
+        url: `https://youtube.com/watch?v=${rs.match.videoKey}&t=${rs.match.start}`,
+        title: rs.match.videoTitle,
+        startTime: rs.match.start,
+        endTime: rs.match.end,
+      };
+      linked++;
+    }
+    if (linked > 0) {
+      setV2Path(updated);
+      devLog(`[Workbench] Auto-linked ${linked} reusable videos`);
+    }
+  }, [reuseReport, v2Path]);
+
+  // Auto-trigger reuse analysis when entering Review stage with a path
+  useEffect(() => {
+    if (stage === AUTHORING_STAGES.REVIEW && v2Path && !reuseReport && !analyzingReuse && !reuseTriggeredRef.current) {
+      reuseTriggeredRef.current = true;
+      runReuseAnalysis();
+    }
+    // Reset trigger when leaving Review
+    if (stage !== AUTHORING_STAGES.REVIEW) {
+      reuseTriggeredRef.current = false;
+    }
+  }, [stage, v2Path, reuseReport, analyzingReuse, runReuseAnalysis]);
+
   // ── Return ───────────────────────────────────────────────
 
   return {
@@ -840,5 +906,12 @@ Constraints:
     saveDraft,
     loadDraft,
     deleteDraft,
+
+    // Reuse analysis
+    reuseReport,
+    analyzingReuse,
+    reuseProgress,
+    runReuseAnalysis,
+    autoLinkReusableSteps,
   };
 }
