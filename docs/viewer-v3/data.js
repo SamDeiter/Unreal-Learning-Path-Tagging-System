@@ -4,7 +4,7 @@
 // Only the first course has full chapter data (the rest are "Coming Soon").
 // ============================================================
 
-const COURSE_LIBRARY = [
+var COURSE_LIBRARY = [
   // ── Course 1: Full data ───────────────────────────────────
   {
   id: "path-ai-patrol",

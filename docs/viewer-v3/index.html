@@ -3,13 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UE5 Learning Path Viewer — AI Patrol &amp; Chase</title>
-  <meta name="description" content="Interactive learner viewer prototype for UE5 In-Editor Learning Path System">
+  <title>UE5 Learning Path Viewer</title>
+  <meta name="description" content="Interactive learner viewer for UE5 Learning Path courses">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="app"></div>
+  <!-- Load default course data (full library) -->
   <script src="data.js"></script>
+  <!-- Override with localStorage data if available (from Authoring Workbench preview) -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('v3_viewer_course_data');
+      if (stored) {
+        try {
+          var parsed = JSON.parse(stored);
+          if (parsed && parsed.length > 0) {
+            COURSE_LIBRARY = parsed;
+            if (parsed[0].title) {
+              document.title = parsed[0].title + ' — UE5 Learning Path Viewer';
+            }
+          }
+        } catch(e) {
+          console.warn('[Viewer] Failed to parse localStorage data, using default library');
+        }
+      }
+    })();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
