@@ -273,6 +273,8 @@ export default function useAuthoringWorkbench() {
       setV2Path(namedPath);
       setTopic(inputTopic);
       setStage(AUTHORING_STAGES.REVIEW);
+      setReuseReport(null);
+      reuseTriggeredRef.current = false;
 
       setProgress({ current: 2, total: 2, label: "Plan ready!" });
       devLog(`[Authoring] Plan generated: "${inputTopic}" → ${result.v2Path.sections?.length} sections`);
@@ -750,6 +752,8 @@ Constraints:
     setV2Path(autoAddQuizzes(autoNameModules(draft.state.v2Path)) || null);
     setBriefs(draft.state.briefs || []);
     setBriefMarkdown(draft.state.briefMarkdown || "");
+    setReuseReport(null);
+    reuseTriggeredRef.current = false;
     setError(null);
     devLog(`[Authoring] Draft loaded: "${draft.topic}"`);
   }, []);

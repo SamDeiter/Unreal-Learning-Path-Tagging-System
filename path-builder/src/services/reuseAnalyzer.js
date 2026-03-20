@@ -20,12 +20,12 @@ import { devLog, devWarn } from "../utils/logger";
 
 // ── Thresholds ─────────────────────────────────────────────
 
-const REUSE_THRESHOLD = 0.7; // ≥ 0.7 = 🟢 REUSE (existing video covers this)
-const ADAPT_THRESHOLD = 0.4; // 0.4–0.7 = 🟡 ADAPT (partial match, needs editing)
-// < 0.4 = 🔴 RECORD (no match, needs new recording)
+const REUSE_THRESHOLD = 0.76; // ≥ 0.76 = 🟢 REUSE (existing video closely covers this)
+const ADAPT_THRESHOLD = 0.72; // 0.72–0.76 = 🟡 ADAPT (partial match, needs editing)
+// < 0.72 = 🔴 RECORD (no match, needs new recording)
 
 const MAX_CONCURRENT = 3; // Limit concurrent embed calls
-const CACHE_KEY_PREFIX = "reuse-analysis-";
+const CACHE_KEY_PREFIX = "reuse-analysis-v7-";
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -40,9 +40,20 @@ function hashString(str) {
 }
 
 function formatTimestamp(seconds) {
+  if (seconds == null || isNaN(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function parseTimestampStr(ts) {
+  if (!ts) return null;
+  const str = String(ts).trim();
+  const parts = str.split(':').map(Number);
+  if (parts.some(isNaN)) return Number(str) || null;
+  if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  if (parts.length === 2) return parts[0]*60 + parts[1];
+  return Number(str) || null;
 }
 
 /**
@@ -77,7 +88,12 @@ export async function analyzeReuse(v2Path, opts = {}) {
   }
 
   // Check cache first
-  const cacheKey = CACHE_KEY_PREFIX + hashString(v2Path.title || "untitled");
+  const combinedText = (v2Path.title || "untitled") + 
+    v2Path.sections?.map(s => 
+      (s.title || "untitled") + 
+      (s.steps?.map(st => st.title || "untitled").join("") || "")
+    ).join("");
+  const cacheKey = CACHE_KEY_PREFIX + hashString(combinedText);
   if (!skipCache) {
     try {
       const cached = localStorage.getItem(cacheKey);
@@ -122,7 +138,7 @@ export async function analyzeReuse(v2Path, opts = {}) {
     allSteps,
     async ({ step, sIdx, stIdx }) => {
       try {
-        const result = await analyzeStep(step, sIdx, stIdx, embedFn, searchFn);
+        const result = await analyzeStep(step, sIdx, stIdx, v2Path.title, embedFn, searchFn);
         completed++;
         if (onProgress) onProgress(completed, total);
         return result;
@@ -164,10 +180,10 @@ export async function analyzeReuse(v2Path, opts = {}) {
 
 // ── Per-Step Analysis ──────────────────────────────────────
 
-async function analyzeStep(step, sIdx, stIdx, embedFn, searchFn) {
+async function analyzeStep(step, sIdx, stIdx, courseTitle, embedFn, searchFn) {
   const title = step.title || "Untitled";
   const searchQuery =
-    `${title} ${step.whyThisMatters || ""} ${step.summary || ""}`.trim();
+    `Course Context: ${courseTitle || "Unreal Engine"}. Lesson: ${title}. ${step.whyThisMatters || ""} ${step.summary || ""}`.trim();
 
   // 1. Embed the step's topic
   const embedResult = await retryWithBackoff(
@@ -220,20 +236,39 @@ async function analyzeStep(step, sIdx, stIdx, embedFn, searchFn) {
           videoKey: bestMatch.video_key || "",
           courseCode: bestMatch.course_code || "",
           similarity: Math.round(similarity * 100) / 100,
-          start: topicSegment?.start ?? Math.floor(bestMatch.start_seconds || 0),
+          start: 
+            topicSegment?.start ?? 
+            Math.floor(
+              parseTimestampStr(bestMatch.start_timestamp) ??
+              (bestMatch.start_seconds != null ? Number(bestMatch.start_seconds) :
+              bestMatch.transcript_segments?.[0]?.start ?? 0)
+            ),
           end:
             topicSegment?.end ??
-            Math.floor((bestMatch.end_seconds || bestMatch.start_seconds || 0) + 60),
+            Math.floor(
+              parseTimestampStr(bestMatch.end_timestamp) ??
+              (bestMatch.end_seconds != null ? Number(bestMatch.end_seconds) :
+              bestMatch.transcript_segments?.[bestMatch.transcript_segments.length - 1]?.end ??
+              null)
+            ) ??
+            (topicSegment?.start ?? parseTimestampStr(bestMatch.start_timestamp) ?? bestMatch.start_seconds ?? 0) + 60,
           startFormatted: formatTimestamp(
-            topicSegment?.start ?? bestMatch.start_seconds ?? 0
+            topicSegment?.start ?? 
+            parseTimestampStr(bestMatch.start_timestamp) ??
+            bestMatch.start_seconds ?? 
+            bestMatch.transcript_segments?.[0]?.start ?? 0
           ),
           endFormatted: formatTimestamp(
-            topicSegment?.end ?? (bestMatch.start_seconds || 0) + 60
+            topicSegment?.end ?? 
+            parseTimestampStr(bestMatch.end_timestamp) ??
+            bestMatch.end_seconds ?? 
+            bestMatch.transcript_segments?.[bestMatch.transcript_segments.length - 1]?.end ?? 
+            ((topicSegment?.start ?? parseTimestampStr(bestMatch.start_timestamp) ?? bestMatch.start_seconds ?? 0) + 60)
           ),
           thumbnailUrl: bestMatch.video_key
             ? `https://img.youtube.com/vi/${bestMatch.video_key}/mqdefault.jpg`
             : null,
-          previewText: (topicSegment?.text || bestMatch.text || "").slice(0, 150),
+          previewText: (topicSegment?.text || bestMatch.text || "").slice(0, 450),
           spliceCommand: null,
         }
       : null;
