@@ -182,8 +182,26 @@ export default function useAuthoringWorkbench() {
         throw new Error(result?.error || "Failed to generate learning path outline");
       }
 
-      // generateBespokePath already runs editorialPass internally
-      setV2Path(autoNameModules(result.v2Path));
+      const namedPath = autoNameModules(result.v2Path);
+
+      // ── Persist to localStorage FIRST ──────────────────────
+      // This ensures the result survives even if the user clicks
+      // away from the Authoring tab and the component unmounts.
+      try {
+        const persistState = {
+          stage: AUTHORING_STAGES.REVIEW,
+          topic: inputTopic,
+          v2Path: namedPath,
+          briefs: [],
+          briefMarkdown: "",
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persistState));
+      } catch (e) {
+        devWarn("[Authoring] localStorage persist failed:", e.message);
+      }
+
+      // ── Then update React state (no-op if unmounted) ───────
+      setV2Path(namedPath);
       setTopic(inputTopic);
       setStage(AUTHORING_STAGES.REVIEW);
 

@@ -239,24 +239,10 @@ export default function AuthoringWorkbench() {
           {(wb.v2Path?.sections || []).map((section, sIdx) => (
             <div key={section.id || sIdx} className="aw-glass-card aw-section-card">
               <div className="aw-module-header">
-                <div className="aw-module-badge">
-                  <span>Module</span>
-                  <span className="aw-badge-number">{sIdx + 1}</span>
-                </div>
-                <input
-                  className="aw-section-title-input"
-                  value={section.title || ""}
-                  onChange={(e) => wb.updateSectionField(sIdx, "title", e.target.value)}
-                  placeholder="Module title (e.g., How to set up a Nav Mesh)"
-                />
+                <span className="aw-module-label">
+                  Module {sIdx + 1} — {section.steps?.[0]?.title || "Untitled"}
+                </span>
               </div>
-              <textarea
-                className="aw-section-desc-input"
-                value={section.description || section.purpose || ""}
-                onChange={(e) => wb.updateSectionField(sIdx, "description", e.target.value)}
-                rows={2}
-                placeholder="Module description..."
-              />
 
               {/* Lessons (steps) */}
               {(section.steps || []).map((step, stIdx) => (
