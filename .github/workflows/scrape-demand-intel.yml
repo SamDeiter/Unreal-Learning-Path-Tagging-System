@@ -1,0 +1,38 @@
+name: Scrape Demand Intelligence
+
+on:
+  schedule:
+    # Run daily at 6am UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install firebase-admin
+        run: npm install firebase-admin@13
+        working-directory: scripts
+
+      - name: Run demand intelligence scraper
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/scrape-demand-intel.js
+
+      - name: Summary
+        if: always()
+        run: echo "✅ Demand intelligence scrape completed at $(date -u)"

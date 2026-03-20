@@ -19,6 +19,7 @@
  */
 
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
 import { searchCommunityPainPoints } from "./communityPainPoints";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
@@ -33,6 +34,8 @@ const TRENDING_QUESTION_LIMIT = 15;
 const BATCH_CONCURRENCY = 3;          // Parallel AI calls at once
 const CACHE_TTL_MS = 30 * 60 * 1000;  // 30-minute cache for demand reports
 const STORAGE_KEY = "demandIntel_report";
+const FIRESTORE_COLLECTION = "demand_intel";
+const FIRESTORE_DOC_ID = "latest";
 
 // ── Persistent + in-memory report cache ───────────────────
 
@@ -424,24 +427,81 @@ export function calculateGranularCoverage(courses) {
   return coverage;
 }
 
+// ── Firestore Pre-computed Data ────────────────────────────
+
+/**
+ * Try to load the pre-computed demand report from Firestore.
+ * The GitHub Action (scrape-demand-intel) writes to demand_intel/latest.
+ *
+ * @returns {Promise<Object|null>} The pre-computed report or null
+ */
+export async function loadFromFirestore() {
+  try {
+    const app = getFirebaseApp();
+    if (!app) return null;
+
+    const db = getFirestore(app);
+    const docRef = doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
+    const snapshot = await getDoc(docRef);
+
+    if (!snapshot.exists()) {
+      devLog("[DemandIntel] No pre-computed report in Firestore");
+      return null;
+    }
+
+    const report = snapshot.data();
+    devLog(
+      `[DemandIntel] Loaded pre-computed report from Firestore ` +
+      `(scraped: ${report.generatedAt}, by: ${report.scrapedBy || "unknown"})`
+    );
+    return report;
+  } catch (err) {
+    devWarn("[DemandIntel] Firestore read failed, falling back to live:", err.message);
+    return null;
+  }
+}
+
 // ── Main Report Generator ──────────────────────────────────
 
 /**
  * Generate a full demand intelligence report with source provenance.
  *
+ * Strategy: Firestore-first → localStorage cache → live AI scraping
+ *   1. Try pre-computed data from Firestore (instant, written by GitHub Action)
+ *   2. Fall back to localStorage cache (instant, 30-min TTL)
+ *   3. Fall back to live AI scraping (30-60s, original method)
+ *
  * @param {Array} courses — Video library courses (for coverage analysis)
  * @param {Object} [options]
  * @param {boolean} [options.skipCache] — Force fresh data (default: false)
+ * @param {boolean} [options.skipFirestore] — Skip Firestore, force live scraping (default: false)
  * @returns {Promise<Object>} Full demand report
  */
-export async function generateDemandReport(courses = [], { skipCache = false } = {}) {
-  // Check cache
+export async function generateDemandReport(courses = [], { skipCache = false, skipFirestore = false } = {}) {
+  // Check in-memory / localStorage cache
   if (!skipCache && _cachedReport && Date.now() - _cachedAt < CACHE_TTL_MS) {
     devLog("[DemandIntel] Returning cached report");
     return _cachedReport;
   }
 
-  devLog("[DemandIntel] Generating fresh demand report...");
+  // ── Try Firestore first (pre-computed by GitHub Action) ──
+  if (!skipFirestore) {
+    try {
+      const firestoreReport = await loadFromFirestore();
+      if (firestoreReport && firestoreReport.suggestions?.length > 0) {
+        firestoreReport._source = "firestore";
+        _cachedReport = firestoreReport;
+        _cachedAt = Date.now();
+        _saveToStorage(firestoreReport);
+        devLog("[DemandIntel] Using pre-computed Firestore report (instant!)");
+        return firestoreReport;
+      }
+    } catch (err) {
+      devWarn("[DemandIntel] Firestore attempt failed:", err.message);
+    }
+  }
+
+  devLog("[DemandIntel] Generating fresh demand report (live scraping)...");
   const startTime = Date.now();
 
   // Layer 1: Granular demand benchmarks (instant — local data)
@@ -630,6 +690,7 @@ export default {
   scanAllCommunityPainPoints,
   getDemandSuggestions,
   loadGranularDemand,
+  loadFromFirestore,
   calculateGranularCoverage,
   clearDemandCache,
   GRANULAR_TAXONOMY,

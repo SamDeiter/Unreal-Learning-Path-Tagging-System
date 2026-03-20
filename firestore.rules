@@ -185,6 +185,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Demand intelligence — pre-computed by GitHub Action (Admin SDK write)
+    // Public read (community demand scores are non-sensitive)
+    match /demand_intel/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false; // GitHub Action only (Admin SDK bypasses rules)
+    }
+
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;

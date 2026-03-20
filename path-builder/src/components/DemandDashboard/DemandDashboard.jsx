@@ -378,11 +378,29 @@ function DemandDashboard() {
       <div className="dashboard-header">
         <h2 title="Demand Intelligence scans community forums, StackOverflow, Reddit, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
         <div className="header-actions">
+          {report && (
+            <span className="data-source-badge" title={
+              report._source === "firestore"
+                ? "Data pre-computed by the scheduled GitHub Action and loaded instantly from Firestore"
+                : "Data generated via live AI scraping in your browser"
+            }>
+              {report._source === "firestore" ? "⚡ Pre-computed" : "🔄 Live Data"}
+              {report.generatedAt && (
+                <span className="data-source-time">
+                  {" · "}{new Date(report.generatedAt).toLocaleString("en-US", {
+                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                  })}
+                </span>
+              )}
+            </span>
+          )}
           <button
             className="refresh-btn"
             onClick={refresh}
             disabled={loading}
-            title="Clear cached data and re-scan all sources for fresh demand signals (takes 30–60 seconds)"
+            title={report?._source === "firestore"
+              ? "Re-fetch pre-computed data from Firestore (instant)"
+              : "Clear cached data and re-scan all sources for fresh demand signals (takes 30–60 seconds)"}
           >
             {loading ? "⏳ Scanning..." : "🔄 Refresh"}
           </button>
