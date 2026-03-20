@@ -52,12 +52,18 @@ const GENERIC_TITLES = new Set([
   "prerequisites", "core steps",
 ]);
 
+function stripEmojis(str) {
+  // Remove leading emoji / symbol characters and whitespace
+  return str.replace(/^[^\p{L}\p{N}&]+/u, "").trim();
+}
+
 function autoNameModules(path) {
   if (!path?.sections) return path;
   const updated = structuredClone(path);
   updated.sections.forEach((section) => {
-    const title = (section.title || "").trim();
-    if (!title || GENERIC_TITLES.has(title.toLowerCase())) {
+    const raw = (section.title || "").trim();
+    const cleaned = stripEmojis(raw).toLowerCase();
+    if (!raw || GENERIC_TITLES.has(cleaned)) {
       const firstLesson = section.steps?.[0]?.title;
       if (firstLesson && firstLesson !== "New Lesson") {
         section.title = firstLesson;
