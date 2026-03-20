@@ -58,14 +58,48 @@ function autoNameModules(path) {
   updated.sections.forEach((section) => {
     const title = (section.title || "").trim();
     if (!title || GENERIC_TITLES.has(title.toLowerCase())) {
-      // Derive a name from the first lesson's title, or fall back
       const firstLesson = section.steps?.[0]?.title;
       if (firstLesson && firstLesson !== "New Lesson") {
-        // Use the first lesson title as the module name
         section.title = firstLesson;
       } else {
-        section.title = ""; // Leave blank so placeholder shows
+        section.title = "";
       }
+    }
+  });
+  return updated;
+}
+
+// ── Auto-Add Quizzes ──────────────────────────────────────
+// Ensures every module ends with a Quiz lesson.
+
+function autoAddQuizzes(path) {
+  if (!path?.sections) return path;
+  const updated = structuredClone(path);
+  updated.sections.forEach((section) => {
+    const steps = section.steps || [];
+    const hasQuiz = steps.some((s) => s.lessonType === "Quiz");
+    if (!hasQuiz) {
+      const moduleTitle = section.title || "this module";
+      steps.push({
+        id: `quiz-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: `${moduleTitle} — Knowledge Check`,
+        lessonType: "Quiz",
+        whyThisMatters: `Test your understanding of the concepts covered in this module.`,
+        whatToDo: [],
+        howToVerify: [],
+        commonMistake: "",
+        takeaway: "",
+        summary: `A short quiz to reinforce what you learned about ${moduleTitle}.`,
+        category: section.phase || "core",
+        completionType: "verify",
+        estimatedMinutes: 3,
+        source: {},
+        video: null,
+        goDeeper: [],
+        quiz: { questions: [] },
+        _editorialStatus: "raw",
+      });
+      section.steps = steps;
     }
   });
   return updated;
@@ -93,7 +127,7 @@ export default function useAuthoringWorkbench() {
   const saved = loadState();
   const [stage, setStage] = useState(saved?.stage || AUTHORING_STAGES.PLAN);
   const [topic, setTopic] = useState(saved?.topic || "");
-  const [v2Path, setV2Path] = useState(() => autoNameModules(saved?.v2Path) || null);
+  const [v2Path, setV2Path] = useState(() => autoAddQuizzes(autoNameModules(saved?.v2Path)) || null);
   const [briefs, setBriefs] = useState(saved?.briefs || []);
   const [briefMarkdown, setBriefMarkdown] = useState(saved?.briefMarkdown || "");
   const [loading, setLoading] = useState(false);
@@ -182,7 +216,7 @@ export default function useAuthoringWorkbench() {
         throw new Error(result?.error || "Failed to generate learning path outline");
       }
 
-      const namedPath = autoNameModules(result.v2Path);
+      const namedPath = autoAddQuizzes(autoNameModules(result.v2Path));
 
       // ── Persist to localStorage FIRST ──────────────────────
       // This ensures the result survives even if the user clicks
@@ -606,7 +640,7 @@ Constraints:
     if (!draft?.state) return;
     setStage(draft.state.stage || AUTHORING_STAGES.PLAN);
     setTopic(draft.state.topic || "");
-    setV2Path(autoNameModules(draft.state.v2Path) || null);
+    setV2Path(autoAddQuizzes(autoNameModules(draft.state.v2Path)) || null);
     setBriefs(draft.state.briefs || []);
     setBriefMarkdown(draft.state.briefMarkdown || "");
     setError(null);
