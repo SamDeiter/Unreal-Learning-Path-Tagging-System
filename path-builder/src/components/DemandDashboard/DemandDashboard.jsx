@@ -473,27 +473,30 @@ function DemandDashboard() {
       (q) => q.category?.toLowerCase() === suggestion.category.toLowerCase()
     );
 
+    // Persist payload to localStorage so AuthoringWorkbench can read it
+    // even if it hasn't mounted yet when the event fires.
+    const payload = {
+      query,
+      suggestion,
+      painPoints: painPoints.slice(0, 5),
+      trendingQuestions: relatedQuestions.slice(0, 5),
+      context: {
+        demandScore: suggestion.demandScore,
+        coverageInLibrary: suggestion.coverageInLibrary,
+        gap: suggestion.gap,
+        confidence: suggestion.confidence,
+        redditEngagement: suggestion.redditEngagement || null,
+      },
+    };
+    localStorage.setItem("demand-start-authoring-payload", JSON.stringify(payload));
+
     window.location.hash = "authoring";
-    // Dispatch event with enriched payload for workbench pre-population
+    // Also dispatch event for workbench pre-population
     setTimeout(() => {
       window.dispatchEvent(
-        new CustomEvent("demand-start-authoring", {
-          detail: {
-            query,
-            suggestion,
-            painPoints: painPoints.slice(0, 5),
-            trendingQuestions: relatedQuestions.slice(0, 5),
-            context: {
-              demandScore: suggestion.demandScore,
-              coverageInLibrary: suggestion.coverageInLibrary,
-              gap: suggestion.gap,
-              confidence: suggestion.confidence,
-              redditEngagement: suggestion.redditEngagement || null,
-            },
-          },
-        })
+        new CustomEvent("demand-start-authoring", { detail: payload })
       );
-    }, 300);
+    }, 400);
   };
 
   return (

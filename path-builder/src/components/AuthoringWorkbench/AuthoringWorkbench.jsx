@@ -25,8 +25,20 @@ const STAGE_META = {
 
 export default function AuthoringWorkbench() {
   const wb = useAuthoringWorkbench();
-  const [topicInput, setTopicInput] = useState("");
-  const [demandContext, setDemandContext] = useState(null);
+
+  // Read any pending payload from Demand Dashboard (written to localStorage before navigation)
+  const [pendingPayload] = useState(() => {
+    try {
+      const stored = localStorage.getItem("demand-start-authoring-payload");
+      if (stored) {
+        localStorage.removeItem("demand-start-authoring-payload");
+        return JSON.parse(stored);
+      }
+    } catch { /* ignore */ }
+    return null;
+  });
+  const [topicInput, setTopicInput] = useState(pendingPayload?.query || "");
+  const [demandContext, setDemandContext] = useState(pendingPayload?.suggestion || null);
 
   // Listen for "Start Brief" navigation from Demand Dashboard
   useEffect(() => {
