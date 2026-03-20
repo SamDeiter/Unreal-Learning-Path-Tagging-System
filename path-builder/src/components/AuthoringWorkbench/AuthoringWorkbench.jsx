@@ -239,9 +239,19 @@ export default function AuthoringWorkbench() {
           {(wb.v2Path?.sections || []).map((section, sIdx) => (
             <div key={section.id || sIdx} className="aw-glass-card aw-section-card">
               <div className="aw-module-header">
-                <span className="aw-module-label">
-                  Module {sIdx + 1} — {section.steps?.[0]?.title || "Untitled"}
-                </span>
+                <span className="aw-module-number">Module {sIdx + 1}</span>
+                <input
+                  className="aw-module-title-input"
+                  value={section.title || ""}
+                  onChange={(e) => wb.updateSectionField(sIdx, "title", e.target.value)}
+                  placeholder="Module title..."
+                />
+                <button
+                  className="aw-btn-icon aw-btn-danger"
+                  onClick={() => wb.removeSection(sIdx)}
+                  disabled={(wb.v2Path?.sections || []).length <= 1}
+                  title="Remove module"
+                >✕</button>
               </div>
 
               {/* Lessons (steps) */}
@@ -402,6 +412,15 @@ export default function AuthoringWorkbench() {
               </div>
             </div>
           ))}
+
+          {/* Add Module button */}
+          <button
+            className="aw-btn aw-btn-secondary"
+            onClick={() => wb.addSection()}
+            style={{ marginTop: '0.5rem' }}
+          >
+            + Add Module
+          </button>
 
           <div className="aw-review-footer">
             <button className="aw-btn aw-btn-secondary" onClick={wb.saveDraft}>

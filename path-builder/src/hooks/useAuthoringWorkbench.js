@@ -355,6 +355,73 @@ export default function useAuthoringWorkbench() {
     });
   }, []);
 
+  // ── Review: Add / Remove Modules ──────────────────────────
+
+  const addSection = useCallback(() => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const newSection = {
+        id: `section-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: "New Module",
+        description: "",
+        phase: "core",
+        steps: [
+          {
+            id: `step-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            title: "New Lesson",
+            lessonType: "Video",
+            whyThisMatters: "",
+            whatToDo: [],
+            howToVerify: [],
+            commonMistake: "",
+            takeaway: "",
+            summary: "",
+            category: "core",
+            completionType: "do",
+            estimatedMinutes: 3,
+            source: {},
+            video: null,
+            goDeeper: [],
+            quiz: null,
+            _editorialStatus: "raw",
+          },
+          {
+            id: `quiz-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            title: "Knowledge Check",
+            lessonType: "Quiz",
+            whyThisMatters: "Test your understanding of the concepts covered in this module.",
+            whatToDo: [],
+            howToVerify: [],
+            commonMistake: "",
+            takeaway: "",
+            summary: "A short quiz to reinforce what you learned in this module.",
+            category: "core",
+            completionType: "verify",
+            estimatedMinutes: 3,
+            source: {},
+            video: null,
+            goDeeper: [],
+            quiz: { questions: [] },
+            _editorialStatus: "raw",
+          },
+        ],
+      };
+      updated.sections = [...(updated.sections || []), newSection];
+      return updated;
+    });
+  }, []);
+
+  const removeSection = useCallback((sectionIdx) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      if (updated.sections?.length <= 1) return prev; // Keep at least 1 module
+      updated.sections.splice(sectionIdx, 1);
+      return updated;
+    });
+  }, []);
+
   // ── Review: Quiz Authoring ──────────────────────────────
 
   const addQuizQuestion = useCallback((sectionIdx, stepIdx) => {
@@ -712,6 +779,8 @@ Constraints:
     removeStep,
     reorderStep,
     updateSectionField,
+    addSection,
+    removeSection,
     addLesson,
     addQuizQuestion,
     removeQuizQuestion,
