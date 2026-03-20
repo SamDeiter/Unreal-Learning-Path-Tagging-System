@@ -41,6 +41,36 @@ const STAGE_ORDER = [
 const STORAGE_KEY = "authoring-workbench-state";
 const DRAFTS_KEY = "authoring-workbench-drafts";
 
+// ── Auto-Name Modules ─────────────────────────────────────
+// Replaces generic Bloom's taxonomy titles ("Understand", "Implement",
+// "Apply & Verify") with descriptive names derived from the lessons inside.
+
+const GENERIC_TITLES = new Set([
+  "understand", "implement", "apply", "apply & verify",
+  "analyze", "evaluate", "create", "remember",
+  "foundation", "core", "practice", "prerequisite",
+  "prerequisites", "core steps",
+]);
+
+function autoNameModules(path) {
+  if (!path?.sections) return path;
+  const updated = structuredClone(path);
+  updated.sections.forEach((section) => {
+    const title = (section.title || "").trim();
+    if (!title || GENERIC_TITLES.has(title.toLowerCase())) {
+      // Derive a name from the first lesson's title, or fall back
+      const firstLesson = section.steps?.[0]?.title;
+      if (firstLesson && firstLesson !== "New Lesson") {
+        // Use the first lesson title as the module name
+        section.title = firstLesson;
+      } else {
+        section.title = ""; // Leave blank so placeholder shows
+      }
+    }
+  });
+  return updated;
+}
+
 // Helper: read saved state from localStorage
 function loadState() {
   try {
@@ -63,7 +93,7 @@ export default function useAuthoringWorkbench() {
   const saved = loadState();
   const [stage, setStage] = useState(saved?.stage || AUTHORING_STAGES.PLAN);
   const [topic, setTopic] = useState(saved?.topic || "");
-  const [v2Path, setV2Path] = useState(saved?.v2Path || null);
+  const [v2Path, setV2Path] = useState(() => autoNameModules(saved?.v2Path) || null);
   const [briefs, setBriefs] = useState(saved?.briefs || []);
   const [briefMarkdown, setBriefMarkdown] = useState(saved?.briefMarkdown || "");
   const [loading, setLoading] = useState(false);
@@ -153,7 +183,7 @@ export default function useAuthoringWorkbench() {
       }
 
       // generateBespokePath already runs editorialPass internally
-      setV2Path(result.v2Path);
+      setV2Path(autoNameModules(result.v2Path));
       setTopic(inputTopic);
       setStage(AUTHORING_STAGES.REVIEW);
 
@@ -535,7 +565,7 @@ Constraints:
     if (!draft?.state) return;
     setStage(draft.state.stage || AUTHORING_STAGES.PLAN);
     setTopic(draft.state.topic || "");
-    setV2Path(draft.state.v2Path || null);
+    setV2Path(autoNameModules(draft.state.v2Path) || null);
     setBriefs(draft.state.briefs || []);
     setBriefMarkdown(draft.state.briefMarkdown || "");
     setError(null);
