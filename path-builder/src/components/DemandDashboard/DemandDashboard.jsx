@@ -116,8 +116,8 @@ function CriticalGapAlerts({ suggestions, painPointsByCategory: _painPointsByCat
             </div>
           </div>
           <div className="gap-alert-actions">
-            <button className="gap-action-btn primary" onClick={() => onStartAuthoring(gap)}>✍️ Start Authoring</button>
-            <button className="gap-action-btn dismiss" onClick={() => dismiss(gap.topic)}>✕</button>
+            <button className="gap-action-btn primary" onClick={() => onStartAuthoring(gap)} title="Create a new course based on this high-demand topic">✍️ Start Authoring</button>
+            <button className="gap-action-btn dismiss" onClick={() => dismiss(gap.topic)} title="Dismiss this alert">✕</button>
           </div>
         </div>
       ))}
@@ -344,14 +344,16 @@ function GranularCoverageChart({ demandData, coverageData }) {
               <span className="category-toggle">{isExpanded ? "▾" : "▸"}</span>
               <span className="category-name">{cat}</span>
               <div className="category-bars">
-                <div className="bar-track">
+                <div className="bar-track" title={`Coverage: ${avgCoverage}% vs Demand: ${catData.overall}%`}>
                   <div
                     className="bar-fill coverage"
                     style={{ width: `${avgCoverage}%` }}
+                    title={`Our library covers approximately ${avgCoverage}% of the subtopics in this category`}
                   />
                   <div
                     className="bar-marker demand"
                     style={{ left: `${catData.overall}%` }}
+                    title={`Community demand for ${cat} is at ${catData.overall}/100`}
                   />
                 </div>
               </div>
@@ -374,14 +376,16 @@ function GranularCoverageChart({ demandData, coverageData }) {
                       <div key={subtopic} className={`subtopic-row ${statusClass}`}>
                         <span className="subtopic-name">{subtopic}</span>
                         <div className="subtopic-bars">
-                          <div className="bar-track">
+                          <div className="bar-track" title={`Subtopic Coverage: ${cov}% | Subtopic Demand: ${demand}%`}>
                             <div
                               className="bar-fill coverage"
                               style={{ width: `${cov}%` }}
+                              title={`Existing video coverage for "${subtopic}"`}
                             />
                             <div
                               className="bar-marker demand"
                               style={{ left: `${demand}%` }}
+                              title={`Community interest level for "${subtopic}"`}
                             />
                           </div>
                         </div>

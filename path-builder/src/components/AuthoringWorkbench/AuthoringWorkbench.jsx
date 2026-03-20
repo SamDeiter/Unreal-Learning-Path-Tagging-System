@@ -138,6 +138,7 @@ export default function AuthoringWorkbench() {
             onClick={() => isClickable && wb.goToStage(stageKey)}
             disabled={!isClickable}
             aria-current={isCurrent ? "step" : undefined}
+            title={meta.description}
           >
             <span className="aw-step-icon">{isCompleted ? "✅" : meta.icon}</span>
             <span className="aw-step-label">{meta.label}</span>
@@ -193,6 +194,7 @@ export default function AuthoringWorkbench() {
           className="aw-btn aw-btn-primary"
           onClick={() => wb.generatePlan(topicInput)}
           disabled={wb.loading || !topicInput.trim()}
+          title="Analyze the topic and generate a structured course outline using AI"
         >
           {wb.loading ? "Generating..." : "🚀 Generate Outline"}
         </button>
@@ -303,6 +305,14 @@ export default function AuthoringWorkbench() {
         />
       ) : (
         <>
+          {/* Content Reuse Analysis — Moved to Top */}
+          <ReusePanel
+            report={wb.reuseReport}
+            analyzing={wb.analyzingReuse}
+            progress={wb.reuseProgress}
+            onReAnalyze={() => wb.runReuseAnalysis(true)}
+            onAutoLink={wb.autoLinkReusableSteps}
+          />
           {/* Modules (sections) */}
           {(wb.v2Path?.sections || []).map((section, sIdx) => (
             <div
@@ -508,20 +518,21 @@ export default function AuthoringWorkbench() {
             + Add Module
           </button>
 
-          {/* Content Reuse Analysis */}
-          <ReusePanel
-            report={wb.reuseReport}
-            analyzing={wb.analyzingReuse}
-            progress={wb.reuseProgress}
-            onReAnalyze={() => wb.runReuseAnalysis(true)}
-            onAutoLink={wb.autoLinkReusableSteps}
-          />
-
           <div className="aw-review-footer">
-            <button className="aw-btn aw-btn-secondary" onClick={wb.saveDraft}>
+
+            <button 
+              className="aw-btn aw-btn-secondary" 
+              onClick={wb.saveDraft}
+              title="Save your current progress as a draft to resume later"
+            >
               💾 Save Draft
             </button>
-            <button className="aw-btn aw-btn-primary" onClick={wb.generateBriefs} disabled={wb.loading}>
+            <button 
+              className="aw-btn aw-btn-primary" 
+              onClick={wb.generateBriefs} 
+              disabled={wb.loading}
+              title="Generate detailed instructor recording guides for each lesson"
+            >
               {wb.loading ? "Generating Briefs..." : "🎬 Generate Recording Briefs →"}
             </button>
           </div>
@@ -721,6 +732,7 @@ export default function AuthoringWorkbench() {
             className="aw-export-card"
             onClick={wb.exportScorm}
             disabled={wb.loading}
+            title="Download this course as a SCORM 1.2 zip file for your LMS"
           >
             <span className="aw-export-icon">📦</span>
             <span className="aw-export-title">SCORM 1.2 Package</span>
@@ -732,6 +744,7 @@ export default function AuthoringWorkbench() {
             className="aw-export-card"
             onClick={wb.exportV3}
             disabled={wb.loading}
+            title="Preview how this course will look in the interactive V3 viewer"
           >
             <span className="aw-export-icon">🌐</span>
             <span className="aw-export-title">Preview in Viewer</span>
@@ -743,6 +756,7 @@ export default function AuthoringWorkbench() {
               id="authoring-export-brief"
               className="aw-export-card"
               onClick={wb.downloadBriefMarkdown}
+              title="Download the full recording brief package as a Markdown document"
             >
               <span className="aw-export-icon">📝</span>
               <span className="aw-export-title">Recording Briefs (Markdown)</span>

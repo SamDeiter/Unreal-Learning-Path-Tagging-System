@@ -37,6 +37,7 @@ export default function AppSidebar({
                 <div key={tab.key}>
                   <button
                     className={`sidebar-tab ${isAnyBuilderActive ? "active" : ""}`}
+                    title={tab.tooltip}
                     onClick={() => {
                       setBuildersExpanded(!buildersExpanded);
                       if (!isAnyBuilderActive) {
@@ -59,6 +60,7 @@ export default function AppSidebar({
                         <button
                           key={sub.key}
                           className={`sidebar-tab sidebar-tab-sub ${activeTab === sub.key ? "active" : ""}`}
+                          title={sub.tooltip}
                           onClick={() => setActiveTab(sub.key)}
                         >
                           <span className="sidebar-tab-icon">{sub.icon}</span>
@@ -74,6 +76,7 @@ export default function AppSidebar({
               <button
                 key={tab.key}
                 className={`sidebar-tab ${activeTab === tab.key ? "active" : ""}`}
+                title={tab.tooltip}
                 onClick={() => setActiveTab(tab.key)}
               >
                 <span className="sidebar-tab-icon">{tab.icon}</span>
@@ -95,6 +98,7 @@ export default function AppSidebar({
                 <div key={tab.key}>
                   <button
                     className={`sidebar-tab sidebar-tab-sm ${isAnyAnalyticsActive ? "active" : ""}`}
+                    title={tab.tooltip}
                     onClick={() => {
                       setAnalyticsExpanded(!analyticsExpanded);
                       if (!isAnyAnalyticsActive) {
@@ -117,6 +121,7 @@ export default function AppSidebar({
                         <button
                           key={sub.key}
                           className={`sidebar-tab sidebar-tab-sub ${activeTab === sub.key ? "active" : ""}`}
+                          title={sub.tooltip}
                           onClick={() => setActiveTab(sub.key)}
                         >
                           <span className="sidebar-tab-icon">{sub.icon}</span>
@@ -132,6 +137,7 @@ export default function AppSidebar({
               <button
                 key={tab.key}
                 className={`sidebar-tab sidebar-tab-sm ${activeTab === tab.key ? "active" : ""}`}
+                title={tab.tooltip}
                 onClick={() => setActiveTab(tab.key)}
               >
                 <span className="sidebar-tab-icon">{tab.icon}</span>
