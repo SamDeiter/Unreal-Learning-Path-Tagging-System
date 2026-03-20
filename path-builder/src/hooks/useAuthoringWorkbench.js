@@ -200,6 +200,29 @@ export default function useAuthoringWorkbench() {
         devWarn("[Authoring] localStorage persist failed:", e.message);
       }
 
+      // ── Auto-save as a draft card ─────────────────────────
+      try {
+        const draft = {
+          id: Date.now().toString(),
+          topic: inputTopic,
+          title: namedPath?.title || inputTopic,
+          sectionCount: namedPath?.sections?.length || 0,
+          stepCount: (namedPath?.sections || []).reduce((s, sec) => s + (sec.steps?.length || 0), 0),
+          stage: AUTHORING_STAGES.REVIEW,
+          savedAt: new Date().toISOString(),
+          state: { stage: AUTHORING_STAGES.REVIEW, topic: inputTopic, v2Path: namedPath, briefs: [], briefMarkdown: "" },
+        };
+        const existingDrafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "[]");
+        const idx = existingDrafts.findIndex((d) => d.topic === inputTopic);
+        if (idx >= 0) existingDrafts[idx] = draft;
+        else existingDrafts.unshift(draft);
+        const trimmed = existingDrafts.slice(0, 10);
+        localStorage.setItem(DRAFTS_KEY, JSON.stringify(trimmed));
+        setSavedDrafts(trimmed);
+      } catch (e) {
+        devWarn("[Authoring] Auto-draft save failed:", e.message);
+      }
+
       // ── Then update React state (no-op if unmounted) ───────
       setV2Path(namedPath);
       setTopic(inputTopic);
