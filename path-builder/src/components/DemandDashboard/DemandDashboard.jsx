@@ -271,13 +271,13 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
             </div>
           )}
           <button
-            className="start-brief-btn"
+            className="start-authoring-btn"
             onClick={(e) => {
               e.stopPropagation();
               onStartBrief?.(suggestion);
             }}
           >
-            Start Brief →
+            Start Authoring →
           </button>
         </div>
       )}

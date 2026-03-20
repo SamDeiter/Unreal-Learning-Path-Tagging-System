@@ -205,6 +205,30 @@ export default function useAuthoringWorkbench() {
     }
   }, [v2Path]);
 
+  // ── Brief: Edit Fields ──────────────────────────────────
+
+  const updateBriefField = useCallback((briefIdx, field, value) => {
+    setBriefs((prev) => {
+      const updated = [...prev];
+      if (updated[briefIdx]) {
+        updated[briefIdx] = { ...updated[briefIdx], [field]: value };
+      }
+      return updated;
+    });
+  }, []);
+
+  const updateBriefListItem = useCallback((briefIdx, field, itemIdx, value) => {
+    setBriefs((prev) => {
+      const updated = [...prev];
+      if (updated[briefIdx]?.[field]) {
+        const list = [...updated[briefIdx][field]];
+        list[itemIdx] = value;
+        updated[briefIdx] = { ...updated[briefIdx], [field]: list };
+      }
+      return updated;
+    });
+  }, []);
+
   // ── Link: Assign Video URLs ──────────────────────────────
 
   const linkVideo = useCallback((sectionIdx, stepIdx, videoUrl, videoTitle) => {
@@ -320,6 +344,8 @@ export default function useAuthoringWorkbench() {
     removeStep,
     reorderStep,
     generateBriefs,
+    updateBriefField,
+    updateBriefListItem,
     linkVideo,
     exportScorm,
     exportV3,

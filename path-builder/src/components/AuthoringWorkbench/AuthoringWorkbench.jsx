@@ -229,18 +229,45 @@ export default function AuthoringWorkbench() {
 
       {wb.briefs.map((brief, idx) => brief && (
         <div key={idx} className="aw-brief-card">
-          <h3>{brief.stepTitle}</h3>
+          <input
+            className="aw-brief-title-input"
+            value={brief.stepTitle || ""}
+            onChange={(e) => wb.updateBriefField(idx, "stepTitle", e.target.value)}
+          />
           <div className="aw-brief-meta">
-            <span className="aw-brief-tag">{brief.skillLevel}</span>
-            <span className="aw-brief-tag">{brief.targetLength}</span>
-            <span className="aw-brief-tag">{brief.position}</span>
+            <input
+              className="aw-brief-tag-input"
+              value={brief.skillLevel || ""}
+              onChange={(e) => wb.updateBriefField(idx, "skillLevel", e.target.value)}
+              title="Skill level"
+            />
+            <input
+              className="aw-brief-tag-input"
+              value={brief.targetLength || ""}
+              onChange={(e) => wb.updateBriefField(idx, "targetLength", e.target.value)}
+              title="Target length"
+            />
+            <input
+              className="aw-brief-tag-input"
+              value={brief.position || ""}
+              onChange={(e) => wb.updateBriefField(idx, "position", e.target.value)}
+              title="Position"
+            />
           </div>
 
           {brief.requiredDemonstrations?.length > 0 && (
             <div className="aw-brief-section">
               <h4>📹 Required Demonstrations</h4>
               <ol>
-                {brief.requiredDemonstrations.map((d, i) => <li key={i}>{d}</li>)}
+                {brief.requiredDemonstrations.map((d, i) => (
+                  <li key={i}>
+                    <input
+                      className="aw-brief-list-input"
+                      value={d}
+                      onChange={(e) => wb.updateBriefListItem(idx, "requiredDemonstrations", i, e.target.value)}
+                    />
+                  </li>
+                ))}
               </ol>
             </div>
           )}
@@ -249,7 +276,15 @@ export default function AuthoringWorkbench() {
             <div className="aw-brief-section">
               <h4>🗣️ Talking Points</h4>
               <ul>
-                {brief.talkingPoints.map((p, i) => <li key={i}>{p}</li>)}
+                {brief.talkingPoints.map((p, i) => (
+                  <li key={i}>
+                    <input
+                      className="aw-brief-list-input"
+                      value={p}
+                      onChange={(e) => wb.updateBriefListItem(idx, "talkingPoints", i, e.target.value)}
+                    />
+                  </li>
+                ))}
               </ul>
             </div>
           )}
@@ -258,17 +293,28 @@ export default function AuthoringWorkbench() {
             <div className="aw-brief-section">
               <h4>🖥️ Editor Setup</h4>
               <ul>
-                {brief.editorSetup.map((s, i) => <li key={i}>{s}</li>)}
+                {brief.editorSetup.map((s, i) => (
+                  <li key={i}>
+                    <input
+                      className="aw-brief-list-input"
+                      value={s}
+                      onChange={(e) => wb.updateBriefListItem(idx, "editorSetup", i, e.target.value)}
+                    />
+                  </li>
+                ))}
               </ul>
             </div>
           )}
 
-          {brief.scriptNotes && (
-            <div className="aw-brief-section aw-script-notes">
-              <h4>📝 Script Notes</h4>
-              <p>{brief.scriptNotes}</p>
-            </div>
-          )}
+          <div className="aw-brief-section aw-script-notes">
+            <h4>📝 Script Notes</h4>
+            <textarea
+              className="aw-brief-notes-input"
+              value={brief.scriptNotes || ""}
+              onChange={(e) => wb.updateBriefField(idx, "scriptNotes", e.target.value)}
+              rows={3}
+            />
+          </div>
         </div>
       ))}
 
