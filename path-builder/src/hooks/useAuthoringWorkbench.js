@@ -16,7 +16,7 @@
  *   - v3Adapter → V3 viewer export
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { devLog, devWarn } from "../utils/logger";
 
 // ── Workflow Stages ────────────────────────────────────────
@@ -37,17 +37,50 @@ const STAGE_ORDER = [
   AUTHORING_STAGES.EXPORT,
 ];
 
-export default function useAuthoringWorkbench() {
-  // ── State ────────────────────────────────────────────────
+const STORAGE_KEY = "authoring-workbench-state";
+const DRAFTS_KEY = "authoring-workbench-drafts";
 
-  const [stage, setStage] = useState(AUTHORING_STAGES.PLAN);
-  const [topic, setTopic] = useState("");
-  const [v2Path, setV2Path] = useState(null);
-  const [briefs, setBriefs] = useState([]);
-  const [briefMarkdown, setBriefMarkdown] = useState("");
+// Helper: read saved state from localStorage
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+// Helper: read saved drafts list
+function loadDrafts() {
+  try {
+    const raw = localStorage.getItem(DRAFTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export default function useAuthoringWorkbench() {
+  // ── State (restored from localStorage if available) ─────
+
+  const saved = loadState();
+  const [stage, setStage] = useState(saved?.stage || AUTHORING_STAGES.PLAN);
+  const [topic, setTopic] = useState(saved?.topic || "");
+  const [v2Path, setV2Path] = useState(saved?.v2Path || null);
+  const [briefs, setBriefs] = useState(saved?.briefs || []);
+  const [briefMarkdown, setBriefMarkdown] = useState(saved?.briefMarkdown || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState({ current: 0, total: 0, label: "" });
+  const [savedDrafts, setSavedDrafts] = useState(loadDrafts);
+
+  // ── Auto-save to localStorage ───────────────────────────
+
+  useEffect(() => {
+    // Only save if there's meaningful content
+    if (!topic && !v2Path) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    const state = { stage, topic, v2Path, briefs, briefMarkdown };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [stage, topic, v2Path, briefs, briefMarkdown]);
 
   // ── Stage Navigation ─────────────────────────────────────
 
@@ -304,6 +337,51 @@ export default function useAuthoringWorkbench() {
     URL.revokeObjectURL(url);
   }, [briefMarkdown]);
 
+  // ── Draft Management ──────────────────────────────────────
+
+  const saveDraft = useCallback(() => {
+    if (!v2Path || !topic) return;
+    const draft = {
+      id: Date.now().toString(),
+      topic,
+      title: v2Path?.title || topic,
+      sectionCount: v2Path?.sections?.length || 0,
+      stepCount: (v2Path?.sections || []).reduce((s, sec) => s + (sec.steps?.length || 0), 0),
+      stage,
+      savedAt: new Date().toISOString(),
+      state: { stage, topic, v2Path, briefs, briefMarkdown },
+    };
+    const drafts = loadDrafts();
+    // Replace existing draft with same topic, or add new
+    const idx = drafts.findIndex((d) => d.topic === topic);
+    if (idx >= 0) drafts[idx] = draft;
+    else drafts.unshift(draft);
+    // Keep max 10 drafts
+    const trimmed = drafts.slice(0, 10);
+    localStorage.setItem(DRAFTS_KEY, JSON.stringify(trimmed));
+    setSavedDrafts(trimmed);
+    devLog(`[Authoring] Draft saved: "${topic}"`);
+  }, [v2Path, topic, stage, briefs, briefMarkdown]);
+
+  const loadDraft = useCallback((draftId) => {
+    const drafts = loadDrafts();
+    const draft = drafts.find((d) => d.id === draftId);
+    if (!draft?.state) return;
+    setStage(draft.state.stage || AUTHORING_STAGES.PLAN);
+    setTopic(draft.state.topic || "");
+    setV2Path(draft.state.v2Path || null);
+    setBriefs(draft.state.briefs || []);
+    setBriefMarkdown(draft.state.briefMarkdown || "");
+    setError(null);
+    devLog(`[Authoring] Draft loaded: "${draft.topic}"`);
+  }, []);
+
+  const deleteDraft = useCallback((draftId) => {
+    const drafts = loadDrafts().filter((d) => d.id !== draftId);
+    localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    setSavedDrafts(drafts);
+  }, []);
+
   // ── Reset ────────────────────────────────────────────────
 
   const reset = useCallback(() => {
@@ -315,6 +393,7 @@ export default function useAuthoringWorkbench() {
     setLoading(false);
     setError(null);
     setProgress({ current: 0, total: 0, label: "" });
+    localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   // ── Return ───────────────────────────────────────────────
@@ -351,5 +430,11 @@ export default function useAuthoringWorkbench() {
     exportV3,
     downloadBriefMarkdown,
     reset,
+
+    // Draft management
+    savedDrafts,
+    saveDraft,
+    loadDraft,
+    deleteDraft,
   };
 }

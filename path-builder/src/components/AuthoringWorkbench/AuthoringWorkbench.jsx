@@ -127,6 +127,36 @@ export default function AuthoringWorkbench() {
           {wb.loading ? "Generating..." : "🚀 Generate Outline"}
         </button>
       </div>
+
+      {/* Saved Drafts */}
+      {wb.savedDrafts.length > 0 && (
+        <div className="aw-drafts-section">
+          <h3>📂 Saved Drafts</h3>
+          <div className="aw-drafts-list">
+            {wb.savedDrafts.map((draft) => (
+              <div key={draft.id} className="aw-draft-card">
+                <div className="aw-draft-info">
+                  <strong>{draft.title || draft.topic}</strong>
+                  <span className="aw-draft-meta">
+                    {draft.sectionCount} chapters · {draft.stepCount} steps · Stage: {draft.stage}
+                  </span>
+                  <span className="aw-draft-date">
+                    Saved {new Date(draft.savedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="aw-draft-actions">
+                  <button className="aw-btn aw-btn-primary aw-btn-sm" onClick={() => wb.loadDraft(draft.id)}>
+                    ▶ Resume
+                  </button>
+                  <button className="aw-btn-icon aw-btn-danger" onClick={() => wb.deleteDraft(draft.id)} title="Delete draft">
+                    🗑
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -205,6 +235,9 @@ export default function AuthoringWorkbench() {
       ))}
 
       <div className="aw-review-footer">
+        <button className="aw-btn aw-btn-secondary" onClick={wb.saveDraft}>
+          💾 Save Draft
+        </button>
         <button className="aw-btn aw-btn-primary" onClick={wb.generateBriefs} disabled={wb.loading}>
           {wb.loading ? "Generating Briefs..." : "🎬 Generate Recording Briefs →"}
         </button>
