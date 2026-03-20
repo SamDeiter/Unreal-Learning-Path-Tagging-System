@@ -95,27 +95,32 @@ export const GRANULAR_TAXONOMY = {
   "Blueprints": [
     "Blueprint Interfaces", "Event Dispatchers", "Blueprint Macros",
     "Data Tables", "Enumerations", "Structures", "Blueprint Communication",
-    "Blueprint Debugging", "Construction Scripts", "Function Libraries"
+    "Blueprint Debugging", "Construction Scripts", "Function Libraries",
+    "Actor Components", "Gameplay Ability System (GAS)"
   ],
   "AI": [
     "State Trees", "Behavior Trees", "NavMesh", "AI Perception",
     "EQS (Environment Query)", "Blackboard", "AI Controllers",
-    "Mass Entity", "Smart Objects", "Crowd Simulation"
+    "Mass Entity", "Smart Objects", "Crowd Simulation",
+    "MassAI", "Goal Oriented Action Planning"
   ],
   "Materials": [
     "Material Instances", "Shader Complexity", "Substrate (Strata)",
     "Material Functions", "Texture Streaming", "PBR Workflows",
-    "Decals", "Post Process Materials", "Landscape Materials"
+    "Decals", "Post Process Materials", "Landscape Materials",
+    "Material Layers", "Shader Permutations"
   ],
   "Niagara": [
     "Niagara Emitters", "Niagara Modules", "GPU Simulation",
     "Niagara Fluids", "Mesh Particles", "Ribbon Renderers",
-    "Data Interfaces", "Niagara Debugging"
+    "Data Interfaces", "Niagara Debugging",
+    "Simulation Stages", "Niagara Fluids 2.0"
   ],
   "Animation": [
     "Animation Blueprints", "Control Rig", "IK (Inverse Kinematics)",
     "Retargeting", "Sequencer Cinematics", "Motion Matching",
-    "Blend Spaces", "Montages", "Pose Search", "Skeletal Mesh LODs"
+    "Blend Spaces", "Montages", "Pose Search", "Skeletal Mesh LODs",
+    "MetaHuman Animator", "Layered Animation"
   ],
   "Lighting": [
     "Lumen Global Illumination", "Ray Tracing", "Light Baking",
@@ -135,7 +140,8 @@ export const GRANULAR_TAXONOMY = {
   "Landscape": [
     "World Partition", "Level Streaming", "Foliage System",
     "Procedural Generation (PCG)", "Water System", "Landmass Plugin",
-    "Terrain Sculpting", "Biome Painting"
+    "Terrain Sculpting", "Biome Painting",
+    "Nanite Foliage"
   ],
   "Networking": [
     "Replication", "RPCs", "Dedicated Servers",
@@ -143,7 +149,8 @@ export const GRANULAR_TAXONOMY = {
   ],
   "C++": [
     "Gameplay Framework", "UPROPERTY/UFUNCTION Macros", "Delegates",
-    "Subsystems", "Plugins", "Build System", "Hot Reload"
+    "Subsystems", "Plugins", "Build System", "Hot Reload",
+    "Gameplay Ability System (GAS)", "Unreal Header Tool"
   ],
   "Physics": [
     "Chaos Physics", "Ragdoll", "Destruction",
@@ -152,7 +159,35 @@ export const GRANULAR_TAXONOMY = {
   "Rendering": [
     "Nanite", "Virtual Shadow Maps", "TSR (Temporal Super Resolution)",
     "Screen Space Reflections", "Mesh Distance Fields",
-    "Hardware Ray Tracing", "Lumen Reflections"
+    "Hardware Ray Tracing", "Lumen Reflections",
+    "Path Tracing", "MegaLights"
+  ],
+  "MetaHumans": [
+    "MetaHuman Creator", "Facial Animation", "Body Customization",
+    "Hair and Groom", "Clothing Simulation", "MetaHuman Animator",
+    "Performance Capture", "MetaHuman Blueprint Integration",
+    "LOD and Scalability", "MetaHuman on FAB"
+  ],
+  "Optimization": [
+    "Profiling Tools (Unreal Insights)", "Draw Call Reduction",
+    "LOD Management", "Texture Optimization", "GPU Profiling",
+    "CPU Threading", "Memory Management", "Shader Compilation",
+    "Asset Streaming", "Cook and Package Size"
+  ],
+  "Virtual Production": [
+    "nDisplay", "LED Wall Workflow", "Live Link",
+    "Camera Tracking", "Color Calibration", "Multi-User Editing",
+    "Composure Compositing", "Stage Operator", "Media Framework"
+  ],
+  "Level Design": [
+    "BSP and Geometry", "Blockout Workflows", "Level Instances",
+    "Data Layers", "Gameplay Scripting", "Level Blueprints",
+    "Environment Art Pipeline", "Collision Setup", "Navigation Volumes"
+  ],
+  "Gameplay Framework": [
+    "GameMode and GameState", "PlayerController", "Pawn vs Character",
+    "GameInstance", "Enhanced Input System", "Gameplay Tags",
+    "Save Game System", "Subsystems Architecture", "Actor Lifecycle"
   ]
 };
 

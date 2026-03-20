@@ -4,6 +4,23 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.7.0-demand-expansion] - 2026-03-20
+
+### Added
+
+- **Demand Benchmarks Expansion** — expanded `demand_benchmarks.json` from 13 → 18 categories and ~110 → ~180 subtopics:
+  - New categories: MetaHumans (82), Optimization (78), Virtual Production (52), Level Design (65), Gameplay Framework (72)
+  - New subtopics across existing categories: Actor Components, GAS, MassAI, MetaHuman Animator, Nanite Foliage, Path Tracing, MegaLights, and more
+  - Scores based on 2025-2026 community data: Reddit r/unrealengine, Epic Forums, StackOverflow, YouTube tutorial engagement, Epic State of Unreal
+  - Version bumped to `Q1_2026_v2` with previous benchmarks preserved for trend comparison
+- **GRANULAR_TAXONOMY sync** — updated `demandIntelligenceService.js` taxonomy to match all 18 categories and ~180 subtopics
+- **Data integrity tests** — 10 new tests in `data-integrity.test.js`:
+  - Schema validation (version, benchmarks, subtopics fields)
+  - Score range checks (all values 0–100)
+  - Bidirectional sync check: GRANULAR_TAXONOMY ↔ demand_benchmarks.json
+
+---
+
 ## [7.6.0-demand-authoring] - 2026-03-19
 
 ### Added

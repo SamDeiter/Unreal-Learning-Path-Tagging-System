@@ -17,6 +17,8 @@ import coursePrerequisites from "../data/course_prerequisites.json";
 import synonymMap from "../data/synonym_map.json";
 import searchIndex from "../data/search_index.json";
 import transcriptSegments from "../data/transcript_segments.json";
+import demandBenchmarks from "../data/demand_benchmarks.json";
+import { GRANULAR_TAXONOMY } from "../services/demandIntelligenceService";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. VIDEO LIBRARY
@@ -410,7 +412,109 @@ describe("transcript_segments.json", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 10. CROSS-FILE CONSISTENCY
+// 10. DEMAND BENCHMARKS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("demand_benchmarks.json", () => {
+  it("should have required top-level fields", () => {
+    expect(demandBenchmarks.version).toBeDefined();
+    expect(demandBenchmarks.benchmarks).toBeDefined();
+    expect(demandBenchmarks.subtopics).toBeDefined();
+    expect(typeof demandBenchmarks.benchmarks).toBe("object");
+    expect(typeof demandBenchmarks.subtopics).toBe("object");
+  });
+
+  it("all benchmark scores should be in range 0–100", () => {
+    const errors = [];
+    for (const [cat, score] of Object.entries(demandBenchmarks.benchmarks)) {
+      if (typeof score !== "number" || score < 0 || score > 100) {
+        errors.push(`${cat}: ${score}`);
+      }
+    }
+    expect(errors).toEqual([]);
+  });
+
+  it("all subtopic scores should be in range 0–100", () => {
+    const errors = [];
+    for (const [cat, subs] of Object.entries(demandBenchmarks.subtopics)) {
+      for (const [sub, score] of Object.entries(subs)) {
+        if (typeof score !== "number" || score < 0 || score > 100) {
+          errors.push(`${cat} → ${sub}: ${score}`);
+        }
+      }
+    }
+    expect(errors).toEqual([]);
+  });
+
+  it("every benchmark category should have a subtopics entry", () => {
+    const missing = Object.keys(demandBenchmarks.benchmarks).filter(
+      (cat) => !demandBenchmarks.subtopics[cat]
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("should have at least 15 categories", () => {
+    expect(Object.keys(demandBenchmarks.benchmarks).length).toBeGreaterThanOrEqual(15);
+  });
+
+  it("should have at least 150 total subtopics", () => {
+    const total = Object.values(demandBenchmarks.subtopics)
+      .reduce((sum, subs) => sum + Object.keys(subs).length, 0);
+    console.log(`📊 Demand benchmarks: ${Object.keys(demandBenchmarks.benchmarks).length} categories, ${total} subtopics`);
+    expect(total).toBeGreaterThanOrEqual(150);
+  });
+});
+
+describe("GRANULAR_TAXONOMY ↔ demand_benchmarks.json sync", () => {
+  it("every GRANULAR_TAXONOMY category should exist in benchmarks", () => {
+    const missing = Object.keys(GRANULAR_TAXONOMY).filter(
+      (cat) => demandBenchmarks.benchmarks[cat] === undefined
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("every GRANULAR_TAXONOMY category should exist in subtopics", () => {
+    const missing = Object.keys(GRANULAR_TAXONOMY).filter(
+      (cat) => !demandBenchmarks.subtopics[cat]
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("every GRANULAR_TAXONOMY subtopic should have a score in the JSON", () => {
+    const missing = [];
+    for (const [cat, subtopics] of Object.entries(GRANULAR_TAXONOMY)) {
+      const jsonSubs = demandBenchmarks.subtopics[cat] || {};
+      for (const sub of subtopics) {
+        if (jsonSubs[sub] === undefined) {
+          missing.push(`${cat} → ${sub}`);
+        }
+      }
+    }
+    if (missing.length > 0) {
+      console.warn(`⚠️ Subtopics in GRANULAR_TAXONOMY but missing from JSON:\n${missing.join("\n")}`);
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it("every JSON subtopic should exist in GRANULAR_TAXONOMY", () => {
+    const orphaned = [];
+    for (const [cat, subs] of Object.entries(demandBenchmarks.subtopics)) {
+      const taxonomySubs = GRANULAR_TAXONOMY[cat] || [];
+      for (const sub of Object.keys(subs)) {
+        if (!taxonomySubs.includes(sub)) {
+          orphaned.push(`${cat} → ${sub}`);
+        }
+      }
+    }
+    if (orphaned.length > 0) {
+      console.warn(`⚠️ Subtopics in JSON but missing from GRANULAR_TAXONOMY:\n${orphaned.join("\n")}`);
+    }
+    expect(orphaned).toEqual([]);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 11. CROSS-FILE CONSISTENCY
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe("Cross-file consistency", () => {
