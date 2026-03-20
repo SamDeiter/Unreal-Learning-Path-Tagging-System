@@ -52,10 +52,13 @@ export function getFirebaseApp() {
   // In dev mode, enable debug mode so localhost isn't blocked.
   const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   if (siteKey) {
-    // Enable debug token in development
+    // Enable stable debug token in development — register this token once
+    // in Firebase Console → App Check → Debug tokens
     if (import.meta.env.DEV) {
       // @ts-ignore — global flag for Firebase App Check debug mode
-      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN =
+        import.meta.env.VITE_APPCHECK_DEBUG_TOKEN ||
+        "950e1832-2320-4572-b11c-e62856452b6e";
     }
     initializeAppCheck(newApp, {
       provider: new ReCaptchaEnterpriseProvider(siteKey),
