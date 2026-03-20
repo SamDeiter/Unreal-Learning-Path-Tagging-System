@@ -428,6 +428,34 @@ export default function useAuthoringWorkbench() {
     });
   }, []);
 
+  // ── Review: Drag-and-Drop Reorder ───────────────────────
+
+  const reorderSection = useCallback((fromIdx, toIdx) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const sections = updated.sections;
+      if (!sections || fromIdx < 0 || toIdx < 0 || fromIdx >= sections.length || toIdx >= sections.length) return prev;
+      const [moved] = sections.splice(fromIdx, 1);
+      sections.splice(toIdx, 0, moved);
+      return updated;
+    });
+  }, []);
+
+  const moveStepToSection = useCallback((fromSectionIdx, fromStepIdx, toSectionIdx, toStepIdx) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const fromSection = updated.sections?.[fromSectionIdx];
+      const toSection = updated.sections?.[toSectionIdx];
+      if (!fromSection?.steps || !toSection) return prev;
+      const [movedStep] = fromSection.steps.splice(fromStepIdx, 1);
+      if (!toSection.steps) toSection.steps = [];
+      toSection.steps.splice(toStepIdx, 0, movedStep);
+      return updated;
+    });
+  }, []);
+
   // ── Review: Quiz Authoring ──────────────────────────────
 
   const addQuizQuestion = useCallback((sectionIdx, stepIdx) => {
@@ -802,6 +830,10 @@ Constraints:
     exportV3,
     downloadBriefMarkdown,
     reset,
+
+    // Drag-and-drop reorder
+    reorderSection,
+    moveStepToSection,
 
     // Draft management
     savedDrafts,

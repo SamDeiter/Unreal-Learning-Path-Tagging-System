@@ -243,24 +243,58 @@ function generateScoHtml(step, index, totalSteps, bridge, pathTitle) {
 // ── Quiz SCO Generator ─────────────────────────────────────────────
 
 function generateQuizHtml(steps, pathTitle) {
-  // Generate simple review questions (one per step)
-  const questions = steps.slice(0, 10).map((step, i) => {
-    const title = cleanVideoTitle(step.segment?.title || step.title || `Step ${i + 1}`);
-    return { question: `What is the main topic covered in "${title}"?`, stepTitle: title };
-  });
+  // Collect authored quiz questions from steps, fall back to auto-generated
+  const questions = [];
+
+  for (const step of steps) {
+    // Use authored quiz data if available
+    if (step.quiz?.questions?.length) {
+      for (const q of step.quiz.questions) {
+        if (q.text && q.options?.length >= 2) {
+          questions.push({
+            text: q.text,
+            options: q.options,
+            correctIndex: q.correctIndex ?? 0,
+            explanation: q.explanation || "",
+          });
+        }
+      }
+    }
+  }
+
+  // Fallback: generate simple questions if no authored quiz data
+  if (questions.length === 0) {
+    for (let i = 0; i < Math.min(steps.length, 10); i++) {
+      const step = steps[i];
+      const title = cleanVideoTitle(step.segment?.title || step.title || `Step ${i + 1}`);
+      questions.push({
+        text: `What is the main topic covered in "${title}"?`,
+        options: [title, "Unrelated Topic A", "Unrelated Topic B", "Unrelated Topic C"],
+        correctIndex: 0,
+        explanation: "",
+      });
+    }
+  }
 
   const questionsHtml = questions
     .map(
-      (q, i) => `
+      (q, i) => {
+        const optionsHtml = q.options
+          .map((opt, oi) => `<label><input type="radio" name="q${i}" value="${oi}"> ${escapeHtml(opt)}</label>`)
+          .join("\n      ");
+        return `
     <div class="quiz-q">
-      <p><strong>Q${i + 1}:</strong> ${escapeHtml(q.question)}</p>
-      <label><input type="radio" name="q${i}" value="correct"> ${escapeHtml(q.stepTitle)}</label>
-      <label><input type="radio" name="q${i}" value="wrong1"> Unrelated Topic A</label>
-      <label><input type="radio" name="q${i}" value="wrong2"> Unrelated Topic B</label>
-    </div>
-  `
+      <p><strong>Q${i + 1}:</strong> ${escapeHtml(q.text)}</p>
+      ${optionsHtml}
+    </div>`;
+      }
     )
     .join("\n");
+
+  // Build correctAnswers array for scoring
+  const correctAnswers = questions.map((q) => q.correctIndex ?? 0);
+  // Build explanations array for feedback
+  const explanations = questions.map((q) => q.explanation || "");
 
   return (
     `<!DOCTYPE html>
@@ -271,6 +305,11 @@ function generateQuizHtml(steps, pathTitle) {
   <link rel="stylesheet" href="shared/style.css">
   <script src="shared/scormapi.js"></` +
     `script>
+  <style>
+    .quiz-feedback { margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; }
+    .quiz-feedback.correct { background: rgba(63,185,80,0.12); color: #3fb950; }
+    .quiz-feedback.incorrect { background: rgba(248,81,73,0.12); color: #f85149; }
+  </style>
 </head>
 <body>
   <h1>Knowledge Check</h1>
@@ -281,13 +320,25 @@ function generateQuizHtml(steps, pathTitle) {
   </form>
   <div id="result" style="display:none;text-align:center;margin-top:24px;"></div>
   <script>
+    var correctAnswers = ${JSON.stringify(correctAnswers)};
+    var explanations = ${JSON.stringify(explanations)};
     document.getElementById('quiz-form').addEventListener('submit', function(e) {
       e.preventDefault();
       var total = ${questions.length};
       var correct = 0;
       for (var i = 0; i < total; i++) {
         var sel = document.querySelector('input[name="q' + i + '"]:checked');
-        if (sel && sel.value === 'correct') correct++;
+        var isCorrect = sel && parseInt(sel.value) === correctAnswers[i];
+        if (isCorrect) correct++;
+        // Show per-question feedback
+        var qDiv = document.querySelectorAll('.quiz-q')[i];
+        var existing = qDiv.querySelector('.quiz-feedback');
+        if (existing) existing.remove();
+        var fb = document.createElement('div');
+        fb.className = 'quiz-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+        fb.textContent = isCorrect ? '✅ Correct!' : '❌ Incorrect.';
+        if (explanations[i]) fb.textContent += ' ' + explanations[i];
+        qDiv.appendChild(fb);
       }
       var pct = Math.round((correct / total) * 100);
       document.getElementById('result').style.display = 'block';

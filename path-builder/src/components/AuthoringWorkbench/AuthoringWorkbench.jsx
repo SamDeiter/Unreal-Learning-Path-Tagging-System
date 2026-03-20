@@ -9,7 +9,7 @@
  *   5. Export — Download SCORM or V3 viewer
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import useAuthoringWorkbench, { AUTHORING_STAGES } from "../../hooks/useAuthoringWorkbench";
 import CoursePreview from "./CoursePreview";
 import "./AuthoringWorkbench.css";
@@ -27,6 +27,73 @@ const STAGE_META = {
 export default function AuthoringWorkbench() {
   const wb = useAuthoringWorkbench();
   const [viewMode, setViewMode] = useState("edit"); // "edit" or "preview"
+  const dragRef = useRef({ type: null, sectionIdx: null, stepIdx: null });
+  const [dragOverTarget, setDragOverTarget] = useState(null);
+
+  const handleModuleDragStart = useCallback((e, sIdx) => {
+    dragRef.current = { type: "module", sectionIdx: sIdx, stepIdx: null };
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.classList.add("aw-dragging");
+  }, []);
+
+  const handleModuleDragOver = useCallback((e, sIdx) => {
+    e.preventDefault();
+    if (dragRef.current.type === "module" && dragRef.current.sectionIdx !== sIdx) {
+      e.dataTransfer.dropEffect = "move";
+      setDragOverTarget({ type: "module", idx: sIdx });
+    }
+  }, []);
+
+  const handleModuleDrop = useCallback((e, toIdx) => {
+    e.preventDefault();
+    setDragOverTarget(null);
+    if (dragRef.current.type === "module") {
+      const fromIdx = dragRef.current.sectionIdx;
+      if (fromIdx !== toIdx) wb.reorderSection(fromIdx, toIdx);
+    }
+    dragRef.current = { type: null, sectionIdx: null, stepIdx: null };
+  }, [wb]);
+
+  const handleLessonDragStart = useCallback((e, sIdx, stIdx) => {
+    dragRef.current = { type: "lesson", sectionIdx: sIdx, stepIdx: stIdx };
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.classList.add("aw-dragging");
+  }, []);
+
+  const handleLessonDragOver = useCallback((e, sIdx, stIdx) => {
+    e.preventDefault();
+    if (dragRef.current.type === "lesson") {
+      e.dataTransfer.dropEffect = "move";
+      setDragOverTarget({ type: "lesson", sIdx, stIdx });
+    }
+  }, []);
+
+  const handleLessonDrop = useCallback((e, toSIdx, toStIdx) => {
+    e.preventDefault();
+    setDragOverTarget(null);
+    if (dragRef.current.type === "lesson") {
+      const { sectionIdx: fromSIdx, stepIdx: fromStIdx } = dragRef.current;
+      if (fromSIdx === toSIdx && fromStIdx === toStIdx) return;
+      if (fromSIdx === toSIdx) {
+        // Same module reorder
+        const dir = toStIdx > fromStIdx ? 1 : -1;
+        let current = fromStIdx;
+        while (current !== toStIdx) {
+          wb.reorderStep(toSIdx, current, dir);
+          current += dir;
+        }
+      } else {
+        wb.moveStepToSection(fromSIdx, fromStIdx, toSIdx, toStIdx);
+      }
+    }
+    dragRef.current = { type: null, sectionIdx: null, stepIdx: null };
+  }, [wb]);
+
+  const handleDragEnd = useCallback((e) => {
+    e.currentTarget.classList.remove("aw-dragging");
+    setDragOverTarget(null);
+    dragRef.current = { type: null, sectionIdx: null, stepIdx: null };
+  }, []);
 
   // Read any pending payload from Demand Dashboard (written to localStorage before navigation)
   const [pendingPayload] = useState(() => {
@@ -237,8 +304,17 @@ export default function AuthoringWorkbench() {
         <>
           {/* Modules (sections) */}
           {(wb.v2Path?.sections || []).map((section, sIdx) => (
-            <div key={section.id || sIdx} className="aw-glass-card aw-section-card">
+            <div
+              key={section.id || sIdx}
+              className={`aw-glass-card aw-section-card${dragOverTarget?.type === "module" && dragOverTarget?.idx === sIdx ? " aw-drag-over" : ""}`}
+              draggable
+              onDragStart={(e) => handleModuleDragStart(e, sIdx)}
+              onDragOver={(e) => handleModuleDragOver(e, sIdx)}
+              onDrop={(e) => handleModuleDrop(e, sIdx)}
+              onDragEnd={handleDragEnd}
+            >
               <div className="aw-module-header">
+                <span className="aw-drag-handle" title="Drag to reorder">⋮⋮</span>
                 <span className="aw-module-number">Module {sIdx + 1}</span>
                 <input
                   className="aw-module-title-input"
@@ -256,8 +332,17 @@ export default function AuthoringWorkbench() {
 
               {/* Lessons (steps) */}
               {(section.steps || []).map((step, stIdx) => (
-                <div key={step.id || stIdx} className="aw-glass-card aw-step-card">
+                <div
+                  key={step.id || stIdx}
+                  className={`aw-glass-card aw-step-card${dragOverTarget?.type === "lesson" && dragOverTarget?.sIdx === sIdx && dragOverTarget?.stIdx === stIdx ? " aw-drag-over" : ""}`}
+                  draggable
+                  onDragStart={(e) => handleLessonDragStart(e, sIdx, stIdx)}
+                  onDragOver={(e) => handleLessonDragOver(e, sIdx, stIdx)}
+                  onDrop={(e) => handleLessonDrop(e, sIdx, stIdx)}
+                  onDragEnd={handleDragEnd}
+                >
                   <div className="aw-step-header">
+                    <span className="aw-drag-handle aw-drag-handle-sm" title="Drag to reorder">⋮⋮</span>
                     <div className="aw-step-label-group">
                       <span className="aw-step-label">Lesson</span>
                       <span className="aw-step-number">{stIdx + 1}</span>
