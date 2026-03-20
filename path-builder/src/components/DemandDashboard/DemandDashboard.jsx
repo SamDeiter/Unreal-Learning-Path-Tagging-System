@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirebaseApp } from "../../services/firebaseConfig";
 import "./DemandDashboard.css";
 
 // ── Source chip rendering ──────────────────────────────────
@@ -134,7 +135,8 @@ function ScrapeButton({ onComplete }) {
     setStatus("triggering");
     setMessage("");
     try {
-      const functions = getFunctions();
+      const app = getFirebaseApp();
+      const functions = getFunctions(app);
       const trigger = httpsCallable(functions, "triggerDemandScrape");
       const result = await trigger();
       setStatus("success");
