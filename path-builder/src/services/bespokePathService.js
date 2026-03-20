@@ -205,29 +205,35 @@ Interpreted as UE5 topic: "${rewrittenQuery}"
 
 This is an Unreal Engine 5 learning platform. The student wants to achieve this IN the UE5 editor.
 
-Create a 4-6 step learning path with these categories:
-- prerequisite (1-2 steps): UE5 editor concepts the student needs first
-- core (2-3 steps): The main implementation — specific step-by-step workflow in the UE5 editor
-- practice (1-2 steps): Hands-on exercises to apply the knowledge
+Create a course with 2-4 MODULES (chapters). Each module should answer ONE specific question or teach ONE specific skill.
+
+For each step, specify:
+- "module": A descriptive SEO-friendly module title. Example: "How to set up a Nav Mesh" or "Configuring AI Patrol Behavior"
+- "category": One of "prerequisite", "core", or "practice" (used for ordering)
+- "title": A 3-6 word gerund phrase for the specific lesson within the module
+- "summary": 3-5 sentences, second person ("you"), plain text only
+- "lessonType": One of "Video", "Quiz", "Walkthrough" (what type of content this lesson should be)
 
 CRITICAL RULES:
 1. TITLE FORMAT: 3-6 word gerund phrases. Examples: "Importing a Skeletal Mesh", "Setting Up Animation Blueprints", "Configuring Physics Assets".
-2. Every title and summary MUST reference specific UE5 features: actual panel names (Details, Content Browser, Outliner), node names, property names, menu paths.
-3. PRIORITIZE Blueprint-based approaches over C++ unless the query explicitly mentions C++.
-4. ASSET ASSUMPTION: The student gets pre-made 3D assets from FAB (Unreal Marketplace) or imports FBX files. "Create/Make" means SETTING UP the asset in UE5 — NOT modeling from scratch. Never suggest Blender, Maya, or external modeling tools.
-5. For "create/make [object]" queries:
+2. MODULE TITLES: Must be descriptive and SEO-friendly. They should read like chapter titles, e.g. "How to set up a Nav Mesh" NOT "Understand" or "Implement".
+3. Every title and summary MUST reference specific UE5 features: actual panel names (Details, Content Browser, Outliner), node names, property names, menu paths.
+4. PRIORITIZE Blueprint-based approaches over C++ unless the query explicitly mentions C++.
+5. ASSET ASSUMPTION: The student gets pre-made 3D assets from FAB (Unreal Marketplace) or imports FBX files. "Create/Make" means SETTING UP the asset in UE5 — NOT modeling from scratch. Never suggest Blender, Maya, or external modeling tools.
+6. For "create/make [object]" queries:
    Step 1: Download from FAB or import an FBX of the object
    Step 2: Set up Materials in the Material Editor
    Step 3: Create a Blueprint Actor with the appropriate mesh component (Static Mesh or Skeletal Mesh)
    Step 4: Configure collision, physics, and gameplay properties
    Step 5: Place in the level and test
-6. Each summary: 3-5 sentences, second person ("you"), plain text only — no markdown.
-7. UE5 ONLY: Never reference UE4. All instructions must be UE5.5-specific.
-8. NEVER generate content about real-world events, shows, competitions, or venues. Stay focused on the UE5 editor workflow.
+7. Each summary: 3-5 sentences, second person ("you"), plain text only — no markdown.
+8. UE5 ONLY: Never reference UE4. All instructions must be UE5.5-specific.
+9. NEVER generate content about real-world events, shows, competitions, or venues. Stay focused on the UE5 editor workflow.
+10. Include at least ONE quiz lesson per module to verify understanding.
 ${adaptiveContext}
 
 Return a JSON array:
-[{"category": "prerequisite", "title": "Importing the Horse Skeletal Mesh", "summary": "Open the Content Browser and use the Import button to bring in your FBX horse model..."}]`;
+[{"module": "How to Import and Set Up a Horse Character", "category": "prerequisite", "title": "Importing the Horse Skeletal Mesh", "summary": "Open the Content Browser and use the Import button to bring in your FBX horse model...", "lessonType": "Video"}]`;
 
   try {
     const app = getFirebaseApp();

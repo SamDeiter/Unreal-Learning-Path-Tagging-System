@@ -42,62 +42,128 @@ export function adaptBespokePath(bespokeResult) {
 
   const { path, bridges = [], query = "" } = bespokeResult;
 
-  // Group steps by section phase
-  const sectionBuckets = { prerequisite: [], core: [], practice: [] };
+  // Detect whether the AI generated module names
+  const hasModuleNames = path.some((step) => step.module);
 
-  path.forEach((step, idx) => {
-    const category = (step.category || "core").toLowerCase();
-    const sectionPhase = CATEGORY_TO_SECTION[category] || "core";
-    const bridge = bridges[idx] || null;
-    const bridgeText = bridge?.text || bridge?.narration || "";
+  let sections;
 
-    // Resolve summary through quality gate
-    const rawSummary =
-      step.summary ||
-      step.segment?.summary ||
-      step.segment?.text ||
-      step.description ||
-      "";
-    const { text: cleanSummary } = ensureQualitySummary(
-      rawSummary,
-      resolveStepTitle(step, idx),
-      category
-    );
+  if (hasModuleNames) {
+    // ── New: Group by AI-generated module name ─────────────────
+    const moduleMap = new Map(); // module title → { phase, steps[] }
 
-    const v2Step = createV2Step({
-      id: step.segment?.id || `bespoke-${idx}`,
-      title: resolveStepTitle(step, idx),
-      summary: cleanSummary,
-      category,
-      // Extract teaching fields from existing pipeline enrichment
-      whyThisMatters: step.gemini_enriched?.one_sentence_summary || "",
-      whatToDo: extractWhatToDo(step),
-      howToVerify: [],
-      commonMistake: extractCommonMistake(step),
-      takeaway: step.gemini_enriched?.takeaway || step.takeaway || "",
-      completionType: step.video || step.segment?.videoUrl ? "watch" : "do",
-      goDeeper: extractGoDeeper(step),
-      source: {
-        type: step.segment?.type || step.segment?.source || "unknown",
-        url: step.segment?.videoUrl || step.segment?.url || "",
-        videoTitle: step.segment?.videoTitle || "",
-        timestamp: step.segment?.startTimestamp || "",
-      },
-      video: extractVideoFromStep(step),
-      estimatedMinutes: step.segment?.durationSeconds
-        ? Math.ceil(step.segment.durationSeconds / 60)
-        : 3,
-      _originalSegment: step.segment || null,
-      _bridgeText: bridgeText,
+    path.forEach((step, idx) => {
+      const moduleName = step.module || `Module ${idx + 1}`;
+      const category = (step.category || "core").toLowerCase();
+      const sectionPhase = CATEGORY_TO_SECTION[category] || "core";
+      const bridge = bridges[idx] || null;
+      const bridgeText = bridge?.text || bridge?.narration || "";
+
+      const rawSummary =
+        step.summary ||
+        step.segment?.summary ||
+        step.segment?.text ||
+        step.description ||
+        "";
+      const { text: cleanSummary } = ensureQualitySummary(
+        rawSummary,
+        resolveStepTitle(step, idx),
+        category
+      );
+
+      const v2Step = createV2Step({
+        id: step.segment?.id || `bespoke-${idx}`,
+        title: resolveStepTitle(step, idx),
+        summary: cleanSummary,
+        category,
+        lessonType: step.lessonType || "Video",
+        whyThisMatters: step.gemini_enriched?.one_sentence_summary || "",
+        whatToDo: extractWhatToDo(step),
+        howToVerify: [],
+        commonMistake: extractCommonMistake(step),
+        takeaway: step.gemini_enriched?.takeaway || step.takeaway || "",
+        completionType: step.lessonType === "Quiz" ? "verify" : (step.video || step.segment?.videoUrl ? "watch" : "do"),
+        goDeeper: extractGoDeeper(step),
+        source: {
+          type: step.segment?.type || step.segment?.source || "unknown",
+          url: step.segment?.videoUrl || step.segment?.url || "",
+          videoTitle: step.segment?.videoTitle || "",
+          timestamp: step.segment?.startTimestamp || "",
+        },
+        video: extractVideoFromStep(step),
+        estimatedMinutes: step.segment?.durationSeconds
+          ? Math.ceil(step.segment.durationSeconds / 60)
+          : 3,
+        quiz: step.lessonType === "Quiz" ? { questions: [{ text: "", options: ["", "", "", ""], correctIndex: 0, explanation: "" }] } : null,
+        _originalSegment: step.segment || null,
+        _bridgeText: bridgeText,
+      });
+
+      if (!moduleMap.has(moduleName)) {
+        moduleMap.set(moduleName, { phase: sectionPhase, steps: [] });
+      }
+      moduleMap.get(moduleName).steps.push(v2Step);
     });
 
-    sectionBuckets[sectionPhase].push(v2Step);
-  });
+    // Convert module map → sections, preserving insertion order
+    sections = Array.from(moduleMap.entries()).map(([title, { phase, steps }]) =>
+      createV2Section(phase, steps, { title, id: `module-${title.replace(/\s+/g, "-").toLowerCase().slice(0, 30)}` })
+    );
+  } else {
+    // ── Legacy: Group by phase (backward compat) ──────────────
+    const sectionBuckets = { prerequisite: [], core: [], practice: [] };
 
-  // Build sections (only non-empty)
-  const sections = SECTION_PHASES
-    .filter((phase) => sectionBuckets[phase].length > 0)
-    .map((phase) => createV2Section(phase, sectionBuckets[phase]));
+    path.forEach((step, idx) => {
+      const category = (step.category || "core").toLowerCase();
+      const sectionPhase = CATEGORY_TO_SECTION[category] || "core";
+      const bridge = bridges[idx] || null;
+      const bridgeText = bridge?.text || bridge?.narration || "";
+
+      const rawSummary =
+        step.summary ||
+        step.segment?.summary ||
+        step.segment?.text ||
+        step.description ||
+        "";
+      const { text: cleanSummary } = ensureQualitySummary(
+        rawSummary,
+        resolveStepTitle(step, idx),
+        category
+      );
+
+      const v2Step = createV2Step({
+        id: step.segment?.id || `bespoke-${idx}`,
+        title: resolveStepTitle(step, idx),
+        summary: cleanSummary,
+        category,
+        lessonType: step.lessonType || "Video",
+        whyThisMatters: step.gemini_enriched?.one_sentence_summary || "",
+        whatToDo: extractWhatToDo(step),
+        howToVerify: [],
+        commonMistake: extractCommonMistake(step),
+        takeaway: step.gemini_enriched?.takeaway || step.takeaway || "",
+        completionType: step.video || step.segment?.videoUrl ? "watch" : "do",
+        goDeeper: extractGoDeeper(step),
+        source: {
+          type: step.segment?.type || step.segment?.source || "unknown",
+          url: step.segment?.videoUrl || step.segment?.url || "",
+          videoTitle: step.segment?.videoTitle || "",
+          timestamp: step.segment?.startTimestamp || "",
+        },
+        video: extractVideoFromStep(step),
+        estimatedMinutes: step.segment?.durationSeconds
+          ? Math.ceil(step.segment.durationSeconds / 60)
+          : 3,
+        _originalSegment: step.segment || null,
+        _bridgeText: bridgeText,
+      });
+
+      sectionBuckets[sectionPhase].push(v2Step);
+    });
+
+    sections = SECTION_PHASES
+      .filter((phase) => sectionBuckets[phase].length > 0)
+      .map((phase) => createV2Section(phase, sectionBuckets[phase]));
+  }
 
   const totalSteps = path.length;
 
@@ -113,11 +179,9 @@ export function adaptBespokePath(bespokeResult) {
     sections,
     _sourceFormat: "bespoke",
     _originalQuery: query,
-    // Preserve metadata for gap analysis, community pain points, etc.
     _gaps: bespokeResult.gaps || null,
     _communityPainPoints: bespokeResult.communityPainPoints || [],
     _bridges: bridges,
-    // Preserve the original path array for backward compat
     _originalPath: path,
   });
 }

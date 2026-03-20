@@ -16,8 +16,9 @@
  *   - v3Adapter → V3 viewer export
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { devLog, devWarn } from "../utils/logger";
+import { DIFFICULTY_LEVELS, LESSON_TYPES } from "../schemas/LearningPathV2";
 
 // ── Workflow Stages ────────────────────────────────────────
 
@@ -204,6 +205,96 @@ export default function useAuthoringWorkbench() {
     });
   }, []);
 
+  // ── Review: Edit Section (Module) Fields ─────────────────
+
+  const updateSectionField = useCallback((sectionIdx, field, value) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      if (updated.sections?.[sectionIdx]) {
+        updated.sections[sectionIdx][field] = value;
+      }
+      return updated;
+    });
+  }, []);
+
+  // ── Review: Add Lesson to a Module ──────────────────────
+
+  const addLesson = useCallback((sectionIdx, lessonType = "Video") => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const section = updated.sections?.[sectionIdx];
+      if (!section) return prev;
+      const newStep = {
+        id: `step-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: "New Lesson",
+        lessonType,
+        whyThisMatters: "",
+        whatToDo: [],
+        howToVerify: [],
+        commonMistake: "",
+        takeaway: "",
+        summary: "",
+        category: section.phase || "core",
+        completionType: lessonType === "Quiz" ? "verify" : "do",
+        estimatedMinutes: 3,
+        source: {},
+        video: null,
+        goDeeper: [],
+        quiz: lessonType === "Quiz" ? { questions: [{ text: "", options: ["", "", "", ""], correctIndex: 0, explanation: "" }] } : null,
+        _editorialStatus: "raw",
+      };
+      section.steps = [...(section.steps || []), newStep];
+      return updated;
+    });
+  }, []);
+
+  // ── Review: Quiz Authoring ──────────────────────────────
+
+  const addQuizQuestion = useCallback((sectionIdx, stepIdx) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const step = updated.sections?.[sectionIdx]?.steps?.[stepIdx];
+      if (!step) return prev;
+      if (!step.quiz) step.quiz = { questions: [] };
+      step.quiz.questions.push({ text: "", options: ["", "", "", ""], correctIndex: 0, explanation: "" });
+      return updated;
+    });
+  }, []);
+
+  const removeQuizQuestion = useCallback((sectionIdx, stepIdx, questionIdx) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const step = updated.sections?.[sectionIdx]?.steps?.[stepIdx];
+      if (!step?.quiz?.questions) return prev;
+      step.quiz.questions.splice(questionIdx, 1);
+      return updated;
+    });
+  }, []);
+
+  const updateQuizQuestion = useCallback((sectionIdx, stepIdx, questionIdx, field, value) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      const updated = structuredClone(prev);
+      const q = updated.sections?.[sectionIdx]?.steps?.[stepIdx]?.quiz?.questions?.[questionIdx];
+      if (!q) return prev;
+      q[field] = value;
+      return updated;
+    });
+  }, []);
+
+  // ── Review: Course-Level Metadata ───────────────────────
+
+  const updateCourseField = useCallback((field, value) => {
+    setV2Path((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value };
+    });
+  }, []);
+
   // ── Brief: Generate Video Briefs ─────────────────────────
 
   const generateBriefs = useCallback(async () => {
@@ -382,6 +473,20 @@ export default function useAuthoringWorkbench() {
     setSavedDrafts(drafts);
   }, []);
 
+  // ── Computed Stats (auto-calculated, not editable) ────────
+
+  const courseStats = useMemo(() => {
+    const sections = v2Path?.sections || [];
+    const totalLessons = sections.reduce((s, sec) => s + (sec.steps?.length || 0), 0);
+    const totalMinutes = sections.reduce((s, sec) =>
+      s + (sec.steps || []).reduce((m, st) => m + (st.estimatedMinutes || 3), 0), 0);
+    const linkedVideos = sections.reduce((s, sec) =>
+      s + (sec.steps || []).filter((st) => st.video?.url || st.video?.youtubeId || st.video?.driveId).length, 0);
+    const quizCount = sections.reduce((s, sec) =>
+      s + (sec.steps || []).filter((st) => st.lessonType === "Quiz" || st.quiz).length, 0);
+    return { totalLessons, totalMinutes, linkedVideos, quizCount, moduleCount: sections.length };
+  }, [v2Path]);
+
   // ── Reset ────────────────────────────────────────────────
 
   const reset = useCallback(() => {
@@ -408,6 +513,11 @@ export default function useAuthoringWorkbench() {
     loading,
     error,
     progress,
+    courseStats,
+
+    // Constants (for dropdowns)
+    DIFFICULTY_LEVELS,
+    LESSON_TYPES,
 
     // Navigation
     canGoNext,
@@ -422,6 +532,12 @@ export default function useAuthoringWorkbench() {
     updateStepField,
     removeStep,
     reorderStep,
+    updateSectionField,
+    addLesson,
+    addQuizQuestion,
+    removeQuizQuestion,
+    updateQuizQuestion,
+    updateCourseField,
     generateBriefs,
     updateBriefField,
     updateBriefListItem,

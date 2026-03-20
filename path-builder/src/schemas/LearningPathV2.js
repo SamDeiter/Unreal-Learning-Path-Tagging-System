@@ -16,11 +16,16 @@
 // ── Section phases (explicit order) ────────────────────────────────
 export const SECTION_PHASES = ["prerequisite", "core", "practice"];
 
+// Legacy labels — kept for backward compat with existing drafts
 export const SECTION_LABELS = {
   prerequisite: "📘 Understand",
   core: "📗 Implement",
   practice: "📙 Apply & Verify",
 };
+
+// ── Course hierarchy constants ─────────────────────────────────────
+export const DIFFICULTY_LEVELS = ["Beginner", "Medium", "Expert"];
+export const LESSON_TYPES = ["Video", "Quiz", "Audio", "Walkthrough"];
 
 // ── Category → Section mapping ─────────────────────────────────────
 export const CATEGORY_TO_SECTION = {
@@ -82,17 +87,18 @@ export function createV2Path(overrides = {}) {
 /**
  * Create a V2 section with authored purpose.
  */
-export function createV2Section(phase, steps = []) {
+export function createV2Section(phase, steps = [], overrides = {}) {
   return {
-    id: `section-${phase}`,
-    title: SECTION_LABELS[phase] || phase,
-    purpose: getSectionPurpose(phase),
+    id: overrides.id || `section-${phase}`,
+    title: overrides.title || SECTION_LABELS[phase] || phase,
+    description: overrides.description || getSectionPurpose(phase),
+    purpose: overrides.description || getSectionPurpose(phase),
     phase,
     steps,
     // Module verification fields (Phase 4 extension)
-    outcome: "",                 // Expected learning outcome for this section/module
-    verificationPrompt: "",      // "Can you explain X?" / "Did this fix Y?"
-    exitCondition: "quiz",       // 'quiz' | 'self-report' | 'ue-test' | 'none'
+    outcome: overrides.outcome || "",
+    verificationPrompt: overrides.verificationPrompt || "",
+    exitCondition: overrides.exitCondition || "quiz",
   };
 }
 
@@ -125,7 +131,9 @@ function getSectionPurpose(phase) {
 export function createV2Step(fields = {}) {
   return {
     id: fields.id || `step-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    title: fields.title || "Untitled Step",
+    title: fields.title || "Untitled Lesson",
+    // Lesson type (Video, Quiz, Audio, Walkthrough)
+    lessonType: fields.lessonType || "Video",
     // Structured teaching fields
     whyThisMatters: fields.whyThisMatters || "",
     whatToDo: fields.whatToDo || [],         // string[] — ordered actions
@@ -142,6 +150,8 @@ export function createV2Step(fields = {}) {
     source: fields.source || {},
     video: fields.video || null,
     goDeeper: fields.goDeeper || [],         // { label, url, type }[]
+    // Quiz data (only used when lessonType === "Quiz")
+    quiz: fields.quiz || null,
     // Pass-through for backward compat
     _originalSegment: fields._originalSegment || null,
     _bridgeText: fields._bridgeText || "",

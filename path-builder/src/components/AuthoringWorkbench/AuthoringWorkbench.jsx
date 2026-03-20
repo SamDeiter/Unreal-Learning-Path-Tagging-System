@@ -164,27 +164,91 @@ export default function AuthoringWorkbench() {
 
   const renderReviewStage = () => (
     <div className="aw-review-stage">
+      {/* Course-level metadata */}
       <div className="aw-review-header">
-        <h2>{wb.v2Path?.title || "Course Outline"}</h2>
-        <p className="aw-subtitle">Edit steps, reorder, or remove content before generating briefs.</p>
+        <input
+          className="aw-course-title-input"
+          value={wb.v2Path?.title || ""}
+          onChange={(e) => wb.updateCourseField("title", e.target.value)}
+          placeholder="Course Title"
+        />
+        <p className="aw-subtitle">Edit modules and lessons. Reorder, add, or remove content.</p>
+
+        {/* Auto-calculated stats bar */}
+        <div className="aw-course-stats-bar">
+          <span className="aw-stat-chip">{wb.courseStats.moduleCount} Modules</span>
+          <span className="aw-stat-chip">{wb.courseStats.totalLessons} Lessons</span>
+          <span className="aw-stat-chip">~{wb.courseStats.totalMinutes} min</span>
+          {wb.courseStats.quizCount > 0 && <span className="aw-stat-chip">📝 {wb.courseStats.quizCount} Quizzes</span>}
+        </div>
+
+        {/* Difficulty dropdown */}
+        <div className="aw-course-meta-row">
+          <label className="aw-meta-label">
+            Difficulty
+            <select
+              className="aw-select"
+              value={wb.v2Path?.difficulty || "Beginner"}
+              onChange={(e) => wb.updateCourseField("difficulty", e.target.value)}
+            >
+              {wb.DIFFICULTY_LEVELS.map((lvl) => (
+                <option key={lvl} value={lvl}>{lvl}</option>
+              ))}
+            </select>
+          </label>
+          <label className="aw-meta-label">
+            Description
+            <textarea
+              className="aw-course-desc-input"
+              value={wb.v2Path?.learnerGoal || ""}
+              onChange={(e) => wb.updateCourseField("learnerGoal", e.target.value)}
+              rows={2}
+              placeholder="What will the student achieve?"
+            />
+          </label>
+        </div>
       </div>
 
+      {/* Modules (sections) */}
       {(wb.v2Path?.sections || []).map((section, sIdx) => (
         <div key={section.id || sIdx} className="aw-section-card">
-          <h3 className="aw-section-title">
-            {section.title || section.phase || `Chapter ${sIdx + 1}`}
-          </h3>
-          {section.purpose && <p className="aw-section-purpose">{section.purpose}</p>}
+          <div className="aw-module-header">
+            <span className="aw-module-badge">Module {sIdx + 1}</span>
+            <input
+              className="aw-section-title-input"
+              value={section.title || ""}
+              onChange={(e) => wb.updateSectionField(sIdx, "title", e.target.value)}
+              placeholder="Module title (e.g., How to set up a Nav Mesh)"
+            />
+          </div>
+          <textarea
+            className="aw-section-desc-input"
+            value={section.description || section.purpose || ""}
+            onChange={(e) => wb.updateSectionField(sIdx, "description", e.target.value)}
+            rows={2}
+            placeholder="Module description..."
+          />
 
+          {/* Lessons (steps) */}
           {(section.steps || []).map((step, stIdx) => (
             <div key={step.id || stIdx} className="aw-step-card">
               <div className="aw-step-header">
-                <span className="aw-step-number">{stIdx + 1}</span>
+                <span className="aw-step-number">Lesson {stIdx + 1}</span>
                 <input
                   className="aw-step-title-input"
                   value={step.title || ""}
                   onChange={(e) => wb.updateStepField(sIdx, stIdx, "title", e.target.value)}
                 />
+                {/* Lesson type dropdown */}
+                <select
+                  className="aw-select aw-select-sm"
+                  value={step.lessonType || "Video"}
+                  onChange={(e) => wb.updateStepField(sIdx, stIdx, "lessonType", e.target.value)}
+                >
+                  {wb.LESSON_TYPES.map((lt) => (
+                    <option key={lt} value={lt}>{lt}</option>
+                  ))}
+                </select>
                 <div className="aw-step-actions">
                   <button
                     className="aw-btn-icon"
@@ -201,7 +265,7 @@ export default function AuthoringWorkbench() {
                   <button
                     className="aw-btn-icon aw-btn-danger"
                     onClick={() => wb.removeStep(sIdx, stIdx)}
-                    title="Remove step"
+                    title="Remove lesson"
                   >✕</button>
                 </div>
               </div>
@@ -228,9 +292,87 @@ export default function AuthoringWorkbench() {
                     🎬 Video: {step.video.title || "Linked"}
                   </div>
                 )}
+
+                {/* Quiz Builder — only shown when lessonType is Quiz */}
+                {step.lessonType === "Quiz" && (
+                  <div className="aw-quiz-builder">
+                    <h4>📝 Quiz Questions</h4>
+                    {(step.quiz?.questions || []).map((q, qIdx) => (
+                      <div key={qIdx} className="aw-quiz-question-card">
+                        <div className="aw-quiz-q-header">
+                          <span className="aw-quiz-q-num">Q{qIdx + 1}</span>
+                          <button
+                            className="aw-btn-icon aw-btn-danger"
+                            onClick={() => wb.removeQuizQuestion(sIdx, stIdx, qIdx)}
+                            title="Remove question"
+                          >✕</button>
+                        </div>
+                        <input
+                          className="aw-quiz-q-input"
+                          value={q.text || ""}
+                          onChange={(e) => wb.updateQuizQuestion(sIdx, stIdx, qIdx, "text", e.target.value)}
+                          placeholder="Question text..."
+                        />
+                        <div className="aw-quiz-options">
+                          {(q.options || []).map((opt, oIdx) => (
+                            <div key={oIdx} className="aw-quiz-option-row">
+                              <input
+                                type="radio"
+                                name={`q-${sIdx}-${stIdx}-${qIdx}`}
+                                checked={q.correctIndex === oIdx}
+                                onChange={() => wb.updateQuizQuestion(sIdx, stIdx, qIdx, "correctIndex", oIdx)}
+                                title="Mark as correct"
+                              />
+                              <input
+                                className="aw-quiz-option-input"
+                                value={opt}
+                                onChange={(e) => {
+                                  const newOpts = [...(q.options || [])];
+                                  newOpts[oIdx] = e.target.value;
+                                  wb.updateQuizQuestion(sIdx, stIdx, qIdx, "options", newOpts);
+                                }}
+                                placeholder={`Option ${oIdx + 1}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <input
+                          className="aw-quiz-explanation-input"
+                          value={q.explanation || ""}
+                          onChange={(e) => wb.updateQuizQuestion(sIdx, stIdx, qIdx, "explanation", e.target.value)}
+                          placeholder="Explanation (shown after answering)"
+                        />
+                      </div>
+                    ))}
+                    <button
+                      className="aw-btn aw-btn-secondary aw-btn-sm"
+                      onClick={() => wb.addQuizQuestion(sIdx, stIdx)}
+                    >
+                      + Add Question
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
+
+          {/* Add Lesson button */}
+          <div className="aw-add-lesson-row">
+            <select className="aw-select aw-select-sm" id={`add-lesson-type-${sIdx}`} defaultValue="Video">
+              {wb.LESSON_TYPES.map((lt) => (
+                <option key={lt} value={lt}>{lt}</option>
+              ))}
+            </select>
+            <button
+              className="aw-btn aw-btn-secondary aw-btn-sm"
+              onClick={() => {
+                const sel = document.getElementById(`add-lesson-type-${sIdx}`);
+                wb.addLesson(sIdx, sel?.value || "Video");
+              }}
+            >
+              + Add Lesson
+            </button>
+          </div>
         </div>
       ))}
 
@@ -268,12 +410,16 @@ export default function AuthoringWorkbench() {
             onChange={(e) => wb.updateBriefField(idx, "stepTitle", e.target.value)}
           />
           <div className="aw-brief-meta">
-            <input
+            <select
               className="aw-brief-tag-input"
-              value={brief.skillLevel || ""}
+              value={brief.skillLevel || "Beginner"}
               onChange={(e) => wb.updateBriefField(idx, "skillLevel", e.target.value)}
               title="Skill level"
-            />
+            >
+              {wb.DIFFICULTY_LEVELS.map((lvl) => (
+                <option key={lvl} value={lvl}>{lvl}</option>
+              ))}
+            </select>
             <input
               className="aw-brief-tag-input"
               value={brief.targetLength || ""}
@@ -410,11 +556,11 @@ export default function AuthoringWorkbench() {
         <div className="aw-export-summary">
           <div className="aw-export-stat">
             <span className="aw-stat-value">{(wb.v2Path?.sections || []).length}</span>
-            <span className="aw-stat-label">Chapters</span>
+            <span className="aw-stat-label">Modules</span>
           </div>
           <div className="aw-export-stat">
             <span className="aw-stat-value">{totalSteps}</span>
-            <span className="aw-stat-label">Steps</span>
+            <span className="aw-stat-label">Lessons</span>
           </div>
           <div className="aw-export-stat">
             <span className="aw-stat-value">{linkedSteps}</span>
