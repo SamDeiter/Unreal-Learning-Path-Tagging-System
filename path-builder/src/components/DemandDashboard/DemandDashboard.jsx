@@ -71,7 +71,60 @@ function SourceChip({ source }) {
   );
 }
 
-// ── Re-scrape trigger button ──────────────────────────────
+// ── Critical Gap Alerts ───────────────────────────────────
+
+function CriticalGapAlerts({ suggestions, painPointsByCategory: _painPointsByCategory, trendingQuestions: _trendingQuestions, onStartAuthoring }) {
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("dismissed-gap-alerts") || "[]");
+    } catch { return []; }
+  });
+
+  const criticalGaps = (suggestions || [])
+    .filter((s) => s.demandScore > 60 && s.coverageInLibrary === 0)
+    .filter((s) => !dismissed.includes(s.topic))
+    .slice(0, 3);
+
+  if (criticalGaps.length === 0) return null;
+
+  const dismiss = (topic) => {
+    const next = [...dismissed, topic];
+    setDismissed(next);
+    localStorage.setItem("dismissed-gap-alerts", JSON.stringify(next));
+  };
+
+  return (
+    <div className="critical-gap-alerts">
+      <div className="alert-header">
+        <span>🚨 Critical Coverage Gaps</span>
+        <span className="alert-count">{criticalGaps.length} topics with high demand but zero coverage</span>
+      </div>
+      {criticalGaps.map((gap) => (
+        <div key={gap.topic} className="gap-alert-card">
+          <div className="gap-alert-content">
+            <div className="gap-alert-title">
+              <strong>{gap.topic}</strong>
+              <span className="gap-alert-category">{gap.category}</span>
+            </div>
+            <div className="gap-alert-stats">
+              <span className="gap-stat demand">📈 Demand: {gap.demandScore}%</span>
+              <span className="gap-stat coverage">📚 Coverage: 0%</span>
+              {gap.redditEngagement && (
+                <span className="gap-stat reddit">🟠 {gap.redditEngagement.postCount} Reddit posts</span>
+              )}
+            </div>
+          </div>
+          <div className="gap-alert-actions">
+            <button className="gap-action-btn primary" onClick={() => onStartAuthoring(gap)}>✍️ Start Authoring</button>
+            <button className="gap-action-btn dismiss" onClick={() => dismiss(gap.topic)}>✕</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── ScrapeButton ──────────────────────────────────────────
 
 function ScrapeButton({ onComplete }) {
   const [status, setStatus] = useState("idle"); // idle | triggering | success | error
@@ -411,13 +464,32 @@ function DemandDashboard() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStartBrief = (suggestion) => {
-    // Navigate to Authoring Workbench with the topic pre-filled
+    // Navigate to Authoring Workbench with rich context
     const query = `${suggestion.topic} in ${suggestion.category}`;
+    const painPoints = report?.painPointsByCategory?.[suggestion.category] || [];
+    const relatedQuestions = (report?.trendingQuestions || []).filter(
+      (q) => q.category?.toLowerCase() === suggestion.category.toLowerCase()
+    );
+
     window.location.hash = "authoring";
-    // Dispatch event so the Authoring Workbench picks up the topic
+    // Dispatch event with enriched payload for workbench pre-population
     setTimeout(() => {
       window.dispatchEvent(
-        new CustomEvent("demand-start-authoring", { detail: { query, suggestion } })
+        new CustomEvent("demand-start-authoring", {
+          detail: {
+            query,
+            suggestion,
+            painPoints: painPoints.slice(0, 5),
+            trendingQuestions: relatedQuestions.slice(0, 5),
+            context: {
+              demandScore: suggestion.demandScore,
+              coverageInLibrary: suggestion.coverageInLibrary,
+              gap: suggestion.gap,
+              confidence: suggestion.confidence,
+              redditEngagement: suggestion.redditEngagement || null,
+            },
+          },
+        })
       );
     }, 300);
   };
@@ -457,6 +529,16 @@ function DemandDashboard() {
           <ScrapeButton onComplete={refresh} />
         </div>
       </div>
+
+      {/* Critical Gap Alerts */}
+      {report && (
+        <CriticalGapAlerts
+          suggestions={report.suggestions}
+          painPointsByCategory={report.painPointsByCategory}
+          trendingQuestions={report.trendingQuestions}
+          onStartAuthoring={handleStartBrief}
+        />
+      )}
 
       {/* Error state */}
       {error && (

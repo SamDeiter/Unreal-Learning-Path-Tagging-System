@@ -53,6 +53,7 @@ Object.assign(exports, require("./ai/logTelemetry"));
 // Scheduled Tasks
 // ============================================================================
 Object.assign(exports, require("./scheduled/cleanupCache"));
+Object.assign(exports, require("./scheduled/checkTokenExpiry"));
 
 // ============================================================================
 // Admin Management
