@@ -211,6 +211,25 @@ function toV3Quiz(v2Section, chapterNum, quizData = null) {
     questions,
   };
 }
+/**
+ * Generate a V3 QUIZ step from V2 quiz data.
+ */
+function toV3QuizStep(v2Step, chapterNum) {
+  const quiz = v2Step.quiz;
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) return null;
+
+  return {
+    id: nextStepId(chapterNum),
+    type: "QUIZ",
+    title: v2Step.title || "Lesson Quiz",
+    questions: quiz.questions.map(q => ({
+      text: q.text || q.question || "",
+      options: q.options || q.choices || [],
+      correctIndex: q.correctIndex ?? q.correctAnswer ?? 0,
+      explanation: q.explanation || q.feedback || "",
+    })),
+  };
+}
 
 // ── Main Converter ─────────────────────────────────────────
 
@@ -235,6 +254,7 @@ export function convertV2ToV3(v2Path, { quizzes = {} } = {}) {
       industryFocus: "Games",
       engineVersion: "5.5",
       tags: extractTags(v2Path),
+      description: v2Path.learnerGoal || "",
     },
     chapters: [],
   };
@@ -248,27 +268,33 @@ export function convertV2ToV3(v2Path, { quizzes = {} } = {}) {
     const chapter = {
       id: chapterId,
       number: chapterNum,
-      title: section.title || SECTION_LABELS[section.phase] || `Chapter ${chapterNum}`,
-      description: section.purpose || "",
+      title: section.title || SECTION_LABELS[section.phase] || `Module ${chapterNum}`,
+      description: section.purpose || section.description || "",
       steps: [],
     };
 
     for (const step of section.steps || []) {
       // 1. Always start with an AI_TRANSITION introducing the step
-      chapter.steps.push(toV3Transition(step, chapterNum));
+      // (Unless it's a quiz, which often serves as its own transition)
+      if (step.lessonType !== "Quiz") {
+        chapter.steps.push(toV3Transition(step, chapterNum));
+      }
 
-      // 2. Add content step based on whether video exists
-      if (step.video?.url || step.video?.video_url) {
+      // 2. Add content step based on lessonType
+      if (step.lessonType === "Quiz") {
+        const quizStep = toV3QuizStep(step, chapterNum);
+        if (quizStep) chapter.steps.push(quizStep);
+      } else if (step.video?.url || step.video?.video_url || step.lessonType === "Video") {
         chapter.steps.push(toV3Video(step, chapterNum));
       } else {
         chapter.steps.push(toV3Doc(step, chapterNum));
       }
     }
 
-    // 3. Add quiz at end of chapter
-    const quiz = toV3Quiz(section, chapterNum, quizzes[section.id]);
-    if (quiz) {
-      chapter.steps.push(quiz);
+    // 3. Add section-level quiz if present in options (legacy support)
+    const sectionQuiz = toV3Quiz(section, chapterNum, quizzes[section.id]);
+    if (sectionQuiz) {
+      chapter.steps.push(sectionQuiz);
     }
 
     course.chapters.push(chapter);

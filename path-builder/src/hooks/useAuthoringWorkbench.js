@@ -67,6 +67,7 @@ export default function useAuthoringWorkbench() {
   const [briefs, setBriefs] = useState(saved?.briefs || []);
   const [briefMarkdown, setBriefMarkdown] = useState(saved?.briefMarkdown || "");
   const [loading, setLoading] = useState(false);
+  const [generatingQuizFor, setGeneratingQuizFor] = useState(null);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState({ current: 0, total: 0, label: "" });
   const [savedDrafts, setSavedDrafts] = useState(loadDrafts);
@@ -285,6 +286,80 @@ export default function useAuthoringWorkbench() {
       return updated;
     });
   }, []);
+
+  const generateQuizForStep = useCallback(async (sectionIdx, stepIdx) => {
+    if (!v2Path) return;
+    const section = v2Path.sections[sectionIdx];
+    const step = section?.steps?.[stepIdx];
+    if (!step) return;
+
+    setGeneratingQuizFor(`${sectionIdx}-${stepIdx}`);
+    setError(null);
+
+    try {
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const { getFirebaseApp } = await import("../services/firebaseConfig");
+      const { retryWithBackoff } = await import("../utils/retryWithBackoff");
+      const app = getFirebaseApp();
+      const functions = getFunctions(app, "us-central1");
+      const classifyFn = httpsCallable(functions, "classifySegments");
+
+      const prompt = `You are an expert Unreal Engine 5 instructor creating a multiple-choice quiz.
+Create exactly 3 quiz questions for this lesson:
+Course Topic: ${v2Path.title || topic}
+Module: ${section.title}
+Lesson Title: ${step.title}
+Lesson Context: ${step.whyThisMatters || step.summary || 'Test knowledge on this topic'}
+
+Return a valid JSON array of question objects matching this exact format:
+[
+  {
+    "text": "The question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctIndex": 0,
+    "explanation": "Why this is correct."
+  }
+]
+Constraints:
+1. Provide exactly 4 options per question.
+2. Return ONLY valid JSON, no markdown formatting.
+3. Make the questions relevant to Unreal Engine 5.`;
+
+      const result = await retryWithBackoff(() => classifyFn({ prompt }), {
+        maxRetries: 2,
+        baseDelayMs: 1000,
+        label: "generateQuiz",
+      });
+      const responseText = result.data?.text || "";
+      
+      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error("Failed to parse AI response into JSON array.");
+      
+      let jsonStr = jsonMatch[0]
+        .replace(/```json?\s*/gi, "")
+        .replace(/```\s*/g, "");
+      
+      const generatedQuestions = JSON.parse(jsonStr);
+
+      if (Array.isArray(generatedQuestions)) {
+        setV2Path((prev) => {
+          if (!prev) return prev;
+          const updated = structuredClone(prev);
+          if (!updated.sections[sectionIdx].steps[stepIdx].quiz) {
+            updated.sections[sectionIdx].steps[stepIdx].quiz = { questions: [] };
+          }
+          updated.sections[sectionIdx].steps[stepIdx].quiz.questions = generatedQuestions;
+          return updated;
+        });
+      }
+      devLog(`[Authoring] Automatically generated ${generatedQuestions.length} quiz questions for Step ${stepIdx}.`);
+    } catch (err) {
+      devWarn("[Authoring] Quiz generation failed:", err.message);
+      setError(`Failed to generate quiz: ${err.message}`);
+    } finally {
+      setGeneratingQuizFor(null);
+    }
+  }, [v2Path, topic]);
 
   // ── Review: Course-Level Metadata ───────────────────────
 
@@ -537,6 +612,8 @@ export default function useAuthoringWorkbench() {
     addQuizQuestion,
     removeQuizQuestion,
     updateQuizQuestion,
+    generateQuizForStep,
+    generatingQuizFor,
     updateCourseField,
     generateBriefs,
     updateBriefField,
