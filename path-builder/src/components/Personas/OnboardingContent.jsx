@@ -160,7 +160,24 @@ export function OnboardingYouTubeSection({ youtube, isInCart, addToCart, removeF
   );
 }
 
-const FILM_ONLY_TOPICS = ["control rig", "metahuman", "virtual production", "composure", "icvfx"];
+// Industries allowed per persona industry — courses outside these are filtered out
+const INDUSTRY_ALLOW_MAP = {
+  games:         ["games", "simulation", "general", ""],
+  animation:     ["animation", "media & entertainment", "simulation", "general", ""],
+  vfx:           ["animation", "media & entertainment", "simulation", "general", ""],
+  architecture:  ["architecture", "simulation", "general", ""],
+  automotive:    ["automotive", "simulation", "general", ""],
+  simulation:    ["simulation", "general", ""],
+  visualization: ["visualization", "simulation", "general", ""],
+};
+
+// Title-based exclusions as a safety net (industry tag might be wrong/missing)
+const FILM_ONLY_TITLE_KEYWORDS = [
+  "virtual production", "composure", "icvfx",
+  "linear content", "datasmith", "digital twin",
+  "for aec", "for architecture", "for automotive",
+  "broadcast", "ndisplay", "stage operator",
+];
 
 export function OnboardingVideosByRole({
   courses,
@@ -171,12 +188,20 @@ export function OnboardingVideosByRole({
   experience,
   persona,
 }) {
-  // Exclude film/cinematic courses for games personas
-  const isGames = persona?.industry?.toLowerCase() === "games";
-  const filteredCourses = isGames
+  // Filter courses to only those relevant to the user's industry
+  const pIndustry = (persona?.industry || "general").toLowerCase();
+  const allowedIndustries = INDUSTRY_ALLOW_MAP[pIndustry] || null;
+
+  const filteredCourses = allowedIndustries
     ? courses.filter((c) => {
+        const cIndustry = (c.tags?.industry || "general").toLowerCase();
         const t = (c.title || c.name || "").toLowerCase();
-        return !FILM_ONLY_TOPICS.some((film) => t.includes(film));
+        // Must be in allowed industry list
+        if (!allowedIndustries.includes(cIndustry)) return false;
+        // Safety net: also exclude by title keywords for edge cases
+        if (FILM_ONLY_TITLE_KEYWORDS.some((kw) => t.includes(kw)) && pIndustry === "games")
+          return false;
+        return true;
       })
     : courses;
   // Build video result objects from courses — never filter out, just assign roles
