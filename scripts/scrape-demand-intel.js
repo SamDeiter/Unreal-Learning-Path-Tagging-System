@@ -58,13 +58,15 @@ function initFirestore() {
   }
 
   try {
-    const serviceAccount = JSON.parse(
-      Buffer.from(FIREBASE_SA_B64, "base64").toString("utf-8")
-    );
-
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
+    // Guard against double initialization (called for YouTube read + report write)
+    if (admin.apps.length === 0) {
+      const serviceAccount = JSON.parse(
+        Buffer.from(FIREBASE_SA_B64, "base64").toString("utf-8")
+      );
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    }
 
     return admin.firestore();
   } catch (err) {
@@ -695,9 +697,12 @@ async function main() {
   // ── Layer 2c: Reddit engagement data (real post counts) ─────────
   const redditEngagement = await scrapeRedditEngagement(taxonomy);
 
+  // ── Initialize Firebase once — reused for YouTube read + report write ──
+  const db = initFirestore();
+
   // ── Layer 2d: YouTube metrics (if available from prior scrape) ───
   let youtubeMetrics = null;
-  const ytDb = initFirestore();
+  const ytDb = db;
   if (ytDb) {
     try {
       const ytDoc = await ytDb.doc("demand_intel/youtube_metrics").get();
@@ -743,8 +748,7 @@ async function main() {
   console.log(`   Reddit subtopics: ${report.provenance.redditEngagement.subtopicsScanned}`);
   console.log(`   Time: ${report.generationTimeMs}ms`);
 
-  // ── Write to Firestore ──────────────────────────────────────────
-  const db = initFirestore();
+  // ── Write to Firestore (reuse db from earlier) ─────────────────
   if (db) {
     console.log("\n🔥 Writing to Firestore...");
     const today = new Date().toISOString().split("T")[0];
