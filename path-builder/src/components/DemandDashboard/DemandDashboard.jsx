@@ -13,6 +13,7 @@
 import { useState, useEffect } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
+import { computePlatformBreakdown, aggregatePlatformDemand, PLATFORM_META } from "../../utils/decayDetector";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import "./DemandDashboard.css";
@@ -200,6 +201,12 @@ function ConfidenceBadge({ confidence }) {
 
 function SuggestionCard({ suggestion, rank, onStartBrief }) {
   const [expanded, setExpanded] = useState(false);
+  const breakdown = computePlatformBreakdown(suggestion);
+
+  // Build platform source badges — only show platforms with score > 0
+  const activePlatforms = Object.entries(breakdown)
+    .filter(([key, val]) => PLATFORM_META[key] && typeof val === "number" && val > 0)
+    .sort(([, a], [, b]) => b - a);
 
   return (
     <div className={`suggestion-card confidence-${suggestion.confidence}`}>
@@ -207,7 +214,21 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
         <span className="suggestion-rank" title={`Ranked #${rank} by opportunity score (gap × demand)`}>#{rank}</span>
         <div className="suggestion-info">
           <h4 className="suggestion-topic">{suggestion.topic}</h4>
-          <span className="suggestion-category" title="UE5 content category">{suggestion.category}</span>
+          <div className="suggestion-meta-row">
+            <span className="suggestion-category" title="UE5 content category">{suggestion.category}</span>
+            <span className="platform-source-badges">
+              {activePlatforms.slice(0, 4).map(([key]) => (
+                <span
+                  key={key}
+                  className="platform-dot"
+                  style={{ background: PLATFORM_META[key].color }}
+                  title={`${PLATFORM_META[key].label}: ${breakdown[key]}/100`}
+                >
+                  {PLATFORM_META[key].icon}
+                </span>
+              ))}
+            </span>
+          </div>
         </div>
         <div className="suggestion-metrics">
           <div className="metric" title={`Gap: ${suggestion.gap}% — the difference between community demand and your library's coverage. Higher gap = bigger opportunity.`}>
@@ -448,6 +469,69 @@ function GranularCoverageChart({ demandData, coverageData }) {
   );
 }
 
+// ── Platform Demand Breakdown Panel ────────────────────────
+
+function PlatformBreakdownPanel({ suggestions, onPlatformFilter, activePlatformFilter }) {
+  const platformData = aggregatePlatformDemand(suggestions);
+  if (!platformData || Object.keys(platformData).length === 0) return null;
+
+  // Find max total for bar scaling
+  const maxTotal = Math.max(1, ...Object.values(platformData).map((p) => p.totalScore));
+
+  return (
+    <div className="platform-breakdown-panel">
+      <h3 title="See which platforms are driving demand for UE5 tutorials">🌐 Platform Demand Breakdown</h3>
+      <div className="platform-bars">
+        {Object.entries(platformData)
+          .sort(([, a], [, b]) => b.totalScore - a.totalScore)
+          .map(([key, data]) => {
+            const barWidth = Math.max(2, (data.totalScore / maxTotal) * 100);
+            const isActive = activePlatformFilter === key;
+            return (
+              <div
+                key={key}
+                className={`platform-row ${isActive ? "active" : ""}`}
+                onClick={() => onPlatformFilter(isActive ? null : key)}
+                title={`Click to filter suggestions by ${data.label} demand`}
+              >
+                <div className="platform-label">
+                  <span className="platform-icon">{data.icon}</span>
+                  <span className="platform-name">{data.label}</span>
+                  <span className="platform-count">{data.topicCount} topics</span>
+                </div>
+                <div className="platform-bar-track">
+                  <div
+                    className="platform-bar-fill"
+                    style={{ width: `${barWidth}%`, background: data.color }}
+                  />
+                </div>
+                <span className="platform-score">{data.avgScore}</span>
+              </div>
+            );
+          })}
+      </div>
+      <div className="platform-unique-topics">
+        {Object.entries(platformData)
+          .filter(([, data]) => data.uniqueTopics.length > 0)
+          .sort(([, a], [, b]) => b.totalScore - a.totalScore)
+          .slice(0, 3)
+          .map(([key, data]) => (
+            <div key={key} className="platform-topic-group">
+              <span className="platform-topic-header" style={{ color: data.color }}>
+                {data.icon} {data.label} wants:
+              </span>
+              <span className="platform-topic-list">
+                {data.uniqueTopics.map((t, i) => (
+                  <span key={i} className="platform-topic-chip">{t.topic}</span>
+                ))}
+              </span>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Provenance Footer ──────────────────────────────────────
 
 function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
@@ -505,6 +589,8 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
               day: "numeric",
               hour: "2-digit",
               minute: "2-digit",
+              timeZone: "America/New_York",
+              timeZoneName: "short",
             })}
           </span>
         )}
@@ -528,6 +614,16 @@ function DemandDashboard() {
     refresh,
     setCategoryFilter,
   } = useDemandIntelligence();
+
+  const [platformFilter, setPlatformFilter] = useState(null);
+
+  // Apply platform filter on top of category filter
+  const displaySuggestions = platformFilter
+    ? filteredSuggestions.filter((s) => {
+        const b = computePlatformBreakdown(s);
+        return b.dominant === platformFilter || (b[platformFilter] || 0) > 20;
+      })
+    : filteredSuggestions;
 
   // Auto-generate on mount if no report
   useEffect(() => {
@@ -587,6 +683,7 @@ function DemandDashboard() {
                 <span className="data-source-time">
                   {" · "}{new Date(report.generatedAt).toLocaleString("en-US", {
                     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                    timeZone: "America/New_York", timeZoneName: "short",
                   })}
                 </span>
               )}
@@ -656,6 +753,13 @@ function DemandDashboard() {
             </div>
           </div>
 
+          {/* Platform Demand Breakdown */}
+          <PlatformBreakdownPanel
+            suggestions={report.suggestions}
+            onPlatformFilter={setPlatformFilter}
+            activePlatformFilter={platformFilter}
+          />
+
           {/* Two-column layout — collapses to single column when no questions */}
           <div className={`dashboard-columns ${(report.trendingQuestions || []).length === 0 ? 'single-column' : ''}`}>
             {/* Left: Suggestions */}
@@ -683,7 +787,7 @@ function DemandDashboard() {
                 </div>
               </div>
               <div className="suggestions-list">
-                {filteredSuggestions.slice(0, 15).map((suggestion, i) => (
+                {displaySuggestions.slice(0, 15).map((suggestion, i) => (
                   <SuggestionCard
                     key={`${suggestion.category}-${suggestion.topic}`}
                     suggestion={suggestion}
@@ -691,7 +795,7 @@ function DemandDashboard() {
                     onStartBrief={handleStartBrief}
                   />
                 ))}
-                {filteredSuggestions.length === 0 && (
+                {displaySuggestions.length === 0 && (
                   <div className="empty-state">
                     No suggestions found for this category.
                   </div>

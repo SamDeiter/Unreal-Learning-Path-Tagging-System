@@ -246,5 +246,158 @@ function computeDemandIndex(suggestions, opts = {}) {
   return suggestions;
 }
 
+// ── Platform Demand Breakdown ─────────────────────────────────────
+
+/**
+ * Platform identifiers used in the breakdown.
+ */
+const PLATFORMS = {
+  YOUTUBE: "youtube",
+  REDDIT: "reddit",
+  EPIC_FORUM: "epicForum",
+  DEV_COMMUNITY: "devCommunity",
+  COMMUNITY_INDEX: "communityIndex",
+};
+
+const PLATFORM_META = {
+  [PLATFORMS.YOUTUBE]:         { icon: "🎬", label: "YouTube",       color: "#FF0000" },
+  [PLATFORMS.REDDIT]:          { icon: "💬", label: "Reddit",        color: "#FF4500" },
+  [PLATFORMS.EPIC_FORUM]:      { icon: "🏛️", label: "Epic Forums",   color: "#0078D7" },
+  [PLATFORMS.DEV_COMMUNITY]:   { icon: "🟣", label: "Dev Community", color: "#7B2FBE" },
+  [PLATFORMS.COMMUNITY_INDEX]: { icon: "📊", label: "Curriculum Gap", color: "#10B981" },
+};
+
+/**
+ * Compute per-platform demand scores for a single suggestion.
+ *
+ * All scores are 0-100. The `dominant` field names the platform with
+ * the highest score for this suggestion.
+ *
+ * @param {Object} suggestion - A suggestion object with sources, redditEngagement, youtubeMetrics, demandScore
+ * @returns {{ youtube: number, reddit: number, epicForum: number, devCommunity: number, communityIndex: number, dominant: string, platforms: Object }}
+ */
+function computePlatformBreakdown(suggestion) {
+  const sources = suggestion.sources || [];
+  const reddit = suggestion.redditEngagement || {};
+  const yt = suggestion.youtubeMetrics || {};
+
+  // Count sources by type for fallback scoring
+  const redditSourceCount = sources.filter(
+    (s) => s.type === "reddit"
+  ).length;
+  const ytSourceCount = sources.filter(
+    (s) => s.type === "youtube_comments" || s.type === "youtube"
+  ).length;
+
+  // YouTube: youtubeMetrics if available, otherwise count sources
+  const ytViewScore = Math.min(100, (yt.avgViews || 0) / 500);
+  const ytEngScore = Math.min(100, (yt.avgEngagement || 0) * 2000);
+  const ytMetricScore = Math.round(ytViewScore * 0.7 + ytEngScore * 0.3);
+  const ytFallback = Math.round(Math.min(100, ytSourceCount * 25));
+  const youtube = Math.max(ytMetricScore, ytFallback);
+
+  // Reddit: redditEngagement if available, otherwise count sources
+  const redditFromEngagement = Math.min(
+    100,
+    (reddit.postCount || 0) * 15 +
+      (reddit.avgUpvotes || 0) * 3 +
+      (reddit.avgComments || 0) * 5
+  );
+  const redditFromSources = Math.min(100, redditSourceCount * 25);
+  const redditScore = Math.round(Math.max(redditFromEngagement, redditFromSources));
+
+  // Epic Forum: count of epic_forum sources, scaled up
+  const epicForumCount = sources.filter(
+    (s) => s.type === "epic_forum"
+  ).length;
+  const epicForum = Math.round(Math.min(100, epicForumCount * 25));
+
+  // Dev Community: count of epic_dev_community sources, scaled up
+  const devCommunityCount = sources.filter(
+    (s) => s.type === "epic_dev_community"
+  ).length;
+  const devCommunity = Math.round(Math.min(100, devCommunityCount * 25));
+
+  // Community Index: demand score from benchmarks (already 0-100)
+  const communityIndex = Math.round(Math.min(100, suggestion.demandScore || 0));
+
+  const scores = { youtube, reddit: redditScore, epicForum, devCommunity, communityIndex };
+
+  // Find dominant platform
+  let dominant = PLATFORMS.COMMUNITY_INDEX;
+  let maxScore = -1;
+  for (const [platform, score] of Object.entries(scores)) {
+    if (score > maxScore) {
+      maxScore = score;
+      dominant = platform;
+    }
+  }
+
+  return {
+    ...scores,
+    dominant,
+    platforms: PLATFORM_META,
+  };
+}
+
+/**
+ * Aggregate platform breakdown across all suggestions to get per-platform totals.
+ * Returns top topics unique to each platform (high on that platform, low on others).
+ *
+ * @param {Array} suggestions
+ * @returns {Object} Per-platform aggregated data with top unique topics
+ */
+function aggregatePlatformDemand(suggestions) {
+  if (!suggestions || suggestions.length === 0) return {};
+
+  const platformTotals = {};
+  for (const key of Object.values(PLATFORMS)) {
+    platformTotals[key] = {
+      ...PLATFORM_META[key],
+      totalScore: 0,
+      topicCount: 0,
+      avgScore: 0,
+      uniqueTopics: [], // Topics where this platform is dominant
+    };
+  }
+
+  for (const s of suggestions) {
+    const breakdown = s.platformBreakdown || computePlatformBreakdown(s);
+
+    for (const [platform, score] of Object.entries(breakdown)) {
+      if (platformTotals[platform] && typeof score === "number") {
+        platformTotals[platform].totalScore += score;
+        if (score > 0) platformTotals[platform].topicCount++;
+      }
+    }
+
+    // Track topics where this platform is dominant
+    if (breakdown.dominant && platformTotals[breakdown.dominant]) {
+      platformTotals[breakdown.dominant].uniqueTopics.push({
+        topic: s.topic,
+        category: s.category,
+        score: breakdown[breakdown.dominant],
+      });
+    }
+  }
+
+  // Compute averages and sort unique topics
+  for (const p of Object.values(platformTotals)) {
+    p.avgScore = p.topicCount > 0 ? Math.round(p.totalScore / p.topicCount) : 0;
+    p.uniqueTopics.sort((a, b) => b.score - a.score);
+    p.uniqueTopics = p.uniqueTopics.slice(0, 3); // Top 3
+  }
+
+  return platformTotals;
+}
+
 // ── Exports (CommonJS for Node.js scripts) ────────────────────────
-module.exports = { UE5_BREAKING_CHANGES, computeDecayRisk, computeDemandIndex };
+module.exports = {
+  UE5_BREAKING_CHANGES,
+  computeDecayRisk,
+  computeDemandIndex,
+  computePlatformBreakdown,
+  aggregatePlatformDemand,
+  PLATFORMS,
+  PLATFORM_META,
+};

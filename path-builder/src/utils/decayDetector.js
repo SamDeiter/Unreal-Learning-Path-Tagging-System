@@ -213,3 +213,122 @@ export function computeDemandIndex(suggestions, opts = {}) {
 
   return suggestions;
 }
+
+// ── Platform Demand Breakdown ─────────────────────────────────────
+
+export const PLATFORMS = {
+  YOUTUBE: "youtube",
+  REDDIT: "reddit",
+  EPIC_FORUM: "epicForum",
+  DEV_COMMUNITY: "devCommunity",
+  COMMUNITY_INDEX: "communityIndex",
+};
+
+export const PLATFORM_META = {
+  [PLATFORMS.YOUTUBE]:         { icon: "🎬", label: "YouTube",       color: "#FF0000" },
+  [PLATFORMS.REDDIT]:          { icon: "💬", label: "Reddit",        color: "#FF4500" },
+  [PLATFORMS.EPIC_FORUM]:      { icon: "🏛️", label: "Epic Forums",   color: "#0078D7" },
+  [PLATFORMS.DEV_COMMUNITY]:   { icon: "🟣", label: "Dev Community", color: "#7B2FBE" },
+  [PLATFORMS.COMMUNITY_INDEX]: { icon: "📊", label: "Curriculum Gap", color: "#10B981" },
+};
+
+export function computePlatformBreakdown(suggestion) {
+  const sources = suggestion.sources || [];
+  const reddit = suggestion.redditEngagement || {};
+  const yt = suggestion.youtubeMetrics || {};
+
+  // Count sources by type for fallback scoring
+  const redditSourceCount = sources.filter(
+    (s) => s.type === "reddit"
+  ).length;
+  const ytSourceCount = sources.filter(
+    (s) => s.type === "youtube_comments" || s.type === "youtube"
+  ).length;
+
+  // YouTube: youtubeMetrics if available, otherwise count sources
+  const ytViewScore = Math.min(100, (yt.avgViews || 0) / 500);
+  const ytEngScore = Math.min(100, (yt.avgEngagement || 0) * 2000);
+  const ytMetricScore = Math.round(ytViewScore * 0.7 + ytEngScore * 0.3);
+  const ytFallback = Math.round(Math.min(100, ytSourceCount * 25));
+  const youtube = Math.max(ytMetricScore, ytFallback);
+
+  // Reddit: redditEngagement if available, otherwise count sources
+  const redditFromEngagement = Math.min(
+    100,
+    (reddit.postCount || 0) * 15 +
+      (reddit.avgUpvotes || 0) * 3 +
+      (reddit.avgComments || 0) * 5
+  );
+  const redditFromSources = Math.min(100, redditSourceCount * 25);
+  const redditScore = Math.round(Math.max(redditFromEngagement, redditFromSources));
+
+  // Epic Forum: count of epic_forum sources
+  const epicForumCount = sources.filter(
+    (s) => s.type === "epic_forum"
+  ).length;
+  const epicForum = Math.round(Math.min(100, epicForumCount * 25));
+
+  // Dev Community: count of epic_dev_community sources
+  const devCommunityCount = sources.filter(
+    (s) => s.type === "epic_dev_community"
+  ).length;
+  const devCommunity = Math.round(Math.min(100, devCommunityCount * 25));
+
+  // Community Index: demand score from benchmarks (already 0-100)
+  const communityIndex = Math.round(Math.min(100, suggestion.demandScore || 0));
+
+  const scores = { youtube, reddit: redditScore, epicForum, devCommunity, communityIndex };
+
+  let dominant = PLATFORMS.COMMUNITY_INDEX;
+  let maxScore = -1;
+  for (const [platform, score] of Object.entries(scores)) {
+    if (score > maxScore) {
+      maxScore = score;
+      dominant = platform;
+    }
+  }
+
+  return { ...scores, dominant, platforms: PLATFORM_META };
+}
+
+export function aggregatePlatformDemand(suggestions) {
+  if (!suggestions || suggestions.length === 0) return {};
+
+  const platformTotals = {};
+  for (const key of Object.values(PLATFORMS)) {
+    platformTotals[key] = {
+      ...PLATFORM_META[key],
+      totalScore: 0,
+      topicCount: 0,
+      avgScore: 0,
+      uniqueTopics: [],
+    };
+  }
+
+  for (const s of suggestions) {
+    const breakdown = s.platformBreakdown || computePlatformBreakdown(s);
+
+    for (const [platform, score] of Object.entries(breakdown)) {
+      if (platformTotals[platform] && typeof score === "number") {
+        platformTotals[platform].totalScore += score;
+        if (score > 0) platformTotals[platform].topicCount++;
+      }
+    }
+
+    if (breakdown.dominant && platformTotals[breakdown.dominant]) {
+      platformTotals[breakdown.dominant].uniqueTopics.push({
+        topic: s.topic,
+        category: s.category,
+        score: breakdown[breakdown.dominant],
+      });
+    }
+  }
+
+  for (const p of Object.values(platformTotals)) {
+    p.avgScore = p.topicCount > 0 ? Math.round(p.totalScore / p.topicCount) : 0;
+    p.uniqueTopics.sort((a, b) => b.score - a.score);
+    p.uniqueTopics = p.uniqueTopics.slice(0, 3);
+  }
+
+  return platformTotals;
+}

@@ -195,7 +195,9 @@ describe("DemandDashboard", () => {
   it("renders demand score for a suggestion", () => {
     setMock();
     render(<DemandDashboard />);
-    expect(screen.getByText("85")).toBeTruthy();
+    // "85" may appear in suggestion demand score AND in platform breakdown scores
+    const matches = screen.getAllByText("85");
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   // --- Category Filters ---
@@ -220,10 +222,12 @@ describe("DemandDashboard", () => {
 
   it("Start Authoring writes localStorage payload and sets hash", () => {
     setMock();
-    render(<DemandDashboard />);
+    const { container } = render(<DemandDashboard />);
 
-    // Expand the first suggestion card by clicking its header area
-    fireEvent.click(screen.getByText("Niagara Particle Systems"));
+    // Expand the first suggestion card by clicking its topic heading
+    // The topic name also appears in platform breakdown chips, so target .suggestion-topic
+    const topicHeadings = container.querySelectorAll(".suggestion-topic");
+    fireEvent.click(topicHeadings[0]);
 
     // Click the "Start Authoring →" button
     fireEvent.click(screen.getByText(/Start Authoring →/));
