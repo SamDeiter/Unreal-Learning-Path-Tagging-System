@@ -44,10 +44,11 @@ const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 const BATCH_SIZE = 3; // Concurrent Gemini calls
-const TRENDING_PER_CATEGORY = 3; // Questions per category
+const TRENDING_PER_CATEGORY = 2; // Questions per category (kept small to avoid truncation)
 const PAIN_POINT_LIMIT = 5;
 const RATE_LIMIT_DELAY_MS = 2000;
 const MAX_RETRIES = 3;
+const PARALLEL_CONCURRENCY = 2; // Run 2 Gemini calls in parallel for speed
 
 // ── Firebase Init ──────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true }
 
   const generationConfig = {
     temperature: 0.3,
-    maxOutputTokens: 8192,
+    maxOutputTokens: 16384,
   };
 
   // IMPORTANT: responseMimeType "application/json" conflicts with google_search
@@ -299,15 +300,24 @@ async function scrapeTrendingQuestions(categories) {
 
   const allQuestions = [];
 
-  // Batch categories into groups of 3-4 to get per-category coverage
-  const TRENDING_BATCH = 2; // Smaller batches to fit within 8k token limit
+  // Build batches of 2 categories each
+  const TRENDING_BATCH = 2;
+  const batches = [];
   for (let i = 0; i < categories.length; i += TRENDING_BATCH) {
-    const batch = categories.slice(i, i + TRENDING_BATCH);
-    const batchNum = Math.floor(i / TRENDING_BATCH) + 1;
-    const totalBatches = Math.ceil(categories.length / TRENDING_BATCH);
-    console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
+    batches.push(categories.slice(i, i + TRENDING_BATCH));
+  }
+  const totalBatches = batches.length;
+  console.log(`  Running ${totalBatches} batches (${PARALLEL_CONCURRENCY} in parallel)...`);
 
-    const prompt = `You are a UE5 community research assistant. Search for REAL questions that Unreal Engine 5 learners are currently asking in online communities.
+  // Process batches with limited concurrency (PARALLEL_CONCURRENCY at a time)
+  for (let g = 0; g < batches.length; g += PARALLEL_CONCURRENCY) {
+    const group = batches.slice(g, g + PARALLEL_CONCURRENCY);
+
+    const promises = group.map(async (batch, idx) => {
+      const batchNum = g + idx + 1;
+      console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
+
+      const prompt = `You are a UE5 community research assistant. Search for REAL questions that Unreal Engine 5 learners are currently asking in online communities.
 
 REQUIRED SEARCH SOURCES:
 - Reddit r/unrealengine (recent posts with upvotes)
@@ -338,24 +348,35 @@ IMPORTANT RULES:
 - ONLY return questions from REAL posts you can find via search
 - Every question MUST have at least one source with a URL
 - Focus on learning/tutorial questions, not engine bug reports
-- Return VALID JSON only`;
+- Return VALID JSON only. Keep source titles SHORT (under 60 chars). Minimize whitespace in your JSON output.`;
 
-    try {
-      const result = await callGemini(prompt);
-      const parsed = parseJSON(result.text);
+      try {
+        const result = await callGemini(prompt);
+        const parsed = parseJSON(result.text);
 
-      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-        allQuestions.push(...parsed);
-        console.log(`    ✅ Got ${parsed.length} questions`);
-      } else {
-        console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable (raw: ${result.text.slice(0, 300)})`);
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          console.log(`    ✅ Batch ${batchNum}: got ${parsed.length} questions`);
+          return parsed;
+        } else {
+          console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable (raw: ${result.text.slice(0, 300)})`);
+          return [];
+        }
+      } catch (err) {
+        console.error(`    ❌ Batch ${batchNum} failed: ${err.message}`);
+        return [];
       }
-    } catch (err) {
-      console.error(`    ❌ Batch ${batchNum} failed: ${err.message}`);
+    });
+
+    // Wait for this group of parallel batches
+    const results = await Promise.allSettled(promises);
+    for (const r of results) {
+      if (r.status === "fulfilled" && r.value && r.value.length > 0) {
+        allQuestions.push(...r.value);
+      }
     }
 
-    // Rate limit between batches
-    if (i + TRENDING_BATCH < categories.length) {
+    // Rate limit between groups
+    if (g + PARALLEL_CONCURRENCY < batches.length) {
       await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
     }
   }
@@ -386,7 +407,7 @@ IMPORTANT RULES:
   console.log(`  ✅ Total: ${uniqueQuestions.length} unique trending questions`);
   return uniqueQuestions;
 }
-
+
 async function scrapePainPoints(category) {
   const prompt = `You are a UE5 community research assistant. Search for the most common struggles and confusion points that Unreal Engine 5 learners experience with: "${category}"
 

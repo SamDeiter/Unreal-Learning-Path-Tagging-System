@@ -50,7 +50,7 @@ function SourceChip({ source }) {
         target="_blank"
         rel="noopener noreferrer"
         className="source-chip clickable"
-        title={source.title || label}
+        data-tooltip={source.title || label}
       >
         <span className="source-icon">{icon}</span>
         <span className="source-label">{label}</span>
@@ -62,7 +62,7 @@ function SourceChip({ source }) {
   }
 
   return (
-    <span className="source-chip" title={source.title || label}>
+    <span className="source-chip" data-tooltip={source.title || label}>
       <span className="source-icon">{icon}</span>
       <span className="source-label">{label}</span>
       {source.interestScore && (
@@ -117,8 +117,8 @@ function CriticalGapAlerts({ suggestions, painPointsByCategory: _painPointsByCat
             </div>
           </div>
           <div className="gap-alert-actions">
-            <button className="gap-action-btn primary" onClick={() => onStartAuthoring(gap)} title="Create a new course based on this high-demand topic">✍️ Start Authoring</button>
-            <button className="gap-action-btn dismiss" onClick={() => dismiss(gap.topic)} title="Dismiss this alert">✕</button>
+            <button className="gap-action-btn primary" onClick={() => onStartAuthoring(gap)} data-tooltip="Create a new course based on this high-demand topic">✍️ Start Authoring</button>
+            <button className="gap-action-btn dismiss" onClick={() => dismiss(gap.topic)} data-tooltip="Dismiss this alert">✕</button>
           </div>
         </div>
       ))}
@@ -167,7 +167,7 @@ function ScrapeButton({ onComplete }) {
       className={`refresh-btn scrape-btn scrape-${status}`}
       onClick={handleTrigger}
       disabled={status === "triggering" || status === "success"}
-      title={status === "success"
+      data-tooltip={status === "success"
         ? message
         : "Trigger a fresh scrape via GitHub Action (~2 min). Data will auto-refresh."}
     >
@@ -190,7 +190,7 @@ function ConfidenceBadge({ confidence }) {
     <span
       className="confidence-badge"
       style={{ "--badge-color": colors[confidence] || colors.low }}
-      title={tips[confidence] || "Confidence level of this opportunity"}
+      data-tooltip={tips[confidence] || "Confidence level of this opportunity"}
     >
       {labels[confidence] || "?"}
     </span>
@@ -211,18 +211,18 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
   return (
     <div className={`suggestion-card confidence-${suggestion.confidence}`}>
       <div className="suggestion-header" onClick={() => setExpanded(!expanded)}>
-        <span className="suggestion-rank" title={`Ranked #${rank} by opportunity score (gap × demand)`}>#{rank}</span>
+        <span className="suggestion-rank" data-tooltip={`Ranked #${rank} by opportunity score (gap × demand)`}>#{rank}</span>
         <div className="suggestion-info">
           <h4 className="suggestion-topic">{suggestion.topic}</h4>
           <div className="suggestion-meta-row">
-            <span className="suggestion-category" title="UE5 content category">{suggestion.category}</span>
+            <span className="suggestion-category" data-tooltip="UE5 content category">{suggestion.category}</span>
             <span className="platform-source-badges">
               {activePlatforms.slice(0, 4).map(([key]) => (
                 <span
                   key={key}
                   className="platform-dot"
                   style={{ background: PLATFORM_META[key].color }}
-                  title={`${PLATFORM_META[key].label}: ${breakdown[key]}/100`}
+                  data-tooltip={`${PLATFORM_META[key].label}: ${breakdown[key]}/100`}
                 >
                   {PLATFORM_META[key].icon}
                 </span>
@@ -231,15 +231,15 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           </div>
         </div>
         <div className="suggestion-metrics">
-          <div className="metric" title={`Gap: ${suggestion.gap}% — the difference between community demand and your library's coverage. Higher gap = bigger opportunity.`}>
+          <div className="metric" data-tooltip={`Gap: ${suggestion.gap}% — the difference between community demand and your library's coverage. Higher gap = bigger opportunity.`}>
             <span className="metric-value gap-value">−{suggestion.gap}%</span>
             <span className="metric-label">Gap</span>
           </div>
-          <div className="metric" title={`Demand Index: ${suggestion.demandIndex ?? suggestion.demandScore}/100 — weighted composite of community activity, Reddit engagement, source verification, coverage gap${suggestion.youtubeMetrics ? ', and YouTube viewership' : ''}.`}>
+          <div className="metric" data-tooltip={`Demand Index: ${suggestion.demandIndex ?? suggestion.demandScore}/100 — weighted composite of community activity, Reddit engagement, source verification, coverage gap${suggestion.youtubeMetrics ? ', and YouTube viewership' : ''}.`}>
             <span className="metric-value">{suggestion.demandIndex ?? suggestion.demandScore}</span>
             <span className="metric-label">Index</span>
           </div>
-          <div className="metric" title={`Coverage: ${suggestion.coverageInLibrary}% — how well your existing video library covers this topic. 0% = no content yet.`}>
+          <div className="metric" data-tooltip={`Coverage: ${suggestion.coverageInLibrary}% — how well your existing video library covers this topic. 0% = no content yet.`}>
             <span className="metric-value">{suggestion.coverageInLibrary}%</span>
             <span className="metric-label">Coverage</span>
           </div>
@@ -247,7 +247,7 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           {suggestion.decayRisk && suggestion.decayRisk !== "none" && (
             <span
               className={`decay-badge decay-${suggestion.decayRisk}`}
-              title={suggestion.decayReason || `Content decay risk: ${suggestion.decayRisk}`}
+              data-tooltip={suggestion.decayReason || `Content decay risk: ${suggestion.decayRisk}`}
             >
               {suggestion.decayRisk === "high" ? "🔴 Outdated" : "⚠️ Aging"}
             </span>
@@ -255,13 +255,13 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           {suggestion.youtubeMetrics && suggestion.youtubeMetrics.avgViews > 50000 && (
             <span
               className="decay-badge" style={{ background: '#2563eb', color: '#fff' }}
-              title={`High YouTube interest: ${suggestion.youtubeMetrics.avgViews.toLocaleString()} avg views across ${suggestion.youtubeMetrics.videoCount} tutorials`}
+              data-tooltip={`High YouTube interest: ${suggestion.youtubeMetrics.avgViews.toLocaleString()} avg views across ${suggestion.youtubeMetrics.videoCount} tutorials`}
             >
               🚀 Breakout
             </span>
           )}
         </div>
-        <span className="expand-arrow" title={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
+        <span className="expand-arrow" data-tooltip={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
       </div>
 
       {expanded && (
@@ -384,7 +384,7 @@ function GranularCoverageChart({ demandData, coverageData }) {
 
   return (
     <div className="granular-coverage">
-      <h3 title="Compares your library's topic coverage (green bar) against community demand (blue marker). Click any category to see subtopic breakdown.">📈 Coverage vs Demand <span className="chart-subtitle">(click to expand)</span></h3>
+      <h3 data-tooltip="Compares your library's topic coverage (green bar) against community demand (blue marker). Click any category to see subtopic breakdown.">📈 Coverage vs Demand <span className="chart-subtitle">(click to expand)</span></h3>
       {categories.map((cat) => {
         const catData = demandData[cat];
         const isExpanded = expandedCategory === cat;
@@ -409,16 +409,16 @@ function GranularCoverageChart({ demandData, coverageData }) {
               <span className="category-toggle">{isExpanded ? "▾" : "▸"}</span>
               <span className="category-name">{cat}</span>
               <div className="category-bars">
-                <div className="bar-track" title={`Coverage: ${avgCoverage}% vs Demand: ${catData.overall}%`}>
+                <div className="bar-track" data-tooltip={`Coverage: ${avgCoverage}% vs Demand: ${catData.overall}%`}>
                   <div
                     className="bar-fill coverage"
                     style={{ width: `${avgCoverage}%` }}
-                    title={`Our library covers approximately ${avgCoverage}% of the subtopics in this category`}
+                    data-tooltip={`Our library covers approximately ${avgCoverage}% of the subtopics in this category`}
                   />
                   <div
                     className="bar-marker demand"
                     style={{ left: `${catData.overall}%` }}
-                    title={`Community demand for ${cat} is at ${catData.overall}/100`}
+                    data-tooltip={`Community demand for ${cat} is at ${catData.overall}/100`}
                   />
                 </div>
               </div>
@@ -441,16 +441,16 @@ function GranularCoverageChart({ demandData, coverageData }) {
                       <div key={subtopic} className={`subtopic-row ${statusClass}`}>
                         <span className="subtopic-name">{subtopic}</span>
                         <div className="subtopic-bars">
-                          <div className="bar-track" title={`Subtopic Coverage: ${cov}% | Subtopic Demand: ${demand}%`}>
+                          <div className="bar-track" data-tooltip={`Subtopic Coverage: ${cov}% | Subtopic Demand: ${demand}%`}>
                             <div
                               className="bar-fill coverage"
                               style={{ width: `${cov}%` }}
-                              title={`Existing video coverage for "${subtopic}"`}
+                              data-tooltip={`Existing video coverage for "${subtopic}"`}
                             />
                             <div
                               className="bar-marker demand"
                               style={{ left: `${demand}%` }}
-                              title={`Community interest level for "${subtopic}"`}
+                              data-tooltip={`Community interest level for "${subtopic}"`}
                             />
                           </div>
                         </div>
@@ -480,7 +480,7 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
 
   return (
     <div className="platform-breakdown-panel">
-      <h3 title="See which platforms are driving demand for UE5 tutorials">🌐 Platform Demand Breakdown</h3>
+      <h3 data-tooltip="See which platforms are driving demand for UE5 tutorials">🌐 Platform Demand Breakdown</h3>
       <div className="platform-bars">
         {Object.entries(platformData)
           .sort(([, a], [, b]) => b.totalScore - a.totalScore)
@@ -492,7 +492,7 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
                 key={key}
                 className={`platform-row ${isActive ? "active" : ""}`}
                 onClick={() => onPlatformFilter(isActive ? null : key)}
-                title={`Click to filter suggestions by ${data.label} demand`}
+                data-tooltip={`Click to filter suggestions by ${data.label} demand`}
               >
                 <div className="platform-label">
                   <span className="platform-icon">{data.icon}</span>
@@ -621,7 +621,20 @@ function DemandDashboard() {
   const displaySuggestions = platformFilter
     ? filteredSuggestions.filter((s) => {
         const b = computePlatformBreakdown(s);
-        return b.dominant === platformFilter || (b[platformFilter] || 0) > 20;
+        // Match if this platform is dominant, has any score > 0,
+        // or the suggestion has sources from that platform
+        if (b.dominant === platformFilter) return true;
+        if ((b[platformFilter] || 0) > 0) return true;
+        // Also match if any source is from the filtered platform
+        const platformSourceTypes = {
+          youtube: ["youtube", "youtube_comments"],
+          reddit: ["reddit"],
+          epicForum: ["epic_forum"],
+          devCommunity: ["epic_dev_community"],
+          communityIndex: ["community_index"],
+        };
+        const matchTypes = platformSourceTypes[platformFilter] || [];
+        return (s.sources || []).some((src) => matchTypes.includes(src.type));
       })
     : filteredSuggestions;
 
@@ -670,10 +683,10 @@ function DemandDashboard() {
     <div className="demand-dashboard">
       {/* Header */}
       <div className="dashboard-header">
-        <h2 title="Demand Intelligence scans community forums, StackOverflow, Reddit, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
+        <h2 data-tooltip="Demand Intelligence scans community forums, StackOverflow, Reddit, and your video library to identify the best topics to create content about.">📊 Demand Intelligence</h2>
         <div className="header-actions">
           {report && (
-            <span className="data-source-badge" title={
+            <span className="data-source-badge" data-tooltip={
               report._source === "firestore"
                 ? "Data pre-computed by the scheduled GitHub Action and loaded instantly from Firestore"
                 : "Data generated via live AI scraping in your browser"
@@ -693,7 +706,7 @@ function DemandDashboard() {
             className="refresh-btn"
             onClick={refresh}
             disabled={loading}
-            title={report?._source === "firestore"
+            data-tooltip={report?._source === "firestore"
               ? "Re-fetch pre-computed data from Firestore (instant)"
               : "Clear cached data and re-scan all sources for fresh demand signals (takes 30–60 seconds)"}
           >
@@ -735,19 +748,19 @@ function DemandDashboard() {
         <>
           {/* Summary Stats Bar */}
           <div className="stats-bar">
-            <div className="stat" title="Total number of content opportunities identified by cross-referencing demand signals against your library's existing coverage.">
+            <div className="stat" data-tooltip="Total number of content opportunities identified by cross-referencing demand signals against your library's existing coverage.">
               <span className="stat-value">{stats?.totalSuggestions || 0}</span>
               <span className="stat-label">Opportunities</span>
             </div>
-            <div className="stat" title="Questions actively being asked in UE5 communities — sourced from Reddit, Epic Forums, Stack Overflow, and YouTube comments.">
+            <div className="stat" data-tooltip="Questions actively being asked in UE5 communities — sourced from Reddit, Epic Forums, Stack Overflow, and YouTube comments.">
               <span className="stat-value">{stats?.trendingQuestions || 0}</span>
               <span className="stat-label">Trending Questions</span>
             </div>
-            <div className="stat" title="Specific frustrations and struggles identified from community posts — topics where learners are getting stuck.">
+            <div className="stat" data-tooltip="Specific frustrations and struggles identified from community posts — topics where learners are getting stuck.">
               <span className="stat-value">{stats?.painPointCount || 0}</span>
               <span className="stat-label">Pain Points</span>
             </div>
-            <div className="stat" title="Number of UE5 topic categories scanned (e.g. Blueprints, AI, Animation, Niagara, etc.)">
+            <div className="stat" data-tooltip="Number of UE5 topic categories scanned (e.g. Blueprints, AI, Animation, Niagara, etc.)">
               <span className="stat-value">{stats?.categoriesScanned || 0}</span>
               <span className="stat-label">Categories</span>
             </div>
@@ -766,7 +779,7 @@ function DemandDashboard() {
             {/* Left: Suggestions */}
             <div className="column-suggestions">
               <div className="column-header">
-                <h3 title="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
+                <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
                 <div className="category-filters">
                   <button
                     className={`filter-chip ${!categoryFilter ? "active" : ""}`}
@@ -807,8 +820,8 @@ function DemandDashboard() {
             {/* Right: Trending Questions */}
             <div className="column-trending">
               <div className="column-header">
-                <h3 title="Real questions being asked right now in UE5 developer communities — sourced via AI-powered web search">💬 Live Community Questions</h3>
-                <span className="source-badge" title="These questions are discovered using Google Gemini's grounded search, which scans live web content from forums and Q&A sites">Gemini Grounded Search</span>
+                <h3 data-tooltip="Real questions being asked right now in UE5 developer communities — sourced via AI-powered web search">💬 Live Community Questions</h3>
+                <span className="source-badge" data-tooltip="These questions are discovered using Google Gemini's grounded search, which scans live web content from forums and Q&A sites">Gemini Grounded Search</span>
               </div>
               <div className="trending-list">
                 {(report.trendingQuestions || []).map((q, i) => (
