@@ -173,7 +173,7 @@ function parseJSON(text) {
     // Find the last complete object boundary "},", trim after it, close array.
     const arrStart = cleaned.indexOf("[");
     if (arrStart !== -1) {
-      let partial = cleaned.slice(arrStart);
+      const partial = cleaned.slice(arrStart);
       // Find last complete object (ends with "}")
       const lastCloseBrace = partial.lastIndexOf("}");
       if (lastCloseBrace > 0) {
@@ -182,8 +182,21 @@ function parseJSON(text) {
           const result = JSON.parse(repaired);
           console.warn(`  ⚠️ Repaired truncated JSON (salvaged ${Array.isArray(result) ? result.length : 1} items)`);
           return result;
-        } catch { /* fall through */ }
+        } catch { /* fall through to deeper repair */ }
       }
+
+      // Deeper repair: strip trailing incomplete key-value pairs and close brackets
+      const attempt = partial.replace(/,?\s*"[^"]*"\s*:\s*[^,}\]]*$/, "");
+      const opens = (attempt.match(/\[/g) || []).length;
+      const closes = (attempt.match(/\]/g) || []).length;
+      const openBraces = (attempt.match(/\{/g) || []).length;
+      const closeBraces = (attempt.match(/\}/g) || []).length;
+      const fixed = attempt + "}".repeat(Math.max(0, openBraces - closeBraces)) + "]".repeat(Math.max(0, opens - closes));
+      try {
+        const result = JSON.parse(fixed);
+        console.warn(`  ⚠️ Deep-repaired truncated JSON (salvaged ${Array.isArray(result) ? result.length : 1} items)`);
+        return result;
+      } catch { /* exhausted all repair strategies */ }
     }
 
     console.warn("  ⚠️ Could not parse JSON from response:", cleaned.slice(0, 200));
@@ -199,7 +212,7 @@ async function fetchRedditEngagement(subtopic) {
 
   try {
     const response = await fetch(url, {
-      headers: { "User-Agent": "UE5-DemandIntel/1.0" },
+      headers: { "User-Agent": "UE5-DemandIntel/2.0 (github.com/SamDeiter; demand-intel-bot)" },
     });
 
     if (!response.ok) return null;
@@ -287,10 +300,11 @@ async function scrapeTrendingQuestions(categories) {
   const allQuestions = [];
 
   // Batch categories into groups of 3-4 to get per-category coverage
-  for (let i = 0; i < categories.length; i += 4) {
-    const batch = categories.slice(i, i + 4);
-    const batchNum = Math.floor(i / 4) + 1;
-    const totalBatches = Math.ceil(categories.length / 4);
+  const TRENDING_BATCH = 2; // Smaller batches to fit within 8k token limit
+  for (let i = 0; i < categories.length; i += TRENDING_BATCH) {
+    const batch = categories.slice(i, i + TRENDING_BATCH);
+    const batchNum = Math.floor(i / TRENDING_BATCH) + 1;
+    const totalBatches = Math.ceil(categories.length / TRENDING_BATCH);
     console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
 
     const prompt = `You are a UE5 community research assistant. Search for REAL questions that Unreal Engine 5 learners are currently asking in online communities.
@@ -341,7 +355,7 @@ IMPORTANT RULES:
     }
 
     // Rate limit between batches
-    if (i + 4 < categories.length) {
+    if (i + TRENDING_BATCH < categories.length) {
       await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
     }
   }
