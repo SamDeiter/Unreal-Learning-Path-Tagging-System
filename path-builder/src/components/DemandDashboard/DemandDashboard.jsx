@@ -214,15 +214,23 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
             <span className="metric-value gap-value">−{suggestion.gap}%</span>
             <span className="metric-label">Gap</span>
           </div>
-          <div className="metric" title={`Demand: ${suggestion.demandScore}/100 — curated community activity score based on Reddit, Epic Forums, StackOverflow, and YouTube tutorial engagement.`}>
-            <span className="metric-value">{suggestion.demandScore}</span>
-            <span className="metric-label">Demand</span>
+          <div className="metric" title={`Demand Index: ${suggestion.demandIndex ?? suggestion.demandScore}/100 — weighted composite of community activity (30%), Reddit engagement (30%), source verification (15%), and coverage gap (25%).`}>
+            <span className="metric-value">{suggestion.demandIndex ?? suggestion.demandScore}</span>
+            <span className="metric-label">Index</span>
           </div>
           <div className="metric" title={`Coverage: ${suggestion.coverageInLibrary}% — how well your existing video library covers this topic. 0% = no content yet.`}>
             <span className="metric-value">{suggestion.coverageInLibrary}%</span>
             <span className="metric-label">Coverage</span>
           </div>
           <ConfidenceBadge confidence={suggestion.confidence} />
+          {suggestion.decayRisk && suggestion.decayRisk !== "none" && (
+            <span
+              className={`decay-badge decay-${suggestion.decayRisk}`}
+              title={suggestion.decayReason || `Content decay risk: ${suggestion.decayRisk}`}
+            >
+              {suggestion.decayRisk === "high" ? "🔴 Outdated" : "⚠️ Aging"}
+            </span>
+          )}
         </div>
         <span className="expand-arrow" title={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
       </div>

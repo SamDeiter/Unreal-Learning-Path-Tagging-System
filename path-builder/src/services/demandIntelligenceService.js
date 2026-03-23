@@ -26,6 +26,7 @@ import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { recordTokenUsage } from "./tokenTracker";
 import { devLog, devWarn } from "../utils/logger";
 import { parseGeminiJSON } from "./gapDetection";
+import { computeDecayRisk, computeDemandIndex } from "../utils/decayDetector";
 import demandBenchmarks from "../data/demand_benchmarks.json";
 
 // ── Configuration ──────────────────────────────────────────
@@ -579,6 +580,9 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
         verifiedSourceCount >= 3 ? "high" : verifiedSourceCount >= 1 ? "medium" : "low";
 
       if (gap > 0 || sources.length > 0) {
+        // Compute decay risk based on UE5 breaking changes
+        const decay = computeDecayRisk(category, subtopic, sources);
+
         suggestions.push({
           topic: subtopic,
           category,
@@ -590,6 +594,9 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
           sourceCount: sources.length,
           // Composite ranking: (demand × verified sources) - coverage
           rankScore: (demandScore * Math.max(1, verifiedSourceCount + 1)) - coverageInfo.coverage,
+          decayRisk: decay.risk,
+          decayReason: decay.reason,
+          decayVersion: decay.breakingVersion,
           sources,
           existingContent: [], // TODO: populate with matching video library entries
         });
@@ -597,8 +604,11 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
     }
   }
 
-  // Sort by composite rank score (highest opportunity first)
-  suggestions.sort((a, b) => b.rankScore - a.rankScore);
+  // Compute weighted Demand Index across all suggestions
+  computeDemandIndex(suggestions);
+
+  // Sort by Demand Index (highest opportunity first)
+  suggestions.sort((a, b) => b.demandIndex - a.demandIndex);
 
   const report = {
     generatedAt: new Date().toISOString(),

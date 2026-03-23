@@ -24,6 +24,7 @@
 const fs = require("fs");
 const path = require("path");
 const admin = require("firebase-admin");
+const { computeDecayRisk, computeDemandIndex } = require("./decayDetector");
 
 // ── Paths ──────────────────────────────────────────────────────────
 const BENCHMARKS_PATH = path.join(
@@ -569,6 +570,9 @@ function buildReport({
             : "low";
 
       if (gap > 0 || sources.length > 0) {
+        // Compute decay risk based on UE5 breaking changes
+        const decay = computeDecayRisk(category, subtopic, sources);
+
         suggestions.push({
           topic: subtopic,
           category,
@@ -582,13 +586,20 @@ function buildReport({
           rankScore:
             demandScore * Math.max(1, effectiveSources + 1) -
             coverageInfo.coverage,
+          decayRisk: decay.risk,
+          decayReason: decay.reason,
+          decayVersion: decay.breakingVersion,
           sources,
         });
       }
     }
   }
 
-  suggestions.sort((a, b) => b.rankScore - a.rankScore);
+  // Compute weighted Demand Index across all suggestions
+  computeDemandIndex(suggestions);
+
+  // Sort by Demand Index (highest opportunity first)
+  suggestions.sort((a, b) => b.demandIndex - a.demandIndex);
 
   return {
     generatedAt: new Date().toISOString(),
