@@ -160,9 +160,10 @@ export function OnboardingYouTubeSection({ youtube, isInCart, addToCart, removeF
   );
 }
 
-// Industries allowed per persona industry — courses outside these are filtered out
+// Industries allowed per persona industry — only these industry-tagged courses show
+// NOTE: "Simulation" means industrial/enterprise simulation, NOT game simulation
 const INDUSTRY_ALLOW_MAP = {
-  games:         ["games", "simulation", "general", ""],
+  games:         ["games", "general", ""],
   animation:     ["animation", "media & entertainment", "simulation", "general", ""],
   vfx:           ["animation", "media & entertainment", "simulation", "general", ""],
   architecture:  ["architecture", "simulation", "general", ""],
@@ -171,12 +172,13 @@ const INDUSTRY_ALLOW_MAP = {
   visualization: ["visualization", "simulation", "general", ""],
 };
 
-// Title-based exclusions as a safety net (industry tag might be wrong/missing)
-const FILM_ONLY_TITLE_KEYWORDS = [
+// Title-based exclusions as a safety net for games personas
+const GAMES_TITLE_EXCLUDE = [
   "virtual production", "composure", "icvfx",
   "linear content", "datasmith", "digital twin",
   "for aec", "for architecture", "for automotive",
   "broadcast", "ndisplay", "stage operator",
+  "control rig", "metahuman", "take recorder",
 ];
 
 export function OnboardingVideosByRole({
@@ -198,8 +200,8 @@ export function OnboardingVideosByRole({
         const t = (c.title || c.name || "").toLowerCase();
         // Must be in allowed industry list
         if (!allowedIndustries.includes(cIndustry)) return false;
-        // Safety net: also exclude by title keywords for edge cases
-        if (FILM_ONLY_TITLE_KEYWORDS.some((kw) => t.includes(kw)) && pIndustry === "games")
+        // Safety net: also exclude by title keywords for games personas
+        if (pIndustry === "games" && GAMES_TITLE_EXCLUDE.some((kw) => t.includes(kw)))
           return false;
         return true;
       })
@@ -242,7 +244,15 @@ export function OnboardingVideosByRole({
       titleLower.includes("intro to unreal") ||
       titleLower.includes("getting started") ||
       (titleLower.includes("your first") && titleLower.includes("project"));
-    const role = isFoundation ? "prerequisite" : course.quickWin ? "core" : "supplemental";
+    // Topic-specific intros are core content for game devs, not supplemental
+    const isGameDevCore = !isFoundation && (
+      titleLower.includes("landscape") || titleLower.includes("terrain") ||
+      titleLower.includes("blueprint") || titleLower.includes("material") ||
+      titleLower.includes("lighting") || titleLower.includes("niagara") ||
+      titleLower.includes("static mesh") || titleLower.includes("animation") ||
+      titleLower.includes("gameplay") || titleLower.includes("level design")
+    );
+    const role = isFoundation ? "prerequisite" : (course.quickWin || isGameDevCore) ? "core" : "supplemental";
 
     return {
       course,
