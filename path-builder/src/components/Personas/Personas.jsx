@@ -278,7 +278,9 @@ export default function Personas() {
                       return full || c;
                     })
                   : [watchingCourse];
-              return raw.map(sortVideos);
+              return raw
+                .map(sortVideos)
+                .filter((c) => c?.videos?.some((v) => v.drive_id));
             })()}
             problemSummary={`New to UE5 — ${detectedPersona?.name || "General"}, ${QUESTIONS[2].options.find((o) => o.value === answers.experience)?.label || ""}, wants to ${QUESTIONS[3].options.find((o) => o.value === answers.goal)?.label || "explore"}`}
             pathSummary={{
