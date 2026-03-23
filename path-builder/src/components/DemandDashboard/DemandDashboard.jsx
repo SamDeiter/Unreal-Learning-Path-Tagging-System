@@ -414,8 +414,18 @@ function GranularCoverageChart({ demandData, coverageData }) {
 
 // ── Provenance Footer ──────────────────────────────────────
 
-function ProvenanceFooter({ provenance, generatedAt }) {
+function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
   if (!provenance) return null;
+
+  // Count decay risks from suggestions
+  const decayHigh = (suggestions || []).filter((s) => s.decayRisk === "high").length;
+  const decayMedium = (suggestions || []).filter((s) => s.decayRisk === "medium").length;
+  const decayTotal = decayHigh + decayMedium;
+
+  // Count suggestions with Reddit engagement
+  const withReddit = (suggestions || []).filter(
+    (s) => s.redditEngagement && (s.redditEngagement.postCount > 0 || s.redditEngagement.avgUpvotes > 0)
+  ).length;
 
   return (
     <div className="provenance-footer">
@@ -426,14 +436,27 @@ function ProvenanceFooter({ provenance, generatedAt }) {
           · {provenance.communityIndex?.version || "?"}
         </span>
         <span className="provenance-item">
-          💬 Community Scan: {provenance.communitySearch?.totalPainPoints || 0} pain
-          points across {provenance.communitySearch?.categoriesScanned || 0} categories
+          💬 Community Scan: {stats?.painPointCount || provenance.communitySearch?.totalPainPoints || 0} pain
+          points across {stats?.categoriesScanned || provenance.communitySearch?.categoriesScanned || 0} categories
           · {provenance.communitySearch?.method || "?"}
         </span>
         <span className="provenance-item">
-          🔥 Trending: {provenance.trendingQuestions?.count || 0} questions
+          🔥 Trending: {stats?.trendingQuestions || provenance.trendingQuestions?.count || 0} questions
           · {provenance.trendingQuestions?.method || "?"}
         </span>
+        <span className="provenance-item">
+          📈 Demand Index: weighted composite (30% community · 30% Reddit · 15% sources · 25% gap)
+        </span>
+        <span className="provenance-item">
+          ⏳ Decay Detection: {decayTotal > 0
+            ? `${decayHigh} high · ${decayMedium} medium risk (UE5 5.0–5.5)`
+            : "active · monitoring UE5 5.0–5.5 breaking changes"}
+        </span>
+        {withReddit > 0 && (
+          <span className="provenance-item">
+            🗣️ Reddit: {withReddit}/{(suggestions || []).length} topics with engagement data
+          </span>
+        )}
         <span className="provenance-item">
           📚 Library: {provenance.libraryCoverage?.totalCourses || 0} videos
           · {provenance.libraryCoverage?.categoriesAnalyzed || 0} categories
@@ -669,6 +692,8 @@ function DemandDashboard() {
           <ProvenanceFooter
             provenance={report.provenance}
             generatedAt={report.generatedAt}
+            stats={stats}
+            suggestions={report.suggestions}
           />
         </>
       )}
