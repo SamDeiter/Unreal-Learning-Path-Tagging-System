@@ -118,7 +118,7 @@ describe("UE5_BREAKING_CHANGES", () => {
   });
 
   it("each version has a valid date and non-empty changes array", () => {
-    for (const [version, info] of Object.entries(UE5_BREAKING_CHANGES)) {
+    for (const [_version, info] of Object.entries(UE5_BREAKING_CHANGES)) {
       expect(new Date(info.date).getTime()).not.toBeNaN();
       expect(info.changes.length).toBeGreaterThan(0);
     }
