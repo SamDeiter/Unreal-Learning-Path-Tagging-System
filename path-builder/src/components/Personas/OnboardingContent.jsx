@@ -190,6 +190,13 @@ export function OnboardingVideosByRole({
       .replace(/^(.+?) - Introduction$/i, (_, t) => `Introduction to ${t}`)
       .replace(/^(.+?) - Quickstart (.+)$/i, (_, prefix, rest) => `${prefix} - ${rest} Quickstart`)
       .trim();
+
+    // Defensive guard: never show a bare numeric course code as a title
+    if (/^\d{3}\.\d{2}$/.test(title)) {
+      const topic = course.tags?.topic || "Unreal Engine";
+      title = `${topic} - Course ${title}`;
+    }
+
     const titleLower = title.toLowerCase();
     const driveId =
       course.videos?.[0]?.drive_id || course.driveId || course.code || `course-${course.order}`;
