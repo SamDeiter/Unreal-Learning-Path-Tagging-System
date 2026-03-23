@@ -1,0 +1,38 @@
+name: Scrape YouTube Intelligence
+
+on:
+  schedule:
+    # Run daily at 5am UTC (1 hour before demand intel scrape)
+    - cron: "0 5 * * *"
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install firebase-admin
+        run: npm install firebase-admin@13
+        working-directory: scripts
+
+      - name: Run YouTube intelligence scraper
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/scrape-youtube-intel.js
+
+      - name: Summary
+        if: always()
+        run: echo "✅ YouTube intelligence scrape completed at $(date -u)"

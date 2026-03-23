@@ -490,6 +490,7 @@ function buildReport({
   taxonomy,
   benchmarks,
   startTime,
+  youtubeMetrics,
 }) {
   const suggestions = [];
 
@@ -596,7 +597,8 @@ function buildReport({
   }
 
   // Compute weighted Demand Index across all suggestions
-  computeDemandIndex(suggestions);
+  // When YouTube metrics exist, auto-rebalances to 5-signal formula
+  computeDemandIndex(suggestions, { youtubeMetrics });
 
   // Sort by Demand Index (highest opportunity first)
   suggestions.sort((a, b) => b.demandIndex - a.demandIndex);
@@ -693,6 +695,27 @@ async function main() {
   // ── Layer 2c: Reddit engagement data (real post counts) ─────────
   const redditEngagement = await scrapeRedditEngagement(taxonomy);
 
+  // ── Layer 2d: YouTube metrics (if available from prior scrape) ───
+  let youtubeMetrics = null;
+  const ytDb = initFirestore();
+  if (ytDb) {
+    try {
+      const ytDoc = await ytDb.doc("demand_intel/youtube_metrics").get();
+      if (ytDoc.exists) {
+        const ytData = ytDoc.data();
+        youtubeMetrics = ytData.categoryMetrics || null;
+        const ytAge = ytData.generatedAt
+          ? Math.round((Date.now() - new Date(ytData.generatedAt).getTime()) / 3600000)
+          : null;
+        console.log(`\n🎬 Layer 2d: YouTube metrics loaded (${ytAge}h old, ${ytData.summary?.uniqueVideos || 0} videos)`);
+      } else {
+        console.log("\n🎬 Layer 2d: No YouTube metrics yet — run scrape-youtube-intel.js first");
+      }
+    } catch (err) {
+      console.warn(`  ⚠️ YouTube metrics load failed: ${err.message}`);
+    }
+  }
+
   // ── Layer 3: Coverage analysis (instant — local computation) ────
   console.log("\n📚 Layer 3: Computing library coverage...");
   const coverageData = calculateCoverage(courses, taxonomy);
@@ -710,6 +733,7 @@ async function main() {
     taxonomy,
     benchmarks,
     startTime,
+    youtubeMetrics,
   });
 
   console.log(`\n✅ Report complete:`);

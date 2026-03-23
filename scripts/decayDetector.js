@@ -148,19 +148,34 @@ function computeDecayRisk(category, subtopic, sources = []) {
 /**
  * Compute the weighted composite Demand Index for a set of suggestions.
  *
- * Formula:
+ * Formula (5-signal when YouTube data available):
  *   demandIndex = α × norm(demandScore) + β × norm(redditScore)
  *               + γ × norm(sourceScore) + δ × norm(gap)
+ *               + ε × norm(youtubeScore)
+ *
+ * Without YouTube data (backward-compatible 4-signal):
+ *   α=0.30, β=0.30, γ=0.15, δ=0.25
+ *
+ * With YouTube data (rebalanced 5-signal):
+ *   α=0.25, β=0.20, γ=0.10, δ=0.25, ε=0.20
  *
  * @param {Array} suggestions - Array of suggestion objects from buildReport
- * @param {{ alpha: number, beta: number, gamma: number, delta: number }} weights
+ * @param {Object} [opts] - Weight overrides and YouTube data
+ * @param {Object} [opts.youtubeMetrics] - Per-category YouTube metrics from scrape-youtube-intel
  * @returns {Array} Same suggestions with `demandIndex` (0-100) added
  */
-function computeDemandIndex(
-  suggestions,
-  { alpha = 0.30, beta = 0.30, gamma = 0.15, delta = 0.25 } = {}
-) {
+function computeDemandIndex(suggestions, opts = {}) {
   if (!suggestions || suggestions.length === 0) return suggestions;
+
+  const ytMetrics = opts.youtubeMetrics || null;
+  const hasYouTube = ytMetrics && Object.keys(ytMetrics).length > 0;
+
+  // Pick weights: 5-signal when YouTube data exists, else 4-signal
+  const alpha = opts.alpha || (hasYouTube ? 0.25 : 0.30);
+  const beta = opts.beta || (hasYouTube ? 0.20 : 0.30);
+  const gamma = opts.gamma || (hasYouTube ? 0.10 : 0.15);
+  const delta = opts.delta || (hasYouTube ? 0.25 : 0.25);
+  const epsilon = opts.epsilon || (hasYouTube ? 0.20 : 0);
 
   // Step 1: Compute raw signal values for each suggestion
   const signals = suggestions.map((s) => {
@@ -177,11 +192,21 @@ function computeDemandIndex(
       (s.sourceCount || 0) * 15
     );
 
+    // YouTube signal: avgViews and avgEngagement for the suggestion's category
+    let youtubeScore = 0;
+    if (hasYouTube) {
+      const catMetrics = ytMetrics[s.category] || {};
+      const viewSignal = Math.min(100, (catMetrics.avgViews || 0) / 10000 * 100);
+      const engSignal = Math.min(100, (catMetrics.avgEngagement || 0) * 1000);
+      youtubeScore = viewSignal * 0.7 + engSignal * 0.3;
+    }
+
     return {
       demandScore: s.demandScore || 0,
       redditScore,
       sourceScore,
       gap: s.gap || 0,
+      youtubeScore,
     };
   });
 
@@ -190,6 +215,7 @@ function computeDemandIndex(
   const maxReddit = Math.max(1, ...signals.map((s) => s.redditScore));
   const maxSource = Math.max(1, ...signals.map((s) => s.sourceScore));
   const maxGap = Math.max(1, ...signals.map((s) => s.gap));
+  const maxYouTube = Math.max(1, ...signals.map((s) => s.youtubeScore));
 
   // Step 3: Compute normalized weighted composite
   for (let i = 0; i < suggestions.length; i++) {
@@ -198,9 +224,23 @@ function computeDemandIndex(
       alpha * ((s.demandScore / maxDemand) * 100) +
       beta * ((s.redditScore / maxReddit) * 100) +
       gamma * ((s.sourceScore / maxSource) * 100) +
-      delta * ((s.gap / maxGap) * 100);
+      delta * ((s.gap / maxGap) * 100) +
+      epsilon * ((s.youtubeScore / maxYouTube) * 100);
 
     suggestions[i].demandIndex = Math.round(Math.min(100, Math.max(0, index)));
+
+    // Attach YouTube metrics for dashboard display
+    if (hasYouTube && ytMetrics[suggestions[i].category]) {
+      const catMetrics = ytMetrics[suggestions[i].category];
+      suggestions[i].youtubeMetrics = {
+        avgViews: catMetrics.avgViews || 0,
+        avgEngagement: catMetrics.avgEngagement || 0,
+        videoCount: catMetrics.videoCount || 0,
+        topVideoTitle: catMetrics.topVideo?.title || "",
+        topVideoViews: catMetrics.topVideo?.views || 0,
+        topVideoUrl: catMetrics.topVideo?.url || "",
+      };
+    }
   }
 
   return suggestions;

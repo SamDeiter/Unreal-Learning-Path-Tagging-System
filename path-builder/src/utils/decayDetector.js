@@ -135,15 +135,24 @@ export function computeDecayRisk(category, subtopic, sources = []) {
 
 /**
  * Compute weighted composite Demand Index for suggestions.
+ *
+ * 5-signal when YouTube data available (ε=0.20), else 4-signal.
+ *
  * @param {Array} suggestions
- * @param {{ alpha: number, beta: number, gamma: number, delta: number }} weights
+ * @param {Object} [opts] - Weight overrides and YouTube data
  * @returns {Array} suggestions with `demandIndex` (0-100) added
  */
-export function computeDemandIndex(
-  suggestions,
-  { alpha = 0.30, beta = 0.30, gamma = 0.15, delta = 0.25 } = {}
-) {
+export function computeDemandIndex(suggestions, opts = {}) {
   if (!suggestions || suggestions.length === 0) return suggestions;
+
+  const ytMetrics = opts.youtubeMetrics || null;
+  const hasYouTube = ytMetrics && Object.keys(ytMetrics).length > 0;
+
+  const alpha = opts.alpha || (hasYouTube ? 0.25 : 0.30);
+  const beta = opts.beta || (hasYouTube ? 0.20 : 0.30);
+  const gamma = opts.gamma || (hasYouTube ? 0.10 : 0.15);
+  const delta = opts.delta || (hasYouTube ? 0.25 : 0.25);
+  const epsilon = opts.epsilon || (hasYouTube ? 0.20 : 0);
 
   const signals = suggestions.map((s) => {
     const reddit = s.redditEngagement || {};
@@ -155,11 +164,20 @@ export function computeDemandIndex(
     );
     const sourceScore = Math.min(100, (s.sourceCount || 0) * 15);
 
+    let youtubeScore = 0;
+    if (hasYouTube) {
+      const catMetrics = ytMetrics[s.category] || {};
+      const viewSignal = Math.min(100, (catMetrics.avgViews || 0) / 10000 * 100);
+      const engSignal = Math.min(100, (catMetrics.avgEngagement || 0) * 1000);
+      youtubeScore = viewSignal * 0.7 + engSignal * 0.3;
+    }
+
     return {
       demandScore: s.demandScore || 0,
       redditScore,
       sourceScore,
       gap: s.gap || 0,
+      youtubeScore,
     };
   });
 
@@ -167,6 +185,7 @@ export function computeDemandIndex(
   const maxReddit = Math.max(1, ...signals.map((s) => s.redditScore));
   const maxSource = Math.max(1, ...signals.map((s) => s.sourceScore));
   const maxGap = Math.max(1, ...signals.map((s) => s.gap));
+  const maxYouTube = Math.max(1, ...signals.map((s) => s.youtubeScore));
 
   for (let i = 0; i < suggestions.length; i++) {
     const s = signals[i];
@@ -174,9 +193,22 @@ export function computeDemandIndex(
       alpha * ((s.demandScore / maxDemand) * 100) +
       beta * ((s.redditScore / maxReddit) * 100) +
       gamma * ((s.sourceScore / maxSource) * 100) +
-      delta * ((s.gap / maxGap) * 100);
+      delta * ((s.gap / maxGap) * 100) +
+      epsilon * ((s.youtubeScore / maxYouTube) * 100);
 
     suggestions[i].demandIndex = Math.round(Math.min(100, Math.max(0, index)));
+
+    if (hasYouTube && ytMetrics[suggestions[i].category]) {
+      const catMetrics = ytMetrics[suggestions[i].category];
+      suggestions[i].youtubeMetrics = {
+        avgViews: catMetrics.avgViews || 0,
+        avgEngagement: catMetrics.avgEngagement || 0,
+        videoCount: catMetrics.videoCount || 0,
+        topVideoTitle: catMetrics.topVideo?.title || "",
+        topVideoViews: catMetrics.topVideo?.views || 0,
+        topVideoUrl: catMetrics.topVideo?.url || "",
+      };
+    }
   }
 
   return suggestions;

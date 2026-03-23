@@ -214,7 +214,7 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
             <span className="metric-value gap-value">−{suggestion.gap}%</span>
             <span className="metric-label">Gap</span>
           </div>
-          <div className="metric" title={`Demand Index: ${suggestion.demandIndex ?? suggestion.demandScore}/100 — weighted composite of community activity (30%), Reddit engagement (30%), source verification (15%), and coverage gap (25%).`}>
+          <div className="metric" title={`Demand Index: ${suggestion.demandIndex ?? suggestion.demandScore}/100 — weighted composite of community activity, Reddit engagement, source verification, coverage gap${suggestion.youtubeMetrics ? ', and YouTube viewership' : ''}.`}>
             <span className="metric-value">{suggestion.demandIndex ?? suggestion.demandScore}</span>
             <span className="metric-label">Index</span>
           </div>
@@ -229,6 +229,14 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
               title={suggestion.decayReason || `Content decay risk: ${suggestion.decayRisk}`}
             >
               {suggestion.decayRisk === "high" ? "🔴 Outdated" : "⚠️ Aging"}
+            </span>
+          )}
+          {suggestion.youtubeMetrics && suggestion.youtubeMetrics.avgViews > 50000 && (
+            <span
+              className="decay-badge" style={{ background: '#2563eb', color: '#fff' }}
+              title={`High YouTube interest: ${suggestion.youtubeMetrics.avgViews.toLocaleString()} avg views across ${suggestion.youtubeMetrics.videoCount} tutorials`}
+            >
+              🚀 Breakout
             </span>
           )}
         </div>
@@ -276,6 +284,34 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           {suggestion.courseCount > 0 && (
             <div className="existing-coverage">
               <h5>📚 Existing Coverage: {suggestion.courseCount} courses</h5>
+            </div>
+          )}
+          {suggestion.youtubeMetrics && (
+            <div className="existing-coverage">
+              <h5>🎬 YouTube Signal</h5>
+              <div className="sources-list">
+                <div className="source-row">
+                  <span>📊 {suggestion.youtubeMetrics.avgViews.toLocaleString()} avg views</span>
+                </div>
+                <div className="source-row">
+                  <span>💬 {(suggestion.youtubeMetrics.avgEngagement * 100).toFixed(1)}% engagement</span>
+                </div>
+                <div className="source-row">
+                  <span>🎥 {suggestion.youtubeMetrics.videoCount} tutorials found</span>
+                </div>
+                {suggestion.youtubeMetrics.topVideoTitle && (
+                  <div className="source-row">
+                    <span>🏆 Top: <a
+                      href={suggestion.youtubeMetrics.topVideoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="source-link"
+                    >
+                      {suggestion.youtubeMetrics.topVideoTitle}
+                    </a> ({suggestion.youtubeMetrics.topVideoViews.toLocaleString()} views)</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           <button
