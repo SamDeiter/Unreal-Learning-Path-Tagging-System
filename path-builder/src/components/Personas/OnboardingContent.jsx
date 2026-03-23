@@ -6,6 +6,20 @@ import React from "react";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import { ONBOARDING_ROLE_SECTIONS } from "./onboardingQuestions";
 
+// Persona ID → normalized industry key (persona.industry has values like 'Games (Indie)'
+// which don't match our map keys, so we use persona.id instead)
+const PERSONA_INDUSTRY_MAP = {
+  indie_isaac: "games",
+  logic_liam: "games",
+  animator_alex: "animation",
+  rigger_regina: "animation",
+  designer_cpg: "visualization",
+  architect_amy: "architecture",
+  simulation_sam: "simulation",
+  vfx_victor: "vfx",
+  automotive_andy: "automotive",
+};
+
 // Title-based exclusions for games personas (used by both docs and video sections)
 const GAMES_TITLE_EXCLUDE = [
   "virtual production", "composure", "icvfx",
@@ -17,7 +31,7 @@ const GAMES_TITLE_EXCLUDE = [
 
 // ─────────── Inline doc + YouTube section components ───────────
 export function OnboardingDocsSection({ docs, isInCart, addToCart, removeFromCart, persona }) {
-  const pIndustry = (persona?.industry || "general").toLowerCase();
+  const pIndustry = PERSONA_INDUSTRY_MAP[persona?.id] || "general";
   const filteredDocs = (pIndustry === "games")
     ? docs.filter((d) => {
         const label = (d.label || "").toLowerCase();
@@ -200,7 +214,7 @@ export function OnboardingVideosByRole({
   persona,
 }) {
   // Filter courses to only those relevant to the user's industry
-  const pIndustry = (persona?.industry || "general").toLowerCase();
+  const pIndustry = PERSONA_INDUSTRY_MAP[persona?.id] || "general";
   const allowedIndustries = INDUSTRY_ALLOW_MAP[pIndustry] || null;
 
   const filteredCourses = allowedIndustries
