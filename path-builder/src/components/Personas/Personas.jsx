@@ -356,6 +356,7 @@ export default function Personas() {
                   isInCart={isInCart}
                   addToCart={addToCart}
                   removeFromCart={removeFromCart}
+                  persona={detectedPersona}
                 />
               )}
               {blendedPath?.youtube?.length > 0 && (

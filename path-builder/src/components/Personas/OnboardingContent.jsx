@@ -6,9 +6,25 @@ import React from "react";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import { ONBOARDING_ROLE_SECTIONS } from "./onboardingQuestions";
 
+// Title-based exclusions for games personas (used by both docs and video sections)
+const GAMES_TITLE_EXCLUDE = [
+  "virtual production", "composure", "icvfx",
+  "linear content", "datasmith", "digital twin",
+  "for aec", "for architecture", "for automotive",
+  "broadcast", "ndisplay", "stage operator",
+  "control rig", "metahuman", "take recorder",
+];
+
 // ─────────── Inline doc + YouTube section components ───────────
-export function OnboardingDocsSection({ docs, isInCart, addToCart, removeFromCart }) {
-  if (!docs?.length) return null;
+export function OnboardingDocsSection({ docs, isInCart, addToCart, removeFromCart, persona }) {
+  const pIndustry = (persona?.industry || "general").toLowerCase();
+  const filteredDocs = (pIndustry === "games")
+    ? docs.filter((d) => {
+        const label = (d.label || "").toLowerCase();
+        return !GAMES_TITLE_EXCLUDE.some((kw) => label.includes(kw));
+      })
+    : docs;
+  if (!filteredDocs?.length) return null;
   return (
     <div className="blended-section">
       <div className="blended-section-header">
@@ -18,7 +34,7 @@ export function OnboardingDocsSection({ docs, isInCart, addToCart, removeFromCar
         </p>
       </div>
       <div className="doc-cards-grid">
-        {docs.map((d, i) => {
+        {filteredDocs.map((d, i) => {
           const docId = `doc_${d.key || i}`;
           const inCart = isInCart(docId);
           return (
@@ -172,14 +188,7 @@ const INDUSTRY_ALLOW_MAP = {
   visualization: ["visualization", "simulation", "general", ""],
 };
 
-// Title-based exclusions as a safety net for games personas
-const GAMES_TITLE_EXCLUDE = [
-  "virtual production", "composure", "icvfx",
-  "linear content", "datasmith", "digital twin",
-  "for aec", "for architecture", "for automotive",
-  "broadcast", "ndisplay", "stage operator",
-  "control rig", "metahuman", "take recorder",
-];
+
 
 export function OnboardingVideosByRole({
   courses,
