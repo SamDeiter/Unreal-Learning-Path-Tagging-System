@@ -172,11 +172,12 @@ export function OnboardingVideosByRole({
   const videoResults = courses.map((course) => {
     // Clean up raw course titles for display
     let title = (course.title || course.name || "")
-      .replace(/_/g, " ")                              // underscores → spaces
-      .replace(/\s*-\s*/g, " - ")                      // normalize dashes
-      .replace(/^(.+?)\s+(?:Introduction to|Quickstart)\s+\1$/i, (_, topic) => `Introduction to ${topic}`)  // "Control Rig Introduction to Control Rig" → "Introduction to Control Rig"
-      .replace(/^(.+?)\s+-\s+Introduction$/i, (_, topic) => `Introduction to ${topic}`)  // "Metahuman - Introduction" → "Introduction to Metahuman"
-      .replace(/Niagar\b/gi, "Niagara")                // fix common typo
+      .replace(/_/g, " - ")                             // underscores → dashes
+      .replace(/\s*-\s*/g, " - ")                       // normalize all dashes
+      .replace(/Niagar\b/gi, "Niagara")                 // fix typo
+      .replace(/^(.+?) - (?:Introduction to |Quickstart )\1$/i, (_, t) => `Introduction to ${t}`)
+      .replace(/^(.+?) - Introduction$/i, (_, t) => `Introduction to ${t}`)
+      .replace(/^(.+?) - Quickstart (.+)$/i, (_, prefix, rest) => `${prefix} - ${rest} Quickstart`)
       .trim();
     const titleLower = title.toLowerCase();
     const driveId =
