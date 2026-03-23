@@ -25,6 +25,9 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 13. **Query Feasibility Gate** — Blocks off-topic queries (e.g., "Horses in UE5") from triggering AI-generated paths. Checks queries against 80+ UE5 domain terms before allowing hybrid fallback. Shows a rich "Topic Not Covered" card with clickable UE5 query suggestions
 14. **Enrichment Pipeline** — Gemini-powered summaries, learning objectives, quizzes, prerequisites, and embeddings
 15. **Mobile Responsive** — Optimized for phone (375px), tablet (768px), and desktop viewports with adaptive drawer navigation
+16. **Demand Intelligence Dashboard** — AI-powered community research engine that scrapes Reddit, Epic Forums, and Stack Overflow via Gemini Grounded Search. Identifies trending UE5 questions, learner pain points, and content gaps across 17 categories with 160+ subtopics. Generates ranked suggestion cards with demand scores, gap levels, and one-click "Start Brief" to begin course authoring
+17. **Authoring Workbench** — 5-stage course creation pipeline (Plan → Outline → Script → Brief → Export) powered by AI. Accepts demand-driven topic suggestions or free-form input. Generates structured course outlines with lessons, steps, and reusable content detection. Produces video recording briefs with talking points and B-roll suggestions
+18. **Video Reuse Analysis** — Semantic similarity matching against existing video library to identify reusable content. Configurable thresholds for "reuse" vs. "adapt" vs. "record new" classification, reducing redundant recording effort
 
 ---
 
@@ -42,7 +45,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 | **Search**         | Firestore vector search + TF-IDF transcript index + Vertex AI docs + tag matching  |
 | **Embeddings**     | 3,622 doc chunks (1,880 scraped + 1,742 UDN/Perforce) + 2,402 segment chunks       |
 | **Hosting**        | GitHub Pages (frontend), Firebase Hosting (API)                                    |
-| **Testing**        | Vitest + React Testing Library + Playwright (566 tests)                            |
+| **Testing**        | Vitest + React Testing Library + Playwright (939+ tests)                           |
 | **Security**       | DOMPurify (XSS sanitization), Firebase Security Rules, invite-based access control |
 | **Linting**        | ESLint 9 (flat config) + Stylelint                                                 |
 
