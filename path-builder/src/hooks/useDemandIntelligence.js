@@ -95,19 +95,34 @@ export function useDemandIntelligence() {
   const _directTrending = report?.trendingQuestions?.length || 0;
   const _directPainPoints = Object.values(report?.painPointsByCategory || {}).flat().length;
 
-  const _derivedTrending = _directTrending || new Set(
+  // Fallback 1: count unique relatedQuestion/painPoint fields in sources
+  const _sourceTrending = new Set(
     (report?.suggestions || [])
       .flatMap((s) => s.sources || [])
       .filter((src) => src.relatedQuestion)
       .map((src) => src.relatedQuestion)
   ).size;
 
-  const _derivedPainPoints = _directPainPoints || new Set(
+  const _sourcePainPoints = new Set(
     (report?.suggestions || [])
       .flatMap((s) => s.sources || [])
       .filter((src) => src.painPoint)
       .map((src) => src.painPoint)
   ).size;
+
+  // Fallback 2: derive from suggestions themselves when sources are also empty
+  // High-gap topics (gap > 30) indicate trending unmet demand
+  const _topicTrending = (report?.suggestions || [])
+    .filter((s) => s.gap > 30).length;
+  // Unique categories with at least one gap > 0 represent pain point areas
+  const _categoryPainPoints = new Set(
+    (report?.suggestions || [])
+      .filter((s) => s.gap > 0)
+      .map((s) => s.category)
+  ).size;
+
+  const _derivedTrending = _directTrending || _sourceTrending || _topicTrending;
+  const _derivedPainPoints = _directPainPoints || _sourcePainPoints || _categoryPainPoints;
 
   const stats = report ? {
     totalSuggestions: report.suggestions?.length || 0,
