@@ -77,13 +77,21 @@ function initFirestore() {
 async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true } = {}) {
   if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
 
+  const generationConfig = {
+    temperature: 0.3,
+    maxOutputTokens: 8192,
+  };
+
+  // IMPORTANT: responseMimeType "application/json" conflicts with google_search
+  // grounding tools — Gemini cannot produce structured JSON while also using
+  // search tools. Only enable JSON mode when grounding is OFF.
+  if (!useGrounding) {
+    generationConfig.responseMimeType = "application/json";
+  }
+
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 8192,
-      responseMimeType: "application/json",
-    },
+    generationConfig,
   };
 
   // Grounded search — snake_case for REST API
@@ -117,6 +125,12 @@ async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true }
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const groundingMetadata = data.candidates?.[0]?.groundingMetadata || null;
+
+      // If grounding returned empty text, retry once without grounding as fallback
+      if (useGrounding && !text.trim()) {
+        console.warn("  ⚠️ Grounded search returned empty text — retrying without grounding...");
+        return callGemini(prompt, { retries: 1, useGrounding: false });
+      }
 
       return { text, groundingMetadata };
     } catch (err) {
@@ -295,11 +309,11 @@ IMPORTANT RULES:
       const result = await callGemini(prompt);
       const parsed = parseJSON(result.text);
 
-      if (parsed && Array.isArray(parsed)) {
+      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
         allQuestions.push(...parsed);
         console.log(`    ✅ Got ${parsed.length} questions`);
       } else {
-        console.warn(`    ⚠️ Failed to parse response for batch ${batchNum}`);
+        console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable (raw: ${result.text.slice(0, 300)})`);
       }
     } catch (err) {
       console.error(`    ❌ Batch ${batchNum} failed: ${err.message}`);
@@ -368,7 +382,10 @@ IMPORTANT RULES:
     const result = await callGemini(prompt);
     const parsed = parseJSON(result.text);
 
-    if (!parsed || !Array.isArray(parsed)) return [];
+    if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
+      console.warn(`    ⚠️ Pain points for "${category}": empty result (raw: ${result.text.slice(0, 300)})`);
+      return [];
+    }
 
     return parsed.slice(0, PAIN_POINT_LIMIT).map((pp) => ({
       painPoint: pp.painPoint || pp.pain_point || "",
