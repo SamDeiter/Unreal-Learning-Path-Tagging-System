@@ -291,7 +291,7 @@ export function computePlatformBreakdown(suggestion) {
   return { ...scores, dominant, platforms: PLATFORM_META };
 }
 
-export function aggregatePlatformDemand(suggestions) {
+export function aggregatePlatformDemand(suggestions, report = {}) {
   if (!suggestions || suggestions.length === 0) return {};
 
   const platformTotals = {};
@@ -305,6 +305,7 @@ export function aggregatePlatformDemand(suggestions) {
     };
   }
 
+  // ── 1. Score from suggestion-level sources ──────────────
   for (const s of suggestions) {
     const breakdown = s.platformBreakdown || computePlatformBreakdown(s);
 
@@ -321,6 +322,86 @@ export function aggregatePlatformDemand(suggestions) {
         category: s.category,
         score: breakdown[breakdown.dominant],
       });
+    }
+  }
+
+  // ── 2. Derive platform signals from report-level data ──
+  //    Pain points have URLs that identify which platform they came from
+  const painPoints = report.painPointsByCategory || {};
+  const platformUrlCounts = {
+    [PLATFORMS.YOUTUBE]: 0,
+    [PLATFORMS.REDDIT]: 0,
+    [PLATFORMS.EPIC_FORUM]: 0,
+    [PLATFORMS.DEV_COMMUNITY]: 0,
+  };
+  const platformPainTopics = {
+    [PLATFORMS.YOUTUBE]: new Set(),
+    [PLATFORMS.REDDIT]: new Set(),
+    [PLATFORMS.EPIC_FORUM]: new Set(),
+    [PLATFORMS.DEV_COMMUNITY]: new Set(),
+  };
+
+  for (const [category, pps] of Object.entries(painPoints)) {
+    for (const pp of pps) {
+      const url = (pp.sourceUrl || "").toLowerCase();
+      let matchPlatform = null;
+      if (url.includes("reddit.com")) matchPlatform = PLATFORMS.REDDIT;
+      else if (url.includes("youtube.com") || url.includes("youtu.be"))
+        matchPlatform = PLATFORMS.YOUTUBE;
+      else if (url.includes("forums.unrealengine.com"))
+        matchPlatform = PLATFORMS.EPIC_FORUM;
+      else if (url.includes("dev.epicgames.com"))
+        matchPlatform = PLATFORMS.DEV_COMMUNITY;
+
+      if (matchPlatform) {
+        platformUrlCounts[matchPlatform]++;
+        platformPainTopics[matchPlatform].add(category);
+      }
+    }
+  }
+
+  // Trending questions sources
+  for (const q of report.trendingQuestions || []) {
+    for (const src of q.sources || []) {
+      const url = (src.url || "").toLowerCase();
+      const type = (src.type || "").toLowerCase();
+      let matchPlatform = null;
+      if (type === "reddit" || url.includes("reddit.com"))
+        matchPlatform = PLATFORMS.REDDIT;
+      else if (type === "youtube" || type === "youtube_comments" || url.includes("youtube.com"))
+        matchPlatform = PLATFORMS.YOUTUBE;
+      else if (type === "epic_forum" || url.includes("forums.unrealengine.com"))
+        matchPlatform = PLATFORMS.EPIC_FORUM;
+      else if (type === "epic_dev_community" || url.includes("dev.epicgames.com"))
+        matchPlatform = PLATFORMS.DEV_COMMUNITY;
+
+      if (matchPlatform) {
+        platformUrlCounts[matchPlatform]++;
+        if (q.category) platformPainTopics[matchPlatform].add(q.category);
+      }
+    }
+  }
+
+  // Merge pain-point/trending counts into platform totals
+  for (const [platform, count] of Object.entries(platformUrlCounts)) {
+    if (count > 0 && platformTotals[platform]) {
+      // Scale: each URL source is worth 15 points, cap at 100
+      const derivedScore = Math.min(100, count * 15);
+      // Only add if suggestion-level data didn't already populate
+      if (platformTotals[platform].totalScore === 0) {
+        platformTotals[platform].totalScore = derivedScore;
+        platformTotals[platform].topicCount = platformPainTopics[platform].size || count;
+      }
+      // Add unique topics from pain point categories
+      for (const cat of platformPainTopics[platform]) {
+        if (!platformTotals[platform].uniqueTopics.find((t) => t.category === cat)) {
+          platformTotals[platform].uniqueTopics.push({
+            topic: cat,
+            category: cat,
+            score: derivedScore,
+          });
+        }
+      }
     }
   }
 

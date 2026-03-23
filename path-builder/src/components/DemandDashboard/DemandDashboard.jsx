@@ -471,8 +471,8 @@ function GranularCoverageChart({ demandData, coverageData }) {
 
 // ── Platform Demand Breakdown Panel ────────────────────────
 
-function PlatformBreakdownPanel({ suggestions, onPlatformFilter, activePlatformFilter }) {
-  const platformData = aggregatePlatformDemand(suggestions);
+function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activePlatformFilter }) {
+  const platformData = aggregatePlatformDemand(suggestions, report);
   if (!platformData || Object.keys(platformData).length === 0) return null;
 
   // Find max total for bar scaling
@@ -756,6 +756,7 @@ function DemandDashboard() {
           {/* Platform Demand Breakdown */}
           <PlatformBreakdownPanel
             suggestions={report.suggestions}
+            report={report}
             onPlatformFilter={setPlatformFilter}
             activePlatformFilter={platformFilter}
           />

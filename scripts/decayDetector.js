@@ -347,7 +347,7 @@ function computePlatformBreakdown(suggestion) {
  * @param {Array} suggestions
  * @returns {Object} Per-platform aggregated data with top unique topics
  */
-function aggregatePlatformDemand(suggestions) {
+function aggregatePlatformDemand(suggestions, report = {}) {
   if (!suggestions || suggestions.length === 0) return {};
 
   const platformTotals = {};
@@ -357,10 +357,11 @@ function aggregatePlatformDemand(suggestions) {
       totalScore: 0,
       topicCount: 0,
       avgScore: 0,
-      uniqueTopics: [], // Topics where this platform is dominant
+      uniqueTopics: [],
     };
   }
 
+  // 1. Score from suggestion-level sources
   for (const s of suggestions) {
     const breakdown = s.platformBreakdown || computePlatformBreakdown(s);
 
@@ -371,7 +372,6 @@ function aggregatePlatformDemand(suggestions) {
       }
     }
 
-    // Track topics where this platform is dominant
     if (breakdown.dominant && platformTotals[breakdown.dominant]) {
       platformTotals[breakdown.dominant].uniqueTopics.push({
         topic: s.topic,
@@ -381,11 +381,84 @@ function aggregatePlatformDemand(suggestions) {
     }
   }
 
-  // Compute averages and sort unique topics
+  // 2. Derive platform signals from report-level pain points & trending questions
+  const painPoints = report.painPointsByCategory || {};
+  const platformUrlCounts = {
+    [PLATFORMS.YOUTUBE]: 0,
+    [PLATFORMS.REDDIT]: 0,
+    [PLATFORMS.EPIC_FORUM]: 0,
+    [PLATFORMS.DEV_COMMUNITY]: 0,
+  };
+  const platformPainTopics = {
+    [PLATFORMS.YOUTUBE]: new Set(),
+    [PLATFORMS.REDDIT]: new Set(),
+    [PLATFORMS.EPIC_FORUM]: new Set(),
+    [PLATFORMS.DEV_COMMUNITY]: new Set(),
+  };
+
+  for (const [category, pps] of Object.entries(painPoints)) {
+    for (const pp of pps) {
+      const url = (pp.sourceUrl || "").toLowerCase();
+      let matchPlatform = null;
+      if (url.includes("reddit.com")) matchPlatform = PLATFORMS.REDDIT;
+      else if (url.includes("youtube.com") || url.includes("youtu.be"))
+        matchPlatform = PLATFORMS.YOUTUBE;
+      else if (url.includes("forums.unrealengine.com"))
+        matchPlatform = PLATFORMS.EPIC_FORUM;
+      else if (url.includes("dev.epicgames.com"))
+        matchPlatform = PLATFORMS.DEV_COMMUNITY;
+
+      if (matchPlatform) {
+        platformUrlCounts[matchPlatform]++;
+        platformPainTopics[matchPlatform].add(category);
+      }
+    }
+  }
+
+  for (const q of report.trendingQuestions || []) {
+    for (const src of q.sources || []) {
+      const url = (src.url || "").toLowerCase();
+      const type = (src.type || "").toLowerCase();
+      let matchPlatform = null;
+      if (type === "reddit" || url.includes("reddit.com"))
+        matchPlatform = PLATFORMS.REDDIT;
+      else if (type === "youtube" || type === "youtube_comments" || url.includes("youtube.com"))
+        matchPlatform = PLATFORMS.YOUTUBE;
+      else if (type === "epic_forum" || url.includes("forums.unrealengine.com"))
+        matchPlatform = PLATFORMS.EPIC_FORUM;
+      else if (type === "epic_dev_community" || url.includes("dev.epicgames.com"))
+        matchPlatform = PLATFORMS.DEV_COMMUNITY;
+
+      if (matchPlatform) {
+        platformUrlCounts[matchPlatform]++;
+        if (q.category) platformPainTopics[matchPlatform].add(q.category);
+      }
+    }
+  }
+
+  for (const [platform, count] of Object.entries(platformUrlCounts)) {
+    if (count > 0 && platformTotals[platform]) {
+      const derivedScore = Math.min(100, count * 15);
+      if (platformTotals[platform].totalScore === 0) {
+        platformTotals[platform].totalScore = derivedScore;
+        platformTotals[platform].topicCount = platformPainTopics[platform].size || count;
+      }
+      for (const cat of platformPainTopics[platform]) {
+        if (!platformTotals[platform].uniqueTopics.find((t) => t.category === cat)) {
+          platformTotals[platform].uniqueTopics.push({
+            topic: cat,
+            category: cat,
+            score: derivedScore,
+          });
+        }
+      }
+    }
+  }
+
   for (const p of Object.values(platformTotals)) {
     p.avgScore = p.topicCount > 0 ? Math.round(p.totalScore / p.topicCount) : 0;
     p.uniqueTopics.sort((a, b) => b.score - a.score);
-    p.uniqueTopics = p.uniqueTopics.slice(0, 3); // Top 3
+    p.uniqueTopics = p.uniqueTopics.slice(0, 3);
   }
 
   return platformTotals;
