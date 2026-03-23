@@ -104,7 +104,7 @@ A **problem-first learning platform** for Unreal Engine 5. Users describe their 
 │   ├── pipeline/                  # Server-side enrichment pipeline
 │   ├── triggers/                  # Firestore event triggers
 │   └── scheduled/                 # Cron/scheduled functions
-├── scripts/                       # 110+ build-time enrichment & data scripts
+├── scripts/                       # 115+ build-time enrichment & data scripts
 │   ├── build_embeddings.py                # Generate semantic embeddings
 │   ├── build_search_index.py              # Build TF-IDF search index
 │   ├── build_transcript_index.py          # Parse VTT → transcript segments
@@ -224,6 +224,7 @@ python scripts/run_enrichment_pipeline.py
 | `embed_udn_docs.py`               | `udn_doc_embeddings.json`          | Perforce UDN docs → 1,742 embedded chunks |
 | `merge_embeddings.py`             | `docs_embeddings.json`             | Merge scraped + UDN embeddings (3,622)    |
 | `content_gap_analysis.py`         | Gap report                         | Identifies missing content areas          |
+| `link_drive_videos.py`            | Updates `video_library_enriched.json` | Link Drive videos to courses by code-prefix matching |
 
 All AI-powered scripts use the Google Gemini API.
 

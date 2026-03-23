@@ -4,6 +4,27 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+## [7.8.0-video-pipeline] - 2026-03-23
+
+### Added
+
+- **Google Drive Video Linking Pipeline** — `scripts/link_drive_videos.py` matches Drive video filenames to course codes via prefix matching (e.g., `127.02_01_Intro.mp4` → course `127.02`):
+  - **1,006 Drive videos** linked to **64 courses** across two passes (pre-scraped metadata + live Drive API search)
+  - Updates `video_library_enriched.json` in 3 locations (`content/`, `src/data/`, `public/data/`)
+  - Full audit: 1,887 doc-only courses, 442 YouTube-embed courses, 40 courses with no Drive content
+- **Persona Industry Mapping** — `PERSONA_INDUSTRY_MAP` in `OnboardingContent.jsx` maps persona IDs (e.g., `indie_isaac`) to normalized industry keys for accurate content filtering
+- **CoursePreview Inline Play** — `CoursePreview` play button now expands inline instead of navigating away
+- **26 New Tests** — Tests for `AuthoringWorkbench` and `DemandDashboard` components
+
+### Fixed
+
+- **Persona Content Filtering** — Game dev personas no longer see irrelevant content (Control Rig, Metahuman) due to industry normalization fix
+- **Mark Complete Button Visibility** — Added CSS pulse animation and video progress counter (`Video 2 of 10 →`) to `GuidedPlayer.css` and `GuidedPlayer.jsx`
+- **Empty Course Dead Ends** — `Personas.jsx` now filters out courses with no playable videos (`drive_id` check) before passing to GuidedPlayer
+- **Trending Question Sources** — `DemandDashboard` now derives trending questions and pain point stats from suggestion sources when Gemini Grounded Search returns 0 results
+
+---
+
 ## [7.7.0-demand-expansion] - 2026-03-20
 
 ### Added

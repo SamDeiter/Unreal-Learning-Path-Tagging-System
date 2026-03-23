@@ -412,6 +412,33 @@ User Question -> [Diagnostic Quiz] -> [Knowledge Profile] -> [Depth-Adjusted Pat
 
 ---
 
+## Drive Video Pipeline
+
+Google Drive video content is linked to courses via a code-prefix matching system:
+
+```
+drive_video_metadata_final.json → link_drive_videos.py → video_library_enriched.json
+         (1,738 files)                                        (64 courses linked)
+```
+
+| Component | Purpose |
+|-----------|---------|
+| `scripts/link_drive_videos.py` | Matches Drive filenames (e.g., `127.02_01_*.mp4`) to course codes (`127.02`) and populates the `videos` array with `drive_id` and `duration_seconds` |
+| `content/drive_video_metadata_final.json` | Pre-scraped Drive file metadata (1,738 video files) |
+| `video_library_enriched.json` | Course catalog updated in 3 locations: `content/`, `src/data/`, `public/data/` |
+| `PERSONA_INDUSTRY_MAP` (OnboardingContent.jsx) | Maps persona IDs to normalized industry keys for accurate content filtering |
+
+### Course Content Categories (2,436 total)
+
+| Category | Count | Video Source |
+|----------|------:|-------------|
+| Drive-linked courses | 64 | Google Drive iframe embed |
+| YouTube video courses | 442 | YouTube embed |
+| Documentation-only (`doc_*`) | 1,887 | No video (text content) |
+| Planned (no content yet) | 40 | Not yet recorded |
+
+---
+
 ## Key Services Reference
 
 | Service                    | Responsibility                                      | External Dependencies                                     |
