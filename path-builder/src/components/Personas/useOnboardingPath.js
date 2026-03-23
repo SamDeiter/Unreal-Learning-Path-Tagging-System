@@ -12,7 +12,7 @@ import {
   personaScoringRules,
 } from "../../services/PersonaService";
 import { useTagData } from "../../context/TagDataContext";
-import { buildBlendedPath } from "../../services/coverageAnalyzer";
+// coverageAnalyzer — docs and youtube are now fetched inline via dynamic imports
 import { buildLearningOutcome } from "../../utils/videoTopicExtractor";
 import useOnboardingRAG from "../../hooks/useOnboardingRAG";
 import { logOnboardingRAG } from "../../services/onboardingTelemetry";
@@ -77,13 +77,51 @@ export default function useOnboardingPath(answers) {
         "introduction", "unreal", "engine", "workshop", "first",
         "project", "games", "your", "quickstart",
       ];
-      const pathTopics = [...personaKeywords, ...goalWords, ...courseTopics]
-        .filter((v, i, a) => a.indexOf(v) === i && !stopWords.includes(v))
-        .slice(0, 20);   // increased from 15 to 20 to fit persona + course topics
 
-      if (pathTopics.length > 0) {
-        const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
-        setBlendedPath(blended);
+      // DOCS: Use focused persona + goal keywords ONLY (no noisy course title words)
+      // This prevents course words like "control", "landscape" from diluting doc relevance
+      const docTopics = [...personaKeywords, ...goalWords]
+        .filter((v, i, a) => a.indexOf(v) === i && !stopWords.includes(v))
+        .slice(0, 10);
+
+      // YOUTUBE: Use broader topic set including course topics
+      const ytTopics = [...personaKeywords, ...goalWords, ...courseTopics]
+        .filter((v, i, a) => a.indexOf(v) === i && !stopWords.includes(v))
+        .slice(0, 20);
+
+      if (docTopics.length > 0 || ytTopics.length > 0) {
+        // Import docs and YouTube separately with focused vs broad topic sets
+        const { getDocReadingPath } = await import("../../services/docsSearchService");
+        const { getResourcesForTopics, getResourcesForTagIds } = await import("../../services/externalContentService");
+
+        let docs = [];
+        try {
+          docs = await getDocReadingPath(docTopics.length > 0 ? docTopics : ytTopics, { limit: 5 });
+        } catch (e) {
+          console.warn("[Personas] Doc fetch failed:", e.message);
+        }
+
+        let youtube = [];
+        try {
+          const topicsForYt = ytTopics.length > 0 ? ytTopics : docTopics;
+          const ytByTopic = await getResourcesForTopics(topicsForYt, { limit: 3 });
+          const ytByTag = await getResourcesForTagIds(topicsForYt, { limit: 3 });
+          const seenIds = new Set(ytByTopic.map((r) => r.id));
+          youtube = [...ytByTopic];
+          for (const r of ytByTag) {
+            if (!seenIds.has(r.id)) { youtube.push(r); seenIds.add(r.id); }
+          }
+        } catch (e) {
+          console.warn("[Personas] YouTube fetch failed:", e.message);
+        }
+
+        setBlendedPath({
+          docs,
+          youtube,
+          totalTimeMinutes: 0,
+          coverageScore: 0,
+          externalEnabled: true,
+        });
       }
     } catch (e) {
       console.warn("[Personas] Blended path fetch failed:", e.message);
