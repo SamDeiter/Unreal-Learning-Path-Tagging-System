@@ -428,8 +428,8 @@ export default function useOnboardingPath(answers) {
       // ── Boost keywords (+5 title, +3 tag) ──
       for (const keyword of rules.boostKeywords) {
         const kw = keyword.toLowerCase();
-        if (courseTitle.includes(kw)) score += 5;
-        if (courseTags.some((tag) => tag.includes(kw))) score += 3;
+        if (courseTitle.includes(kw)) score += 10;
+        if (courseTags.some((tag) => tag.includes(kw))) score += 6;
       }
 
       // ── Penalty keywords (-10 per match) ──
@@ -541,13 +541,54 @@ export default function useOnboardingPath(answers) {
         }
       }
 
-      // STRONGLY boost foundation courses
-      if (course.code?.startsWith("100")) score += 40;
-      if (courseTitle.includes("introduction")) score += 50;
-      if (courseTitle.includes("intro") && !courseTitle.includes("introduction")) score += 40;
-      if (courseTitle.includes("quickstart") || courseTitle.includes("your first")) score += 35;
-      if (courseTitle.includes("getting started")) score += 30;
+      // ── Experience-gated foundation boosts (KST: bypass intros for experienced) ──
+      const introBoostScale = {
+        beginner: { code100: 15, intro: 20, quickstart: 15, gettingStarted: 10 },
+        junior:   { code100: 10, intro: 10, quickstart: 5,  gettingStarted: 5  },
+        mid:      { code100: 5,  intro: 5,  quickstart: 0,  gettingStarted: 0  },
+        senior:   { code100: 5,  intro: 5,  quickstart: 0,  gettingStarted: 0  },
+      };
+      const iBoost = introBoostScale[expLevel] || introBoostScale.beginner;
+      if (course.code?.startsWith("100")) score += iBoost.code100;
+      if (courseTitle.includes("introduction")) score += iBoost.intro;
+      if (courseTitle.includes("intro") && !courseTitle.includes("introduction")) score += iBoost.intro;
+      if (courseTitle.includes("quickstart") || courseTitle.includes("your first")) score += iBoost.quickstart;
+      if (courseTitle.includes("getting started")) score += iBoost.gettingStarted;
       if (courseTitle.includes("fundamental") && score >= 0) score += 10;
+
+      // ── Activate persona preferences (PBR + "Why" research) ──
+      const prefs = detectedPersona.preferences || {};
+
+      // Depth preference: penalize level mismatches
+      const courseLevel = (course.tags?.level || "").toLowerCase();
+      if (prefs.depth === "high" && courseLevel === "beginner") score -= 8;
+      if (prefs.depth === "low" && courseLevel === "advanced") score -= 15;
+
+      // prefersUnderTheHood: boost architecture/systems courses
+      if (prefs.prefersUnderTheHood) {
+        if (/architect|system|api|engine|internal|pipeline|framework|c\+\+|code|programming/.test(combinedText)) score += 8;
+      }
+
+      // prefersVisual: boost art/visual/creative courses
+      if (prefs.prefersVisual) {
+        if (/lighting|material|camera|visual|render|sequencer|animation|niagara|particle|texture/.test(combinedText)) score += 8;
+      }
+
+      // avoidMarketing: penalize marketing/overview courses
+      if (prefs.avoidMarketing) {
+        if (/marketing|overview|showcase|spotlight|enterprise|business/.test(combinedText)) score -= 12;
+      }
+
+      // ── Goal-text matching (TTF: startPrompt influences results) ──
+      if (answers.startPrompt) {
+        const goalWords = answers.startPrompt
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 3 && !["want", "need", "like", "make", "learn", "with", "that", "this", "from", "have", "will", "been", "they", "were"].includes(w));
+        for (const word of goalWords) {
+          if (combinedText.includes(word)) score += 8;
+        }
+      }
 
       const learningOutcome = buildLearningOutcome(course.videos, course.ai_tags);
 
@@ -588,6 +629,18 @@ export default function useOnboardingPath(answers) {
     dedupedCourses = dedupedCourses.filter(
       (c) => c.videos?.length > 0 && c.videos.some((v) => v.drive_id)
     );
+
+    // ── Topic diversity guard (CLT: prevent "Tutorial Hell" intro flooding) ──
+    const introPattern = /^(introduction|quickstart|getting started|your first|intro to)/i;
+    let introCount = 0;
+    dedupedCourses = dedupedCourses.filter((c) => {
+      const title = (c.title || c.name || "");
+      if (introPattern.test(title)) {
+        introCount++;
+        if (introCount > 2) return false;
+      }
+      return true;
+    });
 
     // Take top 8
     dedupedCourses = dedupedCourses.slice(0, 8);
