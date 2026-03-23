@@ -209,14 +209,14 @@ export function OnboardingVideosByRole({
       return 99;
 
     if (isBeginner) {
-      // Beginners: QuickStart → Intro to UE5 → Editor → Blueprint → world-building → specialized
-      if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
-        return 0;
+      // Beginners: Intro to UE5 → QuickStart project → Editor → Blueprint → world-building → specialized
       if (
         t.includes("introduction to unreal") ||
         t.includes("intro to unreal") ||
         t.includes("getting started")
       )
+        return 0;
+      if (t.includes("quickstart") || t.includes("your first") || t.includes("first project"))
         return 1;
       if (t.includes("editor") || t.includes("viewport") || t.includes("navigate")) return 2;
       if (t.includes("blueprint") || t.includes("visual script")) return 3;

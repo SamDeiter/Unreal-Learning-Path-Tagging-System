@@ -52,16 +52,7 @@ export default function useOnboardingPath(answers) {
   // ─── Shared: extract path topics + fetch blended docs/youtube ───
   const fetchBlendedPath = async (pathCourses) => {
     try {
-      // ── Persona-first topic extraction ──
-      // Inject persona keywords + user goal words BEFORE generic course topics
-      // so buildBlendedPath prioritizes docs matching the persona's actual interests
-      const personaKeywords = (detectedPersona?.keywords || []).map((k) => k.toLowerCase());
-      const goalWords = (answers?.startPrompt || "")
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((w) => w.length > 3 && !["want", "need", "learn", "about", "with", "make", "using"].includes(w));
-
-      const courseTopics = pathCourses
+      const pathTopics = pathCourses
         .flatMap((c) => [
           ...(c.ai_tags?.topics || []),
           ...(c.tag_ids || []).flatMap((t) => t.split(".")),
@@ -70,17 +61,23 @@ export default function useOnboardingPath(answers) {
           ...Object.values(c.tags || {}).filter((v) => typeof v === "string" && v.length > 2),
           ...(c.title || c.name || "").split(/[\s_-]+/).filter((w) => w.length > 3),
         ])
-        .map((t) => t.toLowerCase());
-
-      // Persona keywords first → goal words → course topics (deduped, stopwords removed)
-      const stopWords = [
-        "introduction", "unreal", "engine", "workshop", "first",
-        "project", "games", "your", "quickstart",
-      ];
-      const pathTopics = [...personaKeywords, ...goalWords, ...courseTopics]
-        .filter((v, i, a) => a.indexOf(v) === i && !stopWords.includes(v))
-        .slice(0, 20);   // increased from 15 to 20 to fit persona + course topics
-
+        .map((t) => t.toLowerCase())
+        .filter(
+          (v, i, a) =>
+            a.indexOf(v) === i &&
+            ![
+              "introduction",
+              "unreal",
+              "engine",
+              "workshop",
+              "first",
+              "project",
+              "games",
+              "your",
+              "quickstart",
+            ].includes(v)
+        )
+        .slice(0, 15);
       if (pathTopics.length > 0) {
         const blended = await buildBlendedPath(pathTopics, [], { maxDocs: 5, maxYoutube: 3 });
         setBlendedPath(blended);
@@ -496,9 +493,7 @@ export default function useOnboardingPath(answers) {
             "twinmotion",
             "for architecture",
             "for design",
-            "for aec",
             "aeco",
-            " aec",
           ],
           allowPersonas: ["architecture", "design"],
         },
@@ -525,7 +520,7 @@ export default function useOnboardingPath(answers) {
         courseTitle.includes("leadership") ||
         courseTitle.includes("management overview")
       ) {
-        score -= 200;   // same severity as industry mismatch
+        score -= 30;
       }
 
       // Penalize advanced topics for beginners
