@@ -174,13 +174,23 @@ export function OnboardingVideosByRole({
     const titleLower = title.toLowerCase();
     const driveId =
       course.videos?.[0]?.drive_id || course.driveId || course.code || `course-${course.order}`;
+
+    // Hard-filter: executive/leadership content should never show for non-exec personas
+    if (
+      (titleLower.includes("executive") || titleLower.includes("leadership")) &&
+      !titleLower.includes("unreal") // safety: don't filter if somehow part of a real course
+    ) {
+      return null; // filtered out below
+    }
+
+    // Only UE5-GENERAL intros are prerequisites — topic-specific intros are core content
     const isFoundation =
       course.code?.startsWith("100") ||
-      titleLower.includes("quickstart") ||
-      titleLower.includes("introduction") ||
-      titleLower.includes("intro ") ||
+      (titleLower.includes("quickstart") && !titleLower.includes("landscape") && !titleLower.includes("niagara") && !titleLower.includes("control rig")) ||
+      titleLower.includes("introduction to unreal") ||
+      titleLower.includes("intro to unreal") ||
       titleLower.includes("getting started") ||
-      titleLower.includes("your first");
+      (titleLower.includes("your first") && titleLower.includes("project"));
     const role = isFoundation ? "prerequisite" : course.quickWin ? "core" : "supplemental";
 
     return {
@@ -196,7 +206,7 @@ export function OnboardingVideosByRole({
         matchedTags: course.matchedTags || [],
       },
     };
-  });
+  }).filter(Boolean);
 
   // Experience-aware topic priority — beginners see "Intro to UE5" first,
   // experienced users see it later (they already know the basics)
