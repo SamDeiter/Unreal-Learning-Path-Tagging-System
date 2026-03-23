@@ -493,7 +493,9 @@ export default function useOnboardingPath(answers) {
             "twinmotion",
             "for architecture",
             "for design",
+            "for aec",
             "aeco",
+            " aec",
           ],
           allowPersonas: ["architecture", "design"],
         },
@@ -520,7 +522,7 @@ export default function useOnboardingPath(answers) {
         courseTitle.includes("leadership") ||
         courseTitle.includes("management overview")
       ) {
-        score -= 30;
+        score -= 200;   // same severity as industry mismatch
       }
 
       // Penalize advanced topics for beginners
