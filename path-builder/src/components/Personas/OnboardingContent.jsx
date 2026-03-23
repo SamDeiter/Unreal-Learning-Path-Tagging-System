@@ -170,7 +170,14 @@ export function OnboardingVideosByRole({
 }) {
   // Build video result objects from courses — never filter out, just assign roles
   const videoResults = courses.map((course) => {
-    const title = (course.title || course.name || "").replace(/_/g, " ");
+    // Clean up raw course titles for display
+    let title = (course.title || course.name || "")
+      .replace(/_/g, " ")                              // underscores → spaces
+      .replace(/\s*-\s*/g, " - ")                      // normalize dashes
+      .replace(/^(.+?)\s+(?:Introduction to|Quickstart)\s+\1$/i, (_, topic) => `Introduction to ${topic}`)  // "Control Rig Introduction to Control Rig" → "Introduction to Control Rig"
+      .replace(/^(.+?)\s+-\s+Introduction$/i, (_, topic) => `Introduction to ${topic}`)  // "Metahuman - Introduction" → "Introduction to Metahuman"
+      .replace(/Niagar\b/gi, "Niagara")                // fix common typo
+      .trim();
     const titleLower = title.toLowerCase();
     const driveId =
       course.videos?.[0]?.drive_id || course.driveId || course.code || `course-${course.order}`;
