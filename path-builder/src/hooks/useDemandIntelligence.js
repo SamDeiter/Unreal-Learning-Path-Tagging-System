@@ -88,11 +88,31 @@ export function useDemandIntelligence() {
     ...new Set((report?.suggestions || []).map((s) => s.category)),
   ].sort();
 
-  // Summary stats
+  // Summary stats — with fallback derivation from suggestion sources
+  // When Firestore pre-computed data has empty trendingQuestions/painPoints
+  // (e.g. Gemini Grounded Search returned 0 results), derive counts from
+  // the relatedQuestion and painPoint fields embedded in suggestion sources.
+  const _directTrending = report?.trendingQuestions?.length || 0;
+  const _directPainPoints = Object.values(report?.painPointsByCategory || {}).flat().length;
+
+  const _derivedTrending = _directTrending || new Set(
+    (report?.suggestions || [])
+      .flatMap((s) => s.sources || [])
+      .filter((src) => src.relatedQuestion)
+      .map((src) => src.relatedQuestion)
+  ).size;
+
+  const _derivedPainPoints = _directPainPoints || new Set(
+    (report?.suggestions || [])
+      .flatMap((s) => s.sources || [])
+      .filter((src) => src.painPoint)
+      .map((src) => src.painPoint)
+  ).size;
+
   const stats = report ? {
     totalSuggestions: report.suggestions?.length || 0,
-    trendingQuestions: report.trendingQuestions?.length || 0,
-    painPointCount: Object.values(report.painPointsByCategory || {}).flat().length,
+    trendingQuestions: _derivedTrending,
+    painPointCount: _derivedPainPoints,
     categoriesScanned: report.provenance?.communitySearch?.categoriesScanned || 0,
     generationTimeMs: report.generationTimeMs || 0,
     generatedAt: report.generatedAt || null,
