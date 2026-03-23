@@ -90,6 +90,7 @@ export const SOURCE_TYPES = {
   COMMUNITY_INDEX: "community_index",
   YOUTUBE_COMMENTS: "youtube_comments",
   EPIC_DEV_COMMUNITY: "epic_dev_community",
+  GOOGLE_TRENDS: "google_trends",
 };
 
 // ── Granular Subtopic Taxonomy ─────────────────────────────

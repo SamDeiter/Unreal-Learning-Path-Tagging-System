@@ -546,6 +546,7 @@ function buildReport({
   benchmarks,
   startTime,
   youtubeMetrics,
+  trendsData,
 }) {
   const suggestions = [];
 
@@ -652,8 +653,8 @@ function buildReport({
   }
 
   // Compute weighted Demand Index across all suggestions
-  // When YouTube metrics exist, auto-rebalances to 5-signal formula
-  computeDemandIndex(suggestions, { youtubeMetrics });
+  // Auto-rebalances: 4-signal (base) → 5-signal (+YouTube) → 6-signal (+YouTube+Trends)
+  computeDemandIndex(suggestions, { youtubeMetrics, trendsData });
 
   // Sort by Demand Index (highest opportunity first)
   suggestions.sort((a, b) => b.demandIndex - a.demandIndex);
@@ -774,6 +775,26 @@ async function main() {
     }
   }
 
+  // ── Layer 2e: Google Trends data (if available from prior scrape) ──
+  let trendsData = null;
+  if (db) {
+    try {
+      const trendsDoc = await db.doc("demand_intel/google_trends").get();
+      if (trendsDoc.exists) {
+        const tData = trendsDoc.data();
+        trendsData = tData.categoryTrends || null;
+        const trendsAge = tData.scrapedAt
+          ? Math.round((Date.now() - new Date(tData.scrapedAt).getTime()) / 3600000)
+          : null;
+        console.log(`\n📊 Layer 2e: Google Trends loaded (${trendsAge}h old, ${tData.categoryCount || 0} categories)`);
+      } else {
+        console.log("\n📊 Layer 2e: No Google Trends data yet — run scrape-google-trends.py first");
+      }
+    } catch (err) {
+      console.warn(`  ⚠️ Google Trends load failed: ${err.message}`);
+    }
+  }
+
   // ── Layer 3: Coverage analysis (instant — local computation) ────
   console.log("\n📚 Layer 3: Computing library coverage...");
   const coverageData = calculateCoverage(courses, taxonomy);
@@ -792,6 +813,7 @@ async function main() {
     benchmarks,
     startTime,
     youtubeMetrics,
+    trendsData,
   });
 
   console.log(`\n✅ Report complete:`);

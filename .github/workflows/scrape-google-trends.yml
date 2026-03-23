@@ -1,0 +1,39 @@
+name: Scrape Google Trends Intelligence
+
+on:
+  schedule:
+    # Weekly on Sundays at 06:00 UTC (after YouTube scraper at 05:00)
+    - cron: '0 6 * * 0'
+  workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  scrape-trends:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pytrends firebase-admin google-cloud-firestore
+
+      - name: Run Google Trends scraper
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python scripts/scrape-google-trends.py
+
+      - name: Upload local report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-trends-report-${{ github.run_number }}
+          path: scripts/output/google_trends_report.json
+          retention-days: 90

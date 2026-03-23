@@ -148,34 +148,52 @@ function computeDecayRisk(category, subtopic, sources = []) {
 /**
  * Compute the weighted composite Demand Index for a set of suggestions.
  *
- * Formula (5-signal when YouTube data available):
- *   demandIndex = α × norm(demandScore) + β × norm(redditScore)
- *               + γ × norm(sourceScore) + δ × norm(gap)
- *               + ε × norm(youtubeScore)
- *
- * Without YouTube data (backward-compatible 4-signal):
- *   α=0.30, β=0.30, γ=0.15, δ=0.25
- *
- * With YouTube data (rebalanced 5-signal):
- *   α=0.25, β=0.20, γ=0.10, δ=0.25, ε=0.20
+ * Formula tiers (backward-compatible):
+ *   4-signal (base):            α=0.30, β=0.30, γ=0.15, δ=0.25
+ *   5-signal (+YouTube):        α=0.25, β=0.20, γ=0.10, δ=0.25, ε=0.20
+ *   6-signal (+YouTube+Trends): α=0.20, β=0.15, γ=0.10, δ=0.20, ε=0.15, ζ=0.20
  *
  * @param {Array} suggestions - Array of suggestion objects from buildReport
- * @param {Object} [opts] - Weight overrides and YouTube data
+ * @param {Object} [opts] - Weight overrides and signal data
  * @param {Object} [opts.youtubeMetrics] - Per-category YouTube metrics from scrape-youtube-intel
+ * @param {Object} [opts.trendsData] - Per-category Google Trends data from scrape-google-trends
  * @returns {Array} Same suggestions with `demandIndex` (0-100) added
  */
 function computeDemandIndex(suggestions, opts = {}) {
   if (!suggestions || suggestions.length === 0) return suggestions;
 
   const ytMetrics = opts.youtubeMetrics || null;
+  const trendsData = opts.trendsData || null;
   const hasYouTube = ytMetrics && Object.keys(ytMetrics).length > 0;
+  const hasTrends = trendsData && Object.keys(trendsData).length > 0;
 
-  // Pick weights: 5-signal when YouTube data exists, else 4-signal
-  const alpha = opts.alpha || (hasYouTube ? 0.25 : 0.30);
-  const beta = opts.beta || (hasYouTube ? 0.20 : 0.30);
-  const gamma = opts.gamma || (hasYouTube ? 0.10 : 0.15);
-  const delta = opts.delta || (hasYouTube ? 0.25 : 0.25);
-  const epsilon = opts.epsilon || (hasYouTube ? 0.20 : 0);
+  // Pick weights: 6-signal > 5-signal > 4-signal (backward-compatible)
+  let alpha, beta, gamma, delta, epsilon, zeta;
+  if (hasYouTube && hasTrends) {
+    // 6-signal: YouTube + Google Trends
+    alpha   = opts.alpha   || 0.20;
+    beta    = opts.beta    || 0.15;
+    gamma   = opts.gamma   || 0.10;
+    delta   = opts.delta   || 0.20;
+    epsilon = opts.epsilon || 0.15;
+    zeta    = opts.zeta    || 0.20;
+  } else if (hasYouTube) {
+    // 5-signal: YouTube only
+    alpha   = opts.alpha   || 0.25;
+    beta    = opts.beta    || 0.20;
+    gamma   = opts.gamma   || 0.10;
+    delta   = opts.delta   || 0.25;
+    epsilon = opts.epsilon || 0.20;
+    zeta    = 0;
+  } else {
+    // 4-signal: base
+    alpha   = opts.alpha   || 0.30;
+    beta    = opts.beta    || 0.30;
+    gamma   = opts.gamma   || 0.15;
+    delta   = opts.delta   || 0.25;
+    epsilon = 0;
+    zeta    = 0;
+  }
 
   // Step 1: Compute raw signal values for each suggestion
   const signals = suggestions.map((s) => {
@@ -201,12 +219,20 @@ function computeDemandIndex(suggestions, opts = {}) {
       youtubeScore = viewSignal * 0.7 + engSignal * 0.3;
     }
 
+    // Google Trends signal: scaled search interest (0-100) for the suggestion's category
+    let trendsScore = 0;
+    if (hasTrends) {
+      const catTrends = trendsData[s.category] || {};
+      trendsScore = Math.min(100, catTrends.scaledScore || 0);
+    }
+
     return {
       demandScore: s.demandScore || 0,
       redditScore,
       sourceScore,
       gap: s.gap || 0,
       youtubeScore,
+      trendsScore,
     };
   });
 
@@ -216,6 +242,7 @@ function computeDemandIndex(suggestions, opts = {}) {
   const maxSource = Math.max(1, ...signals.map((s) => s.sourceScore));
   const maxGap = Math.max(1, ...signals.map((s) => s.gap));
   const maxYouTube = Math.max(1, ...signals.map((s) => s.youtubeScore));
+  const maxTrends = Math.max(1, ...signals.map((s) => s.trendsScore));
 
   // Step 3: Compute normalized weighted composite
   for (let i = 0; i < suggestions.length; i++) {
@@ -225,7 +252,8 @@ function computeDemandIndex(suggestions, opts = {}) {
       beta * ((s.redditScore / maxReddit) * 100) +
       gamma * ((s.sourceScore / maxSource) * 100) +
       delta * ((s.gap / maxGap) * 100) +
-      epsilon * ((s.youtubeScore / maxYouTube) * 100);
+      epsilon * ((s.youtubeScore / maxYouTube) * 100) +
+      zeta * ((s.trendsScore / maxTrends) * 100);
 
     suggestions[i].demandIndex = Math.round(Math.min(100, Math.max(0, index)));
 
@@ -239,6 +267,15 @@ function computeDemandIndex(suggestions, opts = {}) {
         topVideoTitle: catMetrics.topVideo?.title || "",
         topVideoViews: catMetrics.topVideo?.views || 0,
         topVideoUrl: catMetrics.topVideo?.url || "",
+      };
+    }
+
+    // Attach Google Trends metrics for dashboard display
+    if (hasTrends && trendsData[suggestions[i].category]) {
+      const catTrends = trendsData[suggestions[i].category];
+      suggestions[i].trendsMetrics = {
+        scaledScore: catTrends.scaledScore || 0,
+        rawInterest: catTrends.rawInterest || 0,
       };
     }
   }
