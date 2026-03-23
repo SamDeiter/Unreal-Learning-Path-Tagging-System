@@ -168,6 +168,24 @@ function parseJSON(text) {
     if (objMatch) {
       try { return JSON.parse(objMatch[0]); } catch { /* fall through */ }
     }
+
+    // Truncated JSON repair: Gemini may hit token limit mid-object.
+    // Find the last complete object boundary "},", trim after it, close array.
+    const arrStart = cleaned.indexOf("[");
+    if (arrStart !== -1) {
+      let partial = cleaned.slice(arrStart);
+      // Find last complete object (ends with "}")
+      const lastCloseBrace = partial.lastIndexOf("}");
+      if (lastCloseBrace > 0) {
+        const repaired = partial.slice(0, lastCloseBrace + 1) + "]";
+        try {
+          const result = JSON.parse(repaired);
+          console.warn(`  ⚠️ Repaired truncated JSON (salvaged ${Array.isArray(result) ? result.length : 1} items)`);
+          return result;
+        } catch { /* fall through */ }
+      }
+    }
+
     console.warn("  ⚠️ Could not parse JSON from response:", cleaned.slice(0, 200));
     return null;
   }
