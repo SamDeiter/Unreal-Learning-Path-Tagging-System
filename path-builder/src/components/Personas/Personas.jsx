@@ -347,6 +347,7 @@ export default function Personas() {
                 removeFromCart={removeFromCart}
                 userQuery={answers.startPrompt || ""}
                 experience={answers.experience}
+                persona={detectedPersona}
               />
 
               {blendedPath?.docs?.length > 0 && (

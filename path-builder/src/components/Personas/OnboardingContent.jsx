@@ -160,6 +160,8 @@ export function OnboardingYouTubeSection({ youtube, isInCart, addToCart, removeF
   );
 }
 
+const FILM_ONLY_TOPICS = ["control rig", "metahuman", "virtual production", "composure", "icvfx"];
+
 export function OnboardingVideosByRole({
   courses,
   isInCart,
@@ -167,9 +169,18 @@ export function OnboardingVideosByRole({
   removeFromCart,
   userQuery,
   experience,
+  persona,
 }) {
+  // Exclude film/cinematic courses for games personas
+  const isGames = persona?.industry?.toLowerCase() === "games";
+  const filteredCourses = isGames
+    ? courses.filter((c) => {
+        const t = (c.title || c.name || "").toLowerCase();
+        return !FILM_ONLY_TOPICS.some((film) => t.includes(film));
+      })
+    : courses;
   // Build video result objects from courses — never filter out, just assign roles
-  const videoResults = courses.map((course) => {
+  const videoResults = filteredCourses.map((course) => {
     // Clean up raw course titles for display
     let title = (course.title || course.name || "")
       .replace(/_/g, " - ")                             // underscores → dashes

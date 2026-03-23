@@ -146,7 +146,7 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
 
     // Score: how well does this doc match the requested topics?
     let score = 0;
-    const keyLower = key.toLowerCase();
+    const keyLower = key.toLowerCase().replace(/[-_]/g, " ");
     const labelLower = (doc.label || "").toLowerCase();
     // Extract slug from URL for matching: "https://...unreal-engine/blueprints-visual-scripting" → "blueprints visual scripting"
     const urlSlug = (doc.url || "").split("/").pop().replace(/-/g, " ").toLowerCase();
