@@ -43,7 +43,7 @@ const FIREBASE_SA_B64 = process.env.FIREBASE_SERVICE_ACCOUNT;
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-const BATCH_SIZE = 3; // Concurrent Gemini calls
+const BATCH_SIZE = 6; // Concurrent Gemini calls (pain points batch size)
 const TRENDING_PER_CATEGORY = 2; // Questions per category (kept small to avoid truncation)
 const PAIN_POINT_LIMIT = 5;
 const RATE_LIMIT_DELAY_MS = 2000;
@@ -301,7 +301,7 @@ async function scrapeTrendingQuestions(categories) {
   const allQuestions = [];
 
   // Build batches of 2 categories each
-  const TRENDING_BATCH = 2;
+  const TRENDING_BATCH = 6; // 6 categories per Gemini call (was 2) — reduces calls from 9 to 3
   const batches = [];
   for (let i = 0; i < categories.length; i += TRENDING_BATCH) {
     batches.push(categories.slice(i, i + TRENDING_BATCH));
@@ -349,6 +349,9 @@ Return a JSON array:
 }]
 
 IMPORTANT RULES:
+- CRITICAL: Each question gets exactly ONE source entry — its PRIMARY platform where you found the strongest signal
+- Do NOT list the same question under multiple platforms
+- Distribute questions across platforms — aim for a mix of reddit, epic_forum, youtube, tiktok sources
 - ONLY return questions from REAL posts you can find via search
 - Every question MUST have at least one source with a URL
 - Focus on learning/tutorial questions, not engine bug reports
@@ -595,37 +598,39 @@ function buildReport({
         trend: demandScore > (data.overall || 50) ? "rising" : "stable",
       });
 
-      // Reddit engagement source (real data from Layer 2c API)
+      // Reddit PRAW sentiment PRIMARY (Layer 2f — real Reddit API data from scrape-reddit-praw.py)
+      // This has real r/unrealengine posts, comments, and sentiment — always prefer over Gemini
+      if (!reddit && redditSentiment) {
+        const prawCat = redditSentiment[category] || redditSentiment[category.toLowerCase()];
+        if (prawCat) {
+          // PRAW data is per-category (not per-subtopic) — use category-level stats
+          const topPost = (prawCat.samplePosts || [])[0] || null;
+          reddit = {
+            postCount: prawCat.postCount || 0,
+            avgUpvotes: prawCat.avgUpvotes || 0,
+            avgComments: prawCat.commentCount
+              ? Math.round(prawCat.commentCount / Math.max(1, prawCat.postCount))
+              : 0,
+            totalEngagement: (prawCat.totalUpvotes || 0) + (prawCat.commentCount || 0),
+            topPost: topPost,
+            _source: "praw",
+            _sentiment: prawCat.avgSentimentScore || 0,
+            _frequentTopics: prawCat.frequentTopics || [],
+          };
+        }
+      }
+
+      // Reddit engagement source (Layer 2c — Gemini grounded search OR PRAW data)
       if (reddit) {
+        const topPostUrl = reddit.topPost?.url || "";
+        const topPostTitle = reddit.topPost?.title || `Reddit: ${subtopic}`;
         sources.push({
           type: "reddit",
-          url: reddit.topPost?.url || "",
-          title: reddit.topPost?.title || `Reddit: ${subtopic}`,
+          url: topPostUrl,
+          title: topPostTitle,
           engagement: `${reddit.postCount} posts · ${reddit.avgUpvotes} avg upvotes · ${reddit.avgComments} avg comments`,
           redditStats: reddit,
         });
-      }
-
-      // Reddit PRAW sentiment fallback (Layer 2f — deeper analysis from scrape-reddit-praw.py)
-      if (!reddit && redditSentiment) {
-        const prawCat = redditSentiment[category] || redditSentiment[category.toLowerCase()];
-        const prawSub = prawCat?.subtopics?.[subtopic] || prawCat?.subtopics?.[subtopic.toLowerCase()];
-        if (prawSub) {
-          sources.push({
-            type: "reddit",
-            url: prawSub.topPost?.url || "",
-            title: prawSub.topPost?.title || `Reddit PRAW: ${subtopic}`,
-            engagement: `${prawSub.postCount || 0} posts · ${prawSub.avgScore || 0} avg score · ${prawSub.avgComments || 0} avg comments`,
-            redditStats: {
-              postCount: prawSub.postCount || 0,
-              avgUpvotes: prawSub.avgScore || 0,
-              avgComments: prawSub.avgComments || 0,
-              totalEngagement: (prawSub.totalScore || 0) + (prawSub.totalComments || 0),
-              topPost: prawSub.topPost || null,
-              sentimentLabel: prawSub.sentiment || null,
-            },
-          });
-        }
       }
 
       // Trending question sources
