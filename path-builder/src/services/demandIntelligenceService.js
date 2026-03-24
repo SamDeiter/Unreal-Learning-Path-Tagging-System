@@ -491,12 +491,27 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
     try {
       const firestoreReport = await loadFromFirestore();
       if (firestoreReport && firestoreReport.suggestions?.length > 0) {
-        firestoreReport._source = "firestore";
-        _cachedReport = firestoreReport;
-        _cachedAt = Date.now();
-        _saveToStorage(firestoreReport);
-        devLog("[DemandIntel] Using pre-computed Firestore report (instant!)");
-        return firestoreReport;
+        // Quality check: if the Firestore report has no community intelligence
+        // data (trending questions, pain points, Reddit engagement), it's an
+        // incomplete scraper run and we should fall through to live scraping
+        // to fill in the missing platform signals.
+        const hasTrending = (firestoreReport.trendingQuestions || []).length > 0;
+        const hasPainPoints = Object.values(firestoreReport.painPointsByCategory || {}).flat().length > 0;
+        const hasReddit = firestoreReport.suggestions.some(s => s.redditEngagement);
+        const hasMultiPlatformSources = firestoreReport.suggestions.some(s =>
+          (s.sources || []).some(src => src.type && src.type !== "community_index")
+        );
+
+        if (hasTrending || hasPainPoints || hasReddit || hasMultiPlatformSources) {
+          firestoreReport._source = "firestore";
+          _cachedReport = firestoreReport;
+          _cachedAt = Date.now();
+          _saveToStorage(firestoreReport);
+          devLog("[DemandIntel] Using pre-computed Firestore report (instant!)");
+          return firestoreReport;
+        } else {
+          devLog("[DemandIntel] Firestore report lacks community data (0 trending, 0 pain points, 0 Reddit) — falling through to live scrape");
+        }
       }
     } catch (err) {
       devWarn("[DemandIntel] Firestore attempt failed:", err.message);
