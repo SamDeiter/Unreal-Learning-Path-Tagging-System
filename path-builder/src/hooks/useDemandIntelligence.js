@@ -35,7 +35,7 @@ export function useDemandIntelligence() {
    * Generate (or re-use cached) demand report.
    * Uses a ref-based lock to prevent double-invocation from React StrictMode.
    */
-  const generate = useCallback(async ({ skipCache = false } = {}) => {
+  const generate = useCallback(async ({ skipCache = false, skipFirestore = false } = {}) => {
     if (lockRef.current) return;
     lockRef.current = true;
     setLoading(true);
@@ -44,7 +44,7 @@ export function useDemandIntelligence() {
 
     try {
       devLog("[useDemandIntelligence] Generating report...");
-      const result = await generateDemandReport(courses, { skipCache });
+      const result = await generateDemandReport(courses, { skipCache, skipFirestore });
 
       if (!abortRef.current) {
         setReport(result);
@@ -66,7 +66,7 @@ export function useDemandIntelligence() {
    */
   const refresh = useCallback(() => {
     clearDemandCache();
-    generate({ skipCache: true });
+    generate({ skipCache: true, skipFirestore: true });
   }, [generate]);
 
   /**

@@ -555,6 +555,7 @@ function buildReport({
   startTime,
   youtubeMetrics,
   trendsData,
+  redditSentiment,
 }) {
   const suggestions = [];
 
@@ -578,7 +579,7 @@ function buildReport({
         trend: demandScore > (data.overall || 50) ? "rising" : "stable",
       });
 
-      // Reddit engagement source (real data)
+      // Reddit engagement source (real data from Layer 2c API)
       if (reddit) {
         sources.push({
           type: "reddit",
@@ -587,6 +588,28 @@ function buildReport({
           engagement: `${reddit.postCount} posts · ${reddit.avgUpvotes} avg upvotes · ${reddit.avgComments} avg comments`,
           redditStats: reddit,
         });
+      }
+
+      // Reddit PRAW sentiment fallback (Layer 2f — deeper analysis from scrape-reddit-praw.py)
+      if (!reddit && redditSentiment) {
+        const prawCat = redditSentiment[category] || redditSentiment[category.toLowerCase()];
+        const prawSub = prawCat?.subtopics?.[subtopic] || prawCat?.subtopics?.[subtopic.toLowerCase()];
+        if (prawSub) {
+          sources.push({
+            type: "reddit",
+            url: prawSub.topPost?.url || "",
+            title: prawSub.topPost?.title || `Reddit PRAW: ${subtopic}`,
+            engagement: `${prawSub.postCount || 0} posts · ${prawSub.avgScore || 0} avg score · ${prawSub.avgComments || 0} avg comments`,
+            redditStats: {
+              postCount: prawSub.postCount || 0,
+              avgUpvotes: prawSub.avgScore || 0,
+              avgComments: prawSub.avgComments || 0,
+              totalEngagement: (prawSub.totalScore || 0) + (prawSub.totalComments || 0),
+              topPost: prawSub.topPost || null,
+              sentimentLabel: prawSub.sentiment || null,
+            },
+          });
+        }
       }
 
       // Trending question sources
@@ -818,12 +841,12 @@ async function main() {
         const sentimentAge = sData.scrapedAt
           ? Math.round((Date.now() - new Date(sData.scrapedAt).getTime()) / 3600000)
           : null;
-        console.log(\n🗣️ Layer 2f: Reddit PRAW sentiment loaded (h old,  categories));
+        console.log(`\n🗣️ Layer 2f: Reddit PRAW sentiment loaded (${sentimentAge}h old, ${Object.keys(sData.categories || {}).length} categories)`);
       } else {
         console.log('\n🗣️ Layer 2f: No Reddit PRAW sentiment yet — run scrape-reddit-praw.py first');
       }
     } catch (err) {
-      console.warn(  ⚠️ Reddit PRAW sentiment load failed: );
+      console.warn(`  ⚠️ Reddit PRAW sentiment load failed: ${err.message}`);
     }
   }
 

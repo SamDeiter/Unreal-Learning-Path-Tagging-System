@@ -79,7 +79,7 @@ function initFirestore() {
  * Cost: 100 quota units per call.
  */
 async function searchCategory(category) {
-  const query = `UE5 ${category} tutorial`;
+  const query = `"Unreal Engine 5" ${category} tutorial`;
   const url = new URL(YT_SEARCH_URL);
   url.searchParams.set("key", YOUTUBE_API_KEY);
   url.searchParams.set("part", "snippet");
@@ -90,6 +90,9 @@ async function searchCategory(category) {
   url.searchParams.set("relevanceLanguage", "en");
   url.searchParams.set("videoDuration", "medium"); // 4-20 min (tutorial length)
 
+  // Filter out competitor engines from results
+  const COMPETITOR_KEYWORDS = /\b(unity|godot|blender|cryengine|source\s*2)\b/i;
+
   try {
     const res = await fetch(url.toString());
     if (!res.ok) {
@@ -98,14 +101,16 @@ async function searchCategory(category) {
       return [];
     }
     const data = await res.json();
-    return (data.items || []).map((item) => ({
-      videoId: item.id?.videoId,
-      title: item.snippet?.title,
-      channelId: item.snippet?.channelId,
-      channelTitle: item.snippet?.channelTitle,
-      publishedAt: item.snippet?.publishedAt,
-      category,
-    }));
+    return (data.items || [])
+      .filter((item) => !COMPETITOR_KEYWORDS.test(item.snippet?.title || ""))
+      .map((item) => ({
+        videoId: item.id?.videoId,
+        title: item.snippet?.title,
+        channelId: item.snippet?.channelId,
+        channelTitle: item.snippet?.channelTitle,
+        publishedAt: item.snippet?.publishedAt,
+        category,
+      }));
   } catch (err) {
     console.error(`  ❌ Search error for "${category}": ${err.message}`);
     return [];
