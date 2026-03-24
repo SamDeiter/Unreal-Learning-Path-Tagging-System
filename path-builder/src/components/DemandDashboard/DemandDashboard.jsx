@@ -803,6 +803,7 @@ function DemandDashboard() {
     : industryFiltered;
 
   // Auto-generate on mount if no report
+  // Strategy: tries Firestore first (instant), falls back to live scrape
   useEffect(() => {
     if (!report && !loading) {
       generate();

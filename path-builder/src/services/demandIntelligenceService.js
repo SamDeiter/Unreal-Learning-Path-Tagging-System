@@ -479,7 +479,7 @@ export async function loadFromFirestore() {
  * @param {boolean} [options.skipFirestore] — Skip Firestore, force live scraping (default: false)
  * @returns {Promise<Object>} Full demand report
  */
-export async function generateDemandReport(courses = [], { skipCache = false, skipFirestore = false } = {}) {
+export async function generateDemandReport(courses = [], { skipCache = false, skipFirestore = false, firestoreOnly = false } = {}) {
   // Check in-memory / localStorage cache
   if (!skipCache && _cachedReport && Date.now() - _cachedAt < CACHE_TTL_MS) {
     devLog("[DemandIntel] Returning cached report");
@@ -501,6 +501,12 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
     } catch (err) {
       devWarn("[DemandIntel] Firestore attempt failed:", err.message);
     }
+  }
+
+  // If firestoreOnly mode, don't fall through to expensive live scraping
+  if (firestoreOnly) {
+    devLog("[DemandIntel] firestoreOnly mode — skipping live scrape");
+    return null;
   }
 
   devLog("[DemandIntel] Generating fresh demand report (live scraping)...");
