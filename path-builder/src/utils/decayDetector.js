@@ -374,11 +374,30 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
       }
     }
 
-    if (breakdown.dominant && platformTotals[breakdown.dominant]) {
-      platformTotals[breakdown.dominant].uniqueTopics.push({
+    // Distribute topic to all platforms with actual signal (score > 0)
+    // Exclude communityIndex — it always has a score from demandScore
+    for (const [platform, score] of Object.entries(breakdown)) {
+      if (
+        platform !== "dominant" &&
+        platform !== PLATFORMS.COMMUNITY_INDEX &&
+        typeof score === "number" &&
+        score > 0 &&
+        platformTotals[platform]
+      ) {
+        platformTotals[platform].uniqueTopics.push({
+          topic: s.topic,
+          category: s.category,
+          score,
+        });
+      }
+    }
+
+    // Always add to communityIndex if it's the dominant platform
+    if (breakdown.dominant === PLATFORMS.COMMUNITY_INDEX && platformTotals[PLATFORMS.COMMUNITY_INDEX]) {
+      platformTotals[PLATFORMS.COMMUNITY_INDEX].uniqueTopics.push({
         topic: s.topic,
         category: s.category,
-        score: breakdown[breakdown.dominant],
+        score: breakdown[PLATFORMS.COMMUNITY_INDEX],
       });
     }
   }
