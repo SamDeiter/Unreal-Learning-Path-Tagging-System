@@ -16,7 +16,7 @@ exports.classifySegments = functions
   .runWith({
     secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 120, // Bumped for optional grounding call
-    memory: "256MB",
+    memory: "512MB",
   })
   .https.onCall(async (data, context) => {
     // App Check enforcement (permissive during rollout)

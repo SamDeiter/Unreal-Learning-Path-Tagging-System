@@ -197,6 +197,7 @@ exports.generateSpoke = onCall(
     maxInstances: 5,
     timeoutSeconds: 60,
     memory: "512MiB",
+    minInstances: 0,
     secrets: ["GEMINI_API_KEY"],
   },
   async (request) => {

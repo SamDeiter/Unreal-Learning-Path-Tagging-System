@@ -43,7 +43,7 @@ exports.extractIntent = functions
   .runWith({
     secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 60,
-    memory: "256MB",
+    memory: "512MB",
   })
   .https.onCall(async (data, context) => {
     // App Check enforcement (permissive during rollout)

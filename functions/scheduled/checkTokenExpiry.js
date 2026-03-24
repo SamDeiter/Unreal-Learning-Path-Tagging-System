@@ -16,6 +16,8 @@ exports.checkTokenExpiry = onSchedule(
     schedule: "every monday 09:00",
     timeZone: "America/New_York",
     timeoutSeconds: 30,
+    memory: "512MiB",
+    minInstances: 0,
   },
   async () => {
     const db = admin.firestore();

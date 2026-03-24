@@ -71,7 +71,7 @@ async function searchCollection(collectionName, queryVector, topK) {
 /**
  * Search epic_embeddings — main RAG search across all content
  */
-exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 }, async (request) => {
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);
@@ -94,7 +94,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10 }, a
  * Search course_embeddings — course-level similarity
  */
 exports.vectorSearchCourses = onCall(
-  { region: "us-central1", maxInstances: 10 },
+  { region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 },
   async (request) => {
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: true });
@@ -116,7 +116,7 @@ exports.vectorSearchCourses = onCall(
  * Search segment_embeddings — video segment similarity
  */
 exports.vectorSearchSegments = onCall(
-  { region: "us-central1", maxInstances: 10 },
+  { region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 },
   async (request) => {
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: true });
@@ -137,7 +137,7 @@ exports.vectorSearchSegments = onCall(
 /**
  * Search docs_embeddings — documentation similarity
  */
-exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10 }, async (request) => {
+exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 }, async (request) => {
   // App Check enforcement (permissive during rollout)
   requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);

@@ -61,6 +61,8 @@ exports.cleanupCache = onSchedule(
     schedule: "every 24 hours",
     timeZone: "America/New_York",
     region: "us-east1",
+    memory: "512MiB",
+    minInstances: 0,
   },
   async () => {
     const db = admin.firestore();

@@ -24,7 +24,7 @@ const BOOTSTRAP_ADMIN_EMAILS = [
  *   { targetUid: string, admin: boolean }
  */
 exports.setAdminClaim = functions
-  .runWith({ memory: "256MB" })
+  .runWith({ memory: "512MB" })
   .https.onCall(async (data, context) => {
     // App Check enforcement (permissive during rollout)
     requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });

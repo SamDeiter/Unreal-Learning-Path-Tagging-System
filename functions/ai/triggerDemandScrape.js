@@ -20,6 +20,8 @@ exports.triggerDemandScrape = onCall(
   {
     secrets: ["GITHUB_PAT"],
     timeoutSeconds: 30,
+    memory: "512MiB",
+    minInstances: 0,
   },
   async (request) => {
     // App Check enforcement (permissive during rollout)
