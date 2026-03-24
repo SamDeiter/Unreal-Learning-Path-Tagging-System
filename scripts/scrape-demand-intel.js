@@ -566,7 +566,23 @@ function buildReport({
         courseCount: 0,
       };
       const gap = demandScore - coverageInfo.coverage;
-      const reddit = redditEngagement[category]?.[subtopic] || null;
+
+      // Reddit engagement: exact subtopic match, else fall back to category average
+      let reddit = redditEngagement[category]?.[subtopic] || null;
+      if (!reddit && redditEngagement[category]) {
+        // Category-level fallback: average all sampled subtopics in this category
+        const catEntries = Object.values(redditEngagement[category]).filter(Boolean);
+        if (catEntries.length > 0) {
+          reddit = {
+            postCount: Math.round(catEntries.reduce((s, e) => s + (e.postCount || 0), 0) / catEntries.length),
+            avgUpvotes: Math.round(catEntries.reduce((s, e) => s + (e.avgUpvotes || 0), 0) / catEntries.length),
+            avgComments: Math.round(catEntries.reduce((s, e) => s + (e.avgComments || 0), 0) / catEntries.length),
+            totalEngagement: Math.round(catEntries.reduce((s, e) => s + (e.totalEngagement || 0), 0) / catEntries.length),
+            topPost: catEntries[0]?.topPost || null,
+            _fallback: true,  // Mark as category-level fallback
+          };
+        }
+      }
 
       const sources = [];
 

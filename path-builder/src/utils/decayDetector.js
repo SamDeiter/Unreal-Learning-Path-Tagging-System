@@ -405,6 +405,7 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
   // ── 2. Derive platform signals from report-level data ──
   //    Pain points have URLs that identify which platform they came from
   const painPoints = report.painPointsByCategory || {};
+
   const platformUrlCounts = {
     [PLATFORMS.YOUTUBE]: 0,
     [PLATFORMS.REDDIT]: 0,
@@ -445,7 +446,7 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
     }
   }
 
-  // Trending questions sources
+  // Trending questions sources — check BOTH url and type field
   for (const q of report.trendingQuestions || []) {
     for (const src of q.sources || []) {
       const url = (src.url || "").toLowerCase();
@@ -471,16 +472,35 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
     }
   }
 
+  // ── 2b. Direct Reddit engagement from suggestions ──────────
+  //    Suggestions may have redditEngagement data even without
+  //    explicit reddit-typed sources (from the Reddit API scraper)
+  for (const s of suggestions) {
+    const reddit = s.redditEngagement;
+    if (reddit && (reddit.postCount > 0 || reddit.avgUpvotes > 0)) {
+      const engagementScore = Math.min(100,
+        (reddit.postCount || 0) * 15 +
+        (reddit.avgUpvotes || 0) * 3 +
+        (reddit.avgComments || 0) * 5
+      );
+      if (engagementScore > 0) {
+        platformUrlCounts[PLATFORMS.REDDIT] += Math.ceil(engagementScore / 15);
+        platformPainTopics[PLATFORMS.REDDIT].add(s.category);
+      }
+    }
+  }
+
   // Merge pain-point/trending counts into platform totals
   for (const [platform, count] of Object.entries(platformUrlCounts)) {
     if (count > 0 && platformTotals[platform]) {
       // Scale: each URL source is worth 15 points, cap at 100
       const derivedScore = Math.min(100, count * 15);
-      // Only add if suggestion-level data didn't already populate
-      if (platformTotals[platform].totalScore === 0) {
-        platformTotals[platform].totalScore = derivedScore;
-        platformTotals[platform].topicCount = platformPainTopics[platform].size || count;
-      }
+      // Always add report-level signals (additive with suggestion-level data)
+      platformTotals[platform].totalScore += derivedScore;
+      platformTotals[platform].topicCount = Math.max(
+        platformTotals[platform].topicCount,
+        platformPainTopics[platform].size || count
+      );
       // Add unique topics from pain point categories
       for (const cat of platformPainTopics[platform]) {
         if (!platformTotals[platform].uniqueTopics.find((t) => t.category === cat)) {
