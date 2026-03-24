@@ -255,7 +255,7 @@ SEARCH THESE SOURCES (in priority order):
 
 ${categoryFilter}
 
-Return a JSON array of the top ${limit} trending questions. For EACH question, include the ACTUAL source URL where you found it:
+Return a JSON array of the top ${limit} trending questions. Each question must be attributed to exactly ONE primary source — the platform where you found the strongest signal for that specific question:
 
 [{
   "question": "The exact question people are asking",
@@ -271,6 +271,9 @@ Return a JSON array of the top ${limit} trending questions. For EACH question, i
 }]
 
 RULES:
+- CRITICAL: Each question gets exactly ONE source entry — its PRIMARY platform
+- Do NOT list the same question under multiple platforms
+- Distribute questions across platforms — aim for a mix of reddit, epic_forum, youtube sources
 - Return REAL questions from REAL posts — do not fabricate
 - Include the post/thread title so we can verify
 - Prioritize questions with high engagement (upvotes, comments, views)
