@@ -620,11 +620,9 @@ function DemandDashboard() {
   const displaySuggestions = platformFilter
     ? filteredSuggestions.filter((s) => {
         const b = computePlatformBreakdown(s);
-        // Match if this platform is dominant, has any score > 0,
-        // or the suggestion has sources from that platform
+        // Match if this platform is dominant
         if (b.dominant === platformFilter) return true;
-        if ((b[platformFilter] || 0) > 0) return true;
-        // Also match if any source is from the filtered platform
+        // Match if suggestion has actual sources from that platform
         const platformSourceTypes = {
           youtube: ["youtube", "youtube_comments"],
           reddit: ["reddit"],
