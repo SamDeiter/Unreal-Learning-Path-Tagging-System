@@ -65,7 +65,10 @@ test.describe("Demand → Authoring flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.evaluate((report) => {
       localStorage.setItem("ue5_persona_id", "programmer_pat");
-      localStorage.setItem("demandIntel_report", JSON.stringify(report));
+      localStorage.setItem("demandIntel_report", JSON.stringify({
+        report: report,
+        cachedAt: Date.now(),
+      }));
     }, SEED_REPORT);
     await page.reload();
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
