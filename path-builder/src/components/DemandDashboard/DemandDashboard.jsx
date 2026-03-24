@@ -786,13 +786,9 @@ function DemandDashboard() {
   const displaySuggestions = platformFilter
     ? industryFiltered.filter((s) => {
         const b = computePlatformBreakdown(s);
-        // Match if this platform is dominant
-        if (b.dominant === platformFilter) return true;
-        // Match if this platform has a meaningful score (> 10)
+        // Strict: only show topic under its dominant platform
         // This prevents the same topics from appearing under multiple platforms
-        // when the live scraper attributes them to overlapping source types
-        const score = typeof b[platformFilter] === "number" ? b[platformFilter] : 0;
-        return score > 10;
+        return b.dominant === platformFilter;
       })
     : industryFiltered;
 

@@ -374,22 +374,30 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
       }
     }
 
-    // Distribute topic to all platforms with actual signal (score > 0)
-    // Exclude communityIndex — it always has a score from demandScore
+    // Assign topic to ONLY its best non-communityIndex platform
+    // This prevents the same topic from appearing under both Reddit and Epic Forums
+    let bestPlatform = null;
+    let bestScore = 0;
     for (const [platform, score] of Object.entries(breakdown)) {
       if (
         platform !== "dominant" &&
+        platform !== "platforms" &&
         platform !== PLATFORMS.COMMUNITY_INDEX &&
         typeof score === "number" &&
         score > 0 &&
-        platformTotals[platform]
+        platformTotals[platform] &&
+        score > bestScore
       ) {
-        platformTotals[platform].uniqueTopics.push({
-          topic: s.topic,
-          category: s.category,
-          score,
-        });
+        bestPlatform = platform;
+        bestScore = score;
       }
+    }
+    if (bestPlatform) {
+      platformTotals[bestPlatform].uniqueTopics.push({
+        topic: s.topic,
+        category: s.category,
+        score: bestScore,
+      });
     }
 
     // Always add to communityIndex if it's the dominant platform
@@ -414,6 +422,8 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
     [PLATFORMS.TIKTOK]: 0,
     [PLATFORMS.INSTAGRAM]: 0,
   };
+  // Track per-category-per-platform counts for exclusive assignment
+  const categoryPlatformCounts = {};
   const platformPainTopics = {
     [PLATFORMS.YOUTUBE]: new Set(),
     [PLATFORMS.REDDIT]: new Set(),
@@ -442,6 +452,8 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
       if (matchPlatform) {
         platformUrlCounts[matchPlatform]++;
         platformPainTopics[matchPlatform].add(category);
+        if (!categoryPlatformCounts[category]) categoryPlatformCounts[category] = {};
+        categoryPlatformCounts[category][matchPlatform] = (categoryPlatformCounts[category][matchPlatform] || 0) + 1;
       }
     }
   }
@@ -467,7 +479,11 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
 
       if (matchPlatform) {
         platformUrlCounts[matchPlatform]++;
-        if (q.category) platformPainTopics[matchPlatform].add(q.category);
+        if (q.category) {
+          platformPainTopics[matchPlatform].add(q.category);
+          if (!categoryPlatformCounts[q.category]) categoryPlatformCounts[q.category] = {};
+          categoryPlatformCounts[q.category][matchPlatform] = (categoryPlatformCounts[q.category][matchPlatform] || 0) + 1;
+        }
       }
     }
   }
@@ -486,6 +502,8 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
       if (engagementScore > 0) {
         platformUrlCounts[PLATFORMS.REDDIT] += Math.ceil(engagementScore / 15);
         platformPainTopics[PLATFORMS.REDDIT].add(s.category);
+        if (!categoryPlatformCounts[s.category]) categoryPlatformCounts[s.category] = {};
+        categoryPlatformCounts[s.category][PLATFORMS.REDDIT] = (categoryPlatformCounts[s.category][PLATFORMS.REDDIT] || 0) + Math.ceil(engagementScore / 15);
       }
     }
   }
@@ -493,23 +511,33 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
   // Merge pain-point/trending counts into platform totals
   for (const [platform, count] of Object.entries(platformUrlCounts)) {
     if (count > 0 && platformTotals[platform]) {
-      // Scale: each URL source is worth 15 points, cap at 100
       const derivedScore = Math.min(100, count * 15);
-      // Always add report-level signals (additive with suggestion-level data)
       platformTotals[platform].totalScore += derivedScore;
       platformTotals[platform].topicCount = Math.max(
         platformTotals[platform].topicCount,
         platformPainTopics[platform].size || count
       );
-      // Add unique topics from pain point categories
-      for (const cat of platformPainTopics[platform]) {
-        if (!platformTotals[platform].uniqueTopics.find((t) => t.category === cat)) {
-          platformTotals[platform].uniqueTopics.push({
-            topic: cat,
-            category: cat,
-            score: derivedScore,
-          });
-        }
+    }
+  }
+
+  // Assign each pain-point/trending CATEGORY to only its best platform
+  // Uses per-category-per-platform counts so categories distribute fairly
+  for (const [cat, platformCounts] of Object.entries(categoryPlatformCounts)) {
+    let bestPlatform = null;
+    let bestCount = 0;
+    for (const [platform, count] of Object.entries(platformCounts)) {
+      if (count > bestCount) {
+        bestPlatform = platform;
+        bestCount = count;
+      }
+    }
+    if (bestPlatform && platformTotals[bestPlatform]) {
+      if (!platformTotals[bestPlatform].uniqueTopics.find((t) => t.category === cat)) {
+        platformTotals[bestPlatform].uniqueTopics.push({
+          topic: cat,
+          category: cat,
+          score: Math.min(100, bestCount * 15),
+        });
       }
     }
   }
