@@ -324,6 +324,10 @@ REQUIRED SEARCH SOURCES:
 - forums.unrealengine.com (Epic official forums)
 - stackoverflow.com [unreal-engine5] tag
 - Epic Developer Community (dev.epicgames.com)
+- TikTok UE5 tutorials and gamedev content
+- Instagram UE5 reels and gamedev tutorials
+- Udemy and Skillshare UE5 courses
+- Twitch UE5 dev streams
 
 CATEGORIES TO RESEARCH: ${batch.join(", ")}
 
@@ -336,7 +340,7 @@ Return a JSON array:
   "subtopic": "Specific subtopic within that category",
   "frequency": "high|medium|low",
   "sources": [{
-    "type": "reddit|epic_forum|stackoverflow|youtube",
+    "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch",
     "title": "Post/thread title",
     "url": "URL",
     "date": "YYYY-MM-DD",
@@ -416,6 +420,9 @@ SEARCH THESE SOURCES:
 - Reddit r/unrealengine
 - Epic Developer Community
 - YouTube comments on UE5 tutorials about ${category}
+- TikTok UE5 tutorials and gamedev content about ${category}
+- Instagram UE5 reels about ${category}
+- Udemy course reviews about ${category}
 
 Focus on posts from the last 6 months about UE5 version 5.3, 5.4, or 5.5.
 
@@ -605,7 +612,11 @@ function buildReport({
             ? "reddit"
             : pp.sourceUrl?.includes("forum")
               ? "epic_forum"
-              : "epic_dev_community",
+              : pp.sourceUrl?.includes("tiktok")
+                ? "tiktok"
+                : pp.sourceUrl?.includes("instagram")
+                  ? "instagram"
+                  : "epic_dev_community",
           url: pp.sourceUrl || "",
           title: pp.sourceTitle || pp.painPoint || "",
           painPoint: pp.painPoint,

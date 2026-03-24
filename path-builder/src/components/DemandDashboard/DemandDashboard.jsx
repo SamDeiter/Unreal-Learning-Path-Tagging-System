@@ -514,7 +514,6 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
         {Object.entries(platformData)
           .filter(([, data]) => data.uniqueTopics.length > 0)
           .sort(([, a], [, b]) => b.totalScore - a.totalScore)
-          .slice(0, 3)
           .map(([key, data]) => (
             <div key={key} className="platform-topic-group">
               <span className="platform-topic-header" style={{ color: data.color }}>
@@ -632,6 +631,8 @@ function DemandDashboard() {
           epicForum: ["epic_forum"],
           devCommunity: ["epic_dev_community"],
           communityIndex: ["community_index"],
+          tiktok: ["tiktok"],
+          instagram: ["instagram"],
         };
         const matchTypes = platformSourceTypes[platformFilter] || [];
         return (s.sources || []).some((src) => matchTypes.includes(src.type));

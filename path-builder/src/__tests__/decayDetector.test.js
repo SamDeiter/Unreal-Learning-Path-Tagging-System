@@ -347,7 +347,7 @@ describe("computeDemandIndex", () => {
 // ── computePlatformBreakdown ───────────────────────────────────────
 
 describe("computePlatformBreakdown", () => {
-  it("returns scores for all 5 platforms", () => {
+  it("returns scores for all 7 platforms", () => {
     const suggestion = makeSuggestion();
     const breakdown = computePlatformBreakdown(suggestion);
     expect(breakdown).toHaveProperty("youtube");
@@ -355,6 +355,8 @@ describe("computePlatformBreakdown", () => {
     expect(breakdown).toHaveProperty("epicForum");
     expect(breakdown).toHaveProperty("devCommunity");
     expect(breakdown).toHaveProperty("communityIndex");
+    expect(breakdown).toHaveProperty("tiktok");
+    expect(breakdown).toHaveProperty("instagram");
   });
 
   it("identifies the dominant platform", () => {
@@ -386,5 +388,20 @@ describe("computePlatformBreakdown", () => {
     expect(breakdown.youtube).toBe(0);
     expect(breakdown.reddit).toBe(0);
     expect(breakdown.communityIndex).toBe(0);
+    expect(breakdown.tiktok).toBe(0);
+    expect(breakdown.instagram).toBe(0);
+  });
+
+  it("scores tiktok and instagram sources correctly", () => {
+    const suggestion = makeSuggestion({
+      sources: [
+        { type: "tiktok", url: "https://tiktok.com/@ue5dev", title: "UE5 Tutorial" },
+        { type: "tiktok", url: "https://tiktok.com/@gamedev", title: "Game Dev Tips" },
+        { type: "instagram", url: "https://instagram.com/p/abc", title: "UE5 Reel" },
+      ],
+    });
+    const breakdown = computePlatformBreakdown(suggestion);
+    expect(breakdown.tiktok).toBe(50); // 2 sources * 25 = 50
+    expect(breakdown.instagram).toBe(25); // 1 source * 25 = 25
   });
 });

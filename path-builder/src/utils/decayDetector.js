@@ -264,6 +264,8 @@ export const PLATFORMS = {
   EPIC_FORUM: "epicForum",
   DEV_COMMUNITY: "devCommunity",
   COMMUNITY_INDEX: "communityIndex",
+  TIKTOK: "tiktok",
+  INSTAGRAM: "instagram",
 };
 
 export const PLATFORM_META = {
@@ -272,6 +274,8 @@ export const PLATFORM_META = {
   [PLATFORMS.EPIC_FORUM]:      { icon: "🏛️", label: "Epic Forums",   color: "#0078D7" },
   [PLATFORMS.DEV_COMMUNITY]:   { icon: "🟣", label: "Dev Community", color: "#7B2FBE" },
   [PLATFORMS.COMMUNITY_INDEX]: { icon: "📊", label: "Curriculum Gap", color: "#10B981" },
+  [PLATFORMS.TIKTOK]:          { icon: "🎵", label: "TikTok",        color: "#010101" },
+  [PLATFORMS.INSTAGRAM]:       { icon: "📸", label: "Instagram",     color: "#E1306C" },
 };
 
 export function computePlatformBreakdown(suggestion) {
@@ -316,10 +320,22 @@ export function computePlatformBreakdown(suggestion) {
   ).length;
   const devCommunity = Math.round(Math.min(100, devCommunityCount * 25));
 
+  // TikTok: count of tiktok sources
+  const tiktokCount = sources.filter(
+    (s) => s.type === "tiktok"
+  ).length;
+  const tiktok = Math.round(Math.min(100, tiktokCount * 25));
+
+  // Instagram: count of instagram sources
+  const instagramCount = sources.filter(
+    (s) => s.type === "instagram"
+  ).length;
+  const instagram = Math.round(Math.min(100, instagramCount * 25));
+
   // Community Index: demand score from benchmarks (already 0-100)
   const communityIndex = Math.round(Math.min(100, suggestion.demandScore || 0));
 
-  const scores = { youtube, reddit: redditScore, epicForum, devCommunity, communityIndex };
+  const scores = { youtube, reddit: redditScore, epicForum, devCommunity, communityIndex, tiktok, instagram };
 
   let dominant = PLATFORMS.COMMUNITY_INDEX;
   let maxScore = -1;
@@ -375,12 +391,16 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
     [PLATFORMS.REDDIT]: 0,
     [PLATFORMS.EPIC_FORUM]: 0,
     [PLATFORMS.DEV_COMMUNITY]: 0,
+    [PLATFORMS.TIKTOK]: 0,
+    [PLATFORMS.INSTAGRAM]: 0,
   };
   const platformPainTopics = {
     [PLATFORMS.YOUTUBE]: new Set(),
     [PLATFORMS.REDDIT]: new Set(),
     [PLATFORMS.EPIC_FORUM]: new Set(),
     [PLATFORMS.DEV_COMMUNITY]: new Set(),
+    [PLATFORMS.TIKTOK]: new Set(),
+    [PLATFORMS.INSTAGRAM]: new Set(),
   };
 
   for (const [category, pps] of Object.entries(painPoints)) {
@@ -394,6 +414,10 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
         matchPlatform = PLATFORMS.EPIC_FORUM;
       else if (url.includes("dev.epicgames.com"))
         matchPlatform = PLATFORMS.DEV_COMMUNITY;
+      else if (url.includes("tiktok.com"))
+        matchPlatform = PLATFORMS.TIKTOK;
+      else if (url.includes("instagram.com"))
+        matchPlatform = PLATFORMS.INSTAGRAM;
 
       if (matchPlatform) {
         platformUrlCounts[matchPlatform]++;
@@ -416,6 +440,10 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
         matchPlatform = PLATFORMS.EPIC_FORUM;
       else if (type === "epic_dev_community" || url.includes("dev.epicgames.com"))
         matchPlatform = PLATFORMS.DEV_COMMUNITY;
+      else if (type === "tiktok" || url.includes("tiktok.com"))
+        matchPlatform = PLATFORMS.TIKTOK;
+      else if (type === "instagram" || url.includes("instagram.com"))
+        matchPlatform = PLATFORMS.INSTAGRAM;
 
       if (matchPlatform) {
         platformUrlCounts[matchPlatform]++;
