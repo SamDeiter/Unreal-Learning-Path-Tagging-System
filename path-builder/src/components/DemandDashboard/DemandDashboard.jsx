@@ -10,7 +10,7 @@
  * Every data point links back to its source.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
 import { computePlatformBreakdown, aggregatePlatformDemand, PLATFORM_META } from "../../utils/decayDetector";
@@ -128,50 +128,137 @@ function CriticalGapAlerts({ suggestions, painPointsByCategory: _painPointsByCat
 
 // ── ScrapeButton ──────────────────────────────────────────
 
+const SCRAPE_COOLDOWN_MS = 20 * 60 * 1000; // 20 minutes
+const SCRAPE_COOLDOWN_KEY = "demand-scrape-cooldown-until";
+
 function ScrapeButton({ onComplete }) {
-  const [status, setStatus] = useState("idle"); // idle | triggering | success | error
+  const [status, setStatus] = useState(() => {
+    const cooldownUntil = parseInt(localStorage.getItem(SCRAPE_COOLDOWN_KEY) || "0", 10);
+    return cooldownUntil > Date.now() ? "cooldown" : "idle";
+  }); // idle | triggering | scraping | success | error | cooldown
   const [message, setMessage] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const timerRef = useRef(null);
+
+
+
+  const formatTime = (ms) => {
+    const totalSec = Math.floor(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return min > 0 ? `${min}m ${sec.toString().padStart(2, "0")}s` : `${sec}s`;
+  };
+
+  // Manage cooldown countdown interval
+  useEffect(() => {
+    if (status !== "cooldown") return;
+    const cooldownUntil = parseInt(localStorage.getItem(SCRAPE_COOLDOWN_KEY) || "0", 10);
+    // If cooldown already expired, clean up on next tick (avoids synchronous setState in effect)
+    const initialRemaining = Math.max(0, cooldownUntil - Date.now());
+    setCooldownRemaining(initialRemaining); // eslint-disable-line react-hooks/set-state-in-effect -- initializing derived state
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, cooldownUntil - Date.now());
+      setCooldownRemaining(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        setStatus("idle");
+        localStorage.removeItem(SCRAPE_COOLDOWN_KEY);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [status]);
+
+  // Cleanup elapsed timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
   const handleTrigger = async () => {
+    // Double-check cooldown
+    const cooldownUntil = parseInt(localStorage.getItem(SCRAPE_COOLDOWN_KEY) || "0", 10);
+    if (cooldownUntil > Date.now()) {
+      setStatus("cooldown");
+      return;
+    }
+
     setStatus("triggering");
     setMessage("");
+    setElapsed(0);
+
     try {
       const app = getFirebaseApp();
       const functions = getFunctions(app);
       const trigger = httpsCallable(functions, "triggerDemandScrape");
       const result = await trigger();
-      setStatus("success");
-      setMessage(result.data.message || "Scrape triggered!");
-      // Auto-refresh data after ~90 seconds (workflow takes ~1-2 min)
+
+      // Start elapsed timer
+      setStatus("scraping");
+      setMessage(result.data.message || "Scrape triggered! Waiting for results...");
+      const startTime = Date.now();
+      timerRef.current = setInterval(() => {
+        setElapsed(Date.now() - startTime);
+      }, 1000);
+
+      // Auto-refresh after ~90 seconds
       setTimeout(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = null;
         onComplete?.();
-        setStatus("idle");
-        setMessage("");
+        setStatus("success");
+        setMessage("Data refreshed!");
+
+        // Set cooldown
+        const until = Date.now() + SCRAPE_COOLDOWN_MS;
+        localStorage.setItem(SCRAPE_COOLDOWN_KEY, until.toString());
+
+        setTimeout(() => {
+          setStatus("cooldown");
+          }, 3000);
       }, 90000);
     } catch (err) {
+      if (timerRef.current) clearInterval(timerRef.current);
       setStatus("error");
       setMessage(err.message || "Failed to trigger scrape");
       setTimeout(() => { setStatus("idle"); setMessage(""); }, 5000);
     }
   };
 
-  const labels = {
-    idle: "🚀 Re-scrape",
-    triggering: "⏳ Triggering...",
-    success: "✅ Triggered!",
-    error: "❌ Failed",
+  const getLabel = () => {
+    switch (status) {
+      case "idle": return "🚀 Re-scrape";
+      case "triggering": return "⏳ Triggering...";
+      case "scraping": return `⏳ Scraping... ${formatTime(elapsed)}`;
+      case "success": return "✅ Done!";
+      case "error": return "❌ Failed";
+      case "cooldown": return `🔒 Next scrape in ${formatTime(cooldownRemaining)}`;
+      default: return "🚀 Re-scrape";
+    }
+  };
+
+  const getTooltip = () => {
+    switch (status) {
+      case "cooldown":
+        return `Scrape cooldown active — please wait ${formatTime(cooldownRemaining)} before triggering another scrape`;
+      case "scraping":
+        return `Scrape in progress (${formatTime(elapsed)} elapsed). Data will auto-refresh when complete.`;
+      case "success":
+        return message;
+      default:
+        return "Trigger a fresh scrape via GitHub Action (~20 min). Data will auto-refresh.";
+    }
   };
 
   return (
     <button
       className={`refresh-btn scrape-btn scrape-${status}`}
       onClick={handleTrigger}
-      disabled={status === "triggering" || status === "success"}
-      data-tooltip={status === "success"
-        ? message
-        : "Trigger a fresh scrape via GitHub Action (~2 min). Data will auto-refresh."}
+      disabled={status !== "idle"}
+      data-tooltip={getTooltip()}
     >
-      {labels[status]}
+      {getLabel()}
     </button>
   );
 }
