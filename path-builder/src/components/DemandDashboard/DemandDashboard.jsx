@@ -634,6 +634,7 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
       <h3 data-tooltip="See which platforms are driving demand for UE5 tutorials">🌐 Platform Demand Breakdown</h3>
       <div className="platform-bars">
         {Object.entries(platformData)
+          .filter(([key, data]) => data && data.totalScore > 0 && key !== "communityIndex" && key !== "dominant")
           .sort(([, a], [, b]) => b.totalScore - a.totalScore)
           .map(([key, data]) => {
             const barWidth = Math.max(2, (data.totalScore / maxTotal) * 100);
@@ -663,7 +664,7 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
       </div>
       <div className="platform-unique-topics">
         {Object.entries(platformData)
-          .filter(([, data]) => data.uniqueTopics.length > 0)
+          .filter(([key, data]) => data && data.totalScore > 0 && key !== "communityIndex" && key !== "dominant" && data.uniqueTopics && data.uniqueTopics.length > 0)
           .sort(([, a], [, b]) => b.totalScore - a.totalScore)
           .map(([key, data]) => (
             <div key={key} className="platform-topic-group">
@@ -787,18 +788,11 @@ function DemandDashboard() {
         const b = computePlatformBreakdown(s);
         // Match if this platform is dominant
         if (b.dominant === platformFilter) return true;
-        // Match if suggestion has actual sources from that platform
-        const platformSourceTypes = {
-          youtube: ["youtube", "youtube_comments"],
-          reddit: ["reddit"],
-          epicForum: ["epic_forum"],
-          devCommunity: ["epic_dev_community"],
-          communityIndex: ["community_index"],
-          tiktok: ["tiktok"],
-          instagram: ["instagram"],
-        };
-        const matchTypes = platformSourceTypes[platformFilter] || [];
-        return (s.sources || []).some((src) => matchTypes.includes(src.type));
+        // Match if this platform has a meaningful score (> 10)
+        // This prevents the same topics from appearing under multiple platforms
+        // when the live scraper attributes them to overlapping source types
+        const score = typeof b[platformFilter] === "number" ? b[platformFilter] : 0;
+        return score > 10;
       })
     : industryFiltered;
 

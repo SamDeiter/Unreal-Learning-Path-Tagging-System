@@ -272,7 +272,7 @@ export const PLATFORM_META = {
   [PLATFORMS.YOUTUBE]:         { icon: "🎬", label: "YouTube",       color: "#FF0000" },
   [PLATFORMS.REDDIT]:          { icon: "💬", label: "Reddit",        color: "#FF4500" },
   [PLATFORMS.EPIC_FORUM]:      { icon: "🏛️", label: "Epic Forums",   color: "#0078D7" },
-  [PLATFORMS.DEV_COMMUNITY]:   { icon: "🟣", label: "Dev Community", color: "#7B2FBE" },
+  [PLATFORMS.DEV_COMMUNITY]:   { icon: "🟣", label: "Epic Dev Community", color: "#7B2FBE" },
   [PLATFORMS.COMMUNITY_INDEX]: { icon: "📊", label: "Curriculum Gap", color: "#10B981" },
   [PLATFORMS.TIKTOK]:          { icon: "🎵", label: "TikTok",        color: "#010101" },
   [PLATFORMS.INSTAGRAM]:       { icon: "📸", label: "Instagram",     color: "#E1306C" },
