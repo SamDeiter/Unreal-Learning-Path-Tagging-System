@@ -306,13 +306,27 @@ export function computePlatformBreakdown(suggestion) {
       (reddit.avgComments || 0) * 5
   );
   const redditFromSources = Math.min(100, redditSourceCount * 25);
-  const redditScore = Math.round(Math.max(redditFromEngagement, redditFromSources));
+  let redditScore = Math.round(Math.max(redditFromEngagement, redditFromSources));
 
   // Epic Forum: count of epic_forum sources
   const epicForumCount = sources.filter(
     (s) => s.type === "epic_forum"
   ).length;
-  const epicForum = Math.round(Math.min(100, epicForumCount * 25));
+  let epicForum = Math.round(Math.min(100, epicForumCount * 25));
+
+  // When the AI scraper tags a suggestion with BOTH reddit and epic_forum
+  // (which it does for every question), split them deterministically so each
+  // suggestion belongs to ONE platform. Uses topic hash for even distribution.
+  const hasRealRedditData = redditFromEngagement > 0;
+  if (redditScore > 0 && epicForum > 0 && !hasRealRedditData) {
+    const topicStr = suggestion.topic || suggestion.category || "";
+    const hash = [...topicStr].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    if (hash % 2 === 0) {
+      epicForum = 0;   // This topic attributed to Reddit
+    } else {
+      redditScore = 0;  // This topic attributed to Epic Forums
+    }
+  }
 
   // Dev Community: count of epic_dev_community sources
   const devCommunityCount = sources.filter(
@@ -529,6 +543,13 @@ export function aggregatePlatformDemand(suggestions, report = {}) {
       if (count > bestCount) {
         bestPlatform = platform;
         bestCount = count;
+      } else if (count === bestCount && bestPlatform) {
+        // Tiebreaker: prefer platform with fewer assigned topics for even distribution
+        const currentAssigned = platformTotals[bestPlatform]?.uniqueTopics.length || 0;
+        const candidateAssigned = platformTotals[platform]?.uniqueTopics.length || 0;
+        if (candidateAssigned < currentAssigned) {
+          bestPlatform = platform;
+        }
       }
     }
     if (bestPlatform && platformTotals[bestPlatform]) {

@@ -786,9 +786,9 @@ function DemandDashboard() {
   const displaySuggestions = platformFilter
     ? industryFiltered.filter((s) => {
         const b = computePlatformBreakdown(s);
-        // Strict: only show topic under its dominant platform
-        // This prevents the same topics from appearing under multiple platforms
-        return b.dominant === platformFilter;
+        // Show suggestions that have any signal from this platform
+        const score = typeof b[platformFilter] === "number" ? b[platformFilter] : 0;
+        return score > 0;
       })
     : industryFiltered;
 
