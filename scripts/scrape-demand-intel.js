@@ -411,7 +411,8 @@ IMPORTANT RULES:
   console.log(`  ✅ Total: ${uniqueQuestions.length} unique trending questions`);
   return uniqueQuestions;
 }
-
+
+
 async function scrapePainPoints(category) {
   const prompt = `You are a UE5 community research assistant. Search for the most common struggles and confusion points that Unreal Engine 5 learners experience with: "${category}"
 
@@ -806,6 +807,26 @@ async function main() {
     }
   }
 
+  // ── Layer 2f: Reddit PRAW deep sentiment (if available from prior scrape) ──
+  let redditSentiment = null;
+  if (db) {
+    try {
+      const sentimentDoc = await db.doc('demand_intel/reddit_sentiment').get();
+      if (sentimentDoc.exists) {
+        const sData = sentimentDoc.data();
+        redditSentiment = sData.categories || null;
+        const sentimentAge = sData.scrapedAt
+          ? Math.round((Date.now() - new Date(sData.scrapedAt).getTime()) / 3600000)
+          : null;
+        console.log(\n🗣️ Layer 2f: Reddit PRAW sentiment loaded (h old,  categories));
+      } else {
+        console.log('\n🗣️ Layer 2f: No Reddit PRAW sentiment yet — run scrape-reddit-praw.py first');
+      }
+    } catch (err) {
+      console.warn(  ⚠️ Reddit PRAW sentiment load failed: );
+    }
+  }
+
   // ── Layer 3: Coverage analysis (instant — local computation) ────
   console.log("\n📚 Layer 3: Computing library coverage...");
   const coverageData = calculateCoverage(courses, taxonomy);
@@ -825,6 +846,7 @@ async function main() {
     startTime,
     youtubeMetrics,
     trendsData,
+    redditSentiment,
   });
 
   console.log(`\n✅ Report complete:`);

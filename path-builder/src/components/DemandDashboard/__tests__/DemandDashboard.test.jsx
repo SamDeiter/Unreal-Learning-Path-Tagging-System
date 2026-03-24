@@ -205,7 +205,9 @@ describe("DemandDashboard", () => {
   it("renders All filter chip", () => {
     setMock();
     render(<DemandDashboard />);
-    expect(screen.getByText("All")).toBeTruthy();
+    // Both industry and category filters have 'All' chips
+    const allButtons = screen.getAllByText("All");
+    expect(allButtons.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders category filter chips", () => {

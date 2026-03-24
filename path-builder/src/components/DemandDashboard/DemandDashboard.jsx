@@ -6,6 +6,7 @@
  *   2. Live community questions with source attribution
  *   3. Granular coverage vs demand (expandable categories)
  *   4. Data provenance footer
+ *   5. Google Trends + Industry Vertical intelligence
  *
  * Every data point links back to its source.
  */
@@ -17,6 +18,28 @@ import { computePlatformBreakdown, aggregatePlatformDemand, PLATFORM_META } from
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import "./DemandDashboard.css";
+
+// ── Industry Vertical Taxonomy ─────────────────────────────
+const INDUSTRY_VERTICALS = {
+  Gaming: ["Blueprints", "AI", "Animation", "Networking", "Physics", "Gameplay Framework", "Level Design", "Audio", "Niagara", "C++"],
+  "AEC/ArchViz": ["Lighting", "Materials", "Rendering", "Landscape", "Optimization", "Virtual Production"],
+  "Virtual Production": ["Virtual Production", "Lighting", "Animation", "MetaHumans", "Rendering"],
+  Enterprise: ["Optimization", "Rendering", "MetaHumans", "Networking", "UI/UMG"],
+};
+
+const INDUSTRY_COLORS = {
+  Gaming: "#7c3aed",
+  "AEC/ArchViz": "#0ea5e9",
+  "Virtual Production": "#f97316",
+  Enterprise: "#14b8a6",
+};
+
+/** Get industry verticals for a given category. */
+function getIndustriesForCategory(category) {
+  return Object.entries(INDUSTRY_VERTICALS)
+    .filter(([, cats]) => cats.includes(category))
+    .map(([industry]) => industry);
+}
 
 // ── Source chip rendering ──────────────────────────────────
 
@@ -347,6 +370,14 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
               🚀 Breakout
             </span>
           )}
+          {suggestion.trendsMetrics && (
+            <span
+              className={`decay-badge trends-badge trends-${suggestion.trendsMetrics.scaledScore >= 70 ? 'hot' : suggestion.trendsMetrics.scaledScore >= 40 ? 'warm' : 'cool'}`}
+              data-tooltip={`Google Trends: ${suggestion.trendsMetrics.scaledScore}/100 search interest (raw: ${suggestion.trendsMetrics.rawInterest}). ${suggestion.trendsMetrics.scaledScore >= 70 ? 'Hot topic — high search demand!' : suggestion.trendsMetrics.scaledScore >= 40 ? 'Warm topic — moderate search interest' : 'Cool topic — niche search interest'}`}
+            >
+              {suggestion.trendsMetrics.scaledScore >= 70 ? '🔥' : suggestion.trendsMetrics.scaledScore >= 40 ? '📈' : '📊'} Trends {suggestion.trendsMetrics.scaledScore}
+            </span>
+          )}
         </div>
         <span className="expand-arrow" data-tooltip={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
       </div>
@@ -419,6 +450,39 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
                     </a> ({suggestion.youtubeMetrics.topVideoViews.toLocaleString()} views)</span>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+          {suggestion.trendsMetrics && (
+            <div className="existing-coverage">
+              <h5>📈 Google Trends Signal</h5>
+              <div className="sources-list">
+                <div className="source-row">
+                  <span>🔍 Search Interest: {suggestion.trendsMetrics.scaledScore}/100</span>
+                </div>
+                <div className="source-row">
+                  <span>📊 Raw Interest: {suggestion.trendsMetrics.rawInterest}</span>
+                </div>
+                <div className="source-row">
+                  <span>{suggestion.trendsMetrics.scaledScore >= 70 ? '🔥 Hot topic — high search demand' : suggestion.trendsMetrics.scaledScore >= 40 ? '📈 Warm — moderate search interest' : '📊 Niche — low search volume'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          {getIndustriesForCategory(suggestion.category).length > 0 && (
+            <div className="existing-coverage">
+              <h5>🏭 Relevant Industries</h5>
+              <div className="industry-badges-row">
+                {getIndustriesForCategory(suggestion.category).map((ind) => (
+                  <span
+                    key={ind}
+                    className="industry-badge"
+                    style={{ '--industry-color': INDUSTRY_COLORS[ind] || '#6b7280' }}
+                    data-tooltip={`This topic is relevant to the ${ind} industry vertical`}
+                  >
+                    {ind}
+                  </span>
+                ))}
               </div>
             </div>
           )}
@@ -663,6 +727,11 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
             🗣️ Reddit: {withReddit}/{(suggestions || []).length} topics with engagement data
           </span>
         )}
+        {(suggestions || []).some(s => s.trendsMetrics) && (
+          <span className="provenance-item">
+            📈 Google Trends: {(suggestions || []).filter(s => s.trendsMetrics).length}/{(suggestions || []).length} topics with search interest data · pytrends weekly scrape
+          </span>
+        )}
         <span className="provenance-item">
           📚 Library: {provenance.libraryCoverage?.totalCourses || 0} videos
           · {provenance.libraryCoverage?.categoriesAnalyzed || 0} categories
@@ -702,10 +771,19 @@ function DemandDashboard() {
   } = useDemandIntelligence();
 
   const [platformFilter, setPlatformFilter] = useState(null);
+  const [industryFilter, setIndustryFilter] = useState(null);
 
-  // Apply platform filter on top of category filter
-  const displaySuggestions = platformFilter
+  // Apply industry filter first, then platform filter on top of category filter
+  // Apply industry filter
+  const industryFiltered = industryFilter
     ? filteredSuggestions.filter((s) => {
+        const industriesCats = INDUSTRY_VERTICALS[industryFilter] || [];
+        return industriesCats.includes(s.category);
+      })
+    : filteredSuggestions;
+
+  const displaySuggestions = platformFilter
+    ? industryFiltered.filter((s) => {
         const b = computePlatformBreakdown(s);
         // Match if this platform is dominant
         if (b.dominant === platformFilter) return true;
@@ -722,7 +800,7 @@ function DemandDashboard() {
         const matchTypes = platformSourceTypes[platformFilter] || [];
         return (s.sources || []).some((src) => matchTypes.includes(src.type));
       })
-    : filteredSuggestions;
+    : industryFiltered;
 
   // Auto-generate on mount if no report
   useEffect(() => {
@@ -866,6 +944,25 @@ function DemandDashboard() {
             <div className="column-suggestions">
               <div className="column-header">
                 <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
+                <div className="industry-filter-row">
+                  <span className="filter-group-label">🏭 Industry:</span>
+                  <button
+                    className={`filter-chip industry-chip ${!industryFilter ? "active" : ""}`}
+                    onClick={() => setIndustryFilter(null)}
+                  >
+                    All
+                  </button>
+                  {Object.keys(INDUSTRY_VERTICALS).map((ind) => (
+                    <button
+                      key={ind}
+                      className={`filter-chip industry-chip ${industryFilter === ind ? "active" : ""}`}
+                      style={{ '--chip-color': INDUSTRY_COLORS[ind] }}
+                      onClick={() => setIndustryFilter(industryFilter === ind ? null : ind)}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
                 <div className="category-filters">
                   <button
                     className={`filter-chip ${!categoryFilter ? "active" : ""}`}
