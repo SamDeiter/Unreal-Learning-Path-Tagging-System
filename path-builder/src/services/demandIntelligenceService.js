@@ -28,6 +28,7 @@ import { devLog, devWarn } from "../utils/logger";
 import { parseGeminiJSON } from "./gapDetection";
 import { computeDecayRisk, computeDemandIndex } from "../utils/decayDetector";
 import demandBenchmarks from "../data/demand_benchmarks.json";
+import seoMetricsData from "../data/seoMetrics.json";
 
 // ── Configuration ──────────────────────────────────────────
 
@@ -604,14 +605,10 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
       const confidence =
         verifiedSourceCount >= 3 ? "high" : verifiedSourceCount >= 1 ? "medium" : "low";
 
-      // MOCK SEO DATA (Phase 4.1 Development)
-      // Base MSV on demandScore plus some randomness (e.g. 500 - 10,000 range)
-      const msvBase = demandScore * 80;
-      const msvRandom = Math.floor(Math.random() * 2000);
-      const msv = Math.max(0, msvBase + msvRandom);
-      // Randomize KD (0-100) to create realistic "blue ocean" opportunities (Low KD)
-      const kd = Math.floor(Math.random() * 70) + 10;
-      const seoMetrics = { msv, kd };
+      // REAL SEO DATA (via DataForSEO pipeline)
+      // Note: Data is pre-fetched via scripts/pull_dataforseo.js and stored in seoMetrics.json
+      const seoData = seoMetricsData[subtopic] || { msv: 0, kd: 0 };
+      const seoMetrics = { msv: seoData.msv, kd: seoData.kd };
 
       if (gap > 0 || sources.length > 0) {
         // Compute decay risk based on UE5 breaking changes

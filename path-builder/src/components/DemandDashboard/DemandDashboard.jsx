@@ -437,10 +437,16 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           )}
           {suggestion.seoMetrics && (
             <>
-              <span className="decay-badge seo-badge" title={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`} data-tooltip={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`}>
+              <span 
+                className="decay-badge seo-badge" 
+                data-tooltip={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`}
+              >
                 🔍 {suggestion.seoMetrics.msv >= 1000 ? (suggestion.seoMetrics.msv / 1000).toFixed(1) + 'k' : suggestion.seoMetrics.msv}/mo
               </span>
-              <span className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} title={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 ? '"Blue Ocean": High demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`} data-tooltip={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 ? '"Blue Ocean": High demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`}>
+              <span 
+                className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} 
+                data-tooltip={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 ? '"Blue Ocean": High demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`}
+              >
                 {suggestion.seoMetrics.kd < 30 ? '🌊 Blue Ocean' : `🎯 KD: ${suggestion.seoMetrics.kd}`}
               </span>
             </>
