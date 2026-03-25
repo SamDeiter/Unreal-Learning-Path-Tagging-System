@@ -86,19 +86,15 @@ for code, drive_vids in sorted(code_to_drive.items()):
 
     new_vids = []
     for df in drive_vids_sorted:
-        did = df.get('id', '')
-        if did in existing_drive_ids:
-            already_had += 1
-            continue
         new_vids.append({
             'name': df.get('name', ''),
-            'drive_id': did,
+            'drive_id': df.get('id', ''),
             'duration_seconds': df.get('duration_seconds', 0),
         })
 
     if new_vids:
-        # Append to existing videos (don't overwrite)
-        course.setdefault('videos', []).extend(new_vids)
+        # Overwrite to ensure drive_ids are first and properly ordered
+        course['videos'] = new_vids
         course['video_count'] = len(course['videos'])
         linked_count += 1
         videos_added += len(new_vids)
