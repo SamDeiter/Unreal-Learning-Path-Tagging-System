@@ -64,7 +64,9 @@ export function isRetryableError(error) {
   if (msg.includes("429") || msg.includes("503") || msg.includes("too many requests")) return true;
   if (msg.includes("rate limit")) return true;
 
-  // Network failures
+  // Network failures (exclude App Check fetch-status-error as it is usually a config/403 issue)
+  if (msg.includes("appcheck") && msg.includes("fetch-status")) return false;
+  
   if (msg.includes("network") || msg.includes("fetch") || msg.includes("econnreset")) return true;
   if (error?.name === "TypeError" && msg.includes("failed to fetch")) return true;
 

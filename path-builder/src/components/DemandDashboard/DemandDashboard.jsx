@@ -100,37 +100,55 @@ const SOURCE_LABELS = {
   [SOURCE_TYPES.EPIC_DEV_COMMUNITY]: "Dev Community",
 };
 
+/** Generates a contextual search URL if the AI failed to return a direct link */
+function getFallbackUrl(source) {
+  if (source.url && source.url.startsWith("http")) return source.url;
+  if (!source.type || source.type === SOURCE_TYPES.COMMUNITY_INDEX) return "";
+  
+  const query = encodeURIComponent(source.title || source.painPoint || source.relatedQuestion || "Unreal Engine 5");
+  switch (source.type) {
+    case SOURCE_TYPES.REDDIT: return `https://www.reddit.com/r/unrealengine/search/?q=${query}`;
+    case SOURCE_TYPES.YOUTUBE_COMMENTS: return `https://www.youtube.com/results?search_query=${query}`;
+    case SOURCE_TYPES.EPIC_FORUM: return `https://forums.unrealengine.com/search?q=${query}`;
+    case SOURCE_TYPES.STACKOVERFLOW: return `https://stackoverflow.com/search?q=${encodeURIComponent("[unreal-engine5] " + (source.title || ""))}`;
+    default: return `https://www.google.com/search?q=${encodeURIComponent("Unreal Engine 5 " + (source.title || ""))}`;
+  }
+}
+
 function SourceChip({ source }) {
   const icon = SOURCE_ICONS[source.type] || "📌";
   const label = SOURCE_LABELS[source.type] || source.type;
-  const hasUrl = source.url && source.url.startsWith("http");
+  
+  // Inject synthetic URL safely to handle backend missing data
+  const mergedSource = { ...source, url: getFallbackUrl(source) };
+  const hasUrl = Boolean(mergedSource.url);
 
   if (hasUrl) {
     return (
       <a
-        href={source.url}
+        href={mergedSource.url}
         target="_blank"
         rel="noopener noreferrer"
         className="source-chip clickable"
-        data-tooltip={source.title || label}
+        data-tooltip={mergedSource.title || label}
       >
         <span className="source-icon">{icon}</span>
         <span className="source-label">{label}</span>
-        {source.engagement && (
-          <span className="source-engagement">{source.engagement}</span>
+        {mergedSource.engagement && (
+          <span className="source-engagement">{mergedSource.engagement}</span>
         )}
       </a>
     );
   }
 
   return (
-    <span className="source-chip" data-tooltip={source.title || label}>
+    <span className="source-chip" data-tooltip={mergedSource.title || label}>
       <span className="source-icon">{icon}</span>
       <span className="source-label">{label}</span>
-      {source.interestScore && (
-        <span className="source-engagement">{source.interestScore}</span>
+      {mergedSource.interestScore && (
+        <span className="source-engagement">{mergedSource.interestScore}</span>
       )}
-      {source.trend === "rising" && <span className="trend-arrow">⬆</span>}
+      {mergedSource.trend === "rising" && <span className="trend-arrow">⬆</span>}
     </span>
   );
 }
@@ -426,37 +444,40 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
           <div className="sources-section">
             <h5>📌 Sources ({suggestion.sources.length})</h5>
             <div className="sources-list">
-              {suggestion.sources.map((src, i) => (
-                <div key={i} className="source-row">
-                  <SourceChip source={src} />
-                  {src.title && (
-                    src.url ? (
-                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="source-title source-link">{src.title}</a>
-                    ) : (
-                      <span className="source-title">{src.title}</span>
-                    )
-                  )}
-                  {src.date && (
-                    <span className="source-date">{src.date}</span>
-                  )}
-                  {src.relatedQuestion && (
-                    src.url ? (
-                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="source-question source-link">
-                        &ldquo;{src.relatedQuestion}&rdquo;
-                      </a>
-                    ) : (
-                      <span className="source-question">
-                        &ldquo;{src.relatedQuestion}&rdquo;
+              {suggestion.sources.map((src, i) => {
+                const finalUrl = getFallbackUrl(src);
+                return (
+                  <div key={i} className="source-row">
+                    <SourceChip source={src} />
+                    {src.title && (
+                      finalUrl ? (
+                        <a href={finalUrl} target="_blank" rel="noopener noreferrer" className="source-title source-link">{src.title}</a>
+                      ) : (
+                        <span className="source-title">{src.title}</span>
+                      )
+                    )}
+                    {src.date && (
+                      <span className="source-date">{src.date}</span>
+                    )}
+                    {src.relatedQuestion && (
+                      finalUrl ? (
+                        <a href={finalUrl} target="_blank" rel="noopener noreferrer" className="source-question source-link">
+                          &ldquo;{src.relatedQuestion}&rdquo;
+                        </a>
+                      ) : (
+                        <span className="source-question">
+                          &ldquo;{src.relatedQuestion}&rdquo;
+                        </span>
+                      )
+                    )}
+                    {src.painPoint && (
+                      <span className="source-pain-point">
+                        ⚠️ {src.painPoint}
                       </span>
-                    )
-                  )}
-                  {src.painPoint && (
-                    <span className="source-pain-point">
-                      ⚠️ {src.painPoint}
-                    </span>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
           {suggestion.courseCount > 0 && (
@@ -599,16 +620,17 @@ function GranularCoverageChart({ demandData, coverageData }) {
               <span className="category-toggle">{isExpanded ? "▾" : "▸"}</span>
               <span className="category-name">{cat}</span>
               <div className="category-bars">
-                <div className="bar-track" data-tooltip={`Coverage: ${avgCoverage}% vs Demand: ${catData.overall}%`}>
+                <div
+                  className="bar-track"
+                  data-tooltip={`${cat} — Demand: ${catData.overall}% | Coverage: ${avgCoverage}% | Gap: ${Math.max(0, catData.overall - avgCoverage)}% ${catData.overall - avgCoverage > 20 ? "(High Opportunity)" : ""}`}
+                >
                   <div
                     className="bar-fill coverage"
                     style={{ width: `${avgCoverage}%` }}
-                    data-tooltip={`Our library covers approximately ${avgCoverage}% of the subtopics in this category`}
                   />
                   <div
                     className="bar-marker demand"
                     style={{ left: `${catData.overall}%` }}
-                    data-tooltip={`Community demand for ${cat} is at ${catData.overall}/100`}
                   />
                 </div>
               </div>
@@ -631,16 +653,17 @@ function GranularCoverageChart({ demandData, coverageData }) {
                       <div key={subtopic} className={`subtopic-row ${statusClass}`}>
                         <span className="subtopic-name">{subtopic}</span>
                         <div className="subtopic-bars">
-                          <div className="bar-track" data-tooltip={`Subtopic Coverage: ${cov}% | Subtopic Demand: ${demand}%`}>
+                          <div
+                            className="bar-track"
+                            data-tooltip={`${subtopic} — Demand: ${demand}% | Coverage: ${cov}% | Gap: ${gap > 0 ? gap : 0}%`}
+                          >
                             <div
                               className="bar-fill coverage"
                               style={{ width: `${cov}%` }}
-                              data-tooltip={`Existing video coverage for "${subtopic}"`}
                             />
                             <div
                               className="bar-marker demand"
                               style={{ left: `${demand}%` }}
-                              data-tooltip={`Community interest level for "${subtopic}"`}
                             />
                           </div>
                         </div>
@@ -741,38 +764,38 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
     <div className="provenance-footer">
       <h4>🔍 Data Provenance</h4>
       <div className="provenance-items">
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="The baseline index of UE5 topics derived from community activity data.">
           📊 Community Activity Index: {provenance.communityIndex?.subtopicCount || 0} subtopics
           · {provenance.communityIndex?.version || "?"}
         </span>
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="Live community sentiment and specific frustrations detected via AI scraping.">
           💬 Community Scan: {stats?.painPointCount || provenance.communitySearch?.totalPainPoints || 0} pain
           points across {stats?.categoriesScanned || provenance.communitySearch?.categoriesScanned || 0} categories
           · {provenance.communitySearch?.method || "?"}
         </span>
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="Raw questions extracted from community posts to identify student struggles.">
           🔥 Trending: {stats?.trendingQuestions || provenance.trendingQuestions?.count || 0} questions
           · {provenance.trendingQuestions?.method || "?"}
         </span>
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="Our custom algorithm for ranking opportunities: weightings of 0.3 for Community, 0.3 for Reddit, 0.15 for Sources, and 0.25 for Content Gap.">
           📈 Demand Index: weighted composite (30% community · 30% Reddit · 15% sources · 25% gap)
         </span>
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="Matching topics against known breaking changes in UE5 versions. June 2025/Nov 2025 updates monitor 5.6 & 5.7 risks.">
           ⏳ Decay Detection: {decayTotal > 0
             ? `${decayHigh} high · ${decayMedium} medium risk (UE5 5.0–5.7)`
             : "active · monitoring UE5 5.0–5.7 breaking changes"}
         </span>
         {withReddit > 0 && (
-          <span className="provenance-item">
+          <span className="provenance-item" data-tooltip="Reddit-specific engagement signals including upvotes and comment volume.">
             🗣️ Reddit: {withReddit}/{(suggestions || []).length} topics with engagement data
           </span>
         )}
         {(suggestions || []).some(s => s.trendsMetrics) && (
-          <span className="provenance-item">
+          <span className="provenance-item" data-tooltip="Aggregate Google Trends search interest scores for the specific UE5 topics.">
             📈 Google Trends: {(suggestions || []).filter(s => s.trendsMetrics).length}/{(suggestions || []).length} topics with search interest data · pytrends weekly scrape
           </span>
         )}
-        <span className="provenance-item">
+        <span className="provenance-item" data-tooltip="Analysis of your existing video library to identify what you've already covered.">
           📚 Library: {provenance.libraryCoverage?.totalCourses || 0} videos
           · {provenance.libraryCoverage?.categoriesAnalyzed || 0} categories
         </span>
@@ -995,6 +1018,7 @@ function DemandDashboard() {
                         setIndustryFilter(industryFilter === ind ? null : ind);
                         setSubVerticalFilter(null);
                       }}
+                      data-tooltip={`Show topics relevant to the ${ind} industry`}
                     >
                       {ind}
                     </button>
