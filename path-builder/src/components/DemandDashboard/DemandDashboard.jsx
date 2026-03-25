@@ -439,13 +439,17 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
             <>
               <span 
                 className="decay-badge seo-badge" 
-                data-tooltip={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`}
+                data-tooltip={`Estimated volume: ~${suggestion.seoMetrics.msv.toLocaleString()} searches globally in the past month.`}
               >
                 🔍 {suggestion.seoMetrics.msv >= 1000 ? (suggestion.seoMetrics.msv / 1000).toFixed(1) + 'k' : suggestion.seoMetrics.msv}/mo
               </span>
               <span 
                 className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} 
-                data-tooltip={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? '"Blue Ocean": Solid demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd < 30 ? 'Low competition, but limited search demand.' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`}
+                data-tooltip={
+                  suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 
+                    ? `Keyword Difficulty: Extremely Low (${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}). Solid search volume paired with minimal competition makes this a "Blue Ocean" topic — highly recommended for new content!`
+                    : `Keyword Difficulty: ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}. ${suggestion.seoMetrics.kd < 30 ? 'Low competition, but limited search demand.' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market. Hard to target without strong domain authority.' : 'Moderate competition level.'}`
+                }
               >
                 {suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? '🌊 Blue Ocean' : `🎯 KD: ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}`}
               </span>
