@@ -56,7 +56,7 @@ export function useDemandIntelligence() {
         setError(err.message);
       }
     } finally {
-      if (!abortRef.current) setLoading(false);
+      setLoading(false);
       lockRef.current = false;
     }
   }, [courses]);

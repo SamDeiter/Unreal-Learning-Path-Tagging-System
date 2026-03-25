@@ -21,10 +21,40 @@ import "./DemandDashboard.css";
 
 // ── Industry Vertical Taxonomy ─────────────────────────────
 const INDUSTRY_VERTICALS = {
-  Gaming: ["Blueprints", "AI", "Animation", "Networking", "Physics", "Gameplay Framework", "Level Design", "Audio", "Niagara", "C++"],
-  "AEC/ArchViz": ["Lighting", "Materials", "Rendering", "Landscape", "Optimization", "Virtual Production"],
-  "Virtual Production": ["Virtual Production", "Lighting", "Animation", "MetaHumans", "Rendering"],
-  Enterprise: ["Optimization", "Rendering", "MetaHumans", "Networking", "UI/UMG"],
+  Gaming: {
+    categories: ["Blueprints", "AI", "Animation", "Networking", "Physics", "Gameplay Framework", "Level Design", "Audio", "Niagara", "C++"],
+    subVerticals: {
+      Indie: ["Blueprints", "Gameplay Framework", "Level Design", "Audio", "UI/UMG"],
+      AA: ["AI", "Animation", "Networking", "Physics", "Blueprints", "C++"],
+      AAA: ["AI", "Animation", "Networking", "Physics", "C++", "Optimization", "Rendering"],
+      Mobile: ["Optimization", "UI/UMG", "Blueprints", "Gameplay Framework"],
+      Console: ["Optimization", "Rendering", "Networking", "C++", "Physics"],
+    },
+  },
+  "AEC/ArchViz": {
+    categories: ["Lighting", "Materials", "Rendering", "Landscape", "Optimization", "Virtual Production"],
+    subVerticals: {
+      Architecture: ["Lighting", "Materials", "Rendering", "Landscape"],
+      "Interior Design": ["Lighting", "Materials", "Rendering"],
+      "Urban Planning": ["Landscape", "Rendering", "Optimization"],
+    },
+  },
+  "Virtual Production": {
+    categories: ["Virtual Production", "Lighting", "Animation", "MetaHumans", "Rendering"],
+    subVerticals: {
+      ICVFX: ["Virtual Production", "Lighting", "Rendering"],
+      "LED Volumes": ["Virtual Production", "Lighting"],
+      "MetaHuman Capture": ["MetaHumans", "Animation"],
+    },
+  },
+  Enterprise: {
+    categories: ["Optimization", "Rendering", "MetaHumans", "Networking", "UI/UMG"],
+    subVerticals: {
+      Automotive: ["Rendering", "Materials", "Optimization"],
+      "Product Design": ["Rendering", "Materials", "Lighting"],
+      "Healthcare Simulation": ["MetaHumans", "Networking", "UI/UMG"],
+    },
+  },
 };
 
 const INDUSTRY_COLORS = {
@@ -37,8 +67,17 @@ const INDUSTRY_COLORS = {
 /** Get industry verticals for a given category. */
 function getIndustriesForCategory(category) {
   return Object.entries(INDUSTRY_VERTICALS)
-    .filter(([, cats]) => cats.includes(category))
+    .filter(([, data]) => data.categories.includes(category))
     .map(([industry]) => industry);
+}
+
+/** Get sub-verticals that include a given category. */
+function _getSubVerticalsForCategory(industry, category) {
+  const data = INDUSTRY_VERTICALS[industry];
+  if (!data?.subVerticals) return [];
+  return Object.entries(data.subVerticals)
+    .filter(([, cats]) => cats.includes(category))
+    .map(([name]) => name);
 }
 
 // ── Source chip rendering ──────────────────────────────────
@@ -720,8 +759,8 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
         </span>
         <span className="provenance-item">
           ⏳ Decay Detection: {decayTotal > 0
-            ? `${decayHigh} high · ${decayMedium} medium risk (UE5 5.0–5.5)`
-            : "active · monitoring UE5 5.0–5.5 breaking changes"}
+            ? `${decayHigh} high · ${decayMedium} medium risk (UE5 5.0–5.7)`
+            : "active · monitoring UE5 5.0–5.7 breaking changes"}
         </span>
         {withReddit > 0 && (
           <span className="provenance-item">
@@ -773,12 +812,16 @@ function DemandDashboard() {
 
   const [platformFilter, setPlatformFilter] = useState(null);
   const [industryFilter, setIndustryFilter] = useState(null);
+  const [subVerticalFilter, setSubVerticalFilter] = useState(null);
 
-  // Apply industry filter first, then platform filter on top of category filter
-  // Apply industry filter
+  // Apply industry filter first, then sub-vertical, then platform filter
   const industryFiltered = industryFilter
     ? filteredSuggestions.filter((s) => {
-        const industriesCats = INDUSTRY_VERTICALS[industryFilter] || [];
+        if (subVerticalFilter) {
+          const subCats = INDUSTRY_VERTICALS[industryFilter]?.subVerticals?.[subVerticalFilter] || [];
+          return subCats.includes(s.category);
+        }
+        const industriesCats = INDUSTRY_VERTICALS[industryFilter]?.categories || [];
         return industriesCats.includes(s.category);
       })
     : filteredSuggestions;
@@ -939,7 +982,7 @@ function DemandDashboard() {
                   <span className="filter-group-label">🏭 Industry:</span>
                   <button
                     className={`filter-chip industry-chip ${!industryFilter ? "active" : ""}`}
-                    onClick={() => setIndustryFilter(null)}
+                    onClick={() => { setIndustryFilter(null); setSubVerticalFilter(null); }}
                   >
                     All
                   </button>
@@ -948,12 +991,41 @@ function DemandDashboard() {
                       key={ind}
                       className={`filter-chip industry-chip ${industryFilter === ind ? "active" : ""}`}
                       style={{ '--chip-color': INDUSTRY_COLORS[ind] }}
-                      onClick={() => setIndustryFilter(industryFilter === ind ? null : ind)}
+                      onClick={() => {
+                        setIndustryFilter(industryFilter === ind ? null : ind);
+                        setSubVerticalFilter(null);
+                      }}
                     >
                       {ind}
                     </button>
                   ))}
                 </div>
+                {industryFilter && INDUSTRY_VERTICALS[industryFilter]?.subVerticals && (
+                  <div className="sub-vertical-filter-row">
+                    <span className="filter-group-label">📐 Focus:</span>
+                    <button
+                      className={`filter-chip sub-vertical-chip ${!subVerticalFilter ? "active" : ""}`}
+                      onClick={() => setSubVerticalFilter(null)}
+                    >
+                      All {industryFilter}
+                    </button>
+                    {Object.keys(INDUSTRY_VERTICALS[industryFilter].subVerticals).map((sv) => {
+                      const svCats = INDUSTRY_VERTICALS[industryFilter].subVerticals[sv];
+                      const svCount = displaySuggestions.filter((s) => svCats.includes(s.category)).length;
+                      return (
+                        <button
+                          key={sv}
+                          className={`filter-chip sub-vertical-chip ${subVerticalFilter === sv ? "active" : ""}`}
+                          style={{ '--chip-color': INDUSTRY_COLORS[industryFilter] }}
+                          onClick={() => setSubVerticalFilter(subVerticalFilter === sv ? null : sv)}
+                          data-tooltip={`${sv}: ${svCats.join(", ")} (${svCount} topics)`}
+                        >
+                          {sv} <span className="chip-count">{svCount}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="category-filters">
                   <button
                     className={`filter-chip ${!categoryFilter ? "active" : ""}`}

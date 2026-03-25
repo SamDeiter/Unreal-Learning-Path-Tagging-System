@@ -55,6 +55,26 @@ const UE5_BREAKING_CHANGES = {
       "modular gameplay", "verse",
     ],
   },
+  "5.6": {
+    date: "2025-06-03",
+    changes: [
+      "metahuman creator in-editor", "metahuman body authoring",
+      "content browser 2.0", "hwrt lumen",
+      "animation toolset redesign", "motion trails viewport",
+      "curve editor lattice", "pcg gpu compute",
+      "fast geometry streaming",
+    ],
+  },
+  "5.7": {
+    date: "2025-11-12",
+    changes: [
+      "nanite foliage", "nanite skinning", "nanite voxels",
+      "megalights beta", "substrate production",
+      "pcg production", "pcg editor mode", "procedural vegetation editor",
+      "mover 2.0", "control rig physics",
+      "skeletal editor sculpting", "morph target viewer",
+    ],
+  },
 };
 
 /**
@@ -77,7 +97,14 @@ function computeDecayRisk(category, subtopic, sources = []) {
   for (const [version, info] of Object.entries(UE5_BREAKING_CHANGES)) {
     const matchedChanges = info.changes.filter((change) =>
       searchTerms.some(
-        (term) => change.includes(term) || term.includes(change)
+        (term) => {
+          // Short terms (< 3 chars, e.g. "ai") require exact match to avoid
+          // false positives like "ai" matching inside "motion trails"
+          if (term.length < 3) {
+            return change === term || change.split(/\s+/).includes(term);
+          }
+          return change.includes(term) || term.includes(change);
+        }
       )
     );
     if (matchedChanges.length > 0) {

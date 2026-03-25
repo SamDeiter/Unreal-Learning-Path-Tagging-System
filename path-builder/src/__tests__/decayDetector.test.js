@@ -92,9 +92,9 @@ describe("computeDecayRisk", () => {
   });
 
   it("uses the LATEST breaking change version when multiple match", () => {
-    // "nanite" matches 5.0 (2022-04-05) and "nanite tessellation" matches 5.3 + 5.5
-    const result = computeDecayRisk("Rendering", "Nanite Tessellation", []);
-    expect(result.breakingVersion).toBe("5.5"); // Latest
+    // "nanite" matches 5.0, "nanite tessellation" matches 5.3 + 5.5, "nanite foliage/skinning" matches 5.7
+    const result = computeDecayRisk("Rendering", "Nanite Foliage", []);
+    expect(result.breakingVersion).toBe("5.7"); // Latest
   });
 
   it("handles invalid source dates gracefully", () => {
@@ -111,9 +111,9 @@ describe("computeDecayRisk", () => {
 // ── UE5_BREAKING_CHANGES map ──────────────────────────────────────
 
 describe("UE5_BREAKING_CHANGES", () => {
-  it("has entries from UE 5.0 to 5.5", () => {
+  it("has entries from UE 5.0 to 5.7", () => {
     expect(Object.keys(UE5_BREAKING_CHANGES)).toEqual(
-      expect.arrayContaining(["5.0", "5.1", "5.2", "5.3", "5.4", "5.5"])
+      expect.arrayContaining(["5.0", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7"])
     );
   });
 
