@@ -45,9 +45,13 @@ service cloud.firestore {
     }
     
     // Helper: check if user is admin (via Firebase custom claims)
-    // Set claims using the setAdminClaim Cloud Function
+    // Set claims using the setAdminClaim Cloud Function, or use email fallback for dev
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        request.auth.token.email == 'sam.deiter@epicgames.com' ||
+        request.auth.token.email == 'samdeiter@gmail.com'
+      );
     }
     
     // Invite codes — admin creates/lists/revokes, users read + consume

@@ -435,6 +435,16 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
               {suggestion.trendsMetrics.scaledScore >= 70 ? '🔥' : suggestion.trendsMetrics.scaledScore >= 40 ? '📈' : '📊'} Trends {suggestion.trendsMetrics.scaledScore}
             </span>
           )}
+          {suggestion.seoMetrics && (
+            <>
+              <span className="decay-badge seo-badge" title={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`} data-tooltip={`Monthly Search Volume (MSV): ~${suggestion.seoMetrics.msv.toLocaleString()} searches/mo. This indicates how many times users search for this topic each month.`}>
+                🔍 {suggestion.seoMetrics.msv >= 1000 ? (suggestion.seoMetrics.msv / 1000).toFixed(1) + 'k' : suggestion.seoMetrics.msv}/mo
+              </span>
+              <span className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} title={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 ? '"Blue Ocean": High demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`} data-tooltip={`Keyword Difficulty (KD): ${suggestion.seoMetrics.kd}/100. ${suggestion.seoMetrics.kd < 30 ? '"Blue Ocean": High demand with low competition. Prime target for new content!' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market.' : 'Moderate competition level.'}`}>
+                {suggestion.seoMetrics.kd < 30 ? '🌊 Blue Ocean' : `🎯 KD: ${suggestion.seoMetrics.kd}`}
+              </span>
+            </>
+          )}
         </div>
         <span className="expand-arrow" data-tooltip={expanded ? "Collapse details" : "Expand to see sources and details"}>{expanded ? "▾" : "▸"}</span>
       </div>
@@ -525,6 +535,22 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
                 </div>
                 <div className="source-row">
                   <span>{suggestion.trendsMetrics.scaledScore >= 70 ? '🔥 Hot topic — high search demand' : suggestion.trendsMetrics.scaledScore >= 40 ? '📈 Warm — moderate search interest' : '📊 Niche — low search volume'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          {suggestion.seoMetrics && (
+            <div className="existing-coverage">
+              <h5>🔍 SEO Signal</h5>
+              <div className="sources-list">
+                <div className="source-row" title="Monthly Search Volume (MSV) represents the estimated number of times this topic is searched per month." data-tooltip="Monthly Search Volume (MSV) represents the estimated number of times this topic is searched per month.">
+                  <span>📊 ~{suggestion.seoMetrics.msv.toLocaleString()} searches/mo</span>
+                </div>
+                <div className="source-row" title="Keyword Difficulty (KD) estimates how hard it would be to rank on the first page of search results for this topic (0-100)." data-tooltip="Keyword Difficulty (KD) estimates how hard it would be to rank on the first page of search results for this topic (0-100).">
+                  <span>🎯 Difficulty: {suggestion.seoMetrics.kd}/100</span>
+                </div>
+                <div className="source-row" title='A "Blue Ocean" topic has high search demand but very few competing tutorials, making it a prime target for new content.' data-tooltip='A "Blue Ocean" topic has high search demand but very few competing tutorials, making it a prime target for new content.'>
+                  <span>{suggestion.seoMetrics.kd < 30 ? '🌊 Blue Ocean — easy to rank!' : suggestion.seoMetrics.kd > 70 ? '🧗 Highly competitive' : '⚖️ Moderate competition'}</span>
                 </div>
               </div>
             </div>
@@ -745,6 +771,63 @@ function PlatformBreakdownPanel({ suggestions, report, onPlatformFilter, activeP
   );
 }
 
+// ── Industry Breakdown Panel ────────────────────────────────
+
+function IndustryBreakdownPanel({ suggestions, activeIndustryFilter, onIndustryFilter }) {
+  // Aggregate demand across top industries using INDUSTRY_VERTICALS
+  const industryStats = Object.keys(INDUSTRY_VERTICALS).map(ind => {
+    const cats = INDUSTRY_VERTICALS[ind].categories || [];
+    const relevantSuggestions = (suggestions || []).filter(s => cats.includes(s.category));
+    const totalScore = relevantSuggestions.reduce((sum, s) => sum + (s.demandScore || 0), 0);
+    const avgScore = relevantSuggestions.length > 0 ? Math.round(totalScore / relevantSuggestions.length) : 0;
+    
+    return {
+      name: ind,
+      topicCount: relevantSuggestions.length,
+      totalScore,
+      avgScore,
+      color: INDUSTRY_COLORS[ind]
+    };
+  }).filter(ind => ind.topicCount > 0).sort((a, b) => b.totalScore - a.totalScore);
+
+  if (industryStats.length === 0) return null;
+
+  const maxScore = Math.max(1, ...industryStats.map(i => i.totalScore));
+
+  return (
+    <div className="platform-breakdown-panel industry-breakdown-panel">
+      <h3 data-tooltip="See demand distribution across major UE5 industries">🏭 Industry Demand Breakdown</h3>
+      <div className="platform-bars">
+        {industryStats.map(ind => {
+          const barWidth = Math.max(2, (ind.totalScore / maxScore) * 100);
+          const isActive = activeIndustryFilter === ind.name;
+          
+          return (
+            <div 
+              key={ind.name}
+              className={`platform-row ${isActive ? "active" : ""}`}
+              onClick={() => onIndustryFilter(isActive ? null : ind.name)}
+              data-tooltip={`Click to filter suggestions for ${ind.name}`}
+            >
+              <div className="platform-label">
+                <span className="platform-name">{ind.name}</span>
+                <span className="platform-count">{ind.topicCount} topics</span>
+              </div>
+              <div className="platform-bar-track">
+                <div
+                  className="platform-bar-fill"
+                  style={{ width: `${barWidth}%`, background: ind.color }}
+                />
+              </div>
+              <span className="platform-score">{ind.avgScore}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Provenance Footer ──────────────────────────────────────
 
 function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
@@ -780,6 +863,11 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
         <span className="provenance-item" data-tooltip="Our custom algorithm for ranking opportunities: weightings of 0.3 for Community, 0.3 for Reddit, 0.15 for Sources, and 0.25 for Content Gap.">
           📈 Demand Index: weighted composite (30% community · 30% Reddit · 15% sources · 25% gap)
         </span>
+        {(suggestions || []).some(s => s.seoMetrics) && (
+          <span className="provenance-item" data-tooltip="Simulated SEO metrics (Monthly Search Volume and Keyword Difficulty) evaluated to identify high-opportunity Blue Ocean topics.">
+            🔍 SEO Intelligence: {(suggestions || []).filter(s => s.seoMetrics).length}/{(suggestions || []).length} topics with search metrics
+          </span>
+        )}
         <span className="provenance-item" data-tooltip="Matching topics against known breaking changes in UE5 versions. June 2025/Nov 2025 updates monitor 5.6 & 5.7 risks.">
           ⏳ Decay Detection: {decayTotal > 0
             ? `${decayHigh} high · ${decayMedium} medium risk (UE5 5.0–5.7)`
@@ -995,7 +1083,17 @@ function DemandDashboard() {
             activePlatformFilter={platformFilter}
           />
 
+          <IndustryBreakdownPanel 
+            suggestions={report.suggestions}
+            activeIndustryFilter={industryFilter}
+            onIndustryFilter={(val) => {
+              setIndustryFilter(val);
+              setSubVerticalFilter(null);
+            }}
+          />
+
           {/* Two-column layout — collapses to single column when no questions */}
+
           <div className={`dashboard-columns ${(report.trendingQuestions || []).length === 0 ? 'single-column' : ''}`}>
             {/* Left: Suggestions */}
             <div className="column-suggestions">

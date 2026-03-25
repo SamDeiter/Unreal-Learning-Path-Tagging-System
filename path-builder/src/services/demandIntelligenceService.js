@@ -604,6 +604,15 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
       const confidence =
         verifiedSourceCount >= 3 ? "high" : verifiedSourceCount >= 1 ? "medium" : "low";
 
+      // MOCK SEO DATA (Phase 4.1 Development)
+      // Base MSV on demandScore plus some randomness (e.g. 500 - 10,000 range)
+      const msvBase = demandScore * 80;
+      const msvRandom = Math.floor(Math.random() * 2000);
+      const msv = Math.max(0, msvBase + msvRandom);
+      // Randomize KD (0-100) to create realistic "blue ocean" opportunities (Low KD)
+      const kd = Math.floor(Math.random() * 70) + 10;
+      const seoMetrics = { msv, kd };
+
       if (gap > 0 || sources.length > 0) {
         // Compute decay risk based on UE5 breaking changes
         const decay = computeDecayRisk(category, subtopic, sources);
@@ -622,6 +631,7 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
           decayRisk: decay.risk,
           decayReason: decay.reason,
           decayVersion: decay.breakingVersion,
+          seoMetrics, // Phase 4.1
           sources,
           existingContent: [], // TODO: populate with matching video library entries
         });

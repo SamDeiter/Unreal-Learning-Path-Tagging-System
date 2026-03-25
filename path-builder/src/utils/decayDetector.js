@@ -181,15 +181,35 @@ export function computeDemandIndex(suggestions, opts = {}) {
   const trendsData = opts.trendsData || null;
   const hasYouTube = ytMetrics && Object.keys(ytMetrics).length > 0;
   const hasTrends = trendsData && Object.keys(trendsData).length > 0;
+  const hasSEO = suggestions.some((s) => s.seoMetrics);
 
-  let alpha, beta, gamma, delta, epsilon, zeta;
-  if (hasYouTube && hasTrends) {
+  let alpha, beta, gamma, delta, epsilon, zeta, eta;
+  
+  // Distribute weights roughly to accommodate SEO when present
+  if (hasYouTube && hasTrends && hasSEO) {
+    alpha   = opts.alpha   || 0.15; // Demand Base
+    beta    = opts.beta    || 0.10; // Reddit
+    gamma   = opts.gamma   || 0.10; // Source count
+    delta   = opts.delta   || 0.15; // Gap
+    epsilon = opts.epsilon || 0.15; // YouTube
+    zeta    = opts.zeta    || 0.15; // Trends
+    eta     = opts.eta     || 0.20; // SEO (New)
+  } else if (hasSEO) {
+    alpha   = opts.alpha   || 0.20;
+    beta    = opts.beta    || 0.20;
+    gamma   = opts.gamma   || 0.10;
+    delta   = opts.delta   || 0.25;
+    epsilon = 0;
+    zeta    = 0;
+    eta     = opts.eta     || 0.25; // SEO 25% weight when YT/Trends missing
+  } else if (hasYouTube && hasTrends) {
     alpha   = opts.alpha   || 0.20;
     beta    = opts.beta    || 0.15;
     gamma   = opts.gamma   || 0.10;
     delta   = opts.delta   || 0.20;
     epsilon = opts.epsilon || 0.15;
     zeta    = opts.zeta    || 0.20;
+    eta     = 0;
   } else if (hasYouTube) {
     alpha   = opts.alpha   || 0.25;
     beta    = opts.beta    || 0.20;
@@ -197,6 +217,7 @@ export function computeDemandIndex(suggestions, opts = {}) {
     delta   = opts.delta   || 0.25;
     epsilon = opts.epsilon || 0.20;
     zeta    = 0;
+    eta     = 0;
   } else {
     alpha   = opts.alpha   || 0.30;
     beta    = opts.beta    || 0.30;
@@ -204,6 +225,7 @@ export function computeDemandIndex(suggestions, opts = {}) {
     delta   = opts.delta   || 0.25;
     epsilon = 0;
     zeta    = 0;
+    eta     = 0;
   }
 
   const signals = suggestions.map((s) => {
@@ -229,6 +251,13 @@ export function computeDemandIndex(suggestions, opts = {}) {
       const catTrends = trendsData[s.category] || {};
       trendsScore = Math.min(100, catTrends.scaledScore || 0);
     }
+    
+    let seoScore = 0;
+    if (hasSEO && s.seoMetrics) {
+      const msvSignal = Math.min(100, (s.seoMetrics.msv / 5000) * 100); 
+      const kdSignal = Math.max(0, 100 - s.seoMetrics.kd); // Low KD is better
+      seoScore = (msvSignal * 0.5) + (kdSignal * 0.5);
+    }
 
     return {
       demandScore: s.demandScore || 0,
@@ -237,6 +266,7 @@ export function computeDemandIndex(suggestions, opts = {}) {
       gap: s.gap || 0,
       youtubeScore,
       trendsScore,
+      seoScore,
     };
   });
 
@@ -246,6 +276,7 @@ export function computeDemandIndex(suggestions, opts = {}) {
   const maxGap = Math.max(1, ...signals.map((s) => s.gap));
   const maxYouTube = Math.max(1, ...signals.map((s) => s.youtubeScore));
   const maxTrends = Math.max(1, ...signals.map((s) => s.trendsScore));
+  const maxSEO = Math.max(1, ...signals.map((s) => s.seoScore));
 
   for (let i = 0; i < suggestions.length; i++) {
     const s = signals[i];
@@ -255,7 +286,8 @@ export function computeDemandIndex(suggestions, opts = {}) {
       gamma * ((s.sourceScore / maxSource) * 100) +
       delta * ((s.gap / maxGap) * 100) +
       epsilon * ((s.youtubeScore / maxYouTube) * 100) +
-      zeta * ((s.trendsScore / maxTrends) * 100);
+      zeta * ((s.trendsScore / maxTrends) * 100) +
+      eta * ((s.seoScore / maxSEO) * 100);
 
     suggestions[i].demandIndex = Math.round(Math.min(100, Math.max(0, index)));
 
