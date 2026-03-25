@@ -368,6 +368,7 @@ function ConfidenceBadge({ confidence }) {
 
 function SuggestionCard({ suggestion, rank, onStartBrief }) {
   const [expanded, setExpanded] = useState(false);
+
   const breakdown = computePlatformBreakdown(suggestion);
 
   // Build platform source badges — only show platforms with score > 0
@@ -582,6 +583,7 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
               </div>
             </div>
           )}
+
           <button
             className="start-authoring-btn"
             onClick={(e) => {
@@ -934,6 +936,7 @@ function DemandDashboard() {
   const [platformFilter, setPlatformFilter] = useState(null);
   const [industryFilter, setIndustryFilter] = useState(null);
   const [subVerticalFilter, setSubVerticalFilter] = useState(null);
+  const [showBlueOceansOnly, setShowBlueOceansOnly] = useState(false);
 
   // Apply industry filter first, then sub-vertical, then platform filter
   const industryFiltered = industryFilter
@@ -947,7 +950,7 @@ function DemandDashboard() {
       })
     : filteredSuggestions;
 
-  const displaySuggestions = platformFilter
+  let displaySuggestions = platformFilter
     ? industryFiltered.filter((s) => {
         const b = computePlatformBreakdown(s);
         // Show suggestions that have any signal from this platform
@@ -955,6 +958,12 @@ function DemandDashboard() {
         return score > 0;
       })
     : industryFiltered;
+
+  if (showBlueOceansOnly) {
+    displaySuggestions = displaySuggestions.filter(
+      (s) => s.seoMetrics && s.seoMetrics.msv >= 50 && s.seoMetrics.kd < 30
+    );
+  }
 
   // Auto-generate on mount if no report
   // Strategy: tries Firestore first (instant), falls back to live scrape
@@ -1109,6 +1118,17 @@ function DemandDashboard() {
             <div className="column-suggestions">
               <div className="column-header">
                 <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
+                <div className="filter-toggles" style={{ marginBottom: "12px", marginLeft: "2px" }}>
+                  <label className="blue-ocean-toggle" style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "500" }} data-tooltip="Filter for topics with >50 Monthly Search Volume and <30 Keyword Difficulty">
+                    <input 
+                      type="checkbox" 
+                      checked={showBlueOceansOnly} 
+                      onChange={(e) => setShowBlueOceansOnly(e.target.checked)}
+                      style={{ cursor: "pointer", width: "16px", height: "16px", accentColor: "#0ea5e9" }}
+                    />
+                    🌊 Show Blue Oceans Only
+                  </label>
+                </div>
                 <div className="industry-filter-row">
                   <span className="filter-group-label">🏭 Industry:</span>
                   <button

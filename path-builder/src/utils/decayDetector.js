@@ -379,7 +379,11 @@ export function computePlatformBreakdown(suggestion) {
   const hasRealRedditData = redditFromEngagement > 0;
   if (redditScore > 0 && epicForum > 0 && !hasRealRedditData) {
     const topicStr = suggestion.topic || suggestion.category || "";
-    const hash = [...topicStr].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    let hash = 0;
+    for (let i = 0; i < topicStr.length; i++) {
+      hash += topicStr.charCodeAt(i);
+    }
+    
     if (hash % 2 === 0) {
       epicForum = 0;   // This topic attributed to Reddit
     } else {
