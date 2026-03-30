@@ -87,36 +87,8 @@ const samplePaths = {
   },
 };
 
-let activeEngine = 'UE5';
 let currentPath = null;
 let completedSteps = new Set();
-
-// Switch active engine and update UI
-function switchEngine(engine) {
-  activeEngine = engine;
-  
-  // Update UI buttons
-  const tabs = document.querySelectorAll('.engine-tab');
-  tabs.forEach(tab => {
-    if (tab.textContent.includes(engine)) {
-      tab.classList.add('active');
-    } else {
-      tab.classList.remove('active');
-    }
-  });
-
-  // Update input placeholder to match engine
-  const searchInput = document.getElementById("queryInput");
-  const basketInput = document.getElementById("textInput");
-  if (searchInput) searchInput.placeholder = `Describe your ${engine} problem...`;
-  if (basketInput) basketInput.placeholder = `Describe your ${engine} problem...`;
-
-  // Filter gallery if populated
-  if (typeof populateGallery === 'function') {
-    populateGallery();
-  }
-}
-
 
 // Simple markdown to HTML converter
 function parseMarkdown(text) {
@@ -364,7 +336,7 @@ function generatePath() {
   document.getElementById("gallerySection").style.display = "none";
 
   // Try to find matching cached path
-  const cached = Object.keys(window).includes("findCachedPath") ? findCachedPath(query, activeEngine) : null;
+  const cached = findCachedPath(query);
 
   if (cached) {
     fetch(`/paths/${cached.file}`)
@@ -376,12 +348,12 @@ function generatePath() {
         document.getElementById("loading").classList.remove("active");
         currentPath = data;
         renderPath(currentPath);
-        logQuery(query, true, activeEngine);
+        logQuery(query, true);
         console.log("Loaded from cache:", cached.file);
       })
-      .catch(() => tryApiCall(query, activeEngine));
+      .catch(() => tryApiCall(query));
   } else {
-    tryApiCall(query, activeEngine);
+    tryApiCall(query);
   }
 }
 

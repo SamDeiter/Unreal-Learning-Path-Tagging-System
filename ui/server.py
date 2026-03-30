@@ -55,7 +55,6 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
         """Generate a learning path from a query."""
         params = parse_qs(query_string)
         query = params.get("q", [""])[0]
-        engine = params.get("engine", ["UE5"])[0]
 
         if not query:
             self.send_error(400, "Missing query parameter 'q'")
@@ -63,7 +62,7 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
 
         try:
             generator = PathGenerator()
-            path = generator.generate_path(query, engine=engine)
+            path = generator.generate_path(query)
 
             # Convert to dict
             path_dict = {
@@ -110,7 +109,6 @@ class LearningPathHandler(SimpleHTTPRequestHandler):
             ANALYTICS["queries"].append({
                 "timestamp": datetime.utcnow().isoformat(),
                 "query": query,
-                "engine": engine,
                 "tags": path.tags,
                 "steps_count": len(path.steps),
             })

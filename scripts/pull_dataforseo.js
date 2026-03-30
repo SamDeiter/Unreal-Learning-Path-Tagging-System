@@ -24,21 +24,36 @@ if (taxonomyMatch && taxonomyMatch[1]) {
   process.exit(1);
 }
 
+const uefnMatch = serviceContent.match(/export const UEFN_GRANULAR_TAXONOMY = ({[\s\S]*?});/);
+let uefnTaxonomy = {};
+if (uefnMatch && uefnMatch[1]) {
+  eval("uefnTaxonomy = " + uefnMatch[1]);
+} else {
+  console.error("⚠️ Could not parse UEFN_GRANULAR_TAXONOMY. Proceeding with UE5 only.");
+}
+
+const combinedTaxonomy = { ...taxonomy, ...uefnTaxonomy };
+
 // Build keyword list
 const keywords = [];
 const keywordToSubtopic = new Map(); // Map "ue5 subtopic" back to "Subtopic"
 
-for (const [category, subtopics] of Object.entries(taxonomy)) {
+for (const [category, subtopics] of Object.entries(combinedTaxonomy)) {
   for (const subtopic of subtopics) {
-    // Prefix with "UE5 " or "Unreal Engine " to get accurate context
+    // Prefix with "UE5 " or "UEFN " to get accurate context
     // DataForSEO API strictly rejects parentheses, so we must sanitize
-    const kw = `ue5 ${subtopic.toLowerCase()}`.replace(/[\(\)]/g, '');
+    
+    // Check if this subtopic belongs to UEFN taxonomy
+    const isUefn = !!uefnTaxonomy[category] && uefnTaxonomy[category].includes(subtopic);
+    const prefix = isUefn ? "uefn " : "ue5 ";
+    
+    const kw = `${prefix}${subtopic.toLowerCase()}`.replace(/[\\(\\)]/g, '');
     keywords.push(kw);
     keywordToSubtopic.set(kw, subtopic);
   }
 }
 
-console.log(`🔍 Preparing to pull SEO metrics for ${keywords.length} UE5 topics...`);
+console.log(`🔍 Preparing to pull SEO metrics for ${keywords.length} topics...`);
 
 async function fetchSEOMetrics() {
   const postData = [{
