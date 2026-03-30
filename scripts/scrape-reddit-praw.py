@@ -1,7 +1,7 @@
-"""Reddit PRAW deep-sentiment scraper for UE5 tutorial demand intelligence.
+"""Reddit public-JSON deep-sentiment scraper for UE5 tutorial demand intelligence.
 
-Uses Reddit's authenticated PRAW API (vs the public JSON endpoint) to perform
-deeper comment-level sentiment analysis on r/unrealengine tutorial requests.
+Uses Reddit's public JSON endpoints (no authentication required) to perform
+comment-level sentiment analysis on r/unrealengine tutorial requests.
 
 For each of the 18 UE5 taxonomy categories:
   1. Search r/unrealengine for tutorial/learning posts
@@ -11,13 +11,10 @@ For each of the 18 UE5 taxonomy categories:
   5. Write results to Firestore demand_intel/reddit_sentiment
 
 Environment Variables:
-    REDDIT_CLIENT_ID       — Reddit API client ID
-    REDDIT_CLIENT_SECRET   — Reddit API client secret
-    REDDIT_USER_AGENT      — e.g. "python:ue5-demand-intel:v1.0 (by /u/youruser)"
     FIREBASE_SERVICE_ACCOUNT — Base64-encoded Firebase service account JSON (optional)
 
 Usage:
-    pip install praw firebase-admin google-cloud-firestore
+    pip install requests firebase-admin google-cloud-firestore
     python scripts/scrape-reddit-praw.py
 """
 
@@ -26,13 +23,15 @@ import os
 import sys
 import base64
 import re
+import time
 from datetime import datetime, timezone
 from collections import Counter
+from urllib.parse import quote_plus
 
 try:
-    import praw
+    import requests
 except ImportError:
-    print("ERROR: praw is not installed. Run: pip install praw")
+    print("ERROR: requests is not installed. Run: pip install requests")
     sys.exit(1)
 
 
@@ -46,6 +45,11 @@ SUBREDDIT = "unrealengine"
 POST_LIMIT = 15          # Posts per category search
 COMMENT_LIMIT = 30       # Top-level comments per post
 MAX_CATEGORIES = 18
+
+# Rate-limit: Reddit public JSON allows ~10 req/min without auth
+REQUEST_DELAY_SECS = 2.0
+
+USER_AGENT = "python:ue5-demand-intel:v1.0 (by github-actions)"
 
 # Search queries per category — tuned for tutorial/learning requests
 CATEGORY_QUERIES = {
@@ -86,6 +90,41 @@ NEGATIVE_KEYWORDS = {
 NEUTRAL_THRESHOLD = 0  # Score of 0 = neutral
 
 
+# ── HTTP Session ──────────────────────────────────────────────────────
+
+def create_session():
+    """Create a requests session with proper headers for Reddit public API."""
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+    })
+    return session
+
+
+def rate_limited_get(session, url, params=None, max_retries=3):
+    """GET with rate limiting and retry logic for Reddit's public JSON API."""
+    for attempt in range(max_retries):
+        time.sleep(REQUEST_DELAY_SECS)
+        try:
+            resp = session.get(url, params=params, timeout=30)
+            if resp.status_code == 429:
+                retry_after = int(resp.headers.get("Retry-After", 60))
+                print(f"    ⏳ Rate limited, waiting {retry_after}s...")
+                time.sleep(retry_after)
+                continue
+            if resp.status_code == 403:
+                print(f"    ⚠ 403 Forbidden — skipping (Reddit may be blocking)")
+                return None
+            resp.raise_for_status()
+            return resp.json()
+        except requests.exceptions.RequestException as e:
+            print(f"    ✖ Request failed (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(5 * (attempt + 1))
+    return None
+
+
 # ── Firebase Setup ────────────────────────────────────────────────────
 
 def init_firebase():
@@ -112,29 +151,6 @@ def init_firebase():
     except Exception as e:
         print(f"  ⚠ Firebase init failed: {e}")
         return None
-
-
-# ── Reddit PRAW Setup ─────────────────────────────────────────────────
-
-def init_reddit():
-    """Initialize authenticated PRAW Reddit client."""
-    client_id = os.environ.get("REDDIT_CLIENT_ID")
-    client_secret = os.environ.get("REDDIT_CLIENT_SECRET")
-    user_agent = os.environ.get(
-        "REDDIT_USER_AGENT",
-        "python:ue5-demand-intel:v1.0 (by /u/ue5scraper)"
-    )
-
-    if not client_id or not client_secret:
-        print("ERROR: REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET must be set.")
-        print("  Create an app at https://www.reddit.com/prefs/apps")
-        sys.exit(1)
-
-    return praw.Reddit(
-        client_id=client_id,
-        client_secret=client_secret,
-        user_agent=user_agent,
-    )
 
 
 # ── Sentiment Analysis ────────────────────────────────────────────────
@@ -199,13 +215,51 @@ def extract_topic_keywords(comments, category):
     ]
 
 
-# ── Scraping ──────────────────────────────────────────────────────────
+# ── Scraping (Public JSON) ───────────────────────────────────────────
 
-def scrape_category(reddit, category, query):
+def search_posts(session, query):
+    """Search r/unrealengine using the public JSON search endpoint."""
+    url = f"https://www.reddit.com/r/{SUBREDDIT}/search.json"
+    params = {
+        "q": query,
+        "restrict_sr": "on",
+        "sort": "relevance",
+        "t": "year",
+        "limit": POST_LIMIT,
+    }
+    data = rate_limited_get(session, url, params)
+    if not data or "data" not in data:
+        return []
+    return data["data"].get("children", [])
+
+
+def fetch_comments(session, post_id):
+    """Fetch top-level comments for a post using the public JSON endpoint."""
+    url = f"https://www.reddit.com/r/{SUBREDDIT}/comments/{post_id}.json"
+    params = {"sort": "top", "limit": COMMENT_LIMIT}
+    data = rate_limited_get(session, url, params)
+    if not data or not isinstance(data, list) or len(data) < 2:
+        return []
+
+    comments = []
+    for child in data[1].get("data", {}).get("children", []):
+        if child.get("kind") != "t1":
+            continue
+        body = child.get("data", {}).get("body", "")
+        if body and len(body) >= 10:
+            comments.append({
+                "body": body,
+                "permalink": child["data"].get("permalink", ""),
+            })
+        if len(comments) >= COMMENT_LIMIT:
+            break
+    return comments
+
+
+def scrape_category(session, category, query):
     """Scrape Reddit for a single category's tutorial requests."""
     print(f"  📡 {category}: '{query}'")
 
-    subreddit = reddit.subreddit(SUBREDDIT)
     results = {
         "postCount": 0,
         "commentCount": 0,
@@ -222,41 +276,32 @@ def scrape_category(reddit, category, query):
     sentiment_scores = []
     pain_points = []
 
-    try:
-        posts = list(subreddit.search(query, sort="relevance", time_filter="year", limit=POST_LIMIT))
-    except Exception as e:
-        print(f"    ✖ Search failed: {e}")
-        return results
-
+    posts = search_posts(session, query)
     results["postCount"] = len(posts)
 
-    for post in posts:
-        results["totalUpvotes"] += post.score
+    for post_wrapper in posts:
+        post = post_wrapper.get("data", {})
+        post_id = post.get("id", "")
+        results["totalUpvotes"] += post.get("score", 0)
 
         # Collect sample posts
         if len(results["samplePosts"]) < 3:
+            created_utc = post.get("created_utc", 0)
             results["samplePosts"].append({
-                "title": post.title,
-                "score": post.score,
-                "numComments": post.num_comments,
-                "url": f"https://reddit.com{post.permalink}",
+                "title": post.get("title", ""),
+                "score": post.get("score", 0),
+                "numComments": post.get("num_comments", 0),
+                "url": f"https://reddit.com{post.get('permalink', '')}",
                 "created": datetime.fromtimestamp(
-                    post.created_utc, tz=timezone.utc
-                ).isoformat(),
+                    created_utc, tz=timezone.utc
+                ).isoformat() if created_utc else "",
             })
 
-        # Analyze comments
-        post.comment_sort = "top"
-        post.comments.replace_more(limit=0)  # Skip "load more" links
-        comments = list(post.comments)[:COMMENT_LIMIT]
+        # Fetch and analyze comments
+        comments = fetch_comments(session, post_id)
 
         for comment in comments:
-            if not hasattr(comment, "body"):
-                continue
-            body = comment.body
-            if len(body) < 10:
-                continue
-
+            body = comment["body"]
             results["commentCount"] += 1
             all_comments_text.append(body)
 
@@ -270,8 +315,8 @@ def scrape_category(reddit, category, query):
                     "text": body[:200],
                     "score": score,
                     "keywords": keywords,
-                    "postTitle": post.title,
-                    "url": f"https://reddit.com{comment.permalink}",
+                    "postTitle": post.get("title", ""),
+                    "url": f"https://reddit.com{comment['permalink']}",
                 })
 
     # Compute averages
@@ -367,15 +412,16 @@ def print_results_table(category_results):
 
 def main():
     print("=" * 60)
-    print("  🗣️ Reddit PRAW Deep Sentiment Scraper — r/unrealengine")
+    print("  🗣️ Reddit Public JSON Sentiment Scraper — r/unrealengine")
     print("=" * 60)
     print(f"  Categories: {len(CATEGORY_QUERIES)}")
     print(f"  Posts per category: {POST_LIMIT}")
-    print(f"  Comment depth: {COMMENT_LIMIT} per post\n")
+    print(f"  Comment depth: {COMMENT_LIMIT} per post")
+    print(f"  Rate limit delay: {REQUEST_DELAY_SECS}s per request\n")
 
-    # Init Reddit
-    reddit = init_reddit()
-    print(f"  ✓ Reddit authenticated as: {reddit.user.me() or 'read-only'}\n")
+    # Init HTTP session
+    session = create_session()
+    print(f"  ✓ HTTP session ready (User-Agent: {USER_AGENT})\n")
 
     # Init Firebase (optional)
     db = init_firebase()
@@ -384,7 +430,7 @@ def main():
     category_results = {}
     for i, (category, query) in enumerate(CATEGORY_QUERIES.items()):
         print(f"\n[{i + 1}/{len(CATEGORY_QUERIES)}]")
-        category_results[category] = scrape_category(reddit, category, query)
+        category_results[category] = scrape_category(session, category, query)
 
     # Print results
     print_results_table(category_results)
@@ -397,7 +443,7 @@ def main():
         print("\n📤 Writing to Firestore...")
         write_to_firestore(db, category_results)
 
-    print(f"\n🎉 Done! Reddit PRAW sentiment scraped for {len(category_results)} categories.")
+    print(f"\n🎉 Done! Reddit sentiment scraped for {len(category_results)} categories.")
     if db:
         print("   Firestore: demand_intel/reddit_sentiment")
     print(f"   Local: {REPORT_PATH}")

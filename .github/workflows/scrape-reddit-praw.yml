@@ -24,13 +24,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install praw firebase-admin google-cloud-firestore
+        run: pip install requests firebase-admin google-cloud-firestore
 
-      - name: Run Reddit PRAW scraper
+      - name: Run Reddit sentiment scraper
         env:
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USER_AGENT: "python:ue5-demand-intel:v1.0 (by github-actions)"
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: python scripts/scrape-reddit-praw.py
 
