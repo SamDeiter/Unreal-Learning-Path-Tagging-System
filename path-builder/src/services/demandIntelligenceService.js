@@ -554,6 +554,16 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
         );
 
         if (hasTrending || hasPainPoints || hasReddit || hasMultiPlatformSources) {
+          // Inject SEO metrics if missing (e.g., when loaded from Firestore scraper script)
+          if (firestoreReport.suggestions) {
+            firestoreReport.suggestions.forEach(suggestion => {
+              if (!suggestion.seoMetrics) {
+                const seoData = seoMetricsData[suggestion.topic] || { msv: 0, kd: 0 };
+                suggestion.seoMetrics = { msv: seoData.msv, kd: seoData.kd };
+              }
+            });
+          }
+          
           firestoreReport._source = "firestore";
           _cachedReports[engine] = firestoreReport;
           _cachedAt[engine] = Date.now();
