@@ -175,7 +175,7 @@ exports.generateLearningPath = functions
     // App Check enforcement (permissive during rollout)
     requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
     const userId = requireAuth(context);
-    const { query, tags = [] } = data;
+    const { query, tags = [], engine = "UE5" } = data;
 
     if (!query || query.trim().length < 3) {
       throw new functions.https.HttpsError(
@@ -212,9 +212,11 @@ exports.generateLearningPath = functions
       const videoContext = buildVideoContext(query);
       const hasCuratedVideos = videoContext !== null;
 
-      const systemPrompt = `You are an expert UE5 educator creating DIAGNOSTIC learning paths.
+      const engineName = engine === "UEFN" ? "Unreal Editor for Fortnite (UEFN) and Verse" : "Unreal Engine 5 (UE5) and Blueprints/C++";
+
+      const systemPrompt = `You are an expert ${engine} educator creating DIAGNOSTIC learning paths.
 Your goal is NOT just to fix symptoms, but to teach developers:
-1. WHY this problem occurs (root cause understanding)
+1. WHY this problem occurs in ${engineName} (root cause understanding)
 2. HOW to fix it (practical resolution)
 3. HOW TO PREVENT it in the future (best practices)
 
@@ -249,12 +251,12 @@ Use the video IDs and URLs exactly as shown. These are verified to exist.
 
 IMPORTANT: Prefer curated catalog videos. Only use Google Search for topics not covered.`;
 
-      const userPrompt = `Create an EDUCATIONAL learning path for: "${query}"
+      const userPrompt = `Create an EDUCATIONAL learning path for ${engineName}: "${query}"
 
 ${tags.length > 0 ? `Context tags: ${tags.join(", ")}` : ""}
 
-This developer has a specific problem. Your learning path should:
-1. UNDERSTAND: Explain the underlying UE5 concept and WHY this error/issue occurs
+This developer has a specific problem in ${engineName}. Your learning path should:
+1. UNDERSTAND: Explain the underlying ${engine} concept and WHY this error/issue occurs
 2. DIAGNOSE: Help them identify the specific cause in THEIR project
 3. RESOLVE: Step-by-step fix with practical actions
 4. PREVENT: Best practices so this NEVER happens again
@@ -281,8 +283,8 @@ Return JSON:
       "number": 1,
       "type": "understand",
       "title": "Why This Happens",
-      "description": "2-3 sentences EXPLAINING the root cause with specific UE5 class names, properties, or systems. NOT a summary of a doc — the actual technical explanation.",
-      "action": "1. Open [specific file/Blueprint]\\n2. Find [specific property]\\n3. Set it to [specific value]",
+      "description": "2-3 sentences EXPLAINING the root cause with specific ${engine} class names, properties, or systems. NOT a summary of a doc — the actual technical explanation.",
+      "action": "1. Open [specific file/Blueprint/Verse file]\\n2. Find [specific property]\\n3. Set it to [specific value]",
       "takeaway": "One actionable insight naming a specific property, node, or setting",
       "content": [
         {"type": "video", "title": "Focused Clip Title", "url": "https://youtube.com/watch?v=VIDEO_ID&t=330", "thumbnail_url": "https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg", "description": "(5 min) Deep dive for those wanting more detail"}

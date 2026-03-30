@@ -40,6 +40,7 @@ class GeminiHelper:
         user_query: str,
         tags: list[str],
         video_titles: list[str],
+        engine: str = "UE5",
     ) -> PathGuidance | None:
         """Generate personalized guidance for a learning path.
 
@@ -54,7 +55,7 @@ class GeminiHelper:
         if not self.is_available():
             return None
 
-        prompt = f"""You are helping someone solve a UE5 (Unreal Engine 5) problem.
+        prompt = f"""You are helping someone solve a {engine} problem.
 
 User's problem: "{user_query}"
 
@@ -122,6 +123,7 @@ Be concise and encouraging. Focus on practical help."""
         step_type: str,
         video_titles: list[str],
         user_query: str,
+        engine: str = "UE5",
     ) -> str | None:
         """Generate a brief summary for a specific step.
 
@@ -143,7 +145,7 @@ Be concise and encouraging. Focus on practical help."""
             "prevention": "preventing future issues",
         }
 
-        prompt = f"""For someone with this UE5 problem: "{user_query}"
+        prompt = f"""For someone with this {engine} problem: "{user_query}"
 
 These videos are about {step_context.get(step_type, step_type)}:
 {chr(10).join(f"- {t}" for t in video_titles[:3])}
@@ -181,6 +183,7 @@ Don't use quotes. Be specific and actionable."""
         self,
         user_query: str,
         videos: list[dict],
+        engine: str = "UE5",
     ) -> dict | None:
         """Use AI to curate videos into a structured learning path.
 
@@ -200,7 +203,7 @@ Don't use quotes. Be specific and actionable."""
             desc = v.get("description", "")[:200]
             video_info.append(f"{i+1}. Title: {v['title']}\n   Description: {desc}")
 
-        prompt = f"""You are an expert UE5 educator. A user has this problem: "{user_query}"
+        prompt = f"""You are an expert {engine} educator. A user has this problem: "{user_query}"
 
 Here are videos from Epic Games that might help:
 {chr(10).join(video_info)}

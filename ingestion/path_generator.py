@@ -125,7 +125,7 @@ class PathGenerator:
             display_name = tag.get("display_name", tag_id.split(".")[-1])
 
             # Build search query - Epic Games channel only
-            search_query = f"UE5 {display_name}"
+            search_query = f"UE5 {display_name}" # Used internally for searching tag logic if any but not tied to UX
             videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
 
             for video in videos:
@@ -173,7 +173,7 @@ class PathGenerator:
         else:
             return "foundations"
 
-    def generate_path(self, query: str) -> LearningPath:
+    def generate_path(self, query: str, engine: str = "UE5") -> LearningPath:
         """Generate a complete learning path from a query using AI curation.
 
         Args:
@@ -192,7 +192,7 @@ class PathGenerator:
         for tag_id in tags[:3]:
             tag = self.tags.get(tag_id, {})
             display_name = tag.get("display_name", tag_id.split(".")[-1])
-            search_query = f"UE5 {display_name}"
+            search_query = f"{engine} {display_name}"
             videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
 
             for video in videos:
@@ -213,7 +213,7 @@ class PathGenerator:
         ai_hint = None
 
         if self.gemini.is_available() and all_videos:
-            curated = self.gemini.curate_learning_path(query, all_videos)
+            curated = self.gemini.curate_learning_path(query, all_videos, engine=engine)
 
             if curated:
                 ai_summary = curated.get("problem_overview")
