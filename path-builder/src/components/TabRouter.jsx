@@ -25,6 +25,7 @@ const ContentGaps = lazy(() => import("./AdminAnalytics/ContentGaps"));
 const AnalyticsPipeline = lazy(() => import("./AdminAnalytics/AnalyticsPipeline"));
 const AnalyticsCosts = lazy(() => import("./AdminAnalytics/AnalyticsCosts"));
 const DemandDashboard = lazy(() => import("./DemandDashboard/DemandDashboard"));
+const UefnDemandDashboard = lazy(() => import("./UefnDemandDashboard/UefnDemandDashboard"));
 const AuthoringWorkbench = lazy(() => import("./AuthoringWorkbench/AuthoringWorkbench"));
 
 // Analytics visualizations — import directly for proper code-splitting
@@ -137,6 +138,11 @@ export default function TabRouter({
       {/* ── Demand Intelligence ── */}
       {activeTab === "analytics-demand" && (
         <div className="dashboard-layout"><DemandDashboard /></div>
+      )}
+
+      {/* ── UEFN Demand Intelligence ── */}
+      {activeTab === "analytics-uefn-demand" && (
+        <div className="dashboard-layout"><UefnDemandDashboard /></div>
       )}
 
       {/* ── Path Builder (V1) (dashboard / editor subviews + wizard) ── */}

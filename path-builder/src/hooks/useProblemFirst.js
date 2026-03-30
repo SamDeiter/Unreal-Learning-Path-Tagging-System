@@ -196,11 +196,11 @@ export default function useProblemFirst() {
           }
         }
 
-        // ─── Fresh diagnosis: full pipeline ───
         await trackQuerySubmitted(
           inputData.query,
           inputData.detectedTagIds,
-          getDetectedPersona()?.id
+          getDetectedPersona()?.id,
+          inputData.engine || "UE5"
         );
 
         // ── Step 1: Shared search pipeline ──

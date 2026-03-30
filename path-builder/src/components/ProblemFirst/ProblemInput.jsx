@@ -27,6 +27,7 @@ function redactLocalPaths(text) {
 export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   const [problem, setProblem] = useState("");
   const [detectedTags, setDetectedTags] = useState([]);
+  const [engine, setEngine] = useState("UE5");
   const [pastedImage, setPastedImage] = useState(null); // base64 data URL
   const [errorLog, setErrorLog] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -132,7 +133,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   // Expose updateCartIdForQuery to parent via a ref-like pattern
   // The parent can call onSubmit and receive this function back
-  const handleSubmit = useCallback(
+    const handleSubmit = useCallback(
     (cachedCartId = null, overrideQuery = null) => {
       const queryText = (overrideQuery || problem).trim();
       if (queryText.length < 10) return;
@@ -147,6 +148,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
       onSubmit({
         query: queryText,
+        engine,
         detectedTagIds: detectedTags.map((t) => t.tag.tag_id),
         selectedTagIds: [],
         personaHint: detectedPersona?.name,
@@ -156,7 +158,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         updateCartIdForQuery,
       });
     },
-    [problem, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]
+    [problem, engine, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]
   );
 
   const handleKeyDown = useCallback(
@@ -184,11 +186,29 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
   return (
     <div className="problem-input-container" onPaste={handlePaste}>
       <div className="problem-input-header">
-        <h2>
-          <Search size={22} className="icon-inline" /> What's the problem?
-        </h2>
+        <div className="header-top-row">
+          <h2>
+            <Search size={22} className="icon-inline" /> What's the problem?
+          </h2>
+          <div className="engine-toggle">
+            <button
+              type="button"
+              className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
+              onClick={() => setEngine("UE5")}
+            >
+              UE5
+            </button>
+            <button
+              type="button"
+              className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
+              onClick={() => setEngine("UEFN")}
+            >
+              UEFN
+            </button>
+          </div>
+        </div>
         <p className="subtitle">
-          Describe your UE5 issue in plain English. We'll diagnose the root cause and teach you to
+          Describe your {engine} issue in plain English. We'll diagnose the root cause and teach you to
           fix it.
         </p>
       </div>

@@ -60,6 +60,9 @@ export default function AdaptivePath() {
   // Voice selector
   const [voiceName, setVoiceName] = useState("Kore");
 
+  // Engine selection
+  const [engine, setEngine] = useState("UE5");
+
   const [recentQueries, setRecentQueries] = useState([]);
 
   // Load recent queries on mount
@@ -229,8 +232,9 @@ export default function AdaptivePath() {
         return;
       }
 
-      // Generate path with knowledge profile context
-      const result = await generateBespokePath(query, knowledgeProfile);
+      // Generate path with knowledge profile context and engine
+      const queryWithEngine = engine === "UEFN" ? `[UEFN/Verse Context] ${query}` : query;
+      const result = await generateBespokePath(queryWithEngine, knowledgeProfile);
 
       if (result.error) {
         setPathError(result.error);
@@ -260,7 +264,7 @@ export default function AdaptivePath() {
       timers.forEach(clearTimeout);
       setPathLoading(false);
     }
-  }, [query, knowledgeProfile]);
+  }, [query, knowledgeProfile, engine]);
 
   // Auto-generate path when skipping diagnostic (saved profile)
   useEffect(() => {
@@ -450,11 +454,31 @@ export default function AdaptivePath() {
     return (
       <div className="adaptive-path">
         <div className="adaptive-input-section">
-          <h1 className="adaptive-title">🎯 Adaptive Learning Path</h1>
-          <p className="adaptive-subtitle">
-            Tell us what you want to learn about. We&apos;ll tailor a personalized path based on
-            your experience level.
-          </p>
+          <div className="adaptive-header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+            <div>
+              <h1 className="adaptive-title">🎯 Adaptive Learning Path</h1>
+              <p className="adaptive-subtitle">
+                Tell us what you want to learn about. We'll tailor a personalized path based on
+                your experience level.
+              </p>
+            </div>
+            <div className="engine-toggle">
+              <button
+                type="button"
+                className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
+                onClick={() => setEngine("UE5")}
+              >
+                UE5
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
+                onClick={() => setEngine("UEFN")}
+              >
+                UEFN
+              </button>
+            </div>
+          </div>
 
           <div className="adaptive-input-wrapper">
             <textarea

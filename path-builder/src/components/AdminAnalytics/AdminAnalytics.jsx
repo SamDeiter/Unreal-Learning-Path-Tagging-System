@@ -213,6 +213,11 @@ export default function AdminAnalytics({ onEventsLoaded, onTimeRangeChange }) {
                 <li key={i} className="aa-query-item">
                   <span className="aa-query-text">{q.query}</span>
                   <span className="aa-query-count">{q.count}×</span>
+                  {q.engine && (
+                    <span className={`aa-engine-badge ${q.engine.toLowerCase()}`}>
+                      {q.engine}
+                    </span>
+                  )}
                   {q.personaIds.length > 0 && (
                     <span className="aa-query-personas">
                       {q.personaIds.map((p) => (

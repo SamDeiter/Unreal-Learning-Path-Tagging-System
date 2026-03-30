@@ -139,13 +139,14 @@ export function trackOnboardingPathGenerated(persona, courses, totalTime) {
  * @param {string[]} detectedTags
  * @param {string} personaId - If persona is known
  */
-export function trackQuerySubmitted(query, detectedTags = [], personaId = null) {
+export function trackQuerySubmitted(query, detectedTags = [], personaId = null, engine = "UE5") {
   return trackEvent(EVENTS.QUERY_SUBMITTED, {
     query_length: query?.length || 0,
     query_preview: query?.substring(0, 100),
     detected_tag_count: detectedTags.length,
     detected_tags: detectedTags.slice(0, 5),
     persona_id: personaId,
+    engine: engine,
   });
 }
 

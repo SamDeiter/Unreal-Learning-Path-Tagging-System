@@ -25,17 +25,19 @@ const PAIN_POINT_LIMIT = 5; // Max community pain points returned
  * @param {string} topic - The topic to search for community struggles
  * @returns {Promise<Array<{painPoint: string, sourceUrl: string, sourceTitle: string, relevance: string}>>}
  */
-export async function searchCommunityPainPoints(topic) {
+export async function searchCommunityPainPoints(topic, engine = "UE5") {
   try {
     devLog(`[GapAnalyzer] Searching community pain points for: "${topic}"`);
 
-    const prompt = `Search for the most common struggles, confusion points, and pain points that Unreal Engine 5 learners experience with: "${topic}"
+    const engineContext = engine === "UEFN" ? "Unreal Editor for Fortnite (UEFN) and Verse programming" : "Unreal Engine 5";
+
+    const prompt = `Search for the most common struggles, confusion points, and pain points that ${engineContext} learners experience with: "${topic}"
 
 SEARCH PRIORITY:
 1. forums.unrealengine.com (Epic's official forums)
 2. Reddit r/unrealengine
 3. Epic Developer Community
-4. YouTube comments on UE5 tutorials
+4. YouTube comments on ${engine === "UEFN" ? "UEFN" : "UE5"} tutorials
 
 Return a JSON array of the top ${PAIN_POINT_LIMIT} pain points:
 [{

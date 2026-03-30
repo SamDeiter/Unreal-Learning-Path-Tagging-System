@@ -58,7 +58,7 @@ export function getFirebaseApp() {
       // @ts-ignore — global flag for Firebase App Check debug mode
       self.FIREBASE_APPCHECK_DEBUG_TOKEN =
         import.meta.env.VITE_APPCHECK_DEBUG_TOKEN ||
-        "950e1832-2320-4572-b11c-e62856452b6e";
+        "084BE474-CE46-42CB-8A7C-4CFA5503F14A";
     }
     initializeAppCheck(newApp, {
       provider: new ReCaptchaEnterpriseProvider(siteKey),

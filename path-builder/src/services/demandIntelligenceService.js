@@ -35,30 +35,31 @@ import seoMetricsData from "../data/seoMetrics.json";
 const TRENDING_QUESTION_LIMIT = 15;
 const BATCH_CONCURRENCY = 3;          // Parallel AI calls at once
 const CACHE_TTL_MS = 30 * 60 * 1000;  // 30-minute cache for demand reports
-const STORAGE_KEY = "demandIntel_report";
-const FIRESTORE_COLLECTION = "demand_intel";
+
+const getStorageKey = (engine) => engine === "UEFN" ? "demandIntel_report_uefn" : "demandIntel_report";
+const getFirestoreCollection = (engine) => engine === "UEFN" ? "demand_intel_uefn" : "demand_intel";
 const FIRESTORE_DOC_ID = "latest";
 
 // ── Persistent + in-memory report cache ───────────────────
 
-let _cachedReport = null;
-let _cachedAt = 0;
+const _cachedReports = { UE5: null, UEFN: null };
+const _cachedAt = { UE5: 0, UEFN: 0 };
 
 /**
- * Try to load a cached report from localStorage.
+ * Try to load a cached report from localStorage for a specific engine.
  * Populates the in-memory cache if found and still fresh.
  */
-function _loadFromStorage() {
+function _loadFromStorage(engine = "UE5") {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(engine));
     if (!raw) return;
     const { report, cachedAt } = JSON.parse(raw);
     if (report && cachedAt && Date.now() - cachedAt < CACHE_TTL_MS) {
-      _cachedReport = report;
-      _cachedAt = cachedAt;
-      devLog("[DemandIntel] Loaded cached report from localStorage");
+      _cachedReports[engine] = report;
+      _cachedAt[engine] = cachedAt;
+      devLog(`[DemandIntel] Loaded cached report for ${engine} from localStorage`);
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(getStorageKey(engine));
     }
   } catch {
     // localStorage unavailable or corrupt — ignore
@@ -66,12 +67,12 @@ function _loadFromStorage() {
 }
 
 /**
- * Persist the current report to localStorage.
+ * Persist the current report to localStorage for a specific engine.
  */
-function _saveToStorage(report) {
+function _saveToStorage(report, engine = "UE5") {
   try {
     localStorage.setItem(
-      STORAGE_KEY,
+      getStorageKey(engine),
       JSON.stringify({ report, cachedAt: Date.now() })
     );
   } catch {
@@ -80,7 +81,8 @@ function _saveToStorage(report) {
 }
 
 // Bootstrap: try to restore from localStorage on module load
-_loadFromStorage();
+_loadFromStorage("UE5");
+_loadFromStorage("UEFN");
 
 // ── Source Type Constants ──────────────────────────────────
 
@@ -197,6 +199,44 @@ export const GRANULAR_TAXONOMY = {
   ]
 };
 
+// ── Secondary Taxonomy (UEFN) ──────────────────────────────
+export const UEFN_GRANULAR_TAXONOMY = {
+  "Verse Programming": [
+    "Verse Syntax", "Concurrency (spawn/sync/race)", "Verse Classes & Devices",
+    "Arrays and Maps", "Failure Contexts", "Custom Events",
+    "UI with Verse (Verse UI)", "NPC Behaviors in Verse"
+  ],
+  "UEFN Devices": [
+    "Sequencer Device", "HUD Message Device", "Item Granter",
+    "Cinematic Sequence Device", "Map Indicator", "Tracker Device",
+    "End Game Device", "Player Spawners", "Trigger Volumes"
+  ],
+  "Island Settings": [
+    "Game Rules", "Matchmaking Settings", "Time of Day (Verse)",
+    "Post Process Volumes", "Storm Controller", "Audio Player",
+    "Environment Lighting"
+  ],
+  "Asset Management": [
+    "Importing Custom Models", "Material Translation", "FAB Marketplace integration",
+    "Collision on Custom Assets", "Texture Optimization for Switch/Mobile",
+    "Size Limitations (Memory Calculation)"
+  ],
+  "Level Design / Creative": [
+    "Prefabs", "Landscape Modifiers (UEFN)", "Foliage Painting in UEFN",
+    "Building Grids", "Creative 2.0 Edit Sessions", "Live Edit Workflow"
+  ],
+  "MetaHumans & Animation": [
+    "MetaHumans in UEFN", "Custom Skeletons", "Animation Retargeting",
+    "Control Rig in UEFN", "Sequencer Cinematics"
+  ],
+  "Revision Control": [
+    "Unreal Revision Control (URC)", "Snapshot management", "Team Collaboration",
+    "Conflict Resolution", "Project Publishing"
+  ]
+};
+
+const getTaxonomy = (engine) => engine === "UEFN" ? UEFN_GRANULAR_TAXONOMY : GRANULAR_TAXONOMY;
+
 // ── Layer 1: Demand Benchmarks (granular) ──────────────────
 
 /**
@@ -205,13 +245,16 @@ export const GRANULAR_TAXONOMY = {
  *
  * @returns {Object} { category → { overall, subtopics: { name → score } } }
  */
-export function loadGranularDemand() {
+export function loadGranularDemand(engine = "UE5") {
   const result = {};
   const benchmarks = demandBenchmarks.benchmarks || {};
   const subtopicData = demandBenchmarks.subtopics || {};
+  const taxonomy = getTaxonomy(engine);
 
-  for (const [category, subtopics] of Object.entries(GRANULAR_TAXONOMY)) {
-    const overallScore = benchmarks[category] ?? 50;
+  for (const [category, subtopics] of Object.entries(taxonomy)) {
+    // For UEFN, we either pull from benchmarks or default to a solid baseline of 60 if not tracking it fully yet
+    const defaultScore = engine === "UEFN" ? 60 : 50; 
+    const overallScore = benchmarks[category] ?? defaultScore;
     const fileSubtopics = subtopicData[category] || {};
 
     result[category] = {
@@ -239,13 +282,14 @@ export function loadGranularDemand() {
  * @param {number} [options.limit] — Max questions to return (default 15)
  * @returns {Promise<Array<{question, sources: Array<{type, url, title, date, engagement}>}>>}
  */
-export async function fetchTrendingQuestions({ category = null, limit = TRENDING_QUESTION_LIMIT } = {}) {
+export async function fetchTrendingQuestions({ category = null, limit = TRENDING_QUESTION_LIMIT, engine = "UE5" } = {}) {
   try {
+    const engineContext = engine === "UEFN" ? "Unreal Editor for Fortnite (UEFN) and Verse programming" : "Unreal Engine 5";
     const categoryFilter = category
-      ? `Focus specifically on "${category}" topics within Unreal Engine 5.`
-      : "Cover ALL major Unreal Engine 5 topic areas.";
+      ? `Focus specifically on "${category}" topics within ${engineContext}.`
+      : `Cover ALL major ${engineContext} topic areas.`;
 
-    const prompt = `Search for the most commonly asked questions about Unreal Engine 5 that learners are posting RIGHT NOW.
+    const prompt = `Search for the most commonly asked questions about ${engineContext} that learners are posting RIGHT NOW.
 
 SEARCH THESE SOURCES (in priority order):
 1. Reddit r/unrealengine — recent posts with high engagement
@@ -346,15 +390,16 @@ RULES:
  *
  * @returns {Promise<Object>} { category → painPoints[] }
  */
-export async function scanAllCommunityPainPoints() {
-  const categories = Object.keys(GRANULAR_TAXONOMY);
+export async function scanAllCommunityPainPoints(engine = "UE5") {
+  const taxonomy = getTaxonomy(engine);
+  const categories = Object.keys(taxonomy);
   const results = {};
 
   // Process in batches to avoid overwhelming the AI backend
   for (let i = 0; i < categories.length; i += BATCH_CONCURRENCY) {
     const batch = categories.slice(i, i + BATCH_CONCURRENCY);
     const batchResults = await Promise.allSettled(
-      batch.map((cat) => searchCommunityPainPoints(cat))
+      batch.map((cat) => searchCommunityPainPoints(cat, engine))
     );
 
     batch.forEach((cat, idx) => {
@@ -378,14 +423,16 @@ export async function scanAllCommunityPainPoints() {
  * Calculate coverage percentage for each subtopic against the video library.
  *
  * @param {Array} courses — Course objects from TagDataContext
+ * @param {string} engine — The engine to calculate coverage against
  * @returns {Object} { category → { subtopic → { coverage, courseCount } } }
  */
-export function calculateGranularCoverage(courses) {
+export function calculateGranularCoverage(courses, engine = "UE5") {
   if (!courses?.length) return {};
 
   const coverage = {};
+  const taxonomy = getTaxonomy(engine);
 
-  for (const [category, subtopics] of Object.entries(GRANULAR_TAXONOMY)) {
+  for (const [category, subtopics] of Object.entries(taxonomy)) {
     coverage[category] = {};
 
     for (const subtopic of subtopics) {
@@ -441,13 +488,13 @@ export function calculateGranularCoverage(courses) {
  *
  * @returns {Promise<Object|null>} The pre-computed report or null
  */
-export async function loadFromFirestore() {
+export async function loadFromFirestore(engine = "UE5") {
   try {
     const app = getFirebaseApp();
     if (!app) return null;
 
     const db = getFirestore(app);
-    const docRef = doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
+    const docRef = doc(db, getFirestoreCollection(engine), FIRESTORE_DOC_ID);
     const snapshot = await getDoc(docRef);
 
     if (!snapshot.exists()) {
@@ -483,17 +530,17 @@ export async function loadFromFirestore() {
  * @param {boolean} [options.skipFirestore] — Skip Firestore, force live scraping (default: false)
  * @returns {Promise<Object>} Full demand report
  */
-export async function generateDemandReport(courses = [], { skipCache = false, skipFirestore = false, firestoreOnly = false } = {}) {
+export async function generateDemandReport(courses = [], { skipCache = false, skipFirestore = false, firestoreOnly = false, engine = "UE5" } = {}) {
   // Check in-memory / localStorage cache
-  if (!skipCache && _cachedReport && Date.now() - _cachedAt < CACHE_TTL_MS) {
-    devLog("[DemandIntel] Returning cached report");
-    return _cachedReport;
+  if (!skipCache && _cachedReports[engine] && Date.now() - _cachedAt[engine] < CACHE_TTL_MS) {
+    devLog(`[DemandIntel:${engine}] Returning cached report`);
+    return _cachedReports[engine];
   }
 
   // ── Try Firestore first (pre-computed by GitHub Action) ──
   if (!skipFirestore) {
     try {
-      const firestoreReport = await loadFromFirestore();
+      const firestoreReport = await loadFromFirestore(engine);
       if (firestoreReport && firestoreReport.suggestions?.length > 0) {
         // Quality check: if the Firestore report has no community intelligence
         // data (trending questions, pain points, Reddit engagement), it's an
@@ -508,13 +555,13 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
 
         if (hasTrending || hasPainPoints || hasReddit || hasMultiPlatformSources) {
           firestoreReport._source = "firestore";
-          _cachedReport = firestoreReport;
-          _cachedAt = Date.now();
-          _saveToStorage(firestoreReport);
-          devLog("[DemandIntel] Using pre-computed Firestore report (instant!)");
+          _cachedReports[engine] = firestoreReport;
+          _cachedAt[engine] = Date.now();
+          _saveToStorage(firestoreReport, engine);
+          devLog(`[DemandIntel:${engine}] Using pre-computed Firestore report (instant!)`);
           return firestoreReport;
         } else {
-          devLog("[DemandIntel] Firestore report lacks community data (0 trending, 0 pain points, 0 Reddit) — falling through to live scrape");
+          devLog(`[DemandIntel:${engine}] Firestore report lacks community data (0 trending, 0 pain points, 0 Reddit) — falling through to live scrape`);
         }
       }
     } catch (err) {
@@ -524,20 +571,20 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
 
   // If firestoreOnly mode, don't fall through to expensive live scraping
   if (firestoreOnly) {
-    devLog("[DemandIntel] firestoreOnly mode — skipping live scrape");
+    devLog(`[DemandIntel:${engine}] firestoreOnly mode — skipping live scrape`);
     return null;
   }
 
-  devLog("[DemandIntel] Generating fresh demand report (live scraping)...");
+  devLog(`[DemandIntel:${engine}] Generating fresh demand report (live scraping)...`);
   const startTime = Date.now();
 
   // Layer 1: Granular demand benchmarks (instant — local data)
-  const demandData = loadGranularDemand();
+  const demandData = loadGranularDemand(engine);
 
   // Layer 2a + 2b: Trending questions + community pain points (parallel AI calls)
   const [trendingResult, painPointsResult] = await Promise.allSettled([
-    fetchTrendingQuestions(),
-    scanAllCommunityPainPoints(),
+    fetchTrendingQuestions({ engine }),
+    scanAllCommunityPainPoints(engine),
   ]);
 
   const trendingQuestions =
@@ -650,7 +697,7 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
         version: demandBenchmarks.version || "unknown",
         source: demandBenchmarks.source || "manual",
         methodology: demandBenchmarks.methodology || "",
-        subtopicCount: Object.values(GRANULAR_TAXONOMY).flat().length,
+        subtopicCount: Object.values(getTaxonomy(engine)).flat().length,
       },
       communitySearch: {
         categoriesScanned: Object.keys(painPointsByCategory).length,
@@ -679,12 +726,12 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
   };
 
   // Cache the report (in-memory + persistent)
-  _cachedReport = report;
-  _cachedAt = Date.now();
-  _saveToStorage(report);
+  _cachedReports[engine] = report;
+  _cachedAt[engine] = Date.now();
+  _saveToStorage(report, engine);
 
   devLog(
-    `[DemandIntel] Report complete: ${suggestions.length} suggestions, ` +
+    `[DemandIntel:${engine}] Report complete: ${suggestions.length} suggestions, ` +
     `${trendingQuestions.length} trending, ${Object.values(painPointsByCategory).flat().length} pain points ` +
     `(${Date.now() - startTime}ms)`
   );
@@ -699,8 +746,8 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
  * @param {number} [topN] — Number of suggestions (default 10)
  * @returns {Promise<Array>} Ranked suggestion objects
  */
-export async function getDemandSuggestions(courses = [], topN = 10) {
-  const report = await generateDemandReport(courses);
+export async function getDemandSuggestions(courses = [], topN = 10, engine = "UE5") {
+  const report = await generateDemandReport(courses, { engine });
   return report.suggestions.slice(0, topN);
 }
 
@@ -709,9 +756,9 @@ export async function getDemandSuggestions(courses = [], topN = 10) {
  * This lets React hooks seed their initial state without an async call,
  * preventing a loading-spinner flash when the data is already available.
  */
-export function getCachedReport() {
-  if (_cachedReport && Date.now() - _cachedAt < CACHE_TTL_MS) {
-    return _cachedReport;
+export function getCachedReport(engine = "UE5") {
+  if (_cachedReports[engine] && Date.now() - _cachedAt[engine] < CACHE_TTL_MS) {
+    return _cachedReports[engine];
   }
   return null;
 }
@@ -719,11 +766,11 @@ export function getCachedReport() {
 /**
  * Force-clear the report cache (e.g., when user clicks Refresh).
  */
-export function clearDemandCache() {
-  _cachedReport = null;
-  _cachedAt = 0;
-  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
-  devLog("[DemandIntel] Cache cleared (memory + localStorage)");
+export function clearDemandCache(engine = "UE5") {
+  _cachedReports[engine] = null;
+  _cachedAt[engine] = 0;
+  try { localStorage.removeItem(getStorageKey(engine)); } catch { /* ignore */ }
+  devLog(`[DemandIntel:${engine}] Cache cleared (memory + localStorage)`);
 }
 
 export default {

@@ -20,16 +20,21 @@ import { devLog, devWarn } from "../utils/logger";
 /**
  * @returns {Object} hook state and actions
  */
-export function useDemandIntelligence() {
+export function useDemandIntelligence(engine = "UE5") {
   const { courses } = useTagData();
 
   // Seed from synchronous cache so we never flash a spinner if data exists
-  const [report, setReport] = useState(() => getCachedReport());
+  const [report, setReport] = useState(() => getCachedReport(engine));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const abortRef = useRef(false);
   const lockRef = useRef(false);
+
+  // Re-seed if engine changes dynamically (important when switching tabs)
+  useEffect(() => {
+    setReport(getCachedReport(engine));
+  }, [engine]);
 
   /**
    * Generate (or re-use cached) demand report.
@@ -43,31 +48,31 @@ export function useDemandIntelligence() {
     abortRef.current = false;
 
     try {
-      devLog("[useDemandIntelligence] Generating report...");
-      const result = await generateDemandReport(courses, { skipCache, skipFirestore, firestoreOnly });
+      devLog(`[useDemandIntelligence:${engine}] Generating report...`);
+      const result = await generateDemandReport(courses, { skipCache, skipFirestore, firestoreOnly, engine });
 
       if (!abortRef.current) {
         setReport(result);
-        devLog("[useDemandIntelligence] Report ready");
+        devLog(`[useDemandIntelligence:${engine}] Report ready`);
       }
     } catch (err) {
       if (!abortRef.current) {
-        devWarn("[useDemandIntelligence] Error:", err.message);
+        devWarn(`[useDemandIntelligence:${engine}] Error:`, err.message);
         setError(err.message);
       }
     } finally {
       setLoading(false);
       lockRef.current = false;
     }
-  }, [courses]);
+  }, [courses, engine]);
 
   /**
    * Force-refresh — clears cache and regenerates.
    */
   const refresh = useCallback(() => {
-    clearDemandCache();
+    clearDemandCache(engine);
     generate({ skipCache: true });
-  }, [generate]);
+  }, [generate, engine]);
 
   /**
    * Cleanup on unmount.

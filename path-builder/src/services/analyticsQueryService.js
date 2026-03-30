@@ -86,11 +86,13 @@ export function getTopQueries(events, topN = 10) {
   for (const evt of events) {
     if (evt.event !== EVENTS.QUERY_SUBMITTED) continue;
     const preview = evt.query_preview || "unknown";
-    if (!queryMap[preview]) {
-      queryMap[preview] = { query: preview, count: 0, personaIds: new Set() };
+    const engine = evt.engine || "UE5";
+    const key = `${preview}_${engine}`;
+    if (!queryMap[key]) {
+      queryMap[key] = { query: preview, count: 0, personaIds: new Set(), engine };
     }
-    queryMap[preview].count++;
-    if (evt.persona_id) queryMap[preview].personaIds.add(evt.persona_id);
+    queryMap[key].count++;
+    if (evt.persona_id) queryMap[key].personaIds.add(evt.persona_id);
   }
   return Object.values(queryMap)
     .map((q) => ({ ...q, personaIds: [...q.personaIds] }))
