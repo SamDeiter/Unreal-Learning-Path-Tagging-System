@@ -445,14 +445,14 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
                 🔍 {suggestion.seoMetrics.msv >= 1000 ? (suggestion.seoMetrics.msv / 1000).toFixed(1) + 'k' : suggestion.seoMetrics.msv}/mo
               </span>
               <span 
-                className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} 
+                className={`decay-badge kd-badge ${suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 30 ? 'kd-easy' : suggestion.seoMetrics.kd > 70 ? 'kd-hard' : 'kd-med'}`} 
                 data-tooltip={
-                  suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 
+                  suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 30 
                     ? `Keyword Difficulty: Extremely Low (${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}). Solid search volume paired with minimal competition makes this a "Blue Ocean" topic — highly recommended for new content!`
                     : `Keyword Difficulty: ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}. ${suggestion.seoMetrics.kd < 30 ? 'Low competition, but limited search demand.' : suggestion.seoMetrics.kd > 70 ? 'Highly competitive market. Hard to target without strong domain authority.' : 'Moderate competition level.'}`
                 }
               >
-                {suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? '🌊 Blue Ocean' : `🎯 KD: ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}`}
+                {suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 30 ? '🌊 Blue Ocean' : `🎯 KD: ${suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}`}
               </span>
             </>
           )}
@@ -561,7 +561,7 @@ function SuggestionCard({ suggestion, rank, onStartBrief }) {
                   <span>🎯 Difficulty: {suggestion.seoMetrics.kd === 0 ? '<1' : suggestion.seoMetrics.kd}/100</span>
                 </div>
                 <div className="source-row" title='A "Blue Ocean" topic has solid search demand but very few competing tutorials, making it a prime target for new content.' data-tooltip='A "Blue Ocean" topic has solid search demand but very few competing tutorials, making it a prime target for new content.'>
-                  <span>{suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 50 ? '🌊 Blue Ocean — easy to rank!' : suggestion.seoMetrics.kd < 30 ? '🌱 Untapped — but niche audience' : suggestion.seoMetrics.kd > 70 ? '🧗 Highly competitive' : '⚖️ Moderate competition'}</span>
+                  <span>{suggestion.seoMetrics.kd < 30 && suggestion.seoMetrics.msv >= 30 ? '🌊 Blue Ocean — easy to rank!' : suggestion.seoMetrics.kd < 30 ? '🌱 Untapped — but niche audience' : suggestion.seoMetrics.kd > 70 ? '🧗 Highly competitive' : '⚖️ Moderate competition'}</span>
                 </div>
               </div>
             </div>
@@ -935,7 +935,7 @@ function UefnDemandDashboard() {
 
   if (showBlueOceansOnly) {
     displaySuggestions = displaySuggestions.filter(
-      (s) => s.seoMetrics && s.seoMetrics.msv >= 50 && s.seoMetrics.kd < 30
+      (s) => s.seoMetrics && s.seoMetrics.msv >= 30 && s.seoMetrics.kd < 30
     );
   }
 
@@ -1085,7 +1085,7 @@ function UefnDemandDashboard() {
               <div className="column-header">
                 <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
                 <div className="filter-toggles" style={{ marginBottom: "12px", marginLeft: "2px" }}>
-                  <label className="blue-ocean-toggle" style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "500" }} data-tooltip="Filter for topics with >50 Monthly Search Volume and <30 Keyword Difficulty">
+                  <label className="blue-ocean-toggle" style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "500" }} data-tooltip="Filter for topics with >30 Monthly Search Volume and <30 Keyword Difficulty">
                     <input 
                       type="checkbox" 
                       checked={showBlueOceansOnly} 

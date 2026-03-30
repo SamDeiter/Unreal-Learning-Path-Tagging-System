@@ -534,7 +534,15 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
   // Check in-memory / localStorage cache
   if (!skipCache && _cachedReports[engine] && Date.now() - _cachedAt[engine] < CACHE_TTL_MS) {
     devLog(`[DemandIntel:${engine}] Returning cached report`);
-    return _cachedReports[engine];
+    const cReport = _cachedReports[engine];
+    // ALWAYS inject fresh SEO metrics from local bundle into cache
+    if (cReport && cReport.suggestions) {
+      cReport.suggestions.forEach(suggestion => {
+        const seoData = seoMetricsData[suggestion.topic] || { msv: 0, kd: 0 };
+        suggestion.seoMetrics = { msv: seoData.msv, kd: seoData.kd };
+      });
+    }
+    return cReport;
   }
 
   // ── Try Firestore first (pre-computed by GitHub Action) ──
@@ -554,13 +562,12 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
         );
 
         if (hasTrending || hasPainPoints || hasReddit || hasMultiPlatformSources) {
-          // Inject SEO metrics if missing (e.g., when loaded from Firestore scraper script)
+          // ALWAYS inject fresh SEO metrics from local bundle into Firestore report
+          // (Frontend seoMetrics.json is more authoritative than server-stored values)
           if (firestoreReport.suggestions) {
             firestoreReport.suggestions.forEach(suggestion => {
-              if (!suggestion.seoMetrics) {
-                const seoData = seoMetricsData[suggestion.topic] || { msv: 0, kd: 0 };
-                suggestion.seoMetrics = { msv: seoData.msv, kd: seoData.kd };
-              }
+              const seoData = seoMetricsData[suggestion.topic] || { msv: 0, kd: 0 };
+              suggestion.seoMetrics = { msv: seoData.msv, kd: seoData.kd };
             });
           }
           
@@ -768,7 +775,15 @@ export async function getDemandSuggestions(courses = [], topN = 10, engine = "UE
  */
 export function getCachedReport(engine = "UE5") {
   if (_cachedReports[engine] && Date.now() - _cachedAt[engine] < CACHE_TTL_MS) {
-    return _cachedReports[engine];
+    const cReport = _cachedReports[engine];
+    // ALWAYS inject fresh SEO metrics from local bundle
+    if (cReport && cReport.suggestions) {
+      cReport.suggestions.forEach(suggestion => {
+        const seoData = seoMetricsData[suggestion.topic] || { msv: 0, kd: 0 };
+        suggestion.seoMetrics = { msv: seoData.msv, kd: seoData.kd };
+      });
+    }
+    return cReport;
   }
   return null;
 }
