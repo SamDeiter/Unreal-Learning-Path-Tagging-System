@@ -272,7 +272,7 @@ function ScrapeButton({ onComplete }) {
       const app = getFirebaseApp();
       const functions = getFunctions(app);
       const trigger = httpsCallable(functions, "triggerDemandScrape");
-      const result = await trigger();
+      const result = await trigger({ engine: "UEFN" });
 
       // Start elapsed timer
       setStatus("scraping");

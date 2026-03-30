@@ -26,11 +26,20 @@ const path = require("path");
 const admin = require("firebase-admin");
 const { computeDecayRisk, computeDemandIndex } = require("./decayDetector");
 
+
+// ── Command Line Args ─────────────────────────────────────────────
+const args = process.argv.slice(2);
+const engine = args.includes("--engine") ? args[args.indexOf("--engine") + 1] : "UE5";
+console.log(`Running in ${engine} mode...`);
+
 // ── Paths ──────────────────────────────────────────────────────────
+const BENCHMARKS_FILENAME = engine === "UEFN" ? "demand_benchmarks_uefn.json" : "demand_benchmarks.json";
 const BENCHMARKS_PATH = path.join(
   __dirname,
-  "../path-builder/src/data/demand_benchmarks.json"
+  "../path-builder/src/data",
+  BENCHMARKS_FILENAME
 );
+
 const VIDEO_LIBRARY_PATH = path.join(
   __dirname,
   "../path-builder/src/data/video_library_enriched.json"
@@ -183,7 +192,7 @@ function parseJSON(text) {
           const result = JSON.parse(repaired);
           console.warn(`  ⚠️ Repaired truncated JSON (salvaged ${Array.isArray(result) ? result.length : 1} items)`);
           return result;
-        } catch { /* fall through to deeper repair */ }
+        } catch { /* fall through */ }
       }
 
       // Deeper repair: strip trailing incomplete key-value pairs and close brackets
@@ -208,12 +217,13 @@ function parseJSON(text) {
 // ── Reddit Public API ──────────────────────────────────────────────
 
 async function fetchRedditEngagement(subtopic) {
-  const query = encodeURIComponent(`unreal engine 5 ${subtopic}`);
-  const url = `https://www.reddit.com/r/unrealengine/search.json?q=${query}&sort=relevance&t=month&limit=10`;
+  const query = encodeURIComponent(`${engine === "UEFN" ? "UEFN Verse" : "unreal engine 5"} ${subtopic}`);
+  const subreddit = engine === "UEFN" ? "FortniteCreative" : "unrealengine";
+  const url = `https://www.reddit.com/r/${subreddit}/search.json?q=${query}&sort=relevance&t=month&limit=10`;
 
   try {
     const response = await fetch(url, {
-      headers: { "User-Agent": "UE5-DemandIntel/2.0 (github.com/SamDeiter; demand-intel-bot)" },
+      headers: { "User-Agent": "UE-DemandIntel/2.0 (github.com/SamDeiter; demand-intel-bot)" },
     });
 
     if (!response.ok) return null;
@@ -249,14 +259,14 @@ async function scrapeRedditEngagement(taxonomy) {
   const results = {};
   const allSubtopics = [];
 
-  for (const [category, subtopics] of Object.entries(taxonomy)) {
+  for (const [category, subtopicsObj] of Object.entries(taxonomy)) {
+    const subtopics = Object.keys(subtopicsObj);
     for (const subtopic of subtopics) {
       allSubtopics.push({ category, subtopic });
     }
   }
 
   // Sample top subtopics to avoid hitting Reddit rate limits
-  // Take first 2 from each category
   const sampled = [];
   for (const category of Object.keys(taxonomy)) {
     const catSubtopics = allSubtopics.filter((s) => s.category === category);
@@ -300,8 +310,8 @@ async function scrapeTrendingQuestions(categories) {
 
   const allQuestions = [];
 
-  // Build batches of 2 categories each
-  const TRENDING_BATCH = 6; // 6 categories per Gemini call (was 2) — reduces calls from 9 to 3
+  // Build batches of categories
+  const TRENDING_BATCH = 6;
   const batches = [];
   for (let i = 0; i < categories.length; i += TRENDING_BATCH) {
     batches.push(categories.slice(i, i + TRENDING_BATCH));
@@ -309,7 +319,7 @@ async function scrapeTrendingQuestions(categories) {
   const totalBatches = batches.length;
   console.log(`  Running ${totalBatches} batches (${PARALLEL_CONCURRENCY} in parallel)...`);
 
-  // Process batches with limited concurrency (PARALLEL_CONCURRENCY at a time)
+  // Process batches with limited concurrency
   for (let g = 0; g < batches.length; g += PARALLEL_CONCURRENCY) {
     const group = batches.slice(g, g + PARALLEL_CONCURRENCY);
 
@@ -317,17 +327,15 @@ async function scrapeTrendingQuestions(categories) {
       const batchNum = g + idx + 1;
       console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
 
-      const prompt = `You are a UE5 community research assistant. Search for REAL questions that Unreal Engine 5 learners are currently asking in online communities.
+      const prompt = `You are a ${engine} community research assistant. Search for REAL questions that Unreal Engine (${engine}) learners are currently asking in online communities.
 
 REQUIRED SEARCH SOURCES:
-- Reddit r/unrealengine (recent posts with upvotes)
+- ${engine === "UEFN" ? "Reddit r/FortniteCreative (recent posts with upvotes)" : "Reddit r/unrealengine (recent posts with upvotes)"}
 - forums.unrealengine.com (Epic official forums)
-- stackoverflow.com [unreal-engine5] tag
+- ${engine === "UEFN" ? "stackoverflow.com [fortnite-creative] tag" : "stackoverflow.com [unreal-engine5] tag"}
 - Epic Developer Community (dev.epicgames.com)
-- TikTok UE5 tutorials and gamedev content
-- Instagram UE5 reels and gamedev tutorials
-- Udemy and Skillshare UE5 courses
-- Twitch UE5 dev streams
+- ${engine} tutorials and gamedev content on YouTube, TikTok, and Instagram
+- Udemy and Skillshare ${engine} courses
 
 CATEGORIES TO RESEARCH: ${batch.join(", ")}
 
@@ -350,12 +358,9 @@ Return a JSON array:
 
 IMPORTANT RULES:
 - CRITICAL: Each question gets exactly ONE source entry — its PRIMARY platform where you found the strongest signal
-- Do NOT list the same question under multiple platforms
-- Distribute questions across platforms — aim for a mix of reddit, epic_forum, youtube, tiktok sources
-- ONLY return questions from REAL posts you can find via search
 - Every question MUST have at least one source with a URL
 - Focus on learning/tutorial questions, not engine bug reports
-- Return VALID JSON only. Keep source titles SHORT (under 60 chars). Minimize whitespace in your JSON output.`;
+- Return VALID JSON only.`;
 
       try {
         const result = await callGemini(prompt);
@@ -365,7 +370,7 @@ IMPORTANT RULES:
           console.log(`    ✅ Batch ${batchNum}: got ${parsed.length} questions`);
           return parsed;
         } else {
-          console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable (raw: ${result.text.slice(0, 300)})`);
+          console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable`);
           return [];
         }
       } catch (err) {
@@ -382,7 +387,6 @@ IMPORTANT RULES:
       }
     }
 
-    // Rate limit between groups
     if (g + PARALLEL_CONCURRENCY < batches.length) {
       await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
     }
@@ -417,18 +421,16 @@ IMPORTANT RULES:
 
 
 async function scrapePainPoints(category) {
-  const prompt = `You are a UE5 community research assistant. Search for the most common struggles and confusion points that Unreal Engine 5 learners experience with: "${category}"
+  const prompt = `You are a ${engine} community research assistant. Search for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience with: "${category}"
 
 SEARCH THESE SOURCES:
 - forums.unrealengine.com (Epic's official forums)
-- Reddit r/unrealengine
+- ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - Epic Developer Community
-- YouTube comments on UE5 tutorials about ${category}
-- TikTok UE5 tutorials and gamedev content about ${category}
-- Instagram UE5 reels about ${category}
-- Udemy course reviews about ${category}
+- YouTube comments on ${engine} tutorials about ${category}
+- TikTok/Instagram ${engine} reels and gamedev content
 
-Focus on posts from the last 6 months about UE5 version 5.3, 5.4, or 5.5.
+Focus on posts from the last 6 months.
 
 Return a JSON array of the top ${PAIN_POINT_LIMIT} pain points:
 [{
@@ -436,12 +438,11 @@ Return a JSON array of the top ${PAIN_POINT_LIMIT} pain points:
   "sourceUrl": "URL where this was found",
   "sourceTitle": "Title of the post/thread",
   "relevance": "high|medium|low",
-  "frequency": "How often this comes up (many posts, several posts, a few posts)"
+  "frequency": "How often this comes up"
 }]
 
 IMPORTANT RULES:
-- Focus on LEARNER confusion, not engine bugs or crashes
-- Each pain point should be specific and actionable (e.g. "Learners struggle to understand the difference between Actor Components and Scene Components" NOT "Components are confusing")
+- Focus on LEARNER confusion, not engine bugs
 - Include REAL source URLs you found via search
 - Return VALID JSON only`;
 
@@ -450,7 +451,6 @@ IMPORTANT RULES:
     const parsed = parseJSON(result.text);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-      console.warn(`    ⚠️ Pain points for "${category}": empty result (raw: ${result.text.slice(0, 300)})`);
       return [];
     }
 
@@ -487,7 +487,6 @@ async function scrapeAllPainPoints(categories) {
       results[cat] = result.status === "fulfilled" ? result.value : [];
     });
 
-    // Rate limit between batches
     if (i + BATCH_SIZE < categories.length) {
       await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
     }
@@ -498,14 +497,15 @@ async function scrapeAllPainPoints(categories) {
   return results;
 }
 
-// ── Coverage Analysis (same logic as frontend) ────────────────────
+// ── Coverage Analysis ─────────────────────────────────────────────
 
 function calculateCoverage(courses, taxonomy) {
   const coverage = {};
-  const FULL_COVERAGE_THRESHOLD = 15;
+  const FULL_COVERAGE_THRESHOLD = engine === "UEFN" ? 8 : 15; // Lower threshold for UEFN since it's newer/smaller
 
-  for (const [category, subtopics] of Object.entries(taxonomy)) {
+  for (const [category, subtopicsObj] of Object.entries(taxonomy)) {
     coverage[category] = {};
+    const subtopics = Object.keys(subtopicsObj);
 
     for (const subtopic of subtopics) {
       const keywords = subtopic
@@ -516,6 +516,13 @@ function calculateCoverage(courses, taxonomy) {
 
       let matchCount = 0;
       for (const course of courses) {
+        // Simple engine filter for UEFN
+        const isUEFN = course.title?.toLowerCase().includes("uefn") || 
+                       course.title?.toLowerCase().includes("verse") ||
+                       course.tags?.engine?.toLowerCase() === "uefn";
+        
+        if (engine === "UEFN" && !isUEFN) continue;
+
         const allTags = [
           ...(course.gemini_system_tags || []),
           ...(course.ai_tags || []),
@@ -570,10 +577,8 @@ function buildReport({
       };
       const gap = demandScore - coverageInfo.coverage;
 
-      // Reddit engagement: exact subtopic match, else fall back to category average
       let reddit = redditEngagement[category]?.[subtopic] || null;
       if (!reddit && redditEngagement[category]) {
-        // Category-level fallback: average all sampled subtopics in this category
         const catEntries = Object.values(redditEngagement[category]).filter(Boolean);
         if (catEntries.length > 0) {
           reddit = {
@@ -582,14 +587,13 @@ function buildReport({
             avgComments: Math.round(catEntries.reduce((s, e) => s + (e.avgComments || 0), 0) / catEntries.length),
             totalEngagement: Math.round(catEntries.reduce((s, e) => s + (e.totalEngagement || 0), 0) / catEntries.length),
             topPost: catEntries[0]?.topPost || null,
-            _fallback: true,  // Mark as category-level fallback
+            _fallback: true,
           };
         }
       }
 
       const sources = [];
 
-      // Community Activity Index source
       sources.push({
         type: "community_index",
         url: "",
@@ -598,47 +602,20 @@ function buildReport({
         trend: demandScore > (data.overall || 50) ? "rising" : "stable",
       });
 
-      // Reddit PRAW sentiment PRIMARY (Layer 2f — real Reddit API data from scrape-reddit-praw.py)
-      // This has real r/unrealengine posts, comments, and sentiment — always prefer over Gemini
-      if (!reddit && redditSentiment) {
-        const prawCat = redditSentiment[category] || redditSentiment[category.toLowerCase()];
-        if (prawCat) {
-          // PRAW data is per-category (not per-subtopic) — use category-level stats
-          const topPost = (prawCat.samplePosts || [])[0] || null;
-          reddit = {
-            postCount: prawCat.postCount || 0,
-            avgUpvotes: prawCat.avgUpvotes || 0,
-            avgComments: prawCat.commentCount
-              ? Math.round(prawCat.commentCount / Math.max(1, prawCat.postCount))
-              : 0,
-            totalEngagement: (prawCat.totalUpvotes || 0) + (prawCat.commentCount || 0),
-            topPost: topPost,
-            _source: "praw",
-            _sentiment: prawCat.avgSentimentScore || 0,
-            _frequentTopics: prawCat.frequentTopics || [],
-          };
-        }
-      }
-
-      // Reddit engagement source (Layer 2c — Gemini grounded search OR PRAW data)
       if (reddit) {
-        const topPostUrl = reddit.topPost?.url || "";
-        const topPostTitle = reddit.topPost?.title || `Reddit: ${subtopic}`;
         sources.push({
           type: "reddit",
-          url: topPostUrl,
-          title: topPostTitle,
-          engagement: `${reddit.postCount} posts · ${reddit.avgUpvotes} avg upvotes · ${reddit.avgComments} avg comments`,
+          url: reddit.topPost?.url || "",
+          title: reddit.topPost?.title || `Reddit: ${subtopic}`,
+          engagement: `${reddit.postCount} posts · ${reddit.avgUpvotes} avg upvotes`,
           redditStats: reddit,
         });
       }
 
-      // Trending question sources
       const relatedQuestions = trendingQuestions.filter(
         (q) =>
           q.category?.toLowerCase() === category.toLowerCase() ||
-          q.subtopic?.toLowerCase().includes(subtopic.toLowerCase()) ||
-          subtopic.toLowerCase().includes(q.subtopic?.toLowerCase() || "___")
+          q.subtopic?.toLowerCase().includes(subtopic.toLowerCase())
       );
       for (const q of relatedQuestions) {
         for (const src of q.sources || []) {
@@ -646,44 +623,23 @@ function buildReport({
         }
       }
 
-      // Pain point sources
       const categoryPainPoints = painPointsByCategory[category] || [];
       const relatedPainPoints = categoryPainPoints.filter((pp) =>
         pp.painPoint?.toLowerCase().includes(subtopic.split(" ")[0].toLowerCase())
       );
       for (const pp of relatedPainPoints) {
         sources.push({
-          type: pp.sourceUrl?.includes("reddit")
-            ? "reddit"
-            : pp.sourceUrl?.includes("forum")
-              ? "epic_forum"
-              : pp.sourceUrl?.includes("tiktok")
-                ? "tiktok"
-                : pp.sourceUrl?.includes("instagram")
-                  ? "instagram"
-                  : "epic_dev_community",
+          type: pp.sourceUrl?.includes("reddit") ? "reddit" : "community_resource",
           url: pp.sourceUrl || "",
           title: pp.sourceTitle || pp.painPoint || "",
           painPoint: pp.painPoint,
         });
       }
 
-      // Confidence scoring — now uses Reddit real data
-      const verifiedSourceCount = sources.filter(
-        (s) => s.type !== "community_index" && s.url
-      ).length;
-      const redditBoost = reddit ? Math.min(2, Math.floor(reddit.totalEngagement / 50)) : 0;
-      const effectiveSources = verifiedSourceCount + redditBoost;
-
-      const confidence =
-        effectiveSources >= 4
-          ? "high"
-          : effectiveSources >= 2
-            ? "medium"
-            : "low";
+      const verifiedSourceCount = sources.filter((s) => s.type !== "community_index" && s.url).length;
+      const confidence = verifiedSourceCount >= 3 ? "high" : verifiedSourceCount >= 1 ? "medium" : "low";
 
       if (gap > 0 || sources.length > 0) {
-        // Compute decay risk based on UE5 breaking changes
         const decay = computeDecayRisk(category, subtopic, sources);
 
         suggestions.push({
@@ -696,9 +652,7 @@ function buildReport({
           confidence,
           sourceCount: sources.length,
           redditEngagement: reddit,
-          rankScore:
-            demandScore * Math.max(1, effectiveSources + 1) -
-            coverageInfo.coverage,
+          rankScore: demandScore * Math.max(1, verifiedSourceCount + 1) - coverageInfo.coverage,
           decayRisk: decay.risk,
           decayReason: decay.reason,
           decayVersion: decay.breakingVersion,
@@ -708,84 +662,64 @@ function buildReport({
     }
   }
 
-  // Compute weighted Demand Index across all suggestions
-  // Auto-rebalances: 4-signal (base) → 5-signal (+YouTube) → 6-signal (+YouTube+Trends)
   computeDemandIndex(suggestions, { youtubeMetrics, trendsData });
-
-  // Sort by Demand Index (highest opportunity first)
   suggestions.sort((a, b) => b.demandIndex - a.demandIndex);
 
   return {
     generatedAt: new Date().toISOString(),
     generationTimeMs: Date.now() - startTime,
     scrapedBy: "github-action",
+    engine: engine,
     provenance: {
       communityIndex: {
         version: benchmarks.version || "unknown",
-        source: benchmarks.source || "manual",
-        methodology: benchmarks.methodology || "",
-        subtopicCount: Object.values(taxonomy).flat().length,
+        subtopicCount: Object.values(taxonomy).reduce((sum, subMap) => sum + Object.keys(subMap).length, 0),
       },
       communitySearch: {
         categoriesScanned: Object.keys(painPointsByCategory).length,
         totalPainPoints: Object.values(painPointsByCategory).flat().length,
-        method: "Gemini 2.5 Flash Grounded Search (GitHub Action)",
       },
       trendingQuestions: {
         count: trendingQuestions.length,
-        method: "Gemini 2.5 Flash Grounded Search (GitHub Action)",
       },
       redditEngagement: {
         subtopicsScanned: Object.values(redditEngagement).flatMap((c) => Object.keys(c)).length,
-        method: "Reddit Public JSON API",
       },
       libraryCoverage: {
-        totalCourses: coverageData._totalCourses || 0,
-        categoriesAnalyzed: Object.keys(coverageData).length,
+        totalCourses: (courses || []).length,
       },
     },
     suggestions: suggestions.slice(0, 30),
-    trendingQuestions,
+    trendingQuestions: trendingQuestions.slice(0, 20),
     painPointsByCategory,
-    demandData,
-    coverageData,
   };
 }
 
 // ── Main ───────────────────────────────────────────────────────────
 
 async function main() {
-  console.log("🚀 Demand Intelligence Scraper v2.0 — Starting...\n");
-  console.log(`   Model: ${GEMINI_MODEL}`);
-  console.log(`   Grounding: google_search`);
-  console.log(`   Reddit API: enabled\n`);
   const startTime = Date.now();
+  console.log(`\n🚀 Starting Demand Intelligence Scraper (${engine})...`);
 
-  // ── Validate env ────────────────────────────────────────────────
-  if (!GEMINI_API_KEY) {
-    console.error("❌ GEMINI_API_KEY environment variable is required");
-    process.exit(1);
+  // ── Layer 1: Taxonomy & Benchmarks ────────────────────────────────
+  console.log("\n🧪 Layer 1: Loading taxonomy and benchmarks...");
+  if (!fs.existsSync(BENCHMARKS_PATH)) {
+    throw new Error(`Benchmarks file missing: ${BENCHMARKS_PATH}`);
   }
-
-  // ── Load local data ─────────────────────────────────────────────
-  console.log("📂 Loading local data files...");
   const benchmarks = JSON.parse(fs.readFileSync(BENCHMARKS_PATH, "utf-8"));
-  const videoLibrary = JSON.parse(fs.readFileSync(VIDEO_LIBRARY_PATH, "utf-8"));
-  const courses = videoLibrary.courses || [];
+  const coursesRaw = JSON.parse(fs.readFileSync(VIDEO_LIBRARY_PATH, "utf-8"));
+  const courses = Array.isArray(coursesRaw) ? coursesRaw : (coursesRaw.courses || []);
 
-  // Build taxonomy from benchmarks subtopics
-  const taxonomy = {};
-  for (const [cat, subs] of Object.entries(benchmarks.subtopics || {})) {
-    taxonomy[cat] = Object.keys(subs);
-  }
-
+  const taxonomy = benchmarks.subtopics;
   const categories = Object.keys(taxonomy);
-  console.log(`  ✅ ${categories.length} categories, ${courses.length} courses loaded`);
+  console.log(`  ✅ Loaded ${categories.length} categories from ${BENCHMARKS_FILENAME}`);
 
-  // ── Layer 1: Demand data (instant — local file) ─────────────────
-  console.log("\n📊 Layer 1: Loading demand benchmarks...");
+  // ── Layer 2: Demand Signals ───────────────────────────────────────
+  console.log("\n📡 Layer 2: Gathering demand signals...");
+
   const demandData = {};
-  for (const [category, subtopics] of Object.entries(taxonomy)) {
+  for (const category of categories) {
+    const subtopics = Object.keys(taxonomy[category]);
     const overallScore = benchmarks.benchmarks[category] ?? 50;
     demandData[category] = {
       overall: overallScore,
@@ -793,88 +727,63 @@ async function main() {
     };
     for (const subtopic of subtopics) {
       demandData[category].subtopics[subtopic] =
-        benchmarks.subtopics[category]?.[subtopic] ?? overallScore;
+        taxonomy[category]?.[subtopic] ?? overallScore;
     }
   }
   console.log("  ✅ Demand data loaded");
 
-  // ── Layer 2a: Trending questions (Gemini grounded search) ───────
   const trendingQuestions = await scrapeTrendingQuestions(categories);
-
-  // ── Layer 2b: Pain points per category (batched Gemini calls) ───
   const painPointsByCategory = await scrapeAllPainPoints(categories);
-
-  // ── Layer 2c: Reddit engagement data (real post counts) ─────────
   const redditEngagement = await scrapeRedditEngagement(taxonomy);
 
-  // ── Initialize Firebase once — reused for YouTube read + report write ──
   const db = initFirestore();
+  const collectionName = engine === "UEFN" ? "demand_intel_uefn" : "demand_intel";
 
-  // ── Layer 2d: YouTube metrics (if available from prior scrape) ───
   let youtubeMetrics = null;
-  const ytDb = db;
-  if (ytDb) {
+  if (db) {
     try {
-      const ytDoc = await ytDb.doc("demand_intel/youtube_metrics").get();
+      const ytDoc = await db.doc(`${collectionName}/youtube_metrics`).get();
       if (ytDoc.exists) {
         const ytData = ytDoc.data();
         youtubeMetrics = ytData.categoryMetrics || null;
-        const ytAge = ytData.generatedAt
-          ? Math.round((Date.now() - new Date(ytData.generatedAt).getTime()) / 3600000)
-          : null;
-        console.log(`\n🎬 Layer 2d: YouTube metrics loaded (${ytAge}h old, ${ytData.summary?.uniqueVideos || 0} videos)`);
-      } else {
-        console.log("\n🎬 Layer 2d: No YouTube metrics yet — run scrape-youtube-intel.js first");
+        console.log(`  ✅ YouTube metrics loaded`);
       }
     } catch (err) {
       console.warn(`  ⚠️ YouTube metrics load failed: ${err.message}`);
     }
   }
 
-  // ── Layer 2e: Google Trends data (if available from prior scrape) ──
   let trendsData = null;
   if (db) {
     try {
-      const trendsDoc = await db.doc("demand_intel/google_trends").get();
+      const trendsDoc = await db.doc(`${collectionName}/google_trends`).get();
       if (trendsDoc.exists) {
         const tData = trendsDoc.data();
         trendsData = tData.categoryTrends || null;
-        const trendsAge = tData.scrapedAt
-          ? Math.round((Date.now() - new Date(tData.scrapedAt).getTime()) / 3600000)
-          : null;
-        console.log(`\n📊 Layer 2e: Google Trends loaded (${trendsAge}h old, ${tData.categoryCount || 0} categories)`);
-      } else {
-        console.log("\n📊 Layer 2e: No Google Trends data yet — run scrape-google-trends.py first");
+        console.log(`  ✅ Google Trends loaded`);
       }
     } catch (err) {
       console.warn(`  ⚠️ Google Trends load failed: ${err.message}`);
     }
   }
 
-  // ── Layer 2f: Reddit PRAW deep sentiment (if available from prior scrape) ──
   let redditSentiment = null;
   if (db) {
     try {
-      const sentimentDoc = await db.doc('demand_intel/reddit_sentiment').get();
+      const sentimentDoc = await db.doc(`${collectionName}/reddit_sentiment`).get();
       if (sentimentDoc.exists) {
         const sData = sentimentDoc.data();
         redditSentiment = sData.categories || null;
-        const sentimentAge = sData.scrapedAt
-          ? Math.round((Date.now() - new Date(sData.scrapedAt).getTime()) / 3600000)
-          : null;
-        console.log(`\n🗣️ Layer 2f: Reddit PRAW sentiment loaded (${sentimentAge}h old, ${Object.keys(sData.categories || {}).length} categories)`);
-      } else {
-        console.log('\n🗣️ Layer 2f: No Reddit PRAW sentiment yet — run scrape-reddit-praw.py first');
+        console.log(`  ✅ Reddit PRAW sentiment loaded`);
       }
     } catch (err) {
       console.warn(`  ⚠️ Reddit PRAW sentiment load failed: ${err.message}`);
     }
   }
 
-  // ── Layer 3: Coverage analysis (instant — local computation) ────
+  // ── Layer 3: Coverage analysis ───────────────────────────────────
   console.log("\n📚 Layer 3: Computing library coverage...");
   const coverageData = calculateCoverage(courses, taxonomy);
-  coverageData._totalCourses = courses.length;
   console.log("  ✅ Coverage computed");
 
   // ── Build report ────────────────────────────────────────────────
@@ -893,60 +802,30 @@ async function main() {
     redditSentiment,
   });
 
-  console.log(`\n✅ Report complete:`);
-  console.log(`   Suggestions: ${report.suggestions.length}`);
-  console.log(`   Trending questions: ${report.trendingQuestions.length}`);
-  console.log(`   Pain points: ${report.provenance.communitySearch.totalPainPoints}`);
-  console.log(`   Reddit subtopics: ${report.provenance.redditEngagement.subtopicsScanned}`);
-  console.log(`   Time: ${report.generationTimeMs}ms`);
+  console.log(`\n✅ Report complete: ${report.suggestions.length} suggestions`);
 
-  // ── Write to Firestore (reuse db from earlier) ─────────────────
+  // ── Write to Firestore ─────────────────────────────────────────
   if (db) {
     console.log("\n🔥 Writing to Firestore...");
     const today = new Date().toISOString().split("T")[0];
 
     try {
-      // Write latest report (overwrite)
-      await db.doc("demand_intel/latest").set(report);
-      console.log("  ✅ demand_intel/latest updated");
+      await db.doc(`${collectionName}/latest`).set(report);
+      console.log(`  ✅ ${collectionName}/latest updated`);
 
-      // Write historical snapshot (for trend tracking)
-      await db.doc(`demand_intel/history_${today}`).set({
+      await db.doc(`${collectionName}/history_${today}`).set({
         date: today,
         generatedAt: report.generatedAt,
-        generationTimeMs: report.generationTimeMs,
         suggestionCount: report.suggestions.length,
-        trendingCount: report.trendingQuestions.length,
-        painPointCount: report.provenance.communitySearch.totalPainPoints,
-        redditSubtopics: report.provenance.redditEngagement.subtopicsScanned,
-        topSuggestions: report.suggestions.slice(0, 10).map((s) => ({
-          topic: s.topic,
-          category: s.category,
-          gap: s.gap,
-          demandScore: s.demandScore,
-          confidence: s.confidence,
-          coverageInLibrary: s.coverageInLibrary,
-          redditEngagement: s.redditEngagement,
-        })),
-        // Store critical gaps for alerting
-        criticalGaps: report.suggestions
-          .filter((s) => s.demandScore > 75 && s.coverageInLibrary === 0)
-          .slice(0, 5)
-          .map((s) => ({
-            topic: s.topic,
-            category: s.category,
-            demandScore: s.demandScore,
-            gap: s.gap,
-          })),
+        topSuggestions: report.suggestions.slice(0, 5).map(s => ({ topic: s.topic, score: s.demandScore })),
       });
-      console.log(`  ✅ demand_intel/history_${today} created`);
+      console.log(`  ✅ ${collectionName}/history_${today} created`);
     } catch (err) {
       console.error(`  ❌ Firestore write failed: ${err.message}`);
     }
   } else {
-    console.log("\n⏭️  Skipping Firestore write (no service account)");
-    // Save locally for debugging
-    const outputPath = path.join(__dirname, "../demand_intel_report.json");
+    console.log("\n⏭️ Skipping Firestore write");
+    const outputPath = path.join(__dirname, `../demand_intel_report_${engine.toLowerCase()}.json`);
     fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
     console.log(`  📄 Saved report to ${outputPath}`);
   }

@@ -27,7 +27,8 @@ import { recordTokenUsage } from "./tokenTracker";
 import { devLog, devWarn } from "../utils/logger";
 import { parseGeminiJSON } from "./gapDetection";
 import { computeDecayRisk, computeDemandIndex } from "../utils/decayDetector";
-import demandBenchmarks from "../data/demand_benchmarks.json";
+import demandBenchmarksUE5 from "../data/demand_benchmarks.json";
+import demandBenchmarksUEFN from "../data/demand_benchmarks_uefn.json";
 import seoMetricsData from "../data/seoMetrics.json";
 
 // ── Configuration ──────────────────────────────────────────
@@ -247,8 +248,9 @@ const getTaxonomy = (engine) => engine === "UEFN" ? UEFN_GRANULAR_TAXONOMY : GRA
  */
 export function loadGranularDemand(engine = "UE5") {
   const result = {};
-  const benchmarks = demandBenchmarks.benchmarks || {};
-  const subtopicData = demandBenchmarks.subtopics || {};
+  const benchmarksData = engine === "UEFN" ? demandBenchmarksUEFN : demandBenchmarksUE5;
+  const benchmarks = benchmarksData.benchmarks || {};
+  const subtopicData = benchmarksData.subtopics || {};
   const taxonomy = getTaxonomy(engine);
 
   for (const [category, subtopics] of Object.entries(taxonomy)) {
@@ -610,7 +612,7 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
     painPointsResult.status === "fulfilled" ? painPointsResult.value : {};
 
   // Layer 3: Coverage analysis (instant — local computation)
-  const coverageData = calculateGranularCoverage(courses);
+  const coverageData = calculateGranularCoverage(courses, engine);
 
   // ── Build ranked suggestions ─────────────────────────────
   const suggestions = [];
@@ -711,9 +713,9 @@ export async function generateDemandReport(courses = [], { skipCache = false, sk
     generationTimeMs: Date.now() - startTime,
     provenance: {
       communityIndex: {
-        version: demandBenchmarks.version || "unknown",
-        source: demandBenchmarks.source || "manual",
-        methodology: demandBenchmarks.methodology || "",
+        version: (engine === "UEFN" ? demandBenchmarksUEFN : demandBenchmarksUE5).version || "unknown",
+        source: (engine === "UEFN" ? demandBenchmarksUEFN : demandBenchmarksUE5).source || "manual",
+        methodology: (engine === "UEFN" ? demandBenchmarksUEFN : demandBenchmarksUE5).methodology || "",
         subtopicCount: Object.values(getTaxonomy(engine)).flat().length,
       },
       communitySearch: {

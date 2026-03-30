@@ -32,6 +32,9 @@ exports.triggerDemandScrape = onCall(
       throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
     }
 
+    // Get engine from request data (default to UE5)
+    const { engine = "UE5" } = request.data || {};
+
     const pat = process.env.GITHUB_PAT;
     if (!pat) {
       logger.error("[triggerDemandScrape] GITHUB_PAT secret is not set.");
@@ -40,7 +43,7 @@ exports.triggerDemandScrape = onCall(
 
     const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILE}/dispatches`;
 
-    logger.info(`[triggerDemandScrape] Triggering workflow dispatch by ${request.auth.token.email}`);
+    logger.info(`[triggerDemandScrape] Triggering ${engine} workflow dispatch by ${request.auth?.token?.email || "anonymous"}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -48,8 +51,12 @@ exports.triggerDemandScrape = onCall(
         Authorization: `Bearer ${pat}`,
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "Firebase-Cloud-Function",
       },
-      body: JSON.stringify({ ref: "master" }),
+      body: JSON.stringify({ 
+        ref: "master",
+        inputs: { engine }
+      }),
     });
 
     if (!response.ok) {

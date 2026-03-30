@@ -4,7 +4,12 @@ on:
   schedule:
     # Run daily at 6am UTC
     - cron: "0 6 * * *"
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      engine:
+        description: 'Engine to scrape (UE5 or UEFN)'
+        required: false
+        default: 'UE5'
 
 permissions:
   contents: read
@@ -30,7 +35,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node scripts/scrape-demand-intel.js
+        run: node scripts/scrape-demand-intel.js --engine ${{ github.event.inputs.engine || 'UE5' }}
 
       - name: Summary
         if: always()
