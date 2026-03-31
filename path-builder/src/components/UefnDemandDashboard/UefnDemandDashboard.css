@@ -1,6 +1,8 @@
 /* ── UEFN Demand Intelligence Dashboard ─────────────────────── */
 
 .uefn-demand-dashboard {
+  max-width: 100% !important; box-sizing: border-box !important;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
   padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
@@ -237,6 +239,7 @@
 /* ── Stats Bar ──────────────────────────────────────────── */
 
 .stats-bar {
+  max-width: 100% !important;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
@@ -275,18 +278,23 @@
 /* ── Two-Column Layout ──────────────────────────────────── */
 
 .dashboard-columns {
-  display: grid;
-  grid-template-columns: 3fr 2fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  height: 750px !important;
+  min-height: 750px !important;
+  margin-bottom: 2rem !important;
+  overflow: hidden !important;
 }
 
 .dashboard-columns.single-column {
-  grid-template-columns: 1fr;
+  flex-direction: column !important;
 }
 
 .dashboard-columns.single-column .column-suggestions {
-  grid-column: 1 / -1;
+  width: 100% !important;
 }
 
 .dashboard-columns.single-column .trending-list .empty-state {
@@ -298,6 +306,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  min-height: 125px; /* Alignment of list tops */ /* Force consistent header height */
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -416,12 +425,25 @@
 
 /* ── Suggestion Cards ───────────────────────────────────── */
 
+.column-suggestions, .column-trending {
+  flex: 1 !important;
+  width: 50% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
 .suggestions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 600px;
-  overflow-y: auto;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px !important;
+  scrollbar-gutter: stable !important;
 }
 
 .suggestion-card {
@@ -454,10 +476,11 @@
 .suggestion-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   padding: 0.85rem 1rem;
   cursor: pointer;
   min-height: 48px;
+  flex-wrap: wrap; /* Ensure metrics wrap on narrow columns */
 }
 
 .suggestion-header:hover {
@@ -469,6 +492,7 @@
   font-weight: 700;
   color: var(--kc-text-tertiary);
   min-width: 2rem;
+  margin-top: 1px; /* Align with title text better */
 }
 
 .suggestion-info {
@@ -492,14 +516,18 @@
 
 .suggestion-metrics {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  align-items: baseline; /* Align badges to the baseline of the metrics' first line (the numbers) */
+  gap: 0.85rem;
   flex-shrink: 0;
 }
 
 .metric {
-  text-align: center;
-  min-width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  line-height: 1;
 }
 
 .metric-value {
@@ -516,10 +544,11 @@
 
 .metric-label {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--kc-text-tertiary);
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 4px;
+  opacity: 0.8;
 }
 
 .expand-arrow {
@@ -528,10 +557,17 @@
 }
 
 .confidence-badge {
-  font-size: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 0.5rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.15rem 0.4rem;
   border-radius: 4px;
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
   background: color-mix(in srgb, var(--badge-color, var(--kc-text-secondary)) 15%, transparent);
   color: var(--badge-color, var(--kc-text-secondary));
   letter-spacing: 0.05em;
@@ -540,12 +576,18 @@
 /* ── Decay Risk Badges ─────────────────────────────────── */
 
 .decay-badge {
-  font-size: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 0.5rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
   border-radius: 4px;
-  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+  line-height: 1;
   white-space: nowrap;
+  letter-spacing: 0.03em;
 }
 
 .decay-badge[data-tooltip],
@@ -678,15 +720,21 @@ a.source-question.source-link:hover {
 .source-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.5rem;
-  background: rgba(51, 65, 85, 0.5);
+  justify-content: center;
+  height: 20px;
+  padding: 0 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+  height: 22px; /* Source chips can be slightly taller to accommodate icons */
+  background: rgba(51, 65, 85, 0.4);
   border: 1px solid var(--kc-bg-surface-2);
   border-radius: 12px;
-  font-size: 0.7rem;
   color: var(--kc-text-secondary);
-  text-decoration: none;
-  transition: all 0.15s;
+  gap: 0.35rem;
 }
 
 .source-chip.clickable {
@@ -716,11 +764,11 @@ a.source-question.source-link:hover {
 /* ── Trending Questions ─────────────────────────────────── */
 
 .trending-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 600px;
-  overflow-y: auto;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px !important;
+  scrollbar-gutter: stable !important;
 }
 
 .trending-question {
@@ -760,17 +808,27 @@ a.source-question.source-link:hover {
 
 .question-meta {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Ensure tags wrap to prevent horizontal overflow */
+  align-items: baseline; /* Align tag and source text to same baseline */
+  gap: 0.6rem;
+  margin-top: 8px;
 }
 
 .question-category {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
   border-radius: 4px;
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+  border-radius: 6px;
 }
 
 .question-subtopic {
@@ -780,13 +838,16 @@ a.source-question.source-link:hover {
 
 .question-sources {
   display: flex;
-  gap: 0.25rem;
+  align-items: baseline;
+  gap: 0.35rem;
   margin-left: auto;
+  flex-shrink: 1; /* Allow to shrink if absolutely necessary */
 }
 
 /* ── Granular Coverage Chart ────────────────────────────── */
 
 .granular-coverage {
+  max-width: 100% !important; margin: 1.5rem 0 !important;
   background: var(--kc-bg-surface-1);
   border-radius: 12px;
   padding: 1.25rem;
@@ -951,6 +1012,7 @@ a.source-question.source-link:hover {
 /* ── Provenance Footer ──────────────────────────────────── */
 
 .provenance-footer {
+  max-width: 100% !important;
   background: rgba(15, 23, 42, 0.5);
   border-radius: 10px;
   padding: 1rem 1.25rem;
@@ -1042,10 +1104,19 @@ a.source-question.source-link:hover {
 
 @media (max-width: 900px) {
   .dashboard-columns {
-    grid-template-columns: 1fr;
-  }
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  height: 750px !important;
+  min-height: 750px !important;
+  margin-bottom: 2rem !important;
+  overflow: hidden !important;
+}
 
   .stats-bar {
+  max-width: 100% !important;
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1054,17 +1125,21 @@ a.source-question.source-link:hover {
   }
 
   .suggestion-metrics {
-    margin-left: auto;
-  }
+  display: flex;
+  align-items: baseline; /* Align badges to the baseline of the metrics' first line (the numbers) */
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
 }
 
 /* ── Platform Source Badges (on SuggestionCard) ───────── */
 
 .suggestion-meta-row {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: baseline; /* Align dots and category text to same baseline */
+  gap: 0.6rem;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .platform-source-badges {
@@ -1076,12 +1151,13 @@ a.source-question.source-link:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.55rem;
-  width: 1.1rem;
-  height: 1.1rem;
+  font-size: 0.6rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
-  opacity: 0.85;
-  cursor: default;
+  opacity: 0.9;
+  position: relative;
+  top: 1px; /* Optical adjustment for baseline alignment of circles */
 }
 
 /* ── Platform Demand Breakdown Panel ──────────────────── */
@@ -1343,6 +1419,7 @@ a.source-question.source-link:hover {
 /* ── Industry Vertical Filter ──────────────────────────── */
 
 .industry-filter-row {
+  max-width: 100% !important;
   display: flex;
   align-items: center;
   gap: 0.35rem;
