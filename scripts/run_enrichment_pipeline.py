@@ -35,6 +35,7 @@ SCRIPTS = [
     ("Learning Objectives", "scripts/generate_learning_objectives.py"),
     ("Quiz Questions", "scripts/generate_quiz_questions.py"),
     ("Prerequisites", "scripts/detect_prerequisites.py"),
+    ("Sync Data (SSoT -> Frontend)", "scripts/sync_data.py"),
 ]
 
 

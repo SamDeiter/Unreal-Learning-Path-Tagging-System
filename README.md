@@ -225,6 +225,7 @@ python scripts/run_enrichment_pipeline.py
 | `merge_embeddings.py`             | `docs_embeddings.json`             | Merge scraped + UDN embeddings (3,622)    |
 | `content_gap_analysis.py`         | Gap report                         | Identifies missing content areas          |
 | `link_drive_videos.py`            | Updates `video_library_enriched.json` | Link Drive videos to courses by code-prefix matching |
+| `integrate_mobile_urls.py`        | Updates `doc_links.json`           | Syncs Epic Dev Portal mobile/XR documentation URLs |
 
 All AI-powered scripts use the Google Gemini API.
 

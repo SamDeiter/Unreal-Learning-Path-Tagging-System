@@ -4,6 +4,17 @@ All notable changes to the Unreal Learning Path Tagging System.
 
 ---
 
+---
+
+## [7.8.1-mobile-docs] - 2026-03-31
+
+### Added
+
+- **Mobile Documentation Integration** — `integrate_mobile_urls.py` parses `mobile_docs_urls.txt` and inserts Unreal Engine mobile-specific documentation into `doc_links.json`.
+  - Added 33 new mobile links (Android, iOS, XR).
+  - Synchronized `docs/data/doc_links.json` with the React app (`path-builder/src/data/` and `path-builder/public/data/`).
+  - GitHub Actions ensures this documentation structure is bundled securely on deployment.
+
 ## [7.8.0-video-pipeline] - 2026-03-23
 
 ### Added

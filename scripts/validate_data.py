@@ -7,8 +7,10 @@ import json
 from collections import Counter
 from pathlib import Path
 
-path = Path("path-builder/src/data/video_library_enriched.json")
-data = json.loads(path.read_text())
+# Root Path relative to script
+REPO_ROOT = Path(__file__).resolve().parent.parent
+path = REPO_ROOT / "content" / "video_library_enriched.json"
+data = json.loads(path.read_text(encoding='utf-8'))
 courses = data.get('courses', [])
 
 print("=" * 60)

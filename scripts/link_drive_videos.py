@@ -17,8 +17,6 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 DRIVE_META = Path('content/drive_video_metadata_final.json')
 ENRICHED_PATHS = [
     Path('content/video_library_enriched.json'),
-    Path('path-builder/src/data/video_library_enriched.json'),
-    Path('path-builder/public/data/video_library_enriched.json'),
 ]
 
 # ── 1. Load Drive metadata ──────────────────────────────────────

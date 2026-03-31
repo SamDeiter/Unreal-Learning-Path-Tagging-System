@@ -15,6 +15,10 @@ from pathlib import Path
 
 try:
     from google import genai
+except ImportError:
+    print("ERROR: google-genai package not installed")
+    print("Install with: pip install google-genai")
+    exit(1)
 
 # Load .env file for API keys
 try:
@@ -22,14 +26,10 @@ try:
     load_dotenv(override=True)
 except ImportError:
     pass  # dotenv not installed
-except ImportError:
-    print("ERROR: google-genai package not installed")
-    print("Install with: pip install google-genai")
-    exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SEGMENTS_FILE = REPO_ROOT / "path-builder" / "src" / "data" / "transcript_segments.json"
-OUTPUT_FILE = REPO_ROOT / "path-builder" / "src" / "data" / "course_prerequisites.json"
+SEGMENTS_FILE = REPO_ROOT / "content" / "transcript_segments.json"
+OUTPUT_FILE = REPO_ROOT / "content" / "course_prerequisites.json"
 
 API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 

@@ -1,271 +1,386 @@
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "0.1.0",
-  "description": "Directed tag relationship edges for graph traversal",
-  "relation_types": [
-    {
-      "type": "symptom_of",
-      "description": "Source tag is a symptom of target tag"
-    },
-    {
-      "type": "often_caused_by",
-      "description": "Source issue is often caused by target"
-    },
-    { "type": "related", "description": "Tags are conceptually related" },
-    { "type": "subtopic", "description": "Source is a subtopic of target" },
-    {
-      "type": "replaces",
-      "description": "Source tag replaces deprecated target"
-    }
-  ],
-  "edges": [
-    {
-      "source": "symptom.lumen_noise",
-      "target": "rendering.lumen",
-      "relation": "symptom_of",
-      "weight": 0.95
-    },
-    {
-      "source": "build.exitcode_25",
-      "target": "build.packaging",
-      "relation": "symptom_of",
-      "weight": 0.9
-    },
-    {
-      "source": "build.exitcode_6",
-      "target": "build.packaging",
-      "relation": "symptom_of",
-      "weight": 0.9
-    },
-    {
-      "source": "blueprint.accessed_none",
-      "target": "scripting.blueprint",
-      "relation": "symptom_of",
-      "weight": 0.95
-    },
-    {
-      "source": "blueprint.infinite_loop",
-      "target": "scripting.blueprint",
-      "relation": "symptom_of",
-      "weight": 0.85
-    },
-    {
-      "source": "crash.d3d_device_lost",
-      "target": "rendering.lumen",
-      "relation": "often_caused_by",
-      "weight": 0.6
-    },
-    {
-      "source": "crash.d3d_device_lost",
-      "target": "rendering.nanite",
-      "relation": "often_caused_by",
-      "weight": 0.5
-    },
-    {
-      "source": "crash.d3d_device_lost",
-      "target": "rendering.raytracing",
-      "relation": "often_caused_by",
-      "weight": 0.7
-    },
-    {
-      "source": "crash.access_violation",
-      "target": "blueprint.accessed_none",
-      "relation": "often_caused_by",
-      "weight": 0.4
-    },
-    {
-      "source": "crash.access_violation",
-      "target": "scripting.cpp",
-      "relation": "often_caused_by",
-      "weight": 0.6
-    },
-    {
-      "source": "scripting.blueprint",
-      "target": "scripting.cpp",
-      "relation": "related",
-      "weight": 0.8
-    },
-    {
-      "source": "scripting.anim_blueprint",
-      "target": "scripting.blueprint",
-      "relation": "subtopic",
-      "weight": 0.9
-    },
-    {
-      "source": "scripting.anim_blueprint",
-      "target": "animation.general",
-      "relation": "related",
-      "weight": 0.85
-    },
-    {
-      "source": "rendering.lumen",
-      "target": "rendering.nanite",
-      "relation": "related",
-      "weight": 0.85
-    },
-    {
-      "source": "rendering.lumen",
-      "target": "rendering.lighting",
-      "relation": "subtopic",
-      "weight": 0.9
-    },
-    {
-      "source": "rendering.raytracing",
-      "target": "rendering.lumen",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "character.metahuman",
-      "target": "animation.control_rig",
-      "relation": "related",
-      "weight": 0.8
-    },
-    {
-      "source": "animation.control_rig",
-      "target": "animation.general",
-      "relation": "subtopic",
-      "weight": 0.85
-    },
-    {
-      "source": "cinematic.sequencer",
-      "target": "animation.general",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "platform.quest",
-      "target": "platform.vr",
-      "relation": "subtopic",
-      "weight": 0.95
-    },
-    {
-      "source": "xr.openxr",
-      "target": "platform.vr",
-      "relation": "related",
-      "weight": 0.9
-    },
-    {
-      "source": "ui.hud",
-      "target": "ui.umg",
-      "relation": "subtopic",
-      "weight": 0.85
-    },
-    {
-      "source": "tool.uat",
-      "target": "build.packaging",
-      "relation": "related",
-      "weight": 0.9
-    },
-    {
-      "source": "tool.ubt",
-      "target": "tool.uat",
-      "relation": "related",
-      "weight": 0.8
-    },
-    {
-      "source": "tool.ubt",
-      "target": "scripting.cpp",
-      "relation": "related",
-      "weight": 0.75
-    },
-    {
-      "source": "debug.callstack",
-      "target": "crash.access_violation",
-      "relation": "related",
-      "weight": 0.85
-    },
-    {
-      "source": "debug.symbols",
-      "target": "debug.callstack",
-      "relation": "related",
-      "weight": 0.9
-    },
-    {
-      "source": "debug.output_log",
-      "target": "debug.callstack",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "template.lyra",
-      "target": "genre.fps",
-      "relation": "related",
-      "weight": 0.85
-    },
-    {
-      "source": "genre.platformer",
-      "target": "genre.2d",
-      "relation": "related",
-      "weight": 0.6
-    },
-    {
-      "source": "environment.landscape",
-      "target": "environment.level_design",
-      "relation": "related",
-      "weight": 0.75
-    },
-    {
-      "source": "rendering.niagara",
-      "target": "rendering.material",
-      "relation": "related",
-      "weight": 0.65
-    },
-    {
-      "source": "audio.metasounds",
-      "target": "rendering.niagara",
-      "relation": "related",
-      "weight": 0.4
-    },
-    {
-      "source": "specialty.archviz",
-      "target": "rendering.lumen",
-      "relation": "related",
-      "weight": 0.8
-    },
-    {
-      "source": "specialty.dmx",
-      "target": "rendering.lighting",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "multiplayer.replication",
-      "target": "scripting.blueprint",
-      "relation": "related",
-      "weight": 0.6
-    },
-    {
-      "source": "multiplayer.replication",
-      "target": "scripting.cpp",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "ai.behavior_tree",
-      "target": "scripting.blueprint",
-      "relation": "related",
-      "weight": 0.75
-    },
-    {
-      "source": "genre.rpg",
-      "target": "ai.behavior_tree",
-      "relation": "related",
-      "weight": 0.6
-    },
-    {
-      "source": "genre.rts",
-      "target": "ai.behavior_tree",
-      "relation": "related",
-      "weight": 0.7
-    },
-    {
-      "source": "rendering.niagara",
-      "target": "rendering.niagara",
-      "relation": "replaces",
-      "target_legacy": "cascade",
-      "weight": 1.0,
-      "note": "Niagara replaces Cascade particle system"
-    }
-  ]
-}
+[
+  {
+    "source": "100.07",
+    "target": "219.00",
+    "relationship": "prerequisite",
+    "shared_tag": "Foliage",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "201.02",
+    "target": "311.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Foliage",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "101.02",
+    "target": "219.00",
+    "relationship": "prerequisite",
+    "shared_tag": "Lumen",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "219.02",
+    "target": "209.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Lumen",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "111.02",
+    "target": "219.00",
+    "relationship": "prerequisite",
+    "shared_tag": "Landscape",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "211.00",
+    "target": "311.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Landscape",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "112.03",
+    "target": "219.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Texture",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "222.01",
+    "target": "311.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Materials",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "216.06",
+    "target": "209.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Lighting",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "318.00",
+    "target": "301.05",
+    "relationship": "prerequisite",
+    "shared_tag": "Blueprint",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "100.14",
+    "target": "311.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Niagara",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "318.00",
+    "target": "311.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Niagara",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "101.01",
+    "target": "311.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Nanite",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "103.02",
+    "target": "311.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Runtime",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "100.03",
+    "target": "311.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Gameplay",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "112.03",
+    "target": "311.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Static Mesh",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "110.01",
+    "target": "311.05",
+    "relationship": "prerequisite",
+    "shared_tag": "Performance",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "227.05",
+    "target": "311.05",
+    "relationship": "prerequisite",
+    "shared_tag": "Component",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "107.01",
+    "target": "207.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Animation",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "308.02",
+    "target": "305.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Animation",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "100.03",
+    "target": "204.07",
+    "relationship": "prerequisite",
+    "shared_tag": "Spawn",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "112.03",
+    "target": "210.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Physics",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "101.02",
+    "target": "204.07",
+    "relationship": "prerequisite",
+    "shared_tag": "Tick",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "100.10",
+    "target": "204.07",
+    "relationship": "prerequisite",
+    "shared_tag": "Reference",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "112.03",
+    "target": "204.06",
+    "relationship": "prerequisite",
+    "shared_tag": "Viewport",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "101.01",
+    "target": "204.05",
+    "relationship": "prerequisite",
+    "shared_tag": "Rendering",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "227.05",
+    "target": "204.04",
+    "relationship": "prerequisite",
+    "shared_tag": "UMG",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "108.01",
+    "target": "207.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Control Rig",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "313.02",
+    "target": "305.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Control Rig",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "107.01",
+    "target": "207.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Character",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "102.03",
+    "target": "207.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Live Link",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "112.03",
+    "target": "207.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Collision",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "107.01",
+    "target": "207.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Sequencer",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "305.00",
+    "target": "305.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Sequencer",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "107.01",
+    "target": "205.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Event",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "227.05",
+    "target": "227.08",
+    "relationship": "prerequisite",
+    "shared_tag": "Pawn",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "102.03",
+    "target": "209.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Virtual Production",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "303.00",
+    "target": "209.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Ray Tracing",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "203.04",
+    "target": "209.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Path Tracer",
+    "source_level": "Intermediate",
+    "target_level": "Advanced"
+  },
+  {
+    "source": "100.01",
+    "target": "227.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Ui",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "113.01",
+    "target": "100.08",
+    "relationship": "prerequisite",
+    "shared_tag": "MetaHuman",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "100.14",
+    "target": "205.03",
+    "relationship": "prerequisite",
+    "shared_tag": "Interface",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "100.10",
+    "target": "203.02",
+    "relationship": "prerequisite",
+    "shared_tag": "Post Process",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "100.14",
+    "target": "124.05",
+    "relationship": "prerequisite",
+    "shared_tag": "Ai",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "117.00",
+    "target": "217.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Audio",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "108.01",
+    "target": "203.04",
+    "relationship": "prerequisite",
+    "shared_tag": "Variable",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "105.03",
+    "target": "203.00",
+    "relationship": "prerequisite",
+    "shared_tag": "Datasmith",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  },
+  {
+    "source": "108.01",
+    "target": "208.01",
+    "relationship": "prerequisite",
+    "shared_tag": "Function",
+    "source_level": "Beginner",
+    "target_level": "Intermediate"
+  }
+]

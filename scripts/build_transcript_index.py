@@ -13,7 +13,7 @@ from pathlib import Path
 # Paths
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TRANSCRIPTS_DIR = REPO_ROOT / "content" / "transcripts"
-OUTPUT_FILE = REPO_ROOT / "path-builder" / "src" / "data" / "transcript_segments.json"
+OUTPUT_FILE = REPO_ROOT / "content" / "transcript_segments.json"
 
 # Segment grouping: merge cues into ~30-second chunks
 SEGMENT_DURATION_SECONDS = 30
