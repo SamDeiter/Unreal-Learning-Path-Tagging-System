@@ -21,26 +21,51 @@ import { normalizeQuery, depluralize } from "./QueryNormalizer.js";
 class TagGraphService {
   constructor() {
     this.tags = tagsData?.tags || [];
-    this.edges = edgesData?.edges || [];
+    
+    // Initialize related tag cache
+    this._relatedCache = new Map();
+    
+    // 1. Load edges from edges.json (handle flat array format)
+    let rawEdges = Array.isArray(edgesData) ? edgesData : (edgesData?.edges || []);
+    
+    // 2. Normalize edge fields: support both 'relationship' and 'relation' and ensure weight exists
+    this.edges = rawEdges.map(e => ({
+      ...e,
+      relation: e.relation || e.relationship || 'related',
+      weight: e.weight !== undefined ? e.weight : 0.5
+    }));
 
-    // Build lookup maps for O(1) access
+    // 3. Ingest related_tags from tags.json into the edge list to ensure the graph is populated
+    // even if edges.json only contains course-to-course relationships.
+    if (this.tags && Array.isArray(this.tags)) {
+      this.tags.forEach(tag => {
+        if (tag.related_tags && Array.isArray(tag.related_tags)) {
+          tag.related_tags.forEach(rel => {
+            this.edges.push({
+              source: tag.tag_id,
+              target: rel.tag_id,
+              relation: rel.relation || 'related',
+              weight: rel.weight || 0.8
+            });
+          });
+        }
+      });
+    }
+
+    // 4. Build lookup maps for O(1) access
     this.tagMap = new Map(this.tags.map((t) => [t.tag_id, t]));
     this.edgesBySource = this._buildEdgeMap("source");
     this.edgesByTarget = this._buildEdgeMap("target");
 
-    // Build error signature index for fast matching
+    // 5. Build indices for matching
     this.errorSignatureIndex = this._buildErrorSignatureIndex();
-
-    // V2: Build term index for whole-word/phrase matching
     this.termIndex = this._buildTermIndex();
 
-    // Phase 8A: Cache for getRelated() results to avoid redundant traversals
-    this._relatedCache = new Map();
-
-    // V2: Edge-type weight configuration
+    // 6. Define weights for graph propagation
     this.edgeWeights = {
-      subtopic: { forward: 0.8, reverse: 0.6 },
-      related: { forward: 0.5, reverse: 0.4 },
+      subtopic: { forward: 0.8, reverse: 0.1 },
+      related: { forward: 0.5, reverse: 0.5 },
+      prerequisite: { forward: 0.8, reverse: 0.2 },
       symptom_of: { forward: 0.7, reverse: 0.3 },
       often_caused_by: { forward: 0.6, reverse: 0.4 },
       replaces: { forward: 0.5, reverse: 0.15 },
@@ -54,7 +79,7 @@ class TagGraphService {
    */
   _buildEdgeMap(key) {
     const map = new Map();
-    for (const edge of this.edges) {
+    for (const edge of (this.edges || [])) {
       const id = edge[key];
       if (!map.has(id)) {
         map.set(id, []);
@@ -201,7 +226,7 @@ class TagGraphService {
   getPrerequisites(tagId) {
     const edges = this.edgesBySource.get(tagId) || [];
     return edges
-      .filter((e) => e.relation === "subtopic" || e.relation === "related")
+      .filter((e) => e.relation === "subtopic" || e.relation === "related" || e.relation === "prerequisite")
       .map((e) => ({
         tag: this.getTag(e.target),
         weight: e.weight || 0.5,
@@ -221,21 +246,25 @@ class TagGraphService {
     const incoming = this.edgesByTarget.get(tagId) || [];
 
     const allEdges = [...outgoing, ...incoming];
-    const seen = new Set();
+    const seen = new Set([tagId]);
 
     return allEdges
-      .filter((e) => e.weight >= minWeight)
+      .filter((e) => (e.weight || 0.5) >= minWeight)
       .map((e) => {
-        const relatedId = e.source === tagId ? e.target : e.source;
+        const relatedId = (e.source === tagId) ? e.target : e.source;
         if (seen.has(relatedId)) return null;
         seen.add(relatedId);
+        
+        const tag = this.getTag(relatedId);
+        if (!tag) return null;
+
         return {
-          tag: this.getTag(relatedId),
-          weight: e.weight,
-          relation: e.relation,
+          tag: tag,
+          weight: e.weight || 0.5,
+          relation: e.relation || 'related',
         };
       })
-      .filter((r) => r !== null && r.tag !== null);
+      .filter((r) => r !== null);
   }
 
   /**
@@ -538,7 +567,7 @@ class TagGraphService {
       ui_term: 0.65,
     };
 
-    for (const entry of this.termIndex) {
+    for (const entry of (this.termIndex || [])) {
       if (seen.has(entry.tagId)) continue;
 
       let matched = false;
