@@ -125,7 +125,8 @@ class PathGenerator:
             display_name = tag.get("display_name", tag_id.split(".")[-1])
 
             # Build search query - Epic Games channel only
-            search_query = f"UE5 {display_name}" # Used internally for searching tag logic if any but not tied to UX
+            # Used internally for searching tag logic if any but not tied to UX
+            search_query = f"UE5 {display_name}"
             videos = self.fetcher.search_videos(search_query, max_results=5, epic_only=True)
 
             for video in videos:
@@ -178,6 +179,7 @@ class PathGenerator:
 
         Args:
             query: User's problem statement (e.g., "UE5 packaging fails").
+            engine: The target engine context (default UE5).
 
         Returns:
             Assembled learning path with steps and content.

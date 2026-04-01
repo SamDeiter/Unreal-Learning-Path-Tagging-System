@@ -48,6 +48,7 @@ class GeminiHelper:
             user_query: The user's problem statement.
             tags: Matched tags.
             video_titles: Titles of videos found.
+            engine: The target engine context (default UE5).
 
         Returns:
             PathGuidance object or None if API unavailable.
@@ -131,6 +132,7 @@ Be concise and encouraging. Focus on practical help."""
             step_type: Type of step (foundations, diagnostics, etc.).
             video_titles: Video titles in this step.
             user_query: User's problem.
+            engine: The target engine context (default UE5).
 
         Returns:
             Summary string or None.
@@ -190,6 +192,7 @@ Don't use quotes. Be specific and actionable."""
         Args:
             user_query: The user's problem statement.
             videos: List of video dicts with title, description, video_id, thumbnail_url.
+            engine: The target engine context (default UE5).
 
         Returns:
             Curated path structure or None if API unavailable.
