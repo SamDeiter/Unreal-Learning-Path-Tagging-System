@@ -113,20 +113,20 @@
 
         <!-- Input Method Buttons -->
         <div class="input-methods">
-          <button class="input-method-btn text-btn" onclick="showInputPanel('text')">
-            <span class="method-icon">📝</span>
+          <button class="input-method-btn text-btn" aria-label="Describe your issue in text">
+            <span class="method-icon" aria-hidden="true">📝</span>
             <span class="method-label">Describe Issue</span>
           </button>
-          <button class="input-method-btn log-btn" onclick="showInputPanel('log')">
-            <span class="method-icon">📋</span>
+          <button class="input-method-btn log-btn" aria-label="Paste an error log">
+            <span class="method-icon" aria-hidden="true">📋</span>
             <span class="method-label">Paste Error Log</span>
           </button>
-          <button class="input-method-btn screenshot-btn" onclick="showInputPanel('screenshot')">
-            <span class="method-icon">📷</span>
+          <button class="input-method-btn screenshot-btn" aria-label="Add a screenshot">
+            <span class="method-icon" aria-hidden="true">📷</span>
             <span class="method-label">Add Screenshot</span>
           </button>
-          <button class="input-method-btn tags-btn" onclick="showInputPanel('tags')">
-            <span class="method-icon">🏷️</span>
+          <button class="input-method-btn tags-btn" aria-label="Browse tags">
+            <span class="method-icon" aria-hidden="true">🏷️</span>
             <span class="method-label">Browse Tags</span>
           </button>
         </div>
@@ -140,7 +140,7 @@
               id="textInput"
               placeholder="Describe your UE5 problem..."
             />
-            <button class="add-ingredient-btn" onclick="addTextIngredient()">+ Add</button>
+            <button class="add-ingredient-btn">+ Add</button>
           </div>
           <div class="input-panel" id="logPanel" style="display: none">
             <textarea
@@ -149,7 +149,7 @@
               placeholder="Paste crash log or error output..."
               rows="4"
             ></textarea>
-            <button class="add-ingredient-btn log-add" onclick="addLogIngredient()">
+            <button class="add-ingredient-btn log-add">
               + Extract & Add
             </button>
           </div>
@@ -157,14 +157,12 @@
             <div
               class="screenshot-dropzone"
               id="screenshotDropzone"
-              onclick="document.getElementById('screenshotInput').click()"
             >
               <input
                 type="file"
                 id="screenshotInput"
                 accept="image/*"
                 style="display: none"
-                onchange="handleScreenshotSelect(event)"
               />
               <div class="dropzone-content" id="dropzoneContent">
                 <span class="dropzone-icon">📁</span>
@@ -172,21 +170,12 @@
               </div>
               <div class="screenshot-preview" id="screenshotPreview" style="display: none">
                 <img id="previewImage" alt="Preview" />
-                <button
-                  class="remove-preview"
-                  onclick="
-                    event.stopPropagation();
-                    clearScreenshotPreview();
-                  "
-                >
-                  ✕
-                </button>
+                <button class="remove-preview" aria-label="Remove screenshot">✕</button>
               </div>
             </div>
             <button
               class="add-ingredient-btn screenshot-add"
               id="addScreenshotBtn"
-              onclick="addScreenshotIngredient()"
               disabled
             >
               + Add Screenshot
@@ -209,7 +198,7 @@
         </div>
 
         <!-- Generate Button -->
-        <button class="generate-btn" id="generateBtn" onclick="generateFromBasket()" disabled>
+        <button class="generate-btn" id="generateBtn" disabled>
           🚀 Generate Learning Path
         </button>
       </section>
@@ -227,8 +216,8 @@
         </div>
       </section>
 
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
+      <div class="loading" id="loading" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
         <p class="loading-text">🤖 AI is curating your path...</p>
         <p class="loading-subtext">Finding the best content and timestamps for you</p>
       </div>
@@ -238,7 +227,7 @@
           <!-- Main content column -->
           <div class="path-main">
             <div class="path-header">
-              <button class="back-btn" onclick="goBackToSearch()">← Back to Search</button>
+              <button class="back-btn" aria-label="Back to search">← Back to Search</button>
               <h2 class="path-title" id="pathTitle">🎯 Your Learning Path</h2>
               <p class="path-query" id="pathQuery"></p>
               <div class="path-tags" id="pathTags"></div>
@@ -253,7 +242,7 @@
               <div class="progress-bar">
                 <div class="progress-fill" id="progressFillMobile"></div>
               </div>
-              <button class="complete-btn" onclick="sharePath()" style="background: var(--primary)">
+              <button class="complete-btn" style="background: var(--primary)">
                 Share Path 🔗
               </button>
             </div>
@@ -268,12 +257,12 @@
             <div class="progress-bar sidebar-progress">
               <div class="progress-fill" id="progressFill"></div>
             </div>
-            <nav class="step-tree" id="stepTree">
+            <nav class="step-tree" id="stepTree" aria-label="Learning path steps">
               <!-- Step tree will be populated by JS -->
             </nav>
             <div class="sidebar-actions">
-              <button class="sidebar-btn" onclick="sharePath()">🔗 Share Path</button>
-              <button class="sidebar-btn secondary" onclick="goBackToSearch()">← New Search</button>
+              <button class="sidebar-btn">🔗 Share Path</button>
+              <button class="sidebar-btn secondary">← New Search</button>
             </div>
           </aside>
         </div>
@@ -301,18 +290,21 @@
     </div>
 
     <!-- Video Modal -->
-    <div class="video-modal" id="videoModal" onclick="closeVideo(event)">
-      <div class="video-container" onclick="event.stopPropagation()">
-        <button class="video-close" onclick="closeVideo()">&times;</button>
+    <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="Video player">
+      <div class="video-container">
+        <button class="video-close" aria-label="Close video">&times;</button>
         <iframe id="videoFrame" src="" allowfullscreen></iframe>
       </div>
     </div>
 
     <!-- Modular Architecture Scripts -->
+    <script src="js/state.js"></script>
+    <script src="js/ue5Patterns.js"></script>
     <script src="js/video.js"></script>
     <script src="js/basket.js"></script>
     <script src="js/api.js"></script>
     <script src="js/tagCloud.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/handlers.js"></script>
   </body>
 </html>

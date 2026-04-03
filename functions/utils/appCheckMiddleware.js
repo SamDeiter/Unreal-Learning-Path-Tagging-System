@@ -19,7 +19,9 @@ const { logger } = require("firebase-functions");
  *
  * @param {import("firebase-functions/v2/https").CallableRequest} request
  * @param {Object} [options]
- * @param {boolean} [options.allowInvalid=false] - If true, log a warning but don't reject
+ * @param {boolean} [options.allowInvalid=false] - If true, log a warning but don't reject.
+ *   ENFORCEMENT EOL: Switch to strict mode (allowInvalid=false) by 2026-06-01.
+ *   Track permissive-mode passes via "appcheck_permissive" log to measure impact.
  */
 function requireAppCheck(request, options = {}) {
   const { allowInvalid = false } = options;
@@ -28,6 +30,8 @@ function requireAppCheck(request, options = {}) {
     if (allowInvalid) {
       logger.warn("App Check token missing — request allowed in permissive mode", {
         uid: request.auth?.uid || "anonymous",
+        severity: "WARNING",
+        metric: "appcheck_permissive",
       });
       return;
     }

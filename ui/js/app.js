@@ -87,8 +87,7 @@ const samplePaths = {
   },
 };
 
-let currentPath = null;
-let completedSteps = new Set();
+// AppState.currentPath and AppState.completedSteps are now in AppState (state.js)
 
 // Simple markdown to HTML converter
 function parseMarkdown(text) {
@@ -171,67 +170,7 @@ function toggleCrashLog() {
   }
 }
 
-// UE5 Error Patterns for parsing crash logs
-const UE5_ERROR_PATTERNS = [
-  {
-    pattern: /ExitCode[=:\s]*(\d+)/i,
-    type: "exitcode",
-    extract: (m) => `ExitCode ${m[1]}`,
-  },
-  {
-    pattern: /Error[:\s]+([A-Z]+\d+)/i,
-    type: "linker",
-    extract: (m) => m[1],
-  },
-  {
-    pattern: /ShaderCompileWorker/i,
-    type: "shader",
-    extract: () => "Shader compilation error",
-  },
-  {
-    pattern: /D3D\s*device\s*lost/i,
-    type: "gpu",
-    extract: () => "D3D device lost",
-  },
-  { pattern: /GPU\s*crash/i, type: "gpu", extract: () => "GPU crash" },
-  {
-    pattern: /Accessed\s*None/i,
-    type: "blueprint",
-    extract: () => "Blueprint Accessed None",
-  },
-  {
-    pattern: /cook\s*(fail|error)/i,
-    type: "cook",
-    extract: () => "Cook failure",
-  },
-  {
-    pattern: /packaging\s*(fail|error)/i,
-    type: "packaging",
-    extract: () => "Packaging error",
-  },
-  { pattern: /Lumen/i, type: "lumen", extract: () => "Lumen issue" },
-  { pattern: /Nanite/i, type: "nanite", extract: () => "Nanite issue" },
-  {
-    pattern: /replication|multiplayer|net/i,
-    type: "network",
-    extract: () => "Network/replication",
-  },
-  {
-    pattern: /Fatal\s*error/i,
-    type: "fatal",
-    extract: () => "Fatal error",
-  },
-  {
-    pattern: /LogCore:\s*Error/i,
-    type: "core",
-    extract: () => "Core error",
-  },
-  {
-    pattern: /out\s*of\s*(memory|video\s*memory)/i,
-    type: "memory",
-    extract: () => "Out of memory",
-  },
-];
+// UE5_ERROR_PATTERNS and escapeHtml are defined in ue5Patterns.js
 
 // Parse crash log and extract key terms
 function parseCrashLog() {
@@ -257,7 +196,7 @@ function parseCrashLog() {
   const tagsContainer = document.getElementById("extractedTags");
   if (extractedTerms.length > 0) {
     tagsContainer.innerHTML = extractedTerms
-      .map((t) => `<span class="extracted-tag">${t}</span>`)
+      .map((t) => `<span class="extracted-tag">${escapeHtml(t)}</span>`)
       .join("");
 
     // Build query from extracted terms
@@ -296,7 +235,7 @@ function populateGallery() {
     return "🎯";
   };
 
-  cachedPathsIndex.forEach((path, index) => {
+  AppState.cachedPathsIndex.forEach((path, index) => {
     const card = document.createElement("button");
     card.className = "gallery-card";
     // Use query to generate fresh path instead of loading cached file
@@ -307,8 +246,8 @@ function populateGallery() {
 
     card.innerHTML = `
       <span class="gallery-icon">${getIcon(path.query)}</span>
-      <span class="gallery-title">${path.query}</span>
-      <span class="gallery-steps">${path.steps} steps</span>
+      <span class="gallery-title">${escapeHtml(path.query)}</span>
+      <span class="gallery-steps">${escapeHtml(String(path.steps))} steps</span>
       ${popularBadge}
     `;
 
@@ -346,8 +285,8 @@ function generatePath() {
       })
       .then((data) => {
         document.getElementById("loading").classList.remove("active");
-        currentPath = data;
-        renderPath(currentPath);
+        AppState.AppState.currentPath = data;
+        renderPath(AppState.AppState.currentPath);
         logQuery(query, true);
         console.log("Loaded from cache:", cached.file);
       })
@@ -363,25 +302,25 @@ function renderPath(path) {
   document.getElementById("pathTitle").textContent = "🎯 Your Learning Path";
 
   // Build query display with AI info
-  let queryHtml = `<strong>Problem:</strong> "${path.query}"`;
+  let queryHtml = `<strong>Problem:</strong> "${escapeHtml(path.query)}"`;
   if (path.ai_summary) {
-    queryHtml += `<br><br>📝 <strong>What's happening:</strong> ${path.ai_summary}`;
+    queryHtml += `<br><br>📝 <strong>What's happening:</strong> ${escapeHtml(path.ai_summary)}`;
   }
   if (path.ai_root_cause) {
-    queryHtml += `<br><br>🔍 <strong>Root cause:</strong> ${path.ai_root_cause}`;
+    queryHtml += `<br><br>🔍 <strong>Root cause:</strong> ${escapeHtml(path.ai_root_cause)}`;
   }
   if (path.ai_estimated_time || path.ai_difficulty) {
     queryHtml += `<br><br>`;
-    if (path.ai_estimated_time) queryHtml += `⏱️ ${path.ai_estimated_time} `;
-    if (path.ai_difficulty) queryHtml += `| 📊 ${path.ai_difficulty}`;
+    if (path.ai_estimated_time) queryHtml += `⏱️ ${escapeHtml(path.ai_estimated_time)} `;
+    if (path.ai_difficulty) queryHtml += `| 📊 ${escapeHtml(path.ai_difficulty)}`;
   }
   if (path.ai_hint) {
-    queryHtml += `<br><br>💡 <strong>Tip:</strong> ${path.ai_hint}`;
+    queryHtml += `<br><br>💡 <strong>Tip:</strong> ${escapeHtml(path.ai_hint)}`;
   }
   if (path.ai_what_you_learn && path.ai_what_you_learn.length > 0) {
     queryHtml += `<br><br><strong>What you'll learn:</strong><ul style="margin: 0.5rem 0 0 1.25rem; color: var(--text-muted);">`;
     path.ai_what_you_learn.forEach((item) => {
-      queryHtml += `<li>${item}</li>`;
+      queryHtml += `<li>${escapeHtml(item)}</li>`;
     });
     queryHtml += `</ul>`;
   }
@@ -415,7 +354,7 @@ function renderPath(path) {
   const tagsContainer = document.getElementById("pathTags");
   const tags = path.tags || [];
   tagsContainer.innerHTML = tags
-    .map((t) => `<span class="tag">${t}</span>`)
+    .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
     .join("");
 
   // Render steps (with fallback for empty/missing)
@@ -429,11 +368,11 @@ function renderPath(path) {
   stepsContainer.innerHTML = steps
     .map(
       (step) => `
-          <div class="step-card" id="step-${step.number}" data-type="${step.type}">
+          <div class="step-card" id="step-${step.number}" data-type="${escapeHtml(step.type)}">
               <div class="step-header" onclick="toggleStep(${step.number})">
                   <div class="step-number"><span>${step.number}</span></div>
-                  <span class="step-type ${step.type}">${step.type}</span>
-                  <span class="step-title">${step.title}</span>
+                  <span class="step-type ${escapeHtml(step.type)}">${escapeHtml(step.type)}</span>
+                  <span class="step-title">${escapeHtml(step.title)}</span>
                   <span class="step-toggle">▼</span>
               </div>
               <div class="step-content">
@@ -448,8 +387,8 @@ function renderPath(path) {
                           <div class="content-item" data-url="${c.url}" data-desc="${safeDesc}">
                               ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="" class="content-thumbnail" onclick="playVideoFromCard(this.closest('.content-item'))" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%232a2a3e%22 width=%22320%22 height=%22180%22/><text x=%22160%22 y=%2290%22 text-anchor=%22middle%22 fill=%22%237a7a8a%22 font-size=%2232%22>▶ Video</text></svg>'">` : ""}
                               <div class="content-details">
-                                  <div class="content-type">${c.type}</div>
-                                  <div class="content-title">${c.title}</div>
+                                  <div class="content-type">${escapeHtml(c.type)}</div>
+                                  <div class="content-title">${escapeHtml(c.title)}</div>
                                   ${c.description ? `<p class="content-description">${parseMarkdown(c.description)}</p>` : ""}
                                   ${
                                     c.watch_points && c.watch_points.length > 0
@@ -464,7 +403,7 @@ function renderPath(path) {
                                                   <label class="wp-checkbox-label">
                                                       <input type="checkbox" class="wp-checkbox" onchange="toggleWatchPoint(this)">
                                                       <span class="wp-time" onclick="playVideoAtTime('${c.url}', '${wp.time}')">${wp.time}</span>
-                                                      <span class="wp-label">${wp.label}</span>
+                                                      <span class="wp-label">${escapeHtml(wp.label)}</span>
                                                   </label>
                                                   ${wp.keywords ? `<span class="wp-keywords">${wp.keywords.join(", ")}</span>` : ""}
                                               </li>
@@ -518,7 +457,7 @@ function toggleStep(num) {
 }
 
 function completeStep(num) {
-  completedSteps.add(num);
+  AppState.completedSteps.add(num);
   const card = document.getElementById(`step-${num}`);
   card.classList.add("completed");
   card.classList.remove("expanded"); // Auto-collapse on completion
@@ -531,7 +470,7 @@ function completeStep(num) {
   // Auto-expand and scroll to next uncompleted step
   const nextStep = num + 1;
   const nextCard = document.getElementById(`step-${nextStep}`);
-  if (nextCard && !completedSteps.has(nextStep)) {
+  if (nextCard && !AppState.completedSteps.has(nextStep)) {
     nextCard.classList.add("expanded");
     // Smooth scroll to the next step after a brief delay
     setTimeout(() => {
@@ -541,9 +480,9 @@ function completeStep(num) {
 }
 
 function updateProgress() {
-  if (!currentPath) return;
-  const total = currentPath.steps.length;
-  const completed = completedSteps.size;
+  if (!AppState.currentPath) return;
+  const total = AppState.currentPath.steps.length;
+  const completed = AppState.completedSteps.size;
   const percent = (completed / total) * 100;
 
   // Update progress bar and text (both desktop sidebar and mobile)
@@ -559,12 +498,12 @@ function updateProgress() {
     progressTextMobile.textContent = `Progress: ${completed}/${total} steps`;
 
   // Update step tree items
-  currentPath.steps.forEach((step) => {
+  AppState.currentPath.steps.forEach((step) => {
     const treeItem = document.getElementById(`tree-step-${step.number}`);
     if (treeItem) {
-      treeItem.classList.toggle("completed", completedSteps.has(step.number));
+      treeItem.classList.toggle("completed", AppState.completedSteps.has(step.number));
       const indicator = treeItem.querySelector(".tree-indicator");
-      if (indicator && completedSteps.has(step.number)) {
+      if (indicator && AppState.completedSteps.has(step.number)) {
         indicator.textContent = "✓";
       }
     }
@@ -581,7 +520,7 @@ function renderStepTree(steps) {
       (step) => `
       <div class="step-tree-item" id="tree-step-${step.number}" onclick="jumpToStep(${step.number})">
         <span class="tree-indicator">${step.number}</span>
-        <span class="tree-label">${step.title}</span>
+        <span class="tree-label">${escapeHtml(step.title)}</span>
       </div>
     `,
     )
@@ -605,8 +544,8 @@ function jumpToStep(num) {
 }
 
 function sharePath() {
-  const pathId = currentPath?.path_id || "";
-  const query = currentPath?.query || "";
+  const pathId = AppState.currentPath?.path_id || "";
+  const query = AppState.currentPath?.query || "";
 
   // Use path_id for exact path sharing, fallback to query
   const shareUrl = pathId
@@ -647,7 +586,7 @@ function goBackToSearch() {
 
 // Rate the current learning path (thumbs up/down)
 function ratePath(rating) {
-  if (!currentPath) return;
+  if (!AppState.currentPath) return;
 
   const feedback = document.getElementById("ratingFeedback");
 
@@ -657,8 +596,8 @@ function ratePath(rating) {
       .firestore()
       .collection("path_ratings")
       .add({
-        path_id: currentPath.path_id || currentPath.query,
-        query: currentPath.query,
+        path_id: AppState.currentPath.path_id || AppState.currentPath.query,
+        query: AppState.currentPath.query,
         rating: rating, // 'up' or 'down'
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       })
@@ -681,9 +620,9 @@ function ratePath(rating) {
         display: { "en-US": rating === "up" ? "liked" : "disliked" },
       },
       object: {
-        id: `ue5-path:${currentPath.path_id || currentPath.query}`,
+        id: `ue5-path:${AppState.currentPath.path_id || AppState.currentPath.query}`,
         definition: {
-          name: { "en-US": currentPath.title || currentPath.query },
+          name: { "en-US": AppState.currentPath.title || AppState.currentPath.query },
           type: "http://adlnet.gov/expapi/activities/assessment",
         },
       },
@@ -699,7 +638,7 @@ function ratePath(rating) {
   // 3. Log to internal Tracker (if available)
   if (typeof Tracker !== "undefined") {
     Tracker.trackEvent("path_rating", {
-      path_id: currentPath.path_id || currentPath.query,
+      path_id: AppState.currentPath.path_id || AppState.currentPath.query,
       rating: rating,
     });
   }

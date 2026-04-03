@@ -26,7 +26,7 @@ def get_difficulty(code: str) -> int:
             return 5  # Advanced
         else:
             return 2  # Default
-    except:
+    except (ValueError, IndexError):
         return 2
 
 # Prerequisite suggestions based on topic/difficulty
@@ -61,7 +61,7 @@ def get_prerequisites(code: str) -> list:
             prereqs.append(f"1{topic}.00")
         elif series == 3:
             prereqs.append(f"2{topic}.00")
-    except:
+    except (ValueError, IndexError):
         pass
 
     return prereqs

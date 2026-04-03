@@ -4,9 +4,7 @@
 // PROBLEM BASKET - Ingredient Management
 // =====================================================
 const MAX_INGREDIENTS = 5; // Limit for focused queries
-const ingredients = [];
-let currentPanel = null;
-let currentScreenshot = null;
+// AppState.ingredients, AppState.currentPanel, AppState.currentScreenshot are now in AppState (state.js)
 
 function showInputPanel(panelType) {
   const panels = ["text", "log", "screenshot", "tags"];
@@ -15,7 +13,7 @@ function showInputPanel(panelType) {
     const panel = document.getElementById(p + "Panel");
     const btn = buttons[i];
     if (!panel || !btn) return;
-    if (p === panelType && currentPanel !== panelType) {
+    if (p === panelType && AppState.currentPanel !== panelType) {
       panel.style.display = "flex";
       btn.classList.add("active");
       // Update dynamic suggestions when opening tags panel
@@ -27,9 +25,9 @@ function showInputPanel(panelType) {
       btn.classList.remove("active");
     }
   });
-  currentPanel = currentPanel === panelType ? null : panelType;
-  if (currentPanel === "text") document.getElementById("textInput").focus();
-  else if (currentPanel === "log") document.getElementById("logInput").focus();
+  AppState.currentPanel = AppState.currentPanel === panelType ? null : panelType;
+  if (AppState.currentPanel === "text") document.getElementById("textInput").focus();
+  else if (AppState.currentPanel === "log") document.getElementById("logInput").focus();
 }
 
 function addTextIngredient() {
@@ -40,24 +38,14 @@ function addTextIngredient() {
   input.value = "";
 }
 
-// UE5 Error Patterns for log parsing
-const UE5_PATTERNS = [
-  { pattern: /ExitCode[=:\s]*(\d+)/i, extract: (m) => `ExitCode ${m[1]}` },
-  { pattern: /ShaderCompileWorker/i, extract: () => "Shader error" },
-  { pattern: /D3D\s*device\s*lost/i, extract: () => "D3D device lost" },
-  { pattern: /Accessed\s*None/i, extract: () => "Accessed None" },
-  { pattern: /Lumen/i, extract: () => "Lumen" },
-  { pattern: /Nanite/i, extract: () => "Nanite" },
-  { pattern: /packaging\s*(fail|error)/i, extract: () => "Packaging error" },
-  { pattern: /Fatal\s*error/i, extract: () => "Fatal error" },
-];
+// UE5_ERROR_PATTERNS defined in ue5Patterns.js (shared with app.js)
 
 function addLogIngredient() {
   const textarea = document.getElementById("logInput");
   const log = textarea.value.trim();
   if (!log) return;
   const found = new Set();
-  for (const { pattern, extract } of UE5_PATTERNS) {
+  for (const { pattern, extract } of UE5_ERROR_PATTERNS) {
     const match = log.match(pattern);
     if (match) found.add(extract(match));
   }
@@ -72,17 +60,17 @@ function handleScreenshotSelect(event) {
   if (!file || !file.type.startsWith("image/")) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    currentScreenshot = { data: e.target.result, name: file.name };
+    AppState.currentScreenshot = { data: e.target.result, name: file.name };
     document.getElementById("dropzoneContent").style.display = "none";
     document.getElementById("screenshotPreview").style.display = "block";
-    document.getElementById("previewImage").src = currentScreenshot.data;
+    document.getElementById("previewImage").src = AppState.currentScreenshot.data;
     document.getElementById("addScreenshotBtn").disabled = false;
   };
   reader.readAsDataURL(file);
 }
 
 function clearScreenshotPreview() {
-  currentScreenshot = null;
+  AppState.currentScreenshot = null;
   document.getElementById("screenshotInput").value = "";
   document.getElementById("dropzoneContent").style.display = "flex";
   document.getElementById("screenshotPreview").style.display = "none";
@@ -90,26 +78,26 @@ function clearScreenshotPreview() {
 }
 
 function addScreenshotIngredient() {
-  if (!currentScreenshot) return;
-  addIngredient("screenshot", "Screenshot", "📷", currentScreenshot.data);
+  if (!AppState.currentScreenshot) return;
+  addIngredient("screenshot", "Screenshot", "📷", AppState.currentScreenshot.data);
   clearScreenshotPreview();
 }
 
 // Core ingredient management
 function addIngredient(type, label, icon, data = null) {
   // Enforce max limit
-  if (ingredients.length >= MAX_INGREDIENTS) {
+  if (AppState.ingredients.length >= MAX_INGREDIENTS) {
     return; // Silently refuse - UI disables inputs
   }
   const id = Date.now() + Math.random();
-  ingredients.push({ id, type, label, icon, data });
+  AppState.ingredients.push({ id, type, label, icon, data });
   renderBasket();
 }
 
 function removeIngredient(id) {
-  const idx = ingredients.findIndex((i) => i.id === id);
+  const idx = AppState.ingredients.findIndex((i) => i.id === id);
   if (idx !== -1) {
-    ingredients.splice(idx, 1);
+    AppState.ingredients.splice(idx, 1);
     renderBasket();
   }
 }
@@ -122,7 +110,7 @@ function renderBasket() {
   const empty = document.getElementById("basketEmpty");
   const chips = document.getElementById("ingredientChips");
   const btn = document.getElementById("generateBtn");
-  const atLimit = ingredients.length >= MAX_INGREDIENTS;
+  const atLimit = AppState.ingredients.length >= MAX_INGREDIENTS;
 
   // Disable add buttons when at limit
   document.querySelectorAll(".input-method-btn").forEach((b) => {
@@ -130,21 +118,21 @@ function renderBasket() {
     b.style.pointerEvents = atLimit ? "none" : "auto";
   });
 
-  if (ingredients.length === 0) {
+  if (AppState.ingredients.length === 0) {
     empty.style.display = "block";
-    empty.textContent = "Add up to 5 ingredients to describe your problem";
+    empty.textContent = "Add up to 5 AppState.ingredients to describe your problem";
     chips.innerHTML = "";
     btn.disabled = true;
   } else {
     empty.style.display = atLimit ? "block" : "none";
     if (atLimit) {
-      empty.textContent = `✓ Max ${MAX_INGREDIENTS} ingredients reached`;
+      empty.textContent = `✓ Max ${MAX_INGREDIENTS} AppState.ingredients reached`;
       empty.style.color = "var(--success)";
     }
-    chips.innerHTML = ingredients
+    chips.innerHTML = AppState.ingredients
       .map(
         (ing) =>
-          `<div class="ingredient-chip ${ing.type}-chip"><span>${ing.icon} ${ing.label}</span><button class="chip-remove" onclick="removeIngredient(${ing.id})">✕</button></div>`,
+          `<div class="ingredient-chip ${escapeHtml(ing.type)}-chip"><span>${escapeHtml(ing.icon)} ${escapeHtml(ing.label)}</span><button class="chip-remove" onclick="removeIngredient(${ing.id})">✕</button></div>`,
       )
       .join("");
     btn.disabled = false;
@@ -152,8 +140,8 @@ function renderBasket() {
 }
 
 function generateFromBasket() {
-  if (ingredients.length === 0) return;
-  const query = ingredients
+  if (AppState.ingredients.length === 0) return;
+  const query = AppState.ingredients
     .filter((i) => i.type !== "screenshot")
     .map((i) => i.label)
     .join(" ");
@@ -189,13 +177,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = item.getAsFile();
         if (file) {
           // Open screenshot panel if not already open
-          if (currentPanel !== "screenshot") {
+          if (AppState.currentPanel !== "screenshot") {
             showInputPanel("screenshot");
           }
           // Process the pasted image
           const reader = new FileReader();
           reader.onload = (ev) => {
-            currentScreenshot = {
+            AppState.currentScreenshot = {
               data: ev.target.result,
               name: "pasted-image.png",
             };
@@ -203,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("screenshotPreview").style.display =
               "block";
             document.getElementById("previewImage").src =
-              currentScreenshot.data;
+              AppState.currentScreenshot.data;
             document.getElementById("addScreenshotBtn").disabled = false;
           };
           reader.readAsDataURL(file);
@@ -262,8 +250,8 @@ async function loadTrendingQueries() {
   }
 
   // Fallback: Use cached paths index (works in LMS without Firebase)
-  if (trendingTerms.length === 0 && cachedPathsIndex.length > 0) {
-    trendingTerms = cachedPathsIndex.slice(0, 5).map((p) => p.query);
+  if (trendingTerms.length === 0 && AppState.cachedPathsIndex.length > 0) {
+    trendingTerms = AppState.cachedPathsIndex.slice(0, 5).map((p) => p.query);
   }
 
   // Final fallback: Common UE5 issues
@@ -283,7 +271,7 @@ async function loadTrendingQueries() {
     ${trendingTerms
       .map(
         (term) =>
-          `<button class="example-btn" onclick="quickAddIngredient('${term.replace(/'/g, "\\'")}')">${shortenTerm(term)}</button>`,
+          `<button class="example-btn" onclick="quickAddIngredient('${escapeHtml(term).replace(/'/g, "\\'")}')">${escapeHtml(shortenTerm(term))}</button>`,
       )
       .join("")}
   `;

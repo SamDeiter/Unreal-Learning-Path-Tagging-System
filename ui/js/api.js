@@ -1,13 +1,12 @@
 /* UE5 Learning Path Builder - API Module */
 
-// Cached paths index (populated from paths/index.json)
-let cachedPathsIndex = [];
+// AppState.cachedPathsIndex is now in AppState (state.js)
 
 // Load the paths index on page load
 fetch("/paths/index.json")
   .then((r) => r.json())
   .then((data) => {
-    cachedPathsIndex = data;
+    AppState.cachedPathsIndex = data;
     populateGallery();
   })
   .catch(() => console.log("No cached paths index"));
@@ -16,13 +15,13 @@ fetch("/paths/index.json")
 function findCachedPath(query) {
   const q = query.toLowerCase();
   // First try exact match
-  let match = cachedPathsIndex.find((p) => p.query.toLowerCase() === q);
+  let match = AppState.cachedPathsIndex.find((p) => p.query.toLowerCase() === q);
   if (match) return match;
   // Then try partial match (query contains cached query term)
-  match = cachedPathsIndex.find((p) => q.includes(p.query.toLowerCase()));
+  match = AppState.cachedPathsIndex.find((p) => q.includes(p.query.toLowerCase()));
   if (match) return match;
   // Try if cached query contains search term
-  match = cachedPathsIndex.find((p) =>
+  match = AppState.cachedPathsIndex.find((p) =>
     p.query.toLowerCase().includes(q.split(" ")[0]),
   );
   return match;
@@ -48,16 +47,16 @@ function tryApiCall(query) {
         console.log("[API] Cloud Function SUCCESS:", result.data);
         document.getElementById("loading").classList.remove("active");
         if (result.data.success && result.data.path) {
-          currentPath = result.data.path;
+          AppState.currentPath = result.data.path;
           // Ensure steps array exists
-          currentPath.steps = currentPath.steps || [];
-          currentPath.tags = currentPath.tags || [];
+          AppState.currentPath.steps = AppState.currentPath.steps || [];
+          AppState.currentPath.tags = AppState.currentPath.tags || [];
           // Store usage stats for display
           if (result.data.usage) {
-            currentPath.usage = result.data.usage;
+            AppState.currentPath.usage = result.data.usage;
           }
-          renderPath(currentPath);
-          logQuery(query, currentPath.steps.length > 0);
+          renderPath(AppState.currentPath);
+          logQuery(query, AppState.currentPath.steps.length > 0);
         } else {
           throw new Error("No path in response");
         }
@@ -81,8 +80,8 @@ function tryLocalApi(query) {
     })
     .then((data) => {
       document.getElementById("loading").classList.remove("active");
-      currentPath = data;
-      renderPath(currentPath);
+      AppState.currentPath = data;
+      renderPath(AppState.currentPath);
       logQuery(query, data.steps && data.steps.length > 0);
     })
     .catch((error) => {
@@ -100,8 +99,8 @@ function tryCacheFallback(query) {
       .then((r) => r.json())
       .then((data) => {
         document.getElementById("loading").classList.remove("active");
-        currentPath = data;
-        renderPath(currentPath);
+        AppState.currentPath = data;
+        renderPath(AppState.currentPath);
         logQuery(query, true);
         console.log("Loaded from cache (offline fallback):", cached.file);
       })
@@ -119,25 +118,4 @@ function showOfflineError(query) {
   );
 }
 
-// Log query to Firestore for analytics (optional - fails gracefully)
-function logQuery(query, success) {
-  if (typeof firebase !== "undefined" && firebase.firestore) {
-    try {
-      // Use serverTimestamp() - required by security rules
-      firebase
-        .firestore()
-        .collection("query_logs")
-        .add({
-          query: query.substring(0, 200),
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          // Limit to 5 fields max per security rules
-          success: success,
-        })
-        .catch(() => {
-          // Silent fail - analytics are optional
-        });
-    } catch (e) {
-      // Silent fail - analytics are optional
-    }
-  }
-}
+// logQuery is defined in index.html (canonical version with rate limiting + sanitization)

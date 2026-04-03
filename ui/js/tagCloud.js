@@ -91,11 +91,11 @@ function renderTagCloud(tags, containerId = "tagCloud") {
   container.innerHTML = shuffled
     .map((tag, i) => {
       const hotClass = tag.weight >= 4 && i < 3 ? "hot" : "";
-      return `<button 
-        class="cloud-tag weight-${tag.weight} ${hotClass}" 
-        onclick="addTagToBasket('${tag.term}')"
+      return `<button
+        class="cloud-tag weight-${tag.weight} ${hotClass}"
+        onclick="addTagToBasket('${escapeHtml(tag.term).replace(/'/g, "\\'")}')"
         title="${tag.count ? `${tag.count} searches` : "Popular topic"}"
-      >${tag.term}</button>`;
+      >${escapeHtml(tag.term)}</button>`;
     })
     .join("");
 }
@@ -142,7 +142,7 @@ async function updateTagSuggestions() {
 
   // Get current basket items
   const basketLabels = (
-    typeof ingredients !== "undefined" ? ingredients : []
+    typeof AppState !== "undefined" ? AppState.ingredients : []
   ).map((i) => i.label.toLowerCase());
 
   if (basketLabels.length === 0) {
