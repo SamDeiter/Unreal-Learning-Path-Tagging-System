@@ -83,10 +83,12 @@ export function buildTagEdges(courses) {
  * @returns {Array} Filtered courses
  */
 export function filterCourses(courses, { search = "", level = null, topic = null }) {
+  // Optimize: Normalize search query once before filtering
+  const searchLower = search ? search.toLowerCase() : "";
+
   return courses.filter((course) => {
     // Search filter
-    if (search) {
-      const searchLower = search.toLowerCase();
+    if (searchLower) {
       const matchesSearch =
         course.title?.toLowerCase().includes(searchLower) ||
         course.code?.toLowerCase().includes(searchLower) ||
