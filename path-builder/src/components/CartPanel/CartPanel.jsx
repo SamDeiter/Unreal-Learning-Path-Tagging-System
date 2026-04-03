@@ -43,7 +43,14 @@ export default function CartPanel({ cart, onRemove, onClear, onWatchPath }) {
       <div className="cart-header">
         <h3 className="cart-title">🛒 My Learning Path</h3>
         {cart.length > 0 && (
-          <button className="cart-clear-btn" onClick={onClear} title="Clear all">
+          <button
+            className="cart-clear-btn"
+            onClick={() => {
+              if (window.confirm("Are you sure you want to clear your learning path?")) onClear();
+            }}
+            title="Clear all"
+            aria-label="Clear all items from learning path"
+          >
             Clear
           </button>
         )}
