@@ -22,61 +22,98 @@ function tokenize(str) {
     .filter((t) => t.length > 2);
 }
 
+// ── Cache for normalized course data ──
+const courseCache = new WeakMap();
+
+/**
+ * Pre-processes and caches course data for faster matching.
+ * Since course objects are stable, we can normalize them once.
+ */
+function getCachedCourseData(course) {
+  let data = courseCache.get(course);
+  if (!data) {
+    const title = normalize(course.title || course.folder_name || "");
+    const description = normalize(course.description || "");
+    const tags = [];
+
+    const addTags = (val) => {
+      if (!val) return;
+      if (Array.isArray(val)) {
+        for (let i = 0; i < val.length; i++) {
+          if (typeof val[i] === "string") tags.push(normalize(val[i]));
+        }
+      } else if (typeof val === "object") {
+        for (const k in val) {
+          if (typeof val[k] === "string") tags.push(normalize(val[k]));
+        }
+      }
+    };
+
+    addTags(course.extracted_tags);
+    addTags(course.transcript_tags);
+    addTags(course.tags);
+
+    data = {
+      title,
+      titleWords: title.split(/\s+/),
+      description,
+      tags: [...new Set(tags)], // Deduplicate
+    };
+    courseCache.set(course, data);
+  }
+  return data;
+}
+
 /**
  * Calculates match score between goal and course
- * Higher scores = better match
+ * Optimized: accepts pre-tokenized goal tokens and uses cached course data
  */
-function scoreCourse(goal, course) {
-  if (!course) return 0;
-  const goalTokens = tokenize(goal);
-  if (goalTokens.length === 0) return 0;
+function scoreCourse(goalTokens, course) {
+  if (!course || !goalTokens || goalTokens.length === 0) return 0;
 
+  const { title, titleWords, description, tags } = getCachedCourseData(course);
   let score = 0;
 
-  // Build searchable content from course
-  const title = normalize(course.title || course.folder_name || "");
-  const description = normalize(course.description || "");
+  for (let i = 0; i < goalTokens.length; i++) {
+    const token = goalTokens[i];
 
-  // Handle tags - could be array or object with level/topic properties
-  let tagsList = [];
-  if (Array.isArray(course.extracted_tags)) {
-    tagsList = tagsList.concat(course.extracted_tags);
-  }
-  if (Array.isArray(course.transcript_tags)) {
-    tagsList = tagsList.concat(course.transcript_tags);
-  }
-  if (Array.isArray(course.tags)) {
-    tagsList = tagsList.concat(course.tags);
-  } else if (course.tags && typeof course.tags === "object") {
-    // tags is an object like {level: "Beginner", topic: "Blueprints"}
-    tagsList = tagsList.concat(Object.values(course.tags).filter((v) => typeof v === "string"));
-  }
-  const tags = tagsList.map(normalize);
-
-  goalTokens.forEach((token) => {
     // Title match (highest value)
     if (title.includes(token)) {
       score += 30;
+      // Partial word match in title (bonus if it starts with token)
+      for (let j = 0; j < titleWords.length; j++) {
+        if (titleWords[j].startsWith(token)) {
+          score += 15;
+          break; // Bonus once per token
+        }
+      }
     }
 
     // Exact tag match (very high value)
-    if (tags.some((tag) => tag === token || tag.includes(token))) {
-      score += 25;
+    for (let j = 0; j < tags.length; j++) {
+      if (tags[j].includes(token)) {
+        score += 25;
+        break; // Score once per token
+      }
     }
 
     // Description match
     if (description.includes(token)) {
       score += 10;
     }
-
-    // Partial word match in title
-    if (title.split(/\s+/).some((word) => word.startsWith(token))) {
-      score += 15;
-    }
-  });
+  }
 
   // Bonus for multiple tag matches
-  const tagMatches = tags.filter((tag) => goalTokens.some((t) => tag.includes(t))).length;
+  let tagMatches = 0;
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    for (let j = 0; j < goalTokens.length; j++) {
+      if (tag.includes(goalTokens[j])) {
+        tagMatches++;
+        break;
+      }
+    }
+  }
   score += tagMatches * 5;
 
   return score;
@@ -94,15 +131,20 @@ export function matchCoursesToGoal(goal, courses, limit = 8) {
     return [];
   }
 
-  const scored = courses
-    .map((course) => ({
-      ...course,
-      matchScore: scoreCourse(goal, course),
-    }))
-    .filter((c) => c.matchScore > 0)
-    .sort((a, b) => b.matchScore - a.matchScore);
+  // Optimize: Tokenize goal once instead of 2,400+ times
+  const goalTokens = tokenize(goal);
+  if (goalTokens.length === 0) return [];
 
-  return scored.slice(0, limit);
+  const scored = [];
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+    const score = scoreCourse(goalTokens, course);
+    if (score > 0) {
+      scored.push({ ...course, matchScore: score });
+    }
+  }
+
+  return scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, limit);
 }
 
 /**
