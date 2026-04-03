@@ -45,7 +45,7 @@ export function cosineSimilarity(a, b) {
  * @returns {Array<{code: string, title: string, similarity: number}>}
  */
 export async function findSimilarCourses(queryEmbedding, topK = 5, _threshold = 0.3) {
-  if (!queryEmbedding) return [];
+  if (!queryEmbedding || !Array.isArray(queryEmbedding) || queryEmbedding.length !== 768) return [];
 
   try {
     const app = getFirebaseApp();

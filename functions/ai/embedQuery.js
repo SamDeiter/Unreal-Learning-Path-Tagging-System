@@ -80,6 +80,10 @@ exports.embedQuery = functions
       if (!embedding || embedding.length !== DIMENSION) {
         throw new functions.https.HttpsError("internal", "Invalid embedding response");
       }
+      if (embedding.some((v) => !Number.isFinite(v))) {
+        console.error("[embedQuery] Embedding contains NaN or Infinity values");
+        throw new functions.https.HttpsError("internal", "Invalid embedding response");
+      }
 
       return { success: true, embedding };
     } catch (err) {

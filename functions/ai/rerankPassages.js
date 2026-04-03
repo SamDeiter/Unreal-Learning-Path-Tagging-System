@@ -60,7 +60,10 @@ exports.rerankPassages = functions
 
     // Build numbered passage list
     const passageList = truncated
-      .map((p, i) => `[${i}] ${String(p.text || "").slice(0, 300)}`)
+      .map((p, i) => {
+        const safeText = String(p.text || "").slice(0, 300).replace(/[\[\]"\\]/g, "");
+        return `[${i}] ${safeText}`;
+      })
       .join("\n");
 
     const prompt = `You are a relevance scoring engine for Unreal Engine 5 technical content.
@@ -130,7 +133,7 @@ Include ALL ${truncated.length} passages.`;
       return { success: true, reranked };
     } catch (err) {
       console.error("[rerankPassages] Error:", err.message);
-      return { success: true, reranked: truncated, fallback: true };
+      return { success: false, reranked: truncated, fallback: true, error: err.message };
     } finally {
       logApiUsage(userId, { type: "generation", function: "rerankPassages" , firestoreReads: 12, firestoreWrites: 1 });
     }

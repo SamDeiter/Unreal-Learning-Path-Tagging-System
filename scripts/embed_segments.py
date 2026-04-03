@@ -221,7 +221,7 @@ def main():
 
     # Get API key
     api_key = get_api_key()
-    print(f"\n  API key: {api_key[:8]}...{api_key[-4:]}")
+    print("\n  API key: [set]")
 
     # Resume support
     start_idx = 0

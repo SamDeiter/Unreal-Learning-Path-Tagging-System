@@ -92,6 +92,7 @@ export async function searchSegments(query, courses = []) {
           courseScores.set(courseCode, { score: 0, matchedKeywords: [] });
         }
         const entry = courseScores.get(courseCode);
+        // Exact match weight: 10x frequency to strongly prefer direct keyword hits
         entry.score += wordFreq[keyword] * 10;
         if (!entry.matchedKeywords.includes(keyword)) {
           entry.matchedKeywords.push(keyword);
@@ -112,6 +113,7 @@ export async function searchSegments(query, courses = []) {
             courseScores.set(courseCode, { score: 0, matchedKeywords: [] });
           }
           const entry = courseScores.get(courseCode);
+          // Prefix match weight: 3x frequency (weaker than exact match 10x)
           entry.score += count * 3;
           if (!entry.matchedKeywords.includes(word)) {
             entry.matchedKeywords.push(word);
@@ -353,47 +355,49 @@ export async function searchSegmentsHybrid(query, queryEmbedding, courses = [], 
     semanticResults = await searchSegmentsSemantic(queryEmbedding, topK, 0.35);
   }
 
-  // Semantic results are passage-level, keyword results are course-level
-  // Merge: semantic passages first, then keyword courses as fallback
-  const seen = new Set();
-  const merged = [];
+  // Merge: deduplicate by segment key, keeping the higher-scoring entry
+  const bestByKey = new Map(); // key → entry
 
-  // Add semantic results (higher priority — passage-level)
+  // Add semantic results (passage-level)
   for (const seg of semanticResults) {
     const key = `${seg.courseCode}:${seg.videoKey}:${seg.timestamp}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      merged.push({
-        ...seg,
-        searchType: "semantic",
-        score: Math.round(seg.similarity * 100),
-      });
+    const entry = {
+      ...seg,
+      searchType: "semantic",
+      score: Math.round(seg.similarity * 100),
+    };
+    const existing = bestByKey.get(key);
+    if (!existing || entry.score > existing.score) {
+      bestByKey.set(key, entry);
     }
   }
 
-  // Add keyword results that weren't already covered
+  // Add keyword results, replacing if score is higher
   for (const kw of keywordResults) {
     for (const topSeg of kw.topSegments || []) {
       const key = `${kw.courseCode}:${topSeg.videoKey}:${topSeg.timestamp}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        merged.push({
-          id: `kw_${kw.courseCode}_${topSeg.videoKey}`,
-          courseCode: kw.courseCode,
-          videoKey: topSeg.videoKey,
-          videoTitle: topSeg.videoTitle,
-          timestamp: topSeg.timestamp,
-          startSeconds: topSeg.startSeconds,
-          previewText: topSeg.previewText,
-          similarity: 0,
-          score: topSeg.score,
-          searchType: "keyword",
-          source: "transcript",
-        });
+      const entry = {
+        id: `kw_${kw.courseCode}_${topSeg.videoKey}`,
+        courseCode: kw.courseCode,
+        videoKey: topSeg.videoKey,
+        videoTitle: topSeg.videoTitle,
+        timestamp: topSeg.timestamp,
+        startSeconds: topSeg.startSeconds,
+        previewText: topSeg.previewText,
+        similarity: 0,
+        score: topSeg.score,
+        searchType: "keyword",
+        source: "transcript",
+      };
+      const existing = bestByKey.get(key);
+      if (!existing || entry.score > existing.score) {
+        bestByKey.set(key, entry);
       }
     }
   }
 
+  const merged = Array.from(bestByKey.values());
+  merged.sort((a, b) => b.score - a.score);
   return merged.slice(0, topK);
 }
 

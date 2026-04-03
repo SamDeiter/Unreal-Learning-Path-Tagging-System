@@ -120,11 +120,14 @@ Example: ["ray traced reflections noise", "lumen GI artifact flickering", "scree
       // Cache result
       _cache.set(normalized, { expansions, ts: Date.now() });
 
-      // Evict old entries
-      if (_cache.size > 500) {
-        const now = Date.now();
-        for (const [key, val] of _cache) {
-          if (now - val.ts > CACHE_TTL_MS) _cache.delete(key);
+      // LRU-style eviction: trim to 150 when exceeding 200 (Map preserves insertion order)
+      if (_cache.size > 200) {
+        const toDelete = _cache.size - 150;
+        let deleted = 0;
+        for (const key of _cache.keys()) {
+          if (deleted >= toDelete) break;
+          _cache.delete(key);
+          deleted++;
         }
       }
 

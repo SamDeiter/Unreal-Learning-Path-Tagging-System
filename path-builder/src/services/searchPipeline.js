@@ -150,6 +150,8 @@ export async function runSearchPipeline(query, options = {}) {
         (p.text || "").trim().toLowerCase().slice(0, 120)
       );
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
+    } else {
+      devWarn("⚠️ Embedding failed — falling back to keyword-only search");
     }
   } catch (semanticErr) {
     devWarn("⚠️ Semantic search skipped:", semanticErr.message);

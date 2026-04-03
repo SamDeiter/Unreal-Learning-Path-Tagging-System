@@ -34,6 +34,22 @@ async function enforceRateLimit(request) {
 }
 
 /**
+ * Validate a query vector before sending to Firestore.
+ * Checks dimension, type, and for NaN/Infinity values.
+ */
+function validateVector(queryVector) {
+  if (!queryVector || !Array.isArray(queryVector)) {
+    throw new HttpsError("invalid-argument", "queryVector is required and must be an array");
+  }
+  if (queryVector.length !== 768) {
+    throw new HttpsError("invalid-argument", `Expected 768-dim vector, got ${queryVector.length}`);
+  }
+  if (queryVector.some(v => !Number.isFinite(v))) {
+    throw new HttpsError("invalid-argument", "Vector contains NaN or Infinity values");
+  }
+}
+
+/**
  * Generic vector search against a Firestore collection.
  * Uses findNearest() for native KNN search.
  */
@@ -56,8 +72,9 @@ async function searchCollection(collectionName, queryVector, topK) {
     // Remove the embedding vector from results (too large to send back)
     // eslint-disable-next-line no-unused-vars
     const { embedding: _embedding, vector_distance: rawDist, ...metadata } = data;
-    // Convert cosine distance (0 = identical, 2 = opposite) to similarity (1 = identical, -1 = opposite)
-    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist : 0;
+    // Cosine distance ranges [0, 2]: 0 = identical, 1 = orthogonal, 2 = opposite.
+    // Convert to similarity [1, 0]: 1 = identical, 0 = opposite.
+    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist / 2 : 0;
     results.push({
       id: doc.id,
       similarity,
@@ -76,13 +93,7 @@ exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10, mem
     requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
-
-  if (!queryVector || !Array.isArray(queryVector)) {
-    throw new HttpsError("invalid-argument", "queryVector is required");
-  }
-  if (queryVector.length !== 768) {
-    throw new HttpsError("invalid-argument", `Expected 768-dim vector, got ${queryVector.length}`);
-  }
+  validateVector(queryVector);
 
   const results = await searchCollection("epic_embeddings", queryVector, Math.min(topK, 20));
   logApiUsage(userId, { type: "generation", function: "vectorSearchEpic" , firestoreReads: 12, firestoreWrites: 1 });
@@ -100,10 +111,7 @@ exports.vectorSearchCourses = onCall(
     requireAppCheck(request, { allowInvalid: true });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 5 } = request.data;
-
-    if (!queryVector || !Array.isArray(queryVector)) {
-      throw new HttpsError("invalid-argument", "queryVector is required");
-    }
+    validateVector(queryVector);
 
     const results = await searchCollection("course_embeddings", queryVector, Math.min(topK, 20));
     logApiUsage(userId, { type: "generation", function: "vectorSearchCourses" , firestoreReads: 7, firestoreWrites: 1 });
@@ -122,10 +130,7 @@ exports.vectorSearchSegments = onCall(
     requireAppCheck(request, { allowInvalid: true });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 10 } = request.data;
-
-    if (!queryVector || !Array.isArray(queryVector)) {
-      throw new HttpsError("invalid-argument", "queryVector is required");
-    }
+    validateVector(queryVector);
 
     const results = await searchCollection("segment_embeddings", queryVector, Math.min(topK, 20));
     logApiUsage(userId, { type: "generation", function: "vectorSearchSegments" , firestoreReads: 12, firestoreWrites: 1 });
@@ -142,10 +147,7 @@ exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10, mem
   requireAppCheck(request, { allowInvalid: true });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
-
-  if (!queryVector || !Array.isArray(queryVector)) {
-    throw new HttpsError("invalid-argument", "queryVector is required");
-  }
+  validateVector(queryVector);
 
   const results = await searchCollection("docs_embeddings", queryVector, Math.min(topK, 20));
   logApiUsage(userId, { type: "generation", function: "vectorSearchDocs" , firestoreReads: 12, firestoreWrites: 1 });

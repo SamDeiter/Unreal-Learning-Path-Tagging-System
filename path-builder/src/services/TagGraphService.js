@@ -432,11 +432,13 @@ class TagGraphService {
     for (const tagId of targetTagIds) {
       let tagGraphCredit = 0;
       const visited = new Set([tagId]);
-      let frontier = [{ id: tagId, hops: 0, pathSoFar: [] }];
+      // Track parent references for lazy path reconstruction (avoids O(n*m) copies)
+      const parentMap = new Map();
+      let frontier = [{ id: tagId, hops: 0 }];
 
       while (frontier.length > 0) {
         const nextFrontier = [];
-        for (const { id, hops, pathSoFar } of frontier) {
+        for (const { id, hops } of frontier) {
           if (hops >= MAX_HOPS) continue;
 
           // Get edges from both directions
@@ -454,6 +456,9 @@ class TagGraphService {
           for (const edge of [...outgoing, ...incoming]) {
             if (visited.has(edge.neighborId)) continue;
             visited.add(edge.neighborId);
+
+            // Store parent for path reconstruction on match
+            parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
 
             // Edge-type weight based on direction
             const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
@@ -481,24 +486,24 @@ class TagGraphService {
             if (matched) {
               const credit = 5 * dirWeight * hopMultiplier * edgeDataWeight;
               tagGraphCredit += credit;
-              const newPath = [
-                ...pathSoFar,
-                { from: id, to: edge.neighborId, edgeType: edge.relation },
-              ];
+              // Reconstruct path lazily from parentMap
+              const path = [];
+              let cur = edge.neighborId;
+              while (parentMap.has(cur)) {
+                const p = parentMap.get(cur);
+                path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
+                cur = p.parentId;
+              }
               topContributors.push({
                 sourceQueryTagId: tagId,
                 targetCourseTagId: edge.neighborId,
-                path: newPath,
+                path,
                 contribution: Math.round(credit * 100) / 100,
               });
             }
 
-            // Continue BFS
-            const newPath = [
-              ...pathSoFar,
-              { from: id, to: edge.neighborId, edgeType: edge.relation },
-            ];
-            nextFrontier.push({ id: edge.neighborId, hops: hops + 1, pathSoFar: newPath });
+            // Continue BFS — no path copy needed
+            nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
           }
         }
         frontier = nextFrontier;

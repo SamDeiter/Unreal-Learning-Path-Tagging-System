@@ -202,6 +202,7 @@ def main():
     # Generate embeddings in batches (only for changed courses)
     print(f"🧠 Generating embeddings ({len(to_embed_indices)} courses, batch size {BATCH_SIZE})...")
     new_embeddings = {}
+    failed_batches = []
     for batch_start in range(0, len(to_embed_indices), BATCH_SIZE):
         batch_indices = to_embed_indices[batch_start:batch_start + BATCH_SIZE]
         batch_texts = [chunks[i] for i in batch_indices]
@@ -216,7 +217,8 @@ def main():
             time.sleep(2)
             embeddings = embed_batch(batch_texts, api_key)
             if embeddings is None:
-                print(f"  ❌ Failed to embed batch starting at {batch_codes[0]}, skipping")
+                print(f"  ❌ Failed to embed batch: {batch_codes}")
+                failed_batches.append(batch_codes)
                 continue
 
         for idx_in_batch, emb in enumerate(embeddings):
@@ -247,6 +249,10 @@ def main():
             }
             success_count += 1
         elif code in existing_embeddings and existing_embeddings[code].get("embedding"):
+            emb = existing_embeddings[code]["embedding"]
+            if len(emb) != DIMENSION:
+                print(f"  ⚠️ Stale embedding for {code}: {len(emb)} dims, skipping")
+                continue
             output["courses"][code] = existing_embeddings[code]
             output["courses"][code]["content_hash"] = chash
             success_count += 1
@@ -264,6 +270,10 @@ def main():
     print(f"  Skipped (unchanged): {skipped}")
     print(f"  Re-embedded: {len(new_embeddings)}")
     print(f"📁 Saved to: {OUTPUT_PATH} ({file_size_kb:.0f} KB)")
+
+    if failed_batches:
+        print(f"\n❌ ERROR: {len(failed_batches)} batch(es) failed: {failed_batches}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
