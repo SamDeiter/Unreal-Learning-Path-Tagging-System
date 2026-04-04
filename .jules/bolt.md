@@ -1,0 +1,3 @@
+## 2025-05-21 - [Memoization and WeakMap Caching in Demand Dashboard]
+**Learning:** High-frequency UI loops (like suggestion list filtering) often involve repeated O(N) operations (source filtering/scoring). While `React.memo` and `useMemo` handle component/hook level re-renders, they don't prevent redundant work across different components if the underlying utility functions are stateless.
+**Action:** Use a module-level `WeakMap` in utility files (e.g., `decayDetector.js`) to cache results of expensive computations keyed by stable objects (e.g., `suggestion` data). This provides O(1) retrieval across the entire app lifecycle without memory leaks, complementing React's own memoization hooks.

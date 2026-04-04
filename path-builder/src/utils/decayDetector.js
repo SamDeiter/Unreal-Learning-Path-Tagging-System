@@ -337,7 +337,18 @@ export const PLATFORM_META = {
   [PLATFORMS.INSTAGRAM]:       { icon: "📸", label: "Instagram",     color: "#E1306C" },
 };
 
+/**
+ * WeakMap cache for platform breakdowns to avoid redundant O(N) source filtering
+ * when suggestions are stable between renders.
+ */
+const platformBreakdownCache = new WeakMap();
+
 export function computePlatformBreakdown(suggestion) {
+  if (!suggestion || typeof suggestion !== "object") return {};
+  if (platformBreakdownCache.has(suggestion)) {
+    return platformBreakdownCache.get(suggestion);
+  }
+
   const sources = suggestion.sources || [];
   const reddit = suggestion.redditEngagement || {};
   const yt = suggestion.youtubeMetrics || {};
@@ -423,7 +434,9 @@ export function computePlatformBreakdown(suggestion) {
     }
   }
 
-  return { ...scores, dominant, platforms: PLATFORM_META };
+  const result = { ...scores, dominant, platforms: PLATFORM_META };
+  platformBreakdownCache.set(suggestion, result);
+  return result;
 }
 
 export function aggregatePlatformDemand(suggestions, report = {}) {

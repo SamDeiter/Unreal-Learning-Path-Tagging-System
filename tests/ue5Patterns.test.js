@@ -1,3 +1,33 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+
+// Jest-compatible helpers for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toContain: (item) => {
+    if (typeof val === 'string') assert.ok(val.includes(item), `Expected to contain '${item}'`);
+    else assert.ok(val.includes(item));
+  },
+  toContainEqual: (item) => {
+    const found = val.some(v => JSON.stringify(v) === JSON.stringify(item));
+    assert.ok(found, `Expected array to contain equal item ${JSON.stringify(item)}`);
+  },
+  not: {
+    toContain: (item) => {
+      if (typeof val === 'string') assert.ok(!val.includes(item), `Expected NOT to contain '${item}'`);
+      else assert.ok(!val.includes(item));
+    },
+    toMatch: (re) => assert.ok(!re.test(val), `Expected NOT to match ${re}`),
+  },
+  toMatch: (re) => assert.ok(re.test(val)),
+  toBeLessThan: (n) => assert.ok(val < n, `Expected ${val} < ${n}`),
+  toBeLessThanOrEqual: (n) => assert.ok(val <= n, `Expected ${val} <= ${n}`),
+  toBeGreaterThan: (n) => assert.ok(val > n, `Expected ${val} > ${n}`),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n, `Expected ${val} >= ${n}`),
+  toHaveLength: (n) => assert.strictEqual(val.length, n),
+});
+const test = it;
+
 /**
  * Tests for UE5 error pattern matching (shared module used by ui/js/ue5Patterns.js)
  * These patterns are critical for crash log parsing accuracy.
