@@ -24,6 +24,13 @@ from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
+# Load .env file for API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass  # dotenv not installed
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
@@ -315,13 +322,6 @@ def embed_text(text, api_key):
     """Call Gemini embedding API."""
     import urllib.error
     import urllib.request
-
-# Load .env file for API keys
-try:
-    from dotenv import load_dotenv
-    load_dotenv(override=True)
-except ImportError:
-    pass  # dotenv not installed
 
     url = f"{API_URL}?key={api_key}"
     payload = {
