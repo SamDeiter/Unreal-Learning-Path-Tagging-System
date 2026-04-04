@@ -8,7 +8,7 @@
  *   - Category filtering
  */
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useTagData } from "../context/TagDataContext";
 import {
   generateDemandReport,
@@ -84,14 +84,16 @@ export function useDemandIntelligence(engine = "UE5") {
   // ── Derived data ─────────────────────────────────────────
 
   // Filtered suggestions based on active category filter
-  const filteredSuggestions = report?.suggestions?.filter(
-    (s) => !categoryFilter || s.category === categoryFilter
-  ) || [];
+  const filteredSuggestions = useMemo(() =>
+    report?.suggestions?.filter(
+      (s) => !categoryFilter || s.category === categoryFilter
+    ) || []
+  , [report?.suggestions, categoryFilter]);
 
   // Unique categories present in suggestions
-  const availableCategories = [
-    ...new Set((report?.suggestions || []).map((s) => s.category)),
-  ].sort();
+  const availableCategories = useMemo(() =>
+    [...new Set((report?.suggestions || []).map((s) => s.category))].sort()
+  , [report?.suggestions]);
 
   // Summary stats — with fallback derivation from suggestion sources
   // When Firestore pre-computed data has empty trendingQuestions/painPoints
@@ -101,42 +103,52 @@ export function useDemandIntelligence(engine = "UE5") {
   const _directPainPoints = Object.values(report?.painPointsByCategory || {}).flat().length;
 
   // Fallback 1: count unique relatedQuestion/painPoint fields in sources
-  const _sourceTrending = new Set(
-    (report?.suggestions || [])
-      .flatMap((s) => s.sources || [])
-      .filter((src) => src.relatedQuestion)
-      .map((src) => src.relatedQuestion)
-  ).size;
+  const _sourceTrending = useMemo(() =>
+    new Set(
+      (report?.suggestions || [])
+        .flatMap((s) => s.sources || [])
+        .filter((src) => src.relatedQuestion)
+        .map((src) => src.relatedQuestion)
+    ).size
+  , [report?.suggestions]);
 
-  const _sourcePainPoints = new Set(
-    (report?.suggestions || [])
-      .flatMap((s) => s.sources || [])
-      .filter((src) => src.painPoint)
-      .map((src) => src.painPoint)
-  ).size;
+  const _sourcePainPoints = useMemo(() =>
+    new Set(
+      (report?.suggestions || [])
+        .flatMap((s) => s.sources || [])
+        .filter((src) => src.painPoint)
+        .map((src) => src.painPoint)
+    ).size
+  , [report?.suggestions]);
 
   // Fallback 2: derive from suggestions themselves when sources are also empty
   // High-gap topics (gap > 30) indicate trending unmet demand
-  const _topicTrending = (report?.suggestions || [])
-    .filter((s) => s.gap > 30).length;
+  const _topicTrending = useMemo(() =>
+    (report?.suggestions || []).filter((s) => s.gap > 30).length
+  , [report?.suggestions]);
+
   // Unique categories with at least one gap > 0 represent pain point areas
-  const _categoryPainPoints = new Set(
-    (report?.suggestions || [])
-      .filter((s) => s.gap > 0)
-      .map((s) => s.category)
-  ).size;
+  const _categoryPainPoints = useMemo(() =>
+    new Set(
+      (report?.suggestions || [])
+        .filter((s) => s.gap > 0)
+        .map((s) => s.category)
+    ).size
+  , [report?.suggestions]);
 
   const _derivedTrending = _directTrending || _sourceTrending || _topicTrending;
   const _derivedPainPoints = _directPainPoints || _sourcePainPoints || _categoryPainPoints;
 
-  const stats = report ? {
-    totalSuggestions: report.suggestions?.length || 0,
-    trendingQuestions: _derivedTrending,
-    painPointCount: _derivedPainPoints,
-    categoriesScanned: report.provenance?.communitySearch?.categoriesScanned || 0,
-    generationTimeMs: report.generationTimeMs || 0,
-    generatedAt: report.generatedAt || null,
-  } : null;
+  const stats = useMemo(() =>
+    report ? {
+      totalSuggestions: report.suggestions?.length || 0,
+      trendingQuestions: _derivedTrending,
+      painPointCount: _derivedPainPoints,
+      categoriesScanned: report.provenance?.communitySearch?.categoriesScanned || 0,
+      generationTimeMs: report.generationTimeMs || 0,
+      generatedAt: report.generatedAt || null,
+    } : null
+  , [report, _derivedTrending, _derivedPainPoints]);
 
   return {
     // State
