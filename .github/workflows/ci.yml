@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -102,23 +107,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Validate tag schema
-        run: npm run tags:validate
+        run: pnpm run tags:validate
 
       - name: Lint tag quality
-        run: npm run tags:lint
+        run: pnpm run tags:lint
         continue-on-error: true
 
       - name: Run unit tests
-        run: npm test
+        run: pnpm test
 
       - name: Run tag matching eval
         run: node eval/run_eval.js --json
@@ -139,21 +150,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: path-builder/package-lock.json
+          cache: "pnpm"
+          cache-dependency-path: path-builder/pnpm-lock.yaml
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
+
+      - name: Prebuild data
+        run: pnpm run prebuild
 
       - name: Lint (ESLint)
-        run: npx eslint .
+        run: pnpm exec eslint .
 
       - name: Unit tests (Vitest)
-        run: npx vitest run
+        run: pnpm exec vitest run
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -174,7 +193,7 @@ jobs:
           retention-days: 7
 
       - name: Build check
-        run: npm run build
+        run: pnpm run build
 
   functions-quality:
     runs-on: ubuntu-latest
@@ -185,18 +204,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: functions/package-lock.json
+          cache: "pnpm"
+          cache-dependency-path: functions/pnpm-lock.yaml
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Lint (ESLint)
-        run: npx eslint . --ignore-pattern node_modules --max-warnings 10
+        run: pnpm exec eslint . --ignore-pattern node_modules --max-warnings 10
 
       - name: Syntax check (all JS files)
         run: |
@@ -212,4 +236,3 @@ jobs:
             require('./ai/prompts');
             console.log('All modules resolved OK');
           "
-

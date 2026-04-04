@@ -2,6 +2,8 @@
  * Tests for UE5 error pattern matching (shared module used by ui/js/ue5Patterns.js)
  * These patterns are critical for crash log parsing accuracy.
  */
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 
 // Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
 const UE5_ERROR_PATTERNS = [
@@ -46,119 +48,121 @@ function matchPatterns(text) {
 }
 
 describe("UE5 Error Pattern Matching", () => {
-  test("detects ExitCode with = separator", () => {
+  it("detects ExitCode with = separator", () => {
     const results = matchPatterns("Build failed with ExitCode=25");
-    expect(results).toContainEqual({ type: "exitcode", label: "ExitCode 25" });
+    assert.ok(results.some(r => r.type === "exitcode" && r.label === "ExitCode 25"));
   });
 
-  test("detects ExitCode with : separator", () => {
+  it("detects ExitCode with : separator", () => {
     const results = matchPatterns("Process ExitCode: 1");
-    expect(results).toContainEqual({ type: "exitcode", label: "ExitCode 1" });
+    assert.ok(results.some(r => r.type === "exitcode" && r.label === "ExitCode 1"));
   });
 
-  test("detects shader compilation errors", () => {
+  it("detects shader compilation errors", () => {
     const results = matchPatterns("ShaderCompileWorker crashed");
-    expect(results).toContainEqual({ type: "shader", label: "Shader compilation error" });
+    assert.ok(results.some(r => r.type === "shader" && r.label === "Shader compilation error"));
   });
 
-  test("detects D3D device lost", () => {
+  it("detects D3D device lost", () => {
     const results = matchPatterns("D3D device lost error in RHI");
-    expect(results).toContainEqual({ type: "gpu", label: "D3D device lost" });
+    assert.ok(results.some(r => r.type === "gpu" && r.label === "D3D device lost"));
   });
 
-  test("detects GPU crash", () => {
+  it("detects GPU crash", () => {
     const results = matchPatterns("Detected GPU crash on frame 12345");
-    expect(results).toContainEqual({ type: "gpu", label: "GPU crash" });
+    assert.ok(results.some(r => r.type === "gpu" && r.label === "GPU crash"));
   });
 
-  test("detects Accessed None blueprint error", () => {
+  it("detects Accessed None blueprint error", () => {
     const results = matchPatterns("Blueprint Runtime Error: Accessed None trying to read property");
-    expect(results).toContainEqual({ type: "blueprint", label: "Blueprint Accessed None" });
+    assert.ok(results.some(r => r.type === "blueprint" && r.label === "Blueprint Accessed None"));
   });
 
-  test("detects cook failure", () => {
+  it("detects cook failure", () => {
     const results = matchPatterns("Cook failed for package /Game/Maps/MainLevel");
-    expect(results).toContainEqual({ type: "cook", label: "Cook failure" });
+    assert.ok(results.some(r => r.type === "cook" && r.label === "Cook failure"));
   });
 
-  test("detects packaging error", () => {
+  it("detects packaging error", () => {
     const results = matchPatterns("Packaging failed due to missing assets");
-    expect(results).toContainEqual({ type: "packaging", label: "Packaging error" });
+    assert.ok(results.some(r => r.type === "packaging" && r.label === "Packaging error"));
   });
 
-  test("detects Lumen issues", () => {
+  it("detects Lumen issues", () => {
     const results = matchPatterns("Lumen GI flickering in dark scene");
-    expect(results).toContainEqual({ type: "lumen", label: "Lumen issue" });
+    assert.ok(results.some(r => r.type === "lumen" && r.label === "Lumen issue"));
   });
 
-  test("detects Nanite issues", () => {
+  it("detects Nanite issues", () => {
     const results = matchPatterns("Nanite mesh not rendering correctly");
-    expect(results).toContainEqual({ type: "nanite", label: "Nanite issue" });
+    assert.ok(results.some(r => r.type === "nanite" && r.label === "Nanite issue"));
   });
 
-  test("detects network/replication issues", () => {
+  it("detects network/replication issues", () => {
     const results = matchPatterns("Replication failed for Actor BP_Player");
-    expect(results).toContainEqual({ type: "network", label: "Network/replication" });
+    assert.ok(results.some(r => r.type === "network" && r.label === "Network/replication"));
   });
 
-  test("detects fatal errors", () => {
+  it("detects fatal errors", () => {
     const results = matchPatterns("Fatal error: Unhandled Exception");
-    expect(results).toContainEqual({ type: "fatal", label: "Fatal error" });
+    assert.ok(results.some(r => r.type === "fatal" && r.label === "Fatal error"));
   });
 
-  test("detects out of memory", () => {
+  it("detects out of memory", () => {
     const results = matchPatterns("Out of video memory trying to allocate texture");
-    expect(results).toContainEqual({ type: "memory", label: "Out of memory" });
+    assert.ok(results.some(r => r.type === "memory" && r.label === "Out of memory"));
   });
 
-  test("extracts multiple patterns from a real crash log", () => {
+  it("extracts multiple patterns from a real crash log", () => {
     const crashLog = `
       [2024/01/15 10:30:22] Fatal error: Unhandled Exception
       [2024/01/15 10:30:22] D3D device lost
       [2024/01/15 10:30:22] ExitCode=3
     `;
     const results = matchPatterns(crashLog);
-    expect(results.length).toBeGreaterThanOrEqual(3);
-    expect(results.map((r) => r.type)).toContain("fatal");
-    expect(results.map((r) => r.type)).toContain("gpu");
-    expect(results.map((r) => r.type)).toContain("exitcode");
+    assert.ok(results.length >= 3);
+    const types = results.map((r) => r.type);
+    assert.ok(types.includes("fatal"));
+    assert.ok(types.includes("gpu"));
+    assert.ok(types.includes("exitcode"));
   });
 
-  test("deduplicates by type (only first GPU match)", () => {
+  it("deduplicates by type (only first GPU match)", () => {
     const log = "GPU crash detected\nD3D device lost";
     const results = matchPatterns(log);
     const gpuResults = results.filter((r) => r.type === "gpu");
-    expect(gpuResults).toHaveLength(1);
+    assert.strictEqual(gpuResults.length, 1);
   });
 
-  test("returns empty for unrecognized text", () => {
+  it("returns empty for unrecognized text", () => {
     const results = matchPatterns("Everything is working fine");
-    expect(results).toHaveLength(0);
+    assert.strictEqual(results.length, 0);
   });
 });
 
 describe("escapeHtml", () => {
-  test("escapes angle brackets", () => {
-    expect(escapeHtml("<script>alert('xss')</script>")).toBe(
+  it("escapes angle brackets", () => {
+    assert.strictEqual(
+      escapeHtml("<script>alert('xss')</script>"),
       "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"
     );
   });
 
-  test("escapes ampersands", () => {
-    expect(escapeHtml("a & b")).toBe("a &amp; b");
+  it("escapes ampersands", () => {
+    assert.strictEqual(escapeHtml("a & b"), "a &amp; b");
   });
 
-  test("escapes quotes", () => {
-    expect(escapeHtml('"hello"')).toBe("&quot;hello&quot;");
+  it("escapes quotes", () => {
+    assert.strictEqual(escapeHtml('"hello"'), "&quot;hello&quot;");
   });
 
-  test("returns empty string for falsy input", () => {
-    expect(escapeHtml(null)).toBe("");
-    expect(escapeHtml(undefined)).toBe("");
-    expect(escapeHtml("")).toBe("");
+  it("returns empty string for falsy input", () => {
+    assert.strictEqual(escapeHtml(null), "");
+    assert.strictEqual(escapeHtml(undefined), "");
+    assert.strictEqual(escapeHtml(""), "");
   });
 
-  test("converts numbers to string", () => {
-    expect(escapeHtml(42)).toBe("42");
+  it("converts numbers to string", () => {
+    assert.strictEqual(escapeHtml(42), "42");
   });
 });
