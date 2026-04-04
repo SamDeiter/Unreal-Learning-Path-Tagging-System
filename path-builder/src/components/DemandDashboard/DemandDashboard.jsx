@@ -11,7 +11,7 @@
  * Every data point links back to its source.
  */
 
-import { useState, useEffect, useRef, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useMemo, memo, useCallback } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
 import { computePlatformBreakdown, aggregatePlatformDemand, PLATFORM_META } from "../../utils/decayDetector";
@@ -970,6 +970,15 @@ function DemandDashboard() {
     return suggestions;
   }, [platformFilter, industryFiltered, showBlueOceansOnly]);
 
+  /**
+   * Performance: Memoized industry filter handler to prevent re-renders of
+   * IndustryBreakdownPanel.
+   */
+  const handleIndustryFilter = useCallback((val) => {
+    setIndustryFilter(val);
+    setSubVerticalFilter(null);
+  }, []);
+
   // Auto-generate on mount if no report
   // Strategy: tries Firestore first (instant), falls back to live scrape
   useEffect(() => {
@@ -1116,10 +1125,7 @@ function DemandDashboard() {
           <IndustryBreakdownPanel 
             suggestions={report.suggestions}
             activeIndustryFilter={industryFilter}
-            onIndustryFilter={useCallback((val) => {
-              setIndustryFilter(val);
-              setSubVerticalFilter(null);
-            }, [])}
+            onIndustryFilter={handleIndustryFilter}
           />
 
           {/* Two-column layout — collapses to single column when no questions */}
