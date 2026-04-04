@@ -19,6 +19,7 @@ import {
   setDoc,
   updateDoc,
   increment,
+  serverTimestamp,
   Timestamp,
   collection,
   getDocs,
@@ -175,7 +176,7 @@ export async function consumeInvite(code, email) {
     // Increment usage counter
     await updateDoc(inviteRef, {
       usedCount: increment(1),
-      lastUsedAt: Timestamp.now(),
+      lastUsedAt: serverTimestamp(),
     });
 
     return { success: true };
