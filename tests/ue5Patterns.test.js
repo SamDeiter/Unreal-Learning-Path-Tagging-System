@@ -2,6 +2,19 @@
  * Tests for UE5 error pattern matching (shared module used by ui/js/ue5Patterns.js)
  * These patterns are critical for crash log parsing accuracy.
  */
+import { describe, it as test } from 'node:test';
+import assert from 'node:assert/strict';
+
+// Jest-compatible expect helper for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toEqual: (expected) => assert.deepStrictEqual(val, expected),
+  toContain: (item) => assert.ok(val.includes(item)),
+  toContainEqual: (item) => assert.ok(val.some(i => JSON.stringify(i) === JSON.stringify(item))),
+  toHaveLength: (len) => assert.strictEqual(val.length, len),
+  toMatch: (re) => assert.ok(re.test(val)),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n),
+});
 
 // Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
 const UE5_ERROR_PATTERNS = [
