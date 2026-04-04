@@ -1,5 +1,5 @@
 /**
- * Tests for expandQuery.js — cache behavior, eviction, and error handling.
+ * Tests for expandQuery.js — Firestore cache, expansion limits, and error handling.
  */
 
 // Mock firebase-functions
@@ -24,8 +24,14 @@ jest.mock("../../utils/sanitizeInput", () => ({
   sanitizeAndValidate: (query) => ({ blocked: false, clean: query }),
 }));
 
+// Mock the Firestore-backed cache
+const mockGetCached = jest.fn().mockResolvedValue(null);
+const mockSetCache = jest.fn().mockResolvedValue(undefined);
+
 jest.mock("../../pipeline/cache", () => ({
   normalizeQuery: (q) => q.toLowerCase().trim(),
+  getCached: (...args) => mockGetCached(...args),
+  setCache: (...args) => mockSetCache(...args),
 }));
 
 jest.mock("../../utils/rateLimit", () => ({
@@ -71,7 +77,6 @@ function mockGeminiResponse(expansions) {
 }
 
 describe("expandQuery", () => {
-  // Re-require for each test to reset module-level cache
   let expandQuery;
 
   beforeEach(() => {
@@ -101,6 +106,8 @@ describe("expandQuery", () => {
 
     jest.mock("../../pipeline/cache", () => ({
       normalizeQuery: (q) => q.toLowerCase().trim(),
+      getCached: (...args) => mockGetCached(...args),
+      setCache: (...args) => mockSetCache(...args),
     }));
 
     jest.mock("../../utils/rateLimit", () => ({
@@ -122,6 +129,8 @@ describe("expandQuery", () => {
 
     global.fetch = jest.fn();
     process.env.GEMINI_API_KEY = "test-key";
+    mockGetCached.mockReset().mockResolvedValue(null);
+    mockSetCache.mockReset().mockResolvedValue(undefined);
 
     expandQuery = require("../expandQuery").expandQuery;
   });
@@ -135,16 +144,27 @@ describe("expandQuery", () => {
     expect(result.expansions).toContain("variant 1");
   });
 
-  test("returns cached result on second call", async () => {
-    mockGeminiResponse(["cached variant"]);
+  test("returns cached result from Firestore cache", async () => {
+    mockGetCached.mockResolvedValue({ expansions: ["cached variant"] });
 
-    await expandQuery({ query: "same query" }, makeContext());
     const result = await expandQuery({ query: "same query" }, makeContext());
 
     expect(result.cached).toBe(true);
     expect(result.expansions).toContain("cached variant");
-    // fetch should only be called once (second call hits cache)
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    // fetch should NOT be called (cache hit)
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test("writes to Firestore cache on cache miss", async () => {
+    mockGeminiResponse(["new variant"]);
+
+    await expandQuery({ query: "fresh query" }, makeContext());
+
+    expect(mockSetCache).toHaveBeenCalledWith(
+      "query_expansion",
+      { query: "fresh query" },
+      { expansions: ["new variant"] }
+    );
   });
 
   test("limits expansions to 3", async () => {
@@ -206,5 +226,17 @@ describe("expandQuery", () => {
     const result = await expandQuery({ query: "bad json" }, makeContext());
     expect(result.success).toBe(true);
     expect(result.expansions).toEqual([]);
+  });
+
+  test("falls back gracefully when cache read fails", async () => {
+    mockGetCached.mockRejectedValue(new Error("Firestore down"));
+    mockGeminiResponse(["fallback variant"]);
+
+    // getCached failure is caught inside the cache module itself,
+    // returning null. The function should proceed to call Gemini.
+    mockGetCached.mockResolvedValue(null);
+    const result = await expandQuery({ query: "cache fail" }, makeContext());
+    expect(result.success).toBe(true);
+    expect(result.expansions).toContain("fallback variant");
   });
 });

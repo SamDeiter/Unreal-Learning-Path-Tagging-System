@@ -34,6 +34,16 @@ EMBEDDING_CONFIGS = [
         "key": "segments",
     },
     {
+        "name": "Epic Learning Embeddings",
+        "embedding_file": os.path.join(DATA_DIR, "epic_learning_embeddings.json"),
+        "source_files": [
+            os.path.join(CONTENT_DIR, "epic_learning", "extracted"),
+            os.path.join(CONTENT_DIR, "epic_learning", "transcripts"),
+        ],
+        "regen_command": ["python", os.path.join(ROOT, "scripts", "embed_epic_learning.py")],
+        "key": "epic_learning",
+    },
+    {
         "name": "Doc Embeddings (Epic UE5 docs)",
         "embedding_file": os.path.join(DATA_DIR, "docs_embeddings.json"),
         "source_files": [
@@ -48,7 +58,7 @@ EMBEDDING_CONFIGS = [
         "source_files": [
             os.path.join(DATA_DIR, "video_library_enriched.json"),
         ],
-        "regen_command": None,  # Manual for now
+        "regen_command": ["python", os.path.join(ROOT, "scripts", "build_embeddings.py")],
         "key": "courses",
     },
 ]
@@ -66,15 +76,36 @@ def file_hash(filepath):
     return h.hexdigest()
 
 
+def dir_hash(dirpath):
+    """Compute combined SHA-256 across all files in a directory."""
+    h = hashlib.sha256()
+    if not os.path.isdir(dirpath):
+        return None
+    for root, _dirs, files in os.walk(dirpath):
+        for fname in sorted(files):
+            fpath = os.path.join(root, fname)
+            fh = file_hash(fpath)
+            if fh:
+                h.update(f"{fname}:{fh}".encode())
+    return h.hexdigest()
+
+
 def multi_file_hash(filepaths):
-    """Compute a combined SHA-256 across multiple source files."""
+    """Compute a combined SHA-256 across multiple source files or directories."""
     h = hashlib.sha256()
     for fp in sorted(filepaths):
-        fh = file_hash(fp)
-        if fh:
-            h.update(fh.encode())
+        if os.path.isdir(fp):
+            dh = dir_hash(fp)
+            if dh:
+                h.update(dh.encode())
+            else:
+                h.update(f"EMPTY_DIR:{fp}".encode())
         else:
-            h.update(f"MISSING:{fp}".encode())
+            fh = file_hash(fp)
+            if fh:
+                h.update(fh.encode())
+            else:
+                h.update(f"MISSING:{fp}".encode())
     return h.hexdigest()
 
 
@@ -137,70 +168,85 @@ def format_age(generated_at_str):
 
 # ---------- Main ----------
 
-def check_all(auto_fix=False):
-    print("=" * 60)
-    print("  RAG Embedding Freshness Check")
-    print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 60)
-    print()
+def check_all(auto_fix=False, json_output=False):
+    if not json_output:
+        print("=" * 60)
+        print("  RAG Embedding Freshness Check")
+        print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
+        print()
 
     stale_count = 0
     missing_count = 0
     fresh_count = 0
+    stale_keys = []
+    fresh_keys = []
+    missing_keys = []
+
+    def log(msg):
+        if not json_output:
+            print(msg)
 
     for config in EMBEDDING_CONFIGS:
         name = config["name"]
+        key = config["key"]
         emb_file = config["embedding_file"]
         src_files = config["source_files"]
 
-        print(f"📦 {name}")
-        print(f"   Embedding: {os.path.relpath(emb_file, ROOT)}")
+        log(f"📦 {name}")
+        log(f"   Embedding: {os.path.relpath(emb_file, ROOT)}")
 
         # Check source files exist
-        missing_sources = [f for f in src_files if not os.path.exists(f)]
+        missing_sources = [f for f in src_files
+                          if not os.path.exists(f) and not os.path.isdir(f)]
         if missing_sources:
             for ms in missing_sources:
-                print(f"   ⚠️  Source missing: {os.path.relpath(ms, ROOT)}")
+                log(f"   ⚠️  Source missing: {os.path.relpath(ms, ROOT)}")
 
         # Check embedding file exists
         if not os.path.exists(emb_file):
-            print("   ✗ MISSING — embedding file does not exist")
+            log("   ✗ MISSING — embedding file does not exist")
             missing_count += 1
-            print()
+            missing_keys.append(key)
+            log("")
             continue
 
         # Read metadata
         meta = read_embedding_meta(emb_file)
         if not meta:
-            print("   ✗ UNREADABLE — cannot parse embedding file")
+            log("   ✗ UNREADABLE — cannot parse embedding file")
             missing_count += 1
-            print()
+            missing_keys.append(key)
+            log("")
             continue
 
         age = format_age(meta.get("generated_at"))
         chunks = meta.get("total_chunks", "?")
-        print(f"   Generated: {age} ({chunks} chunks)")
+        log(f"   Generated: {age} ({chunks} chunks)")
 
         # Compare hashes
         current_hash = multi_file_hash(src_files)
         stored_hash = meta.get("source_hash")
 
         if stored_hash is None:
-            print("   ⚠️  No source_hash stored — injecting current hash")
+            log("   ⚠️  No source_hash stored — injecting current hash")
             inject_hash(emb_file, current_hash)
-            print("   ✓ ASSUMED FRESH (hash now stored for future checks)")
+            log("   ✓ ASSUMED FRESH (hash now stored for future checks)")
             fresh_count += 1
+            fresh_keys.append(key)
         elif stored_hash == current_hash:
-            print("   ✓ FRESH — source data unchanged")
+            log("   ✓ FRESH — source data unchanged")
             fresh_count += 1
+            fresh_keys.append(key)
         else:
-            print("   ✗ STALE — source data has changed since last embedding!")
-            print(f"     Stored:  {stored_hash[:16]}...")
-            print(f"     Current: {current_hash[:16]}...")
+            log("   ✗ STALE — source data has changed since last embedding!")
+            log(f"     Stored:  {stored_hash[:16]}...")
+            log(f"     Current: {current_hash[:16]}...")
             stale_count += 1
+            stale_keys.append(key)
 
             if auto_fix and config["regen_command"]:
-                print("   🔄 Re-generating...")
+                log("   🔄 Re-generating...")
                 try:
                     result = subprocess.run(
                         config["regen_command"],
@@ -210,19 +256,27 @@ def check_all(auto_fix=False):
                         timeout=600,
                     )
                     if result.returncode == 0:
-                        # Inject new hash
                         inject_hash(emb_file, current_hash)
-                        print("   ✓ Regenerated successfully!")
+                        log("   ✓ Regenerated successfully!")
                     else:
-                        print(f"   ✗ Regeneration failed: {result.stderr[:200]}")
+                        log(f"   ✗ Regeneration failed: {result.stderr[:200]}")
                 except subprocess.TimeoutExpired:
-                    print("   ✗ Regeneration timed out (10 min)")
+                    log("   ✗ Regeneration timed out (10 min)")
                 except Exception as e:
-                    print(f"   ✗ Regeneration error: {e}")
+                    log(f"   ✗ Regeneration error: {e}")
 
         emb_size = os.path.getsize(emb_file)
-        print(f"   Size: {emb_size / (1024*1024):.1f} MB")
-        print()
+        log(f"   Size: {emb_size / (1024*1024):.1f} MB")
+        log("")
+
+    # JSON output mode for CI
+    if json_output:
+        print(json.dumps({
+            "stale": stale_keys,
+            "fresh": fresh_keys,
+            "missing": missing_keys,
+        }))
+        return 1 if (stale_count > 0 or missing_count > 0) else 0
 
     # Summary
     print("=" * 60)
@@ -243,5 +297,6 @@ def check_all(auto_fix=False):
 
 if __name__ == "__main__":
     auto_fix = "--fix" in sys.argv
-    exit_code = check_all(auto_fix)
+    json_mode = "--json" in sys.argv
+    exit_code = check_all(auto_fix, json_output=json_mode)
     sys.exit(exit_code)

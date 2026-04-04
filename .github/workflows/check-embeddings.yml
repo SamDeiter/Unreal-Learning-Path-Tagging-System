@@ -1,0 +1,95 @@
+name: Check Embedding Freshness
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'path-builder/src/data/segment_index.json'
+      - 'path-builder/src/data/video_library_enriched.json'
+      - 'content/scraped_docs.json'
+      - 'content/epic_learning/**'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6AM UTC
+  workflow_dispatch:
+
+jobs:
+  check-freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check embedding freshness
+        id: freshness
+        run: |
+          RESULT=$(python scripts/check_embeddings.py --json 2>/dev/null || true)
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+
+          # Parse stale/missing counts
+          STALE=$(echo "$RESULT" | python -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('stale',[])))")
+          MISSING=$(echo "$RESULT" | python -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('missing',[])))")
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+          echo "missing=$MISSING" >> "$GITHUB_OUTPUT"
+
+      - name: Create issue for stale embeddings
+        if: steps.freshness.outputs.stale != '0' || steps.freshness.outputs.missing != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = JSON.parse('${{ steps.freshness.outputs.result }}');
+            const stale = result.stale || [];
+            const missing = result.missing || [];
+            const items = [
+              ...stale.map(k => `- **${k}**: STALE (source data changed)`),
+              ...missing.map(k => `- **${k}**: MISSING (embedding file not found)`),
+            ];
+            const body = [
+              '## Embedding Freshness Alert',
+              '',
+              `Found ${stale.length} stale and ${missing.length} missing embedding files.`,
+              '',
+              ...items,
+              '',
+              '### How to fix',
+              '```bash',
+              'python scripts/check_embeddings.py --fix',
+              '```',
+              '',
+              'Then upload to Firestore:',
+              '```bash',
+              'python scripts/upload_embeddings_to_firestore.py',
+              '```',
+            ].join('\n');
+
+            // Check for existing open issue to avoid duplicates
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'embeddings',
+            });
+            const existing = issues.data.find(i => i.title.includes('Stale Embeddings'));
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `Updated freshness check:\n\n${body}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Stale Embeddings Detected',
+                body,
+                labels: ['embeddings', 'automated'],
+              });
+            }
+
+      - name: Report fresh
+        if: steps.freshness.outputs.stale == '0' && steps.freshness.outputs.missing == '0'
+        run: echo "All embeddings are fresh!"

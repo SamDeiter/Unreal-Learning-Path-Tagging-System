@@ -15,6 +15,8 @@ import { searchDocsSemantic, searchDocsVertexAI } from "./docsSearchService";
 import { devLog, devWarn } from "../utils/logger";
 import { deduplicateBy } from "../utils/collectionUtils";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
+import { classifyQueryIntent } from "./queryIntentClassifier";
+import { wordJaccard } from "../utils/textSimilarity";
 
 /**
  * Run the full RAG search pipeline: embed → expand → multi-source search → dedup → re-rank.
@@ -28,14 +30,38 @@ import { retryWithBackoff } from "../utils/retryWithBackoff";
  * @param {number} [options.minSimilarity=0.35] - Similarity threshold for courses/docs
  * @returns {Promise<{queryEmbedding: number[]|null, semanticResults: Array, retrievedPassages: Array, expandedQueries: string[], vertexAIDocs: Object|null}>}
  */
+// Source-based score multipliers per intent
+const SOURCE_WEIGHTS = {
+  default:         { transcript: 1.0, epic_learning: 0.95, epic_docs: 0.9 },
+  troubleshooting: { transcript: 1.0, epic_learning: 0.8,  epic_docs: 0.85 },
+  learning:        { transcript: 0.9, epic_learning: 1.0,  epic_docs: 0.95 },
+  exploring:       { transcript: 0.85, epic_learning: 1.0, epic_docs: 1.0 },
+};
+
+// Intent-specific search parameter overrides
+const INTENT_PARAMS = {
+  troubleshooting: { maxSegments: 12, maxCourses: 4, maxDocs: 4, expansionPenalty: 0.95 },
+  learning:        { maxSegments: 6,  maxCourses: 10, maxDocs: 6, expansionPenalty: 0.85 },
+  exploring:       { maxSegments: 8,  maxCourses: 8, maxDocs: 10, expansionPenalty: 0.85 },
+};
+
 export async function runSearchPipeline(query, options = {}) {
+  // Classify query intent for parameter tuning
+  const { intent, confidence } = classifyQueryIntent(query);
+  const useIntent = confidence >= 0.5;
+  const intentParams = useIntent ? INTENT_PARAMS[intent] || {} : {};
+  devLog(`[Intent] ${intent} (confidence: ${confidence.toFixed(2)}, active: ${useIntent})`);
+
   const {
     maxPassages = 10,
-    maxCourses = 8,
-    maxSegments = 8,
-    maxDocs = 6,
+    maxCourses = intentParams.maxCourses || 8,
+    maxSegments = intentParams.maxSegments || 8,
+    maxDocs = intentParams.maxDocs || 6,
     minSimilarity = 0.35,
   } = options;
+
+  const expansionPenalty = intentParams.expansionPenalty || 0.9;
+  const sourceWeights = useIntent ? (SOURCE_WEIGHTS[intent] || SOURCE_WEIGHTS.default) : SOURCE_WEIGHTS.default;
 
   const app = getFirebaseApp();
   const functions = getFunctions(app, "us-central1");
@@ -132,7 +158,7 @@ export async function runSearchPipeline(query, options = {}) {
               courseCode: s.courseCode,
               videoTitle: s.videoTitle,
               timestamp: s.timestamp,
-              similarity: (s.similarity || 0) * 0.9,
+              similarity: (s.similarity || 0) * expansionPenalty,
               source: "transcript",
             }));
             retrievedPassages.push(...expPassages);
@@ -144,11 +170,28 @@ export async function runSearchPipeline(query, options = {}) {
         }
       }
 
-      // Rank + dedup
+      // Apply content-type source weights before ranking
+      for (const p of retrievedPassages) {
+        const w = sourceWeights[p.source] || 1.0;
+        p.similarity = (p.similarity || 0) * w;
+      }
+
+      // Rank + text-exact dedup
       retrievedPassages.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
       retrievedPassages = deduplicateBy(retrievedPassages, (p) =>
         (p.text || "").trim().toLowerCase().slice(0, 120)
       );
+
+      // Semantic dedup: remove passages with >70% word overlap with a higher-scoring passage
+      const semanticDeduped = [];
+      for (const p of retrievedPassages) {
+        const isDupe = semanticDeduped.some(
+          (kept) => wordJaccard(kept.text || "", p.text || "") > 0.7
+        );
+        if (!isDupe) semanticDeduped.push(p);
+      }
+      retrievedPassages = semanticDeduped;
+
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
     } else {
       devWarn("⚠️ Embedding failed — falling back to keyword-only search");
@@ -162,7 +205,7 @@ export async function runSearchPipeline(query, options = {}) {
     try {
       const rerankFn = httpsCallable(functions, "rerankPassages");
       const rerankResult = await retryWithBackoff(
-        () => rerankFn({ query, passages: retrievedPassages.slice(0, 20) }),
+        () => rerankFn({ query, passages: retrievedPassages.slice(0, 30) }),
         { maxRetries: 1, label: "rerankPassages" }
       );
       if (rerankResult.data?.success && rerankResult.data?.reranked) {

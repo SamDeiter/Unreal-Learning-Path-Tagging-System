@@ -8,15 +8,11 @@
  */
 const functions = require("firebase-functions");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
-const { normalizeQuery } = require("../pipeline/cache");
+const { normalizeQuery, getCached, setCache } = require("../pipeline/cache");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
-
-// In-memory cache (per instance) to avoid redundant Gemini calls
-const _cache = new Map();
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 exports.expandQuery = functions
   .runWith({
@@ -51,9 +47,9 @@ exports.expandQuery = functions
 
     const normalized = normalizeQuery(validation.clean);
 
-    // Check cache
-    const cached = _cache.get(normalized);
-    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    // Check Firestore-backed cache (survives cold starts, shared across instances)
+    const cached = await getCached("query_expansion", { query: normalized });
+    if (cached && cached.expansions) {
       return { success: true, expansions: cached.expansions, cached: true };
     }
 
@@ -117,19 +113,8 @@ Example: ["ray traced reflections noise", "lumen GI artifact flickering", "scree
         expansions = [];
       }
 
-      // Cache result
-      _cache.set(normalized, { expansions, ts: Date.now() });
-
-      // LRU-style eviction: trim to 150 when exceeding 200 (Map preserves insertion order)
-      if (_cache.size > 200) {
-        const toDelete = _cache.size - 150;
-        let deleted = 0;
-        for (const key of _cache.keys()) {
-          if (deleted >= toDelete) break;
-          _cache.delete(key);
-          deleted++;
-        }
-      }
+      // Cache result in Firestore (7-day TTL, shared across instances)
+      await setCache("query_expansion", { query: normalized }, { expansions });
 
       return { success: true, expansions };
     } catch (err) {

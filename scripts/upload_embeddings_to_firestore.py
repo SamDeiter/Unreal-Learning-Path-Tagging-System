@@ -244,11 +244,15 @@ def upload_segment_embeddings(db, data, collection_name, dry_run=False):
             "embedding": Vector(embedding),
             "text": str(seg_data.get("text", ""))[:1000],
             "course_code": seg_data.get("courseCode", seg_data.get("course_code", "")),
+            "video_key": seg_data.get("videoKey", seg_data.get("video_key", "")),
             "video_title": seg_data.get("videoTitle", seg_data.get("video_title", "")),
-            "timestamp": seg_data.get("timestamp", 0),
+            "start_timestamp": seg_data.get("start_timestamp", seg_data.get("timestamp", "")),
+            "end_timestamp": seg_data.get("end_timestamp", ""),
+            "start_seconds": seg_data.get("start_seconds", 0),
+            "token_estimate": seg_data.get("token_estimate", 0),
         }
         # Add any extra metadata fields
-        for key in ["title", "url", "hash_id", "chunk_index"]:
+        for key in ["title", "url", "hash_id", "chunk_index", "segment_count"]:
             if key in seg_data:
                 doc[key] = seg_data[key]
 

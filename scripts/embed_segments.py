@@ -39,9 +39,9 @@ TASK_TYPE = "RETRIEVAL_DOCUMENT"        # documents use RETRIEVAL_DOCUMENT
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
 
 # Chunking params
-TARGET_TOKENS = 400          # aim for ~400 tokens per chunk
-MAX_TOKENS = 600             # hard max
-OVERLAP_SEGMENTS = 1         # overlap 1 segment between chunks
+TARGET_TOKENS = 250          # aim for ~250 tokens per chunk (tighter for timestamp precision)
+MAX_TOKENS = 400             # hard max
+OVERLAP_SEGMENTS = 2         # overlap 2 segments between chunks for context continuity
 APPROX_CHARS_PER_TOKEN = 4   # rough estimate for English text
 
 # Rate limiting (Gemini free tier: 1500 req/min)

@@ -47,8 +47,8 @@ exports.rerankPassages = functions
       return { success: true, reranked: [] };
     }
 
-    // Cap at 20 passages to keep prompt reasonable
-    const truncated = passages.slice(0, 20);
+    // Cap at 30 passages to keep prompt reasonable
+    const truncated = passages.slice(0, 30);
 
     let apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) apiKey = functions.config().gemini?.api_key;
@@ -90,7 +90,7 @@ Include ALL ${truncated.length} passages.`;
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 400,
+            maxOutputTokens: 600,
             responseMimeType: "application/json",
           },
         }),

@@ -28,6 +28,7 @@ const TTL = {
   path_summary_data: 30 * 24 * 60 * 60 * 1000,  // 30 days
   micro_lesson: 14 * 24 * 60 * 60 * 1000,       // 14 days
   learning_path: 30 * 24 * 60 * 60 * 1000,      // 30 days
+  query_expansion: 7 * 24 * 60 * 60 * 1000,     // 7 days
 };
 
 /**
