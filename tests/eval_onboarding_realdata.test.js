@@ -19,7 +19,8 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_PATH = resolve(__dirname, "../path-builder/src/data/video_library_enriched.json");
+// Use the source of truth in content/ to avoid dependency on path-builder local data copy
+const DATA_PATH = resolve(__dirname, "../content/video_library_enriched.json");
 
 // ── Load real course data ───────────────────────────────────────────────
 const rawData = JSON.parse(readFileSync(DATA_PATH, "utf8"));
