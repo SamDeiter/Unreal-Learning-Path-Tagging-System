@@ -3,6 +3,22 @@
  * These patterns are critical for crash log parsing accuracy.
  */
 
+import { describe, it as test } from "node:test";
+import assert from "node:assert/strict";
+
+// Compatibility helper to mimic Vitest/Jest expect()
+const expect = (actual) => ({
+  toBe: (expected) => assert.strictEqual(actual, expected),
+  toEqual: (expected) => assert.deepStrictEqual(actual, expected),
+  toContain: (expected) => assert.ok(actual.includes(expected), `Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`),
+  toContainEqual: (expected) => {
+    const found = actual.some((item) => JSON.stringify(item) === JSON.stringify(expected));
+    if (!found) assert.fail(`Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
+  },
+  toHaveLength: (expected) => assert.strictEqual(actual.length, expected),
+  toBeGreaterThanOrEqual: (expected) => assert.ok(actual >= expected),
+});
+
 // Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
 const UE5_ERROR_PATTERNS = [
   { pattern: /ExitCode[=:\s]*(\d+)/i, type: "exitcode", extract: (m) => `ExitCode ${m[1]}` },
