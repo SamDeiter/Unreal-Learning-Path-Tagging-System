@@ -22,6 +22,7 @@ import {
   getFirestore,
   doc,
   setDoc,
+  serverTimestamp,
   collection,
   getDocs,
   query,
@@ -237,7 +238,7 @@ async function syncDayToFirestore(dateKey, dayData) {
         calls: dayData.calls,
         operations: dayData.operations,
         estimatedCost: estimateCost(dayData.totalInput, dayData.totalOutput),
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: serverTimestamp(),
       },
       { merge: true }
     );

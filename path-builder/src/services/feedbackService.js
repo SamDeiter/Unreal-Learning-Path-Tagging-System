@@ -278,7 +278,6 @@ export async function submitFeedbackToFirestore(
       userEmail,
       status: "new",
       timestamp: serverTimestamp(),
-      createdAt: timestamp,
     };
 
     const docRef = await addDoc(collection(db, "feedback"), feedbackDoc);

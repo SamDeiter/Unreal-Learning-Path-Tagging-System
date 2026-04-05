@@ -1,0 +1,4 @@
+## 2025-03-03 - [Insecure Client-Side Timestamps and Non-Atomic Invite Increments]
+**Vulnerability:** Several Firestore collections (`analytics_events`, `feedback`, `errorLogs`, `performanceLogs`, `token_usage`, `path_builder_invites`) were relying on client-side timestamps or lacked server-side validation for atomic increments.
+**Learning:** Client-side timestamps (e.g., `new Date().toISOString()`) can be spoofed by users, leading to incorrect analytics and logging data. Non-atomic increments on `usedCount` in `path_builder_invites` allowed users to potentially bypass usage limits by sending concurrent or manually constructed update requests.
+**Prevention:** Always use `serverTimestamp()` in client-side Firestore writes and enforce `request.resource.data.timestamp == request.time` in `firestore.rules`. For counters, use `increment(1)` and enforce the exact increment in rules using `request.resource.data.count == resource.data.count + 1`.
