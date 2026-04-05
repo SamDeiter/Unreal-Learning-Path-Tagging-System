@@ -64,7 +64,9 @@ service cloud.firestore {
       allow get: if request.auth != null;
       // Authenticated users can update usedCount when consuming
       allow update: if request.auth != null
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt'])
+        && request.resource.data.usedCount == resource.data.usedCount + 1
+        && request.resource.data.lastUsedAt == request.time;
     }
     
     // Access allowlist — admin manages, users can read own + create via invite
@@ -110,6 +112,7 @@ service cloud.firestore {
         && request.resource.data.type in ['bug', 'feature', 'general', 'content', 'other']
         && request.resource.data.description is string
         && request.resource.data.description.size() <= 2000
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read, update, delete: if isAdmin();
     }
@@ -124,7 +127,8 @@ service cloud.firestore {
     // (internal tool — all users need dashboard access)
     match /analytics_events/{docId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.timestamp == request.time;
       allow update, delete: if false;
     }
 
@@ -134,6 +138,7 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['sentiment', 'timestamp'])
         && request.resource.data.sentiment in ['positive', 'negative']
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
@@ -144,6 +149,7 @@ service cloud.firestore {
     match /token_usage/{dateKey} {
       allow read: if request.auth != null;
       allow create, update: if request.auth != null
+        && request.resource.data.lastUpdated == request.time
         && request.resource.data.keys().size() <= 15;
       allow delete: if false;
     }
@@ -155,6 +161,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['message', 'source', 'timestamp'])
         && request.resource.data.message is string
         && request.resource.data.message.size() <= 500
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
@@ -168,6 +175,7 @@ service cloud.firestore {
         && request.resource.data.label is string
         && request.resource.data.label.size() <= 100
         && request.resource.data.durationMs is number
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
