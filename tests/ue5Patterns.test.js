@@ -3,6 +3,19 @@
  * These patterns are critical for crash log parsing accuracy.
  */
 
+import { describe, test } from "node:test";
+import assert from "node:assert/strict";
+
+// Jest-compatible expect shim for node:test
+const expect = (val) => ({
+  toBe: (expected) => assert.strictEqual(val, expected),
+  toEqual: (expected) => assert.deepStrictEqual(val, expected),
+  toContainEqual: (item) => assert.ok(val.some(x => JSON.stringify(x) === JSON.stringify(item)), `Expected to contain ${JSON.stringify(item)}`),
+  toContain: (item) => assert.ok(val.includes(item), `Expected to contain ${item}`),
+  toHaveLength: (n) => assert.strictEqual(val.length, n),
+  toBeGreaterThanOrEqual: (n) => assert.ok(val >= n, `Expected ${val} >= ${n}`),
+});
+
 // Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
 const UE5_ERROR_PATTERNS = [
   { pattern: /ExitCode[=:\s]*(\d+)/i, type: "exitcode", extract: (m) => `ExitCode ${m[1]}` },
