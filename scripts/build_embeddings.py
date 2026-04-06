@@ -228,6 +228,11 @@ def main():
         if batch_start + BATCH_SIZE < len(to_embed_indices):
             time.sleep(RATE_LIMIT_DELAY)
 
+    # Compute source hash for freshness tracking
+    source_hash = hashlib.sha256(
+        open(ENRICHED_PATH, "rb").read()
+    ).hexdigest()
+
     # Build output: merge unchanged + newly embedded
     output = {
         "model": MODEL,
@@ -235,6 +240,7 @@ def main():
         "task_type": TASK_TYPE,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "total_courses": 0,
+        "source_hash": source_hash,
         "courses": {},
     }
 

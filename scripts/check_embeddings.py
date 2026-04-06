@@ -44,12 +44,12 @@ EMBEDDING_CONFIGS = [
         "key": "epic_learning",
     },
     {
-        "name": "Doc Embeddings (Epic UE5 docs)",
+        "name": "Doc Embeddings (UDN + scraped)",
         "embedding_file": os.path.join(DATA_DIR, "docs_embeddings.json"),
         "source_files": [
-            os.path.join(CONTENT_DIR, "scraped_docs.json"),
+            os.path.join(CONTENT_DIR, "udn_docs.json"),
         ],
-        "regen_command": ["python", os.path.join(ROOT, "scripts", "scrape_epic_docs.py"), "--embed-only"],
+        "regen_command": ["python", os.path.join(ROOT, "scripts", "embed_udn_docs.py")],
         "key": "docs",
     },
     {
@@ -91,7 +91,16 @@ def dir_hash(dirpath):
 
 
 def multi_file_hash(filepaths):
-    """Compute a combined SHA-256 across multiple source files or directories."""
+    """Compute a combined SHA-256 across multiple source files or directories.
+
+    For a single non-directory file, returns the raw file hash directly
+    (matches the sha256(file_bytes) used by individual embed scripts).
+    For multiple sources or directories, combines hashes.
+    """
+    # Single file shortcut — matches embed script hash format
+    if len(filepaths) == 1 and os.path.isfile(filepaths[0]):
+        return file_hash(filepaths[0])
+
     h = hashlib.sha256()
     for fp in sorted(filepaths):
         if os.path.isdir(fp):
@@ -138,7 +147,7 @@ def inject_hash(embedding_file, source_hash):
             json.dump(data, f, separators=(",", ":"))
         return True
     except (OSError, json.JSONDecodeError) as e:
-        print(f"  ✗ Failed to inject hash: {e}")
+        print(f"  [FAIL] Failed to inject hash: {e}")
         return False
 
 
@@ -193,7 +202,7 @@ def check_all(auto_fix=False, json_output=False):
         emb_file = config["embedding_file"]
         src_files = config["source_files"]
 
-        log(f"📦 {name}")
+        log(f"[*] {name}")
         log(f"   Embedding: {os.path.relpath(emb_file, ROOT)}")
 
         # Check source files exist
@@ -201,11 +210,11 @@ def check_all(auto_fix=False, json_output=False):
                           if not os.path.exists(f) and not os.path.isdir(f)]
         if missing_sources:
             for ms in missing_sources:
-                log(f"   ⚠️  Source missing: {os.path.relpath(ms, ROOT)}")
+                log(f"   [WARN] Source missing: {os.path.relpath(ms, ROOT)}")
 
         # Check embedding file exists
         if not os.path.exists(emb_file):
-            log("   ✗ MISSING — embedding file does not exist")
+            log("   [FAIL] MISSING -- embedding file does not exist")
             missing_count += 1
             missing_keys.append(key)
             log("")
@@ -214,7 +223,7 @@ def check_all(auto_fix=False, json_output=False):
         # Read metadata
         meta = read_embedding_meta(emb_file)
         if not meta:
-            log("   ✗ UNREADABLE — cannot parse embedding file")
+            log("   [FAIL] UNREADABLE -- cannot parse embedding file")
             missing_count += 1
             missing_keys.append(key)
             log("")
@@ -229,24 +238,24 @@ def check_all(auto_fix=False, json_output=False):
         stored_hash = meta.get("source_hash")
 
         if stored_hash is None:
-            log("   ⚠️  No source_hash stored — injecting current hash")
+            log("   [WARN] No source_hash stored -- injecting current hash")
             inject_hash(emb_file, current_hash)
-            log("   ✓ ASSUMED FRESH (hash now stored for future checks)")
+            log("   [OK] ASSUMED FRESH (hash now stored for future checks)")
             fresh_count += 1
             fresh_keys.append(key)
         elif stored_hash == current_hash:
-            log("   ✓ FRESH — source data unchanged")
+            log("   [OK] FRESH -- source data unchanged")
             fresh_count += 1
             fresh_keys.append(key)
         else:
-            log("   ✗ STALE — source data has changed since last embedding!")
+            log("   [STALE] source data has changed since last embedding!")
             log(f"     Stored:  {stored_hash[:16]}...")
             log(f"     Current: {current_hash[:16]}...")
             stale_count += 1
             stale_keys.append(key)
 
             if auto_fix and config["regen_command"]:
-                log("   🔄 Re-generating...")
+                log("   [REGEN] Re-generating...")
                 try:
                     result = subprocess.run(
                         config["regen_command"],
@@ -257,13 +266,13 @@ def check_all(auto_fix=False, json_output=False):
                     )
                     if result.returncode == 0:
                         inject_hash(emb_file, current_hash)
-                        log("   ✓ Regenerated successfully!")
+                        log("   [OK] Regenerated successfully!")
                     else:
-                        log(f"   ✗ Regeneration failed: {result.stderr[:200]}")
+                        log(f"   [FAIL] Regeneration failed: {result.stderr[:200]}")
                 except subprocess.TimeoutExpired:
-                    log("   ✗ Regeneration timed out (10 min)")
+                    log("   [FAIL] Regeneration timed out (10 min)")
                 except Exception as e:
-                    log(f"   ✗ Regeneration error: {e}")
+                    log(f"   [FAIL] Regeneration error: {e}")
 
         emb_size = os.path.getsize(emb_file)
         log(f"   Size: {emb_size / (1024*1024):.1f} MB")
@@ -282,12 +291,12 @@ def check_all(auto_fix=False, json_output=False):
     print("=" * 60)
     total = fresh_count + stale_count + missing_count
     if stale_count == 0 and missing_count == 0:
-        print(f"  ✅ All {fresh_count} embedding files are FRESH")
+        print(f"  [OK] All {fresh_count} embedding files are FRESH")
     else:
         if stale_count > 0:
-            print(f"  ⚠️  {stale_count}/{total} embedding files are STALE")
+            print(f"  [WARN] {stale_count}/{total} embedding files are STALE")
         if missing_count > 0:
-            print(f"  ❌ {missing_count}/{total} embedding files are MISSING")
+            print(f"  [FAIL] {missing_count}/{total} embedding files are MISSING")
         if not auto_fix:
             print("\n  Run with --fix to auto-regenerate stale embeddings")
     print("=" * 60)

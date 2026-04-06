@@ -433,7 +433,7 @@ def main():
         "total_chunks": len(merged_embeddings),
         "source": "dev.epicgames.com + udn_perforce",
         "source_hash": hashlib.sha256(
-            json.dumps(list(merged_embeddings.keys())).encode()
+            open(UDN_DOCS_PATH, "rb").read()
         ).hexdigest(),
         "docs": merged_embeddings,
     }
