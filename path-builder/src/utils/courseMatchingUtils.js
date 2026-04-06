@@ -23,35 +23,43 @@ function tokenize(str) {
 }
 
 /**
- * Calculates match score between goal and course
+ * Internal cache for normalized course data to avoid redundant processing.
+ */
+const courseCache = new WeakMap();
+
+/**
+ * Calculates match score between goal tokens and course
  * Higher scores = better match
  */
-function scoreCourse(goal, course) {
-  if (!course) return 0;
-  const goalTokens = tokenize(goal);
-  if (goalTokens.length === 0) return 0;
+function scoreCourse(goalTokens, course) {
+  if (!course || !goalTokens || goalTokens.length === 0) return 0;
 
+  // Retrieve or compute normalized metadata
+  let metadata = courseCache.get(course);
+  if (!metadata) {
+    const title = normalize(course.title || course.folder_name || "");
+    const description = normalize(course.description || "");
+
+    let tagsList = [];
+    if (Array.isArray(course.extracted_tags)) {
+      tagsList = tagsList.concat(course.extracted_tags);
+    }
+    if (Array.isArray(course.transcript_tags)) {
+      tagsList = tagsList.concat(course.transcript_tags);
+    }
+    if (Array.isArray(course.tags)) {
+      tagsList = tagsList.concat(course.tags);
+    } else if (course.tags && typeof course.tags === "object") {
+      tagsList = tagsList.concat(Object.values(course.tags).filter((v) => typeof v === "string"));
+    }
+    const tags = tagsList.map(normalize);
+
+    metadata = { title, description, tags };
+    courseCache.set(course, metadata);
+  }
+
+  const { title, description, tags } = metadata;
   let score = 0;
-
-  // Build searchable content from course
-  const title = normalize(course.title || course.folder_name || "");
-  const description = normalize(course.description || "");
-
-  // Handle tags - could be array or object with level/topic properties
-  let tagsList = [];
-  if (Array.isArray(course.extracted_tags)) {
-    tagsList = tagsList.concat(course.extracted_tags);
-  }
-  if (Array.isArray(course.transcript_tags)) {
-    tagsList = tagsList.concat(course.transcript_tags);
-  }
-  if (Array.isArray(course.tags)) {
-    tagsList = tagsList.concat(course.tags);
-  } else if (course.tags && typeof course.tags === "object") {
-    // tags is an object like {level: "Beginner", topic: "Blueprints"}
-    tagsList = tagsList.concat(Object.values(course.tags).filter((v) => typeof v === "string"));
-  }
-  const tags = tagsList.map(normalize);
 
   goalTokens.forEach((token) => {
     // Title match (highest value)
@@ -94,10 +102,13 @@ export function matchCoursesToGoal(goal, courses, limit = 8) {
     return [];
   }
 
+  const goalTokens = tokenize(goal);
+  if (goalTokens.length === 0) return [];
+
   const scored = courses
     .map((course) => ({
       ...course,
-      matchScore: scoreCourse(goal, course),
+      matchScore: scoreCourse(goalTokens, course),
     }))
     .filter((c) => c.matchScore > 0)
     .sort((a, b) => b.matchScore - a.matchScore);
