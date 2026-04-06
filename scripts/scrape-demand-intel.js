@@ -9,7 +9,7 @@
  *   2. Call Gemini 2.5 Flash with grounded search for trending questions
  *   3. Call Gemini 2.5 Flash for community pain points (batched)
  *   4. Query Reddit public JSON API for real engagement counts
- *   5. Load video_library_enriched.json for coverage analysis
+ *   5. Load video_library_enriched.json (or video_library.json fallback) for coverage analysis
  *   6. Build ranked suggestions report with confidence scoring
  *   7. Write to Firestore: demand_intel/latest + demand_intel/history_{date}
  *
@@ -40,10 +40,17 @@ const BENCHMARKS_PATH = path.join(
   BENCHMARKS_FILENAME
 );
 
-const VIDEO_LIBRARY_PATH = path.join(
+const VIDEO_LIBRARY_ENRICHED = path.join(
   __dirname,
   "../path-builder/src/data/video_library_enriched.json"
 );
+const VIDEO_LIBRARY_FALLBACK = path.join(
+  __dirname,
+  "../path-builder/src/data/video_library.json"
+);
+const VIDEO_LIBRARY_PATH = fs.existsSync(VIDEO_LIBRARY_ENRICHED)
+  ? VIDEO_LIBRARY_ENRICHED
+  : VIDEO_LIBRARY_FALLBACK;
 
 // ── Config ─────────────────────────────────────────────────────────
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
