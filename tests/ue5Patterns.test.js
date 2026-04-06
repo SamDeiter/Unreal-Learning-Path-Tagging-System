@@ -3,6 +3,29 @@
  * These patterns are critical for crash log parsing accuracy.
  */
 
+import { describe, test } from "node:test";
+import assert from "node:assert/strict";
+
+// Custom expect shim for compatibility
+const expect = (actual) => ({
+  toContainEqual: (expected) => {
+    const found = actual.some(item => JSON.stringify(item) === JSON.stringify(expected));
+    assert.ok(found, `Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
+  },
+  toBeGreaterThanOrEqual: (expected) => {
+    assert.ok(actual >= expected, `Expected ${actual} >= ${expected}`);
+  },
+  toHaveLength: (expected) => {
+    assert.strictEqual(actual.length, expected);
+  },
+  toBe: (expected) => {
+    assert.strictEqual(actual, expected);
+  },
+  toContain: (expected) => {
+    assert.ok(actual.includes(expected), `Expected ${JSON.stringify(actual)} to contain ${expected}`);
+  }
+});
+
 // Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
 const UE5_ERROR_PATTERNS = [
   { pattern: /ExitCode[=:\s]*(\d+)/i, type: "exitcode", extract: (m) => `ExitCode ${m[1]}` },
@@ -119,9 +142,10 @@ describe("UE5 Error Pattern Matching", () => {
     `;
     const results = matchPatterns(crashLog);
     expect(results.length).toBeGreaterThanOrEqual(3);
-    expect(results.map((r) => r.type)).toContain("fatal");
-    expect(results.map((r) => r.type)).toContain("gpu");
-    expect(results.map((r) => r.type)).toContain("exitcode");
+    const types = results.map((r) => r.type);
+    expect(types).toContain("fatal");
+    expect(types).toContain("gpu");
+    expect(types).toContain("exitcode");
   });
 
   test("deduplicates by type (only first GPU match)", () => {
