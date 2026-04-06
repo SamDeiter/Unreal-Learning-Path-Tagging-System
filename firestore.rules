@@ -64,7 +64,10 @@ service cloud.firestore {
       allow get: if request.auth != null;
       // Authenticated users can update usedCount when consuming
       allow update: if request.auth != null
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt'])
+        && request.resource.data.usedCount == resource.data.usedCount + 1
+        && (resource.data.maxUses == 0 || request.resource.data.usedCount <= resource.data.maxUses)
+        && request.resource.data.lastUsedAt == request.time;
     }
     
     // Access allowlist — admin manages, users can read own + create via invite
