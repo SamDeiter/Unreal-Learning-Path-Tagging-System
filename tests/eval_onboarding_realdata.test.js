@@ -14,19 +14,23 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_PATH = resolve(__dirname, "../path-builder/src/data/video_library_enriched.json");
+const ENRICHED_PATH = resolve(__dirname, "../path-builder/src/data/video_library_enriched.json");
+const FALLBACK_PATH = resolve(__dirname, "../path-builder/src/data/video_library.json");
+const DATA_PATH = existsSync(ENRICHED_PATH) ? ENRICHED_PATH : FALLBACK_PATH;
 
 // ── Load real course data ───────────────────────────────────────────────
 const rawData = JSON.parse(readFileSync(DATA_PATH, "utf8"));
 const ALL_COURSES = rawData.courses;
 
 // Playability filter (same as Personas.jsx)
+// Non-enriched data lacks drive_id, so fall back to all courses with videos
 const PLAYABLE_COURSES = ALL_COURSES.filter((c) => c.videos?.length > 0 && c.videos[0]?.drive_id);
+const SCORABLE_COURSES = PLAYABLE_COURSES.length > 0 ? PLAYABLE_COURSES : ALL_COURSES.filter((c) => c.videos?.length > 0);
 
 // ── Persona Scoring Rules (from PersonaService.js) ──────────────────────
 const personaScoringRules = {
@@ -379,15 +383,15 @@ function scoreCourses(personaId, rules, courses) {
 const PERSONA_IDS = Object.keys(personaScoringRules);
 
 describe("Onboarding Real Data — Persona Scoring", () => {
-  it(`loaded ${ALL_COURSES.length} courses, ${PLAYABLE_COURSES.length} playable`, () => {
+  it(`loaded ${ALL_COURSES.length} courses, ${SCORABLE_COURSES.length} scorable`, () => {
     assert.ok(ALL_COURSES.length > 100, "Expected 100+ courses");
-    assert.ok(PLAYABLE_COURSES.length > 30, "Expected 30+ playable courses");
+    assert.ok(SCORABLE_COURSES.length > 30, "Expected 30+ scorable courses");
   });
 
   for (const personaId of PERSONA_IDS) {
     describe(personaId, () => {
       const rules = personaScoringRules[personaId];
-      const ranked = scoreCourses(personaId, rules, PLAYABLE_COURSES);
+      const ranked = scoreCourses(personaId, rules, SCORABLE_COURSES);
       const top5 = ranked.slice(0, 5);
       const top5Titles = top5.map((c) => c.title);
 
@@ -435,13 +439,13 @@ describe("Onboarding Real Data — Persona Scoring", () => {
     console.log("\n╔═══════════════════════════════════════════════════════════════════════╗");
     console.log("║           Onboarding Real Data — Persona Ranking Summary            ║");
     console.log(
-      `║           ${PLAYABLE_COURSES.length} playable courses from ${ALL_COURSES.length} total${" ".repeat(Math.max(0, 25 - String(PLAYABLE_COURSES.length).length - String(ALL_COURSES.length).length))}║`
+      `║           ${SCORABLE_COURSES.length} scorable courses from ${ALL_COURSES.length} total${" ".repeat(Math.max(0, 25 - String(PLAYABLE_COURSES.length).length - String(ALL_COURSES.length).length))}║`
     );
     console.log("╠═══════════════════════════════════════════════════════════════════════╣");
 
     for (const personaId of PERSONA_IDS) {
       const rules = personaScoringRules[personaId];
-      const ranked = scoreCourses(personaId, rules, PLAYABLE_COURSES);
+      const ranked = scoreCourses(personaId, rules, SCORABLE_COURSES);
       const top3 = ranked.slice(0, 3);
 
       console.log(`║  ${personaId.padEnd(20)}`);
