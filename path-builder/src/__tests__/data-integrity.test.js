@@ -8,7 +8,12 @@
 import { describe, it, expect } from "vitest";
 
 // ── Data imports ──────────────────────────────────────────────────────────────
-import videoLibrary from "../data/video_library_enriched.json";
+let videoLibrary;
+try {
+  videoLibrary = await import("../data/video_library_enriched.json");
+} catch {
+  videoLibrary = await import("../data/video_library.json");
+}
 import tagsData from "../data/tags.json";
 import edgesData from "../data/edges.json";
 import personas from "../data/personas.json";
