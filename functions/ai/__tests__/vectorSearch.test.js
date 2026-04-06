@@ -49,7 +49,7 @@ jest.mock("../../utils/appCheckMiddleware", () => ({
 }));
 
 const admin = require("firebase-admin");
-const { HttpsError } = require("firebase-functions/v2/https");
+// HttpsError available via firebase-functions mock
 const {
   vectorSearchEpic,
   vectorSearchCourses,

@@ -15,7 +15,6 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 const { checkRateLimits } = require("../utils/rateLimit");
-const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
 

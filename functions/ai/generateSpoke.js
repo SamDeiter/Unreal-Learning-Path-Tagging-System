@@ -11,12 +11,13 @@
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
-const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
+const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
 const db = admin.firestore();
 
@@ -183,7 +184,7 @@ Rules:
 
   try {
     return JSON.parse(text);
-  } catch (parseErr) {
+  } catch {
     logger.error("[generateSpoke] JSON parse error:", text.substring(0, 200));
     throw new HttpsError("internal", "Failed to parse lesson JSON");
   }
@@ -254,8 +255,6 @@ exports.generateSpoke = onCall(
     let apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       const functions = require("firebase-functions");
-const { logger } = require("firebase-functions");
-const { requireAppCheck } = require("../utils/appCheckMiddleware");
       apiKey = functions.config().gemini?.api_key;
     }
     if (!apiKey) {

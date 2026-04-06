@@ -14,7 +14,7 @@
  */
 
 const { SCHEMAS } = require("./schemas");
-const { getCached, setCache, normalizeQuery } = require("./cache");
+const { getCached, setCache } = require("./cache");
 const { sanitizeOutput } = require("./promptVersions");
 const { PROMPT_VERSION } = require("./promptVersions");
 

@@ -12,7 +12,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { SearchServiceClient } = require("@google-cloud/discoveryengine").v1beta;
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
-const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
 
