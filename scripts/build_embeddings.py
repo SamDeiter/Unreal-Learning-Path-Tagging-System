@@ -39,8 +39,8 @@ MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "SEMANTIC_SIMILARITY"
 MAX_TRANSCRIPT_WORDS = 500  # Limit transcript text to keep within token budget
-BATCH_SIZE = 5  # Gemini supports batch embedding
-RATE_LIMIT_DELAY = 0.5  # Seconds between batches
+BATCH_SIZE = 100  # Gemini supports up to 100 per batchEmbedContents call
+RATE_LIMIT_DELAY = 0.1  # Seconds between batches
 
 
 def load_data():

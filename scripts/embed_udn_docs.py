@@ -35,12 +35,14 @@ MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
+BATCH_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:batchEmbedContents"
 
 TARGET_TOKENS = 500
 MAX_TOKENS = 700
 APPROX_CHARS_PER_TOKEN = 4
 CHECKPOINT_INTERVAL = 100
-MAX_WORKERS = 10  # Parallel embedding threads
+BATCH_SIZE = 100  # texts per batchEmbedContents call
+MAX_WORKERS = 10  # Parallel embedding threads (legacy, kept for compat)
 
 # Skip entries with very little content
 MIN_CONTENT_TOKENS = 40
@@ -138,13 +140,6 @@ def embed_text(text, api_key):
     import urllib.error
     import urllib.request
 
-# Load .env file for API keys
-try:
-    from dotenv import load_dotenv
-    load_dotenv(override=True)
-except ImportError:
-    pass  # dotenv not installed
-
     url = f"{API_URL}?key={api_key}"
     payload = {
         "model": f"models/{MODEL}",
@@ -172,6 +167,55 @@ except ImportError:
                 wait = (attempt + 1) * 5
                 time.sleep(wait)
             else:
+                raise
+        except Exception:
+            if attempt < 2:
+                time.sleep(2)
+            else:
+                raise
+
+
+def embed_texts_batch(texts, api_key):
+    """Call Gemini batchEmbedContents API. Returns list of 768-dim vectors."""
+    import urllib.error
+    import urllib.request
+
+    url = f"{BATCH_API_URL}?key={api_key}"
+    payload = {
+        "requests": [
+            {
+                "model": f"models/{MODEL}",
+                "content": {"parts": [{"text": t}]},
+                "taskType": TASK_TYPE,
+                "outputDimensionality": DIMENSION,
+            }
+            for t in texts
+        ]
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode("utf-8"))
+                vectors = [e.get("values", []) for e in result.get("embeddings", [])]
+                if len(vectors) != len(texts):
+                    raise ValueError(f"Expected {len(texts)} embeddings, got {len(vectors)}")
+                return vectors
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:
+                wait = (attempt + 1) * 5
+                print(f"  Rate limited, waiting {wait}s...")
+                time.sleep(wait)
+            else:
+                body = e.read().decode("utf-8")[:300]
+                print(f"  Batch API error {e.code}: {body}")
                 raise
         except Exception:
             if attempt < 2:
@@ -311,7 +355,7 @@ def main():
         print("\nNo new chunks to embed. Nothing to do.")
         return
 
-    # ── Step 5: Parallel embed new UDN chunks ──
+    # ── Step 5: Batch embed new UDN chunks ──
     api_key = get_api_key()
     print(f"\n  API key: {api_key[:8]}...{api_key[-4:]}")
 
@@ -326,45 +370,49 @@ def main():
     total = len(chunks_to_embed)
     errors = 0
     done_count = 0
-    lock = threading.Lock()
     start_time = time.time()
-    workers = args.workers
 
-    print(f"\nEmbedding {total} UDN doc chunks ({workers} parallel workers)...\n")
+    num_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
+    print(f"\nEmbedding {total} UDN doc chunks in {num_batches} batches of {BATCH_SIZE}...\n")
 
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {
-            executor.submit(embed_one_chunk, chunk, api_key): chunk
-            for chunk in chunks_to_embed
-        }
+    for batch_start in range(0, total, BATCH_SIZE):
+        batch = chunks_to_embed[batch_start:batch_start + BATCH_SIZE]
+        batch_texts = [c["text"] for c in batch]
 
-        for future in as_completed(futures):
-            chunk = futures[future]
-            try:
-                result = future.result()
-                with lock:
-                    merged_embeddings[result["id"]] = result["result"]
-                    done_count += 1
+        try:
+            vectors = embed_texts_batch(batch_texts, api_key)
+            for chunk, vector in zip(batch, vectors):
+                content_h = hashlib.sha256(chunk["text"].encode("utf-8")).hexdigest()[:16]
+                merged_embeddings[chunk["id"]] = {
+                    "embedding": vector,
+                    "slug": chunk["slug"],
+                    "url": chunk["url"],
+                    "title": chunk["title"],
+                    "section": chunk["section"],
+                    "text": chunk["text"][:300],
+                    "token_estimate": chunk["token_estimate"],
+                    "content_hash": content_h,
+                    "source": "udn",
+                }
+            done_count += len(batch)
+        except Exception as e:
+            errors += len(batch)
+            print(f"  FAILED batch at {batch_start}: {e}")
+            if errors > 200:
+                print("  Too many errors. Use --resume to continue.")
+                save_checkpoint(start_idx + done_count)
+                break
 
-                    if done_count % 50 == 0 or done_count == total:
-                        elapsed = time.time() - start_time
-                        rate = done_count / elapsed if elapsed > 0 else 0
-                        eta = (total - done_count) / rate if rate > 0 else 0
-                        print(f"  [{done_count}/{total}] {done_count * 100 // total}% "
-                              f"({rate:.1f}/sec, ETA: {eta:.0f}s)")
+        elapsed = time.time() - start_time
+        rate = done_count / elapsed if elapsed > 0 else 0
+        eta = (total - done_count) / rate if rate > 0 else 0
+        print(f"  [{done_count}/{total}] {done_count * 100 // total}% "
+              f"({rate:.1f}/sec, ETA: {eta:.0f}s)")
 
-                    if done_count % CHECKPOINT_INTERVAL == 0:
-                        save_checkpoint(start_idx + done_count)
+        if done_count % CHECKPOINT_INTERVAL == 0:
+            save_checkpoint(start_idx + done_count)
 
-            except Exception as e:
-                with lock:
-                    errors += 1
-                    print(f"  ERROR on {chunk['id']}: {e}")
-                    if errors > 50:
-                        print("  Too many errors. Use --resume to continue.")
-                        executor.shutdown(wait=False, cancel_futures=True)
-                        save_checkpoint(start_idx + done_count)
-                        break
+        time.sleep(0.05)  # Small delay between batches
 
     # ── Step 6: Safety check — don't lose data ──
     if len(merged_embeddings) < len(existing_embeddings):

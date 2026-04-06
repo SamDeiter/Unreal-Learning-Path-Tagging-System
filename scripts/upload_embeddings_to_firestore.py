@@ -374,7 +374,7 @@ def main():
         file_path = config["file"]
         collection_name = config["collection"]
 
-        print(f"\n{'─' * 50}")
+        print(f"\n{'-' * 50}")
         print(f"  {coll_key.upper()}: {config['description']}")
         print(f"  File: {file_path}")
 

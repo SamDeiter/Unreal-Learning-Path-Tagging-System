@@ -37,6 +37,7 @@ MODEL = "gemini-embedding-001"          # same as embedQuery Cloud Function
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"        # documents use RETRIEVAL_DOCUMENT
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
+BATCH_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:batchEmbedContents"
 
 # Chunking params
 TARGET_TOKENS = 250          # aim for ~250 tokens per chunk (tighter for timestamp precision)
@@ -44,8 +45,9 @@ MAX_TOKENS = 400             # hard max
 OVERLAP_SEGMENTS = 2         # overlap 2 segments between chunks for context continuity
 APPROX_CHARS_PER_TOKEN = 4   # rough estimate for English text
 
-# Rate limiting (Gemini free tier: 1500 req/min)
-BATCH_DELAY = 0.05           # 50ms between requests = ~1200/min (safe margin)
+# Rate limiting (Gemini free tier: 1500 req/min, but each batch = 1 request)
+BATCH_DELAY = 1.0            # 1s between batch requests (~60 batches/min, well within limit)
+BATCH_SIZE = 100             # max texts per batchEmbedContents request
 CHECKPOINT_INTERVAL = 50     # save progress every 50 embeddings
 
 
@@ -152,6 +154,49 @@ def embed_text(text, api_key):
         raise
 
 
+def embed_texts_batch(texts, api_key):
+    """Call Gemini batchEmbedContents API. Returns list of 768-dim vectors."""
+    import urllib.error
+    import urllib.request
+
+    url = f"{BATCH_API_URL}?key={api_key}"
+    payload = {
+        "requests": [
+            {
+                "model": f"models/{MODEL}",
+                "content": {"parts": [{"text": t}]},
+                "taskType": TASK_TYPE,
+                "outputDimensionality": DIMENSION,
+            }
+            for t in texts
+        ]
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            vectors = []
+            for emb in result.get("embeddings", []):
+                values = emb.get("values", [])
+                if len(values) != DIMENSION:
+                    raise ValueError(f"Expected {DIMENSION} dims, got {len(values)}")
+                vectors.append(values)
+            if len(vectors) != len(texts):
+                raise ValueError(f"Expected {len(texts)} embeddings, got {len(vectors)}")
+            return vectors
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")[:300]
+        print(f"  Batch API error {e.code}: {body}")
+        raise
+
+
 def save_checkpoint(chunk_id, embeddings_done):
     """Save progress for resume capability."""
     CHECKPOINT_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -238,60 +283,64 @@ def main():
                     existing_embeddings = existing_data.get("segments", {})
                     print(f"  Loaded {len(existing_embeddings)} existing embeddings")
 
-    # Embed chunks
+    # Embed chunks in batches
     embeddings = dict(existing_embeddings)
     total = len(chunks)
+    consecutive_errors = 0
     errors = 0
     start_time = time.time()
+    remaining = chunks[start_idx:]
 
-    print(f"\nEmbedding {total - start_idx} chunks (starting at {start_idx})...\n")
+    print(f"\nEmbedding {len(remaining)} chunks in batches of {BATCH_SIZE} (starting at {start_idx})...\n")
 
-    for i in range(start_idx, total):
-        chunk = chunks[i]
-        # Retry each chunk up to 3 times with exponential backoff
+    for batch_start in range(0, len(remaining), BATCH_SIZE):
+        batch = remaining[batch_start:batch_start + BATCH_SIZE]
+        batch_texts = [c["text"] for c in batch]
+        done = start_idx + batch_start + len(batch)
+
+        # Retry batch up to 3 times with exponential backoff
         success = False
-        for attempt in range(3):
+        for attempt in range(5):
             try:
-                vector = embed_text(chunk["text"], api_key)
-                embeddings[chunk["id"]] = {
-                    "embedding": vector,
-                    "course_code": chunk["course_code"],
-                    "video_key": chunk["video_key"],
-                    "video_title": chunk["video_title"],
-                    "start_timestamp": chunk["start_timestamp"],
-                    "end_timestamp": chunk["end_timestamp"],
-                    "start_seconds": chunk["start_seconds"],
-                    "text": chunk["text"][:300],   # truncated for storage
-                    "token_estimate": chunk["token_estimate"],
-                }
+                vectors = embed_texts_batch(batch_texts, api_key)
+                for chunk, vector in zip(batch, vectors):
+                    embeddings[chunk["id"]] = {
+                        "embedding": vector,
+                        "course_code": chunk["course_code"],
+                        "video_key": chunk["video_key"],
+                        "video_title": chunk["video_title"],
+                        "start_timestamp": chunk["start_timestamp"],
+                        "end_timestamp": chunk["end_timestamp"],
+                        "start_seconds": chunk["start_seconds"],
+                        "text": chunk["text"][:300],   # truncated for storage
+                        "token_estimate": chunk["token_estimate"],
+                    }
                 success = True
-                errors = 0  # reset consecutive error counter on success
+                consecutive_errors = 0
                 break
             except Exception as e:
-                wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
-                if attempt < 2:
-                    print(f"  Retry {attempt+1}/3 for {chunk['id']} (waiting {wait}s)...")
+                wait = 5 * (attempt + 1)  # 5s, 10s, 15s, 20s, 25s
+                if attempt < 4:
+                    print(f"  Retry {attempt+1}/5 for batch at {batch_start} (waiting {wait}s)...")
                     time.sleep(wait)
                 else:
-                    errors += 1
-                    print(f"  FAILED {chunk['id']} after 3 attempts: {e}")
+                    consecutive_errors += 1
+                    errors += len(batch)
+                    print(f"  FAILED batch at {batch_start} after 5 attempts: {e}")
 
-        if not success and errors > 50:
-            print("  Too many consecutive errors, stopping.")
+        if not success and consecutive_errors > 10:
+            print("  Too many consecutive batch errors, stopping.")
             break
 
         # Progress
-        done = i + 1
-        if done % 10 == 0 or done == total:
-            elapsed = time.time() - start_time
-            rate = (done - start_idx) / elapsed if elapsed > 0 else 0
-            eta = (total - done) / rate if rate > 0 else 0
-            print(f"  [{done}/{total}] {done * 100 // total}% "
-                  f"({rate:.1f} chunks/sec, ETA: {eta:.0f}s)")
+        elapsed = time.time() - start_time
+        rate = (done - start_idx) / elapsed if elapsed > 0 else 0
+        eta = (total - done) / rate if rate > 0 else 0
+        print(f"  [{done}/{total}] {done * 100 // total}% "
+              f"({rate:.1f} chunks/sec, ETA: {eta:.0f}s)")
 
         # Checkpoint
-        if done % CHECKPOINT_INTERVAL == 0:
-            save_checkpoint(chunk["id"], done)
+        save_checkpoint(batch[-1]["id"], done)
 
         time.sleep(BATCH_DELAY)
 
