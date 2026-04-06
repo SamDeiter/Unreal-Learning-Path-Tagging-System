@@ -202,7 +202,7 @@ exports.generateSpoke = onCall(
   },
   async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
     // 1. Auth check
     const userId = request.auth?.uid;
     if (!userId) {

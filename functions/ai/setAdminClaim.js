@@ -27,7 +27,7 @@ exports.setAdminClaim = functions
   .runWith({ memory: "512MB" })
   .https.onCall(async (data, context) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: false });
     // Must be authenticated
     if (!context.auth) {
       throw new functions.https.HttpsError(

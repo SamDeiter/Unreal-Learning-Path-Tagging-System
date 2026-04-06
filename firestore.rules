@@ -45,15 +45,9 @@ service cloud.firestore {
     }
     
     // Helper: check if user is admin (via Firebase custom claims)
-    // Primary: custom claim `admin == true` (set via setAdminClaim Cloud Function)
-    // Fallback: hardcoded emails for dev/bootstrap — REMOVE after migrating to custom claims
-    // TODO(2026-06-01): Remove email fallback once all admins have custom claims set
+    // Set via setAdminClaim Cloud Function (bootstrap list handles first-time seeding)
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.admin == true ||
-        request.auth.token.email == 'sam.deiter@epicgames.com' ||
-        request.auth.token.email == 'samdeiter@gmail.com'
-      );
+      return request.auth != null && request.auth.token.admin == true;
     }
     
     // Invite codes — admin creates/lists/revokes, users read + consume

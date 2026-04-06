@@ -20,7 +20,7 @@ exports.rerankPassages = functions
   })
   .https.onCall(async (data, context) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: true });
+    requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: false });
     const userId = requireAuth(context);
     const { query, passages } = data;
 

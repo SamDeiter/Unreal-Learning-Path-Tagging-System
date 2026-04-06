@@ -25,7 +25,7 @@ exports.triggerDemandScrape = onCall(
   },
   async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
 
     // Require authentication (any signed-in user)
     if (!request.auth) {

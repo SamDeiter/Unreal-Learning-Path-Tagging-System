@@ -41,7 +41,7 @@ exports.searchVertexAIDocs = onCall(
   { region: "us-central1", timeoutSeconds: 30, memory: "512MiB", minInstances: 0 },
   async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
     const userId = request.auth?.uid || "anonymous";
     const { query, pageSize = 5 } = request.data || {};
 

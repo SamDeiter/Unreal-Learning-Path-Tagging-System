@@ -90,7 +90,7 @@ async function searchCollection(collectionName, queryVector, topK) {
  */
 exports.vectorSearchEpic = onCall({ region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 }, async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
   validateVector(queryVector);
@@ -108,7 +108,7 @@ exports.vectorSearchCourses = onCall(
   { region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 },
   async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 5 } = request.data;
     validateVector(queryVector);
@@ -127,7 +127,7 @@ exports.vectorSearchSegments = onCall(
   { region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 },
   async (request) => {
     // App Check enforcement (permissive during rollout)
-    requireAppCheck(request, { allowInvalid: true });
+    requireAppCheck(request, { allowInvalid: false });
     const userId = await enforceRateLimit(request);
     const { queryVector, topK = 10 } = request.data;
     validateVector(queryVector);
@@ -144,7 +144,7 @@ exports.vectorSearchSegments = onCall(
  */
 exports.vectorSearchDocs = onCall({ region: "us-central1", maxInstances: 10, memory: "512MiB", minInstances: 0 }, async (request) => {
   // App Check enforcement (permissive during rollout)
-  requireAppCheck(request, { allowInvalid: true });
+  requireAppCheck(request, { allowInvalid: false });
   const userId = await enforceRateLimit(request);
   const { queryVector, topK = 10 } = request.data;
   validateVector(queryVector);
