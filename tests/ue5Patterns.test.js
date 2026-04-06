@@ -3,33 +3,31 @@
  * These patterns are critical for crash log parsing accuracy.
  */
 
-// Re-define patterns inline since ui/js/ue5Patterns.js is a browser script (not a module)
-const UE5_ERROR_PATTERNS = [
-  { pattern: /ExitCode[=:\s]*(\d+)/i, type: "exitcode", extract: (m) => `ExitCode ${m[1]}` },
-  { pattern: /Error[:\s]+([A-Z]+\d+)/i, type: "linker", extract: (m) => m[1] },
-  { pattern: /ShaderCompileWorker/i, type: "shader", extract: () => "Shader compilation error" },
-  { pattern: /D3D\s*device\s*lost/i, type: "gpu", extract: () => "D3D device lost" },
-  { pattern: /GPU\s*crash/i, type: "gpu", extract: () => "GPU crash" },
-  { pattern: /Accessed\s*None/i, type: "blueprint", extract: () => "Blueprint Accessed None" },
-  { pattern: /cook\s*(fail|error)/i, type: "cook", extract: () => "Cook failure" },
-  { pattern: /packaging\s*(fail|error)/i, type: "packaging", extract: () => "Packaging error" },
-  { pattern: /Lumen/i, type: "lumen", extract: () => "Lumen issue" },
-  { pattern: /Nanite/i, type: "nanite", extract: () => "Nanite issue" },
-  { pattern: /replication|multiplayer|net/i, type: "network", extract: () => "Network/replication" },
-  { pattern: /Fatal\s*error/i, type: "fatal", extract: () => "Fatal error" },
-  { pattern: /LogCore:\s*Error/i, type: "core", extract: () => "Core error" },
-  { pattern: /out\s*of\s*(memory|video\s*memory)/i, type: "memory", extract: () => "Out of memory" },
-];
+const { describe, it: test } = require('node:test');
+const assert = require('node:assert/strict');
+const { UE5_ERROR_PATTERNS, escapeHtml } = require('../ui/js/ue5Patterns.js');
 
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+// Custom expect shim to provide Vitest-like assertions for Node.js native test runner
+const expect = (actual) => ({
+  toBe: (expected) => assert.strictEqual(actual, expected),
+  toEqual: (expected) => assert.deepStrictEqual(actual, expected),
+  toHaveLength: (expected) => assert.strictEqual(actual.length, expected),
+  toContainEqual: (expected) => {
+    const found = actual.some((item) => {
+      try {
+        assert.deepStrictEqual(item, expected);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    if (!found) {
+      throw new Error("Expected item not found in array");
+    }
+  },
+  toBeGreaterThanOrEqual: (expected) => assert.ok(actual >= expected),
+  toContain: (expected) => assert.ok(actual.includes(expected)),
+});
 
 // Helper: run all patterns against text, return matches
 function matchPatterns(text) {
@@ -112,11 +110,7 @@ describe("UE5 Error Pattern Matching", () => {
   });
 
   test("extracts multiple patterns from a real crash log", () => {
-    const crashLog = `
-      [2024/01/15 10:30:22] Fatal error: Unhandled Exception
-      [2024/01/15 10:30:22] D3D device lost
-      [2024/01/15 10:30:22] ExitCode=3
-    `;
+    const crashLog = "Fatal error: Unhandled Exception\nD3D device lost\nExitCode=3";
     const results = matchPatterns(crashLog);
     expect(results.length).toBeGreaterThanOrEqual(3);
     expect(results.map((r) => r.type)).toContain("fatal");
@@ -149,7 +143,7 @@ describe("escapeHtml", () => {
   });
 
   test("escapes quotes", () => {
-    expect(escapeHtml('"hello"')).toBe("&quot;hello&quot;");
+    expect(escapeHtml('\"hello\"')).toBe("&quot;hello&quot;");
   });
 
   test("returns empty string for falsy input", () => {
