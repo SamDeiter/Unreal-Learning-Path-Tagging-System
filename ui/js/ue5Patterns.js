@@ -74,7 +74,6 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
-// Export for Node.js native tests if running in that environment
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { UE5_ERROR_PATTERNS, escapeHtml };
 }
