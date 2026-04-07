@@ -22,36 +22,46 @@ function tokenize(str) {
     .filter((t) => t.length > 2);
 }
 
+// Cache for course metadata to avoid redundant normalization and tag processing
+const courseCache = new WeakMap();
+
 /**
- * Calculates match score between goal and course
- * Higher scores = better match
+ * Extracts and normalizes metadata for a course
  */
-function scoreCourse(goal, course) {
-  if (!course) return 0;
-  const goalTokens = tokenize(goal);
-  if (goalTokens.length === 0) return 0;
+function getCourseMetadata(course) {
+  if (courseCache.has(course)) {
+    return courseCache.get(course);
+  }
 
-  let score = 0;
-
-  // Build searchable content from course
   const title = normalize(course.title || course.folder_name || "");
   const description = normalize(course.description || "");
 
-  // Handle tags - could be array or object with level/topic properties
   let tagsList = [];
-  if (Array.isArray(course.extracted_tags)) {
-    tagsList = tagsList.concat(course.extracted_tags);
-  }
-  if (Array.isArray(course.transcript_tags)) {
-    tagsList = tagsList.concat(course.transcript_tags);
-  }
+  if (Array.isArray(course.extracted_tags)) tagsList.push(...course.extracted_tags);
+  if (Array.isArray(course.transcript_tags)) tagsList.push(...course.transcript_tags);
   if (Array.isArray(course.tags)) {
-    tagsList = tagsList.concat(course.tags);
+    tagsList.push(...course.tags);
   } else if (course.tags && typeof course.tags === "object") {
-    // tags is an object like {level: "Beginner", topic: "Blueprints"}
-    tagsList = tagsList.concat(Object.values(course.tags).filter((v) => typeof v === "string"));
+    tagsList.push(...Object.values(course.tags).filter((v) => typeof v === "string"));
   }
+
   const tags = tagsList.map(normalize);
+  const titleWords = title.split(/\s+/);
+
+  const metadata = { title, description, tags, titleWords };
+  courseCache.set(course, metadata);
+  return metadata;
+}
+
+/**
+ * Calculates match score between goal tokens and course
+ * Higher scores = better match
+ */
+function scoreCourse(goalTokens, course) {
+  if (!course || goalTokens.length === 0) return 0;
+
+  const { title, description, tags, titleWords } = getCourseMetadata(course);
+  let score = 0;
 
   goalTokens.forEach((token) => {
     // Title match (highest value)
@@ -70,7 +80,7 @@ function scoreCourse(goal, course) {
     }
 
     // Partial word match in title
-    if (title.split(/\s+/).some((word) => word.startsWith(token))) {
+    if (titleWords.some((word) => word.startsWith(token))) {
       score += 15;
     }
   });
@@ -94,12 +104,15 @@ export function matchCoursesToGoal(goal, courses, limit = 8) {
     return [];
   }
 
+  const goalTokens = tokenize(goal);
+  if (goalTokens.length === 0) return [];
+
   const scored = courses
-    .map((course) => ({
-      ...course,
-      matchScore: scoreCourse(goal, course),
-    }))
-    .filter((c) => c.matchScore > 0)
+    .map((course) => {
+      const matchScore = scoreCourse(goalTokens, course);
+      return matchScore > 0 ? { ...course, matchScore } : null;
+    })
+    .filter(Boolean)
     .sort((a, b) => b.matchScore - a.matchScore);
 
   return scored.slice(0, limit);
