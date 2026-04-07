@@ -573,6 +573,7 @@ function buildReport({
   youtubeMetrics,
   trendsData,
   redditSentiment,
+  courses,
 }) {
   const suggestions = [];
 
@@ -807,6 +808,7 @@ async function main() {
     youtubeMetrics,
     trendsData,
     redditSentiment,
+    courses,
   });
 
   console.log(`\n✅ Report complete: ${report.suggestions.length} suggestions`);
