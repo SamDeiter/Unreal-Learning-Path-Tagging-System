@@ -38,6 +38,7 @@ export default function AppSidebar({
                   <button
                     className={`sidebar-tab ${isAnyBuilderActive ? "active" : ""}`}
                     title={tab.tooltip}
+                    aria-expanded={buildersExpanded}
                     onClick={() => {
                       setBuildersExpanded(!buildersExpanded);
                       if (!isAnyBuilderActive) {
@@ -50,6 +51,7 @@ export default function AppSidebar({
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${buildersExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -99,6 +101,7 @@ export default function AppSidebar({
                   <button
                     className={`sidebar-tab sidebar-tab-sm ${isAnyAnalyticsActive ? "active" : ""}`}
                     title={tab.tooltip}
+                    aria-expanded={analyticsExpanded}
                     onClick={() => {
                       setAnalyticsExpanded(!analyticsExpanded);
                       if (!isAnyAnalyticsActive) {
@@ -111,6 +114,7 @@ export default function AppSidebar({
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${analyticsExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -191,4 +195,3 @@ export default function AppSidebar({
     </aside>
   );
 }
-
