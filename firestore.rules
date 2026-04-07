@@ -62,7 +62,7 @@ service cloud.firestore {
       allow read, write: if isAdmin();
       // Authenticated users can read individual invites (to validate)
       allow get: if request.auth != null;
-      // Authenticated users can update usedCount when consuming
+      // Authenticated users can update usedCount when consuming (enforce atomic increment)
       allow update: if request.auth != null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'lastUsedAt'])
         && request.resource.data.usedCount == resource.data.usedCount + 1
