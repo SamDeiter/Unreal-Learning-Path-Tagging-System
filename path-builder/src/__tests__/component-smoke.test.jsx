@@ -35,6 +35,16 @@ describe("LoadingSpinner", () => {
     render(<LoadingSpinner message="Fetching courses..." />);
     expect(screen.getByText("Fetching courses...")).toBeTruthy();
   });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<LoadingSpinner />);
+    const spinnerContainer = container.querySelector(".loading-spinner-container");
+    expect(spinnerContainer.getAttribute("role")).toBe("status");
+    expect(spinnerContainer.getAttribute("aria-live")).toBe("polite");
+
+    const visualSpinner = container.querySelector(".loading-spinner");
+    expect(visualSpinner.getAttribute("aria-hidden")).toBe("true");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
