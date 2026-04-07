@@ -138,9 +138,12 @@ export default function AuthoringWorkbench() {
             onClick={() => isClickable && wb.goToStage(stageKey)}
             disabled={!isClickable}
             aria-current={isCurrent ? "step" : undefined}
+            aria-label={`${meta.label}${isCompleted ? " (completed)" : ""}`}
             title={meta.description}
           >
-            <span className="aw-step-icon">{isCompleted ? "✅" : meta.icon}</span>
+            <span className="aw-step-icon" aria-hidden="true">
+              {isCompleted ? "✅" : meta.icon}
+            </span>
             <span className="aw-step-label">{meta.label}</span>
           </button>
         );

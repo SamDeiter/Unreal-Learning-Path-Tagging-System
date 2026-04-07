@@ -85,7 +85,9 @@ export default function CartPanel({ cart, onRemove, onClear, onWatchPath }) {
               return (
                 <div key={itemId} className={`cart-item cart-item-${itemType}`}>
                   <span className="cart-item-num">{index + 1}</span>
-                  <span className="cart-item-icon" title={itemType}>{icon}</span>
+                  <span className="cart-item-icon" title={itemType} aria-hidden="true">
+                    {icon}
+                  </span>
                   <div className="cart-item-info">
                     <span className="cart-item-title">{displayTitle}</span>
                     {dur && <span className="cart-item-dur">{dur}</span>}
@@ -108,7 +110,9 @@ export default function CartPanel({ cart, onRemove, onClear, onWatchPath }) {
         </>
       ) : (
         <div className="cart-empty">
-          <span className="cart-empty-icon">📺</span>
+          <span className="cart-empty-icon" aria-hidden="true">
+            📺
+          </span>
           <p>Add videos, docs, and resources to build your learning path</p>
         </div>
       )}
