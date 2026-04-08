@@ -73,6 +73,14 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.token.email == email;
     }
     
+    // User feedback — per-user signals (isolation enforced)
+    match /userFeedback/{userId} {
+      match /videoSignals/{feedbackId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId
+          && (request.method != 'create' || request.resource.data.timestamp == request.time);
+      }
+    }
+
     // Adaptive carts — per-user isolation (Google Auth required)
     match /adaptive_carts/{cartId} {
       // Users can only read their own carts
@@ -106,6 +114,7 @@ service cloud.firestore {
         && request.resource.data.type in ['bug', 'feature', 'general', 'content', 'other']
         && request.resource.data.description is string
         && request.resource.data.description.size() <= 2000
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read, update, delete: if isAdmin();
     }
@@ -120,7 +129,9 @@ service cloud.firestore {
     // (Restricted to prevent cross-user data leakage of queries/sessions)
     match /analytics_events/{docId} {
       allow read: if isAdmin();
-      allow create: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['event', 'session_id', 'timestamp'])
+        && request.resource.data.timestamp == request.time;
       allow update, delete: if false;
     }
 
@@ -130,6 +141,18 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['sentiment', 'timestamp'])
         && request.resource.data.sentiment in ['positive', 'negative']
+        && request.resource.data.timestamp == request.time
+        && request.resource.data.keys().size() <= 10;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Deep dive ratings — 👍/👎 quality signals on AI enrichment
+    match /deepdive_ratings/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['rating', 'timestamp'])
+        && request.resource.data.rating in ['good', 'bad']
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
@@ -140,6 +163,7 @@ service cloud.firestore {
     match /token_usage/{dateKey} {
       allow read: if request.auth != null;
       allow create, update: if request.auth != null
+        && request.resource.data.lastUpdated == request.time
         && request.resource.data.keys().size() <= 15;
       allow delete: if false;
     }
@@ -151,6 +175,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['message', 'source', 'timestamp'])
         && request.resource.data.message is string
         && request.resource.data.message.size() <= 500
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
@@ -164,6 +189,7 @@ service cloud.firestore {
         && request.resource.data.label is string
         && request.resource.data.label.size() <= 100
         && request.resource.data.durationMs is number
+        && request.resource.data.timestamp == request.time
         && request.resource.data.keys().size() <= 10;
       allow read: if isAdmin();
       allow update, delete: if false;
