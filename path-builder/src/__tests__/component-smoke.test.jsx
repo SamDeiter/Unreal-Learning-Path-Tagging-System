@@ -7,12 +7,16 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import AppSidebar from "../components/AppSidebar/AppSidebar";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
 vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../services/googleAuthService", () => ({
+  signOutUser: vi.fn(),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +178,64 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AppSidebar
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("AppSidebar", () => {
+  const defaultProps = {
+    tabs: [],
+    activeTab: "authoring",
+    setActiveTab: vi.fn(),
+    analyticsExpanded: false,
+    setAnalyticsExpanded: vi.fn(),
+    buildersExpanded: false,
+    setBuildersExpanded: vi.fn(),
+    newFeedbackCount: 0,
+    currentUser: {
+      displayName: "Test User",
+      photoURL: "https://example.com/avatar.png",
+    },
+    onRetakeQuiz: vi.fn(),
+  };
+
+  it("should render without crashing", () => {
+    const { container } = render(<AppSidebar {...defaultProps} />);
+    expect(container.querySelector(".app-sidebar")).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes on toggle buttons", () => {
+    render(<AppSidebar {...defaultProps} />);
+
+    const buildersBtn = screen.getByTitle(/Choose between different path generation engines/i);
+    expect(buildersBtn.getAttribute("aria-expanded")).toBe("false");
+
+    const analyticsBtn = screen.getByTitle(/Deep data insights into demand and coverage/i);
+    expect(analyticsBtn.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("should have aria-hidden on decorative elements", () => {
+    const { container } = render(<AppSidebar {...defaultProps} />);
+
+    // All icons should be hidden
+    const icons = container.querySelectorAll(".sidebar-tab-icon");
+    icons.forEach((icon) => {
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    // Expand arrows should be hidden
+    const arrows = container.querySelectorAll(".sidebar-expand-arrow");
+    arrows.forEach((arrow) => {
+      expect(arrow.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    // Change Role emoji should be hidden
+    const changeRoleBtn = screen.getByText(/Change Role/i);
+    const emoji = changeRoleBtn.querySelector("span[aria-hidden='true']");
+    expect(emoji).toBeTruthy();
+    expect(emoji.textContent).toBe("🔄");
   });
 });
