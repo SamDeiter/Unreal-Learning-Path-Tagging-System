@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { wordJaccard } from "../textSimilarity";
+import { wordJaccard, getWordSet } from "../textSimilarity";
 
 describe("wordJaccard", () => {
   test("identical texts return 1", () => {
@@ -48,5 +48,15 @@ describe("wordJaccard", () => {
     const a = "Setting up Nanite for static meshes requires enabling the plugin";
     const b = "Virtual shadow maps work with Nanite to provide detailed shadow rendering";
     expect(wordJaccard(a, b)).toBeLessThan(0.7);
+  });
+
+  test("handles pre-computed Sets", () => {
+    const textA = "Lumen global illumination";
+    const textB = "Lumen global illumination";
+    const setA = getWordSet(textA);
+    const setB = getWordSet(textB);
+    expect(wordJaccard(setA, setB)).toBe(1);
+    expect(wordJaccard(setA, textB)).toBe(1);
+    expect(wordJaccard(textA, setB)).toBe(1);
   });
 });
