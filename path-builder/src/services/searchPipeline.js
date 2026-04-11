@@ -197,7 +197,7 @@ export async function runSearchPipeline(query, options = {}) {
         if (!isDupe) semanticDeduped.push(p);
       }
       // Remove wordSet before returning results
-      retrievedPassages = semanticDeduped.map(({ wordSet, ...p }) => p);
+      retrievedPassages = semanticDeduped.map(({ wordSet: _wordSet, ...p }) => p);
 
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
     } else {
