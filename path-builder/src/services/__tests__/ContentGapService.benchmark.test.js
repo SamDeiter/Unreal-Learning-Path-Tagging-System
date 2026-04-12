@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { analyzeGaps, getRelevanceBadge } from "../ContentGapService";
-import { allCourses, makeCourse } from "../../__tests__/fixtures/testCourses";
+import { makeCourse } from "../../__tests__/fixtures/testCourses";
 
 describe("ContentGapService Benchmark", () => {
   const largeCatalog = Array.from({ length: 2000 }, (_, i) =>
