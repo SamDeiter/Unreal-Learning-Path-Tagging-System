@@ -27,9 +27,16 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
+    // Require authentication and admin claim
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+    }
+
+    if (request.auth.token.admin !== true) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only admins can trigger a demand scrape."
+      );
     }
 
     // Get engine from request data (default to UE5)
