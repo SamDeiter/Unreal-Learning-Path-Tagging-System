@@ -16,18 +16,18 @@ const servicePath = path.join(__dirname, '../path-builder/src/services/demandInt
 const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
 const taxonomyMatch = serviceContent.match(/export const GRANULAR_TAXONOMY = ({[\s\S]*?});/);
-let taxonomy = {};
+const taxonomy = {};
 if (taxonomyMatch && taxonomyMatch[1]) {
-  eval("taxonomy = " + taxonomyMatch[1]);
+  Object.assign(taxonomy, eval(`(${taxonomyMatch[1]})`));
 } else {
   console.error("❌ Could not parse GRANULAR_TAXONOMY from demandIntelligenceService.js");
   process.exit(1);
 }
 
 const uefnMatch = serviceContent.match(/export const UEFN_GRANULAR_TAXONOMY = ({[\s\S]*?});/);
-let uefnTaxonomy = {};
+const uefnTaxonomy = {};
 if (uefnMatch && uefnMatch[1]) {
-  eval("uefnTaxonomy = " + uefnMatch[1]);
+  Object.assign(uefnTaxonomy, eval(`(${uefnMatch[1]})`));
 } else {
   console.error("⚠️ Could not parse UEFN_GRANULAR_TAXONOMY. Proceeding with UE5 only.");
 }
