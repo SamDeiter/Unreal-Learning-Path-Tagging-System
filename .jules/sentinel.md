@@ -2,3 +2,8 @@
 **Vulnerability:** The `analytics_events` collection was readable by any authenticated user, potentially leaking search queries and session data. The `path_builder_invites` collection allowed client-side updates to `usedCount` and `lastUsedAt` without server-side validation of the increment or timestamp.
 **Learning:** Even when documentation (like `analyticsQueryService.js`) claims a collection is admin-only, the Firestore rules are the actual source of truth and must be explicitly audited. Implicit trust in "authenticated users" is often too broad for sensitive telemetry.
 **Prevention:** Always restrict read access to the minimum necessary persona (e.g., `isAdmin()`). For sensitive counters or metadata updates (like invite consumption), use `request.resource.data.field == resource.data.field + 1` and `request.resource.data.timestamp == request.time` to ensure data integrity and prevent replay or bulk-increment attacks.
+
+## 2026-04-10 - [User Isolation for Token Usage and Analytics Hardening]
+**Vulnerability:** Token usage statistics were stored in a flat root collection (`token_usage/{dateKey}`), allowing any authenticated user to view or modify others' consumption data. Additionally, `analytics_events` lacked timestamp validation and document size limits.
+**Learning:** Root-level collections without user-ID keys are high-risk for IDOR vulnerabilities in multi-tenant Firebase apps. "Authenticated" != "Authorized" for specific records.
+**Prevention:** Enforce user-namespaced paths (e.g., `collection/{userId}/...`) in Firestore and validate `request.auth.uid == userId` in rules. Always bound document sizes and enforce server-side timestamps for telemetry.
