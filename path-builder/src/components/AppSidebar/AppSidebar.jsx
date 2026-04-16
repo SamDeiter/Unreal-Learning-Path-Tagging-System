@@ -50,6 +50,7 @@ export default function AppSidebar({
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${buildersExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -111,6 +112,7 @@ export default function AppSidebar({
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${analyticsExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -180,7 +182,7 @@ export default function AppSidebar({
               className="retake-quiz-btn"
               onClick={onRetakeQuiz}
             >
-              🔄 Change Role
+              <span aria-hidden="true">🔄</span> Change Role
             </button>
             <button className="header-signout-btn" onClick={() => signOutUser()}>
               Sign Out

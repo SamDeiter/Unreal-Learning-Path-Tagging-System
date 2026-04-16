@@ -107,7 +107,7 @@ describe("DiagnosisCard", () => {
     };
 
     render(<DiagnosisCard diagnosis={diagnosis} />);
-    expect(screen.getByText("🔬 Diagnosis")).toBeTruthy();
+    expect(screen.getByText(/Diagnosis/)).toBeTruthy();
     expect(screen.getByText("Lumen reflections are flickering")).toBeTruthy();
     expect(screen.getByText(/Root Causes/)).toBeTruthy();
   });
@@ -119,6 +119,18 @@ describe("DiagnosisCard", () => {
     };
     const { container } = render(<DiagnosisCard diagnosis={partial} />);
     expect(container.querySelector(".diagnosis-card")).toBeTruthy();
+  });
+
+  it("should hide decorative emojis from screen readers", () => {
+    const diagnosis = { problem_summary: "Test", root_causes: ["Cause"] };
+    const { container } = render(<DiagnosisCard diagnosis={diagnosis} />);
+
+    // Header emoji 🔬
+    expect(screen.getByText("🔬").getAttribute("aria-hidden")).toBe("true");
+
+    // Section icon 🎯
+    const rootCauseIcon = container.querySelector(".root-causes .icon");
+    expect(rootCauseIcon.getAttribute("aria-hidden")).toBe("true");
   });
 });
 
