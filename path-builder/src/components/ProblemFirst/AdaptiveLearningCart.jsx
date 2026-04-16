@@ -43,7 +43,7 @@ export default function AdaptiveLearningCart({
       {/* Validation Status Banner */}
       {validationStatus && !validationStatus.approved && (
         <div className="validation-warning">
-          <span className="icon">⚠️</span>
+          <span className="icon" aria-hidden="true">⚠️</span>
           <div className="content">
             <strong>Quality Check:</strong> {validationStatus.reason}
             {validation.suggestions?.length > 0 && (
@@ -61,7 +61,7 @@ export default function AdaptiveLearningCart({
       <section className="cart-section fix-now">
         <div className="section-header">
           <h3>
-            <span className="icon">🔧</span>
+            <span className="icon" aria-hidden="true">🔧</span>
             Fix Now
           </h3>
           <p className="description">These solve your immediate problem:</p>
@@ -96,7 +96,7 @@ export default function AdaptiveLearningCart({
       <section className="cart-section learn-forever">
         <div className="section-header">
           <h3>
-            <span className="icon">🎓</span>
+            <span className="icon" aria-hidden="true">🎓</span>
             Learn Forever
           </h3>
           <p className="description">These help you diagnose similar issues in the future:</p>
@@ -114,7 +114,7 @@ export default function AdaptiveLearningCart({
 
         {objectives?.transferable?.length === 0 && (
           <div className="empty-warning">
-            ⚠️ No transferable objectives generated. This path may not teach reusable skills.
+            <span aria-hidden="true">⚠️</span> No transferable objectives generated. This path may not teach reusable skills.
           </div>
         )}
 
@@ -223,8 +223,8 @@ function CourseCard({ course, type, onClick, onAddToCart, isInCart }) {
         )}
 
         <div className="meta">
-          {duration && <span className="duration">⏱️ {duration}</span>}
-          {videoCount && <span className="video-count">🎬 {videoCount} videos</span>}
+          {duration && <span className="duration"><span aria-hidden="true">⏱️</span> {duration}</span>}
+          {videoCount && <span className="video-count"><span aria-hidden="true">🎬</span> {videoCount} videos</span>}
           {difficultyLabel && (
             <span className={`difficulty ${difficultyLabel.toLowerCase()}`}>{difficultyLabel}</span>
           )}
