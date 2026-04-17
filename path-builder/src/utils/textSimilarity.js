@@ -3,20 +3,27 @@
  */
 
 /**
- * Compute Jaccard similarity between two texts based on word sets.
+ * Tokenize text into a set of words for matching.
  * Filters words <= 2 chars to ignore noise.
  *
- * @param {string} textA
- * @param {string} textB
+ * @param {string|Set} text
+ * @returns {Set}
+ */
+export function tokenize(text) {
+  if (text instanceof Set) return text;
+  return new Set((text || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2));
+}
+
+/**
+ * Compute Jaccard similarity between two texts based on word sets.
+ *
+ * @param {string|Set} textA
+ * @param {string|Set} textB
  * @returns {number} Similarity in [0, 1] — 1 means identical word sets
  */
 export function wordJaccard(textA, textB) {
-  const wordsA = new Set(
-    (textA || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
-  const wordsB = new Set(
-    (textB || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
+  const wordsA = tokenize(textA);
+  const wordsB = tokenize(textB);
 
   if (wordsA.size === 0 && wordsB.size === 0) return 0;
 
@@ -25,6 +32,7 @@ export function wordJaccard(textA, textB) {
     if (wordsB.has(w)) intersection++;
   }
 
-  const union = new Set([...wordsA, ...wordsB]).size;
+  // Use inclusion-exclusion principle: |A ∪ B| = |A| + |B| - |A ∩ B|
+  const union = wordsA.size + wordsB.size - intersection;
   return union === 0 ? 0 : intersection / union;
 }
