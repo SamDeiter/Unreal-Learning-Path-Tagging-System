@@ -3,28 +3,46 @@
  */
 
 /**
- * Compute Jaccard similarity between two texts based on word sets.
+ * Tokenize text into a Set of unique words.
+ * Filters words <= 2 chars to ignore noise and normalizes to lowercase.
+ *
+ * @param {string} text
+ * @returns {Set<string>}
+ */
+export function tokenize(text) {
+  return new Set(
+    (text || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
+  );
+}
+
+/**
+ * Compute Jaccard similarity between two texts or pre-tokenized Sets.
  * Filters words <= 2 chars to ignore noise.
  *
- * @param {string} textA
- * @param {string} textB
+ * @param {string|Set<string>} a
+ * @param {string|Set<string>} b
  * @returns {number} Similarity in [0, 1] — 1 means identical word sets
  */
-export function wordJaccard(textA, textB) {
-  const wordsA = new Set(
-    (textA || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
-  const wordsB = new Set(
-    (textB || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
+export function wordJaccard(a, b) {
+  const setA = a instanceof Set ? a : tokenize(a);
+  const setB = b instanceof Set ? b : tokenize(b);
 
-  if (wordsA.size === 0 && wordsB.size === 0) return 0;
+  if (setA.size === 0 && setB.size === 0) return 0;
 
   let intersection = 0;
-  for (const w of wordsA) {
-    if (wordsB.has(w)) intersection++;
+  // Iterate over the smaller set for efficiency
+  if (setA.size < setB.size) {
+    for (const w of setA) {
+      if (setB.has(w)) intersection++;
+    }
+  } else {
+    for (const w of setB) {
+      if (setA.has(w)) intersection++;
+    }
   }
 
-  const union = new Set([...wordsA, ...wordsB]).size;
-  return union === 0 ? 0 : intersection / union;
+  // Jaccard Index = |A ∩ B| / |A ∪ B|
+  // Using inclusion-exclusion: |A ∪ B| = |A| + |B| - |A ∩ B|
+  const unionSize = setA.size + setB.size - intersection;
+  return unionSize === 0 ? 0 : intersection / unionSize;
 }
