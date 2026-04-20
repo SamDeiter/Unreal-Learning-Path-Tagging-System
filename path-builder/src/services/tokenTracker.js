@@ -27,8 +27,10 @@ import {
   query,
   orderBy,
   limit,
+  collectionGroup,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
+import { getAuth } from "firebase/auth";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -220,14 +222,18 @@ export function resetTokenTracker() {
 
 /**
  * Sync a day's token data to Firestore for persistent storage.
- * Writes to: token_usage/{date}
+ * Writes to: token_usage/{userId}/usage/{dateKey}
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+    const auth = getAuth(app);
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    const docRef = doc(db, "token_usage", userId, "usage", dateKey);
     await setDoc(
       docRef,
       {
@@ -249,6 +255,8 @@ async function syncDayToFirestore(dateKey, dayData) {
 
 /**
  * Fetch historical token usage from Firestore.
+ * For admins, fetches from all users via collectionGroup.
+ * For regular users, fetches only their own data.
  * @param {number} days - Number of days to fetch (default 30)
  * @returns {Promise<Array>} Array of daily usage records
  */
@@ -257,7 +265,23 @@ export async function fetchCloudStats(days = 30) {
     const app = getFirebaseApp();
     if (!app) return [];
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const auth = getAuth(app);
+    const userId = auth.currentUser?.uid;
+    if (!userId) return [];
+
+    // Check if user is admin (async check via token)
+    const idToken = await auth.currentUser.getIdTokenResult();
+    const isAdmin = idToken.claims.admin === true;
+
+    let q;
+    if (isAdmin) {
+      // Admins see everything (requires a collectionGroup index on 'date')
+      q = query(collectionGroup(db, "usage"), orderBy("date", "desc"), limit(days));
+    } else {
+      // Regular users only see their own
+      q = query(collection(db, "token_usage", userId, "usage"), orderBy("date", "desc"), limit(days));
+    }
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
