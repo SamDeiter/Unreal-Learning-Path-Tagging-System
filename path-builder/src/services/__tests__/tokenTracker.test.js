@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { syncDayToFirestore, fetchCloudStats, recordTokenUsage } from '../tokenTracker';
+import { fetchCloudStats, recordTokenUsage } from '../tokenTracker';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDocs, collection, query, collectionGroup, where } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDocs, collection, collectionGroup, where } from 'firebase/firestore';
 import { getFirebaseApp } from '../firebaseConfig';
 
 vi.mock('firebase/auth');
@@ -23,7 +23,6 @@ describe('tokenTracker isolation', () => {
   });
 
   it('syncDayToFirestore uses isolated path with userId', async () => {
-    const dayData = { totalInput: 100, totalOutput: 50, calls: 2, operations: {} };
     // syncDayToFirestore is not exported, but it's called by recordTokenUsage
     // Wait, recordTokenUsage is exported.
 
