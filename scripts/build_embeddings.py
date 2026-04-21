@@ -37,7 +37,10 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "course_embeddings.json")
 
 MODEL = "gemini-embedding-001"
 DIMENSION = 768
-TASK_TYPE = "SEMANTIC_SIMILARITY"
+# Must be RETRIEVAL_DOCUMENT to pair with RETRIEVAL_QUERY at query time
+# (embedQuery.js / generateSpoke.js). Asymmetric retrieval task pairing is
+# required for correct vector-space geometry — see Gemini embedding docs.
+TASK_TYPE = "RETRIEVAL_DOCUMENT"
 MAX_TRANSCRIPT_WORDS = 500  # Limit transcript text to keep within token budget
 BATCH_SIZE = 100  # Gemini supports up to 100 per batchEmbedContents call
 RATE_LIMIT_DELAY = 0.1  # Seconds between batches

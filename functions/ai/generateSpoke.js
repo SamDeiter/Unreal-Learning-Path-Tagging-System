@@ -89,7 +89,9 @@ async function vectorSearch(collectionName, queryVector, topK = 8) {
     const data = doc.data();
     // eslint-disable-next-line no-unused-vars
     const { embedding: _embedding, vector_distance: rawDist, ...metadata } = data;
-    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist : 0;
+    // Cosine distance ranges [0, 2]: 0 = identical, 1 = orthogonal, 2 = opposite.
+    // Convert to similarity [1, 0] to match vectorSearch.js convention.
+    const similarity = rawDist !== null && rawDist !== undefined ? 1 - rawDist / 2 : 0;
     results.push({ id: doc.id, similarity, ...metadata });
   });
 
