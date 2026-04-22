@@ -8,12 +8,15 @@
  * Reuses QuizEngine, DeepDiveSection, and FeedbackBar. Widget HTML is
  * rendered inside a sandboxed iframe via LessonWidget.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import useLesson from "../../hooks/useLesson";
 import QuizEngine from "../BespokePath/QuizEngine";
 import DeepDiveSection from "../BespokePath/DeepDiveSection";
 import FeedbackBar from "../chat/FeedbackBar";
 import LessonWidget from "./LessonWidget";
+import { getFirebaseApp } from "../../services/firebaseConfig";
+import { devLog, devWarn } from "../../utils/logger";
 import "./LessonPage.css";
 
 const CHOICE_KEYS = ["A", "B", "C", "D", "E", "F"];
@@ -33,11 +36,15 @@ function adaptQuizQuestions(questions) {
     });
     const correctIdx = Number.isInteger(q.correctIndex) ? q.correctIndex : 0;
     const correct = CHOICE_KEYS[correctIdx] || CHOICE_KEYS[0];
+    const explanations = Array.isArray(q.explanations)
+      ? options.map((_, i) => (typeof q.explanations[i] === "string" ? q.explanations[i] : ""))
+      : null;
     return {
       stem: q.q || q.stem || "",
       choices,
       correct,
       explanation: q.explanation || "",
+      ...(explanations ? { explanations } : {}),
     };
   });
 }
@@ -148,6 +155,35 @@ export default function LessonPage() {
   const [sectionRatings, setSectionRatings] = useState({});
   const rateSection = (idx, rating) =>
     setSectionRatings((prev) => ({ ...prev, [idx]: rating }));
+
+  // Fire-and-forget quiz → skillState write on FULL completion only.
+  // Partial completion is intentionally ignored — noisy signal.
+  const quizIngestedRef = useRef(null);
+  const handleQuizComplete = useCallback(
+    ({ score, total }) => {
+      if (!lessonId) return;
+      if (!Number.isFinite(score) || !Number.isFinite(total) || total <= 0) return;
+      if (quizIngestedRef.current === lessonId) return;
+      quizIngestedRef.current = lessonId;
+      try {
+        const app = getFirebaseApp();
+        const functions = getFunctions(app, "us-central1");
+        const fn = httpsCallable(functions, "ingestQuizResult");
+        fn({ lessonId, score, total })
+          .then((res) => {
+            devLog(
+              `[Quiz] Ingested ${score}/${total} for ${lessonId} (signals=${res?.data?.signalsApplied ?? 0})`
+            );
+          })
+          .catch((err) => {
+            devWarn("[Quiz] ingestQuizResult failed:", err?.message || err);
+          });
+      } catch (err) {
+        devWarn("[Quiz] ingestQuizResult setup failed:", err?.message || err);
+      }
+    },
+    [lessonId]
+  );
 
   if (loading) return <LessonSkeleton />;
   if (error) return <LessonError message={error} onBack={handleBack} />;
@@ -283,7 +319,11 @@ export default function LessonPage() {
       {quizQuestions.length > 0 && (
         <section className="lesson-section lesson-quiz-section">
           <h2 className="lesson-section__title">Check your understanding</h2>
-          <QuizEngine questions={quizQuestions} stepIndex={lessonId || "lesson"} />
+          <QuizEngine
+            questions={quizQuestions}
+            stepIndex={lessonId || "lesson"}
+            onComplete={handleQuizComplete}
+          />
         </section>
       )}
 

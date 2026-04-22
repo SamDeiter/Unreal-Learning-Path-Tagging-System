@@ -141,11 +141,15 @@ Return ONLY valid JSON (no markdown, no fences) matching:
   "markdown_notes": "markdown str, 300-500 words",
   "featured_video": { "video_id": "str|null", "start_seconds": 0, "end_seconds": 0, "video_title": "str" },
   "deep_dive_sections": [ { "title": "str", "content": "str", "type": "properties|pitfalls|tryit|concept" } ],
-  "quiz_questions": [ { "question": "str", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "str" } ]
+  "quiz_questions": [ { "question": "str", "options": ["A","B","C","D"], "correct_index": 0, "explanations": ["str","str","str","str"] } ]
 }
 Rules:
 - featured_video.video_id must reference a real video_id from the chunks (or null).
-- Generate exactly 3 deep_dive_sections and 2-3 quiz_questions.`;
+- Generate exactly 3 deep_dive_sections and 2-3 quiz_questions.
+- Each quiz question MUST have exactly 4 options and an "explanations" array of exactly 4 strings, one per option (aligned by index).
+- For the correct option, the explanation should reinforce the correct mental model.
+- For each incorrect option, the explanation should address WHY that choice is tempting (the likely misconception) and point to the correct mental model.
+- Keep each explanation to 1-3 sentences. No markdown, no fences.`;
 
   const resp = await fetchDynamic(`${SYNTH_URL}?key=${apiKey}`, {
     method: "POST",
@@ -413,18 +417,35 @@ exports.generateLesson = onCall(
       takeaways: takeaways || null,
       quiz: spoke && Array.isArray(spoke.quiz_questions) && spoke.quiz_questions.length > 0
         ? {
-            questions: spoke.quiz_questions.map((q) => ({
-              q: q.question,
-              options: Array.isArray(q.options) ? q.options : [],
-              correctIndex: Number.isFinite(q.correct_index) ? q.correct_index : 0,
-              explanation: q.explanation || "",
-            })),
+            questions: spoke.quiz_questions.map((q) => {
+              const options = Array.isArray(q.options) ? q.options : [];
+              const rawExplanations = Array.isArray(q.explanations) ? q.explanations : null;
+              const explanations = rawExplanations
+                ? options.map((_, i) =>
+                    typeof rawExplanations[i] === "string" ? rawExplanations[i] : ""
+                  )
+                : null;
+              return {
+                q: q.question,
+                options,
+                correctIndex: Number.isFinite(q.correct_index) ? q.correct_index : 0,
+                explanation: q.explanation || "",
+                ...(explanations ? { explanations } : {}),
+              };
+            }),
           }
         : null,
       widgetHtml,
       generatedAt: new Date().toISOString(),
       engine,
     };
+
+    // skillTags feeds the quiz→skillState adaptation loop (ingestQuizResult).
+    // Use fix_specific ++ transferable as the tag set; skillStateWriter normalizes names.
+    const skillTags = [
+      ...((objectives && Array.isArray(objectives.fix_specific)) ? objectives.fix_specific : []),
+      ...((objectives && Array.isArray(objectives.transferable)) ? objectives.transferable : []),
+    ].filter((t) => typeof t === "string" && t.trim().length > 0);
 
     let lessonId = null;
     try {
@@ -433,6 +454,7 @@ exports.generateLesson = onCall(
       lessonId = ref.id;
       await ref.set({
         ...lesson,
+        skillTags,
         sessionId: sessionId || null,
         createdAt: FieldValue.serverTimestamp(),
       });

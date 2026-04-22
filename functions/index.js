@@ -54,6 +54,7 @@ Object.assign(exports, require("./ai/logTelemetry"));
 // Feedback Loop (skillState signals)
 // ============================================================================
 Object.assign(exports, require("./ai/submitFeedback"));
+Object.assign(exports, require("./ai/ingestQuizResult"));
 
 // ============================================================================
 // Scheduled Tasks
