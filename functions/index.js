@@ -61,6 +61,11 @@ Object.assign(exports, require("./ai/submitFeedback"));
 Object.assign(exports, require("./ai/ingestQuizResult"));
 
 // ============================================================================
+// Misconception Library (Phase 3 — synthesize named misconceptions from signals)
+// ============================================================================
+Object.assign(exports, require("./ai/mineMisconceptions"));
+
+// ============================================================================
 // Scheduled Tasks
 // ============================================================================
 Object.assign(exports, require("./scheduled/cleanupCache"));
