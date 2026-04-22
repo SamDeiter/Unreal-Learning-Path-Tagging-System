@@ -21,6 +21,18 @@ function fixStepsKey(cause, steps) {
   return `fixSteps:${h}`;
 }
 
+function loadCheckedSteps(key) {
+  if (!key || typeof window === "undefined") return new Set();
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
 export default function AnswerView({
   answer,
   onFeedback,
@@ -37,17 +49,14 @@ export default function AnswerView({
     [answer?.mostLikelyCause, answer?.fixSteps]
   );
 
-  const [checkedSteps, setCheckedSteps] = useState(() => {
-    if (!stepsKey || typeof window === "undefined") return new Set();
-    try {
-      const raw = window.sessionStorage.getItem(stepsKey);
-      if (!raw) return new Set();
-      const arr = JSON.parse(raw);
-      return new Set(Array.isArray(arr) ? arr : []);
-    } catch {
-      return new Set();
-    }
-  });
+  const [checkedSteps, setCheckedSteps] = useState(() => loadCheckedSteps(stepsKey));
+  // Reset state when stepsKey changes — React-recommended alternative to
+  // setState-in-effect (https://react.dev/learn/you-might-not-need-an-effect).
+  const [prevStepsKey, setPrevStepsKey] = useState(stepsKey);
+  if (prevStepsKey !== stepsKey) {
+    setPrevStepsKey(stepsKey);
+    setCheckedSteps(loadCheckedSteps(stepsKey));
+  }
 
   useEffect(() => {
     if (!stepsKey || typeof window === "undefined") return;
@@ -57,21 +66,6 @@ export default function AnswerView({
       // session storage full / disabled — non-fatal
     }
   }, [stepsKey, checkedSteps]);
-
-  // Re-hydrate when the answer identity changes (new diagnosis).
-  useEffect(() => {
-    if (!stepsKey || typeof window === "undefined") {
-      setCheckedSteps(new Set());
-      return;
-    }
-    try {
-      const raw = window.sessionStorage.getItem(stepsKey);
-      const arr = raw ? JSON.parse(raw) : [];
-      setCheckedSteps(new Set(Array.isArray(arr) ? arr : []));
-    } catch {
-      setCheckedSteps(new Set());
-    }
-  }, [stepsKey]);
 
   if (!answer) return null;
 
