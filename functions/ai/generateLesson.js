@@ -26,6 +26,10 @@ const { normalizeQuery } = require("../pipeline/cache");
 const { wrapEvidence } = require("../pipeline/promptVersions");
 
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
+const {
+  readMisconceptionsForTags,
+  buildMisconceptionSnippet,
+} = require("./misconceptionReader");
 const { readLatestFeedback, buildAffectiveDirective } = require("./feedbackReader");
 const { UE5_GUARDRAIL, INTERACTIVE_WIDGET_HTML_PROMPT } = require("./prompts");
 
@@ -410,10 +414,15 @@ function composeSpokePromptDirectives(bandDirectives = {}) {
   const readingLevelLine = bandDirectives.readingLevel
     ? `\n\n${bandDirectives.readingLevel}`
     : "";
+  // Misconception block renders before affective — it's reference knowledge
+  // about the topic itself, not a response-specific override.
+  const misconceptionLine = bandDirectives.misconceptions
+    ? `\n\n${bandDirectives.misconceptions}`
+    : "";
   const affectiveLine = bandDirectives.affective
     ? `\n\nAFFECTIVE SIGNAL (from prior response — overrides depth/difficulty defaults):\n${bandDirectives.affective}`
     : "";
-  return `${depthLine}${difficultyLine}${readingLevelLine}${affectiveLine}`;
+  return `${depthLine}${difficultyLine}${readingLevelLine}${misconceptionLine}${affectiveLine}`;
 }
 
 /**
@@ -574,12 +583,20 @@ exports.generateLesson = onCall(
     );
     const depthBand = classifyDepthBand(meanMastery);
     const difficultyBand = classifyDifficultyBand(meanMastery);
+
+    // Phase 3 — misconception library. Pull the top named misconceptions for
+    // this lesson's tags so the deep-dive + quiz generation can preempt them.
+    // Read is failure-silent: an empty taxonomy just yields "".
+    const misconceptions = await readMisconceptionsForTags(skillTags, { limit: 5 });
+    const misconceptionSnippet = buildMisconceptionSnippet(misconceptions);
+
     const bandDirectives = {
       depth: depthDirective(depthBand, meanMastery),
       difficulty: difficultyDirective(difficultyBand),
       // UDL reading-level rides alongside the adaptive bands — it reflects an
       // explicit learner choice, not an inferred signal.
       readingLevel: readingLevelDirective(readingLevel),
+      misconceptions: misconceptionSnippet,
       // Affective directive wins when present (rendered last in the prompt).
       affective: affectiveDirective,
     };

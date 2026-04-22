@@ -22,6 +22,10 @@ const { computeConfidence } = require("./confidence");
 const { writeSession, summarizeSession } = require("./sessions");
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
 const { readLatestFeedback, buildAffectiveDirective } = require("./feedbackReader");
+const {
+  readMisconceptionsForTags,
+  buildMisconceptionSnippet,
+} = require("./misconceptionReader");
 
 const MAX_CLARIFY_ROUNDS = 3;
 
@@ -597,6 +601,19 @@ JSON:{"fix_specific":["str"],"transferable":["str"]}`;
   }
   const objectives = objectivesResult.data;
 
+  // Phase 3 — misconception library. Read named misconceptions for the
+  // objectives' tags so the answer_data stage can preempt them in the
+  // Cause / Fast Checks / Why sections. Read is failure-silent.
+  const misconceptionTags = [
+    ...((objectives && Array.isArray(objectives.transferable)) ? objectives.transferable : []),
+    ...((objectives && Array.isArray(objectives.fix_specific)) ? objectives.fix_specific : []),
+  ].filter((t) => typeof t === "string" && t.trim().length > 0);
+  const misconceptions = await readMisconceptionsForTags(misconceptionTags, { limit: 4 });
+  const misconceptionSnippet = buildMisconceptionSnippet(misconceptions);
+  const misconceptionBlock = misconceptionSnippet
+    ? `\n\nKNOWN MISCONCEPTIONS (preempt these when they align with the learner's problem — don't invent new ones):\n${misconceptionSnippet}\n`
+    : "";
+
   // ── Steps 4, 5, 5.5, 6 — PARALLEL ────────────────────────────
   const parallelStages = [
     // 4. Validation
@@ -675,7 +692,7 @@ STRICT GROUNDING RULES:
 3. Blueprint instructions: describe visually — "Right-click → Add Node → [Node Name], connect [Pin A] to [Pin B]".
 4. C++ goes in \`\`\`cpp fenced blocks.
 5. Only return confidence="NO_DATA_AVAILABLE" if you genuinely cannot produce a plausible diagnosis. In that case whyThisResult must still have 2-3 items explaining what's missing and what the user could try.
-6. If LEARNER CONTEXT is provided below, tailor depth: skip basics for topics they already know; add orientation for topics they don't.${learnerBlock}
+6. If LEARNER CONTEXT is provided below, tailor depth: skip basics for topics they already know; add orientation for topics they don't.${learnerBlock}${misconceptionBlock}
 
 SUBSTANCE REQUIREMENTS (non-negotiable):
 - fastChecks: 2-3 items. Each names the exact thing to check AND what "looks wrong" vs "looks right". Bad: "Check input settings". Good: "Open Project Settings → Engine → Input; confirm 'Jump' exists under Action Mappings with a bound key. If the row is missing entirely, that's the cause."
