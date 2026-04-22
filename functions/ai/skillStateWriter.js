@@ -6,6 +6,11 @@
  * All writes are defensive: missing uid is a no-op, errors are swallowed
  * and logged. Never throws to the caller — telemetry and feedback paths
  * rely on fire-and-forget semantics.
+ *
+ * Phase 2A — Performance Factor Analysis (PFA).
+ * In addition to `level`/`confidence`/`encounters`/`lastSeenAt`, each
+ * per-tag entry now tracks `successes`, `failures`, `opportunities`, and a
+ * PFA-derived `mastery` probability in [0, 1].
  */
 
 const admin = require("firebase-admin");
@@ -21,11 +26,46 @@ const VALID_SIGNALS = new Set([
 
 const LEVELS = ["beginner", "intermediate", "expert"];
 
+/**
+ * PFA coefficients for the simplified logistic model:
+ *   logit = beta0 + gamma * successes + rho * failures
+ *   mastery = 1 / (1 + exp(-logit))
+ *
+ * Starting values chosen for sparse-data early-life. Tune as data accrues.
+ */
+const PFA_COEFFICIENTS = Object.freeze({
+  beta0: -1.0,
+  gamma: 0.4,
+  rho: -0.3,
+});
+
+const LOGIT_CLAMP = 10;
+
 function clamp01(n) {
   if (!Number.isFinite(n)) return 0;
   if (n < 0) return 0;
   if (n > 1) return 1;
   return n;
+}
+
+function clampLogit(x) {
+  if (!Number.isFinite(x)) return 0;
+  if (x > LOGIT_CLAMP) return LOGIT_CLAMP;
+  if (x < -LOGIT_CLAMP) return -LOGIT_CLAMP;
+  return x;
+}
+
+/**
+ * Compute PFA mastery probability from (successes, failures).
+ * Returns a float in [0, 1].
+ */
+function computeMastery(successes, failures, coefficients = PFA_COEFFICIENTS) {
+  const s = Number.isFinite(successes) && successes > 0 ? successes : 0;
+  const f = Number.isFinite(failures) && failures > 0 ? failures : 0;
+  const { beta0, gamma, rho } = coefficients;
+  const logit = clampLogit(beta0 + gamma * s + rho * f);
+  const mastery = 1 / (1 + Math.exp(-logit));
+  return clamp01(mastery);
 }
 
 function levelForConfidence(currentLevel, confidence) {
@@ -42,37 +82,64 @@ function downgradeLevel(currentLevel, confidence) {
   return lvl;
 }
 
+/**
+ * Apply mastery-derived promotions on top of the confidence-derived level.
+ * Upgrades only — downgrades remain the responsibility of `downgradeLevel`
+ * so struggles still erode level via the confidence path.
+ */
+function applyMasteryLevel(currentLevel, mastery) {
+  let lvl = LEVELS.includes(currentLevel) ? currentLevel : "beginner";
+  if (mastery > 0.85) return "expert";
+  if (mastery > 0.5 && lvl === "beginner") return "intermediate";
+  return lvl;
+}
+
 function computeNextEntry(existing, signal, weight) {
   const prev = (existing && typeof existing === "object") ? existing : {};
   const prevLevel = LEVELS.includes(prev.level) ? prev.level : "beginner";
   const prevConfidence = Number.isFinite(prev.confidence) ? prev.confidence : 0;
   const prevEncounters = Number.isFinite(prev.encounters) ? prev.encounters : 0;
+  const prevSuccesses = Number.isFinite(prev.successes) ? prev.successes : 0;
+  const prevFailures = Number.isFinite(prev.failures) ? prev.failures : 0;
+  const prevOpportunities = Number.isFinite(prev.opportunities)
+    ? prev.opportunities
+    : 0;
 
   let level = prevLevel;
   let confidence = prevConfidence;
+  let successes = prevSuccesses;
+  let failures = prevFailures;
+  let opportunities = prevOpportunities;
   let changed = true;
 
   switch (signal) {
     case "encountered": {
       const w = Number.isFinite(weight) ? weight : 0.02;
       confidence = clamp01(prevConfidence + w);
+      opportunities = prevOpportunities + 1;
       level = levelForConfidence(prevLevel, confidence);
       break;
     }
     case "completed": {
       const w = Number.isFinite(weight) ? weight : 0.2;
       confidence = clamp01(prevConfidence + w);
+      successes = prevSuccesses + 1;
+      opportunities = prevOpportunities + 1;
       level = levelForConfidence(prevLevel, confidence);
       break;
     }
     case "mastered": {
       level = "expert";
       confidence = 1.0;
+      successes = prevSuccesses + 1;
+      opportunities = prevOpportunities + 1;
       break;
     }
     case "struggled": {
       const w = Number.isFinite(weight) ? weight : 0.15;
       confidence = clamp01(prevConfidence - w);
+      failures = prevFailures + 1;
+      opportunities = prevOpportunities + 1;
       level = downgradeLevel(prevLevel, confidence);
       break;
     }
@@ -84,12 +151,23 @@ function computeNextEntry(existing, signal, weight) {
       changed = false;
   }
 
+  const mastery = computeMastery(successes, failures);
+  // PFA-derived upgrades. Downgrades remain with downgradeLevel above so
+  // struggles still flow through the confidence path as before.
+  if (signal !== "struggled") {
+    level = applyMasteryLevel(level, mastery);
+  }
+
   return {
     changed,
     next: {
       level,
       confidence,
       encounters: prevEncounters + 1,
+      successes,
+      failures,
+      opportunities,
+      mastery,
       lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
     },
   };
@@ -137,6 +215,10 @@ async function applyBatch(uid, signals) {
         level: next.level,
         confidence: next.confidence,
         encounters: next.encounters,
+        successes: next.successes,
+        failures: next.failures,
+        opportunities: next.opportunities,
+        mastery: next.mastery,
         lastSeenAt: next.lastSeenAt,
       };
       anyChange = true;
@@ -198,5 +280,7 @@ async function applySkillSignals(uid, signals) {
 module.exports = {
   applySkillSignal,
   applySkillSignals,
+  computeMastery,
   VALID_SIGNALS,
+  PFA_COEFFICIENTS,
 };

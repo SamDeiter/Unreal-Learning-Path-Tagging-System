@@ -1,12 +1,28 @@
 /**
- * ingestQuizResult — Callable that maps a completed quiz score into skillState.
+ * ingestQuizResult — Record a quiz result against a learner's skillState.
  *
- * Input:  { lessonId: string, score: number, total: number }
+ * Input (callable payload):
+ *   {
+ *     lessonId: string,                   // required — owner-scoped lesson doc
+ *     score: number,                      // required — 0..total
+ *     total: number,                      // required — > 0
+ *     perQuestionResults?: Array<{        // optional PFA upgrade (Phase 2A)
+ *       correct: boolean,
+ *       skillTags?: string[]              // falls back to lesson-level skillTags
+ *     }>
+ *   }
+ *
  * Output: { success: true, signalsApplied: number }
  *
- * Decision: we only record signals on FULL quiz completion (client guarantees
- * score/total reflect every question). Partial-completion signals are
- * intentionally dropped — a half-finished quiz is noisy signal.
+ * Two modes:
+ *   1. Coarse (back-compat) — when perQuestionResults is absent, collapse the
+ *      whole quiz to a single coarse signal per lesson tag using the ratio.
+ *   2. Per-question (PFA) — emit one `completed` or `struggled` signal per
+ *      question per tag. This drives per-tag successes/failures/opportunities
+ *      in the PFA counters so mastery updates at question granularity.
+ *
+ * Lesson `skillTags` are read from the lesson doc server-side so the client
+ * cannot forge tags it doesn't own.
  */
 
 const functions = require("firebase-functions");
@@ -15,12 +31,78 @@ const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
 const { applySkillSignals } = require("./skillStateWriter");
 
+const MAX_TAGS = 20;
+const MAX_QUESTIONS = 200;
+
+function sanitizeTag(t) {
+  return typeof t === "string" && t.length > 0 && t.length <= 120 ? t : null;
+}
+
+function sanitizeTagList(arr) {
+  if (!Array.isArray(arr)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const raw of arr) {
+    const t = sanitizeTag(raw);
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= MAX_TAGS) break;
+  }
+  return out;
+}
+
 function ratioToSignal(ratio) {
   if (!Number.isFinite(ratio)) return null;
   if (ratio >= 0.8) return "mastered";
   if (ratio <= 0.4) return "struggled";
   return "encountered";
 }
+
+/**
+ * Build the list of per-tag signals to apply.
+ * Pure — no Firestore dependency. Exported for testing.
+ *
+ * @param {Object} payload
+ * @param {string[]} payload.skillTags  lesson-level fallback tags (required)
+ * @param {Array<{correct: boolean, skillTags?: string[]}>} [payload.perQuestionResults]
+ * @param {number} [payload.score]
+ * @param {number} [payload.total]
+ * @returns {Array<{tag: string, signal: string}>}
+ */
+function buildQuizSignals(payload) {
+  const lessonTags = sanitizeTagList(payload && payload.skillTags);
+  const perQ = payload && payload.perQuestionResults;
+
+  if (Array.isArray(perQ) && perQ.length > 0) {
+    const signals = [];
+    const limit = Math.min(perQ.length, MAX_QUESTIONS);
+    for (let i = 0; i < limit; i++) {
+      const q = perQ[i];
+      if (!q || typeof q !== "object") continue;
+      const tags = sanitizeTagList(q.skillTags);
+      const chosen = tags.length > 0 ? tags : lessonTags;
+      if (chosen.length === 0) continue;
+      const signal = q.correct ? "completed" : "struggled";
+      for (const tag of chosen) {
+        signals.push({ tag, signal });
+      }
+    }
+    return signals;
+  }
+
+  const score = Number.isFinite(payload && payload.score) ? payload.score : null;
+  const total = Number.isFinite(payload && payload.total) && payload.total > 0
+    ? payload.total
+    : 0;
+  if (score === null || total === 0 || lessonTags.length === 0) return [];
+  const signal = ratioToSignal(score / total);
+  if (!signal) return [];
+  return lessonTags.map((tag) => ({ tag, signal }));
+}
+
+exports.buildQuizSignals = buildQuizSignals;
+exports.ratioToSignal = ratioToSignal;
 
 exports.ingestQuizResult = functions
   .runWith({ memory: "256MB", timeoutSeconds: 10 })
@@ -32,7 +114,7 @@ exports.ingestQuizResult = functions
     }
     const uid = context.auth.uid;
 
-    const { lessonId, score, total } = data || {};
+    const { lessonId, score, total, perQuestionResults } = data || {};
 
     if (!lessonId || typeof lessonId !== "string") {
       throw new functions.https.HttpsError("invalid-argument", "lessonId is required.");
@@ -63,26 +145,30 @@ exports.ingestQuizResult = functions
     }
 
     const lessonData = lessonSnap.data() || {};
-    const skillTags = Array.isArray(lessonData.skillTags)
-      ? lessonData.skillTags.filter((t) => typeof t === "string" && t.length > 0)
-      : [];
+    const skillTags = sanitizeTagList(lessonData.skillTags);
 
-    const ratio = score / total;
-    const signal = ratioToSignal(ratio);
+    const signals = buildQuizSignals({
+      skillTags,
+      perQuestionResults,
+      score,
+      total,
+    });
 
-    if (!signal || skillTags.length === 0) {
+    const mode = Array.isArray(perQuestionResults) && perQuestionResults.length > 0
+      ? "per_question"
+      : "coarse";
+
+    if (signals.length === 0) {
       logger.info(JSON.stringify({
         severity: "INFO",
         message: "quiz_ingest_no_signals",
         uid,
         lessonId,
-        ratio,
+        mode,
         tagCount: skillTags.length,
       }));
       return { success: true, signalsApplied: 0 };
     }
-
-    const signals = skillTags.map((tag) => ({ tag, signal }));
 
     try {
       await applySkillSignals(uid, signals);
@@ -101,10 +187,9 @@ exports.ingestQuizResult = functions
       message: "quiz_ingested",
       uid,
       lessonId,
+      mode,
       score,
       total,
-      ratio,
-      signal,
       signalsApplied: signals.length,
     }));
 
