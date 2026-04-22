@@ -4,7 +4,10 @@
  *
  * Schema: docs/skillState-schema.md
  *   users/{uid} doc with fields:
- *     skillState: { [tag]: { level, confidence, lastSeenAt, encounters } }
+ *     skillState: { [tag]: {
+ *       level, confidence, encounters, lastSeenAt,
+ *       successes, failures, opportunities, mastery  // PFA (Phase 2A)
+ *     } }
  *     topicsLearned: string[]
  *     persona: string?
  *     lastQueryAt: timestamp?
@@ -94,6 +97,8 @@ function buildSkillStateSnippet(state) {
       tag,
       level: typeof v.level === "string" ? v.level : "beginner",
       encounters: Number.isFinite(v.encounters) ? v.encounters : 0,
+      mastery: Number.isFinite(v.mastery) ? v.mastery : 0,
+      opportunities: Number.isFinite(v.opportunities) ? v.opportunities : 0,
     }))
     .sort((a, b) => b.encounters - a.encounters)
     .slice(0, MAX_TOPICS);
@@ -108,7 +113,15 @@ function buildSkillStateSnippet(state) {
   const lines = ["Learner profile:"];
   if (hasPersona) lines.push(`- Persona: ${persona}`);
   if (hasTopics) {
-    const topicStr = entries.map((e) => `${e.tag} (${e.level})`).join(", ");
+    const topicStr = entries
+      .map((e) => {
+        if (e.opportunities > 0) {
+          const m = e.mastery.toFixed(2);
+          return `${e.tag} (${e.level}, mastery ${m})`;
+        }
+        return `${e.tag} (${e.level})`;
+      })
+      .join(", ");
     lines.push(`- Known topics: ${topicStr}`);
   } else if (hasLearned) {
     lines.push(`- Completed topics: ${topicsLearned.slice(0, MAX_TOPICS).join(", ")}`);

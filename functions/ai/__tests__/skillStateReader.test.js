@@ -175,4 +175,43 @@ describe("buildSkillStateSnippet", () => {
     });
     expect(snippet).toContain("Completed topics: nanite, lumen");
   });
+
+  it("includes mastery in topic line when opportunities > 0 (PFA)", () => {
+    const snippet = buildSkillStateSnippet({
+      skillState: {
+        "blueprints.basics": {
+          level: "intermediate",
+          confidence: 0.6,
+          encounters: 4,
+          successes: 3,
+          failures: 1,
+          opportunities: 4,
+          mastery: 0.62,
+          lastSeenAt: Date.now(),
+        },
+      },
+      topicsLearned: [],
+      persona: null,
+      lastPathId: null,
+    });
+    expect(snippet).toContain("blueprints.basics (intermediate, mastery 0.62)");
+  });
+
+  it("omits mastery when opportunities is 0 (legacy docs)", () => {
+    const snippet = buildSkillStateSnippet({
+      skillState: {
+        lumen: {
+          level: "intermediate",
+          confidence: 0.6,
+          encounters: 2,
+          lastSeenAt: Date.now(),
+        },
+      },
+      topicsLearned: [],
+      persona: null,
+      lastPathId: null,
+    });
+    expect(snippet).toContain("lumen (intermediate)");
+    expect(snippet).not.toContain("mastery");
+  });
 });

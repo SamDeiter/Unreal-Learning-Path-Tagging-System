@@ -54,6 +54,10 @@ Object.assign(exports, require("./ai/logTelemetry"));
 // Feedback Loop (skillState signals)
 // ============================================================================
 Object.assign(exports, require("./ai/submitFeedback"));
+
+// ============================================================================
+// Quiz Result Ingestion (PFA knowledge tracing — Phase 2A)
+// ============================================================================
 Object.assign(exports, require("./ai/ingestQuizResult"));
 
 // ============================================================================

@@ -46,7 +46,9 @@ jest.mock("firebase-functions", () => ({
 const {
   applySkillSignal,
   applySkillSignals,
+  computeMastery,
   VALID_SIGNALS,
+  PFA_COEFFICIENTS,
 } = require("../skillStateWriter");
 
 function resetDoc(data = null) {
@@ -181,6 +183,89 @@ describe("applySkillSignal", () => {
       applySkillSignal("uid-1", { tag: "lumen", signal: "encountered" })
     ).resolves.toBeUndefined();
   });
+
+  // ------------------------------------------------------------------
+  // PFA counter increments (Phase 2A)
+  // ------------------------------------------------------------------
+
+  it("'encountered' bumps opportunities only (no success/failure)", async () => {
+    await applySkillSignal("uid-1", { tag: "lumen", signal: "encountered" });
+    const e = __docData.skillState.lumen;
+    expect(e.opportunities).toBe(1);
+    expect(e.successes).toBe(0);
+    expect(e.failures).toBe(0);
+    expect(e.mastery).toBeGreaterThan(0);
+    expect(e.mastery).toBeLessThan(1);
+  });
+
+  it("'completed' bumps successes + opportunities", async () => {
+    await applySkillSignal("uid-1", { tag: "lumen", signal: "completed" });
+    const e = __docData.skillState.lumen;
+    expect(e.successes).toBe(1);
+    expect(e.failures).toBe(0);
+    expect(e.opportunities).toBe(1);
+  });
+
+  it("'mastered' bumps successes + opportunities", async () => {
+    await applySkillSignal("uid-1", { tag: "nanite", signal: "mastered" });
+    const e = __docData.skillState.nanite;
+    expect(e.successes).toBe(1);
+    expect(e.failures).toBe(0);
+    expect(e.opportunities).toBe(1);
+  });
+
+  it("'struggled' bumps failures + opportunities", async () => {
+    resetDoc({
+      skillState: { lumen: { level: "intermediate", confidence: 0.5, encounters: 2 } },
+    });
+    await applySkillSignal("uid-1", { tag: "lumen", signal: "struggled" });
+    const e = __docData.skillState.lumen;
+    expect(e.failures).toBe(1);
+    expect(e.successes).toBe(0);
+    expect(e.opportunities).toBe(1);
+  });
+
+  it("carries forward existing PFA counters on next signal", async () => {
+    resetDoc({
+      skillState: {
+        lumen: {
+          level: "intermediate",
+          confidence: 0.5,
+          encounters: 3,
+          successes: 2,
+          failures: 1,
+          opportunities: 3,
+          mastery: 0.4,
+        },
+      },
+    });
+    await applySkillSignal("uid-1", { tag: "lumen", signal: "completed" });
+    const e = __docData.skillState.lumen;
+    expect(e.successes).toBe(3);
+    expect(e.failures).toBe(1);
+    expect(e.opportunities).toBe(4);
+  });
+
+  it("mastery > 0.85 promotes level to expert via PFA", async () => {
+    // 10 successes, 0 failures → logit = -1 + 4 = 3 → mastery ≈ 0.95
+    resetDoc({
+      skillState: {
+        lumen: {
+          level: "beginner",
+          confidence: 0.1,
+          encounters: 9,
+          successes: 9,
+          failures: 0,
+          opportunities: 9,
+          mastery: 0.9,
+        },
+      },
+    });
+    await applySkillSignal("uid-1", { tag: "lumen", signal: "completed" });
+    const e = __docData.skillState.lumen;
+    expect(e.mastery).toBeGreaterThan(0.85);
+    expect(e.level).toBe("expert");
+  });
 });
 
 describe("applySkillSignals (batch)", () => {
@@ -216,5 +301,47 @@ describe("applySkillSignals (batch)", () => {
     await expect(
       applySkillSignals("uid-1", [{ tag: "lumen", signal: "encountered" }])
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("computeMastery (PFA)", () => {
+  it("exports PFA_COEFFICIENTS with the documented defaults", () => {
+    expect(PFA_COEFFICIENTS.beta0).toBe(-1.0);
+    expect(PFA_COEFFICIENTS.gamma).toBe(0.4);
+    expect(PFA_COEFFICIENTS.rho).toBe(-0.3);
+  });
+
+  it("at (0, 0) returns sigmoid(-1) ≈ 0.269 — starts below 0.5", () => {
+    const m = computeMastery(0, 0);
+    expect(m).toBeCloseTo(1 / (1 + Math.exp(1)), 5);
+    expect(m).toBeLessThan(0.5);
+  });
+
+  it("lots of successes and no failures pushes mastery into expert band (>0.85)", () => {
+    expect(computeMastery(10, 0)).toBeGreaterThan(0.85);
+  });
+
+  it("lots of failures crushes mastery below 0.15", () => {
+    expect(computeMastery(0, 10)).toBeLessThan(0.15);
+  });
+
+  it("successes and failures partly cancel (monotonic)", () => {
+    const balanced = computeMastery(5, 5);
+    const withMoreSuccess = computeMastery(6, 5);
+    expect(withMoreSuccess).toBeGreaterThan(balanced);
+  });
+
+  it("returns a float in [0, 1] even for extreme counters (logit clamp)", () => {
+    const huge = computeMastery(10_000_000, 0);
+    const squashed = computeMastery(0, 10_000_000);
+    expect(huge).toBeLessThanOrEqual(1);
+    expect(huge).toBeGreaterThan(0.9999);
+    expect(squashed).toBeGreaterThanOrEqual(0);
+    expect(squashed).toBeLessThan(0.0001);
+  });
+
+  it("treats negative or non-finite counters as zero", () => {
+    expect(computeMastery(-5, -5)).toBeCloseTo(computeMastery(0, 0), 5);
+    expect(computeMastery(NaN, NaN)).toBeCloseTo(computeMastery(0, 0), 5);
   });
 });
