@@ -92,6 +92,11 @@ export async function trackEvent(eventName, payload = {}) {
       client_timestamp: new Date().toISOString(),
     };
 
+    // Firestore rejects undefined values; drop them so optional fields don't break tracking.
+    for (const key of Object.keys(eventData)) {
+      if (eventData[key] === undefined) delete eventData[key];
+    }
+
     await addDoc(collection(db, "analytics_events"), eventData);
 
     // Also log to console in development
