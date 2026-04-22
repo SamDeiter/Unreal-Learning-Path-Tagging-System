@@ -168,7 +168,6 @@ export default function LessonPage() {
     query,
     diagnosis = {},
     objectives = {},
-    concept = {},
     takeaways = [],
     widgetHtml,
   } = lesson;

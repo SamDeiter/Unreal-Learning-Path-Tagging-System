@@ -59,8 +59,6 @@ export default function useSessions() {
 
   useEffect(() => {
     if (!uid) return undefined;
-    setLoading(true);
-    setError(null);
 
     let unsub = () => {};
     try {
@@ -74,6 +72,7 @@ export default function useSessions() {
         q,
         (snap) => {
           setSessions(snap.docs.map(normalize));
+          setError(null);
           setLoading(false);
         },
         (err) => {
@@ -84,8 +83,10 @@ export default function useSessions() {
       );
     } catch (err) {
       devWarn("[useSessions] init error:", err.message);
-      setError(err);
-      setLoading(false);
+      queueMicrotask(() => {
+        setError(err);
+        setLoading(false);
+      });
     }
     return () => unsub();
   }, [uid, refetchTick]);
