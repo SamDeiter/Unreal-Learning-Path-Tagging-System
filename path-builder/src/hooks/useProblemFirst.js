@@ -300,6 +300,7 @@ export default function useProblemFirst() {
             caseReport: activeCaseReport || undefined,
             conversationHistory: inputData._conversationHistory || conversationHistory,
             sessionId: inputData._sessionIdOverride ?? sessionId,
+            priorSessionId: inputData.priorSessionId || undefined,
           });
 
           // Plumb sessionId on every response so it persists across turns (Wave 2B)
@@ -396,6 +397,7 @@ export default function useProblemFirst() {
                 conversationHistory: inputData._conversationHistory || conversationHistory,
                 agenticRound: result.data.agenticRound || 1,
                 sessionId: result.data?.sessionId ?? (inputData._sessionIdOverride ?? sessionId),
+                priorSessionId: inputData.priorSessionId || undefined,
               });
               if (retryResult.data?.sessionId) setSessionId(retryResult.data.sessionId);
 
