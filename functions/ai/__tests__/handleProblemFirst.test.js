@@ -36,6 +36,10 @@ jest.mock("../../pipeline/promptVersions", () => ({
 
 jest.mock("../prompts", () => ({
   UE5_GUARDRAIL: "UE5 ONLY. ",
+  SOCRATIC_ELICITATION_PROMPT: jest.fn(
+    ({ priorSummary } = {}) =>
+      `SOCRATIC_PROMPT${priorSummary ? `|prior:${priorSummary}` : ""}`
+  ),
 }));
 
 jest.mock("../confidence", () => ({
@@ -438,6 +442,158 @@ describe("handleProblemFirst", () => {
       const intentCall = mockRunStage.mock.calls[0][0];
       expect(intentCall.userPrompt).toContain("5.3");
       expect(intentCall.userPrompt).toContain("Windows");
+    });
+  });
+
+  // ── Socratic elicitation (opt-in "Tutor me") ───────────────────
+
+  describe("socratic elicitation", () => {
+    it("returns SOCRATIC_ELICIT when socratic=true AND conversationHistory is empty", async () => {
+      // Intent succeeds
+      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+      // Socratic elicitation stage succeeds
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: {
+          kind: "clarify",
+          question: "When you say the Lumen GI flickers, is the flicker tied to camera motion or to lighting changes in the scene?",
+          intent: "Learner assumes the bug is in Lumen; probing whether it's actually camera-driven.",
+        },
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers when camera moves", socratic: true },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("SOCRATIC_ELICIT");
+      expect(result.kind).toBe("clarify");
+      expect(result.question).toContain("Lumen");
+      expect(result.intent).toBeTruthy();
+      // Only 2 runStage calls: intent + socratic. No diagnosis/objectives.
+      expect(mockRunStage).toHaveBeenCalledTimes(2);
+    });
+
+    it("falls through to full diagnosis when socratic=true BUT conversationHistory is non-empty", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        {
+          query: "Lumen GI flickers when camera moves",
+          socratic: true,
+          conversationHistory: [
+            { role: "assistant", content: "Is the flicker tied to camera motion?" },
+            { role: "user", content: "Yes, only when I pan quickly." },
+          ],
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("ANSWER");
+      // Socratic stage must NOT have been invoked on a follow-up turn.
+      // Expect: intent, diagnosis, objectives, validation, path_summary, answer
+      // = 6 runStage calls (micro-lesson skipped since no passages).
+      expect(mockRunStage).toHaveBeenCalledTimes(6);
+    });
+
+    it("runs normal diagnosis when socratic=false (default)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers when camera moves", socratic: false },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("ANSWER");
+      expect(mockRunStage).toHaveBeenCalledTimes(6);
+    });
+
+    it("threads priorSessionSummary into the Socratic prompt when present", async () => {
+      const { SOCRATIC_ELICITATION_PROMPT } = require("../prompts");
+      SOCRATIC_ELICITATION_PROMPT.mockClear();
+
+      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: { kind: "clarify", question: "Still seeing the same flicker you mentioned last time?", intent: "Continuity check." },
+      });
+
+      const result = await handleProblemFirst(
+        {
+          query: "Lumen still flickering",
+          socratic: true,
+          priorSessionSummary: "Learner previously investigated Lumen temporal accumulation; ruled out screen percentage.",
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("SOCRATIC_ELICIT");
+      // Prompt builder should have received the prior-session summary
+      expect(SOCRATIC_ELICITATION_PROMPT).toHaveBeenCalledWith(
+        expect.objectContaining({
+          priorSummary: expect.stringContaining("temporal accumulation"),
+        })
+      );
+    });
+
+    it("threads priorSessionSummary into the diagnosis prompt when present (non-socratic path)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        {
+          query: "Lumen flickers",
+          priorSessionSummary: "Learner previously ruled out screen percentage as a cause.",
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      // Diagnosis call is the 2nd runStage invocation (after intent).
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).toContain("PRIOR SESSION SUMMARY");
+      expect(diagnosisCall.systemPrompt).toContain("screen percentage");
+    });
+
+    it("falls through to normal pipeline if Socratic stage fails", async () => {
+      // Intent ok
+      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+      // Socratic stage fails
+      mockRunStage.mockResolvedValueOnce({ success: false, error: "socratic LLM error" });
+      // Then the rest of the pipeline kicks in
+      mockRunStage
+        .mockResolvedValueOnce({ success: true, data: makeDiagnosisData() })
+        .mockResolvedValueOnce({ success: true, data: makeObjectivesData() })
+        .mockResolvedValueOnce({ success: true, data: { approved: true, reason: "ok" } })
+        .mockResolvedValueOnce({ success: true, data: { path_summary: "sum", topics_covered: [] } })
+        .mockResolvedValueOnce({
+          success: true,
+          data: {
+            mostLikelyCause: "Fallback cause",
+            confidence: "med",
+            fastChecks: [],
+            fixSteps: [],
+            ifStillBrokenBranches: [],
+            whyThisResult: [],
+          },
+        });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers when camera moves", socratic: true },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("ANSWER");
     });
   });
 

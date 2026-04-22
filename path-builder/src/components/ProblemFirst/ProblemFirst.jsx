@@ -100,13 +100,17 @@ export default function ProblemFirst() {
   } = useProblemFirst();
 
   const [lastSubmittedInput, setLastSubmittedInput] = useState(null);
+  // "Tutor me" toggle — opt-in Socratic elicitation turn before diagnosis.
+  // Session-scoped (useState) per spec: no Firestore persistence needed.
+  const [socraticMode, setSocraticMode] = useState(false);
 
   const wrappedSubmit = useCallback(
     (inputData) => {
-      setLastSubmittedInput(inputData);
-      return handleSubmit(inputData);
+      const enriched = { ...inputData, socratic: socraticMode };
+      setLastSubmittedInput(enriched);
+      return handleSubmit(enriched);
     },
-    [handleSubmit]
+    [handleSubmit, socraticMode]
   );
 
   const handleChatSend = useCallback(
@@ -119,12 +123,19 @@ export default function ProblemFirst() {
         errorLog: null,
         cachedCartId: null,
         _conversationHistory: undefined,
+        socratic: socraticMode,
       };
       setLastSubmittedInput(payload);
       handleSubmit(payload);
     },
-    [handleSubmit, lastSubmittedInput]
+    [handleSubmit, lastSubmittedInput, socraticMode]
   );
+
+  const wrappedReset = useCallback(() => {
+    setSocraticMode(false);
+    setLastSubmittedInput(null);
+    handleReset();
+  }, [handleReset]);
 
   // ── Resume hydration ──
   // Rebuild a chat thread from a persisted session's conversationHistory + result.
@@ -251,7 +262,7 @@ export default function ProblemFirst() {
           answer={content.answerData}
           onFeedback={handleFeedback}
           onBackToVideos={handleBackToVideos}
-          onStartOver={handleReset}
+          onStartOver={wrappedReset}
           isRerunning={isRerunning}
           vertexAIDocs={content.vertexAIDocs || vertexAIDocs}
           vertexAILoading={vertexAILoading}
@@ -278,7 +289,7 @@ export default function ProblemFirst() {
       (epic?.length || 0);
 
     return (
-      <DiagnosisErrorBoundary onReset={handleReset}>
+      <DiagnosisErrorBoundary onReset={wrappedReset}>
         <div className="tutor-response">
           {isFallback && !summary && (
             <p style={{ margin: "0 0 10px", color: "#e5e7eb" }}>
@@ -478,6 +489,11 @@ export default function ProblemFirst() {
               disabled={isAssistantTyping}
               placeholder="What are you stuck on?"
             />
+            <SocraticToggle
+              checked={socraticMode}
+              onChange={setSocraticMode}
+              disabled={isAssistantTyping}
+            />
             <details style={{ marginTop: 12 }}>
               <summary
                 style={{
@@ -522,10 +538,15 @@ export default function ProblemFirst() {
             disabled={isAssistantTyping}
             placeholder="Ask a follow-up…"
           />
+          <SocraticToggle
+            checked={socraticMode}
+            onChange={setSocraticMode}
+            disabled={isAssistantTyping}
+          />
           <div style={{ textAlign: "center", margin: "8px 0 20px" }}>
             <button
               className="back-btn"
-              onClick={handleReset}
+              onClick={wrappedReset}
               style={{
                 background: "transparent",
                 border: "1px solid rgba(139,92,246,0.3)",
@@ -546,6 +567,46 @@ export default function ProblemFirst() {
 }
 
 // ──────────── Sub-components (inline) ────────────
+
+/**
+ * SocraticToggle — opt-in "Tutor me" switch that routes the next submission
+ * through a Socratic elicitation turn instead of going straight to diagnosis.
+ * Session-scoped only; no persistence. Cleared on Start Over.
+ */
+function SocraticToggle({ checked, onChange, disabled }) {
+  return (
+    <label
+      className="socratic-toggle"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 8,
+        padding: "6px 10px",
+        fontSize: "0.85rem",
+        color: checked ? "#a78bfa" : "#94a3b8",
+        cursor: disabled ? "not-allowed" : "pointer",
+        userSelect: "none",
+        background: checked ? "rgba(139,92,246,0.08)" : "transparent",
+        border: checked ? "1px solid rgba(139,92,246,0.3)" : "1px solid transparent",
+        borderRadius: 8,
+        opacity: disabled ? 0.6 : 1,
+      }}
+      title="When on, I'll ask you a focused question before diagnosing. Off by default."
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        aria-label="Tutor me — ask me a question first"
+        style={{ margin: 0, cursor: disabled ? "not-allowed" : "pointer" }}
+      />
+      <span>🎓 Tutor me — ask me a question first</span>
+    </label>
+  );
+}
+
 
 const ROLE_SECTIONS = [
   {
