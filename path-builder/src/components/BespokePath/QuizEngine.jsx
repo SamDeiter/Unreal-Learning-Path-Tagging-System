@@ -2,7 +2,10 @@
  * QuizEngine — Interactive MCQ quiz shown after each path step.
  *
  * Props:
- * - questions: Array of {stem, choices, correct, explanation}
+ * - questions: Array of {stem, choices, correct, explanation, explanations?}
+ *   - explanations (optional): array aligned with Object.keys(choices); when
+ *     present, the per-choice string is shown on reveal instead of the shared
+ *     `explanation` fallback.
  * - stepIndex: Which path step this quiz belongs to
  * - onComplete: Callback with {stepIndex, score, total} when quiz is finished
  */
@@ -88,15 +91,24 @@ export default function QuizEngine({ questions, stepIndex, onComplete }) {
           ))}
         </div>
 
-        {/* Explanation after reveal */}
-        {revealed && (
-          <div
-            className={`quiz-explanation ${selected === question.correct ? "correct" : "incorrect"}`}
-          >
-            <span className="explanation-icon">{selected === question.correct ? "✅" : "💡"}</span>
-            <p>{question.explanation}</p>
-          </div>
-        )}
+        {/* Explanation after reveal — prefer per-choice explanations when present */}
+        {revealed && (() => {
+          const choiceKeys = Object.keys(question.choices);
+          const selectedIdx = choiceKeys.indexOf(selected);
+          const perChoice =
+            Array.isArray(question.explanations) && selectedIdx >= 0
+              ? question.explanations[selectedIdx]
+              : null;
+          const text = perChoice || question.explanation || "";
+          return (
+            <div
+              className={`quiz-explanation ${selected === question.correct ? "correct" : "incorrect"}`}
+            >
+              <span className="explanation-icon">{selected === question.correct ? "✅" : "💡"}</span>
+              <p>{text}</p>
+            </div>
+          );
+        })()}
 
         {/* Action buttons */}
         <div className="quiz-actions">
