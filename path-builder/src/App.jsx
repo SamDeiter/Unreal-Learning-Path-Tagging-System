@@ -72,10 +72,16 @@ function BuilderEditor({
   );
 }
 
+// Legacy hash keys kept working as redirects so old bookmarks/links don't 404.
+function normalizeTabHash(hash) {
+  if (hash === "problem") return "bespoke";
+  return hash;
+}
+
 function App() {
   // Deep-link: read initial tab from URL hash
   const [activeTab, setActiveTabRaw] = useState(() => {
-    const hash = window.location.hash.slice(1);
+    const hash = normalizeTabHash(window.location.hash.slice(1));
     return hash || "adaptive";
   });
   const [preSelectedSkill, setPreSelectedSkill] = useState(null);
@@ -111,7 +117,7 @@ function App() {
   // Sync React state when hash changes externally (e.g. from Demand Dashboard "Start Brief")
   useEffect(() => {
     const onHashChange = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = normalizeTabHash(window.location.hash.slice(1));
       if (hash) {
         setActiveTabRaw(hash);
         if (["builder-v3", "builder-v2", "builder"].includes(hash)) {

@@ -10,7 +10,6 @@ export const PRIMARY_TABS = [
   { key: "adaptive", label: "Adaptive Path", icon: "🎯", tooltip: "Dynamic learning paths based on your current knowledge" },
   { key: "path-builders", label: "Path Builders", icon: "🛤️", expandable: true, tooltip: "Choose between different path generation engines" },
   { key: "bespoke", label: "Tutor", icon: "🎓", tooltip: "Work through a problem with a guided tutor — understand the why, not just the fix" },
-  { key: "problem", label: "Learn Why", icon: "🧠", tooltip: "Deep dive into the theory behind the concepts" },
   { key: "augmentation", label: "Augmentation", icon: "🔬", tooltip: "Experiment with AI models to improve content" },
   { key: "personas", label: "Onboarding", icon: "🚀", tooltip: "Configure your expertise level and learning goals" },
 ];
@@ -58,7 +57,6 @@ export const MOBILE_TAB_ORDER = [
   "builder-v3",
   "builder-v2",
   "bespoke",
-  "problem",
   "personas",
   "builder",
   "dashboard",

@@ -14,7 +14,6 @@ const Personas = lazy(() => import("./Personas/Personas"));
 const ProblemFirst = lazy(() =>
   import("./ProblemFirst").then((m) => ({ default: m.ProblemFirst }))
 );
-const BespokePath = lazy(() => import("./BespokePath/BespokePath"));
 const AdaptivePath = lazy(() => import("./AdaptivePath/AdaptivePath"));
 const AdminFeedback = lazy(() => import("./AdminFeedback/AdminFeedback"));
 const AdminErrorLogs = lazy(() => import("./AdminErrorLogs/AdminErrorLogs"));
@@ -105,14 +104,11 @@ export default function TabRouter({
       {activeTab === "personas" && (
         <div className="dashboard-layout"><Personas /></div>
       )}
-      {activeTab === "problem" && (
-        <div className="dashboard-layout"><ProblemFirst /></div>
-      )}
       {activeTab === "adaptive" && (
         <div className="dashboard-layout"><AdaptivePath /></div>
       )}
       {activeTab === "bespoke" && (
-        <div className="dashboard-layout"><BespokePath /></div>
+        <div className="dashboard-layout"><ProblemFirst /></div>
       )}
 
       {/* ── Lesson (hidden route) ── */}
