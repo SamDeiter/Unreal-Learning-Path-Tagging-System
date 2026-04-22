@@ -17,6 +17,7 @@ const ProblemFirst = lazy(() =>
 const AdaptivePath = lazy(() => import("./AdaptivePath/AdaptivePath"));
 const AdminFeedback = lazy(() => import("./AdminFeedback/AdminFeedback"));
 const AdminErrorLogs = lazy(() => import("./AdminErrorLogs/AdminErrorLogs"));
+const AdminMisconceptions = lazy(() => import("./AdminMisconceptions/AdminMisconceptions"));
 const InsightsPanel = lazy(() => import("./Visualizations/InsightsPanel"));
 const InviteManager = lazy(() => import("./InviteManager/InviteManager"));
 const AdminAnalytics = lazy(() => import("./AdminAnalytics/AdminAnalytics"));
@@ -281,6 +282,9 @@ export default function TabRouter({
       )}
       {activeTab === "admin-errors" && userIsAdmin && (
         <div className="dashboard-layout"><AdminErrorLogs /></div>
+      )}
+      {activeTab === "admin-misconceptions" && userIsAdmin && (
+        <div className="dashboard-layout"><AdminMisconceptions /></div>
       )}
     </Suspense>
   );

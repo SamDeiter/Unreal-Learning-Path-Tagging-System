@@ -143,6 +143,7 @@ function App() {
           { key: "invites", label: "Invites", icon: "🎟️", adminOnly: true },
           { key: "admin-feedback", label: "Feedback", icon: "📋", adminOnly: true },
           { key: "admin-errors", label: "Error Logs", icon: "🚨", adminOnly: true },
+          { key: "admin-misconceptions", label: "Misconceptions", icon: "🧠", adminOnly: true },
         ]
       : [];
     const allTabs = [...BASE_TABS, ...adminTabs];
