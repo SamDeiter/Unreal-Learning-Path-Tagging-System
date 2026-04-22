@@ -12,7 +12,35 @@
  * Uses PersonaService scoring rules as the source of truth.
  */
 
-import { personaScoringRules, getPersonaById } from "./PersonaService";
+import { personaScoringRules, getPersonaById } from "./PersonaService.js";
+
+// Cache for course metadata to avoid redundant normalization and tag processing
+const courseCache = new WeakMap();
+
+/**
+ * Extracts and normalizes metadata for a course.
+ *
+ * @param {object} course - Course object
+ * @returns {{ title: string, allTags: string[] }}
+ */
+function getCourseMetadata(course) {
+  if (courseCache.has(course)) {
+    return courseCache.get(course);
+  }
+
+  const title = (course.title || "").toLowerCase();
+  const allTags = [
+    ...(course.canonical_tags || []),
+    ...(course.ai_tags || []),
+    ...(course.gemini_system_tags || []),
+    ...(course.transcript_tags || []),
+    ...(course.extracted_tags || []),
+  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+  const metadata = { title, allTags };
+  courseCache.set(course, metadata);
+  return metadata;
+}
 
 /**
  * Analyze content gaps for a specific persona.
@@ -43,14 +71,7 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
 
   // Score each course for this persona
   const scored = courses.map((course) => {
-    const title = (course.title || "").toLowerCase();
-    const allTags = [
-      ...(course.canonical_tags || []),
-      ...(course.ai_tags || []),
-      ...(course.gemini_system_tags || []),
-      ...(course.transcript_tags || []),
-      ...(course.extracted_tags || []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    const { title, allTags } = getCourseMetadata(course);
 
     let score = 0;
     const matchedBoosts = [];
@@ -145,26 +166,20 @@ export function getRelevanceBadge(course, personaId) {
   const rules = personaScoringRules[personaId];
   if (!rules) return { label: "", type: "neutral", score: 0 };
 
-  const title = (course.title || "").toLowerCase();
-  const allTags = [
-    ...(course.canonical_tags || []),
-    ...(course.ai_tags || []),
-    ...(course.gemini_system_tags || []),
-    ...(course.transcript_tags || []),
-    ...(course.extracted_tags || []),
-  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+  const { title, allTags } = getCourseMetadata(course);
 
   let score = 0;
   let hasPenalty = false;
 
-  for (const keyword of (rules.boostKeywords || [])) {
-    const kw = keyword.toLowerCase();
+  const boostKeywords = (rules.boostKeywords || []).map(k => k.toLowerCase());
+  const penaltyKeywords = (rules.penaltyKeywords || []).map(k => k.toLowerCase());
+
+  for (const kw of boostKeywords) {
     if (title.includes(kw)) score += 5;
     else if (allTags.some((t) => t.includes(kw))) score += 3;
   }
 
-  for (const keyword of (rules.penaltyKeywords || [])) {
-    const kw = keyword.toLowerCase();
+  for (const kw of penaltyKeywords) {
     if (title.includes(kw) || allTags.some((t) => t.includes(kw))) {
       score -= 10;
       hasPenalty = true;
