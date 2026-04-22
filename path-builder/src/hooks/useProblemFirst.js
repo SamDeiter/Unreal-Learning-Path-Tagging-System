@@ -291,6 +291,11 @@ export default function useProblemFirst() {
         let capturedAnswerData = null;
         try {
           const queryLearningPath = httpsCallable(functions, "queryLearningPath");
+          const effectiveHistory = inputData._conversationHistory || conversationHistory;
+          // Socratic elicitation is opt-in and only affects the FIRST turn.
+          // Once the learner has answered the Socratic question (history is
+          // non-empty), we drop the flag so the follow-up runs normal diagnosis.
+          const wantsSocratic = !!inputData.socratic && effectiveHistory.length === 0;
           let result = await queryLearningPath({
             query: inputData.query,
             mode: "problem-first",
@@ -298,9 +303,10 @@ export default function useProblemFirst() {
             personaHint: inputData.personaHint,
             retrievedContext: retrievedPassages.slice(0, 10),
             caseReport: activeCaseReport || undefined,
-            conversationHistory: inputData._conversationHistory || conversationHistory,
+            conversationHistory: effectiveHistory,
             sessionId: inputData._sessionIdOverride ?? sessionId,
             priorSessionId: inputData.priorSessionId || undefined,
+            socratic: wantsSocratic,
           });
 
           // Plumb sessionId on every response so it persists across turns (Wave 2B)
@@ -314,6 +320,33 @@ export default function useProblemFirst() {
             setStage(STAGES.ERROR);
             setIsAssistantTyping(false);
             replaceLastTyping(makeMessage("assistant", "error", offTopicMsg));
+            return;
+          }
+
+          if (result.data.responseType === "SOCRATIC_ELICIT") {
+            // Socratic turn: single open-ended question, no multiple-choice.
+            // When the user answers, the follow-up submit will have non-empty
+            // conversationHistory which drops the socratic flag and routes
+            // through normal diagnosis.
+            setConversationHistory((prev) => [
+              ...prev,
+              { role: "assistant", content: result.data.question },
+            ]);
+            const socraticPayload = {
+              question: result.data.question,
+              options: [],
+              whyAsking: "",
+              query: result.data.query,
+              caseReport: result.data.caseReport,
+              clarifyRound: 1,
+              maxClarifyRounds: 1,
+              conversationHistory: result.data.conversationHistory || [],
+              isSocratic: true,
+            };
+            setClarifyData(socraticPayload);
+            setStage(STAGES.CLARIFYING);
+            setIsAssistantTyping(false);
+            replaceLastTyping(makeMessage("assistant", "clarification", socraticPayload));
             return;
           }
 

@@ -17,7 +17,7 @@ const { PROMPT_VERSION, wrapEvidence } = require("../pipeline/promptVersions");
 const { findCachedDiagnosis, cacheDiagnosis } = require("../utils/diagnosisCacheUtils");
 const { writePathCache } = require("../utils/pathCacheUtils");
 const { logger } = require("firebase-functions");
-const { UE5_GUARDRAIL } = require("./prompts");
+const { UE5_GUARDRAIL, SOCRATIC_ELICITATION_PROMPT } = require("./prompts");
 const { computeConfidence } = require("./confidence");
 const { writeSession, summarizeSession } = require("./sessions");
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
@@ -33,6 +33,7 @@ async function handleProblemFirst(data, context, apiKey) {
     caseReport,
     conversationHistory: rawHistory,
     engine = "UE5",
+    socratic = false,
   } = data;
   const engineName = engine === "UEFN" ? "Unreal Editor for Fortnite (UEFN) and Verse" : "Unreal Engine 5 (UE5) and Blueprints/C++";
   const IS_UEFN = engine === "UEFN";
@@ -250,6 +251,83 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
     return { success: false, mode: "problem-first", error: intentResult.error };
   }
   const intent = intentResult.data;
+
+  // ── Step 1.25: Socratic Elicitation (opt-in, first turn only) ──
+  // When the learner explicitly opts into "Tutor me" mode AND this is the
+  // first turn of the exchange, surface their implicit assumptions with
+  // ONE focused question before diagnosing. Once they answer, the next
+  // call lands here with non-empty conversationHistory and falls through
+  // to the normal diagnosis path — so the Socratic turn is strictly
+  // additive and bounded to a single pre-diagnosis exchange.
+  if (socratic === true && conversationHistory.length === 0) {
+    const socraticSystemPrompt = SOCRATIC_ELICITATION_PROMPT({
+      engine,
+      engineName,
+      priorSummary: priorSessionSummary,
+    });
+
+    // Build a tight user prompt that anchors the model to this learner's
+    // specific query + any structured signal we already pulled from intent.
+    const socraticUserPrompt = [
+      `Learner query: "${query}"`,
+      intent.systems?.length ? `Detected systems: ${intent.systems.join(", ")}` : null,
+      intent.goal ? `Stated goal: ${intent.goal}` : null,
+      personaHint ? `Persona: ${personaHint}` : null,
+      safeCase?.errorStrings?.length ? `Errors reported: ${safeCase.errorStrings.join("; ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const socraticResult = await runStage({
+      stage: "intent",
+      systemPrompt: socraticSystemPrompt,
+      userPrompt: socraticUserPrompt,
+      apiKey,
+      trace,
+      cacheParams: null, // elicitation should feel fresh, never cached
+    });
+
+    if (socraticResult.success && socraticResult.data?.question) {
+      // Analytics: log Socratic elicitation (fire-and-forget)
+      logApiUsage(userId, {
+        type: "confidence_routing",
+        outcome: "socratic_elicit",
+        queryLength: (query || "").length,
+        hasPriorSession: !!priorSessionSummary,
+        firestoreReads: 2,
+        firestoreWrites: 1,
+      });
+      trace.toLog();
+      const socraticResponse = {
+        success: true,
+        mode: "problem-first",
+        responseType: "SOCRATIC_ELICIT",
+        kind: "clarify",
+        prompt_version: PROMPT_VERSION,
+        question: socraticResult.data.question,
+        intent: socraticResult.data.intent || "",
+        query,
+        caseReport: safeCase,
+        conversationHistory,
+      };
+      const socraticSessionId = await writeSession({
+        uid: userId,
+        mode: "problemFirst",
+        query: rawQuery,
+        conversationHistory,
+        result: socraticResponse,
+        sessionId: data.sessionId,
+      });
+      return { ...socraticResponse, sessionId: socraticSessionId };
+    }
+    // If elicitation generation failed, fall through to normal pipeline.
+    console.warn(
+      JSON.stringify({
+        severity: "WARNING",
+        message: "socratic_elicit_failed_falling_through",
+      })
+    );
+  }
 
   // ── Step 1.5: Confidence Check (multi-turn aware) ───────────────
   const confidence = computeConfidence(intent, safeCase, passages, conversationHistory, query);
