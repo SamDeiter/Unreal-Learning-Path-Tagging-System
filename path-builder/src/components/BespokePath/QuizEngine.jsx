@@ -7,7 +7,11 @@
  *     present, the per-choice string is shown on reveal instead of the shared
  *     `explanation` fallback.
  * - stepIndex: Which path step this quiz belongs to
- * - onComplete: Callback with {stepIndex, score, total} when quiz is finished
+ * - onComplete: Callback with {stepIndex, score, total, perQuestionResults}
+ *   when the quiz is finished. `perQuestionResults` is a 1:1 array with the
+ *   questions prop in order; each entry is {correct: boolean}. This lets the
+ *   PFA (Phase 2A) per-question skill-signal path fire with question-level
+ *   granularity instead of a single coarse lesson-level signal.
  */
 
 import { useState, useCallback } from "react";
@@ -40,10 +44,14 @@ export default function QuizEngine({ questions, stepIndex, onComplete }) {
 
   const handleNext = useCallback(() => {
     if (isLastQ) {
+      // results is indexed in question order because handleCheck appends on
+      // each question before handleNext advances.
+      const perQuestionResults = results.map((r) => ({ correct: !!r.isCorrect }));
       onComplete?.({
         stepIndex,
         score: results.filter((r) => r.isCorrect).length,
         total: questions.length,
+        perQuestionResults,
       });
     } else {
       setCurrentQ((prev) => prev + 1);

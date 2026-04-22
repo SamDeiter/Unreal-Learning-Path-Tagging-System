@@ -158,9 +158,11 @@ export default function LessonPage() {
 
   // Fire-and-forget quiz → skillState write on FULL completion only.
   // Partial completion is intentionally ignored — noisy signal.
+  // perQuestionResults enables the PFA (Phase 2A) per-question mode in the
+  // ingestQuizResult callable, so mastery updates at question granularity.
   const quizIngestedRef = useRef(null);
   const handleQuizComplete = useCallback(
-    ({ score, total }) => {
+    ({ score, total, perQuestionResults }) => {
       if (!lessonId) return;
       if (!Number.isFinite(score) || !Number.isFinite(total) || total <= 0) return;
       if (quizIngestedRef.current === lessonId) return;
@@ -169,7 +171,13 @@ export default function LessonPage() {
         const app = getFirebaseApp();
         const functions = getFunctions(app, "us-central1");
         const fn = httpsCallable(functions, "ingestQuizResult");
-        fn({ lessonId, score, total })
+        const payload = { lessonId, score, total };
+        if (Array.isArray(perQuestionResults) && perQuestionResults.length > 0) {
+          payload.perQuestionResults = perQuestionResults.map((r) => ({
+            correct: !!(r && r.correct),
+          }));
+        }
+        fn(payload)
           .then((res) => {
             devLog(
               `[Quiz] Ingested ${score}/${total} for ${lessonId} (signals=${res?.data?.signalsApplied ?? 0})`
