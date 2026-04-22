@@ -131,7 +131,7 @@ export default function MessageBubble({
               <SpeakButton id={`msg-${message.id}`} text={speakText} />
             </div>
           )}
-          <FeedbackBar sessionId={sessionId} tagsTouched={tagsTouched} />
+          {kind !== "path" && <FeedbackBar sessionId={sessionId} tagsTouched={tagsTouched} />}
         </div>
       </div>
     );

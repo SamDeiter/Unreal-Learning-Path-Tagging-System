@@ -9,7 +9,7 @@ export const PRIMARY_TABS = [
   { key: "authoring", label: "Authoring", icon: "✍️", tooltip: "Create and edit learning paths with AI assistance" },
   { key: "adaptive", label: "Adaptive Path", icon: "🎯", tooltip: "Dynamic learning paths based on your current knowledge" },
   { key: "path-builders", label: "Path Builders", icon: "🛤️", expandable: true, tooltip: "Choose between different path generation engines" },
-  { key: "bespoke", label: "Fix a Problem", icon: "🔧", tooltip: "Generate a custom path to solve a specific technical issue" },
+  { key: "bespoke", label: "Tutor", icon: "🎓", tooltip: "Work through a problem with a guided tutor — understand the why, not just the fix" },
   { key: "problem", label: "Learn Why", icon: "🧠", tooltip: "Deep dive into the theory behind the concepts" },
   { key: "augmentation", label: "Augmentation", icon: "🔬", tooltip: "Experiment with AI models to improve content" },
   { key: "personas", label: "Onboarding", icon: "🚀", tooltip: "Configure your expertise level and learning goals" },

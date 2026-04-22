@@ -372,9 +372,9 @@ export default function ProblemFirst() {
                 cursor: "pointer",
                 boxShadow: "0 2px 8px rgba(139,92,246,0.3)",
               }}
-              title="Generate an interactive mini-lesson for this topic"
+              title="Go deeper — open an interactive walkthrough of the concepts behind this"
             >
-              🎓 Turn this into an interactive lesson
+              🎓 Walk me through the why
             </button>
           )}
 
@@ -462,8 +462,8 @@ export default function ProblemFirst() {
               fontStyle: "italic",
             }}
           >
-            Tell me what you tried, paste an error, or ask me to explain any step — I&apos;ll dig
-            deeper before sending you off to watch videos.
+            Ask me to explain any part of this, tell me what you tried, or say &ldquo;teach me the
+            concept behind this&rdquo; — I&apos;m here to help you understand it, not just patch it.
           </p>
         </div>
       </DiagnosisErrorBoundary>
@@ -475,8 +475,23 @@ export default function ProblemFirst() {
   return (
     <div className="problem-first-page">
       <header className="page-header">
-        <h1>🔧 Fix a Problem</h1>
-        <p>Describe your issue. We&apos;ll diagnose it and show you how to fix it.</p>
+        <h1>🎓 Learn Unreal, From Your Problem Up</h1>
+        <p>
+          Ask anything — a bug, a concept, a stuck moment. I&apos;ll walk you through what&apos;s
+          going on and <em>why</em>, so the next time you hit something similar you&apos;ll
+          already know where to look.
+        </p>
+        <p className="tutor-aside">
+          Just need a quick fix with no teaching? The{" "}
+          <a
+            href="https://dev.epicgames.com/community/assistant/unreal-engine"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <strong>Unreal Editor Assistant</strong>
+          </a>{" "}
+          is built for that — come here when you want to actually understand it.
+        </p>
       </header>
 
       {!hasConversation && (
@@ -487,7 +502,8 @@ export default function ProblemFirst() {
               emptyState={
                 <div style={{ padding: "32px 16px", color: "#94a3b8", textAlign: "center" }}>
                   <p style={{ margin: 0, fontSize: "0.95rem" }}>
-                    Describe your UE5 issue below. I&apos;ll diagnose it and build a learning path.
+                    Tell me what you&apos;re working on or what&apos;s confusing you — I&apos;ll
+                    meet you where you are and teach through it.
                   </p>
                 </div>
               }
@@ -495,7 +511,7 @@ export default function ProblemFirst() {
             <ChatInput
               onSend={handleChatSend}
               disabled={isAssistantTyping}
-              placeholder="What are you stuck on?"
+              placeholder="What are you trying to build, or where are you getting lost?"
             />
             <SocraticToggle
               checked={socraticMode}
@@ -819,7 +835,7 @@ function YouTubeSection({ youtube, isInCart, addToCart, removeFromCart }) {
           const vidId = vidMatch ? vidMatch[1] : null;
           return (
             <div
-              key={yt.id}
+              key={ytId}
               className={`doc-card yt-card-with-thumb ${inCart ? "doc-card-added" : ""}`}
             >
               <a
