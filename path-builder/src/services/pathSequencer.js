@@ -227,7 +227,8 @@ Rules:
 - Max ${MAX_PATH_SEGMENTS} segments total
 - Min ${MIN_PATH_SEGMENTS} segments if enough are relevant
 - Prefer transcript segments over docs for hands-on topics
-- Each summary should be plain text only — no asterisks, no markdown, no code blocks${adaptiveInstructions}`;
+- Each summary should be plain text only — no asterisks, no markdown, no code blocks
+- NEVER frame a step as a quiz, test, or assessment. Titles must not start with "Quiz:", "Test:", "Assessment:", "Check:", or similar. Summaries must not say "Test your understanding", "Answer questions", "This quiz will", "solidify your knowledge", or otherwise prompt the learner to be assessed. Every step is a direct mini-lesson that teaches a concept — quizzes are handled separately by the system.${adaptiveInstructions}`;
 
   try {
     const app = getFirebaseApp();
@@ -250,6 +251,29 @@ Rules:
     }
 
     const classifications = JSON.parse(jsonMatch[0]);
+
+    // ── POST-CLASSIFICATION: strip quiz/assessment framing ──
+    // The AI occasionally frames steps as quizzes ("Quiz: X", "Test your understanding…").
+    // Real quiz steps are rendered separately (currentStep === -2); path steps must teach.
+    const QUIZ_TITLE_PREFIX = /^\s*(quiz|test|assessment|check|knowledge check)\s*[:\-–—]\s*/i;
+    const QUIZ_SUMMARY_PATTERNS = [
+      /\btest your (?:understanding|knowledge)\b/i,
+      /\bthis quiz\b/i,
+      /\banswer questions? about\b/i,
+      /\bsolidify your (?:knowledge|understanding)\b/i,
+      /\bhelp you (?:solidify|assess|test)\b/i,
+    ];
+    for (const c of classifications) {
+      if (typeof c.title === "string") {
+        c.title = c.title.replace(QUIZ_TITLE_PREFIX, "").trim();
+      }
+      if (typeof c.summary === "string" && QUIZ_SUMMARY_PATTERNS.some((p) => p.test(c.summary))) {
+        devWarn(
+          `[BespokePath] Quiz-framed summary rejected for "${c.title || `segment ${c.index}`}" — falling back to quality gate`
+        );
+        c.summary = "";
+      }
+    }
 
     // ── POST-CLASSIFICATION TOPICAL CROSS-CHECK ──
     // Code-level guardrail: even if Gemini rated a step as "high" relevance,
