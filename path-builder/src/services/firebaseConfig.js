@@ -56,9 +56,12 @@ export function getFirebaseApp() {
     // in Firebase Console → App Check → Debug tokens
     if (import.meta.env.DEV) {
       // @ts-ignore — global flag for Firebase App Check debug mode
+      // `true` tells Firebase to mint a fresh debug token and log it to the
+      // browser console. Copy that token into Firebase Console → App Check →
+      // Manage debug tokens. Set VITE_APPCHECK_DEBUG_TOKEN to pin a specific
+      // registered token instead.
       self.FIREBASE_APPCHECK_DEBUG_TOKEN =
-        import.meta.env.VITE_APPCHECK_DEBUG_TOKEN ||
-        "084BE474-CE46-42CB-8A7C-4CFA5503F14A";
+        import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
     }
     initializeAppCheck(newApp, {
       provider: new ReCaptchaEnterpriseProvider(siteKey),
