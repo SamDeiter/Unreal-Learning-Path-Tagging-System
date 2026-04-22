@@ -11,6 +11,7 @@ const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
 const { applySkillSignals } = require("./skillStateWriter");
+const { logMisconceptionSignal } = require("./misconceptionWriter");
 
 const VALID_SIGNALS = new Set([
   "helpful",
@@ -94,6 +95,18 @@ exports.submitFeedback = functions
     if (mapped && tags.length > 0) {
       const signalsPayload = tags.map((tag) => ({ tag, signal: mapped }));
       applySkillSignals(uid, signalsPayload).catch(() => {});
+    }
+
+    // Misconception capture — `confused` on a tagged message is a direct
+    // signal the learner hit a misconception on those tags.
+    if (signal === "confused" && tags.length > 0) {
+      logMisconceptionSignal({
+        source: "confused_feedback",
+        uid,
+        skillTags: tags,
+        comment: trimmedComment,
+        sessionId,
+      }).catch(() => {});
     }
 
     logger.info(JSON.stringify({

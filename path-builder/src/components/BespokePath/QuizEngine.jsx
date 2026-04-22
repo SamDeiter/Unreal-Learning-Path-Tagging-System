@@ -45,8 +45,16 @@ export default function QuizEngine({ questions, stepIndex, onComplete }) {
   const handleNext = useCallback(() => {
     if (isLastQ) {
       // results is indexed in question order because handleCheck appends on
-      // each question before handleNext advances.
-      const perQuestionResults = results.map((r) => ({ correct: !!r.isCorrect }));
+      // each question before handleNext advances. pickedIndex joins the
+      // selected choice back to its option index for misconception mining.
+      const perQuestionResults = results.map((r, idx) => {
+        const q = questions[idx];
+        const choiceKeys = q ? Object.keys(q.choices || {}) : [];
+        const pickedIdx = choiceKeys.indexOf(r?.selected);
+        const out = { correct: !!r.isCorrect };
+        if (pickedIdx >= 0) out.pickedIndex = pickedIdx;
+        return out;
+      });
       onComplete?.({
         stepIndex,
         score: results.filter((r) => r.isCorrect).length,

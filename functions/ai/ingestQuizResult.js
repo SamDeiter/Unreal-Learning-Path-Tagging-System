@@ -30,6 +30,7 @@ const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
 const { applySkillSignals } = require("./skillStateWriter");
+const { logMisconceptionSignal } = require("./misconceptionWriter");
 
 const MAX_TAGS = 20;
 const MAX_QUESTIONS = 200;
@@ -180,6 +181,58 @@ exports.ingestQuizResult = functions
         lessonId,
         error: err && err.message ? err.message : String(err),
       }));
+    }
+
+    // Misconception capture — log one signal per wrong answer, joining the
+    // client-sent pickedIndex against the lesson's stored quiz questions for
+    // stem + correct answer + per-choice explanation. All fire-and-forget.
+    if (mode === "per_question") {
+      const quizQuestions = Array.isArray(lessonData?.quiz?.questions)
+        ? lessonData.quiz.questions
+        : [];
+      const sigPromises = [];
+      const limit = Math.min(perQuestionResults.length, MAX_QUESTIONS, quizQuestions.length);
+      for (let i = 0; i < limit; i++) {
+        const r = perQuestionResults[i];
+        if (!r || typeof r !== "object" || r.correct) continue;
+        const q = quizQuestions[i];
+        if (!q) continue;
+        const options = Array.isArray(q.options) ? q.options : [];
+        const correctIdx = Number.isFinite(q.correctIndex) ? q.correctIndex : null;
+        const pickedIdx = Number.isFinite(r.pickedIndex) ? r.pickedIndex : null;
+        const perQTags = sanitizeTagList(r.skillTags);
+        const tagsForSignal = perQTags.length > 0 ? perQTags : skillTags;
+        if (tagsForSignal.length === 0) continue;
+        const pickedOptionText =
+          pickedIdx !== null && pickedIdx >= 0 && pickedIdx < options.length
+            ? options[pickedIdx]
+            : undefined;
+        const correctOptionText =
+          correctIdx !== null && correctIdx >= 0 && correctIdx < options.length
+            ? options[correctIdx]
+            : undefined;
+        const perChoiceExplanations = Array.isArray(q.explanations) ? q.explanations : null;
+        const explanationForPick =
+          perChoiceExplanations && pickedIdx !== null
+            ? perChoiceExplanations[pickedIdx]
+            : undefined;
+        sigPromises.push(
+          logMisconceptionSignal({
+            source: "quiz_wrong",
+            uid,
+            skillTags: tagsForSignal,
+            stem: q.q,
+            pickedOptionText,
+            correctOptionText,
+            explanationForPick,
+            lessonId,
+            questionIndex: i,
+          })
+        );
+      }
+      if (sigPromises.length > 0) {
+        Promise.allSettled(sigPromises).catch(() => {});
+      }
     }
 
     logger.info(JSON.stringify({

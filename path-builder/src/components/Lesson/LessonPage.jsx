@@ -174,9 +174,13 @@ export default function LessonPage() {
         const fn = httpsCallable(functions, "ingestQuizResult");
         const payload = { lessonId, score, total };
         if (Array.isArray(perQuestionResults) && perQuestionResults.length > 0) {
-          payload.perQuestionResults = perQuestionResults.map((r) => ({
-            correct: !!(r && r.correct),
-          }));
+          payload.perQuestionResults = perQuestionResults.map((r) => {
+            const out = { correct: !!(r && r.correct) };
+            // pickedIndex feeds misconception mining — only forward when the
+            // quiz UI actually resolved a selection.
+            if (r && Number.isFinite(r.pickedIndex)) out.pickedIndex = r.pickedIndex;
+            return out;
+          });
         }
         fn(payload)
           .then((res) => {
