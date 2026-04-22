@@ -7,6 +7,7 @@ const {
   FALLBACK_CURRICULUM,
   ONBOARDING_PLANNER_PROMPT,
   ONBOARDING_ASSEMBLER_PROMPT,
+  SOCRATIC_ELICITATION_PROMPT,
 } = require("../prompts");
 
 describe("prompts exports", () => {
@@ -63,6 +64,41 @@ describe("prompts exports", () => {
       expect(ONBOARDING_PLANNER_PROMPT).toContain("Unity");
       expect(ONBOARDING_PLANNER_PROMPT).toContain("Artist");
       expect(ONBOARDING_PLANNER_PROMPT).toContain("Beginner");
+    });
+  });
+
+  describe("SOCRATIC_ELICITATION_PROMPT (Phase 3 — affective loop)", () => {
+    it("returns a string that includes UE5 guardrail by default", () => {
+      const s = SOCRATIC_ELICITATION_PROMPT();
+      expect(typeof s).toBe("string");
+      expect(s).toContain("CRITICAL");
+    });
+
+    it("omits the affective block when no directive is passed", () => {
+      const s = SOCRATIC_ELICITATION_PROMPT({ engine: "UE5" });
+      expect(s).not.toContain("AFFECTIVE SIGNAL");
+    });
+
+    it("includes the affective block when a directive is passed", () => {
+      const directive =
+        "The learner marked the previous response as CONFUSING. Use simpler language.";
+      const s = SOCRATIC_ELICITATION_PROMPT({
+        engine: "UE5",
+        affectiveDirective: directive,
+      });
+      expect(s).toContain("AFFECTIVE SIGNAL");
+      expect(s).toContain("CONFUSING");
+    });
+
+    it("includes both prior summary and affective block when both provided", () => {
+      const s = SOCRATIC_ELICITATION_PROMPT({
+        engine: "UE5",
+        priorSummary: "Previous session explored Lumen temporal artifacts.",
+        affectiveDirective: "The learner marked the previous response as NOT HELPFUL.",
+      });
+      expect(s).toContain("LAST SESSION SUMMARY");
+      expect(s).toContain("AFFECTIVE SIGNAL");
+      expect(s).toContain("NOT HELPFUL");
     });
   });
 
