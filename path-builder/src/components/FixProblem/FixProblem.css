@@ -661,17 +661,122 @@
   flex-shrink: 0;
 }
 
-/* Fix Steps */
-.answer-fix-steps ol {
-  padding-left: 20px;
+/* Fix Steps — interactive checklist */
+.answer-fix-steps h3 {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fix-step-progress {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 2px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.fix-step-reset {
+  background: transparent;
+  border: none;
+  color: #a78bfa;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  text-decoration: underline dotted;
+  transition: color 0.15s ease;
+}
+
+.fix-step-reset:hover {
+  color: #c4b5fd;
+}
+
+.fix-step-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.answer-fix-steps li {
-  padding: 8px 0;
+.fix-step-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: opacity 0.2s ease;
+  padding: 0;
+}
+
+.fix-step-item:last-child {
+  border-bottom: none;
+}
+
+.fix-step-item label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fix-step-item input[type="checkbox"] {
+  margin: 3px 0 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #8b5cf6;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.fix-step-item .fix-step-number {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #a78bfa;
+  min-width: 18px;
+  padding-top: 1px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.fix-step-item .fix-step-text {
   font-size: 0.9rem;
   color: var(--text-primary, #e5e7eb);
   line-height: 1.5;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.fix-step-item.checked {
+  opacity: 0.7;
+}
+
+.fix-step-item.checked .fix-step-text {
+  text-decoration: line-through;
+  text-decoration-color: rgba(107, 114, 128, 0.6);
+  color: #6b7280;
+}
+
+.fix-step-item.checked .fix-step-number {
+  color: #4b5563;
+}
+
+.fix-steps-complete {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(139, 92, 246, 0.12));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  color: #d1fae5;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fix-step-item,
+  .fix-step-item .fix-step-text,
+  .fix-step-item .fix-step-number,
+  .fix-step-reset {
+    transition: none;
+  }
 }
 
 /* If Still Broken - Branches */
@@ -702,9 +807,20 @@
   color: var(--text-primary, #e5e7eb);
 }
 
-/* Skills You'll Build */
+/* Skills You'll Build — takeaway card placed after the actionable content */
 .answer-skills {
   border-left: 3px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.05);
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.skills-intro {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.5;
 }
 
 .skills-list {
@@ -727,6 +843,55 @@
   content: "🔄";
   flex-shrink: 0;
   font-size: 0.8rem;
+}
+
+/* Why This Result — collapsible to reduce extraneous load on the main flow */
+.answer-reasoning-collapsible {
+  padding: 0;
+  margin: 16px 0;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+}
+
+.answer-reasoning-collapsible > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 14px;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.answer-reasoning-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.answer-reasoning-collapsible > summary::after {
+  content: "▾";
+  margin-left: auto;
+  color: #a78bfa;
+  transition: transform 0.15s ease;
+}
+
+.answer-reasoning-collapsible[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.answer-reasoning-collapsible[open] > summary {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.answer-reasoning-collapsible > .reasoning-list {
+  padding: 10px 14px 14px;
+}
+
+.reasoning-summary-label {
+  flex: 1;
 }
 
 /* Why This Result */

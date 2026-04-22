@@ -3,12 +3,23 @@
  * Displays: Most likely cause → Fast checks → Fix steps → If still broken → Learn path → Evidence
  */
 
+import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
 import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import highlightWithCitations from "../../utils/highlightWithCitations";
 import "./FixProblem.css";
+
+// Stable-ish session key so refreshing mid-troubleshoot keeps progress,
+// but a fresh question re-keys and starts over.
+function fixStepsKey(cause, steps) {
+  if (!steps?.length) return null;
+  const sig = `${cause || ""}::${steps.length}::${(steps[0] || "").slice(0, 40)}`;
+  let h = 5381;
+  for (let i = 0; i < sig.length; i++) h = ((h << 5) + h + sig.charCodeAt(i)) | 0;
+  return `fixSteps:${h}`;
+}
 
 export default function AnswerView({
   answer,
@@ -20,6 +31,48 @@ export default function AnswerView({
   vertexAILoading,
   vertexAIError,
 }) {
+  // Hooks must run unconditionally, before any early return.
+  const stepsKey = useMemo(
+    () => fixStepsKey(answer?.mostLikelyCause, answer?.fixSteps),
+    [answer?.mostLikelyCause, answer?.fixSteps]
+  );
+
+  const [checkedSteps, setCheckedSteps] = useState(() => {
+    if (!stepsKey || typeof window === "undefined") return new Set();
+    try {
+      const raw = window.sessionStorage.getItem(stepsKey);
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (!stepsKey || typeof window === "undefined") return;
+    try {
+      window.sessionStorage.setItem(stepsKey, JSON.stringify([...checkedSteps]));
+    } catch {
+      // session storage full / disabled — non-fatal
+    }
+  }, [stepsKey, checkedSteps]);
+
+  // Re-hydrate when the answer identity changes (new diagnosis).
+  useEffect(() => {
+    if (!stepsKey || typeof window === "undefined") {
+      setCheckedSteps(new Set());
+      return;
+    }
+    try {
+      const raw = window.sessionStorage.getItem(stepsKey);
+      const arr = raw ? JSON.parse(raw) : [];
+      setCheckedSteps(new Set(Array.isArray(arr) ? arr : []));
+    } catch {
+      setCheckedSteps(new Set());
+    }
+  }, [stepsKey]);
+
   if (!answer) return null;
 
   const confidenceColor =
@@ -28,22 +81,23 @@ export default function AnswerView({
   // Shorthand: highlight terms + make [N] citations clickable
   const cite = (text) => highlightWithCitations(text, vertexAIDocs?.results);
 
+  const toggleStep = (i) => {
+    setCheckedSteps((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  };
+
+  const resetSteps = () => setCheckedSteps(new Set());
+
+  const totalSteps = answer.fixSteps?.length || 0;
+  const doneCount = checkedSteps.size;
+  const allStepsDone = totalSteps > 0 && doneCount === totalSteps;
+
   return (
     <div className="answer-view">
-      {/* ─── Skills You'll Build (transferable only) ─── */}
-      {answer.learnPath?.objectives?.transferable?.length > 0 && (
-        <div className="answer-section answer-skills">
-          <h3>
-            <span className="section-icon">🔄</span> Skills You&apos;ll Build
-          </h3>
-          <ul className="skills-list">
-            {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>{cite(skill)}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* ─── Header ─── */}
       <div className="answer-header">
         <h2 className="answer-title">
@@ -80,17 +134,55 @@ export default function AnswerView({
         </div>
       )}
 
-      {/* ─── Fix Steps ─── */}
+      {/* ─── Fix Steps (interactive checklist) ─── */}
       {answer.fixSteps?.length > 0 && (
         <div className="answer-section answer-fix-steps">
           <h3>
-            <span className="section-icon">🔧</span> Fix Steps
+            <span className="section-icon">🔧</span>
+            <span>Fix Steps</span>
+            <span
+              className="fix-step-progress"
+              aria-live="polite"
+              aria-label={`${doneCount} of ${totalSteps} steps completed`}
+            >
+              {doneCount} of {totalSteps} done
+            </span>
+            {doneCount > 0 && (
+              <button
+                type="button"
+                className="fix-step-reset"
+                onClick={resetSteps}
+                title="Uncheck every step"
+              >
+                Reset
+              </button>
+            )}
           </h3>
-          <ol>
-            {answer.fixSteps.map((step, i) => (
-              <li key={i}>{cite(step)}</li>
-            ))}
-          </ol>
+          <ul className="fix-step-list">
+            {answer.fixSteps.map((step, i) => {
+              const checked = checkedSteps.has(i);
+              return (
+                <li key={i} className={`fix-step-item ${checked ? "checked" : ""}`}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleStep(i)}
+                      aria-label={`Mark step ${i + 1} complete`}
+                    />
+                    <span className="fix-step-number">{i + 1}</span>
+                    <span className="fix-step-text">{cite(step)}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+          {allStepsDone && (
+            <div className="fix-steps-complete" role="status">
+              🎉 Nice — every step tried. Did this resolve it? Let me know below so I can
+              improve.
+            </div>
+          )}
         </div>
       )}
 
@@ -111,17 +203,35 @@ export default function AnswerView({
         </div>
       )}
 
-      {/* ─── Why This Result ─── */}
+      {/* ─── Why This Result (collapsible — reduces cognitive load on main flow) ─── */}
       {answer.whyThisResult?.length > 0 && (
-        <div className="answer-section answer-reasoning">
-          <h3>
-            <span className="section-icon">💡</span> How the AI reached this conclusion
-          </h3>
+        <details className="answer-section answer-reasoning answer-reasoning-collapsible">
+          <summary>
+            <span className="section-icon">💡</span>
+            <span className="reasoning-summary-label">How the AI reached this conclusion</span>
+          </summary>
           <ul className="reasoning-list">
             {answer.whyThisResult.map((reason, i) => (
               <li key={i}>
                 <span>{cite(reason)}</span>
               </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {/* ─── Skills You'll Build (takeaway — placed after reasoning) ─── */}
+      {answer.learnPath?.objectives?.transferable?.length > 0 && (
+        <div className="answer-section answer-skills">
+          <h3>
+            <span className="section-icon">🔄</span> What you&apos;ll take away from this
+          </h3>
+          <p className="skills-intro">
+            Beyond fixing this specific issue, here&apos;s the transferable skill you&apos;ll build:
+          </p>
+          <ul className="skills-list">
+            {answer.learnPath.objectives.transferable.map((skill, i) => (
+              <li key={i}>{cite(skill)}</li>
             ))}
           </ul>
         </div>
