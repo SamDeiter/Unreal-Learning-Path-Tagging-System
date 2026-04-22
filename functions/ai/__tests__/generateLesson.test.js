@@ -1,0 +1,268 @@
+/**
+ * generateLesson.test.js — Phase 2B/2C ZPD helpers.
+ *
+ * Covers computeMeanMastery, classifyDepthBand, classifyDifficultyBand, and
+ * the prompt directive strings threaded into runSpoke for fade logic and
+ * ZPD-aware quiz difficulty.
+ */
+
+// Defensive mocks — generateLesson.js transitively requires firebase-admin,
+// firebase-functions, and various pipeline utilities. We never invoke the
+// exported callable here, only the pure `_internal` helpers.
+jest.mock("firebase-admin", () => {
+  const collection = jest.fn(() => ({ doc: jest.fn() }));
+  const firestore = jest.fn(() => ({ collection }));
+  return { firestore };
+});
+
+jest.mock("firebase-functions", () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+  config: jest.fn(() => ({})),
+  runWith: jest.fn(() => ({ https: { onCall: (fn) => fn } })),
+}));
+
+jest.mock("firebase-functions/v2/https", () => ({
+  onCall: (_opts, fn) => fn,
+  HttpsError: class HttpsError extends Error {
+    constructor(code, message) {
+      super(message);
+      this.code = code;
+    }
+  },
+}));
+
+jest.mock("firebase-admin/firestore", () => ({
+  FieldValue: {
+    serverTimestamp: jest.fn(() => "SERVER_TS"),
+    vector: jest.fn((v) => ({ __vector: v })),
+  },
+}));
+
+jest.mock("../../utils/rateLimit", () => ({
+  checkRateLimit: jest.fn(),
+  checkGlobalRateLimit: jest.fn(),
+}));
+jest.mock("../../utils/apiUsage", () => ({ logApiUsage: jest.fn() }));
+jest.mock("../../utils/sanitizeInput", () => ({
+  sanitizeAndValidate: jest.fn(),
+}));
+jest.mock("../../utils/appCheckMiddleware", () => ({
+  requireAppCheck: jest.fn(),
+}));
+jest.mock("../../pipeline/llmStage", () => ({ runStage: jest.fn() }));
+jest.mock("../../pipeline/telemetry", () => ({
+  createTrace: jest.fn(() => ({ toLog: jest.fn() })),
+}));
+jest.mock("../../pipeline/cache", () => ({ normalizeQuery: jest.fn() }));
+jest.mock("../../pipeline/promptVersions", () => ({
+  wrapEvidence: jest.fn(),
+}));
+jest.mock("../skillStateReader", () => ({
+  readSkillState: jest.fn(),
+  buildSkillStateSnippet: jest.fn(() => ""),
+}));
+jest.mock("../prompts", () => ({
+  UE5_GUARDRAIL: "",
+  INTERACTIVE_WIDGET_HTML_PROMPT: jest.fn(() => ""),
+}));
+
+const { _internal } = require("../generateLesson");
+const {
+  computeMeanMastery,
+  classifyDepthBand,
+  classifyDifficultyBand,
+  depthDirective,
+  difficultyDirective,
+} = _internal;
+
+describe("computeMeanMastery", () => {
+  it("returns {mean: null, sampled: 0} when skillState is missing/empty", () => {
+    expect(computeMeanMastery(null, ["a"])).toEqual({ mean: null, sampled: 0 });
+    expect(computeMeanMastery(undefined, ["a"])).toEqual({ mean: null, sampled: 0 });
+    expect(computeMeanMastery({}, ["a"])).toEqual({ mean: null, sampled: 0 });
+  });
+
+  it("returns {mean: null, sampled: 0} when tags array is empty or invalid", () => {
+    const state = { lumen: { mastery: 0.8, opportunities: 2 } };
+    expect(computeMeanMastery(state, [])).toEqual({ mean: null, sampled: 0 });
+    expect(computeMeanMastery(state, null)).toEqual({ mean: null, sampled: 0 });
+  });
+
+  it("ignores tags with opportunities === 0 (no data is not low mastery)", () => {
+    const state = {
+      lumen: { mastery: 0.9, opportunities: 5 },
+      nanite: { mastery: 0, opportunities: 0 }, // skipped
+    };
+    expect(computeMeanMastery(state, ["lumen", "nanite"])).toEqual({
+      mean: 0.9,
+      sampled: 1,
+    });
+  });
+
+  it("ignores tags not present in skillState", () => {
+    const state = { lumen: { mastery: 0.7, opportunities: 3 } };
+    expect(computeMeanMastery(state, ["lumen", "ghost"])).toEqual({
+      mean: 0.7,
+      sampled: 1,
+    });
+  });
+
+  it("averages mastery across multiple qualifying tags", () => {
+    const state = {
+      a: { mastery: 0.4, opportunities: 2 },
+      b: { mastery: 0.8, opportunities: 3 },
+    };
+    const { mean, sampled } = computeMeanMastery(state, ["a", "b"]);
+    expect(sampled).toBe(2);
+    expect(mean).toBeCloseTo(0.6, 5);
+  });
+
+  it("treats NaN/missing mastery on qualifying tags as 0", () => {
+    const state = {
+      a: { mastery: "nope", opportunities: 2 },
+      b: { opportunities: 3 }, // no mastery field
+    };
+    const { mean, sampled } = computeMeanMastery(state, ["a", "b"]);
+    expect(sampled).toBe(2);
+    expect(mean).toBe(0);
+  });
+
+  it("skips non-string or empty tags", () => {
+    const state = { lumen: { mastery: 0.9, opportunities: 2 } };
+    expect(computeMeanMastery(state, ["lumen", "", 42, null])).toEqual({
+      mean: 0.9,
+      sampled: 1,
+    });
+  });
+});
+
+describe("classifyDepthBand", () => {
+  it("returns 'typical' for null / undefined / NaN (no data)", () => {
+    expect(classifyDepthBand(null)).toBe("typical");
+    expect(classifyDepthBand(undefined)).toBe("typical");
+    expect(classifyDepthBand(NaN)).toBe("typical");
+  });
+
+  it("mean >= 0.75 → 'known'", () => {
+    expect(classifyDepthBand(0.75)).toBe("known");
+    expect(classifyDepthBand(0.9)).toBe("known");
+    expect(classifyDepthBand(1.0)).toBe("known");
+  });
+
+  it("0.3 <= mean < 0.75 → 'typical'", () => {
+    expect(classifyDepthBand(0.3)).toBe("typical");
+    expect(classifyDepthBand(0.5)).toBe("typical");
+    expect(classifyDepthBand(0.7499)).toBe("typical");
+  });
+
+  it("mean < 0.3 → 'struggling'", () => {
+    expect(classifyDepthBand(0.29)).toBe("struggling");
+    expect(classifyDepthBand(0.0)).toBe("struggling");
+  });
+});
+
+describe("classifyDifficultyBand", () => {
+  it("returns 'medium' for null / undefined / NaN (no data)", () => {
+    expect(classifyDifficultyBand(null)).toBe("medium");
+    expect(classifyDifficultyBand(undefined)).toBe("medium");
+    expect(classifyDifficultyBand(NaN)).toBe("medium");
+  });
+
+  it("mean >= 0.75 → 'hard'", () => {
+    expect(classifyDifficultyBand(0.75)).toBe("hard");
+    expect(classifyDifficultyBand(0.9)).toBe("hard");
+  });
+
+  it("0.3 <= mean < 0.75 → 'medium'", () => {
+    expect(classifyDifficultyBand(0.3)).toBe("medium");
+    expect(classifyDifficultyBand(0.5)).toBe("medium");
+  });
+
+  it("mean < 0.3 → 'easy'", () => {
+    expect(classifyDifficultyBand(0.29)).toBe("easy");
+    expect(classifyDifficultyBand(0.0)).toBe("easy");
+  });
+});
+
+describe("depthDirective", () => {
+  it("returns empty string for 'typical' band", () => {
+    expect(depthDirective("typical", 0.5)).toBe("");
+    expect(depthDirective("typical", null)).toBe("");
+  });
+
+  it("emits a known-band directive mentioning mastery and fade keywords", () => {
+    const s = depthDirective("known", 0.82);
+    expect(s).toContain("FADE DIRECTIVE");
+    expect(s).toContain("mastery");
+    expect(s).toContain("0.82");
+    expect(s).toMatch(/concise|edge cases/i);
+  });
+
+  it("emits a struggling-band directive mentioning prereq primer", () => {
+    const s = depthDirective("struggling", 0.21);
+    expect(s).toContain("FADE DIRECTIVE");
+    expect(s).toContain("0.21");
+    expect(s).toMatch(/primer|simpler|misconceptions/i);
+  });
+
+  it("omits mastery value when mean is non-finite", () => {
+    const s = depthDirective("known", null);
+    expect(s).toContain("FADE DIRECTIVE");
+    expect(s).not.toContain("mean mastery");
+  });
+});
+
+describe("difficultyDirective", () => {
+  it("returns empty string for 'medium' band", () => {
+    expect(difficultyDirective("medium")).toBe("");
+  });
+
+  it("emits a hard-band directive", () => {
+    const s = difficultyDirective("hard");
+    expect(s).toContain("DIFFICULTY DIRECTIVE");
+    expect(s).toContain("HARD");
+    expect(s).toMatch(/edge cases|multi-step|distractors/i);
+  });
+
+  it("emits an easy-band directive", () => {
+    const s = difficultyDirective("easy");
+    expect(s).toContain("DIFFICULTY DIRECTIVE");
+    expect(s).toContain("EASY");
+    expect(s).toMatch(/recall|core understanding/i);
+  });
+});
+
+describe("integration: band classification → prompt directive", () => {
+  it("new-learner no-data path → typical depth, medium difficulty, no directives", () => {
+    const { mean } = computeMeanMastery({}, ["a", "b"]);
+    expect(mean).toBeNull();
+    expect(classifyDepthBand(mean)).toBe("typical");
+    expect(classifyDifficultyBand(mean)).toBe("medium");
+    expect(depthDirective(classifyDepthBand(mean), mean)).toBe("");
+    expect(difficultyDirective(classifyDifficultyBand(mean))).toBe("");
+  });
+
+  it("mastered learner → known depth, hard difficulty, both directives populated", () => {
+    const state = {
+      a: { mastery: 0.9, opportunities: 5 },
+      b: { mastery: 0.8, opportunities: 4 },
+    };
+    const { mean } = computeMeanMastery(state, ["a", "b"]);
+    expect(classifyDepthBand(mean)).toBe("known");
+    expect(classifyDifficultyBand(mean)).toBe("hard");
+    expect(depthDirective("known", mean)).toMatch(/FADE DIRECTIVE/);
+    expect(difficultyDirective("hard")).toMatch(/DIFFICULTY DIRECTIVE/);
+  });
+
+  it("struggling learner → struggling depth, easy difficulty, both directives populated", () => {
+    const state = {
+      a: { mastery: 0.15, opportunities: 3 },
+      b: { mastery: 0.1, opportunities: 2 },
+    };
+    const { mean } = computeMeanMastery(state, ["a", "b"]);
+    expect(classifyDepthBand(mean)).toBe("struggling");
+    expect(classifyDifficultyBand(mean)).toBe("easy");
+    expect(depthDirective("struggling", mean)).toMatch(/FADE DIRECTIVE/);
+    expect(difficultyDirective("easy")).toMatch(/DIFFICULTY DIRECTIVE/);
+  });
+});

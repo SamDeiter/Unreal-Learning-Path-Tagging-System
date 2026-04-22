@@ -118,7 +118,7 @@ function buildChunkContext(chunks) {
     .join("\n\n");
 }
 
-async function runSpoke(topic, learnerLevel, apiKey) {
+async function runSpoke(topic, learnerLevel, apiKey, bandDirectives = {}) {
   const vec = await embedQueryVector(
     `Unreal Engine 5 tutorial about: ${topic}. Difficulty: ${learnerLevel}.`,
     apiKey
@@ -130,9 +130,12 @@ async function runSpoke(topic, learnerLevel, apiKey) {
   const chunks = [...seg, ...epic].sort((a, b) => b.similarity - a.similarity).slice(0, 8);
   if (chunks.length === 0) return null;
 
+  const depthLine = bandDirectives.depth ? `\n\n${bandDirectives.depth}` : "";
+  const difficultyLine = bandDirectives.difficulty ? `\n\n${bandDirectives.difficulty}` : "";
+
   const systemPrompt = `You are an expert Unreal Engine 5 instructor creating a focused mini-lesson.
 Synthesize the provided transcript chunks into a clear lesson about "${topic}".
-Target audience: ${learnerLevel}.
+Target audience: ${learnerLevel}.${depthLine}${difficultyLine}
 
 Return ONLY valid JSON (no markdown, no fences) matching:
 {
@@ -306,6 +309,99 @@ function inferLearnerLevel(state) {
   return top;
 }
 
+/**
+ * Phase 2B/2C — ZPD helpers.
+ *
+ * Compute the mean PFA mastery across a set of skill tags, ignoring tags the
+ * learner has never attempted (opportunities === 0). No-data is not the same
+ * as low mastery — new tags get default treatment, not "struggling" treatment.
+ *
+ * @param {Object} skillState  per-user skillState map from readSkillState
+ * @param {string[]} tags      lesson-level skillTags
+ * @returns {{ mean: number|null, sampled: number }}
+ *   mean: null when no tag has opportunities > 0, otherwise mean mastery in [0,1]
+ *   sampled: count of tags contributing to the mean
+ */
+function computeMeanMastery(skillState, tags) {
+  if (!skillState || typeof skillState !== "object") return { mean: null, sampled: 0 };
+  if (!Array.isArray(tags) || tags.length === 0) return { mean: null, sampled: 0 };
+  let sum = 0;
+  let n = 0;
+  for (const tag of tags) {
+    if (typeof tag !== "string" || tag.length === 0) continue;
+    const entry = skillState[tag];
+    if (!entry || typeof entry !== "object") continue;
+    const opp = Number.isFinite(entry.opportunities) ? entry.opportunities : 0;
+    if (opp <= 0) continue;
+    const m = Number.isFinite(entry.mastery) ? entry.mastery : 0;
+    sum += m;
+    n += 1;
+  }
+  if (n === 0) return { mean: null, sampled: 0 };
+  return { mean: sum / n, sampled: n };
+}
+
+/**
+ * Classify mean mastery into a depth band for fade logic (Phase 2B).
+ *   >= 0.75  -> known      (compress recap, skip prereq primer)
+ *   >= 0.30  -> typical    (default)
+ *   <  0.30  -> struggling (expand scaffolding, add prereq primer)
+ *   null     -> typical    (no-data default for new learners)
+ */
+function classifyDepthBand(mean) {
+  if (mean === null || mean === undefined || !Number.isFinite(mean)) return "typical";
+  if (mean >= 0.75) return "known";
+  if (mean < 0.3) return "struggling";
+  return "typical";
+}
+
+/**
+ * Classify mean mastery into a quiz difficulty band (Phase 2C).
+ *   >= 0.75  -> hard
+ *   >= 0.30  -> medium
+ *   <  0.30  -> easy
+ *   null     -> medium (default)
+ */
+function classifyDifficultyBand(mean) {
+  if (mean === null || mean === undefined || !Number.isFinite(mean)) return "medium";
+  if (mean >= 0.75) return "hard";
+  if (mean < 0.3) return "easy";
+  return "medium";
+}
+
+/**
+ * Directive text injected into the Gemini spoke prompt for fade logic.
+ * "typical" returns "" — keeps current prompt behavior unchanged.
+ */
+function depthDirective(band, mean) {
+  const m = Number.isFinite(mean) ? mean.toFixed(2) : null;
+  if (band === "known") {
+    return `FADE DIRECTIVE: The learner has demonstrated mastery of these topics${
+      m ? ` (mean mastery ${m})` : ""
+    }. Keep the deep dive concise — assume familiarity with fundamentals. Skip prerequisite explainers. Focus on edge cases and advanced nuance.`;
+  }
+  if (band === "struggling") {
+    return `FADE DIRECTIVE: The learner is struggling with these topics${
+      m ? ` (mean mastery ${m})` : ""
+    }. Include a brief prerequisite primer before the deep dive. Use simpler language. Surface common misconceptions early.`;
+  }
+  return "";
+}
+
+/**
+ * Directive text injected into the Gemini quiz prompt for difficulty band.
+ * "medium" returns "" — keeps current prompt behavior unchanged.
+ */
+function difficultyDirective(band) {
+  if (band === "hard") {
+    return "DIFFICULTY DIRECTIVE: Generate quiz questions at a HARD difficulty band. Target learner success rate 70-80%. Use edge cases, multi-step reasoning, and plausible distractors close to the correct answer.";
+  }
+  if (band === "easy") {
+    return "DIFFICULTY DIRECTIVE: Generate quiz questions at an EASY difficulty band. Focus on recall and core understanding. Keep distractors clearly incorrect to the informed learner. Target 70-80% success rate.";
+  }
+  return "";
+}
+
 async function settledValue(promise) {
   try {
     return await promise;
@@ -356,30 +452,53 @@ exports.generateLesson = onCall(
 
     const topic = query;
 
-    const diagnosisPromise = runDiagnosis({ query, learnerBlock, apiKey, trace, normalized });
-    const spokePromise = runSpoke(topic, learnerLevel, apiKey);
-    const takeawaysPromise = runTakeaways({ query, topic, apiKey });
-
-    const diagnosisSettled = await settledValue(diagnosisPromise);
+    // Diagnosis first, then objectives — we need objectives' skillTags BEFORE
+    // runSpoke so ZPD mastery can thread fade/difficulty directives into the
+    // spoke prompt. The latency hit (one extra sequential Gemini call) is
+    // worth the tutor-impact gain of actually personalizing the deep dive.
+    const diagnosisSettled = await settledValue(
+      runDiagnosis({ query, learnerBlock, apiKey, trace, normalized })
+    );
     const diagnosis = diagnosisSettled && !diagnosisSettled.__error ? diagnosisSettled : null;
 
-    const [objectivesSettled, spokeSettled, takeawaysSettled, widgetSettled] = await Promise.all([
-      settledValue(runObjectives({ query, diagnosis, apiKey, trace, normalized })),
-      settledValue(spokePromise),
-      settledValue(takeawaysPromise),
+    const objectivesSettled = await settledValue(
+      runObjectives({ query, diagnosis, apiKey, trace, normalized })
+    );
+    const objectives =
+      objectivesSettled && !objectivesSettled.__error ? objectivesSettled : null;
+
+    // Compute skillTags now so we can feed them into ZPD band classification.
+    const skillTags = [
+      ...((objectives && Array.isArray(objectives.fix_specific)) ? objectives.fix_specific : []),
+      ...((objectives && Array.isArray(objectives.transferable)) ? objectives.transferable : []),
+    ].filter((t) => typeof t === "string" && t.trim().length > 0);
+
+    // Phase 2B/2C — band classification from PFA mastery across lesson tags.
+    const { mean: meanMastery, sampled: masterySampled } = computeMeanMastery(
+      learnerState && learnerState.skillState,
+      skillTags
+    );
+    const depthBand = classifyDepthBand(meanMastery);
+    const difficultyBand = classifyDifficultyBand(meanMastery);
+    const bandDirectives = {
+      depth: depthDirective(depthBand, meanMastery),
+      difficulty: difficultyDirective(difficultyBand),
+    };
+
+    const [spokeSettled, takeawaysSettled, widgetSettled] = await Promise.all([
+      settledValue(runSpoke(topic, learnerLevel, apiKey, bandDirectives)),
+      settledValue(runTakeaways({ query, topic, apiKey })),
       settledValue(
         runWidget({
           topic,
           diagnosis,
-          objectives: null,
+          objectives,
           learnerLevel,
           apiKey,
         })
       ),
     ]);
 
-    const objectives =
-      objectivesSettled && !objectivesSettled.__error ? objectivesSettled : null;
     const spoke = spokeSettled && !spokeSettled.__error ? spokeSettled : null;
     const takeaways =
       takeawaysSettled && Array.isArray(takeawaysSettled) && !takeawaysSettled.__error
@@ -436,16 +555,16 @@ exports.generateLesson = onCall(
           }
         : null,
       widgetHtml,
+      depthBand,
+      difficultyBand,
+      meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
       generatedAt: new Date().toISOString(),
       engine,
     };
 
-    // skillTags feeds the quiz→skillState adaptation loop (ingestQuizResult).
-    // Use fix_specific ++ transferable as the tag set; skillStateWriter normalizes names.
-    const skillTags = [
-      ...((objectives && Array.isArray(objectives.fix_specific)) ? objectives.fix_specific : []),
-      ...((objectives && Array.isArray(objectives.transferable)) ? objectives.transferable : []),
-    ].filter((t) => typeof t === "string" && t.trim().length > 0);
+    // skillTags (computed earlier for ZPD band classification) feeds the
+    // quiz→skillState adaptation loop (ingestQuizResult). skillStateWriter
+    // normalizes names.
 
     let lessonId = null;
     try {
@@ -479,6 +598,10 @@ exports.generateLesson = onCall(
       hasConcept: !!spoke,
       hasTakeaways: !!takeaways,
       hasWidget: !!widgetHtml,
+      depthBand,
+      difficultyBand,
+      meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
+      masterySampled,
       firestoreReads: 3,
       firestoreWrites: 1,
     }).catch(() => {});
@@ -493,7 +616,15 @@ exports.generateLesson = onCall(
 );
 
 // Exported for unit tests / internal reuse.
-exports._internal = { stripWidgetFences, inferLearnerLevel };
+exports._internal = {
+  stripWidgetFences,
+  inferLearnerLevel,
+  computeMeanMastery,
+  classifyDepthBand,
+  classifyDifficultyBand,
+  depthDirective,
+  difficultyDirective,
+};
 
 // Silence unused-warning for wrapEvidence (kept for parity with related handlers
 // in case this file is extended to include grounded evidence blocks).
