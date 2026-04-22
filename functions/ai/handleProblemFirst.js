@@ -571,7 +571,17 @@ JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"]
   // ── Step 3: Objectives ─────────────────────────────────────────
   const objectivesSystemPrompt =
     guardrail +
-    `Create ${engine} learning objectives. MUST have >=1 transferable skill.
+    `You are a ${engine} tutor writing learning objectives the learner will SEE at the end of their session as "Skills You'll Build". These are not internal category tags — they are the takeaway the learner reads to understand what they just gained.
+
+REQUIREMENTS for every item in "transferable":
+- Full sentence, learner-voice, starting with a concrete verb (e.g. "Diagnose…", "Trace…", "Decide when…").
+- State the *skill*, not the *topic*. Bad: "Blueprint Event Graph Management". Good: "Trace a broken Blueprint event chain by isolating which node stops firing and why."
+- Say *why it transfers* — mention the class of future problem it unlocks (e.g. "…so you can debug any input-driven character behavior, not just jump.").
+- 15-30 words each. No bare nouns. No duplicates. No marketing fluff.
+
+"fix_specific" items can be terser (they feed internal pipeline) but must still be actionable phrases, not labels.
+
+Produce 2-4 transferable skills and 2-4 fix_specific items.${readingLevelBlock}
 JSON:{"fix_specific":["str"],"transferable":["str"]}`;
 
   const objectivesResult = await runStage({
@@ -657,15 +667,21 @@ ${wrapEvidence(passages.map((p, i) => `[${i + 1}] (Course: ${p.courseCode}, Vide
     runStage({
       stage: "intent", // Re-use intent schema loosely for answer data
       systemPrompt: `CRITICAL: You MUST ONLY respond about ${engineName} topics.
-You are a technical writer generating a custom, grounded solution for a ${engine} developer.
+You are a ${engine} tutor writing the bulk of the answer screen. The learner will see Most Likely Cause → Quick Checks → Fix Steps → If Still Broken → Why This Result in that order. Each section must carry substance — the Cause is not allowed to be the only detailed section on the page.
 
 STRICT GROUNDING RULES:
-1. Answer the user's question using ONLY the context provided in the 'Context Block'. Do not use outside knowledge unless it strictly bridges a gap in the context.
-2. CITATIONS ARE MANDATORY. Every distinct claim must end with a reference like [1] or [Source: Video Title].
-3. If the Context Block contains C++ code, format it in markdown code blocks.
-4. If the Context Block describes a Blueprint, describe it visually: "Right-click -> [Node Name] -> Connect [Pin A] to [Pin B]".
-5. If the provided context does NOT contain the answer, return "NO_DATA_AVAILABLE" in the 'confidence' field and explain why in 'whyThisResult'.
+1. Prefer the 'Context Block' for specific claims; you may use well-known ${engine} editor paths/menus when context is thin, but flag anything uncertain in whyThisResult instead of inventing.
+2. Cite with [1], [2] where you use retrieved passages. Not every sentence needs a citation, but specific settings/paths that came from a source must be cited.
+3. Blueprint instructions: describe visually — "Right-click → Add Node → [Node Name], connect [Pin A] to [Pin B]".
+4. C++ goes in \`\`\`cpp fenced blocks.
+5. Only return confidence="NO_DATA_AVAILABLE" if you genuinely cannot produce a plausible diagnosis. In that case whyThisResult must still have 2-3 items explaining what's missing and what the user could try.
 6. If LEARNER CONTEXT is provided below, tailor depth: skip basics for topics they already know; add orientation for topics they don't.${learnerBlock}
+
+SUBSTANCE REQUIREMENTS (non-negotiable):
+- fastChecks: 2-3 items. Each names the exact thing to check AND what "looks wrong" vs "looks right". Bad: "Check input settings". Good: "Open Project Settings → Engine → Input; confirm 'Jump' exists under Action Mappings with a bound key. If the row is missing entirely, that's the cause."
+- fixSteps: 3-6 ordered, specific steps. Each step names the menu path, the button/node/property, and the value. Bad: "Configure input". Good: "In Project Settings → Engine → Input, click the + next to Action Mappings, type 'Jump', expand it, click + again, and assign Space Bar."
+- ifStillBrokenBranches: 2-3 branches covering the most likely reasons the primary fix doesn't work. condition = observable symptom after trying the fix; action = what to try next.
+- whyThisResult: 2-3 items walking the reasoning chain — what in the problem pointed to this cause, what ruled out alternatives.
 
 JSON:{
   "intent_id":"answer","user_role":"expert","goal":"fix",
@@ -674,10 +690,10 @@ JSON:{
   "constraints":[],
   "mostLikelyCause": "str (one sentence, the most likely root cause)",
   "confidence": "high|med|low|NO_DATA_AVAILABLE",
-  "fastChecks": ["str (quick things to verify before doing full fix, max 3)"],
-  "fixSteps": ["str (ordered fix steps, be specific with ${engine} settings/menus, cite sources)"],
+  "fastChecks": ["str"],
+  "fixSteps": ["str"],
   "ifStillBrokenBranches": [{"condition":"str","action":"str"}],
-  "whyThisResult": ["str (explain reasoning chain with citations, max 3)"]
+  "whyThisResult": ["str"]
 }`,
       userPrompt: `Problem: ${(intent.problem_description || "").slice(0, 300)}\nRoot causes: ${(diagnosis.root_causes || []).slice(0, 3).join("; ")}\nSignals: ${(diagnosis.signals_to_watch_for || []).slice(0, 3).join("; ")}${exclusionNote}${contextBlock}`,
       apiKey,
@@ -715,6 +731,60 @@ JSON:{
     answerDataResult.value?.data
   ) {
     answerData = answerDataResult.value.data;
+  }
+
+  // Backfill: when the answer_data stage returns empty arrays, hydrate from
+  // diagnosis + microLesson so the page never renders a bare cause + sources
+  // layout with no actionable middle sections. Logs a warning so we can spot
+  // repeated fallbacks in telemetry.
+  const answerIsSparse =
+    !answerData ||
+    ((answerData.fastChecks || []).length === 0 &&
+      (answerData.fixSteps || []).length === 0 &&
+      (answerData.whyThisResult || []).length === 0);
+
+  if (answerIsSparse) {
+    logger.warn(
+      JSON.stringify({
+        severity: "WARNING",
+        message: "answer_data_sparse_backfilling",
+        had_answer_data: !!answerData,
+        confidence: answerData?.confidence,
+        query: (rawQuery || "").slice(0, 120),
+      })
+    );
+
+    const signals = (diagnosis.signals_to_watch_for || []).slice(0, 3);
+    const quickFixSteps = microLesson?.quick_fix?.steps || [];
+    const rootCauses = (diagnosis.root_causes || []).slice(0, 3);
+
+    answerData = {
+      ...(answerData || {}),
+      mostLikelyCause:
+        answerData?.mostLikelyCause || rootCauses[0] || "Unable to pinpoint a single root cause — see reasoning below.",
+      confidence: answerData?.confidence || "low",
+      fastChecks:
+        (answerData?.fastChecks || []).length > 0
+          ? answerData.fastChecks
+          : signals.length > 0
+            ? signals.map((s) => `Check: ${s}`)
+            : ["Re-read the error or symptom carefully and note the exact wording — it often points at the subsystem involved."],
+      fixSteps:
+        (answerData?.fixSteps || []).length > 0
+          ? answerData.fixSteps
+          : quickFixSteps.length > 0
+            ? quickFixSteps
+            : rootCauses.length > 0
+              ? rootCauses.map((c) => `Address: ${c}`)
+              : ["Share more detail (exact error text, what you clicked, what you expected) so I can give precise steps."],
+      ifStillBrokenBranches: answerData?.ifStillBrokenBranches || [],
+      whyThisResult:
+        (answerData?.whyThisResult || []).length > 0
+          ? answerData.whyThisResult
+          : rootCauses.length > 0
+            ? [`Based on the reported symptoms, the most likely cause is: ${rootCauses[0]}.`, "The evidence below is what the retrieval step surfaced as most relevant."]
+            : ["The retrieval step didn't return enough grounded context to reason confidently. Adding a screenshot or the exact error message will help."],
+    };
   }
 
   // Log API usage (batched, non-blocking)
