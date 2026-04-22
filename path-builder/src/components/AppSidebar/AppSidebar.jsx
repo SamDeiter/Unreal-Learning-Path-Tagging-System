@@ -6,6 +6,7 @@
 /* global __BUILD_HASH__, __BUILD_TIME__, __BUILD_NUMBER__ */
 import { signOutUser } from "../../services/googleAuthService";
 import { PRIMARY_TABS, SECONDARY_TABS, ANALYTICS_SUBTABS, PATH_BUILDER_TABS } from "../../domain/tabDefinitions";
+import AccessibilityPanel from "../Settings/AccessibilityPanel";
 
 export default function AppSidebar({
   tabs,
@@ -185,6 +186,7 @@ export default function AppSidebar({
             <button className="header-signout-btn" onClick={() => signOutUser()}>
               Sign Out
             </button>
+            <AccessibilityPanel />
           </div>
         </div>
       )}

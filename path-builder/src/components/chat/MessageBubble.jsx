@@ -10,6 +10,30 @@
  */
 import PropTypes from "prop-types";
 import FeedbackBar from "./FeedbackBar";
+import SpeakButton from "../Settings/SpeakButton";
+
+/**
+ * Extract plain text suitable for TTS from a message of any supported kind.
+ * Diagnosis / path kinds get synthesised into a readable summary.
+ */
+function extractSpeakableText(message) {
+  if (!message) return "";
+  const { kind, content } = message;
+  if (kind === "diagnosis" || kind === "path") {
+    const d = content?.cartData?.diagnosis || content?.diagnosis || {};
+    const parts = [];
+    if (d.problem_summary) parts.push(d.problem_summary);
+    if (Array.isArray(d.root_causes) && d.root_causes.length) {
+      parts.push("Root causes: " + d.root_causes.map((c) => (typeof c === "string" ? c : c?.title || "")).filter(Boolean).join(". "));
+    }
+    if (Array.isArray(d.signals_to_watch_for) && d.signals_to_watch_for.length) {
+      parts.push("Signals to watch for: " + d.signals_to_watch_for.filter(Boolean).join(". "));
+    }
+    return parts.join(" ");
+  }
+  if (typeof content === "string") return content;
+  return "";
+}
 
 function TypingIndicator() {
   return (
@@ -97,10 +121,16 @@ export default function MessageBubble({
       : Array.isArray(content?.cartData?.tags)
         ? content.cartData.tags
         : [];
+    const speakText = extractSpeakableText(message);
     return (
       <div className="chat-bubble-row assistant">
         <div className="chat-bubble assistant rich">
           {renderRich ? renderRich(message) : <pre>{JSON.stringify(content, null, 2)}</pre>}
+          {speakText && (
+            <div className="chat-bubble__actions">
+              <SpeakButton id={`msg-${message.id}`} text={speakText} />
+            </div>
+          )}
           <FeedbackBar sessionId={sessionId} tagsTouched={tagsTouched} />
         </div>
       </div>
@@ -110,9 +140,18 @@ export default function MessageBubble({
   const classes = ["chat-bubble", role];
   if (kind === "error") classes.push("error");
 
+  const speakText = role === "assistant" ? extractSpeakableText(message) : "";
+
   return (
     <div className={`chat-bubble-row ${role}`}>
-      <div className={classes.join(" ")}>{typeof content === "string" ? content : String(content)}</div>
+      <div className={classes.join(" ")}>
+        {typeof content === "string" ? content : String(content)}
+        {speakText && (
+          <div className="chat-bubble__actions">
+            <SpeakButton id={`msg-${message.id}`} text={speakText} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

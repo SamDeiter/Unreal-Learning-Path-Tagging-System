@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap');
 
 * {
   box-sizing: border-box;
@@ -93,4 +93,48 @@ button {
   border-top: 1px solid var(--kc-glass-border-light);
   border-bottom: 1px solid var(--kc-glass-border-dark);
   border-radius: 12px;
+}
+
+/* ==========================================================================
+   UDL / Accessibility (Phase 3)
+   ========================================================================== */
+
+/* Dyslexic-friendly font: Lexend is research-backed for reading fluency and
+   available via the existing Google Fonts import. OpenDyslexic listed as a
+   fallback for users who have it locally. Scoped by [data-font="dyslexic"]
+   on <html> so it cascades without a rebuild. */
+html[data-font="dyslexic"] {
+  --font-body: 'Lexend', 'OpenDyslexic', 'Comic Sans MS', system-ui, sans-serif;
+  --font-display: 'Lexend', 'OpenDyslexic', system-ui, sans-serif;
+  font-family: var(--font-body);
+}
+
+html[data-font="dyslexic"] body,
+html[data-font="dyslexic"] button,
+html[data-font="dyslexic"] input,
+html[data-font="dyslexic"] textarea,
+html[data-font="dyslexic"] select {
+  font-family: var(--font-body);
+}
+
+/* Reduced motion — honor OS preference by default. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="always-on"]) *,
+  html:not([data-motion="always-on"]) *::before,
+  html:not([data-motion="always-on"]) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Explicit user override: "always-off" forces reduced-motion regardless of OS. */
+html[data-motion="always-off"] *,
+html[data-motion="always-off"] *::before,
+html[data-motion="always-off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
