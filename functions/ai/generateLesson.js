@@ -187,12 +187,12 @@ Rules:
   };
 }
 
-async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", apiKey, trace, normalized }) {
+async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", readingLevelBlock = "", apiKey, trace, normalized }) {
   const result = await runStage({
     stage: "diagnosis",
     systemPrompt:
       UE5_GUARDRAIL +
-      `UE5 expert. Diagnose UE5 problems with specific settings and Editor workflows. Teach WHY the problem occurs, not just the fix. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for this response — it overrides depth/difficulty defaults.${affectiveBlock}${learnerBlock}
+      `UE5 expert. Diagnose UE5 problems with specific settings and Editor workflows. Teach WHY the problem occurs, not just the fix. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for this response — it overrides depth/difficulty defaults.${affectiveBlock}${learnerBlock}${readingLevelBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`,
     userPrompt: `Problem: ${query}`,
     apiKey,
@@ -396,16 +396,55 @@ function depthDirective(band, mean) {
  * renders AFTER depth/difficulty so it lexically overrides those bands in the
  * model's instruction stack.
  *
- * @param {{depth?:string, difficulty?:string, affective?:string}} bandDirectives
+ * Phase 3 adds `readingLevel` — a learner-controlled UDL preference. It renders
+ * alongside the adaptive bands (not overriding affective), because the learner
+ * explicitly opted into a reading altitude and that choice should survive
+ * in-session signal-based adaptation.
+ *
+ * @param {{depth?:string, difficulty?:string, affective?:string, readingLevel?:string}} bandDirectives
  * @returns {string}
  */
 function composeSpokePromptDirectives(bandDirectives = {}) {
   const depthLine = bandDirectives.depth ? `\n\n${bandDirectives.depth}` : "";
   const difficultyLine = bandDirectives.difficulty ? `\n\n${bandDirectives.difficulty}` : "";
+  const readingLevelLine = bandDirectives.readingLevel
+    ? `\n\n${bandDirectives.readingLevel}`
+    : "";
   const affectiveLine = bandDirectives.affective
     ? `\n\nAFFECTIVE SIGNAL (from prior response — overrides depth/difficulty defaults):\n${bandDirectives.affective}`
     : "";
-  return `${depthLine}${difficultyLine}${affectiveLine}`;
+  return `${depthLine}${difficultyLine}${readingLevelLine}${affectiveLine}`;
+}
+
+/**
+ * UDL reading-level directive. Maps the learner's chosen altitude
+ * (simple|standard|advanced) to a compact prompt instruction. "standard"
+ * returns "" so the existing tutor voice is unchanged for the default.
+ *
+ * Unknown values fall back to "standard" silently — the caller is expected to
+ * have already coerced, but this is the last line of defense.
+ *
+ * @param {string} level  one of "simple" | "standard" | "advanced"
+ * @returns {string}
+ */
+function readingLevelDirective(level) {
+  if (level === "simple") {
+    return "READING LEVEL DIRECTIVE: Write at a middle-school reading level. Prefer short sentences, concrete analogies, and plain words over jargon. Define technical terms inline the first time they appear.";
+  }
+  if (level === "advanced") {
+    return "READING LEVEL DIRECTIVE: Write at a graduate reading level. Use domain terminology freely without spelling out basics; prefer precise, compact prose over illustrative analogies.";
+  }
+  return "";
+}
+
+const VALID_READING_LEVELS = new Set(["simple", "standard", "advanced"]);
+
+/**
+ * Server-side coercion for the `readingLevel` payload field. Unknown values
+ * (including undefined/null/non-strings) fall back to "standard" — never throw.
+ */
+function coerceReadingLevel(raw) {
+  return typeof raw === "string" && VALID_READING_LEVELS.has(raw) ? raw : "standard";
 }
 
 /**
@@ -450,10 +489,17 @@ exports.generateLesson = onCall(
     const gl = await checkGlobalRateLimit(userId);
     if (!gl.allowed) throw new HttpsError("resource-exhausted", `${gl.message}`);
 
-    const { query: rawQuery, sessionId = null, engine = "UE5" } = request.data || {};
+    const {
+      query: rawQuery,
+      sessionId = null,
+      engine = "UE5",
+      readingLevel: rawReadingLevel,
+    } = request.data || {};
     if (!rawQuery || typeof rawQuery !== "string") {
       throw new HttpsError("invalid-argument", "query is required");
     }
+    // UDL: coerce unknown values to "standard" silently — never throw
+    const readingLevel = coerceReadingLevel(rawReadingLevel);
     const validation = sanitizeAndValidate(rawQuery, 1000);
     if (validation.blocked) {
       throw new HttpsError("invalid-argument", `Invalid input: ${validation.reason}`);
@@ -469,6 +515,13 @@ exports.generateLesson = onCall(
     const learnerSnippet = buildSkillStateSnippet(learnerState);
     const learnerBlock = learnerSnippet ? `\n\nLEARNER CONTEXT:\n${learnerSnippet}\n` : "";
     const learnerLevel = inferLearnerLevel(learnerState);
+
+    // UDL reading-level directive — a learner-controlled preference that
+    // tunes the tutor voice across every stage of the lesson composition.
+    const readingLevelPromptBlock = (() => {
+      const directive = readingLevelDirective(readingLevel);
+      return directive ? `\n\n${directive}\n` : "";
+    })();
 
     // Phase 3 — Affective feedback. Pull the most-recent fresh signal for
     // this session (if any) so we can adapt this lesson's depth and angle
@@ -490,7 +543,15 @@ exports.generateLesson = onCall(
     // spoke prompt. The latency hit (one extra sequential Gemini call) is
     // worth the tutor-impact gain of actually personalizing the deep dive.
     const diagnosisSettled = await settledValue(
-      runDiagnosis({ query, learnerBlock, affectiveBlock, apiKey, trace, normalized })
+      runDiagnosis({
+        query,
+        learnerBlock,
+        affectiveBlock,
+        readingLevelBlock: readingLevelPromptBlock,
+        apiKey,
+        trace,
+        normalized,
+      })
     );
     const diagnosis = diagnosisSettled && !diagnosisSettled.__error ? diagnosisSettled : null;
 
@@ -516,6 +577,9 @@ exports.generateLesson = onCall(
     const bandDirectives = {
       depth: depthDirective(depthBand, meanMastery),
       difficulty: difficultyDirective(difficultyBand),
+      // UDL reading-level rides alongside the adaptive bands — it reflects an
+      // explicit learner choice, not an inferred signal.
+      readingLevel: readingLevelDirective(readingLevel),
       // Affective directive wins when present (rendered last in the prompt).
       affective: affectiveDirective,
     };
@@ -594,6 +658,8 @@ exports.generateLesson = onCall(
       difficultyBand,
       meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
       affectiveContext,
+      // UDL: persist learner's chosen reading level for telemetry
+      readingLevel,
       generatedAt: new Date().toISOString(),
       engine,
     };
@@ -639,6 +705,7 @@ exports.generateLesson = onCall(
       meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
       masterySampled,
       affectiveContext,
+      readingLevel,
       firestoreReads: 3,
       firestoreWrites: 1,
     }).catch(() => {});
@@ -662,6 +729,8 @@ exports._internal = {
   depthDirective,
   difficultyDirective,
   composeSpokePromptDirectives,
+  readingLevelDirective,
+  coerceReadingLevel,
 };
 
 // Silence unused-warning for wrapEvidence (kept for parity with related handlers

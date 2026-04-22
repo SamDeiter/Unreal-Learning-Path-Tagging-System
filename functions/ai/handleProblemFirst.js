@@ -25,6 +25,25 @@ const { readLatestFeedback, buildAffectiveDirective } = require("./feedbackReade
 
 const MAX_CLARIFY_ROUNDS = 3;
 
+// ── UDL reading-level helpers ────────────────────────────────────────
+// Mirrors the frontend's useAccessibilityPreferences("udl-prefs-v1").readingLevel
+// field. Unknown values coerce silently to "standard" — never throw.
+const VALID_READING_LEVELS = new Set(["simple", "standard", "advanced"]);
+
+function coerceReadingLevel(raw) {
+  return typeof raw === "string" && VALID_READING_LEVELS.has(raw) ? raw : "standard";
+}
+
+function readingLevelDirective(level) {
+  if (level === "simple") {
+    return "READING LEVEL DIRECTIVE: Write at a middle-school reading level. Prefer short sentences, concrete analogies, and plain words over jargon. Define technical terms inline the first time they appear.";
+  }
+  if (level === "advanced") {
+    return "READING LEVEL DIRECTIVE: Write at a graduate reading level. Use domain terminology freely without spelling out basics; prefer precise, compact prose over illustrative analogies.";
+  }
+  return "";
+}
+
 async function handleProblemFirst(data, context, apiKey) {
   const {
     query: rawQuery,
@@ -35,7 +54,15 @@ async function handleProblemFirst(data, context, apiKey) {
     conversationHistory: rawHistory,
     engine = "UE5",
     socratic = false,
+    readingLevel: rawReadingLevel,
   } = data;
+
+  // UDL: coerce unknown values silently to "standard" (never throw)
+  const readingLevel = coerceReadingLevel(rawReadingLevel);
+  const readingLevelDirectiveText = readingLevelDirective(readingLevel);
+  const readingLevelBlock = readingLevelDirectiveText
+    ? `\n\n${readingLevelDirectiveText}\n`
+    : "";
   const engineName = engine === "UEFN" ? "Unreal Editor for Fortnite (UEFN) and Verse" : "Unreal Engine 5 (UE5) and Blueprints/C++";
   const IS_UEFN = engine === "UEFN";
   const guardrail = IS_UEFN 
@@ -288,6 +315,8 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
       engineName,
       priorSummary: priorSessionSummary,
       affectiveDirective,
+      // UDL: thread reading-level directive into the Socratic question
+      readingLevelDirective: readingLevelDirectiveText,
     });
 
     // Build a tight user prompt that anchors the model to this learner's
@@ -523,7 +552,7 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
 
   const diagnosisSystemPrompt =
     guardrail +
-    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for tone and depth of this response.${affectiveBlock}${learnerBlock}${priorSessionBlock}
+    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for tone and depth of this response.${affectiveBlock}${learnerBlock}${priorSessionBlock}${readingLevelBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`;
 
   const diagnosisResult = await runStage({
@@ -748,6 +777,9 @@ JSON:{
     validation: validationData,
     pathSummary,
     microLesson,
+    // UDL: persist the learner's chosen reading level for telemetry (mirrors
+    // the depthBand/difficultyBand/affectiveContext pattern on the lesson doc).
+    readingLevel,
     created_at: new Date().toISOString(),
   };
 
@@ -808,6 +840,8 @@ JSON:{
         transferable: objectives.transferable,
       },
     },
+    // UDL: surface persisted reading level on the response for telemetry
+    readingLevel,
   };
 
   // Debug trace for admin callers
@@ -836,4 +870,8 @@ JSON:{
   return response;
 }
 
-module.exports = { handleProblemFirst };
+module.exports = {
+  handleProblemFirst,
+  // Exposed for unit tests — these are pure helpers with no side effects.
+  _internal: { coerceReadingLevel, readingLevelDirective },
+};

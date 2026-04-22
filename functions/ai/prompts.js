@@ -132,7 +132,7 @@ WIDGET REQUIREMENTS:
 //       (never a generic "tell me more", never a multi-part list)
 //   (c) explicitly withhold the answer — this is elicitation, not teaching
 //   (d) keep voice consistent with the rest of the pipeline (direct, UE5-aware)
-function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary, affectiveDirective } = {}) {
+function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary, affectiveDirective, readingLevelDirective } = {}) {
   const resolvedEngineName =
     engineName ||
     (engine === "UEFN"
@@ -153,9 +153,16 @@ function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary,
       ? `\n\nAFFECTIVE SIGNAL (from prior response):\n${String(affectiveDirective).slice(0, 600)}\n`
       : "";
 
+  // UDL reading-level directive (Phase 3) — shapes the Socratic question's
+  // vocabulary and register alongside any adaptive affective signal.
+  const readingLevelBlock =
+    readingLevelDirective && String(readingLevelDirective).trim().length > 0
+      ? `\n\n${String(readingLevelDirective).slice(0, 600)}\n`
+      : "";
+
   return (
     guardrail +
-    `You are a ${resolvedEngineName} tutor running a Socratic elicitation turn BEFORE diagnosing the learner's problem. Your job is to understand what the learner currently believes about their own problem — NOT to answer it yet.${priorBlock}${affectiveBlock}
+    `You are a ${resolvedEngineName} tutor running a Socratic elicitation turn BEFORE diagnosing the learner's problem. Your job is to understand what the learner currently believes about their own problem — NOT to answer it yet.${priorBlock}${affectiveBlock}${readingLevelBlock}
 
 STRICT RULES:
 - Ask exactly ONE question. Never a list, never multi-part, never "and also…".

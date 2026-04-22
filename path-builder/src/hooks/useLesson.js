@@ -14,8 +14,10 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getFirebaseApp } from "../services/firebaseConfig";
 import { getCurrentUser } from "../services/googleAuthService";
 import { devLog, devWarn } from "../utils/logger";
+import useAccessibilityPreferences from "./useAccessibilityPreferences";
 
 export default function useLesson() {
+  const { prefs } = useAccessibilityPreferences();
   const [lesson, setLesson] = useState(null);
   const [lessonId, setLessonId] = useState(null);
   const [sessionId, setSessionId] = useState(null);
@@ -38,6 +40,8 @@ export default function useLesson() {
       const payload = { query };
       if (sid) payload.sessionId = sid;
       if (engine) payload.engine = engine;
+      // UDL: thread the learner's reading-level preference into the Gemini prompt
+      if (prefs?.readingLevel) payload.readingLevel = prefs.readingLevel;
 
       const result = await callable(payload);
       const data = result?.data || {};
@@ -59,7 +63,7 @@ export default function useLesson() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [prefs?.readingLevel]);
 
   const loadById = useCallback(async (id) => {
     if (!id) {

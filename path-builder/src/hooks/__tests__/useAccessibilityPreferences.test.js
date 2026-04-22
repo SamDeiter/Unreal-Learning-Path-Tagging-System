@@ -94,4 +94,74 @@ describe("useAccessibilityPreferences", () => {
     expect(result.current.prefs.dyslexicFont).toBe(false);
     expect(result.current.prefs.reducedMotion).toBe("system");
   });
+
+  // ── Phase 3 — readingLevel (tutor prompt preference) ──────────────
+  it("defaults readingLevel to 'standard'", () => {
+    const { result } = renderHook(() => useAccessibilityPreferences());
+    expect(result.current.prefs.readingLevel).toBe("standard");
+  });
+
+  it("persists readingLevel to localStorage under the shared key", () => {
+    const { result } = renderHook(() => useAccessibilityPreferences());
+
+    act(() => {
+      result.current.setReadingLevel("simple");
+    });
+    expect(result.current.prefs.readingLevel).toBe("simple");
+    let stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
+    expect(stored.readingLevel).toBe("simple");
+
+    act(() => {
+      result.current.setReadingLevel("advanced");
+    });
+    expect(result.current.prefs.readingLevel).toBe("advanced");
+    stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
+    expect(stored.readingLevel).toBe("advanced");
+  });
+
+  it("rejects invalid readingLevel values (falls back to 'standard')", () => {
+    const { result } = renderHook(() => useAccessibilityPreferences());
+
+    act(() => {
+      result.current.setReadingLevel("phd-plus");
+    });
+
+    expect(result.current.prefs.readingLevel).toBe("standard");
+  });
+
+  it("defaults readingLevel when reading an older-shape stored blob (backwards compat)", () => {
+    // Simulate a pre-Phase-3 stored blob that doesn't include readingLevel
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ dyslexicFont: true, reducedMotion: "always-off" })
+    );
+    const { result } = renderHook(() => useAccessibilityPreferences());
+    expect(result.current.prefs.dyslexicFont).toBe(true);
+    expect(result.current.prefs.reducedMotion).toBe("always-off");
+    expect(result.current.prefs.readingLevel).toBe("standard");
+  });
+
+  it("reads a persisted readingLevel on initial mount", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        dyslexicFont: false,
+        reducedMotion: "system",
+        readingLevel: "advanced",
+      })
+    );
+    const { result } = renderHook(() => useAccessibilityPreferences());
+    expect(result.current.prefs.readingLevel).toBe("advanced");
+  });
+
+  it("does not mirror readingLevel to <html> data-attrs (it is a prompt-only pref)", () => {
+    const { result } = renderHook(() => useAccessibilityPreferences());
+
+    act(() => {
+      result.current.setReadingLevel("simple");
+    });
+
+    // readingLevel is threaded through to Gemini, not applied as a CSS hook.
+    expect(document.documentElement.getAttribute("data-reading-level")).toBeNull();
+  });
 });

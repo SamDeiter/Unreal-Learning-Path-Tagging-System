@@ -65,7 +65,13 @@ describe("useLesson", () => {
     });
 
     expect(mockHttpsCallable).toHaveBeenCalledWith(expect.anything(), "generateLesson");
-    expect(mockCallable).toHaveBeenCalledWith({ query: "lumen flicker", sessionId: "sess_1" });
+    // Payload includes the UDL reading-level preference (default "standard" when
+    // the learner hasn't changed it — see useAccessibilityPreferences).
+    expect(mockCallable).toHaveBeenCalledWith({
+      query: "lumen flicker",
+      sessionId: "sess_1",
+      readingLevel: "standard",
+    });
     expect(res.ok).toBe(true);
     expect(res.lessonId).toBe("lesson_123");
     expect(result.current.lesson.topic).toBe("Lumen");
