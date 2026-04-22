@@ -27,6 +27,7 @@ const AnalyticsCosts = lazy(() => import("./AdminAnalytics/AnalyticsCosts"));
 const DemandDashboard = lazy(() => import("./DemandDashboard/DemandDashboard"));
 const UefnDemandDashboard = lazy(() => import("./UefnDemandDashboard/UefnDemandDashboard"));
 const AuthoringWorkbench = lazy(() => import("./AuthoringWorkbench/AuthoringWorkbench"));
+const LessonPage = lazy(() => import("./Lesson/LessonPage"));
 
 // Analytics visualizations — import directly for proper code-splitting
 const JourneyHeatmap = lazy(() => import("./Visualizations/JourneyHeatmap"));
@@ -112,6 +113,11 @@ export default function TabRouter({
       )}
       {activeTab === "bespoke" && (
         <div className="dashboard-layout"><BespokePath /></div>
+      )}
+
+      {/* ── Lesson (hidden route) ── */}
+      {(activeTab === "lesson" || activeTab.startsWith("lesson/")) && (
+        <div className="dashboard-layout"><LessonPage /></div>
       )}
 
       {/* ── Path Builder V2 Mockup ── */}

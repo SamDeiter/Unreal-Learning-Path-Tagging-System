@@ -44,7 +44,12 @@ export const ANALYTICS_SUBTABS = [
   { key: "analytics-costs", label: "Costs", icon: "💰", tooltip: "Tracking API and infrastructure costs" },
 ];
 
-export const BASE_TABS = [...PRIMARY_TABS, ...PATH_BUILDER_TABS, ...SECONDARY_TABS];
+// Hidden tabs — addressable via hash routes but not surfaced in nav
+export const HIDDEN_TABS = [
+  { key: "lesson", label: "Lesson", icon: "📖", hidden: true, tooltip: "Generated lesson page" },
+];
+
+export const BASE_TABS = [...PRIMARY_TABS, ...PATH_BUILDER_TABS, ...SECONDARY_TABS, ...HIDDEN_TABS];
 
 // On mobile, surface the most useful tabs first
 export const MOBILE_TAB_ORDER = [

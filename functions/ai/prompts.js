@@ -81,9 +81,50 @@ Return ONLY valid JSON:
   ]
 }`;
 
+// Interactive HTML widget prompt — used by generateLesson to build a
+// self-contained teaching widget tailored to a topic.
+function INTERACTIVE_WIDGET_HTML_PROMPT({
+  topic,
+  problem_summary,
+  objectives,
+  learnerLevel,
+}) {
+  const safeTopic = String(topic || "").slice(0, 200);
+  const safeSummary = String(problem_summary || "").slice(0, 600);
+  const safeObjectives = Array.isArray(objectives)
+    ? objectives.slice(0, 6).map((o) => `- ${String(o).slice(0, 200)}`).join("\n")
+    : "";
+  const safeLevel = String(learnerLevel || "intermediate").slice(0, 20);
+
+  return `${UE5_GUARDRAIL}You are a UE5 instructional interaction designer. Produce ONE self-contained HTML fragment that teaches a single concept from the topic below. The fragment must render inline inside a dark slate-900 learning surface and must be fully self-contained: a single outer <div> containing an inline <style> block and an inline <script> block.
+
+TOPIC: ${safeTopic}
+LEARNER LEVEL: ${safeLevel}
+PROBLEM SUMMARY: ${safeSummary}
+LEARNING OBJECTIVES:
+${safeObjectives || "- (no objectives provided — choose the single most important concept for this topic)"}
+
+WIDGET REQUIREMENTS:
+- Pick ONE of these interaction patterns, whichever fits the topic best:
+  1) Draggable canvas demo (e.g. move nodes, drag a vector, reposition a volume).
+  2) Hover-reveal annotated diagram (SVG with regions that expose detail on hover/focus).
+  3) Step-through animation (Prev/Next buttons that advance through 3-5 labeled stages).
+- Teach ONE concept deeply. Do not try to cover the whole topic.
+- Include a short title (<=8 words) and a 1-2 sentence caption explaining what the learner should try.
+- Provide clear visual affordances and accessible keyboard focus states.
+- All interactivity must be implemented in plain JavaScript inside the inline <script> tag. No imports, no external CDN references, no fetch/XHR/WebSocket calls, no eval, no new Function, no remote images.
+- Styling must be scoped to the widget via a unique root class (e.g. .ulp-widget-<random-slug>) so it cannot leak into the host page.
+- Dark theme only: slate-900 background (#0f172a), cyan-400 (#22d3ee) accents, emerald-400 (#34d399) for success/highlight states, slate-100 (#f1f5f9) text. Use soft rounded corners and subtle borders (rgba(148,163,184,0.2)).
+- 300-600 lines of output maximum.
+- No emojis anywhere.
+- No markdown. No code fences. No commentary before or after.
+- Output ONLY the HTML fragment starting with <div and ending with </div>. Nothing else.`;
+}
+
 module.exports = {
   UE5_GUARDRAIL,
   FALLBACK_CURRICULUM,
   ONBOARDING_PLANNER_PROMPT,
   ONBOARDING_ASSEMBLER_PROMPT,
+  INTERACTIVE_WIDGET_HTML_PROMPT,
 };

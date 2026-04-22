@@ -1,32 +1,32 @@
 /**
- * ProblemFirst - Main page component for Problem-First Learning
- * Orchestrates: Input → Video Shopping Cart → GuidedPlayer
+ * ProblemFirst — thin shell for the scrolling chat-thread experience.
  *
- * Business logic extracted to:
- *   hooks/useProblemFirst.js — state management + handleSubmit pipeline
- *   domain/courseMatching.js — course matching pipeline
- *   domain/videoRanking.js  — video flattening + persona weighting
- *   domain/buildGuidedCourses.js — cart → GuidedPlayer course array
+ * The heavy lifting (pipeline calls, clarification loop, caching) lives in
+ * useProblemFirst. This component:
+ *   - Renders the initial rich ProblemInput (first turn only)
+ *   - Renders <ChatThread /> once conversation has begun
+ *   - Renders the pinned <ChatInput /> for subsequent turns
+ *   - Punches out to <GuidedPlayer /> when the user commits a path
+ *
+ * Rich diagnosis / answer bubbles are rendered inline via the renderRich
+ * prop so the results stay inside the thread instead of replacing it.
  */
 import React, { useState, useCallback, Component } from "react";
 import ProblemInput from "./ProblemInput";
 import CaseReportForm from "../FixProblem/CaseReportForm";
-import ClarifyStep from "../FixProblem/ClarifyStep";
-import DiagnosisLoader from "../FixProblem/DiagnosisLoader";
 import AnswerView from "../FixProblem/AnswerView";
 import GuidedPlayer from "../GuidedPlayer/GuidedPlayer";
 import CartPanel from "../CartPanel/CartPanel";
 import VideoResultCard from "../VideoResultCard/VideoResultCard";
 import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
+import ChatThread from "../chat/ChatThread";
+import ChatInput from "../chat/ChatInput";
+import ResumeSessionList from "../sessions/ResumeSessionList";
 import useProblemFirst, { STAGES } from "../../hooks/useProblemFirst";
 import { ExternalLink, FileText, Presentation, BookOpen } from "lucide-react";
 import { buildGuidedCourses } from "../../domain/buildGuidedCourses";
 import "./ProblemFirst.css";
 
-/**
- * Error boundary for the DIAGNOSIS view.
- * Prevents the entire app from crashing when transitioning stages.
- */
 class DiagnosisErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -67,17 +67,21 @@ export default function ProblemFirst() {
   const {
     stage,
     diagnosisData,
-    error,
     blendedPath,
     videoResults,
     answerData,
-    clarifyData,
     isRerunning,
     courses,
     vertexAIDocs,
     vertexAILoading,
     vertexAIError,
     epicResults,
+    messages,
+    sessionId,
+    setMessages,
+    setSessionId,
+    setConversationHistory,
+    isAssistantTyping,
     cart,
     addToCart,
     removeFromCart,
@@ -85,7 +89,6 @@ export default function ProblemFirst() {
     isInCart,
     handleSubmit,
     handleReset,
-    handleAskAgain,
     handleClarifyAnswer,
     handleClarifySkip,
     handleFeedback,
@@ -96,196 +99,126 @@ export default function ProblemFirst() {
     getDetectedPersona,
   } = useProblemFirst();
 
-  // Track the submitted query so DiagnosisLoader can echo it
-  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [lastSubmittedInput, setLastSubmittedInput] = useState(null);
+
   const wrappedSubmit = useCallback(
-    (...args) => {
-      // ProblemInput passes the query text as first arg
-      if (typeof args[0] === "string") setSubmittedQuery(args[0]);
-      else if (args[0]?.query) setSubmittedQuery(args[0].query);
-      return handleSubmit(...args);
+    (inputData) => {
+      setLastSubmittedInput(inputData);
+      return handleSubmit(inputData);
     },
     [handleSubmit]
   );
 
-  return (
-    <div className="problem-first-page">
-      <header className="page-header">
-        <h1>🔧 Fix a Problem</h1>
-        <p>Describe your issue. We&apos;ll diagnose it and show you how to fix it.</p>
-      </header>
+  const handleChatSend = useCallback(
+    (text) => {
+      const base = lastSubmittedInput || { engine: "UE5", detectedTagIds: [] };
+      const payload = {
+        ...base,
+        query: text,
+        pastedImage: null,
+        errorLog: null,
+        cachedCartId: null,
+        _conversationHistory: undefined,
+      };
+      setLastSubmittedInput(payload);
+      handleSubmit(payload);
+    },
+    [handleSubmit, lastSubmittedInput]
+  );
 
-      {stage === STAGES.INPUT && (
-        <div className="pf-input-layout">
-          <div className="pf-input-main">
-            <ProblemInput
-              onSubmit={wrappedSubmit}
-              detectedPersona={getDetectedPersona()}
-              isLoading={false}
-            />
-          </div>
-          <aside className="pf-input-sidebar">
-            <CaseReportForm onUpdate={setCaseReport} disabled={false} />
-          </aside>
-        </div>
-      )}
+  // ── Resume hydration ──
+  // Rebuild a chat thread from a persisted session's conversationHistory + result.
+  // Bubbles are slightly less rich than live (no cart/video state round-trip) — a
+  // follow-up turn will re-derive full context from the backend.
+  const handleResumeSession = useCallback(
+    (session) => {
+      if (!session?.id) return;
+      let counter = 0;
+      const mkId = () => `r_${session.id}_${++counter}`;
+      const now = Date.now();
+      const hydrated = [];
 
-      {stage === STAGES.LOADING && <DiagnosisLoader query={submittedQuery} />}
+      const history = Array.isArray(session.conversationHistory) ? session.conversationHistory : [];
+      for (const turn of history) {
+        if (!turn || !turn.content) continue;
+        const role = turn.role === "assistant" ? "assistant" : "user";
+        hydrated.push({
+          id: mkId(),
+          role,
+          kind: "text",
+          content: String(turn.content),
+          createdAt: now,
+        });
+      }
 
-      {stage === STAGES.CLARIFYING && clarifyData && (
-        <ClarifyStep
-          question={clarifyData.question}
-          options={clarifyData.options}
-          whyAsking={clarifyData.whyAsking}
-          onAnswer={handleClarifyAnswer}
-          onSkip={handleClarifySkip}
-          isLoading={false}
-          clarifyRound={clarifyData.clarifyRound || 1}
-          maxClarifyRounds={clarifyData.maxClarifyRounds || 3}
-          conversationHistory={clarifyData.conversationHistory || []}
-        />
-      )}
+      const result = session.result || null;
+      if (result) {
+        const hasAnswerData = !!(result.mostLikelyCause || result.fixSteps?.length);
+        if (hasAnswerData) {
+          hydrated.push({
+            id: mkId(),
+            role: "assistant",
+            kind: "path",
+            createdAt: now,
+            content: {
+              answerData: {
+                mostLikelyCause: result.mostLikelyCause,
+                confidence: result.confidence,
+                fastChecks: result.fastChecks || [],
+                fixSteps: result.fixSteps || [],
+                ifStillBrokenBranches: result.ifStillBrokenBranches || [],
+                whyThisResult: result.whyThisResult || [],
+                evidence: result.evidence || [],
+                learnPath: result.learnPath,
+              },
+              cartData: result.cart || null,
+              videoResults: result.videoResults || [],
+              blendedPath: result.blendedPath || null,
+              epicResults: result.epicResults || [],
+              vertexAIDocs: result.vertexAIDocs || null,
+            },
+          });
+        } else if (result.cart || result.videoResults) {
+          hydrated.push({
+            id: mkId(),
+            role: "assistant",
+            kind: "diagnosis",
+            createdAt: now,
+            content: {
+              cartData: result.cart || null,
+              videoResults: result.videoResults || [],
+              blendedPath: result.blendedPath || null,
+              epicResults: result.epicResults || [],
+              vertexAIDocs: result.vertexAIDocs || null,
+            },
+          });
+        } else {
+          hydrated.push({
+            id: mkId(),
+            role: "assistant",
+            kind: "text",
+            createdAt: now,
+            content: "(Previous response restored — send a follow-up to refresh full details.)",
+          });
+        }
+      }
 
-      {stage === STAGES.ANSWERED && answerData && (
-        <AnswerView
-          answer={answerData}
-          onFeedback={handleFeedback}
-          onBackToVideos={handleBackToVideos}
-          onStartOver={handleReset}
-          isRerunning={isRerunning}
-          vertexAIDocs={vertexAIDocs}
-          vertexAILoading={vertexAILoading}
-          vertexAIError={vertexAIError}
-        />
-      )}
+      setSessionId(session.id);
+      setConversationHistory(history);
+      setMessages(hydrated);
+      setLastSubmittedInput({
+        query: session.query || "",
+        detectedTagIds: [],
+        engine: "UE5",
+      });
+    },
+    [setSessionId, setMessages, setConversationHistory]
+  );
 
-      {stage === STAGES.ERROR && (
-        <div className="error-state">
-          <div className="error-icon">⚠️</div>
-          <h3>Something went wrong</h3>
-          <p>{error}</p>
-          <div className="error-tips">
-            <p className="error-tips-label">💡 Things to try:</p>
-            <ul>
-              <li>Be more specific — mention the UE5 system (e.g. Lumen, Nanite, Blueprints)</li>
-              <li>Include your engine version (e.g. UE 5.4)</li>
-              <li>Paste the exact error message if you have one</li>
-            </ul>
-          </div>
-          <div className="error-actions">
-            <button className="retry-btn" onClick={handleAskAgain}>
-              🔄 Retry Same Question
-            </button>
-            <button className="retry-btn secondary" onClick={handleReset}>
-              ✏️ Ask Something Else
-            </button>
-          </div>
-        </div>
-      )}
-
-      {stage === STAGES.DIAGNOSIS && diagnosisData && (
-        <DiagnosisErrorBoundary onReset={handleReset}>
-          <div className="shopping-layout">
-            <div className="results-column">
-              <div className="tldr-diagnosis">
-                <div className="tldr-user-query">
-                  <span className="tldr-query-label">🔍 You asked:</span>
-                  <p className="tldr-query-text">{diagnosisData.userQuery}</p>
-                </div>
-                {diagnosisData._localFallback && (
-                  <div
-                    className="tldr-fallback-notice"
-                    style={{
-                      background: "rgba(255, 193, 7, 0.1)",
-                      border: "1px solid rgba(255, 193, 7, 0.3)",
-                      borderRadius: "8px",
-                      padding: "8px 14px",
-                      margin: "8px 0",
-                      fontSize: "0.85rem",
-                      color: "var(--text-muted, #aaa)",
-                    }}
-                  >
-                    ⚡ <strong>Fast results</strong> — AI diagnosis temporarily unavailable. Videos
-                    matched by tag taxonomy. Try again in a moment for AI-powered results.
-                  </div>
-                )}
-                {diagnosisData.diagnosis?.problem_summary && (
-                  <p className="tldr-bridge">
-                    Based on your question, we think these videos will help you:
-                  </p>
-                )}
-              </div>
-
-              {/* 📖 Official UE5 Documentation (Vertex AI Search) */}
-              <OfficialDocsSummary
-                data={vertexAIDocs}
-                isLoading={vertexAILoading}
-                error={vertexAIError}
-              />
-
-              {/* 🎬 Videos for You — Grouped by Role */}
-              <h2 className="results-title">🎬 Videos for You ({videoResults.length})</h2>
-
-              {videoResults.length === 0 && (
-                <div className="no-results">
-                  <p>No matching videos found. Try rephrasing your question.</p>
-                </div>
-              )}
-
-              <VideosByRole
-                videoResults={videoResults}
-                isInCart={isInCart}
-                handleVideoToggle={handleVideoToggle}
-                userQuery={diagnosisData?.userQuery || ""}
-              />
-
-              {/* 📚 Recommended Reading — Official Epic Docs */}
-              {blendedPath?.docs?.length > 0 && (
-                <DocsSection
-                  docs={blendedPath.docs}
-                  isInCart={isInCart}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              )}
-
-              {/* 📺 Official Epic YouTube */}
-              {blendedPath?.youtube?.length > 0 && (
-                <YouTubeSection
-                  youtube={blendedPath.youtube}
-                  isInCart={isInCart}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              )}
-
-              {/* 📝 Epic Learning Articles */}
-              {epicResults.length > 0 && <EpicLearningSection epicResults={epicResults} />}
-
-              {/* Bottom actions */}
-              <div className="results-actions-bottom">
-                <button className="back-btn" onClick={handleReset}>
-                  ← Start Over
-                </button>
-                <button className="ask-again-btn" onClick={handleAskAgain}>
-                  + Ask Another Question
-                </button>
-              </div>
-            </div>
-
-            <div className="cart-column">
-              <CartPanel
-                cart={cart}
-                onRemove={removeFromCart}
-                onClear={clearCart}
-                onWatchPath={handleWatchPath}
-              />
-            </div>
-          </div>
-        </DiagnosisErrorBoundary>
-      )}
-
-      {stage === STAGES.GUIDED && (
+  // ── GUIDED stage: full-screen learning player — unchanged ──
+  if (stage === STAGES.GUIDED) {
+    return (
+      <div className="problem-first-page">
         <GuidedPlayer
           courses={buildGuidedCourses(cart, courses, diagnosisData?.microLesson?.quick_fix?.steps)}
           diagnosis={diagnosisData?.diagnosis}
@@ -301,17 +234,318 @@ export default function ProblemFirst() {
                 }
               : null
           }
-          onComplete={() => {
-            // Path complete — stay on the guided player, don't auto-redirect
-          }}
+          onComplete={() => {}}
           onExit={() => handleBackToVideos()}
         />
+      </div>
+    );
+  }
+
+  // Rich renderer for 'diagnosis' / 'path' bubbles — embeds the existing
+  // shopping-layout cards + answer view inside the thread.
+  const renderRich = (message) => {
+    const { kind, content } = message;
+    if (kind === "path" && content.answerData) {
+      return (
+        <AnswerView
+          answer={content.answerData}
+          onFeedback={handleFeedback}
+          onBackToVideos={handleBackToVideos}
+          onStartOver={handleReset}
+          isRerunning={isRerunning}
+          vertexAIDocs={content.vertexAIDocs || vertexAIDocs}
+          vertexAILoading={vertexAILoading}
+          vertexAIError={vertexAIError}
+        />
+      );
+    }
+
+    // kind === 'diagnosis' (also fall-through for 'path' without answerData)
+    const cart$ = content.cartData || diagnosisData;
+    const videos = content.videoResults || videoResults;
+    const bp = content.blendedPath || blendedPath;
+    const epic = content.epicResults || epicResults;
+    const vaDocs = content.vertexAIDocs || vertexAIDocs;
+
+    const isFallback = !!cart$?._localFallback;
+    const summary = cart$?.diagnosis?.problem_summary;
+    const likelyCause = cart$?.diagnosis?.likely_cause || cart$?.diagnosis?.most_likely_cause;
+    const fastChecks = cart$?.diagnosis?.fast_checks || [];
+    const resourceCount =
+      (videos?.length || 0) +
+      (bp?.docs?.length || 0) +
+      (bp?.youtube?.length || 0) +
+      (epic?.length || 0);
+
+    return (
+      <DiagnosisErrorBoundary onReset={handleReset}>
+        <div className="tutor-response">
+          {isFallback && !summary && (
+            <p style={{ margin: "0 0 10px", color: "#e5e7eb" }}>
+              I couldn&apos;t run the AI diagnosis right now, so I pulled the closest matches from
+              the tag taxonomy. Take a look below and tell me which one feels closest to your
+              issue — I&apos;ll narrow it down from there.
+            </p>
+          )}
+
+          {summary && (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ margin: 0, color: "#e5e7eb", lineHeight: 1.55 }}>{summary}</p>
+            </div>
+          )}
+
+          {likelyCause && (
+            <div
+              style={{
+                marginBottom: 12,
+                padding: "10px 14px",
+                background: "rgba(139,92,246,0.08)",
+                border: "1px solid rgba(139,92,246,0.25)",
+                borderRadius: 8,
+              }}
+            >
+              <div style={{ fontSize: "0.75rem", color: "#a78bfa", marginBottom: 4, fontWeight: 600 }}>
+                Most likely cause
+              </div>
+              <div style={{ color: "#e5e7eb", lineHeight: 1.5 }}>{likelyCause}</div>
+            </div>
+          )}
+
+          {fastChecks.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: "0.85rem", color: "#cbd5e1", marginBottom: 6, fontWeight: 600 }}>
+                Try these first:
+              </div>
+              <ol style={{ margin: 0, paddingLeft: 20, color: "#e5e7eb", lineHeight: 1.6 }}>
+                {fastChecks.slice(0, 5).map((c, i) => (
+                  <li key={i}>{typeof c === "string" ? c : c.check || c.step || ""}</li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {(summary || likelyCause) && (
+            <button
+              type="button"
+              onClick={() => {
+                const topic =
+                  cart$?.userQuery ||
+                  lastSubmittedInput?.query ||
+                  summary ||
+                  likelyCause ||
+                  "";
+                if (!topic) return;
+                window.location.hash = `#lesson/new?query=${encodeURIComponent(topic)}`;
+              }}
+              style={{
+                marginTop: 4,
+                marginBottom: 4,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 16px",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(139,92,246,0.3)",
+              }}
+              title="Generate an interactive mini-lesson for this topic"
+            >
+              🎓 Turn this into an interactive lesson
+            </button>
+          )}
+
+          {!isFallback && !summary && !likelyCause && (
+            <p style={{ margin: "0 0 10px", color: "#e5e7eb" }}>
+              Here&apos;s what I pulled for your question. Pick the closest match or tell me more
+              about what you&apos;re seeing.
+            </p>
+          )}
+
+          {resourceCount > 0 && (
+            <details style={{ marginTop: 8 }}>
+              <summary
+                style={{
+                  cursor: "pointer",
+                  color: "#a78bfa",
+                  fontSize: "0.85rem",
+                  padding: "8px 12px",
+                  userSelect: "none",
+                  background: "rgba(139,92,246,0.06)",
+                  border: "1px solid rgba(139,92,246,0.2)",
+                  borderRadius: 8,
+                  fontWeight: 500,
+                }}
+              >
+                Want to learn more? Show {resourceCount} related video
+                {resourceCount === 1 ? "" : "s"} &amp; docs
+              </summary>
+              <div style={{ marginTop: 12 }}>
+                <div className="shopping-layout">
+                  <div className="results-column">
+                    <OfficialDocsSummary
+                      data={vaDocs}
+                      isLoading={vertexAILoading}
+                      error={vertexAIError}
+                    />
+                    {videos.length > 0 && (
+                      <>
+                        <h2 className="results-title">Videos ({videos.length})</h2>
+                        <VideosByRole
+                          videoResults={videos}
+                          isInCart={isInCart}
+                          handleVideoToggle={handleVideoToggle}
+                          userQuery={cart$?.userQuery || ""}
+                        />
+                      </>
+                    )}
+                    {bp?.docs?.length > 0 && (
+                      <DocsSection
+                        docs={bp.docs}
+                        isInCart={isInCart}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                      />
+                    )}
+                    {bp?.youtube?.length > 0 && (
+                      <YouTubeSection
+                        youtube={bp.youtube}
+                        isInCart={isInCart}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                      />
+                    )}
+                    {epic?.length > 0 && <EpicLearningSection epicResults={epic} />}
+                  </div>
+                  <div className="cart-column">
+                    <CartPanel
+                      cart={cart}
+                      onRemove={removeFromCart}
+                      onClear={clearCart}
+                      onWatchPath={handleWatchPath}
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+          )}
+
+          <p
+            style={{
+              marginTop: 12,
+              marginBottom: 0,
+              fontSize: "0.85rem",
+              color: "#94a3b8",
+              fontStyle: "italic",
+            }}
+          >
+            Tell me what you tried, paste an error, or ask me to explain any step — I&apos;ll dig
+            deeper before sending you off to watch videos.
+          </p>
+        </div>
+      </DiagnosisErrorBoundary>
+    );
+  };
+
+  const hasConversation = messages.length > 0;
+
+  return (
+    <div className="problem-first-page">
+      <header className="page-header">
+        <h1>🔧 Fix a Problem</h1>
+        <p>Describe your issue. We&apos;ll diagnose it and show you how to fix it.</p>
+      </header>
+
+      {!hasConversation && (
+        <div className="pf-input-layout">
+          <div className="pf-input-main">
+            <ChatThread
+              messages={[]}
+              emptyState={
+                <div style={{ padding: "32px 16px", color: "#94a3b8", textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: "0.95rem" }}>
+                    Describe your UE5 issue below. I&apos;ll diagnose it and build a learning path.
+                  </p>
+                </div>
+              }
+            />
+            <ChatInput
+              onSend={handleChatSend}
+              disabled={isAssistantTyping}
+              placeholder="What are you stuck on?"
+            />
+            <details style={{ marginTop: 12 }}>
+              <summary
+                style={{
+                  cursor: "pointer",
+                  color: "#94a3b8",
+                  fontSize: "0.85rem",
+                  padding: "4px 0",
+                }}
+              >
+                Attach a screenshot or error log
+              </summary>
+              <div style={{ marginTop: 8 }}>
+                <ProblemInput
+                  onSubmit={wrappedSubmit}
+                  detectedPersona={getDetectedPersona()}
+                  isLoading={isAssistantTyping}
+                />
+              </div>
+            </details>
+          </div>
+          <aside className="pf-input-sidebar">
+            <CaseReportForm onUpdate={setCaseReport} disabled={false} />
+            <ResumeSessionList
+              onResume={handleResumeSession}
+              currentSessionId={sessionId || undefined}
+            />
+          </aside>
+        </div>
+      )}
+
+      {hasConversation && (
+        <>
+          <ChatThread
+            messages={messages}
+            onClarifyAnswer={handleClarifyAnswer}
+            onClarifySkip={handleClarifySkip}
+            renderRich={renderRich}
+            sessionId={sessionId || undefined}
+          />
+          <ChatInput
+            onSend={handleChatSend}
+            disabled={isAssistantTyping}
+            placeholder="Ask a follow-up…"
+          />
+          <div style={{ textAlign: "center", margin: "8px 0 20px" }}>
+            <button
+              className="back-btn"
+              onClick={handleReset}
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(139,92,246,0.3)",
+                color: "#94a3b8",
+                padding: "6px 14px",
+                borderRadius: 8,
+                fontSize: "0.8rem",
+                cursor: "pointer",
+              }}
+            >
+              ← Start Over
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-// ──────────── Sub-components (inline, keeps JSX organized) ────────────
+// ──────────── Sub-components (inline) ────────────
 
 const ROLE_SECTIONS = [
   {

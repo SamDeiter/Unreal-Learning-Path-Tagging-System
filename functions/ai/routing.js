@@ -63,9 +63,10 @@ const GOAL_BUILD_INDICATORS = [
  * Detect query mode from incoming request data.
  *
  * @param {object} data - Raw request data
+ * @param {object} [learnerState] - Optional per-user skillState (from skillStateReader)
  * @returns {"goal-build" | "onboarding" | "problem-first" | "unknown"} Detected mode
  */
-function detectMode(data) {
+function detectMode(data, learnerState = {}) {
   const { query, mode, persona, isOnboarding } = data;
 
   // ── Explicit mode override ──
@@ -73,15 +74,38 @@ function detectMode(data) {
   if (mode === "onboarding" || isOnboarding) return "onboarding";
   if (mode === "problem-first" || mode === "problem") return "problem-first";
 
+  const ls = learnerState || {};
+  const lsPersona = typeof ls.persona === "string" ? ls.persona : null;
+  const lsTopicsLearned = Array.isArray(ls.topicsLearned) ? ls.topicsLearned : [];
+  const lsSkillState = (ls.skillState && typeof ls.skillState === "object") ? ls.skillState : {};
+
   if (query) {
     const queryLower = query.toLowerCase();
 
     const isProblem = PROBLEM_INDICATORS.some((ind) => queryLower.includes(ind));
     const isGoalBuild = GOAL_BUILD_INDICATORS.some((ind) => queryLower.includes(ind));
 
-    // Goal-build wins if goal indicators are present AND no problem indicators
+    // Strong keyword signals take precedence
     if (isGoalBuild && !isProblem) return "goal-build";
     if (isProblem) return "problem-first";
+
+    // ── SkillState tiebreakers for ambiguous queries ──
+    // Expert-level topic referenced in query → bias toward goal-build (advanced)
+    const expertTags = Object.entries(lsSkillState)
+      .filter(([, v]) => v && v.level === "expert")
+      .map(([tag]) => tag);
+    if (expertTags.length > 0) {
+      const hit = expertTags.some((tag) => {
+        const needle = String(tag).toLowerCase().replace(/[._-]/g, " ");
+        return queryLower.includes(needle) || needle.split(" ").some((part) => part.length > 3 && queryLower.includes(part));
+      });
+      if (hit) return "goal-build";
+    }
+
+    // Persona set but no learned topics → prefer onboarding for vague queries
+    if ((persona || lsPersona) && lsTopicsLearned.length === 0 && query.length <= 40) {
+      return "onboarding";
+    }
 
     // Persona + query but no strong signals → onboarding
     if (persona) return "onboarding";
@@ -90,7 +114,7 @@ function detectMode(data) {
     if (query.length > 10) return "problem-first";
   }
 
-  if (persona) return "onboarding";
+  if (persona || lsPersona) return "onboarding";
   return "unknown";
 }
 

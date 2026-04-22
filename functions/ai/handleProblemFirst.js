@@ -19,6 +19,8 @@ const { writePathCache } = require("../utils/pathCacheUtils");
 const { logger } = require("firebase-functions");
 const { UE5_GUARDRAIL } = require("./prompts");
 const { computeConfidence } = require("./confidence");
+const { writeSession } = require("./sessions");
+const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
 
 const MAX_CLARIFY_ROUNDS = 3;
 
@@ -39,6 +41,11 @@ async function handleProblemFirst(data, context, apiKey) {
     : UE5_GUARDRAIL;
   const userId = requireAuth(context);
   const trace = createTrace(userId, "problem-first");
+
+  // Per-user skillState (defensive — empty on missing user)
+  const learnerState = await readSkillState(userId);
+  const learnerContext = buildSkillStateSnippet(learnerState);
+  const learnerBlock = learnerContext ? `\n\nLEARNER CONTEXT:\n${learnerContext}\n` : "";
 
   // Sanitize conversation history (max 6 entries = 3 Q&A rounds)
   const conversationHistory = Array.isArray(rawHistory)
@@ -96,13 +103,21 @@ async function handleProblemFirst(data, context, apiKey) {
                 docId: cacheResult.docId,
               })
             );
-            // Return cached result with cache indicator
-            return {
+            const cachedResponse = {
               ...cacheResult.result,
               _cached: true,
               _cacheSimilarity: cacheResult.similarity,
               _cacheDocId: cacheResult.docId,
             };
+            const cachedSessionId = await writeSession({
+              uid: userId,
+              mode: "problemFirst",
+              query: rawQuery,
+              conversationHistory,
+              result: cachedResponse,
+              sessionId: data.sessionId,
+            });
+            return { ...cachedResponse, sessionId: cachedSessionId };
           }
         }
       }
@@ -243,7 +258,7 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
         firestoreReads: 2, firestoreWrites: 1,
       });
       trace.toLog();
-      return {
+      const clarifyResponse = {
         success: true,
         mode: "problem-first",
         responseType: "NEEDS_CLARIFICATION",
@@ -258,6 +273,15 @@ JSON:{"question":"str","options":["str"],"whyAsking":"str (explain what this inf
         maxClarifyRounds: MAX_CLARIFY_ROUNDS,
         conversationHistory,
       };
+      const clarifySessionId = await writeSession({
+        uid: userId,
+        mode: "problemFirst",
+        query: rawQuery,
+        conversationHistory,
+        result: clarifyResponse,
+        sessionId: data.sessionId,
+      });
+      return { ...clarifyResponse, sessionId: clarifySessionId };
     }
     // If clarification generation failed, fall through to best-effort answer
   }
@@ -302,7 +326,7 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
           firestoreReads: 2, firestoreWrites: 1,
         });
         trace.toLog();
-        return {
+        const agenticResponse = {
           success: true,
           mode: "problem-first",
           responseType: "NEEDS_MORE_CONTEXT",
@@ -316,6 +340,15 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
           conversationHistory,
           agenticRound: agenticRound + 1,
         };
+        const agenticSessionId = await writeSession({
+          uid: userId,
+          mode: "problemFirst",
+          query: rawQuery,
+          conversationHistory,
+          result: agenticResponse,
+          sessionId: data.sessionId,
+        });
+        return { ...agenticResponse, sessionId: agenticSessionId };
       }
     } catch (agenticErr) {
       console.warn(
@@ -351,7 +384,7 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
 
   const diagnosisSystemPrompt =
     guardrail +
-    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details.
+    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know.${learnerBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`;
 
   const diagnosisResult = await runStage({
@@ -464,6 +497,7 @@ STRICT GROUNDING RULES:
 3. If the Context Block contains C++ code, format it in markdown code blocks.
 4. If the Context Block describes a Blueprint, describe it visually: "Right-click -> [Node Name] -> Connect [Pin A] to [Pin B]".
 5. If the provided context does NOT contain the answer, return "NO_DATA_AVAILABLE" in the 'confidence' field and explain why in 'whyThisResult'.
+6. If LEARNER CONTEXT is provided below, tailor depth: skip basics for topics they already know; add orientation for topics they don't.${learnerBlock}
 
 JSON:{
   "intent_id":"answer","user_role":"expert","goal":"fix",
@@ -649,6 +683,16 @@ JSON:{
 
   // Write to shared pathCache for cross-user reuse (backend-owned)
   writePathCache(query, response).catch(() => {});
+
+  const sessionId = await writeSession({
+    uid: userId,
+    mode: "problemFirst",
+    query: rawQuery,
+    conversationHistory,
+    result: response,
+    sessionId: data.sessionId,
+  });
+  response.sessionId = sessionId;
 
   return response;
 }

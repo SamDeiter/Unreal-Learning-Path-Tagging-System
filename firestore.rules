@@ -188,6 +188,44 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Digital tutor user state — per-user skill tracking + session history
+    // Only the owning user can read/write their own doc and subcollections.
+    // Cloud Functions (Admin SDK) bypass rules for server-side updates.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().size() <= 15;
+      allow delete: if false;
+
+      // Session history — written by tutor conversation flow (Wave 1A)
+      match /sessions/{sessionId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.keys().size() <= 20;
+        allow delete: if false;
+      }
+
+      // Feedback signals tied to sessions (Wave 2)
+      match /feedback/{feedbackId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasAll(['uid', 'sessionId', 'signal', 'createdAt'])
+          && request.resource.data.uid == uid
+          && request.resource.data.keys().size() <= 10;
+        allow update, delete: if false;
+      }
+
+      // Generated interactive lessons — written by generateLesson Cloud Function (Admin SDK).
+      // Owner-only reads so a learner can revisit their lesson pages.
+      match /lessons/{lessonId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
+      }
+    }
+
     // Demand intelligence — pre-computed by GitHub Action (Admin SDK write)
     // Public read (community demand scores are non-sensitive, same as cached_paths)
     match /demand_intel/{docId} {

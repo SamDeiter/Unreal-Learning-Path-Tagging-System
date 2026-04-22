@@ -50,7 +50,7 @@ export default function MobileNavDrawer({ tabs, activeTab, onSelect, isOpen, onC
         </div>
 
         <ul className="mobile-nav-list">
-          {tabs.map((tab) => (
+          {tabs.filter((tab) => !tab.hidden).map((tab) => (
             <li key={tab.key}>
               <button
                 className={`mobile-nav-item ${activeTab === tab.key ? "active" : ""}`}

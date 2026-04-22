@@ -47,6 +47,20 @@ export const STAGES = {
   ERROR: "error",
 };
 
+// ──────────── Message helpers ────────────
+let _msgIdCounter = 0;
+const nextMsgId = () => `m_${Date.now()}_${++_msgIdCounter}`;
+
+/**
+ * Flat chat-thread message shape:
+ *   { id, role: 'user'|'assistant', kind, content, createdAt }
+ * kind ∈ { 'text', 'clarification', 'diagnosis', 'path', 'typing', 'error' }
+ * content is kind-specific (string for text/typing/error, object for others).
+ */
+function makeMessage(role, kind, content) {
+  return { id: nextMsgId(), role, kind, content, createdAt: Date.now() };
+}
+
 // ──────────── Hook ────────────
 export default function useProblemFirst() {
   // ── State ──
@@ -65,6 +79,25 @@ export default function useProblemFirst() {
   const [vertexAILoading, setVertexAILoading] = useState(false);
   const [vertexAIError, setVertexAIError] = useState(null);
   const [epicResults, setEpicResults] = useState([]);
+  // Chat-thread state (Wave 1C)
+  const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState(null);
+  const [isAssistantTyping, setIsAssistantTyping] = useState(false);
+
+  const appendMessage = useCallback((msg) => {
+    setMessages((prev) => [...prev, msg]);
+  }, []);
+  const replaceLastTyping = useCallback((replacement) => {
+    setMessages((prev) => {
+      const idx = [...prev].reverse().findIndex((m) => m.kind === "typing");
+      if (idx === -1) return replacement ? [...prev, replacement] : prev;
+      const realIdx = prev.length - 1 - idx;
+      const next = prev.slice();
+      if (replacement) next.splice(realIdx, 1, replacement);
+      else next.splice(realIdx, 1);
+      return next;
+    });
+  }, []);
 
   // ── Shared hooks ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
@@ -99,6 +132,20 @@ export default function useProblemFirst() {
       setVertexAIDocs(null);
       setVertexAILoading(true);
       setVertexAIError(null);
+
+      // ── Chat thread: user bubble + typing indicator ──
+      // Skip the user bubble for clarification answers — those are appended
+      // by handleClarifyAnswer/handleClarifySkip to preserve wording.
+      if (!inputData._suppressUserBubble && inputData.query) {
+        setMessages((prev) => [
+          ...prev,
+          makeMessage("user", "text", inputData.query),
+          makeMessage("assistant", "typing", ""),
+        ]);
+      } else {
+        setMessages((prev) => [...prev, makeMessage("assistant", "typing", "")]);
+      }
+      setIsAssistantTyping(true);
 
       const activeCaseReport = overrideCaseReport || caseReport;
 
@@ -177,6 +224,14 @@ export default function useProblemFirst() {
                   setVideoResults(videos);
                   setDiagnosisData(cartData);
                   setStage(STAGES.DIAGNOSIS);
+                  setIsAssistantTyping(false);
+                  replaceLastTyping(
+                    makeMessage("assistant", "diagnosis", {
+                      cartData,
+                      videoResults: videos,
+                      fromCache: true,
+                    })
+                  );
                   devLog(
                     `[Cache] Loaded ${videos.length} videos from cached cart — 0 Gemini calls`
                   );
@@ -233,6 +288,7 @@ export default function useProblemFirst() {
         let cartData;
         let geminiSucceeded = true;
         let gotAnswerData = false;
+        let capturedAnswerData = null;
         try {
           const queryLearningPath = httpsCallable(functions, "queryLearningPath");
           let result = await queryLearningPath({
@@ -243,14 +299,20 @@ export default function useProblemFirst() {
             retrievedContext: retrievedPassages.slice(0, 10),
             caseReport: activeCaseReport || undefined,
             conversationHistory: inputData._conversationHistory || conversationHistory,
+            sessionId: inputData._sessionIdOverride ?? sessionId,
           });
 
+          // Plumb sessionId on every response so it persists across turns (Wave 2B)
+          setSessionId(result.data?.sessionId ?? null);
+
           if (!result.data.success && result.data.error === "off_topic") {
-            setError(
+            const offTopicMsg =
               result.data.message ||
-                "This doesn't appear to be a UE5 question. Please describe a specific Unreal Engine 5 issue."
-            );
+              "This doesn't appear to be a UE5 question. Please describe a specific Unreal Engine 5 issue.";
+            setError(offTopicMsg);
             setStage(STAGES.ERROR);
+            setIsAssistantTyping(false);
+            replaceLastTyping(makeMessage("assistant", "error", offTopicMsg));
             return;
           }
 
@@ -259,7 +321,7 @@ export default function useProblemFirst() {
               ...prev,
               { role: "assistant", content: result.data.question },
             ]);
-            setClarifyData({
+            const clarifyPayload = {
               question: result.data.question,
               options: result.data.options || [],
               whyAsking: result.data.whyAsking || "",
@@ -268,8 +330,11 @@ export default function useProblemFirst() {
               clarifyRound: result.data.clarifyRound || 1,
               maxClarifyRounds: result.data.maxClarifyRounds || 3,
               conversationHistory: result.data.conversationHistory || [],
-            });
+            };
+            setClarifyData(clarifyPayload);
             setStage(STAGES.CLARIFYING);
+            setIsAssistantTyping(false);
+            replaceLastTyping(makeMessage("assistant", "clarification", clarifyPayload));
             return;
           }
 
@@ -330,7 +395,9 @@ export default function useProblemFirst() {
                 caseReport: activeCaseReport || undefined,
                 conversationHistory: inputData._conversationHistory || conversationHistory,
                 agenticRound: result.data.agenticRound || 1,
+                sessionId: result.data?.sessionId ?? (inputData._sessionIdOverride ?? sessionId),
               });
+              if (retryResult.data?.sessionId) setSessionId(retryResult.data.sessionId);
 
               if (retryResult.data?.responseType === "ANSWER") {
                 result = retryResult;
@@ -353,7 +420,7 @@ export default function useProblemFirst() {
             result.data.responseType === "ANSWER" && result.data.mostLikelyCause;
           if (hasAnswerData) {
             gotAnswerData = true;
-            setAnswerData({
+            capturedAnswerData = {
               mostLikelyCause: result.data.mostLikelyCause,
               confidence: result.data.confidence,
               fastChecks: result.data.fastChecks || [],
@@ -362,7 +429,8 @@ export default function useProblemFirst() {
               whyThisResult: result.data.whyThisResult || [],
               evidence: result.data.evidence || [],
               learnPath: result.data.learnPath,
-            });
+            };
+            setAnswerData(capturedAnswerData);
           }
 
           cartData = result.data.cart;
@@ -373,13 +441,15 @@ export default function useProblemFirst() {
             geminiErr.message?.includes("off_topic") || geminiErr.message?.includes("not a UE5");
 
           if (isOffTopic) {
-            setError(
+            const offTopicMsg =
               "This doesn't appear to be a UE5 question. Try describing a specific Unreal Engine 5 issue, for example:\n" +
-                '• "Lumen reflections flickering"\n' +
-                '• "Blueprint compile error"\n' +
-                '• "Niagara particles not spawning"'
-            );
+              '• "Lumen reflections flickering"\n' +
+              '• "Blueprint compile error"\n' +
+              '• "Niagara particles not spawning"';
+            setError(offTopicMsg);
             setStage(STAGES.ERROR);
+            setIsAssistantTyping(false);
+            replaceLastTyping(makeMessage("assistant", "error", offTopicMsg));
             return;
           }
 
@@ -408,15 +478,17 @@ export default function useProblemFirst() {
           });
 
         if (allItems.length === 0) {
-          setError(
+          const noResultsMsg =
             "We couldn't find UE5 content matching your query. " +
-              "Try describing a specific Unreal Engine problem, for example:\n" +
-              '• "Blueprint compile error LNK2019"\n' +
-              '• "Lumen reflections flickering in indoor scene"\n' +
-              '• "Niagara particle system not spawning"\n' +
-              '• "UMG widget not rendering"'
-          );
+            "Try describing a specific Unreal Engine problem, for example:\n" +
+            '• "Blueprint compile error LNK2019"\n' +
+            '• "Lumen reflections flickering in indoor scene"\n' +
+            '• "Niagara particle system not spawning"\n' +
+            '• "UMG widget not rendering"';
+          setError(noResultsMsg);
           setStage(STAGES.ERROR);
+          setIsAssistantTyping(false);
+          replaceLastTyping(makeMessage("assistant", "error", noResultsMsg));
           return;
         }
 
@@ -434,6 +506,17 @@ export default function useProblemFirst() {
         if (blended) setBlendedPath(blended);
 
         setStage(gotAnswerData ? STAGES.ANSWERED : STAGES.DIAGNOSIS);
+        setIsAssistantTyping(false);
+        replaceLastTyping(
+          makeMessage("assistant", gotAnswerData ? "path" : "diagnosis", {
+            cartData,
+            videoResults: driveVideos,
+            blendedPath: blended || null,
+            epicResults: epicHits,
+            vertexAIDocs: vaDocs || null,
+            answerData: capturedAnswerData,
+          })
+        );
 
         // Update history with cart_id
         if (inputData.updateCartIdForQuery && cartData.cart_id) {
@@ -451,12 +534,15 @@ export default function useProblemFirst() {
         );
       } catch (err) {
         console.error("[ProblemFirst] Error:", err);
-        setError(err.message || "An unexpected error occurred");
+        const errMsg = err.message || "An unexpected error occurred";
+        setError(errMsg);
         setStage(STAGES.ERROR);
         setVertexAILoading(false);
+        setIsAssistantTyping(false);
+        replaceLastTyping(makeMessage("assistant", "error", errMsg));
       }
     },
-    [courses, getDetectedPersona, clearCart, caseReport, conversationHistory]
+    [courses, getDetectedPersona, clearCart, caseReport, conversationHistory, replaceLastTyping, sessionId]
   );
 
   // ──────────── UI Handlers ────────────
@@ -477,16 +563,21 @@ export default function useProblemFirst() {
     setVertexAILoading(false);
     setVertexAIError(null);
     setEpicResults([]);
+    setMessages([]);
+    setSessionId(null);
+    setIsAssistantTyping(false);
   }, []);
 
   const handleClarifyAnswer = useCallback(
     (answer) => {
       if (!lastInputData) return;
+      setMessages((prev) => [...prev, makeMessage("user", "text", answer)]);
       const updatedHistory = [...conversationHistory, { role: "user", content: answer }];
       setConversationHistory(updatedHistory);
       const augmentedInput = {
         ...lastInputData,
         _conversationHistory: updatedHistory,
+        _suppressUserBubble: true,
       };
       handleSubmit(augmentedInput, caseReport);
     },
@@ -495,6 +586,10 @@ export default function useProblemFirst() {
 
   const handleClarifySkip = useCallback(() => {
     if (!lastInputData) return;
+    setMessages((prev) => [
+      ...prev,
+      makeMessage("user", "text", "(skipped — proceed with best effort)"),
+    ]);
     const skipHistory = [
       ...conversationHistory,
       { role: "user", content: "(skipped — proceed with best effort)" },
@@ -503,6 +598,7 @@ export default function useProblemFirst() {
     const augmentedInput = {
       ...lastInputData,
       _conversationHistory: skipHistory,
+      _suppressUserBubble: true,
     };
     handleSubmit(augmentedInput, caseReport);
   }, [lastInputData, caseReport, handleSubmit, conversationHistory]);
@@ -548,6 +644,15 @@ export default function useProblemFirst() {
     vertexAILoading,
     vertexAIError,
     epicResults,
+
+    // Chat thread (Wave 1C)
+    messages,
+    sessionId,
+    isAssistantTyping,
+    appendMessage,
+    setMessages,
+    setSessionId,
+    setConversationHistory,
 
     // Cart
     cart,

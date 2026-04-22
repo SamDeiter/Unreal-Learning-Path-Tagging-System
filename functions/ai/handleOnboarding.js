@@ -15,6 +15,9 @@ const { createTrace } = require("../pipeline/telemetry");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 const { logger } = require("firebase-functions");
 const { FALLBACK_CURRICULUM, ONBOARDING_PLANNER_PROMPT, ONBOARDING_ASSEMBLER_PROMPT } = require("./prompts");
+const { writeSession } = require("./sessions");
+const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
+const { detectMode } = require("./routing");
 
 // NOTE: ONBOARDING_PLANNER_PROMPT, ONBOARDING_ASSEMBLER_PROMPT, FALLBACK_CURRICULUM
 // moved to ./prompts.js
@@ -69,8 +72,13 @@ async function handleOnboarding(data, context, apiKey) {
   const userId = requireAuth(context);
   const trace = createTrace(userId, "onboarding_gen");
 
+  const learnerState = await readSkillState(userId);
+  const learnerContext = buildSkillStateSnippet(learnerState);
+  const learnerBlock = learnerContext ? `\n\nLEARNER CONTEXT:\n${learnerContext}\n` : "";
+  detectMode(data, learnerState);
+
   if (!persona || String(persona).trim().length < 5) {
-    return {
+    const noPersonaResponse = {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
@@ -79,6 +87,15 @@ async function handleOnboarding(data, context, apiKey) {
       fallback: true,
       message: "Tell us more about your goals for a personalized path!",
     };
+    const noPersonaSessionId = await writeSession({
+      uid: userId,
+      mode: "onboarding",
+      query: persona || null,
+      conversationHistory: [],
+      result: noPersonaResponse,
+      sessionId: data.sessionId,
+    });
+    return { ...noPersonaResponse, sessionId: noPersonaSessionId };
   }
 
   try {
@@ -88,7 +105,7 @@ async function handleOnboarding(data, context, apiKey) {
     if (onboardingStep === "plan") {
       const plannerResult = await runStage({
         stage: "onboarding_planner",
-        systemPrompt: ONBOARDING_PLANNER_PROMPT,
+        systemPrompt: ONBOARDING_PLANNER_PROMPT + learnerBlock,
         userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
         apiKey,
         trace,
@@ -108,7 +125,7 @@ async function handleOnboarding(data, context, apiKey) {
         return { success: false, mode: "onboarding", step: "plan", error: "Planner failed" };
       }
 
-      return {
+      const planResponse = {
         success: true,
         mode: "onboarding",
         step: "plan",
@@ -116,6 +133,15 @@ async function handleOnboarding(data, context, apiKey) {
         searchQueries: plannerResult.data.searchQueries || [],
         archetype: plannerResult.data.archetype || "unknown",
       };
+      const planSessionId = await writeSession({
+        uid: userId,
+        mode: "onboarding",
+        query: persona,
+        conversationHistory: [],
+        result: planResponse,
+        sessionId: data.sessionId,
+      });
+      return { ...planResponse, sessionId: planSessionId };
     }
 
     // ────────────────────────────────────────────────────────────────
@@ -140,7 +166,7 @@ async function handleOnboarding(data, context, apiKey) {
 
       const assemblerResult = await runStage({
         stage: "onboarding_path",
-        systemPrompt: ONBOARDING_ASSEMBLER_PROMPT,
+        systemPrompt: ONBOARDING_ASSEMBLER_PROMPT + learnerBlock,
         userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
         apiKey,
         trace,
@@ -162,7 +188,7 @@ async function handleOnboarding(data, context, apiKey) {
           ? assemblerResult.data
           : FALLBACK_CURRICULUM;
 
-      return {
+      const assembleResponse = {
         success: true,
         mode: "onboarding",
         step: "assemble",
@@ -174,6 +200,15 @@ async function handleOnboarding(data, context, apiKey) {
           ? `Your personalized First Hour path is ready — archetype: ${archetype}`
           : "Generated a general path — retrieval had limited results.",
       };
+      const assembleSessionId = await writeSession({
+        uid: userId,
+        mode: "onboarding",
+        query: persona,
+        conversationHistory: [],
+        result: assembleResponse,
+        sessionId: data.sessionId,
+      });
+      return { ...assembleResponse, sessionId: assembleSessionId };
     }
 
     // ────────────────────────────────────────────────────────────────
@@ -181,7 +216,7 @@ async function handleOnboarding(data, context, apiKey) {
     // ────────────────────────────────────────────────────────────────
     const plannerResult = await runStage({
       stage: "onboarding_planner",
-      systemPrompt: ONBOARDING_PLANNER_PROMPT,
+      systemPrompt: ONBOARDING_PLANNER_PROMPT + learnerBlock,
       userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
       apiKey,
       trace,
@@ -196,7 +231,7 @@ async function handleOnboarding(data, context, apiKey) {
           error: plannerResult.error,
         })
       );
-      return {
+      const plannerFailResponse = {
         success: true,
         mode: "onboarding",
         prompt_version: PROMPT_VERSION,
@@ -205,6 +240,15 @@ async function handleOnboarding(data, context, apiKey) {
         fallback: true,
         message: "Couldn't personalize your path right now — here's a general starting point.",
       };
+      const plannerFailSessionId = await writeSession({
+        uid: userId,
+        mode: "onboarding",
+        query: persona,
+        conversationHistory: [],
+        result: plannerFailResponse,
+        sessionId: data.sessionId,
+      });
+      return { ...plannerFailResponse, sessionId: plannerFailSessionId };
     }
 
     const { searchQueries, archetype } = plannerResult.data;
@@ -226,7 +270,7 @@ async function handleOnboarding(data, context, apiKey) {
 
     const assemblerResult = await runStage({
       stage: "onboarding_path",
-      systemPrompt: ONBOARDING_ASSEMBLER_PROMPT,
+      systemPrompt: ONBOARDING_ASSEMBLER_PROMPT + learnerBlock,
       userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
       apiKey,
       trace,
@@ -246,7 +290,7 @@ async function handleOnboarding(data, context, apiKey) {
     const curriculum =
       assemblerResult.success && assemblerResult.data ? assemblerResult.data : FALLBACK_CURRICULUM;
 
-    return {
+    const fullResponse = {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
@@ -258,11 +302,20 @@ async function handleOnboarding(data, context, apiKey) {
         ? `Your personalized First Hour path is ready — archetype: ${archetype}`
         : "Generated a general path — retrieval had limited results.",
     };
+    const fullSessionId = await writeSession({
+      uid: userId,
+      mode: "onboarding",
+      query: persona,
+      conversationHistory: [],
+      result: fullResponse,
+      sessionId: data.sessionId,
+    });
+    return { ...fullResponse, sessionId: fullSessionId };
   } catch (err) {
     logger.error(
       JSON.stringify({ severity: "ERROR", message: "onboarding_error", error: err.message })
     );
-    return {
+    const errorResponse = {
       success: true,
       mode: "onboarding",
       prompt_version: PROMPT_VERSION,
@@ -273,6 +326,15 @@ async function handleOnboarding(data, context, apiKey) {
       message:
         "Here's a getting-started path. We couldn't personalize it right now — try again shortly.",
     };
+    const errorSessionId = await writeSession({
+      uid: userId,
+      mode: "onboarding",
+      query: persona,
+      conversationHistory: [],
+      result: errorResponse,
+      sessionId: data.sessionId,
+    });
+    return { ...errorResponse, sessionId: errorSessionId };
   }
 }
 

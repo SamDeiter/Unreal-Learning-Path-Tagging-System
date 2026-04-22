@@ -43,11 +43,17 @@ Object.assign(exports, require("./ai/classifySegments"));
 // ============================================================================
 Object.assign(exports, require("./ai/generateSpoke"));
 Object.assign(exports, require("./ai/generateAudioBriefing"));
+Object.assign(exports, require("./ai/generateLesson"));
 
 // ============================================================================
 // Telemetry
 // ============================================================================
 Object.assign(exports, require("./ai/logTelemetry"));
+
+// ============================================================================
+// Feedback Loop (skillState signals)
+// ============================================================================
+Object.assign(exports, require("./ai/submitFeedback"));
 
 // ============================================================================
 // Scheduled Tasks

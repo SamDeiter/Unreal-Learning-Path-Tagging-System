@@ -9,6 +9,9 @@
 const { logger } = require("firebase-functions");
 const functions = require("firebase-functions");
 const { generateRoadmap } = require("./roadmapPlanner");
+const { writeSession } = require("./sessions");
+const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
+const { detectMode } = require("./routing");
 
 /**
  * Handle a goal-build request.
@@ -28,25 +31,34 @@ async function handleGoalBuild(data, context, apiKey) {
     );
   }
 
+  const uid = context.auth?.uid;
+  const learnerState = await readSkillState(uid);
+  const learnerContext = buildSkillStateSnippet(learnerState);
+  // Routing tiebreaker awareness — callers may choose to honor a re-route.
+  // We keep goal-build behavior here; detectMode is invoked so learnerState
+  // informs downstream/future routing decisions consistently.
+  detectMode(data, learnerState);
+
   logger.info(JSON.stringify({
     severity: "INFO",
     message: "goal_build_start",
     query,
     persona: persona || "none",
-    user: context.auth?.uid || "anonymous",
+    user: uid || "anonymous",
+    hasLearnerContext: !!learnerContext,
   }));
 
   try {
     const { milestones, title, learnerLevel } = await generateRoadmap(
       query,
       apiKey,
-      { persona }
+      { persona, learnerContext, learnerState }
     );
 
     // Determine best persona for this goal
     const resolvedPersona = persona || inferPersona(query);
 
-    return {
+    const response = {
       success: true,
       mode: "goal-build",
       title,
@@ -63,6 +75,18 @@ async function handleGoalBuild(data, context, apiKey) {
       nextBestAction: "Start with the first milestone and complete the first 2-3 steps.",
       generatedAt: new Date().toISOString(),
     };
+
+    const sessionId = await writeSession({
+      uid: context.auth?.uid,
+      mode: "goalBuild",
+      query,
+      conversationHistory: Array.isArray(data.conversationHistory) ? data.conversationHistory : [],
+      result: response,
+      sessionId: data.sessionId,
+    });
+    response.sessionId = sessionId;
+
+    return response;
   } catch (error) {
     logger.error(JSON.stringify({
       severity: "ERROR",
