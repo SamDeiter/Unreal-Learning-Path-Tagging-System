@@ -15,6 +15,7 @@ import QuizEngine from "../BespokePath/QuizEngine";
 import DeepDiveSection from "../BespokePath/DeepDiveSection";
 import FeedbackBar from "../chat/FeedbackBar";
 import LessonWidget from "./LessonWidget";
+import SpeakButton from "../Settings/SpeakButton";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import { devLog, devWarn } from "../../utils/logger";
 import "./LessonPage.css";
@@ -303,7 +304,13 @@ export default function LessonPage() {
 
       {deepDive.length > 0 && (
         <section className="lesson-section lesson-deepdive-section">
-          <h2 className="lesson-section__title">Deep dive</h2>
+          <div className="lesson-section__header">
+            <h2 className="lesson-section__title">Deep dive</h2>
+            <SpeakButton
+              id={`lesson-deepdive-${lessonId || "new"}`}
+              text={deepDive.map((s) => `${s.title}. ${s.content}`).join("\n\n")}
+            />
+          </div>
           <DeepDiveSection
             deepDive={deepDive}
             deepDiveLoading={false}
