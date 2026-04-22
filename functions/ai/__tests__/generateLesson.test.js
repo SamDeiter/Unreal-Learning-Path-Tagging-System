@@ -78,6 +78,8 @@ const {
   depthDirective,
   difficultyDirective,
   composeSpokePromptDirectives,
+  readingLevelDirective,
+  coerceReadingLevel,
 } = _internal;
 
 describe("computeMeanMastery", () => {
@@ -317,5 +319,106 @@ describe("composeSpokePromptDirectives (Phase 3 — affective loop)", () => {
     expect(s).toContain("NOT HELPFUL");
     expect(s).not.toContain("FADE DIRECTIVE");
     expect(s).not.toContain("DIFFICULTY DIRECTIVE");
+  });
+});
+
+// ── Phase 3 — UDL reading level directive ───────────────────────────
+describe("readingLevelDirective (Phase 3 — UDL slider)", () => {
+  it("returns '' for 'standard' (no directive, keeps default tutor voice)", () => {
+    expect(readingLevelDirective("standard")).toBe("");
+  });
+
+  it("emits a 'simple' directive mentioning middle-school reading level", () => {
+    const s = readingLevelDirective("simple");
+    expect(s).toContain("READING LEVEL DIRECTIVE");
+    expect(s).toContain("middle-school reading level");
+    expect(s).toMatch(/analog/i);
+  });
+
+  it("emits an 'advanced' directive mentioning graduate reading level", () => {
+    const s = readingLevelDirective("advanced");
+    expect(s).toContain("READING LEVEL DIRECTIVE");
+    expect(s).toContain("graduate reading level");
+    expect(s).toMatch(/terminology|precise/i);
+  });
+
+  it("returns '' silently for unknown values (no directive, no error)", () => {
+    expect(readingLevelDirective("phd-plus")).toBe("");
+    expect(readingLevelDirective(undefined)).toBe("");
+    expect(readingLevelDirective(null)).toBe("");
+    expect(readingLevelDirective(42)).toBe("");
+    expect(readingLevelDirective("")).toBe("");
+  });
+});
+
+describe("coerceReadingLevel (Phase 3 — server-side validation)", () => {
+  it("passes through valid values unchanged", () => {
+    expect(coerceReadingLevel("simple")).toBe("simple");
+    expect(coerceReadingLevel("standard")).toBe("standard");
+    expect(coerceReadingLevel("advanced")).toBe("advanced");
+  });
+
+  it("coerces unknown strings to 'standard' (no error)", () => {
+    expect(coerceReadingLevel("phd-plus")).toBe("standard");
+    expect(coerceReadingLevel("Simple")).toBe("standard"); // case-sensitive
+    expect(coerceReadingLevel("")).toBe("standard");
+  });
+
+  it("coerces non-string inputs to 'standard' (defensive)", () => {
+    expect(coerceReadingLevel(undefined)).toBe("standard");
+    expect(coerceReadingLevel(null)).toBe("standard");
+    expect(coerceReadingLevel(42)).toBe("standard");
+    expect(coerceReadingLevel({})).toBe("standard");
+  });
+});
+
+describe("composeSpokePromptDirectives + readingLevel (Phase 3 — UDL threading)", () => {
+  it("includes a 'simple' reading-level directive with middle-school reading level", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "",
+      difficulty: "",
+      readingLevel: readingLevelDirective("simple"),
+      affective: "",
+    });
+    expect(s).toContain("middle-school reading level");
+  });
+
+  it("includes an 'advanced' reading-level directive with graduate reading level", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "",
+      difficulty: "",
+      readingLevel: readingLevelDirective("advanced"),
+      affective: "",
+    });
+    expect(s).toContain("graduate reading level");
+  });
+
+  it("emits no directive when readingLevel is unknown (falls back silently)", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "",
+      difficulty: "",
+      readingLevel: readingLevelDirective("garbage"),
+      affective: "",
+    });
+    expect(s).toBe("");
+    expect(s).not.toContain("READING LEVEL DIRECTIVE");
+  });
+
+  it("renders reading-level alongside depth/difficulty without overriding affective order", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "FADE_KNOWN",
+      difficulty: "DIFF_HARD",
+      readingLevel: readingLevelDirective("simple"),
+      affective: "The learner marked the previous response as CONFUSING.",
+    });
+    const iDepth = s.indexOf("FADE_KNOWN");
+    const iDiff = s.indexOf("DIFF_HARD");
+    const iRead = s.indexOf("middle-school reading level");
+    const iAff = s.indexOf("AFFECTIVE SIGNAL");
+    expect(iDepth).toBeGreaterThan(-1);
+    expect(iDiff).toBeGreaterThan(iDepth);
+    expect(iRead).toBeGreaterThan(iDiff);
+    // Affective still renders LAST so it overrides depth/difficulty defaults
+    expect(iAff).toBeGreaterThan(iRead);
   });
 });

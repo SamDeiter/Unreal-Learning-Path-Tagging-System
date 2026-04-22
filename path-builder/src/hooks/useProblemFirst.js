@@ -25,6 +25,7 @@ import {
 
 import { useVideoCart } from "./useVideoCart";
 import { devLog, devWarn } from "../utils/logger";
+import useAccessibilityPreferences from "./useAccessibilityPreferences";
 
 // Shared hooks (deduplication refactor)
 import { useCourses } from "./useSearchSubmit";
@@ -101,6 +102,11 @@ export default function useProblemFirst() {
 
   // ── Shared hooks ──
   const { cart, addToCart, removeFromCart, clearCart, isInCart } = useVideoCart();
+
+  // UDL accessibility preferences — `readingLevel` rides the queryLearningPath
+  // payload into handleProblemFirst so the tutor's prose matches the learner's
+  // chosen altitude (simple/standard/advanced).
+  const { prefs: a11yPrefs } = useAccessibilityPreferences();
   const courses = useCourses();
   const { handleVideoToggle, handleWatchPath } = useVideoActions({
     isInCart,
@@ -307,6 +313,8 @@ export default function useProblemFirst() {
             sessionId: inputData._sessionIdOverride ?? sessionId,
             priorSessionId: inputData.priorSessionId || undefined,
             socratic: wantsSocratic,
+            // UDL: thread reading-level preference through to handleProblemFirst
+            readingLevel: a11yPrefs?.readingLevel,
           });
 
           // Plumb sessionId on every response so it persists across turns (Wave 2B)
@@ -577,7 +585,7 @@ export default function useProblemFirst() {
         replaceLastTyping(makeMessage("assistant", "error", errMsg));
       }
     },
-    [courses, getDetectedPersona, clearCart, caseReport, conversationHistory, replaceLastTyping, sessionId]
+    [courses, getDetectedPersona, clearCart, caseReport, conversationHistory, replaceLastTyping, sessionId, a11yPrefs?.readingLevel]
   );
 
   // ──────────── UI Handlers ────────────

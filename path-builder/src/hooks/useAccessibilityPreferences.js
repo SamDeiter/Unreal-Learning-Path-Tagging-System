@@ -10,7 +10,12 @@
  *   html[data-motion="always-on"]     → forces full animations regardless of OS
  *   (no attribute / "system")         → defers to prefers-reduced-motion
  *
- * Returns { prefs, setDyslexicFont, setReducedMotion }.
+ * `readingLevel` is a tutor-prompt preference (not a CSS hook): it rides
+ * the same localStorage entry but is threaded through to Gemini via the
+ * generateLesson / queryLearningPath callable payloads so the model can
+ * tune its prose to "simple" | "standard" | "advanced".
+ *
+ * Returns { prefs, setDyslexicFont, setReducedMotion, setReadingLevel }.
  */
 import { useCallback, useEffect, useState } from "react";
 
@@ -19,9 +24,11 @@ const STORAGE_KEY = "udl-prefs-v1";
 const DEFAULT_PREFS = {
   dyslexicFont: false,
   reducedMotion: "system", // "system" | "always-on" | "always-off"
+  readingLevel: "standard", // "simple" | "standard" | "advanced"
 };
 
 const VALID_MOTION = new Set(["system", "always-on", "always-off"]);
+const VALID_READING_LEVEL = new Set(["simple", "standard", "advanced"]);
 
 function readPrefs() {
   if (typeof window === "undefined" || !window.localStorage) return { ...DEFAULT_PREFS };
@@ -32,6 +39,8 @@ function readPrefs() {
     return {
       dyslexicFont: typeof parsed.dyslexicFont === "boolean" ? parsed.dyslexicFont : false,
       reducedMotion: VALID_MOTION.has(parsed.reducedMotion) ? parsed.reducedMotion : "system",
+      // Older-shape guard: pre-Phase-3 reads won't have readingLevel — default to "standard"
+      readingLevel: VALID_READING_LEVEL.has(parsed.readingLevel) ? parsed.readingLevel : "standard",
     };
   } catch {
     return { ...DEFAULT_PREFS };
@@ -85,7 +94,12 @@ export default function useAccessibilityPreferences() {
     setPrefs((p) => ({ ...p, reducedMotion: v }));
   }, []);
 
-  return { prefs, setDyslexicFont, setReducedMotion };
+  const setReadingLevel = useCallback((value) => {
+    const v = VALID_READING_LEVEL.has(value) ? value : "standard";
+    setPrefs((p) => ({ ...p, readingLevel: v }));
+  }, []);
+
+  return { prefs, setDyslexicFont, setReducedMotion, setReadingLevel };
 }
 
 export { STORAGE_KEY, DEFAULT_PREFS };

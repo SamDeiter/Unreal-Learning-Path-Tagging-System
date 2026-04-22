@@ -697,6 +697,117 @@ describe("handleProblemFirst", () => {
     });
   });
 
+  // ── Phase 3 — UDL reading-level directive threading ─────────────
+
+  describe("reading-level directive (Phase 3 — UDL slider)", () => {
+    it("threads 'simple' readingLevel into the diagnosis prompt (middle-school reading level)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", readingLevel: "simple" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      // Diagnosis is the 2nd runStage call (index 1).
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.stage).toBe("diagnosis");
+      expect(diagnosisCall.systemPrompt).toContain("READING LEVEL DIRECTIVE");
+      expect(diagnosisCall.systemPrompt).toContain("middle-school reading level");
+      // Persisted on response for telemetry
+      expect(result.readingLevel).toBe("simple");
+      expect(result.cart.readingLevel).toBe("simple");
+    });
+
+    it("threads 'advanced' readingLevel into the diagnosis prompt (graduate reading level)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Niagara GPU sim edge case", readingLevel: "advanced" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).toContain("READING LEVEL DIRECTIVE");
+      expect(diagnosisCall.systemPrompt).toContain("graduate reading level");
+      expect(result.readingLevel).toBe("advanced");
+    });
+
+    it("emits no reading-level directive for 'standard' (default voice unchanged)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Blueprint compile error", readingLevel: "standard" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
+      expect(result.readingLevel).toBe("standard");
+    });
+
+    it("falls back silently to 'standard' when readingLevel is unknown (no error, no directive)", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", readingLevel: "phd-plus" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
+      // Coerced to "standard" server-side
+      expect(result.readingLevel).toBe("standard");
+    });
+
+    it("defaults to 'standard' when readingLevel is missing entirely", async () => {
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
+      expect(result.readingLevel).toBe("standard");
+    });
+
+    it("threads readingLevel into SOCRATIC_ELICITATION_PROMPT when socratic=true", async () => {
+      const { SOCRATIC_ELICITATION_PROMPT } = require("../prompts");
+
+      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: {
+          kind: "clarify",
+          question: "What have you already tried?",
+          intent: "probe prior attempts",
+        },
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", socratic: true, readingLevel: "simple" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("SOCRATIC_ELICIT");
+      const socraticArgs = SOCRATIC_ELICITATION_PROMPT.mock.calls[0][0];
+      expect(socraticArgs.readingLevelDirective).toContain("middle-school reading level");
+    });
+  });
+
   // ── Parallel stage resilience ───────────────────────────────────
 
   describe("parallel stage resilience", () => {
