@@ -19,7 +19,7 @@ const { writePathCache } = require("../utils/pathCacheUtils");
 const { logger } = require("firebase-functions");
 const { UE5_GUARDRAIL } = require("./prompts");
 const { computeConfidence } = require("./confidence");
-const { writeSession } = require("./sessions");
+const { writeSession, summarizeSession } = require("./sessions");
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
 
 const MAX_CLARIFY_ROUNDS = 3;
@@ -41,6 +41,39 @@ async function handleProblemFirst(data, context, apiKey) {
     : UE5_GUARDRAIL;
   const userId = requireAuth(context);
   const trace = createTrace(userId, "problem-first");
+
+  // Cross-session memory: fetch prior session summary if the caller provided one
+  // and it belongs to this user. Silent 404 on mismatch — never block the pipeline.
+  let priorSessionSummary = "";
+  const priorSessionId =
+    typeof data.priorSessionId === "string" && data.priorSessionId.trim()
+      ? data.priorSessionId.trim().slice(0, 128)
+      : null;
+  if (priorSessionId) {
+    try {
+      const priorRef = admin
+        .firestore()
+        .collection("users")
+        .doc(userId)
+        .collection("sessions")
+        .doc(priorSessionId);
+      const priorSnap = await priorRef.get();
+      if (priorSnap.exists) {
+        const priorData = priorSnap.data() || {};
+        if (priorData.uid === userId) {
+          priorSessionSummary = summarizeSession({ id: priorSessionId, ...priorData });
+        }
+      }
+    } catch (priorErr) {
+      logger.warn(
+        JSON.stringify({
+          severity: "WARNING",
+          message: "prior_session_fetch_failed",
+          error: priorErr.message,
+        })
+      );
+    }
+  }
 
   // Per-user skillState (defensive — empty on missing user)
   const learnerState = await readSkillState(userId);
@@ -382,9 +415,13 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
     exclusionNote = `\nIMPORTANT: The user has already tried these solutions and they did NOT work: ${safeCase.exclusions.join("; ")}. Suggest DIFFERENT approaches.`;
   }
 
+  const priorSessionBlock = priorSessionSummary
+    ? `\n\nThe learner is continuing a prior session. Context: ${priorSessionSummary} Build on this — do not repeat the prior diagnosis verbatim. If the new question changes the picture, explain the shift.\n`
+    : "";
+
   const diagnosisSystemPrompt =
     guardrail +
-    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know.${learnerBlock}
+    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know.${learnerBlock}${priorSessionBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`;
 
   const diagnosisResult = await runStage({

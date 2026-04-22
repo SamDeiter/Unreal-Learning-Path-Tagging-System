@@ -43,7 +43,7 @@ jest.mock("firebase-functions", () => ({
   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }));
 
-const { writeSession } = require("../sessions");
+const { writeSession, summarizeSession } = require("../sessions");
 
 describe("writeSession", () => {
   beforeEach(() => {
@@ -112,5 +112,97 @@ describe("writeSession", () => {
     expect(id).toBe(mockDocId);
     const [payload] = mockDocSet.mock.calls[0];
     expect(payload.conversationHistory).toEqual([]);
+  });
+});
+
+describe("summarizeSession", () => {
+  it("returns empty string for null/undefined input", () => {
+    expect(summarizeSession(null)).toBe("");
+    expect(summarizeSession(undefined)).toBe("");
+    expect(summarizeSession({})).toBe("");
+  });
+
+  it("returns empty string when session has no result", () => {
+    expect(summarizeSession({ id: "abc", result: null })).toBe("");
+  });
+
+  it("returns empty string when diagnosis fields are all missing", () => {
+    const out = summarizeSession({
+      id: "abc123xyz",
+      result: { diagnosis: {}, objectives: {} },
+    });
+    expect(out).toBe("");
+  });
+
+  it("builds a complete summary from diagnosis + objectives (happy path)", () => {
+    const out = summarizeSession({
+      id: "sess12345abcdef",
+      result: {
+        diagnosis: {
+          problem_summary: "Lumen GI flickers when camera moves quickly",
+          root_causes: ["Temporal accumulation resets on fast movement"],
+        },
+        objectives: {
+          fix_specific: ["Increase Lumen Final Gather Quality"],
+        },
+      },
+    });
+    expect(out).toContain("Prior session (sess1234)");
+    expect(out).toContain("Lumen GI flickers when camera moves quickly");
+    expect(out).toContain("Root cause identified: Temporal accumulation resets on fast movement");
+    expect(out).toContain("Increase Lumen Final Gather Quality");
+  });
+
+  it("reads from result.cart.diagnosis/objectives when top-level is absent", () => {
+    const out = summarizeSession({
+      id: "s1",
+      result: {
+        cart: {
+          diagnosis: {
+            problem_summary: "Niagara particles not spawning",
+            root_causes: ["Emitter spawn rate set to zero"],
+          },
+          objectives: {
+            fix_specific: ["Set spawn rate > 0"],
+          },
+        },
+      },
+    });
+    expect(out).toContain("Niagara particles not spawning");
+    expect(out).toContain("Emitter spawn rate set to zero");
+    expect(out).toContain("Set spawn rate > 0");
+  });
+
+  it("omits missing fields gracefully", () => {
+    const out = summarizeSession({
+      id: "abcdefghij",
+      result: {
+        diagnosis: { problem_summary: "Shader compile error" },
+      },
+    });
+    expect(out).toContain("Prior session (abcdefgh)");
+    expect(out).toContain("Shader compile error");
+    expect(out).not.toContain("Root cause");
+  });
+
+  it("handles missing session id by dropping the parenthetical", () => {
+    const out = summarizeSession({
+      result: {
+        diagnosis: { problem_summary: "Blueprint crash on BeginPlay" },
+      },
+    });
+    expect(out).toMatch(/^Prior session:/);
+    expect(out).toContain("Blueprint crash on BeginPlay");
+  });
+
+  it("ignores empty-string and whitespace-only fields", () => {
+    const out = summarizeSession({
+      id: "s1",
+      result: {
+        diagnosis: { problem_summary: "   ", root_causes: [""] },
+        objectives: { fix_specific: ["  "] },
+      },
+    });
+    expect(out).toBe("");
   });
 });

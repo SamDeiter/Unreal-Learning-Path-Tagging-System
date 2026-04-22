@@ -100,9 +100,13 @@ export default function ProblemFirst() {
   } = useProblemFirst();
 
   const [lastSubmittedInput, setLastSubmittedInput] = useState(null);
+  const [resumedSessionId, setResumedSessionId] = useState(null);
 
   const wrappedSubmit = useCallback(
     (inputData) => {
+      // A fresh submit from the rich input means a brand new thread —
+      // drop any prior-session memory so we don't leak stale context.
+      setResumedSessionId(null);
       setLastSubmittedInput(inputData);
       return handleSubmit(inputData);
     },
@@ -119,11 +123,12 @@ export default function ProblemFirst() {
         errorLog: null,
         cachedCartId: null,
         _conversationHistory: undefined,
+        priorSessionId: resumedSessionId || undefined,
       };
       setLastSubmittedInput(payload);
       handleSubmit(payload);
     },
-    [handleSubmit, lastSubmittedInput]
+    [handleSubmit, lastSubmittedInput, resumedSessionId]
   );
 
   // ── Resume hydration ──
@@ -206,10 +211,12 @@ export default function ProblemFirst() {
       setSessionId(session.id);
       setConversationHistory(history);
       setMessages(hydrated);
+      setResumedSessionId(session.id);
       setLastSubmittedInput({
         query: session.query || "",
         detectedTagIds: [],
         engine: "UE5",
+        priorSessionId: session.id,
       });
     },
     [setSessionId, setMessages, setConversationHistory]
@@ -525,7 +532,10 @@ export default function ProblemFirst() {
           <div style={{ textAlign: "center", margin: "8px 0 20px" }}>
             <button
               className="back-btn"
-              onClick={handleReset}
+              onClick={() => {
+                setResumedSessionId(null);
+                handleReset();
+              }}
               style={{
                 background: "transparent",
                 border: "1px solid rgba(139,92,246,0.3)",
