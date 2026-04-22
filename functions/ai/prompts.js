@@ -132,7 +132,7 @@ WIDGET REQUIREMENTS:
 //       (never a generic "tell me more", never a multi-part list)
 //   (c) explicitly withhold the answer — this is elicitation, not teaching
 //   (d) keep voice consistent with the rest of the pipeline (direct, UE5-aware)
-function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary } = {}) {
+function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary, affectiveDirective } = {}) {
   const resolvedEngineName =
     engineName ||
     (engine === "UEFN"
@@ -148,9 +148,14 @@ function SOCRATIC_ELICITATION_PROMPT({ engine = "UE5", engineName, priorSummary 
       ? `\n\nLAST SESSION SUMMARY (what this learner already figured out previously — reference it so the question acknowledges their progress):\n${String(priorSummary).slice(0, 800)}\n`
       : "";
 
+  const affectiveBlock =
+    affectiveDirective && String(affectiveDirective).trim().length > 0
+      ? `\n\nAFFECTIVE SIGNAL (from prior response):\n${String(affectiveDirective).slice(0, 600)}\n`
+      : "";
+
   return (
     guardrail +
-    `You are a ${resolvedEngineName} tutor running a Socratic elicitation turn BEFORE diagnosing the learner's problem. Your job is to understand what the learner currently believes about their own problem — NOT to answer it yet.${priorBlock}
+    `You are a ${resolvedEngineName} tutor running a Socratic elicitation turn BEFORE diagnosing the learner's problem. Your job is to understand what the learner currently believes about their own problem — NOT to answer it yet.${priorBlock}${affectiveBlock}
 
 STRICT RULES:
 - Ask exactly ONE question. Never a list, never multi-part, never "and also…".

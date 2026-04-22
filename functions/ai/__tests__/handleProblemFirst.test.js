@@ -37,10 +37,37 @@ jest.mock("../../pipeline/promptVersions", () => ({
 jest.mock("../prompts", () => ({
   UE5_GUARDRAIL: "UE5 ONLY. ",
   SOCRATIC_ELICITATION_PROMPT: jest.fn(
-    ({ priorSummary } = {}) =>
-      `SOCRATIC_PROMPT${priorSummary ? `|prior:${priorSummary}` : ""}`
+    ({ priorSummary, affectiveDirective } = {}) =>
+      `SOCRATIC_PROMPT${priorSummary ? `|prior:${priorSummary}` : ""}${affectiveDirective ? `|affective:${affectiveDirective}` : ""}`
   ),
 }));
+
+// Default: no feedback. Individual tests override via mockReadLatestFeedback.
+const mockReadLatestFeedback = jest.fn(() => Promise.resolve(null));
+jest.mock("../feedbackReader", () => {
+  // Re-implement buildAffectiveDirective inline so tests can assert on directive
+  // text without importing the real module (which would drag in firebase-admin
+  // before our mock).
+  const MAP = {
+    confused:
+      "The learner marked the previous response as CONFUSING. For this response: use simpler language, add concrete examples, break concepts into smaller steps, and surface any prerequisite knowledge explicitly.",
+    already_knew:
+      "The learner marked the previous response as ALREADY KNOWN. For this response: compress foundational explanation, skip basics, raise the altitude toward advanced nuance or edge cases.",
+    not_helpful:
+      "The learner marked the previous response as NOT HELPFUL. For this response: try a fundamentally different angle — a different analogy, a different level of abstraction, or a worked example instead of explanation.",
+    rejected:
+      "The learner marked the previous response as NOT HELPFUL. For this response: try a fundamentally different angle — a different analogy, a different level of abstraction, or a worked example instead of explanation.",
+    helpful: "",
+    completed: "",
+  };
+  return {
+    readLatestFeedback: (...args) => mockReadLatestFeedback(...args),
+    buildAffectiveDirective: (doc) => {
+      if (!doc || typeof doc !== "object") return "";
+      return MAP[doc.signal] || "";
+    },
+  };
+});
 
 jest.mock("../confidence", () => ({
   computeConfidence: jest.fn(() => ({ score: 80, reasons: ["good query"] })),
@@ -173,6 +200,8 @@ function setupFullPipelineSuccess() {
 beforeEach(() => {
   jest.clearAllMocks();
   computeConfidence.mockReturnValue({ score: 80, reasons: ["good query"] });
+  mockReadLatestFeedback.mockReset();
+  mockReadLatestFeedback.mockResolvedValue(null);
 });
 
 // ── Tests ────────────────────────────────────────────────────────────
@@ -545,6 +574,126 @@ describe("handleProblemFirst", () => {
 
       expect(result.success).toBe(true);
       expect(result.responseType).toBe("ANSWER");
+    });
+  });
+
+  // ── Affective feedback loop (Phase 3) ───────────────────────────
+
+  describe("affective feedback loop", () => {
+    it("injects confused directive into the diagnosis system prompt", async () => {
+      mockReadLatestFeedback.mockResolvedValue({
+        id: "fb-1",
+        signal: "confused",
+        sessionId: "sess-xyz",
+        createdAt: Date.now() - 60_000,
+      });
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", sessionId: "sess-xyz" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("ANSWER");
+      // Diagnosis is the 2nd runStage call (index 1). Its systemPrompt should
+      // contain the CONFUSING directive text.
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.stage).toBe("diagnosis");
+      expect(diagnosisCall.systemPrompt).toContain("AFFECTIVE SIGNAL");
+      expect(diagnosisCall.systemPrompt).toContain("CONFUSING");
+    });
+
+    it("falls back to priorSessionId feedback when in-session has none", async () => {
+      // First call (in-session) → null, second call (priorSessionId) → confused
+      mockReadLatestFeedback
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: "fb-2",
+          signal: "already_knew",
+          sessionId: "prev-session",
+          createdAt: Date.now() - 30_000,
+        });
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        {
+          query: "Nanite LOD edge case",
+          sessionId: "sess-new",
+          priorSessionId: "prev-session",
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(mockReadLatestFeedback).toHaveBeenCalledTimes(2);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).toContain("ALREADY KNOWN");
+    });
+
+    it("emits no affective block when feedback signal is helpful (no directive)", async () => {
+      mockReadLatestFeedback.mockResolvedValue({
+        id: "fb-3",
+        signal: "helpful",
+        createdAt: Date.now() - 60_000,
+      });
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", sessionId: "sess-1" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).not.toContain("AFFECTIVE SIGNAL (from prior response):");
+    });
+
+    it("emits no affective block when no feedback exists", async () => {
+      mockReadLatestFeedback.mockResolvedValue(null);
+      setupFullPipelineSuccess();
+
+      const result = await handleProblemFirst(
+        { query: "Blueprint compile error", sessionId: "sess-1" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      const diagnosisCall = mockRunStage.mock.calls[1][0];
+      expect(diagnosisCall.systemPrompt).not.toContain("AFFECTIVE SIGNAL (from prior response):");
+    });
+
+    it("threads directive into Socratic prompt when socratic=true and feedback exists", async () => {
+      const { SOCRATIC_ELICITATION_PROMPT } = require("../prompts");
+      mockReadLatestFeedback.mockResolvedValue({
+        id: "fb-4",
+        signal: "not_helpful",
+        sessionId: "sess-xyz",
+        createdAt: Date.now() - 10_000,
+      });
+
+      // Intent ok; socratic stage ok
+      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: { kind: "clarify", question: "What have you already tried?", intent: "probe prior attempts" },
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", socratic: true, sessionId: "sess-xyz" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("SOCRATIC_ELICIT");
+      // Verify the SOCRATIC prompt builder received a non-empty affectiveDirective.
+      const socraticArgs = SOCRATIC_ELICITATION_PROMPT.mock.calls[0][0];
+      expect(socraticArgs.affectiveDirective).toContain("NOT HELPFUL");
     });
   });
 

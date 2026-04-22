@@ -26,6 +26,7 @@ const { normalizeQuery } = require("../pipeline/cache");
 const { wrapEvidence } = require("../pipeline/promptVersions");
 
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
+const { readLatestFeedback, buildAffectiveDirective } = require("./feedbackReader");
 const { UE5_GUARDRAIL, INTERACTIVE_WIDGET_HTML_PROMPT } = require("./prompts");
 
 const db = admin.firestore();
@@ -130,12 +131,13 @@ async function runSpoke(topic, learnerLevel, apiKey, bandDirectives = {}) {
   const chunks = [...seg, ...epic].sort((a, b) => b.similarity - a.similarity).slice(0, 8);
   if (chunks.length === 0) return null;
 
-  const depthLine = bandDirectives.depth ? `\n\n${bandDirectives.depth}` : "";
-  const difficultyLine = bandDirectives.difficulty ? `\n\n${bandDirectives.difficulty}` : "";
+  // Render affective directive AFTER depth/difficulty — it is more specific
+  // than mean-mastery banding and should therefore override when it applies.
+  const directiveBlock = composeSpokePromptDirectives(bandDirectives);
 
   const systemPrompt = `You are an expert Unreal Engine 5 instructor creating a focused mini-lesson.
 Synthesize the provided transcript chunks into a clear lesson about "${topic}".
-Target audience: ${learnerLevel}.${depthLine}${difficultyLine}
+Target audience: ${learnerLevel}.${directiveBlock}
 
 Return ONLY valid JSON (no markdown, no fences) matching:
 {
@@ -185,12 +187,12 @@ Rules:
   };
 }
 
-async function runDiagnosis({ query, learnerBlock, apiKey, trace, normalized }) {
+async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", apiKey, trace, normalized }) {
   const result = await runStage({
     stage: "diagnosis",
     systemPrompt:
       UE5_GUARDRAIL +
-      `UE5 expert. Diagnose UE5 problems with specific settings and Editor workflows. Teach WHY the problem occurs, not just the fix.${learnerBlock}
+      `UE5 expert. Diagnose UE5 problems with specific settings and Editor workflows. Teach WHY the problem occurs, not just the fix. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for this response — it overrides depth/difficulty defaults.${affectiveBlock}${learnerBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`,
     userPrompt: `Problem: ${query}`,
     apiKey,
@@ -389,6 +391,24 @@ function depthDirective(band, mean) {
 }
 
 /**
+ * Compose the spoke-prompt header lines for depth/difficulty/affective
+ * directives. Exposed for unit tests — asserts that the affective directive
+ * renders AFTER depth/difficulty so it lexically overrides those bands in the
+ * model's instruction stack.
+ *
+ * @param {{depth?:string, difficulty?:string, affective?:string}} bandDirectives
+ * @returns {string}
+ */
+function composeSpokePromptDirectives(bandDirectives = {}) {
+  const depthLine = bandDirectives.depth ? `\n\n${bandDirectives.depth}` : "";
+  const difficultyLine = bandDirectives.difficulty ? `\n\n${bandDirectives.difficulty}` : "";
+  const affectiveLine = bandDirectives.affective
+    ? `\n\nAFFECTIVE SIGNAL (from prior response — overrides depth/difficulty defaults):\n${bandDirectives.affective}`
+    : "";
+  return `${depthLine}${difficultyLine}${affectiveLine}`;
+}
+
+/**
  * Directive text injected into the Gemini quiz prompt for difficulty band.
  * "medium" returns "" — keeps current prompt behavior unchanged.
  */
@@ -450,6 +470,19 @@ exports.generateLesson = onCall(
     const learnerBlock = learnerSnippet ? `\n\nLEARNER CONTEXT:\n${learnerSnippet}\n` : "";
     const learnerLevel = inferLearnerLevel(learnerState);
 
+    // Phase 3 — Affective feedback. Pull the most-recent fresh signal for
+    // this session (if any) so we can adapt this lesson's depth and angle
+    // to how the learner reacted to the previous response.
+    const latestFeedback = await readLatestFeedback(userId, { sessionId: sessionId || undefined });
+    const affectiveDirective = buildAffectiveDirective(latestFeedback);
+    const affectiveBlock = affectiveDirective
+      ? `\n\nAFFECTIVE SIGNAL (from prior response):\n${affectiveDirective}\n`
+      : "";
+    const affectiveContext =
+      latestFeedback && typeof latestFeedback.signal === "string" && affectiveDirective
+        ? latestFeedback.signal
+        : null;
+
     const topic = query;
 
     // Diagnosis first, then objectives — we need objectives' skillTags BEFORE
@@ -457,7 +490,7 @@ exports.generateLesson = onCall(
     // spoke prompt. The latency hit (one extra sequential Gemini call) is
     // worth the tutor-impact gain of actually personalizing the deep dive.
     const diagnosisSettled = await settledValue(
-      runDiagnosis({ query, learnerBlock, apiKey, trace, normalized })
+      runDiagnosis({ query, learnerBlock, affectiveBlock, apiKey, trace, normalized })
     );
     const diagnosis = diagnosisSettled && !diagnosisSettled.__error ? diagnosisSettled : null;
 
@@ -483,6 +516,8 @@ exports.generateLesson = onCall(
     const bandDirectives = {
       depth: depthDirective(depthBand, meanMastery),
       difficulty: difficultyDirective(difficultyBand),
+      // Affective directive wins when present (rendered last in the prompt).
+      affective: affectiveDirective,
     };
 
     const [spokeSettled, takeawaysSettled, widgetSettled] = await Promise.all([
@@ -558,6 +593,7 @@ exports.generateLesson = onCall(
       depthBand,
       difficultyBand,
       meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
+      affectiveContext,
       generatedAt: new Date().toISOString(),
       engine,
     };
@@ -602,6 +638,7 @@ exports.generateLesson = onCall(
       difficultyBand,
       meanMastery: meanMastery === null ? null : Number(meanMastery.toFixed(4)),
       masterySampled,
+      affectiveContext,
       firestoreReads: 3,
       firestoreWrites: 1,
     }).catch(() => {});
@@ -624,6 +661,7 @@ exports._internal = {
   classifyDifficultyBand,
   depthDirective,
   difficultyDirective,
+  composeSpokePromptDirectives,
 };
 
 // Silence unused-warning for wrapEvidence (kept for parity with related handlers

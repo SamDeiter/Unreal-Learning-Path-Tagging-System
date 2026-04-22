@@ -21,6 +21,7 @@ const { UE5_GUARDRAIL, SOCRATIC_ELICITATION_PROMPT } = require("./prompts");
 const { computeConfidence } = require("./confidence");
 const { writeSession, summarizeSession } = require("./sessions");
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
+const { readLatestFeedback, buildAffectiveDirective } = require("./feedbackReader");
 
 const MAX_CLARIFY_ROUNDS = 3;
 
@@ -80,6 +81,28 @@ async function handleProblemFirst(data, context, apiKey) {
   const learnerState = await readSkillState(userId);
   const learnerContext = buildSkillStateSnippet(learnerState);
   const learnerBlock = learnerContext ? `\n\nLEARNER CONTEXT:\n${learnerContext}\n` : "";
+
+  // Phase 3 — Affective feedback loop.
+  // Read the most-recent feedback signal for this user, preferring in-session
+  // feedback; if none exists and we have a priorSessionId, fall back to that
+  // session's latest signal. The reader already filters out stale entries
+  // (>24h). A null result or an adaptation-neutral signal (helpful/completed)
+  // yields an empty directive and the block is skipped entirely below.
+  const inSessionSid =
+    typeof data.sessionId === "string" && data.sessionId.trim()
+      ? data.sessionId.trim().slice(0, 128)
+      : null;
+  let latestFeedback = null;
+  if (inSessionSid) {
+    latestFeedback = await readLatestFeedback(userId, { sessionId: inSessionSid });
+  }
+  if (!latestFeedback && priorSessionId) {
+    latestFeedback = await readLatestFeedback(userId, { sessionId: priorSessionId });
+  }
+  const affectiveDirective = buildAffectiveDirective(latestFeedback);
+  const affectiveBlock = affectiveDirective
+    ? `\n\nAFFECTIVE SIGNAL (from prior response):\n${affectiveDirective}\n`
+    : "";
 
   // Sanitize conversation history (max 6 entries = 3 Q&A rounds)
   const conversationHistory = Array.isArray(rawHistory)
@@ -264,6 +287,7 @@ JSON:{"intent_id":"intent_<uuid>","user_role":"str","goal":"str","problem_descri
       engine,
       engineName,
       priorSummary: priorSessionSummary,
+      affectiveDirective,
     });
 
     // Build a tight user prompt that anchors the model to this learner's
@@ -499,7 +523,7 @@ JSON:{"intent_id":"search_strategy","user_role":"search","goal":"search","proble
 
   const diagnosisSystemPrompt =
     guardrail +
-    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know.${learnerBlock}${priorSessionBlock}
+    `${engine} expert. Diagnose ${engine} problems only${IS_UEFN ? " (Verse/Verse UI/Editor)" : " (Lumen/Nanite/Blueprint/Material/Niagara/etc)"}. Specific settings & Editor workflows. When transcript excerpts are provided, use them to ground your diagnosis with specific, actionable details. Respect the learner's prior knowledge if LEARNER CONTEXT is provided — do not re-explain basics they already know. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for tone and depth of this response.${affectiveBlock}${learnerBlock}${priorSessionBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"variables_that_matter":["str"],"variables_that_do_not":["str"],"generalization_scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`;
 
   const diagnosisResult = await runStage({

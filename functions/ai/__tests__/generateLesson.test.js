@@ -61,6 +61,10 @@ jest.mock("../skillStateReader", () => ({
   readSkillState: jest.fn(),
   buildSkillStateSnippet: jest.fn(() => ""),
 }));
+jest.mock("../feedbackReader", () => ({
+  readLatestFeedback: jest.fn(() => Promise.resolve(null)),
+  buildAffectiveDirective: jest.fn(() => ""),
+}));
 jest.mock("../prompts", () => ({
   UE5_GUARDRAIL: "",
   INTERACTIVE_WIDGET_HTML_PROMPT: jest.fn(() => ""),
@@ -73,6 +77,7 @@ const {
   classifyDifficultyBand,
   depthDirective,
   difficultyDirective,
+  composeSpokePromptDirectives,
 } = _internal;
 
 describe("computeMeanMastery", () => {
@@ -264,5 +269,53 @@ describe("integration: band classification → prompt directive", () => {
     expect(classifyDifficultyBand(mean)).toBe("easy");
     expect(depthDirective("struggling", mean)).toMatch(/FADE DIRECTIVE/);
     expect(difficultyDirective("easy")).toMatch(/DIFFICULTY DIRECTIVE/);
+  });
+});
+
+// ── Phase 3 — affective directive flowing through spoke prompt ──────
+describe("composeSpokePromptDirectives (Phase 3 — affective loop)", () => {
+  it("returns '' when all directives are absent", () => {
+    expect(composeSpokePromptDirectives({})).toBe("");
+    expect(composeSpokePromptDirectives({ depth: "", difficulty: "", affective: "" })).toBe("");
+  });
+
+  it("renders depth + difficulty when present and no affective", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "FADE DIRECTIVE: known.",
+      difficulty: "DIFFICULTY DIRECTIVE: HARD",
+      affective: "",
+    });
+    expect(s).toContain("FADE DIRECTIVE");
+    expect(s).toContain("DIFFICULTY DIRECTIVE");
+    expect(s).not.toContain("AFFECTIVE SIGNAL");
+  });
+
+  it("renders affective directive AFTER depth/difficulty so it overrides", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "FADE_KNOWN",
+      difficulty: "DIFF_HARD",
+      affective: "The learner marked the previous response as CONFUSING.",
+    });
+    const iDepth = s.indexOf("FADE_KNOWN");
+    const iDiff = s.indexOf("DIFF_HARD");
+    const iAff = s.indexOf("AFFECTIVE SIGNAL");
+    expect(iDepth).toBeGreaterThan(-1);
+    expect(iDiff).toBeGreaterThan(iDepth);
+    expect(iAff).toBeGreaterThan(iDiff);
+    expect(s).toContain("CONFUSING");
+    expect(s).toContain("overrides depth/difficulty defaults");
+  });
+
+  it("renders only affective block when depth/difficulty are neutral bands", () => {
+    const s = composeSpokePromptDirectives({
+      depth: "",
+      difficulty: "",
+      affective:
+        "The learner marked the previous response as NOT HELPFUL. For this response: try a fundamentally different angle",
+    });
+    expect(s).toContain("AFFECTIVE SIGNAL");
+    expect(s).toContain("NOT HELPFUL");
+    expect(s).not.toContain("FADE DIRECTIVE");
+    expect(s).not.toContain("DIFFICULTY DIRECTIVE");
   });
 });
