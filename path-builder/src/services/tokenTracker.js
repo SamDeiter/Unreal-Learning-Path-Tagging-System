@@ -29,6 +29,7 @@ import {
   where,
   orderBy,
   limit,
+  serverTimestamp,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "./firebaseConfig";
@@ -244,7 +245,7 @@ async function syncDayToFirestore(dateKey, dayData) {
         calls: dayData.calls,
         operations: dayData.operations,
         estimatedCost: estimateCost(dayData.totalInput, dayData.totalOutput),
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: serverTimestamp(),
       },
       { merge: true }
     );

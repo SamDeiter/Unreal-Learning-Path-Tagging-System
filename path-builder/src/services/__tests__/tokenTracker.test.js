@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { recordTokenUsage, fetchCloudStats } from "../tokenTracker";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDocs, collection, query, collectionGroup } from "firebase/firestore";
+import { doc, setDoc, getDocs, collection, collectionGroup } from "firebase/firestore";
 
 // Mock Firebase
 vi.mock("firebase/auth");
@@ -16,6 +16,7 @@ vi.mock("firebase/firestore", () => ({
   orderBy: vi.fn(),
   limit: vi.fn(),
   where: vi.fn(),
+  serverTimestamp: vi.fn(),
 }));
 
 vi.mock("../firebaseConfig", () => ({
