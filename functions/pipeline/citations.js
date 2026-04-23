@@ -23,7 +23,7 @@ function extractCitations(answer) {
   if (!answer || typeof answer !== "object") return [];
   const refs = new Set();
   const walk = (v) => {
-    if (v == null) return;
+    if (v === null || v === undefined) return;
     if (typeof v === "string") {
       for (const m of v.matchAll(CITATION_RE)) {
         const n = Number(m[1]);
