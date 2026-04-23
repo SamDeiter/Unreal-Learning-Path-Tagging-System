@@ -14,6 +14,11 @@ vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
 
+// Mock googleAuthService to prevent Firebase init errors during sidebar test
+vi.mock("../services/googleAuthService", () => ({
+  signOutUser: vi.fn(),
+}));
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -142,6 +147,69 @@ describe("DiagnosisLoader", () => {
   it("should show progress phases", () => {
     render(<DiagnosisLoader />);
     expect(screen.getByText(/Analyzing your problem/)).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<DiagnosisLoader />);
+    const loader = container.querySelector(".dx-loader");
+    expect(loader.getAttribute("role")).toBe("status");
+    expect(loader.getAttribute("aria-live")).toBe("polite");
+
+    const spinner = container.querySelector(".dx-loader-spinner");
+    expect(spinner.getAttribute("aria-hidden")).toBe("true");
+
+    const progressBar = container.querySelector(".dx-progress-bar");
+    expect(progressBar.getAttribute("role")).toBe("progressbar");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4a. AppSidebar
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AppSidebar from "../components/AppSidebar/AppSidebar";
+
+describe("AppSidebar", () => {
+  const defaultProps = {
+    tabs: [],
+    activeTab: "adaptive",
+    setActiveTab: vi.fn(),
+    analyticsExpanded: false,
+    setAnalyticsExpanded: vi.fn(),
+    buildersExpanded: false,
+    setBuildersExpanded: vi.fn(),
+    newFeedbackCount: 0,
+    currentUser: {
+      displayName: "Test User",
+      email: "test@example.com",
+      photoURL: "https://example.com/photo.jpg",
+    },
+    onRetakeQuiz: vi.fn(),
+  };
+
+  it("should render without crashing", () => {
+    const { container } = render(<AppSidebar {...defaultProps} />);
+    expect(container.querySelector(".app-sidebar")).toBeTruthy();
+    expect(screen.getByText("Test User")).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes for expandable sections", () => {
+    const { container } = render(<AppSidebar {...defaultProps} buildersExpanded={true} />);
+
+    // Path Builders toggle
+    const builderBtn = screen.getByTitle(/Choose between different path generation engines/i).closest("button");
+    expect(builderBtn.getAttribute("aria-expanded")).toBe("true");
+
+    // Check for hidden icons
+    const icons = container.querySelectorAll(".sidebar-tab-icon");
+    icons.forEach(icon => {
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    const arrows = container.querySelectorAll(".sidebar-expand-arrow");
+    arrows.forEach(arrow => {
+      expect(arrow.getAttribute("aria-hidden")).toBe("true");
+    });
   });
 });
 
