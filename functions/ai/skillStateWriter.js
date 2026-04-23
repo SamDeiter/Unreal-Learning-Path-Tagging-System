@@ -88,7 +88,7 @@ function downgradeLevel(currentLevel, confidence) {
  * so struggles still erode level via the confidence path.
  */
 function applyMasteryLevel(currentLevel, mastery) {
-  let lvl = LEVELS.includes(currentLevel) ? currentLevel : "beginner";
+  const lvl = LEVELS.includes(currentLevel) ? currentLevel : "beginner";
   if (mastery > 0.85) return "expert";
   if (mastery > 0.5 && lvl === "beginner") return "intermediate";
   return lvl;

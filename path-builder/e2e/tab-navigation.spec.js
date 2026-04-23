@@ -9,7 +9,7 @@ test.describe("Tab navigation", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     // Set persona to bypass quiz modal
     await page.evaluate(() => {
-      localStorage.setItem("ue5_persona_id", "programmer_pat");
+      localStorage.setItem("ue5_persona_id", "indie_isaac");
     });
     await page.reload();
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
@@ -23,8 +23,8 @@ test.describe("Tab navigation", () => {
     await page.waitForTimeout(500);
   });
 
-  test("should navigate to the Fix a Problem tab", async ({ page }) => {
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Fix a Problem/ });
+  test("should navigate to the Tutor tab", async ({ page }) => {
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await expect(tab).toBeVisible();
     await tab.click();
     await page.waitForTimeout(1_000);
