@@ -437,7 +437,9 @@ export default function AnswerView({
           </p>
           <ul className="skills-list">
             {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>{cite(skill)}</li>
+              <li key={i}>
+                <span>{cite(skill)}</span>
+              </li>
             ))}
           </ul>
         </div>
