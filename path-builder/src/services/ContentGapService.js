@@ -14,6 +14,61 @@
 
 import { personaScoringRules, getPersonaById } from "./PersonaService";
 
+// Cache for course metadata to avoid redundant normalization and tag processing
+const courseCache = new WeakMap();
+
+// Cache for persona-specific scoring rules (lowercased)
+const personaCache = new Map();
+
+/**
+ * Get lowercased rules for a persona
+ * @param {string} personaId
+ * @returns {object|null}
+ */
+function getPersonaRules(personaId) {
+  if (personaCache.has(personaId)) {
+    return personaCache.get(personaId);
+  }
+
+  const rawRules = personaScoringRules[personaId];
+  if (!rawRules) return null;
+
+  const rules = {
+    ...rawRules,
+    boostKeywords: (rawRules.boostKeywords || []).map((k) => k.toLowerCase()),
+    penaltyKeywords: (rawRules.penaltyKeywords || []).map((k) => k.toLowerCase()),
+    requiredTopics: (rawRules.requiredTopics || []).map((t) => t.toLowerCase()),
+  };
+
+  personaCache.set(personaId, rules);
+  return rules;
+}
+
+/**
+ * Extracts and normalizes metadata for a course.
+ *
+ * @param {object} course - Course object
+ * @returns {{ title: string, allTags: string[] }}
+ */
+function getCourseMetadata(course) {
+  if (courseCache.has(course)) {
+    return courseCache.get(course);
+  }
+
+  const title = (course.title || "").toLowerCase();
+  const allTags = [
+    ...(course.canonical_tags || []),
+    ...(course.ai_tags || []),
+    ...(course.gemini_system_tags || []),
+    ...(course.transcript_tags || []),
+    ...(course.extracted_tags || []),
+  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+  const metadata = { title, allTags };
+  courseCache.set(course, metadata);
+  return metadata;
+}
+
 /**
  * Analyze content gaps for a specific persona.
  *
@@ -23,7 +78,7 @@ import { personaScoringRules, getPersonaById } from "./PersonaService";
  * @returns {{ coveredTopics: string[], missingTopics: string[], tooTechnical: object[], artistFriendly: object[], relevanceScores: object[], topGaps: string[] }}
  */
 export function analyzeGaps(personaId, courses = [], _tags = []) {
-  const rules = personaScoringRules[personaId];
+  const rules = getPersonaRules(personaId);
   const persona = getPersonaById(personaId);
 
   if (!rules || !persona) {
@@ -37,20 +92,11 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
     };
   }
 
-  const boostKeywords = (rules.boostKeywords || []).map((k) => k.toLowerCase());
-  const penaltyKeywords = (rules.penaltyKeywords || []).map((k) => k.toLowerCase());
-  const requiredTopics = (rules.requiredTopics || []).map((t) => t.toLowerCase());
+  const { boostKeywords, penaltyKeywords, requiredTopics } = rules;
 
   // Score each course for this persona
   const scored = courses.map((course) => {
-    const title = (course.title || "").toLowerCase();
-    const allTags = [
-      ...(course.canonical_tags || []),
-      ...(course.ai_tags || []),
-      ...(course.gemini_system_tags || []),
-      ...(course.transcript_tags || []),
-      ...(course.extracted_tags || []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    const { title, allTags } = getCourseMetadata(course);
 
     let score = 0;
     const matchedBoosts = [];
@@ -142,29 +188,22 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
  * @returns {{ label: string, type: "relevant"|"technical"|"neutral", score: number }}
  */
 export function getRelevanceBadge(course, personaId) {
-  const rules = personaScoringRules[personaId];
+  const rules = getPersonaRules(personaId);
   if (!rules) return { label: "", type: "neutral", score: 0 };
 
-  const title = (course.title || "").toLowerCase();
-  const allTags = [
-    ...(course.canonical_tags || []),
-    ...(course.ai_tags || []),
-    ...(course.gemini_system_tags || []),
-    ...(course.transcript_tags || []),
-    ...(course.extracted_tags || []),
-  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+  const { title, allTags } = getCourseMetadata(course);
 
   let score = 0;
   let hasPenalty = false;
 
-  for (const keyword of (rules.boostKeywords || [])) {
-    const kw = keyword.toLowerCase();
+  const { boostKeywords, penaltyKeywords } = rules;
+
+  for (const kw of boostKeywords) {
     if (title.includes(kw)) score += 5;
     else if (allTags.some((t) => t.includes(kw))) score += 3;
   }
 
-  for (const keyword of (rules.penaltyKeywords || [])) {
-    const kw = keyword.toLowerCase();
+  for (const kw of penaltyKeywords) {
     if (title.includes(kw) || allTags.some((t) => t.includes(kw))) {
       score -= 10;
       hasPenalty = true;

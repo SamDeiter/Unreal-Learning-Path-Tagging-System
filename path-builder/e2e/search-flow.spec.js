@@ -18,6 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Fix a Problem
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
     await tab.click();
+
+    // The ProblemInput is now inside a <details> element, need to expand it
+    const expander = page.locator("summary").filter({ hasText: /Attach a screenshot or error log/i });
+    await expander.click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
