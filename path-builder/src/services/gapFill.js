@@ -32,7 +32,7 @@ export async function generateGapFillStep(topic, query, steps, existingCodes = [
       const app = getFirebaseApp();
       const functions = getFunctions(app, "us-central1");
       const embedFn = httpsCallable(functions, "embedQuery");
-      const embedResult = await embedFn({ text: topic });
+      const embedResult = await embedFn({ query: topic });
       const embedding = embedResult.data?.embedding;
 
       if (embedding) {
