@@ -132,9 +132,52 @@ const OnboardingPathSchema = z
   })
   .passthrough();
 
+// ─── Unified Tutor Answer (the one-call replacement) ────────────────────────
+// Collapses intent + diagnosis + objectives + path_summary + answer_data into
+// a single Gemini call. This is the load-bearing schema for the slim handler;
+// every field the UI reads is produced here in one shot.
+
+const TutorAnswerSchema = z
+  .object({
+    // Tight list of subsystems the model thinks are involved (replaces intent.systems)
+    systems: z.array(z.string()).default([]),
+
+    // Answer payload the UI renders
+    mostLikelyCause: z.string().min(1),
+    confidence: z.enum(["high", "med", "low", "NO_DATA_AVAILABLE"]),
+    fastChecks: z.array(z.string()).default([]),
+    fixSteps: z.array(z.string()).default([]),
+    ifStillBroken: z
+      .array(
+        z
+          .object({
+            condition: z.string().min(1),
+            action: z.string().min(1),
+          })
+          .passthrough()
+      )
+      .default([]),
+    whyThisResult: z.array(z.string()).default([]),
+
+    // Learning-path side data (replaces objectives + path_summary)
+    objectives: z
+      .object({
+        transferable: z.array(z.string()).default([]),
+        fixSpecific: z.array(z.string()).default([]),
+      })
+      .passthrough()
+      .default({ transferable: [], fixSpecific: [] }),
+    pathSummary: z.string().default(""),
+  })
+  .passthrough();
+
 // ─── Schema Registry (lookup by stage name) ─────────────────────────────────
 
 const SCHEMAS = {
+  // New unified stage — the only LLM call the slim handler makes
+  tutor_answer: TutorAnswerSchema,
+
+  // Legacy stages — still registered for other handlers (onboarding, spoke, etc.)
   intent: IntentSchema,
   diagnosis: DiagnosisSchema,
   objectives: ObjectivesSchema,
@@ -147,6 +190,7 @@ const SCHEMAS = {
 };
 
 module.exports = {
+  TutorAnswerSchema,
   IntentSchema,
   DiagnosisSchema,
   ObjectivesSchema,

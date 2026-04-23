@@ -38,9 +38,11 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
     
-    // Cached paths - read only (managed by admin)
+    // Cached paths — backend-only. Client reads must go through a Cloud Function
+    // so cached payloads (which include original user queries) are never
+    // enumerable from the client SDK.
     match /cached_paths/{pathId} {
-      allow read: if true;
+      allow read: if false;
       allow write: if false;
     }
     
@@ -86,16 +88,20 @@ service cloud.firestore {
                             && resource.data.userId == request.auth.uid;
     }
 
-    // Cached diagnoses — public read (cache reuse), Cloud Functions write via Admin SDK
+    // Cached diagnoses — backend-only. Stored payloads include the original
+    // user query text; public read would let any authenticated user enumerate
+    // other users' troubleshooting history. All reads go through Cloud
+    // Functions (handleProblemFirst) which filter by uid.
     match /cached_diagnoses/{docId} {
-      allow read: if true;
+      allow read: if false;
       allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
     }
 
-    // Path cache — cross-user cache for generated learning paths
-    // Public read (cache hits benefit all users), backend-only write via Admin SDK
+    // Path cache — backend-only for the same reason as cached_diagnoses:
+    // the stored payload contains the raw query. Reads go through Cloud
+    // Functions which enforce per-uid access.
     match /pathCache/{cacheId} {
-      allow read: if true;
+      allow read: if false;
       allow write: if false; // Backend Cloud Functions only (Admin SDK bypasses rules)
     }
 

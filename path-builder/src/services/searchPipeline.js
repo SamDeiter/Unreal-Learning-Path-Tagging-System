@@ -71,16 +71,24 @@ export async function runSearchPipeline(query, options = {}) {
   let retrievedPassages = [];
   let expandedQueries = [];
   let vertexAIDocs = null;
+  // Retrieval-failure signal: distinguishes "tutor couldn't reach its own
+  // embedding/search" from "tutor honestly has no matching content." The
+  // hook (useProblemFirst) branches on this so a transient Gemini 5xx or
+  // network blip shows "try again" instead of a silent NEEDS_MORE_CONTEXT
+  // refusal that makes the tutor look like it doesn't know anything.
+  let retrievalFailed = false;
+  let retrievalError = null;
 
   try {
     const embedQueryFn = httpsCallable(functions, "embedQuery");
-    const expandQueryFn = httpsCallable(functions, "expandQuery");
 
-    const [embedResult, expandResult, vertexResult] = await Promise.allSettled([
+    // expandQuery removed — paraphrases were routed to keyword-only search.
+    // gemini-embedding-001 is paraphrase-robust; re-add when eval proves need.
+    const [embedResult, vertexResult] = await Promise.allSettled([
       retryWithBackoff(() => embedQueryFn({ query }), { maxRetries: 2, label: "embedQuery" }),
-      retryWithBackoff(() => expandQueryFn({ query }), { maxRetries: 2, label: "expandQuery" }),
       searchDocsVertexAI(query, maxDocs),
     ]);
+    const expandResult = { status: "fulfilled", value: { data: { expansions: [] } } };
 
     // Vertex AI docs (independent of embedding)
     if (vertexResult.status === "fulfilled" && vertexResult.value) {
@@ -116,12 +124,15 @@ export async function runSearchPipeline(query, options = {}) {
 
       if (segResult.status === "fulfilled") {
         const segPassages = segResult.value.map((s) => ({
+          // Stable chunk id — preserved through to the Cloud Function so the
+          // retrieval log and eval harness can correlate answers to chunks.
+          id: s.id || null,
           text: s.previewText,
           courseCode: s.courseCode,
           videoTitle: s.videoTitle,
           timestamp: s.timestamp,
           similarity: s.similarity,
-          source: "transcript",
+          source: s.source || "transcript",
         }));
         retrievedPassages.push(...segPassages);
         devLog(`[RAG] ${segPassages.length} transcript passages`);
@@ -131,6 +142,7 @@ export async function runSearchPipeline(query, options = {}) {
 
       if (docResult.status === "fulfilled") {
         const docPassages = docResult.value.map((d) => ({
+          id: d.id || null,
           text: d.previewText,
           url: d.url,
           title: d.title,
@@ -194,31 +206,35 @@ export async function runSearchPipeline(query, options = {}) {
 
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
     } else {
-      devWarn("⚠️ Embedding failed — falling back to keyword-only search");
+      // Embedding call resolved but without a usable vector — treat as a
+      // real retrieval failure, not "no content matches." There is no actual
+      // keyword-only fallback path; the earlier comment was misleading.
+      retrievalFailed = true;
+      retrievalError = "embedding_empty_or_rejected";
+      devWarn("⚠️ Embedding failed — marking retrieval as failed");
     }
   } catch (semanticErr) {
+    // Any thrown error in the retrieval try-block means we cannot trust the
+    // zero-passage state. Propagate the failure so the hook can render an
+    // actionable error rather than a silent refusal.
+    retrievalFailed = true;
+    retrievalError = semanticErr?.message || "semantic_search_threw";
     devWarn("⚠️ Semantic search skipped:", semanticErr.message);
   }
 
-  // Cross-encoder re-ranking
-  if (retrievedPassages.length > 2) {
-    try {
-      const rerankFn = httpsCallable(functions, "rerankPassages");
-      const rerankResult = await retryWithBackoff(
-        () => rerankFn({ query, passages: retrievedPassages.slice(0, 30) }),
-        { maxRetries: 1, label: "rerankPassages" }
-      );
-      if (rerankResult.data?.success && rerankResult.data?.reranked) {
-        retrievedPassages = rerankResult.data.reranked;
-        if (!rerankResult.data.fallback) {
-          devLog(`[Rerank] Passages re-ranked by Gemini cross-encoder`);
-        }
-      }
-    } catch (rerankErr) {
-      devWarn("⚠️ Re-ranking skipped:", rerankErr.message);
-    }
-  }
+  // Cross-encoder rerank removed in the slim-down. With gemini-embedding-001
+  // and intent-weighted source multipliers applied above, cosine ordering is
+  // strong enough for the prototype. Re-add when eval data justifies the
+  // extra LLM call + ~9k tokens per query.
   retrievedPassages = retrievedPassages.slice(0, maxPassages);
 
-  return { queryEmbedding, semanticResults, retrievedPassages, expandedQueries, vertexAIDocs };
+  return {
+    queryEmbedding,
+    semanticResults,
+    retrievedPassages,
+    expandedQueries,
+    vertexAIDocs,
+    retrievalFailed,
+    retrievalError,
+  };
 }

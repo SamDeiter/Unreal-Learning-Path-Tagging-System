@@ -7,7 +7,7 @@
  *
  * @returns {Object} All state + handlers the view needs
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
@@ -85,6 +85,15 @@ export default function useProblemFirst() {
   const [sessionId, setSessionId] = useState(null);
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
 
+  // ── Session race guard ───────────────────────────────────────────
+  // Every call to handleSubmit captures the current value of this ref at
+  // entry, then checks it before writing state after each `await` boundary.
+  // If the user submits query A, then query B while A is in flight, A's
+  // captured id will no longer equal ref.current — its late setStates are
+  // dropped. Without this guard, whichever promise resolves last wins and
+  // the UI can show query B's user bubble under query A's answer.
+  const latestSubmitIdRef = useRef(0);
+
   const appendMessage = useCallback((msg) => {
     setMessages((prev) => [...prev, msg]);
   }, []);
@@ -129,6 +138,12 @@ export default function useProblemFirst() {
   // ──────────── Main submit handler ────────────
   const handleSubmit = useCallback(
     async (inputData, overrideCaseReport) => {
+      // Session-race guard: capture a per-submission id at entry. Every state
+      // write after an await must check isStale() — if a newer submission has
+      // started, drop this result on the floor. See note on latestSubmitIdRef.
+      const mySubmitId = ++latestSubmitIdRef.current;
+      const isStale = () => latestSubmitIdRef.current !== mySubmitId;
+
       clearCart();
       setStage(STAGES.LOADING);
       setError(null);
@@ -227,6 +242,7 @@ export default function useProblemFirst() {
                 );
 
                 if (videos.length > 0) {
+                  if (isStale()) return; // a newer submit won the race
                   setVideoResults(videos);
                   setDiagnosisData(cartData);
                   setStage(STAGES.DIAGNOSIS);
@@ -269,7 +285,28 @@ export default function useProblemFirst() {
           semanticResults,
           retrievedPassages,
           vertexAIDocs: vaDocs,
+          retrievalFailed,
+          retrievalError,
         } = await runSearchPipeline(inputData.query, { maxPassages: 10 });
+
+        if (isStale()) return; // user submitted a newer query while we were retrieving
+
+        // Retrieval-failure UX: distinguish "the tutor can't reach its own
+        // embedding/search" from "the tutor honestly has no matching content."
+        // Pre-fix the silent refusal branch caught any transient Gemini 5xx or
+        // network blip and rendered it as NEEDS_MORE_CONTEXT, which made the
+        // tutor look dumb. Now we render an error the learner can act on.
+        if (retrievalFailed) {
+          const retryMsg =
+            "Having trouble reaching the tutor right now. This is usually a transient network or API hiccup — try submitting the same query again in a few seconds.";
+          setError(retryMsg);
+          setStage(STAGES.ERROR);
+          setVertexAILoading(false);
+          setIsAssistantTyping(false);
+          replaceLastTyping(makeMessage("assistant", "error", retryMsg));
+          devWarn("[ProblemFirst] retrievalFailed=true reason=", retrievalError);
+          return;
+        }
 
         // Fork out Epic Learning results (articles/tutorials from dev.epicgames.com)
         const epicHits = (semanticResults || []).filter((r) => r.source === "epic_learning");
@@ -316,6 +353,10 @@ export default function useProblemFirst() {
             // UDL: thread reading-level preference through to handleProblemFirst
             readingLevel: a11yPrefs?.readingLevel,
           });
+
+          // Session-race guard: if a newer submit started while queryLearningPath
+          // was in flight, drop this response without touching state.
+          if (isStale()) return;
 
           // Plumb sessionId on every response so it persists across turns (Wave 2B)
           setSessionId(result.data?.sessionId ?? null);
@@ -520,6 +561,8 @@ export default function useProblemFirst() {
             errorLog: inputData.errorLog || "",
           });
 
+        if (isStale()) return;
+
         if (allItems.length === 0) {
           const noResultsMsg =
             "We couldn't find UE5 content matching your query. " +
@@ -577,6 +620,7 @@ export default function useProblemFirst() {
         );
       } catch (err) {
         console.error("[ProblemFirst] Error:", err);
+        if (isStale()) return; // don't surface errors from a superseded submit
         const errMsg = err.message || "An unexpected error occurred";
         setError(errMsg);
         setStage(STAGES.ERROR);

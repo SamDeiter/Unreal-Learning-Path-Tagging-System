@@ -6,6 +6,7 @@
  *
  * Schema (cached_diagnoses collection):
  *   {
+ *     uid: string,                     // owning user — required for per-user cache isolation
  *     embedding: FieldValue.vector(),  // 768-dim query embedding (Firestore Vector)
  *     query: string,                   // original query text
  *     result: object,                  // full diagnosis response payload
@@ -52,25 +53,36 @@ function cosineSimilarity(a, b) {
 }
 
 /**
- * Find a cached diagnosis using Firestore native vector KNN (findNearest).
- * Falls back to linear scan if the vector index is not available.
+ * Find a cached diagnosis using Firestore native vector KNN (findNearest),
+ * scoped to a single user's cache partition.
  *
+ * `uid` is required. Without it we would serve one user's cached diagnosis
+ * to another learner whose query happens to land within the cosine
+ * threshold — silently violating the per-learner contract the UI promises.
+ * Pass `uid` explicitly; callers that genuinely have no user (e.g. admin
+ * tools) should not be using this cache at all.
+ *
+ * @param {string} uid - Owning user UID. Required.
  * @param {number[]} queryEmbedding - 768-dim embedding of the user's query
  * @param {number} threshold - Minimum cosine similarity to count as a hit (default 0.92)
  * @returns {Promise<{hit: boolean, result?: object, docId?: string, similarity?: number}>}
  */
-async function findCachedDiagnosis(queryEmbedding, threshold = DEFAULT_THRESHOLD) {
+async function findCachedDiagnosis(uid, queryEmbedding, threshold = DEFAULT_THRESHOLD) {
+  if (!uid || typeof uid !== "string") {
+    return { hit: false };
+  }
   if (!queryEmbedding || queryEmbedding.length === 0) {
     return { hit: false };
   }
 
   const db = admin.firestore();
 
-  // --- Primary path: Firestore vector KNN ---
+  // --- Primary path: Firestore vector KNN with uid pre-filter ---
   try {
     const distanceThreshold = 1 - threshold;
     const snapshot = await db
       .collection(COLLECTION)
+      .where("uid", "==", uid)
       .findNearest({
         vectorField: "embedding",
         queryVector: FieldValue.vector(queryEmbedding),
@@ -124,10 +136,11 @@ async function findCachedDiagnosis(queryEmbedding, threshold = DEFAULT_THRESHOLD
     );
   }
 
-  // --- Fallback: linear scan (original behavior) ---
+  // --- Fallback: linear scan (original behavior), uid-scoped ---
   try {
     const snapshot = await db
       .collection(COLLECTION)
+      .where("uid", "==", uid)
       .orderBy("lastHitAt", "desc")
       .limit(MAX_CACHE_SCAN)
       .get();
@@ -191,19 +204,25 @@ async function findCachedDiagnosis(queryEmbedding, threshold = DEFAULT_THRESHOLD
 }
 
 /**
- * Cache a new diagnosis result for future reuse.
+ * Cache a new diagnosis result for future reuse, scoped to the owning user.
  *
+ * `uid` is required: the lookup side filters by uid, so a write without it
+ * would produce an entry that can never be found again.
+ *
+ * @param {string} uid - Owning user UID. Required.
  * @param {number[]} embedding - 768-dim query embedding
  * @param {string} query - Original query text
  * @param {object} result - Full diagnosis response payload to cache
  * @returns {Promise<string|null>} The document ID of the cached entry, or null on error
  */
-async function cacheDiagnosis(embedding, query, result) {
+async function cacheDiagnosis(uid, embedding, query, result) {
+  if (!uid || typeof uid !== "string") return null;
   if (!embedding || !query || !result) return null;
 
   try {
     const db = admin.firestore();
     const docRef = await db.collection(COLLECTION).add({
+      uid,
       embedding,
       query: String(query).slice(0, 500),
       result,

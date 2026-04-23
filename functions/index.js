@@ -25,11 +25,20 @@ Object.assign(exports, require("./ai/validateCurriculum"));
 Object.assign(exports, require("./ai/queryLearningPath"));
 
 // ============================================================================
-// Semantic Search - Query Embedding + Expansion + Re-ranking
+// Semantic Search - Query Embedding only
+// ----------------------------------------------------------------------------
+// expandQuery and rerankPassages were removed in the 2026-04-22 slim-down.
+// Reasons:
+//   * expandQuery: paraphrases were being routed into keyword-only search
+//     (null embedding), so they added an LLM round-trip for a keyword-search
+//     benefit that modern embeddings don't need.
+//   * rerankPassages: Gemini cross-encoder on 30 passages adds 1-2s and
+//     ~9k tokens per query. With gemini-embedding-001, cosine ordering is
+//     strong enough until eval data shows otherwise.
+// Both files are kept on disk but unexported; restore the require() line
+// above when eval data justifies them.
 // ============================================================================
 Object.assign(exports, require("./ai/embedQuery"));
-Object.assign(exports, require("./ai/expandQuery"));
-Object.assign(exports, require("./ai/rerankPassages"));
 Object.assign(exports, require("./ai/searchVertexAIDocs"));
 
 // ============================================================================

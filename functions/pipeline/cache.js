@@ -38,10 +38,19 @@ const TTL = {
  * @returns {string} Cache document ID
  */
 function buildCacheKey(stage, keyParams) {
-  // Normalize key params — include all differentiating fields
+  // Normalize key params — include all differentiating fields.
+  //
+  // `uid` is load-bearing: without it, two users with the same normalized
+  // query share a cache entry and one receives the other's synthesized
+  // answer. Callers MUST pass uid; a missing uid is treated as "no cache"
+  // (anonymous partition) rather than silently sharing across users.
+  const uidKey = typeof keyParams.uid === "string" && keyParams.uid
+    ? keyParams.uid
+    : "__anonymous__";
   const payload = JSON.stringify({
     stage,
     prompt_version: PROMPT_VERSION,
+    uid: uidKey,
     query: keyParams.query || "",
     mode: keyParams.mode || "",
     case_fingerprint: keyParams.case_fingerprint || "",
@@ -52,7 +61,7 @@ function buildCacheKey(stage, keyParams) {
     // Spread any extra fields (tags, has_passages, etc.)
     ...Object.fromEntries(
       Object.entries(keyParams).filter(
-        ([k]) => !["query", "mode", "case_fingerprint", "engine_version", "platform", "locale", "model"].includes(k)
+        ([k]) => !["uid", "query", "mode", "case_fingerprint", "engine_version", "platform", "locale", "model"].includes(k)
       )
     ),
   });
