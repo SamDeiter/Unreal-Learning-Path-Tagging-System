@@ -9,7 +9,7 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     // Set persona then reload to dismiss quiz
     await page.evaluate(() => {
-      localStorage.setItem("ue5_persona_id", "programmer_pat");
+      localStorage.setItem("ue5_persona_id", "indie_isaac");
     });
     await page.reload();
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
@@ -18,6 +18,10 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (formerly Learn Why / Fix a Problem)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Expand the details section to reveal ProblemInput
+    await page.click('summary:has-text("Attach a screenshot or error log")');
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 

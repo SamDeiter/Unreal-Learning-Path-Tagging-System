@@ -9,7 +9,7 @@ test.describe("Tab navigation", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     // Set persona to bypass quiz modal
     await page.evaluate(() => {
-      localStorage.setItem("ue5_persona_id", "programmer_pat");
+      localStorage.setItem("ue5_persona_id", "indie_isaac");
     });
     await page.reload();
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
