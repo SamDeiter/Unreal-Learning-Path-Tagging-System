@@ -13,12 +13,17 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../App.css", () => ({}));
+vi.mock("../services/googleAuthService", () => ({
+  signOutUser: vi.fn(),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import LoadingSpinner from "../components/LoadingSpinner/LoadingSpinner";
+import AppSidebar from "../components/AppSidebar/AppSidebar";
 
 describe("LoadingSpinner", () => {
   it("should render without crashing", () => {
@@ -174,5 +179,69 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AppSidebar
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("AppSidebar", () => {
+  const mockProps = {
+    tabs: [{ key: "admin-feedback", label: "Feedback", adminOnly: true }],
+    activeTab: "bespoke",
+    setActiveTab: vi.fn(),
+    analyticsExpanded: false,
+    setAnalyticsExpanded: vi.fn(),
+    buildersExpanded: false,
+    setBuildersExpanded: vi.fn(),
+    newFeedbackCount: 0,
+    currentUser: {
+      displayName: "Test User",
+      photoURL: "https://example.com/photo.jpg",
+    },
+    onRetakeQuiz: vi.fn(),
+  };
+
+  it("should render without crashing", () => {
+    const { container } = render(<AppSidebar {...mockProps} />);
+    expect(container.querySelector(".app-sidebar")).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes for expandable sections", () => {
+    const { container, rerender } = render(<AppSidebar {...mockProps} />);
+
+    // Path Builders button
+    const buildersBtn = screen.getByTitle(/different path generation engines/);
+    expect(buildersBtn.getAttribute("aria-expanded")).toBe("false");
+    expect(buildersBtn.getAttribute("aria-controls")).toBe("builders-subtabs");
+
+    // Analytics button
+    const analyticsBtn = screen.getByTitle(/Deep data insights/);
+    expect(analyticsBtn.getAttribute("aria-expanded")).toBe("false");
+    expect(analyticsBtn.getAttribute("aria-controls")).toBe("analytics-subtabs");
+
+    // Rerender with expanded state
+    rerender(<AppSidebar {...mockProps} buildersExpanded={true} analyticsExpanded={true} />);
+    expect(buildersBtn.getAttribute("aria-expanded")).toBe("true");
+    expect(analyticsBtn.getAttribute("aria-expanded")).toBe("true");
+
+    // Verify subtab container IDs
+    expect(container.querySelector("#builders-subtabs")).toBeTruthy();
+    expect(container.querySelector("#analytics-subtabs")).toBeTruthy();
+  });
+
+  it("should hide decorative elements from screen readers", () => {
+    const { container } = render(<AppSidebar {...mockProps} />);
+
+    // Expand arrows
+    const arrows = container.querySelectorAll(".sidebar-expand-arrow");
+    arrows.forEach((arrow) => {
+      expect(arrow.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    // Change Role emoji
+    const roleEmoji = screen.getByText("🔄");
+    expect(roleEmoji.getAttribute("aria-hidden")).toBe("true");
   });
 });
