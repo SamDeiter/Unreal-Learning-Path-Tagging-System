@@ -27,8 +27,12 @@ import {
   query,
   orderBy,
   limit,
+  collectionGroup,
+  where,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "./firebaseConfig";
+import { isAdmin } from "./accessControl";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -220,14 +224,19 @@ export function resetTokenTracker() {
 
 /**
  * Sync a day's token data to Firestore for persistent storage.
- * Writes to: token_usage/{date}
+ * Writes to: token_usage/{userId}/usage/{dateKey}
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+
+    const auth = getAuth(app);
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    const docRef = doc(db, "token_usage", userId, "usage", dateKey);
     await setDoc(
       docRef,
       {
@@ -249,6 +258,9 @@ async function syncDayToFirestore(dateKey, dayData) {
 
 /**
  * Fetch historical token usage from Firestore.
+ * Administrators fetch global stats (collectionGroup), while regular
+ * users fetch only their own isolated stats.
+ *
  * @param {number} days - Number of days to fetch (default 30)
  * @returns {Promise<Array>} Array of daily usage records
  */
@@ -256,10 +268,59 @@ export async function fetchCloudStats(days = 30) {
   try {
     const app = getFirebaseApp();
     if (!app) return [];
+
+    const auth = getAuth(app);
+    const userId = auth.currentUser?.uid;
+    if (!userId) return [];
+
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const admin = await isAdmin();
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffKey = formatDateKey(cutoff);
+
+    if (admin) {
+      // Fetch global stats for all users via collectionGroup
+      const q = query(
+        collectionGroup(db, "usage"),
+        where("date", ">=", cutoffKey),
+        orderBy("date", "desc")
+      );
+      const snapshot = await getDocs(q);
+
+      // Aggregate global stats by date client-side
+      const dailyAgg = {};
+      snapshot.docs.forEach((d) => {
+        const data = d.data();
+        const date = data.date;
+        if (!dailyAgg[date]) {
+          dailyAgg[date] = {
+            id: date,
+            date,
+            totalInput: 0,
+            totalOutput: 0,
+            calls: 0,
+            estimatedCost: 0,
+          };
+        }
+        dailyAgg[date].totalInput += data.totalInput || 0;
+        dailyAgg[date].totalOutput += data.totalOutput || 0;
+        dailyAgg[date].calls += data.calls || 0;
+        dailyAgg[date].estimatedCost += data.estimatedCost || 0;
+      });
+
+      return Object.values(dailyAgg).sort((a, b) => b.date.localeCompare(a.date));
+    } else {
+      // Fetch user-isolated stats
+      const q = query(
+        collection(db, "token_usage", userId, "usage"),
+        orderBy("date", "desc"),
+        limit(days)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    }
   } catch (err) {
     console.warn("[TokenTracker] Failed to fetch cloud stats:", err.message);
     return [];

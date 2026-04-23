@@ -2,3 +2,8 @@
 **Vulnerability:** The `analytics_events` collection was readable by any authenticated user, potentially leaking search queries and session data. The `path_builder_invites` collection allowed client-side updates to `usedCount` and `lastUsedAt` without server-side validation of the increment or timestamp.
 **Learning:** Even when documentation (like `analyticsQueryService.js`) claims a collection is admin-only, the Firestore rules are the actual source of truth and must be explicitly audited. Implicit trust in "authenticated users" is often too broad for sensitive telemetry.
 **Prevention:** Always restrict read access to the minimum necessary persona (e.g., `isAdmin()`). For sensitive counters or metadata updates (like invite consumption), use `request.resource.data.field == resource.data.field + 1` and `request.resource.data.timestamp == request.time` to ensure data integrity and prevent replay or bulk-increment attacks.
+
+## 2026-04-09 - [User Data Isolation for Token Tracking]
+**Vulnerability:** Token usage telemetry was stored in a global `token_usage` collection, allowing any authenticated user to potentially read or write to any other user's usage record (IDOR).
+**Learning:** Telemetry and cost-tracking data are often overlooked as "non-sensitive," but they can leak usage patterns or be abused to inflate costs. Implementing user-level subcollections (`token_usage/{userId}/usage/{dateKey}`) is the standard for multi-tenant isolation.
+**Prevention:** Use subcollections keyed by UID for any user-generated telemetry. To maintain administrative overviews without compromising isolation, use `collectionGroup` queries in the dashboard combined with Firestore rules that restrict `collectionGroup` access to `isAdmin()`.
