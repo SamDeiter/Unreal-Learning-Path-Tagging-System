@@ -7,19 +7,31 @@ const MAX_INGREDIENTS = 5; // Limit for focused queries
 // AppState.ingredients, AppState.currentPanel, AppState.currentScreenshot are now in AppState (state.js)
 
 function showInputPanel(panelType) {
-  const panels = ["text", "log", "screenshot", "tags"];
-  const buttons = document.querySelectorAll(".input-method-btn");
-  panels.forEach((p, i) => {
-    const panel = document.getElementById(p + "Panel");
-    const btn = buttons[i];
-    if (!panel || !btn) return;
-    if (p === panelType && AppState.currentPanel !== panelType) {
-      panel.style.display = "flex";
-      btn.classList.add("active");
-      // Update dynamic suggestions when opening tags panel
-      if (p === "tags" && typeof updateTagSuggestions === "function") {
+  const panels = ['text', 'log', 'screenshot', 'tags'];
+  
+  panels.forEach((p) => {
+    const panel = document.getElementById(p + 'Panel');
+    const btn = document.getElementById('btn-method-' + p);
+    if (!panel) return;
+    
+    if (p === panelType) {
+      panel.style.display = 'flex';
+      if (btn) btn.classList.add('active');
+      // Update dynamic suggestions
+      if (p === 'tags' && typeof updateTagSuggestions === 'function') {
         updateTagSuggestions();
       }
+    } else {
+      panel.style.display = 'none';
+      if (btn) btn.classList.remove('active');
+    }
+  });
+  AppState.currentPanel = panelType;
+  if (panelType === 'text') {
+      const input = document.getElementById('textInput');
+      if (input) input.focus();
+  }
+}
     } else {
       panel.style.display = "none";
       btn.classList.remove("active");
@@ -107,16 +119,37 @@ function quickAddIngredient(text) {
 }
 
 function renderBasket() {
-  const empty = document.getElementById("basketEmpty");
-  const chips = document.getElementById("ingredientChips");
-  const btn = document.getElementById("generateBtn");
+  const empty = document.getElementById('basketEmpty');
+  const chips = document.getElementById('ingredientChips');
+  const btn = document.getElementById('initialize-path-btn');
   const atLimit = AppState.ingredients.length >= MAX_INGREDIENTS;
 
   // Disable add buttons when at limit
-  document.querySelectorAll(".input-method-btn").forEach((b) => {
-    b.style.opacity = atLimit ? "0.5" : "1";
-    b.style.pointerEvents = atLimit ? "none" : "auto";
+  document.querySelectorAll('.input-method-btn').forEach((b) => {
+    b.style.opacity = atLimit ? '0.5' : '1';
+    b.style.pointerEvents = atLimit ? 'none' : 'auto';
   });
+
+  if (AppState.ingredients.length === 0) {
+    if (empty) {
+        empty.style.display = 'flex';
+        empty.textContent = 'Capture evidence to synthesize a learning path...';
+    }
+    if (chips) chips.innerHTML = '';
+    if (btn) btn.disabled = true;
+  } else {
+    if (empty) empty.style.display = 'none';
+    if (chips) {
+        chips.innerHTML = AppState.ingredients
+          .map(
+            (ing) =>
+              `<div class="evidence-tag ${ing.type}-tag"><span>${ing.icon} ${ing.label}</span><button class="tag-remove" onclick="removeIngredient('${ing.id}')">✕</button></div>`,
+          )
+          .join('');
+    }
+    if (btn) btn.disabled = false;
+  }
+});
 
   if (AppState.ingredients.length === 0) {
     empty.style.display = "block";

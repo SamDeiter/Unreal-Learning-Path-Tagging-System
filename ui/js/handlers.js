@@ -1,95 +1,73 @@
-/* UE5 Learning Path Builder - Event Handlers Module
- * Replaces inline onclick attributes with addEventListener calls.
- * Loaded after all other modules so all functions are available.
- */
+/* UE5 Intelligence Console - Event Handlers */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Handler Initialization Sequence Started...');
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Input method buttons
-  const inputMethodBtns = document.querySelectorAll(".input-method-btn");
-  const panelTypes = ["text", "log", "screenshot", "tags"];
-  inputMethodBtns.forEach((btn, i) => {
-    if (panelTypes[i]) {
-      btn.addEventListener("click", () => showInputPanel(panelTypes[i]));
+    // --- Navigation Rail ---
+    document.querySelectorAll('.rail-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.id.replace('rail-tab-', '');
+            if (typeof window.switchTab === 'function') {
+                window.switchTab(tabId);
+            }
+        });
+    });
+
+    // --- Inspector Toggle ---
+    const inspectorToggle = document.getElementById('inspector-toggle');
+    if (inspectorToggle) {
+        inspectorToggle.addEventListener('click', () => {
+            if (typeof window.toggleInspector === 'function') {
+                window.toggleInspector();
+            }
+        });
     }
-  });
 
-  // Add ingredient buttons
-  const addTextBtn = document.querySelector("#textPanel .add-ingredient-btn");
-  if (addTextBtn) addTextBtn.addEventListener("click", addTextIngredient);
-
-  const addLogBtn = document.querySelector("#logPanel .add-ingredient-btn");
-  if (addLogBtn) addLogBtn.addEventListener("click", addLogIngredient);
-
-  // Screenshot dropzone click
-  const dropzone = document.getElementById("screenshotDropzone");
-  if (dropzone) {
-    dropzone.addEventListener("click", (e) => {
-      // Don't trigger file input if clicking the remove button
-      if (e.target.closest(".remove-preview")) return;
-      document.getElementById("screenshotInput").click();
-    });
-  }
-
-  // Screenshot file input
-  const screenshotInput = document.getElementById("screenshotInput");
-  if (screenshotInput) {
-    screenshotInput.addEventListener("change", handleScreenshotSelect);
-  }
-
-  // Remove preview button
-  const removePreviewBtn = document.querySelector(".remove-preview");
-  if (removePreviewBtn) {
-    removePreviewBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      clearScreenshotPreview();
-    });
-  }
-
-  // Add screenshot button
-  const addScreenshotBtn = document.getElementById("addScreenshotBtn");
-  if (addScreenshotBtn) {
-    addScreenshotBtn.addEventListener("click", addScreenshotIngredient);
-  }
-
-  // Generate button
-  const generateBtn = document.getElementById("generateBtn");
-  if (generateBtn) {
-    generateBtn.addEventListener("click", generateFromBasket);
-  }
-
-  // Back to search button
-  const backBtn = document.querySelector(".back-btn");
-  if (backBtn) backBtn.addEventListener("click", goBackToSearch);
-
-  // Share path buttons
-  document.querySelectorAll(".sidebar-btn:not(.secondary)").forEach((btn) => {
-    if (btn.textContent.includes("Share")) {
-      btn.addEventListener("click", sharePath);
+    // --- Core Actions ---
+    const initializeBtn = document.getElementById('initialize-path-btn');
+    if (initializeBtn) {
+        initializeBtn.addEventListener('click', () => {
+            if (typeof generateFromBasket === 'function') {
+                generateFromBasket();
+            }
+        });
     }
-  });
 
-  // Sidebar new search button
-  const newSearchBtn = document.querySelector(".sidebar-btn.secondary");
-  if (newSearchBtn) newSearchBtn.addEventListener("click", goBackToSearch);
+    const backToOpsBtn = document.getElementById('back-to-ops');
+    if (backToOpsBtn) {
+        backToOpsBtn.addEventListener('click', () => {
+            if (typeof goBackToSearch === 'function') {
+                goBackToSearch();
+            }
+        });
+    }
 
-  // Mobile share button
-  const mobileShareBtn = document.querySelector(".mobile-only .complete-btn");
-  if (mobileShareBtn) mobileShareBtn.addEventListener("click", sharePath);
-
-  // Video modal close
-  const videoModal = document.getElementById("videoModal");
-  if (videoModal) {
-    videoModal.addEventListener("click", (e) => {
-      if (e.target === videoModal) closeVideo();
+    // --- Input Panel Toggles ---
+    const inputMethodBtns = document.querySelectorAll('.input-method-btn');
+    const panelTypes = ['text', 'log', 'screenshot', 'tags'];
+    inputMethodBtns.forEach((btn, i) => {
+        if (panelTypes[i]) {
+            btn.addEventListener('click', () => {
+                if (typeof showInputPanel === 'function') {
+                    showInputPanel(panelTypes[i]);
+                }
+            });
+        }
     });
-  }
 
-  const videoCloseBtn = document.querySelector(".video-close");
-  if (videoCloseBtn) videoCloseBtn.addEventListener("click", () => closeVideo());
+    // --- Video Modal ---
+    const videoModal = document.getElementById('videoModal');
+    if (videoModal) {
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal && typeof closeVideo === 'function') {
+                closeVideo();
+            }
+        });
+    }
 
-  // Prevent click propagation on video container
-  const videoContainer = document.querySelector(".video-container");
-  if (videoContainer) {
-    videoContainer.addEventListener("click", (e) => e.stopPropagation());
-  }
+    const videoCloseBtn = document.querySelector('.video-close');
+    if (videoCloseBtn) {
+        videoCloseBtn.addEventListener('click', () => {
+            if (typeof closeVideo === 'function') closeVideo();
+        });
+    }
 });

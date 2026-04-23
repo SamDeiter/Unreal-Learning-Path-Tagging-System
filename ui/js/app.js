@@ -86,6 +86,35 @@ const samplePaths = {
     ],
   },
 };
+// --- UI Control Functions ---
+window.switchTab = function(tabId) {
+  console.log(`Switching to tab: ${tabId}`);
+  AppState.currentTab = tabId;
+  
+  // Update Rail Buttons
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.id === `rail-tab-${tabId}`) btn.classList.add('active');
+  });
+  
+  // Update Tab Panes
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    pane.classList.remove('active');
+  });
+  const activePane = document.getElementById(`pane-${tabId}`);
+  if (activePane) activePane.classList.add('active');
+};
+
+window.toggleInspector = function() {
+  const shell = document.querySelector('.app-shell');
+  AppState.inspectorOpen = !AppState.inspectorOpen;
+  if (AppState.inspectorOpen) {
+    shell.classList.remove('nav-collapsed');
+  } else {
+    shell.classList.add('nav-collapsed');
+  }
+};
+
 
 // AppState.currentPath and AppState.completedSteps are now in AppState (state.js)
 
@@ -299,7 +328,7 @@ function generatePath() {
 // [REFACTORED] Code from lines 680-728 moved to modules
 
 function renderPath(path) {
-  document.getElementById("pathTitle").textContent = "🎯 Your Learning Path";
+  document.getElementById("pathTitle").textContent = "Operational Path Blueprint";
 
   // Build query display with AI info
   let queryHtml = `<strong>Problem:</strong> "${escapeHtml(path.query)}"`;
@@ -447,6 +476,7 @@ function renderPath(path) {
     .join("");
 
   document.getElementById("pathSection").classList.add("active");
+  document.getElementById("pathSection").style.display = "block";
   renderStepTree(steps); // Populate sidebar step tree
   updateProgress();
 }
@@ -566,8 +596,12 @@ function sharePath() {
 }
 
 function goBackToSearch() {
-  // Clear URL params
-  window.history.pushState({}, "", window.location.pathname);
+  const results = document.getElementById('path-results');
+  const diagnostic = document.querySelector('.diagnostic-console');
+  
+  if (results) results.style.display = 'none';
+  if (diagnostic) diagnostic.style.display = 'block';
+}, "", window.location.pathname);
 
   // Hide path section
   document.getElementById("pathSection").classList.remove("active");
@@ -665,3 +699,83 @@ document
   .addEventListener("keypress", function (e) {
     if (e.key === "Enter") generatePath();
   });
+
+/** 
+ * UI Shell Controls 
+ */
+function switchTab(tabId) {
+    AppState.currentTab = tabId;
+    
+    // Update Nav Rail UI
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    const activeNav = document.getElementById(`nav-${tabId}`);
+    if (activeNav) activeNav.classList.add('active');
+
+    // Toggle Content Sections
+    const sessionSection = document.querySelector('.search-section');
+    const librarySection = document.getElementById('gallerySection');
+    const activePathSection = document.getElementById('pathSection');
+    
+    // Default Hide
+    if (sessionSection) sessionSection.style.display = 'none';
+    if (librarySection) librarySection.style.display = 'none';
+    if (activePathSection) activePathSection.style.display = 'none';
+
+    if (tabId === 'session') {
+        if (AppState.currentPath) {
+            activePathSection.style.display = 'block';
+        } else {
+            sessionSection.style.display = 'block';
+        }
+    } else if (tabId === 'library') {
+        librarySection.style.display = 'block';
+    } else if (tabId === 'ops') {
+        // Ops view - could show system metrics or patterns
+        alert('System Heuristics: Monitoring UE5 Pattern Matching Engine...');
+    }
+}
+
+function toggleInspector() {
+    AppState.inspectorOpen = !AppState.inspectorOpen;
+    const shell = document.getElementById('appShell');
+    if (AppState.inspectorOpen) {
+        shell.classList.remove('nav-collapsed');
+    } else {
+        shell.classList.add('nav-collapsed');
+    }
+}
+
+// Ensure inspector elements are moved to the inspector panel
+function moveSidebarToInspector() {
+    const sidebar = document.getElementById('progressSidebar');
+    const inspectorContent = document.getElementById('inspectorContent');
+    if (sidebar && inspectorContent) {
+        // Remove from original flow and move to inspector
+        inspectorContent.appendChild(sidebar);
+        sidebar.style.display = 'block';
+        sidebar.style.position = 'static'; // Unglue from sticky
+        sidebar.style.width = '100%';
+    }
+}
+
+// Run on load
+window.addEventListener('DOMContentLoaded', () => {
+    moveSidebarToInspector();
+    // Default to session tab
+    switchTab('session');
+    
+    // Custom Terminology updates for dynamically rendered items
+    const loaderText = document.querySelector('.loading-text');
+    if (loaderText) loaderText.textContent = 'System Heuristics Running...';
+});
+\nfunction renderProgressSidebar(data) {
+  const tree = document.getElementById('step-tree');
+  if (!tree) return;
+  
+  tree.innerHTML = data.steps.map(step => `
+    <div class="step-tree-item" onclick="document.getElementById('step-${step.number}').scrollIntoView({behavior: 'smooth'})">
+      <span class="tree-indicator">${step.number}</span>
+      <span class="tree-label">${step.title}</span>
+    </div>
+  `).join('');
+}
