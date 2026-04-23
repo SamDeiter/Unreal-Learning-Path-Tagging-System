@@ -125,6 +125,8 @@ function makeTutorAnswerData() {
     confidence: "high",
     howItWorks:
       "Lumen computes global illumination by accumulating light bounces across frames. When the camera moves quickly, the temporal history is invalidated and Lumen must rebuild from scratch, which is what manifests as flicker [1].",
+    diagram:
+      "flowchart LR\n  Cam[Camera Movement] -- invalidates --> Hist[Temporal History]\n  Hist -- feeds --> LumenGI[Lumen GI]\n  LumenGI -- renders --> Frame[Frame Output]",
     fastChecks: [
       "Check Lumen Scene Lighting Quality — should be 4, not 1",
       "Check r.Lumen.ScreenProbeGather.TemporalFilterAlpha value",
@@ -319,6 +321,7 @@ describe("handleProblemFirst", () => {
       expect(result.mostLikelyCause).toContain("temporal accumulation");
       expect(result.confidence).toBe("high");
       expect(result.howItWorks).toContain("Lumen");
+      expect(result.diagram).toMatch(/^flowchart /);
       expect(result.fastChecks).toHaveLength(2);
       expect(result.fixSteps).toHaveLength(3);
       expect(result.ifStillBrokenBranches).toHaveLength(2);
@@ -640,6 +643,7 @@ describe("handleProblemFirst", () => {
       expect(result.success).toBe(true);
       expect(result.responseType).toBe("ANSWER");
       expect(result.howItWorks).toBe("");
+      expect(result.diagram).toBe("");
       expect(result.fastChecks).toEqual([]);
       expect(result.fixSteps).toEqual([]);
       expect(result.ifStillBrokenBranches).toEqual([]);

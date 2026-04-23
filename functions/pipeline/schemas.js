@@ -149,6 +149,10 @@ const TutorAnswerSchema = z
     // scaffold so fastChecks/fixSteps land on a grounded mental model.
     // 2-4 sentences; cites evidence like the rest of the answer.
     howItWorks: z.string().default(""),
+    // Mermaid flowchart source (flowchart TD / flowchart LR) that visualizes
+    // the same components named in howItWorks. Empty string = no diagram.
+    // Client renders with mermaid.js; invalid syntax is silently skipped.
+    diagram: z.string().default(""),
     fastChecks: z.array(z.string()).default([]),
     fixSteps: z.array(z.string()).default([]),
     ifStillBroken: z

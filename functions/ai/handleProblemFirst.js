@@ -114,6 +114,14 @@ STRICT GROUNDING RULES:
 
 SUBSTANCE REQUIREMENTS:
 - howItWorks (2-4 sentences): plain-language primer on the subsystem this problem lives in. Name the components involved (e.g. "Pawns receive input through a PlayerController, which routes it through an Input Component to Action Mappings defined in Project Settings"), state WHY the wiring exists. This is the mental model the learner needs BEFORE verifying or fixing. Grounded in EVIDENCE, not common knowledge. Cite with [n].
+- diagram (Mermaid flowchart source, OPTIONAL): when howItWorks names 3+ components with a clear data/control flow between them, emit a Mermaid flowchart that visualizes that flow. Rules:
+  * Syntax: \`flowchart LR\` or \`flowchart TD\` only. No other chart types.
+  * Maximum 10 nodes. Keep node labels ≤ 4 words.
+  * Every node MUST correspond to a component named in howItWorks. Do NOT invent components that aren't in howItWorks or evidence.
+  * Edges should carry short labels naming the signal/data on the arrow (e.g. "input event", "possesses", "routes to").
+  * Output the raw Mermaid source as a plain string. Do NOT wrap in \`\`\`mermaid fences — the client adds those as needed.
+  * Example: "flowchart LR\\n  PC[PlayerController] -- possesses --> P[Pawn]\\n  P -- routes input --> IC[Input Component]\\n  IC -- fires --> AM[Action Mapping]"
+  * If howItWorks has fewer than 3 components or the flow isn't clearly directional, emit an empty string.
 - fastChecks (2-3): for each named piece in howItWorks, give a single check that confirms it EXISTS and is wired correctly. Each check points at a location the learner can open (menu path, asset, property) and names the telltale "yes, it's there" signal. Do NOT list generic debugging tips here.
 - fixSteps (3-6): ordered, specific; each step names menu path, the button/node/property, and the value. Only used when a fastCheck failed.
 - ifStillBroken (2-3): condition = observable symptom after trying the fix; action = what to try next.
@@ -128,6 +136,7 @@ Return ONLY valid JSON matching this shape:
   "mostLikelyCause": "one sentence",
   "confidence": "high|med|low|NO_DATA_AVAILABLE",
   "howItWorks": "2-4 sentences",
+  "diagram": "flowchart LR\\n  ... (Mermaid source, or empty string)",
   "fastChecks": ["str"],
   "fixSteps": ["str"],
   "ifStillBroken": [{"condition":"str","action":"str"}],
@@ -266,6 +275,7 @@ async function handleProblemFirst(data, context, apiKey) {
         "I couldn't retrieve any UE5 context that matches this problem, so I won't guess at a fix.",
       confidence: "NO_DATA_AVAILABLE",
       howItWorks: "",
+      diagram: "",
       fastChecks: [],
       fixSteps: [],
       ifStillBrokenBranches: [],
@@ -369,6 +379,7 @@ async function handleProblemFirst(data, context, apiKey) {
     mostLikelyCause: answer.mostLikelyCause,
     confidence: answer.confidence,
     howItWorks: answer.howItWorks || "",
+    diagram: answer.diagram || "",
     fastChecks: answer.fastChecks || [],
     fixSteps: answer.fixSteps || [],
     ifStillBrokenBranches: answer.ifStillBroken || [], // schema renames to ifStillBroken

@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import EvidencePanel from "./EvidencePanel";
 import FeedbackPanel from "./FeedbackPanel";
+import HowItWorksDiagram from "./HowItWorksDiagram";
 import OfficialDocsSummary from "../OfficialDocsSummary/OfficialDocsSummary";
 import highlightWithCitations from "../../utils/highlightWithCitations";
 import "./FixProblem.css";
@@ -322,6 +323,7 @@ export default function AnswerView({
             <span className="section-icon">🧭</span> How This Works
           </h3>
           <p className="how-it-works-body">{cite(answer.howItWorks)}</p>
+          {answer.diagram && <HowItWorksDiagram source={answer.diagram} />}
         </div>
       )}
 
@@ -483,6 +485,7 @@ AnswerView.propTypes = {
     mostLikelyCause: PropTypes.string,
     confidence: PropTypes.oneOf(["high", "med", "low"]),
     howItWorks: PropTypes.string,
+    diagram: PropTypes.string,
     fastChecks: PropTypes.arrayOf(PropTypes.string),
     fixSteps: PropTypes.arrayOf(PropTypes.string),
     ifStillBrokenBranches: PropTypes.arrayOf(
