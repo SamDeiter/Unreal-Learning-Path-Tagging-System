@@ -1,6 +1,7 @@
 /**
  * AnswerView - Fix-first answer layout
- * Displays: Most likely cause → Fast checks → Fix steps → If still broken → Learn path → Evidence
+ * Displays: Most likely cause → How it works → Verify the pieces → Fix steps
+ *           → If still broken → (reasoning, collapsible) → Skills → Evidence
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -314,11 +315,21 @@ export default function AnswerView({
 
       <p className="answer-cause">{cite(answer.mostLikelyCause)}</p>
 
-      {/* ─── Fast Checks ─── */}
+      {/* ─── How It Works (concept primer before verification) ─── */}
+      {answer.howItWorks && (
+        <div className="answer-section answer-how-it-works">
+          <h3>
+            <span className="section-icon">🧭</span> How This Works
+          </h3>
+          <p className="how-it-works-body">{cite(answer.howItWorks)}</p>
+        </div>
+      )}
+
+      {/* ─── Verify The Pieces (existence / wiring checks tied to howItWorks) ─── */}
       {answer.fastChecks?.length > 0 && (
         <div className="answer-section answer-fast-checks">
           <h3>
-            <span className="section-icon">⚡</span> Quick Checks
+            <span className="section-icon">⚡</span> Verify The Pieces
           </h3>
           <ul>
             {answer.fastChecks.map((check, i) => (
@@ -471,6 +482,7 @@ AnswerView.propTypes = {
   answer: PropTypes.shape({
     mostLikelyCause: PropTypes.string,
     confidence: PropTypes.oneOf(["high", "med", "low"]),
+    howItWorks: PropTypes.string,
     fastChecks: PropTypes.arrayOf(PropTypes.string),
     fixSteps: PropTypes.arrayOf(PropTypes.string),
     ifStillBrokenBranches: PropTypes.arrayOf(

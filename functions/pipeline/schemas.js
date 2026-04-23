@@ -145,6 +145,10 @@ const TutorAnswerSchema = z
     // Answer payload the UI renders
     mostLikelyCause: z.string().min(1),
     confidence: z.enum(["high", "med", "low", "NO_DATA_AVAILABLE"]),
+    // Plain-language primer on how the subsystem works. Front-loaded concept
+    // scaffold so fastChecks/fixSteps land on a grounded mental model.
+    // 2-4 sentences; cites evidence like the rest of the answer.
+    howItWorks: z.string().default(""),
     fastChecks: z.array(z.string()).default([]),
     fixSteps: z.array(z.string()).default([]),
     ifStillBroken: z

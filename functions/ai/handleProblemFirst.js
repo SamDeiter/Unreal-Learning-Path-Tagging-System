@@ -103,7 +103,7 @@ function buildTutorSystemPrompt(engine) {
 
   return (
     guardrail +
-    `You are a ${engineName} tutor. In ONE response you diagnose the problem, produce the fix, and summarize the learner's takeaway.
+    `You are a ${engineName} tutor. In ONE response you teach how the relevant subsystem works, diagnose the problem, produce the fix, and summarize the learner's takeaway.
 
 STRICT GROUNDING RULES:
 - Every menu path, setting name, node name, console command, property value, or file path must come from the EVIDENCE block. Do NOT invent these — if you would need to guess, lower confidence instead.
@@ -113,8 +113,9 @@ STRICT GROUNDING RULES:
 - If the EVIDENCE block is empty, irrelevant, or contradicts the problem: set confidence="NO_DATA_AVAILABLE", make whyThisResult explain exactly what is missing and what the learner could capture (screenshot, exact error text, project settings), and leave fixSteps with a SINGLE step asking for that specific info. Do NOT fabricate steps.
 
 SUBSTANCE REQUIREMENTS:
-- fastChecks (2-3): each names the exact thing to check AND what "looks wrong" vs "looks right".
-- fixSteps (3-6): ordered, specific; each step names menu path, the button/node/property, and the value.
+- howItWorks (2-4 sentences): plain-language primer on the subsystem this problem lives in. Name the components involved (e.g. "Pawns receive input through a PlayerController, which routes it through an Input Component to Action Mappings defined in Project Settings"), state WHY the wiring exists. This is the mental model the learner needs BEFORE verifying or fixing. Grounded in EVIDENCE, not common knowledge. Cite with [n].
+- fastChecks (2-3): for each named piece in howItWorks, give a single check that confirms it EXISTS and is wired correctly. Each check points at a location the learner can open (menu path, asset, property) and names the telltale "yes, it's there" signal. Do NOT list generic debugging tips here.
+- fixSteps (3-6): ordered, specific; each step names menu path, the button/node/property, and the value. Only used when a fastCheck failed.
 - ifStillBroken (2-3): condition = observable symptom after trying the fix; action = what to try next.
 - whyThisResult (2-3): reasoning chain from symptoms to cause; what ruled out alternatives.
 - objectives.transferable (2-4): full-sentence skills the learner gains, starting with a concrete verb, stating why it transfers.
@@ -126,6 +127,7 @@ Return ONLY valid JSON matching this shape:
   "systems": ["subsystem labels"],
   "mostLikelyCause": "one sentence",
   "confidence": "high|med|low|NO_DATA_AVAILABLE",
+  "howItWorks": "2-4 sentences",
   "fastChecks": ["str"],
   "fixSteps": ["str"],
   "ifStillBroken": [{"condition":"str","action":"str"}],
@@ -263,6 +265,7 @@ async function handleProblemFirst(data, context, apiKey) {
       mostLikelyCause:
         "I couldn't retrieve any UE5 context that matches this problem, so I won't guess at a fix.",
       confidence: "NO_DATA_AVAILABLE",
+      howItWorks: "",
       fastChecks: [],
       fixSteps: [],
       ifStillBrokenBranches: [],
@@ -365,6 +368,7 @@ async function handleProblemFirst(data, context, apiKey) {
     // Answer-first fields
     mostLikelyCause: answer.mostLikelyCause,
     confidence: answer.confidence,
+    howItWorks: answer.howItWorks || "",
     fastChecks: answer.fastChecks || [],
     fixSteps: answer.fixSteps || [],
     ifStillBrokenBranches: answer.ifStillBroken || [], // schema renames to ifStillBroken
