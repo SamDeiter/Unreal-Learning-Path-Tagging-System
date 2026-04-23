@@ -1,14 +1,15 @@
 /**
- * handleProblemFirst.test.js — Unit tests for the problem-first handler.
+ * handleProblemFirst.test.js — Unit tests for the SLIM problem-first handler.
  *
- * Tests the key decision branches:
+ * Tests the key decision branches of the post-audit 2-call architecture:
  *   - Input validation (blocked queries)
- *   - Intent extraction (success / off-topic / failure)
- *   - Confidence routing: clarification, agentic RAG, direct answer
- *   - Response shape for ANSWER, NEEDS_CLARIFICATION, NEEDS_MORE_CONTEXT
- *   - Conversation history sanitization
- *   - Diagnosis cache hit path
- *   - Error resilience (parallel stage failures)
+ *   - Cache hit path (returns cached response)
+ *   - Zero-retrieval refusal (NEEDS_MORE_CONTEXT)
+ *   - Tutor answer (single runStage "tutor_answer" → ANSWER)
+ *   - Off-topic detection
+ *   - Error resilience (LLM failure)
+ *   - Response shape validation (evidence, citations, learnPath, cart shim)
+ *   - Case report sanitization
  */
 
 // ── Mocks ────────────────────────────────────────────────────────────
@@ -23,6 +24,7 @@ jest.mock("../../utils/apiUsage", () => ({
 
 jest.mock("../../pipeline/telemetry", () => ({
   createTrace: jest.fn(() => ({
+    request_id: "trace-123",
     toLog: jest.fn(),
     toDebugPayload: jest.fn(() => ({})),
   })),
@@ -36,48 +38,6 @@ jest.mock("../../pipeline/promptVersions", () => ({
 
 jest.mock("../prompts", () => ({
   UE5_GUARDRAIL: "UE5 ONLY. ",
-  SOCRATIC_ELICITATION_PROMPT: jest.fn(
-    ({ priorSummary, affectiveDirective } = {}) =>
-      `SOCRATIC_PROMPT${priorSummary ? `|prior:${priorSummary}` : ""}${affectiveDirective ? `|affective:${affectiveDirective}` : ""}`
-  ),
-}));
-
-// Default: no feedback. Individual tests override via mockReadLatestFeedback.
-const mockReadLatestFeedback = jest.fn(() => Promise.resolve(null));
-jest.mock("../feedbackReader", () => {
-  // Re-implement buildAffectiveDirective inline so tests can assert on directive
-  // text without importing the real module (which would drag in firebase-admin
-  // before our mock).
-  const MAP = {
-    confused:
-      "The learner marked the previous response as CONFUSING. For this response: use simpler language, add concrete examples, break concepts into smaller steps, and surface any prerequisite knowledge explicitly.",
-    already_knew:
-      "The learner marked the previous response as ALREADY KNOWN. For this response: compress foundational explanation, skip basics, raise the altitude toward advanced nuance or edge cases.",
-    not_helpful:
-      "The learner marked the previous response as NOT HELPFUL. For this response: try a fundamentally different angle — a different analogy, a different level of abstraction, or a worked example instead of explanation.",
-    rejected:
-      "The learner marked the previous response as NOT HELPFUL. For this response: try a fundamentally different angle — a different analogy, a different level of abstraction, or a worked example instead of explanation.",
-    helpful: "",
-    completed: "",
-  };
-  return {
-    readLatestFeedback: (...args) => mockReadLatestFeedback(...args),
-    buildAffectiveDirective: (doc) => {
-      if (!doc || typeof doc !== "object") return "";
-      return MAP[doc.signal] || "";
-    },
-  };
-});
-
-jest.mock("../confidence", () => ({
-  computeConfidence: jest.fn(() => ({ score: 80, reasons: ["good query"] })),
-}));
-
-jest.mock("../../utils/sanitizeInput", () => ({
-  sanitizeAndValidate: jest.fn((q) => {
-    if (!q || q.includes("DROP TABLE")) return { blocked: true, reason: "Injection attempt" };
-    return { blocked: false, clean: q };
-  }),
 }));
 
 jest.mock("../../pipeline/cache", () => ({
@@ -93,17 +53,34 @@ jest.mock("../../utils/pathCacheUtils", () => ({
   writePathCache: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({
-    collection: jest.fn(() => ({
-      doc: jest.fn(() => ({
-        set: jest.fn(() => Promise.resolve()),
-      })),
-    })),
+jest.mock("../../utils/sanitizeInput", () => ({
+  sanitizeAndValidate: jest.fn((q) => {
+    if (!q || q.includes("DROP TABLE")) return { blocked: true, reason: "Injection attempt" };
+    return { blocked: false, clean: q };
+  }),
+}));
+
+jest.mock("../../pipeline/queryEmbedding", () => ({
+  embedQueryText: jest.fn(() => Promise.resolve([0.1, 0.2, 0.3])),
+}));
+
+jest.mock("../../pipeline/citations", () => ({
+  validateCitations: jest.fn(() => ({
+    valid: [1, 2],
+    invalid: [],
+    total_cited: 2,
+    uncited: [],
   })),
 }));
 
-// Add FieldValue mock
+jest.mock("../../pipeline/retrievalLog", () => ({
+  logRetrieval: jest.fn(),
+}));
+
+jest.mock("../sessions", () => ({
+  writeSession: jest.fn(() => Promise.resolve("session-abc")),
+}));
+
 jest.mock("firebase-admin", () => {
   const mockSet = jest.fn(() => Promise.resolve());
   return {
@@ -131,77 +108,68 @@ jest.mock("../../pipeline/llmStage", () => ({
 }));
 
 const { handleProblemFirst } = require("../handleProblemFirst");
-const { computeConfidence } = require("../confidence");
+const { findCachedDiagnosis } = require("../../utils/diagnosisCacheUtils");
+const { logRetrieval } = require("../../pipeline/retrievalLog");
+const { validateCitations } = require("../../pipeline/citations");
+const { writeSession } = require("../sessions");
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
 const fakeContext = { auth: { uid: "test-user-456" } };
 const fakeApiKey = "test-api-key";
 
-function makeIntentData() {
+function makeTutorAnswerData() {
   return {
-    intent_id: "intent_123",
-    user_role: "developer",
-    goal: "fix lighting",
-    problem_description: "Lumen GI flickers when camera moves",
     systems: ["Lumen", "Camera"],
-    constraints: [],
+    mostLikelyCause: "Lumen temporal accumulation resets on fast camera movement",
+    confidence: "high",
+    fastChecks: [
+      "Check Lumen Scene Lighting Quality — should be 4, not 1",
+      "Check r.Lumen.ScreenProbeGather.TemporalFilterAlpha value",
+    ],
+    fixSteps: [
+      "Open Project Settings > Engine > Rendering > Global Illumination",
+      "Set Lumen Scene Lighting Quality to 4",
+      "Set r.Lumen.ScreenProbeGather.TemporalFilterAlpha to 0.1 via console",
+    ],
+    ifStillBroken: [
+      { condition: "Flicker persists in dark areas only", action: "Enable Distance Field AO as supplement" },
+      { condition: "Flicker appears on all surfaces", action: "Check if Nanite is enabled — Nanite+Lumen interact differently" },
+    ],
+    whyThisResult: [
+      "Lumen uses temporal accumulation that resets when the camera moves quickly [1]",
+      "Lowering the temporal filter alpha increases stability at the cost of slight softening [2]",
+    ],
+    objectives: {
+      fixSpecific: ["Set Lumen quality to 4", "Tune temporal filter alpha"],
+      transferable: [
+        "Diagnose temporal-based rendering artifacts by correlating flicker with camera motion",
+        "Tune Lumen quality vs performance tradeoffs for real-time lighting",
+      ],
+    },
+    pathSummary:
+      "You'll learn to stabilize Lumen GI by tuning temporal accumulation settings, understanding how camera motion affects probe gathering.",
   };
 }
 
-function makeDiagnosisData() {
-  return {
-    diagnosis_id: "diag_123",
-    problem_summary: "Lumen temporal instability",
-    root_causes: ["Lumen temporal accumulation resets on fast camera movement"],
-    signals_to_watch_for: ["Flicker in dark areas"],
-    variables_that_matter: ["Lumen Scene Lighting Quality"],
-    variables_that_do_not: ["Screen resolution"],
-    generalization_scope: ["All Lumen GI scenes"],
-    cited_sources: [],
-  };
-}
-
-function makeObjectivesData() {
-  return {
-    fix_specific: ["Increase temporal stability settings"],
-    transferable: ["Understanding Lumen temporal accumulation"],
-  };
-}
-
-// Setup for a successful full pipeline (4 parallel stages)
-function setupFullPipelineSuccess() {
-  mockRunStage
-    // Intent
-    .mockResolvedValueOnce({ success: true, data: makeIntentData() })
-    // Diagnosis
-    .mockResolvedValueOnce({ success: true, data: makeDiagnosisData() })
-    // Objectives
-    .mockResolvedValueOnce({ success: true, data: makeObjectivesData() })
-    // Validation (parallel)
-    .mockResolvedValueOnce({ success: true, data: { approved: true, reason: "Good" } })
-    // Path Summary (parallel)
-    .mockResolvedValueOnce({ success: true, data: { path_summary: "Learn Lumen settings", topics_covered: ["Lumen"] } })
-    // Micro-lesson (parallel) — skipped since no passages
-    // Answer Data (parallel)
-    .mockResolvedValueOnce({
-      success: true,
-      data: {
-        mostLikelyCause: "Temporal instability",
-        confidence: "high",
-        fastChecks: ["Check Lumen quality"],
-        fixSteps: ["Go to Project Settings > Lumen"],
-        ifStillBrokenBranches: [],
-        whyThisResult: ["Lumen uses temporal accumulation"],
-      },
-    });
+function makePassages(count = 2) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `passage-${i + 1}`,
+    text: `Passage ${i + 1} about Lumen temporal accumulation.`,
+    courseCode: `LUM10${i + 1}`,
+    videoTitle: `Lumen Basics ${i + 1}`,
+    timestamp: `${i + 1}:30`,
+    source: "transcript",
+    similarity: 0.85 - i * 0.1,
+    url: "",
+    title: "",
+    section: "",
+  }));
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
-  computeConfidence.mockReturnValue({ score: 80, reasons: ["good query"] });
-  mockReadLatestFeedback.mockReset();
-  mockReadLatestFeedback.mockResolvedValue(null);
+  findCachedDiagnosis.mockResolvedValue({ hit: false });
 });
 
 // ── Tests ────────────────────────────────────────────────────────────
@@ -221,19 +189,261 @@ describe("handleProblemFirst", () => {
       expect(result.mode).toBe("problem-first");
       expect(result.error).toBe("Injection attempt");
     });
+
+    it("blocks empty queries", async () => {
+      const result = await handleProblemFirst(
+        { query: "" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(false);
+    });
   });
 
-  // ── Intent extraction ───────────────────────────────────────────
+  // ── Cache hit path ──────────────────────────────────────────────
 
-  describe("intent extraction", () => {
-    it("returns off_topic when intent fails with off-topic raw text", async () => {
-      mockRunStage.mockResolvedValueOnce({
-        success: false,
-        error: { rawText: "off_topic: not UE5" },
+  describe("diagnosis cache hit", () => {
+    it("returns cached response immediately when cache hits", async () => {
+      const cachedResponse = {
+        success: true,
+        mode: "problem-first",
+        responseType: "ANSWER",
+        mostLikelyCause: "Cached cause",
+        confidence: "high",
+      };
+      findCachedDiagnosis.mockResolvedValue({
+        hit: true,
+        result: cachedResponse,
+        similarity: 0.95,
+        docId: "cache-doc-1",
       });
 
       const result = await handleProblemFirst(
-        { query: "How to cook pasta" },
+        { query: "Lumen GI flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.mostLikelyCause).toBe("Cached cause");
+      expect(result._cached).toBe(true);
+      expect(result._cacheSimilarity).toBe(0.95);
+      expect(result.sessionId).toBe("session-abc");
+      // Should NOT call runStage when cache hits
+      expect(mockRunStage).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── Zero-retrieval refusal ─────────────────────────────────────
+
+  describe("zero-retrieval refusal", () => {
+    it("returns NEEDS_MORE_CONTEXT when no passages are provided", async () => {
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers", retrievedContext: [] },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("NEEDS_MORE_CONTEXT");
+      expect(result.refused).toBe(true);
+      expect(result.refusalReason).toBe("no_retrieval");
+      expect(result.confidence).toBe("NO_DATA_AVAILABLE");
+      expect(result.fastChecks).toEqual([]);
+      expect(result.fixSteps).toEqual([]);
+      expect(mockRunStage).not.toHaveBeenCalled();
+    });
+
+    it("returns NEEDS_MORE_CONTEXT when retrievedContext is undefined", async () => {
+      const result = await handleProblemFirst(
+        { query: "Blueprint compile error" },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("NEEDS_MORE_CONTEXT");
+      expect(result.refused).toBe(true);
+    });
+
+    it("emits retrieval log with refused flag on zero-retrieval", async () => {
+      await handleProblemFirst(
+        { query: "Niagara crash", retrievedContext: [] },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(logRetrieval).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: "problem-first",
+          flags: { refused: true, reason: "no_passages" },
+        })
+      );
+    });
+
+    it("writes a session even on refusal", async () => {
+      const result = await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: [] },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(writeSession).toHaveBeenCalled();
+      expect(result.sessionId).toBe("session-abc");
+    });
+  });
+
+  // ── Full pipeline: ANSWER response ──────────────────────────────
+
+  describe("full pipeline — tutor_answer stage", () => {
+    it("returns complete ANSWER response with all expected fields", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen GI flickers when camera moves", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.mode).toBe("problem-first");
+      expect(result.responseType).toBe("ANSWER");
+
+      // Answer-first fields
+      expect(result.mostLikelyCause).toContain("temporal accumulation");
+      expect(result.confidence).toBe("high");
+      expect(result.fastChecks).toHaveLength(2);
+      expect(result.fixSteps).toHaveLength(3);
+      expect(result.ifStillBrokenBranches).toHaveLength(2);
+      expect(result.whyThisResult).toHaveLength(2);
+
+      // Learn path
+      expect(result.learnPath).toBeDefined();
+      expect(result.learnPath.pathSummary).toContain("Lumen GI");
+      expect(result.learnPath.objectives.transferable).toHaveLength(2);
+      expect(result.learnPath.objectives.fixSpecific).toHaveLength(2);
+
+      // Legacy cart shim
+      expect(result.cart).toBeDefined();
+      expect(result.cart.mode).toBe("problem-first");
+      expect(result.cart.intent.systems).toEqual(["Lumen", "Camera"]);
+      expect(result.cart.diagnosis.root_causes).toHaveLength(1);
+      expect(result.cart.objectives.fix_specific).toHaveLength(2);
+    });
+
+    it("calls runStage exactly once with tutor_answer stage", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      await handleProblemFirst(
+        { query: "Lumen GI flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(mockRunStage).toHaveBeenCalledTimes(1);
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.stage).toBe("tutor_answer");
+      expect(stageArgs.systemPrompt).toContain("tutor");
+      expect(stageArgs.userPrompt).toContain("Lumen GI flickers");
+    });
+
+    it("includes evidence array with citation flags in response", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.evidence).toBeDefined();
+      expect(result.evidence).toHaveLength(2);
+      expect(result.evidence[0].courseCode).toBe("LUM101");
+      expect(result.evidence[0].ref).toBe(1);
+      expect(result.evidence[0].id).toBe("passage-1");
+      // Citation validation mock returns valid=[1,2]
+      expect(result.citedRefs).toEqual([1, 2]);
+      expect(result.invalidCitedRefs).toEqual([]);
+    });
+
+    it("includes _meta with citation report and retrieval count", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: makePassages(3) },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result._meta).toBeDefined();
+      expect(result._meta.retrieved_count).toBe(3);
+      expect(result._meta.stages_called).toEqual(["tutor_answer"]);
+      expect(result._meta.request_id).toBe("trace-123");
+    });
+
+    it("calls validateCitations with answer and passages", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(validateCitations).toHaveBeenCalledWith(
+        expect.objectContaining({ confidence: "high" }),
+        expect.arrayContaining([expect.objectContaining({ id: "passage-1" })])
+      );
+    });
+
+    it("emits retrieval log with refused=false on successful answer", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(logRetrieval).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mode: "problem-first",
+          flags: { refused: false },
+        })
+      );
+    });
+  });
+
+  // ── Off-topic detection ────────────────────────────────────────
+
+  describe("off-topic detection", () => {
+    it("returns off_topic when LLM error contains off_topic marker", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: false,
+        error: { rawText: 'off_topic: not UE5 related' },
+      });
+
+      const result = await handleProblemFirst(
+        { query: "How to cook pasta", retrievedContext: makePassages() },
         fakeContext,
         fakeApiKey
       );
@@ -243,14 +453,30 @@ describe("handleProblemFirst", () => {
       expect(result.message).toContain("UE5");
     });
 
-    it("returns generic error when intent fails without off-topic", async () => {
+    it("returns off_topic when LLM error contains error JSON marker", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: false,
+        error: { rawText: '{"error": "off_topic"}' },
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Python list comprehension", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("off_topic");
+    });
+
+    it("returns generic error when LLM fails without off-topic marker", async () => {
       mockRunStage.mockResolvedValueOnce({
         success: false,
         error: "LLM timeout",
       });
 
       const result = await handleProblemFirst(
-        { query: "Blueprint compile error in my project" },
+        { query: "Blueprint compile error", retrievedContext: makePassages() },
         fakeContext,
         fakeApiKey
       );
@@ -260,578 +486,278 @@ describe("handleProblemFirst", () => {
     });
   });
 
-  // ── Confidence routing: clarification ───────────────────────────
-
-  describe("confidence routing — clarification", () => {
-    it("asks clarifying question when confidence < 50 and rounds remain", async () => {
-      computeConfidence.mockReturnValue({ score: 30, reasons: ["vague query"] });
-
-      // Intent succeeds
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
-      // Clarification question succeeds
-      mockRunStage.mockResolvedValueOnce({
-        success: true,
-        data: {
-          question: "What renderer are you using?",
-          options: ["Lumen", "Path Tracing", "Forward"],
-          whyAsking: "Helps narrow the GI algorithm",
-          intent_id: "clarify",
-        },
-      });
-
-      const result = await handleProblemFirst(
-        { query: "Lighting looks wrong" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("NEEDS_CLARIFICATION");
-      expect(result.question).toBe("What renderer are you using?");
-      expect(result.options).toHaveLength(3);
-      expect(result.clarifyRound).toBe(1);
-    });
-  });
-
-  // ── Confidence routing: agentic RAG ─────────────────────────────
-
-  describe("confidence routing — agentic RAG", () => {
-    it("returns NEEDS_MORE_CONTEXT when low confidence + few passages + max clarify rounds reached", async () => {
-      computeConfidence.mockReturnValue({ score: 30, reasons: ["vague"] });
-
-      // Intent succeeds
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
-      // clarifyRound=3 == MAX_CLARIFY_ROUNDS, so clarification branch is SKIPPED.
-      // Agentic search succeeds (this is the 2nd mock call, not 3rd)
-      mockRunStage.mockResolvedValueOnce({
-        success: true,
-        data: {
-          searchQueries: ["UE5 Lumen temporal stability", "UE5 GI flicker fix"],
-          searchReason: "Need specific Lumen settings documentation",
-          intent_id: "search_strategy",
-        },
-      });
-
-      const result = await handleProblemFirst(
-        { query: "Lighting looks wrong", conversationHistory: [
-          { role: "assistant", content: "What renderer?" },
-          { role: "user", content: "Lumen" },
-          { role: "assistant", content: "What about quality?" },
-          { role: "user", content: "Default" },
-          { role: "assistant", content: "Screen percentage?" },
-          { role: "user", content: "100" },
-        ]},
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("NEEDS_MORE_CONTEXT");
-      expect(result.searchQueries).toHaveLength(2);
-      expect(result.agenticRound).toBe(1);
-    });
-  });
-
-  // ── Full pipeline: ANSWER response ──────────────────────────────
-
-  describe("full pipeline — direct answer", () => {
-    it("returns complete ANSWER response with all fields", async () => {
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers when camera moves" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.mode).toBe("problem-first");
-      expect(result.responseType).toBe("ANSWER");
-      // Answer-first fields
-      expect(result.mostLikelyCause).toBe("Temporal instability");
-      expect(result.confidence).toBe("high");
-      expect(result.fastChecks).toEqual(["Check Lumen quality"]);
-      expect(result.fixSteps).toEqual(["Go to Project Settings > Lumen"]);
-      // Cart
-      expect(result.cart).toBeDefined();
-      expect(result.cart.mode).toBe("problem-first");
-      expect(result.cart.intent).toBeDefined();
-      expect(result.cart.diagnosis).toBeDefined();
-      expect(result.cart.objectives).toBeDefined();
-      // Learn path
-      expect(result.learnPath).toBeDefined();
-      expect(result.learnPath.pathSummary).toBe("Learn Lumen settings");
-    });
-
-    it("includes evidence array in response", async () => {
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        {
-          query: "Lumen flickers",
-          retrievedContext: [
-            { text: "Lumen uses temporal", courseCode: "LUM101", videoTitle: "Lumen Basics", timestamp: "2:30" },
-          ],
-        },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.evidence).toBeDefined();
-      expect(result.evidence.length).toBeGreaterThan(0);
-      expect(result.evidence[0].courseCode).toBe("LUM101");
-    });
-  });
-
-  // ── Diagnosis failure ───────────────────────────────────────────
-
-  describe("diagnosis failure", () => {
-    it("returns error when diagnosis stage fails", async () => {
-      mockRunStage
-        .mockResolvedValueOnce({ success: true, data: makeIntentData() })
-        .mockResolvedValueOnce({ success: false, error: "Diagnosis LLM error" });
-
-      const result = await handleProblemFirst(
-        { query: "Blueprint compile error in animation graph" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Diagnosis LLM error");
-    });
-  });
-
-  // ── Objectives failure ──────────────────────────────────────────
-
-  describe("objectives failure", () => {
-    it("returns error when objectives stage fails", async () => {
-      mockRunStage
-        .mockResolvedValueOnce({ success: true, data: makeIntentData() })
-        .mockResolvedValueOnce({ success: true, data: makeDiagnosisData() })
-        .mockResolvedValueOnce({ success: false, error: "Objectives LLM error" });
-
-      const result = await handleProblemFirst(
-        { query: "Niagara particles not spawning" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Objectives LLM error");
-    });
-  });
-
-  // ── Conversation history sanitization ───────────────────────────
-
-  describe("conversation history sanitization", () => {
-    it("caps conversation history to MAX_CLARIFY_ROUNDS * 2 entries", async () => {
-      setupFullPipelineSuccess();
-
-      // 10 entries → should be capped to 6 (MAX_CLARIFY_ROUNDS=3, *2=6)
-      const longHistory = Array.from({ length: 10 }, (_, i) => ({
-        role: i % 2 === 0 ? "user" : "assistant",
-        content: `Message ${i}`,
-      }));
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", conversationHistory: longHistory },
-        fakeContext,
-        fakeApiKey
-      );
-
-      // Should still succeed (history is sanitized internally)
-      expect(result.success).toBe(true);
-    });
-  });
-
-  // ── Case report sanitization ────────────────────────────────────
+  // ── Case report handling ───────────────────────────────────────
 
   describe("case report handling", () => {
-    it("includes sanitized case report in intent extraction", async () => {
-      setupFullPipelineSuccess();
+    it("includes sanitized case report fields in the user prompt", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
 
-      const result = await handleProblemFirst(
+      await handleProblemFirst(
         {
           query: "Lumen flickers",
+          retrievedContext: makePassages(),
           caseReport: {
             engineVersion: "5.3",
             platform: "Windows",
             renderer: "Deferred",
             errorStrings: ["GI flicker"],
-            features: ["Lumen"],
+            whatChangedRecently: "Updated to UE 5.3",
           },
         },
         fakeContext,
         fakeApiKey
       );
 
-      expect(result.success).toBe(true);
-      // Verify runStage was called with case context in the user prompt
-      const intentCall = mockRunStage.mock.calls[0][0];
-      expect(intentCall.userPrompt).toContain("5.3");
-      expect(intentCall.userPrompt).toContain("Windows");
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.userPrompt).toContain("5.3");
+      expect(stageArgs.userPrompt).toContain("Windows");
+      expect(stageArgs.userPrompt).toContain("Deferred");
     });
-  });
 
-  // ── Socratic elicitation (opt-in "Tutor me") ───────────────────
-
-  describe("socratic elicitation", () => {
-    it("returns SOCRATIC_ELICIT when socratic=true AND conversationHistory is empty", async () => {
-      // Intent succeeds
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
-      // Socratic elicitation stage succeeds
+    it("includes exclusions as 'already tried' in the prompt", async () => {
       mockRunStage.mockResolvedValueOnce({
         success: true,
-        data: {
-          kind: "clarify",
-          question: "When you say the Lumen GI flickers, is the flicker tied to camera motion or to lighting changes in the scene?",
-          intent: "Learner assumes the bug is in Lumen; probing whether it's actually camera-driven.",
-        },
+        data: makeTutorAnswerData(),
       });
 
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers when camera moves", socratic: true },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("SOCRATIC_ELICIT");
-      expect(result.kind).toBe("clarify");
-      expect(result.question).toContain("Lumen");
-      expect(result.intent).toBeTruthy();
-      // Only 2 runStage calls: intent + socratic. No diagnosis/objectives.
-      expect(mockRunStage).toHaveBeenCalledTimes(2);
-    });
-
-    it("falls through to full diagnosis when socratic=true BUT conversationHistory is non-empty", async () => {
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
+      await handleProblemFirst(
         {
-          query: "Lumen GI flickers when camera moves",
-          socratic: true,
-          conversationHistory: [
-            { role: "assistant", content: "Is the flicker tied to camera motion?" },
-            { role: "user", content: "Yes, only when I pan quickly." },
-          ],
-        },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("ANSWER");
-      // Socratic stage must NOT have been invoked on a follow-up turn.
-      // Expect: intent, diagnosis, objectives, validation, path_summary, answer
-      // = 6 runStage calls (micro-lesson skipped since no passages).
-      expect(mockRunStage).toHaveBeenCalledTimes(6);
-    });
-
-    it("runs normal diagnosis when socratic=false (default)", async () => {
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers when camera moves", socratic: false },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("ANSWER");
-      expect(mockRunStage).toHaveBeenCalledTimes(6);
-    });
-
-    it("falls through to normal pipeline if Socratic stage fails", async () => {
-      // Intent ok
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
-      // Socratic stage fails
-      mockRunStage.mockResolvedValueOnce({ success: false, error: "socratic LLM error" });
-      // Then the rest of the pipeline kicks in
-      mockRunStage
-        .mockResolvedValueOnce({ success: true, data: makeDiagnosisData() })
-        .mockResolvedValueOnce({ success: true, data: makeObjectivesData() })
-        .mockResolvedValueOnce({ success: true, data: { approved: true, reason: "ok" } })
-        .mockResolvedValueOnce({ success: true, data: { path_summary: "sum", topics_covered: [] } })
-        .mockResolvedValueOnce({
-          success: true,
-          data: {
-            mostLikelyCause: "Fallback cause",
-            confidence: "med",
-            fastChecks: [],
-            fixSteps: [],
-            ifStillBrokenBranches: [],
-            whyThisResult: [],
+          query: "Lumen flickers",
+          retrievedContext: makePassages(),
+          caseReport: {
+            exclusions: ["Restarting editor", "Clearing shader cache"],
           },
-        });
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers when camera moves", socratic: true },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("ANSWER");
-    });
-  });
-
-  // ── Affective feedback loop (Phase 3) ───────────────────────────
-
-  describe("affective feedback loop", () => {
-    it("injects confused directive into the diagnosis system prompt", async () => {
-      mockReadLatestFeedback.mockResolvedValue({
-        id: "fb-1",
-        signal: "confused",
-        sessionId: "sess-xyz",
-        createdAt: Date.now() - 60_000,
-      });
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", sessionId: "sess-xyz" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("ANSWER");
-      // Diagnosis is the 2nd runStage call (index 1). Its systemPrompt should
-      // contain the CONFUSING directive text.
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.stage).toBe("diagnosis");
-      expect(diagnosisCall.systemPrompt).toContain("AFFECTIVE SIGNAL");
-      expect(diagnosisCall.systemPrompt).toContain("CONFUSING");
-    });
-
-    it("falls back to priorSessionId feedback when in-session has none", async () => {
-      // First call (in-session) → null, second call (priorSessionId) → confused
-      mockReadLatestFeedback
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: "fb-2",
-          signal: "already_knew",
-          sessionId: "prev-session",
-          createdAt: Date.now() - 30_000,
-        });
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        {
-          query: "Nanite LOD edge case",
-          sessionId: "sess-new",
-          priorSessionId: "prev-session",
         },
         fakeContext,
         fakeApiKey
       );
 
-      expect(result.success).toBe(true);
-      expect(mockReadLatestFeedback).toHaveBeenCalledTimes(2);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).toContain("ALREADY KNOWN");
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.userPrompt).toContain("Already tried");
+      expect(stageArgs.userPrompt).toContain("Restarting editor");
     });
 
-    it("emits no affective block when feedback signal is helpful (no directive)", async () => {
-      mockReadLatestFeedback.mockResolvedValue({
-        id: "fb-3",
-        signal: "helpful",
-        createdAt: Date.now() - 60_000,
-      });
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", sessionId: "sess-1" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).not.toContain("AFFECTIVE SIGNAL (from prior response):");
-    });
-
-    it("emits no affective block when no feedback exists", async () => {
-      mockReadLatestFeedback.mockResolvedValue(null);
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Blueprint compile error", sessionId: "sess-1" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).not.toContain("AFFECTIVE SIGNAL (from prior response):");
-    });
-
-    it("threads directive into Socratic prompt when socratic=true and feedback exists", async () => {
-      const { SOCRATIC_ELICITATION_PROMPT } = require("../prompts");
-      mockReadLatestFeedback.mockResolvedValue({
-        id: "fb-4",
-        signal: "not_helpful",
-        sessionId: "sess-xyz",
-        createdAt: Date.now() - 10_000,
-      });
-
-      // Intent ok; socratic stage ok
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+    it("handles null caseReport gracefully", async () => {
       mockRunStage.mockResolvedValueOnce({
         success: true,
-        data: { kind: "clarify", question: "What have you already tried?", intent: "probe prior attempts" },
+        data: makeTutorAnswerData(),
       });
 
       const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", socratic: true, sessionId: "sess-xyz" },
+        { query: "Lumen flickers", retrievedContext: makePassages() },
         fakeContext,
         fakeApiKey
       );
 
       expect(result.success).toBe(true);
-      expect(result.responseType).toBe("SOCRATIC_ELICIT");
-      // Verify the SOCRATIC prompt builder received a non-empty affectiveDirective.
-      const socraticArgs = SOCRATIC_ELICITATION_PROMPT.mock.calls[0][0];
-      expect(socraticArgs.affectiveDirective).toContain("NOT HELPFUL");
     });
   });
 
-  // ── Phase 3 — UDL reading-level directive threading ─────────────
+  // ── Passage sanitization ───────────────────────────────────────
 
-  describe("reading-level directive (Phase 3 — UDL slider)", () => {
-    it("threads 'simple' readingLevel into the diagnosis prompt (middle-school reading level)", async () => {
-      setupFullPipelineSuccess();
+  describe("passage sanitization", () => {
+    it("caps passages to MAX_PASSAGES (10)", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
 
       const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", readingLevel: "simple" },
+        { query: "Lumen flickers", retrievedContext: makePassages(15) },
         fakeContext,
         fakeApiKey
       );
 
       expect(result.success).toBe(true);
-      // Diagnosis is the 2nd runStage call (index 1).
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.stage).toBe("diagnosis");
-      expect(diagnosisCall.systemPrompt).toContain("READING LEVEL DIRECTIVE");
-      expect(diagnosisCall.systemPrompt).toContain("middle-school reading level");
-      // Persisted on response for telemetry
-      expect(result.readingLevel).toBe("simple");
-      expect(result.cart.readingLevel).toBe("simple");
+      expect(result.evidence).toHaveLength(10);
     });
 
-    it("threads 'advanced' readingLevel into the diagnosis prompt (graduate reading level)", async () => {
-      setupFullPipelineSuccess();
+    it("preserves passage IDs through the pipeline", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
 
       const result = await handleProblemFirst(
-        { query: "Niagara GPU sim edge case", readingLevel: "advanced" },
+        { query: "Lumen flickers", retrievedContext: makePassages(3) },
         fakeContext,
         fakeApiKey
       );
 
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).toContain("READING LEVEL DIRECTIVE");
-      expect(diagnosisCall.systemPrompt).toContain("graduate reading level");
-      expect(result.readingLevel).toBe("advanced");
+      expect(result.evidence[0].id).toBe("passage-1");
+      expect(result.evidence[1].id).toBe("passage-2");
+      expect(result.evidence[2].id).toBe("passage-3");
     });
+  });
 
-    it("emits no reading-level directive for 'standard' (default voice unchanged)", async () => {
-      setupFullPipelineSuccess();
+  // ── UEFN engine variant ────────────────────────────────────────
 
-      const result = await handleProblemFirst(
-        { query: "Blueprint compile error", readingLevel: "standard" },
+  describe("UEFN engine variant", () => {
+    it("uses UEFN guardrail when engine=UEFN", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      await handleProblemFirst(
+        { query: "Verse script error", retrievedContext: makePassages(), engine: "UEFN" },
         fakeContext,
         fakeApiKey
       );
 
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
-      expect(result.readingLevel).toBe("standard");
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.systemPrompt).toContain("UEFN");
+      expect(stageArgs.systemPrompt).toContain("Verse");
     });
+  });
 
-    it("falls back silently to 'standard' when readingLevel is unknown (no error, no directive)", async () => {
-      setupFullPipelineSuccess();
+  // ── Edge cases: graceful degradation ───────────────────────────
 
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", readingLevel: "phd-plus" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
-      // Coerced to "standard" server-side
-      expect(result.readingLevel).toBe("standard");
-    });
-
-    it("defaults to 'standard' when readingLevel is missing entirely", async () => {
-      setupFullPipelineSuccess();
-
-      const result = await handleProblemFirst(
-        { query: "Lumen GI flickers" },
-        fakeContext,
-        fakeApiKey
-      );
-
-      expect(result.success).toBe(true);
-      const diagnosisCall = mockRunStage.mock.calls[1][0];
-      expect(diagnosisCall.systemPrompt).not.toContain("READING LEVEL DIRECTIVE");
-      expect(result.readingLevel).toBe("standard");
-    });
-
-    it("threads readingLevel into SOCRATIC_ELICITATION_PROMPT when socratic=true", async () => {
-      const { SOCRATIC_ELICITATION_PROMPT } = require("../prompts");
-
-      mockRunStage.mockResolvedValueOnce({ success: true, data: makeIntentData() });
+  describe("graceful degradation", () => {
+    it("handles missing optional fields in LLM answer", async () => {
       mockRunStage.mockResolvedValueOnce({
         success: true,
         data: {
-          kind: "clarify",
-          question: "What have you already tried?",
-          intent: "probe prior attempts",
+          systems: ["Lumen"],
+          mostLikelyCause: "Unknown cause",
+          confidence: "low",
+          // Missing: fastChecks, fixSteps, ifStillBroken, objectives, pathSummary
         },
       });
 
       const result = await handleProblemFirst(
-        { query: "Lumen GI flickers", socratic: true, readingLevel: "simple" },
+        { query: "Lumen flickers", retrievedContext: makePassages() },
         fakeContext,
         fakeApiKey
       );
 
       expect(result.success).toBe(true);
-      expect(result.responseType).toBe("SOCRATIC_ELICIT");
-      const socraticArgs = SOCRATIC_ELICITATION_PROMPT.mock.calls[0][0];
-      expect(socraticArgs.readingLevelDirective).toContain("middle-school reading level");
+      expect(result.responseType).toBe("ANSWER");
+      expect(result.fastChecks).toEqual([]);
+      expect(result.fixSteps).toEqual([]);
+      expect(result.ifStillBrokenBranches).toEqual([]);
+      expect(result.whyThisResult).toEqual([]);
+      expect(result.learnPath.pathSummary).toBe("");
+      expect(result.learnPath.objectives.transferable).toEqual([]);
+    });
+
+    it("handles epic_docs source passages in evidence block", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const epicPassages = [
+        {
+          id: "doc-1",
+          text: "Lumen uses software ray tracing",
+          source: "epic_docs",
+          title: "Lumen Technical Reference",
+          section: "Architecture Overview",
+          similarity: 0.9,
+        },
+      ];
+
+      await handleProblemFirst(
+        { query: "Lumen architecture", retrievedContext: epicPassages },
+        fakeContext,
+        fakeApiKey
+      );
+
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.userPrompt).toContain("Lumen Technical Reference");
+      expect(stageArgs.userPrompt).toContain("Architecture Overview");
+    });
+
+    it("handles cache check failure gracefully (continues to LLM)", async () => {
+      findCachedDiagnosis.mockRejectedValue(new Error("Firestore timeout"));
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const result = await handleProblemFirst(
+        { query: "Lumen flickers", retrievedContext: makePassages() },
+        fakeContext,
+        fakeApiKey
+      );
+
+      // Should still succeed via LLM path
+      expect(result.success).toBe(true);
+      expect(result.responseType).toBe("ANSWER");
     });
   });
 
-  // ── Parallel stage resilience ───────────────────────────────────
+  // ── Session writes ─────────────────────────────────────────────
 
-  describe("parallel stage resilience", () => {
-    it("still returns ANSWER even if validation stage rejects", async () => {
-      mockRunStage
-        .mockResolvedValueOnce({ success: true, data: makeIntentData() })
-        .mockResolvedValueOnce({ success: true, data: makeDiagnosisData() })
-        .mockResolvedValueOnce({ success: true, data: makeObjectivesData() })
-        // Validation rejects
-        .mockRejectedValueOnce(new Error("Validation crashed"))
-        // Path summary
-        .mockResolvedValueOnce({ success: true, data: { path_summary: "Summary", topics_covered: [] } })
-        // Answer data
-        .mockResolvedValueOnce({ success: true, data: { mostLikelyCause: "Unknown", confidence: "med", fastChecks: [], fixSteps: [], ifStillBrokenBranches: [], whyThisResult: [] } });
+  describe("session writes", () => {
+    it("writes session on ANSWER and returns sessionId", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
 
       const result = await handleProblemFirst(
-        { query: "Nanite mesh not rendering correctly" },
+        { query: "Lumen flickers", retrievedContext: makePassages(), sessionId: "custom-session" },
         fakeContext,
         fakeApiKey
       );
 
-      // Should still return a result (validation failure is non-blocking)
-      expect(result.success).toBe(true);
-      expect(result.responseType).toBe("ANSWER");
+      expect(writeSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          uid: "test-user-456",
+          mode: "problemFirst",
+          sessionId: "custom-session",
+        })
+      );
+      expect(result.sessionId).toBe("session-abc");
+    });
+  });
+
+  // ── Tag detection passthrough ──────────────────────────────────
+
+  describe("tag detection passthrough", () => {
+    it("includes detected tags in user prompt", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      await handleProblemFirst(
+        {
+          query: "Lumen flickers",
+          retrievedContext: makePassages(),
+          detectedTagIds: ["lumen_gi", "camera_movement"],
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      const stageArgs = mockRunStage.mock.calls[0][0];
+      expect(stageArgs.userPrompt).toContain("lumen_gi");
+      expect(stageArgs.userPrompt).toContain("camera_movement");
+    });
+
+    it("passes detected tags into the cart shim", async () => {
+      mockRunStage.mockResolvedValueOnce({
+        success: true,
+        data: makeTutorAnswerData(),
+      });
+
+      const result = await handleProblemFirst(
+        {
+          query: "Lumen flickers",
+          retrievedContext: makePassages(),
+          detectedTagIds: ["lumen_gi"],
+        },
+        fakeContext,
+        fakeApiKey
+      );
+
+      expect(result.cart.diagnosis.matched_tag_ids).toEqual(["lumen_gi"]);
     });
   });
 });
