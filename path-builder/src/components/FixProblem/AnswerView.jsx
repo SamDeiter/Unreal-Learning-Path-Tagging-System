@@ -23,6 +23,20 @@ function fixStepsKey(cause, steps) {
   return `fixSteps:${h}`;
 }
 
+// Claude often prefixes list items with a markdown-bold title like
+// `**Check Project Settings for Jump Action Mapping:** Go to ...`.
+// Rendering that inline just makes each item visually heavier; splitting
+// it into a title + body block gives the list real hierarchy.
+function splitTitle(text) {
+  if (!text || typeof text !== "string") return { title: null, body: text };
+  const m = text.match(/^\s*\*\*([^*\n]+?)\*\*\s*/);
+  if (!m) return { title: null, body: text };
+  let title = m[1].trim();
+  title = title.replace(/^\d+\.\s*/, ""); // drop "N. " — the list already numbers
+  title = title.replace(/[:：]\s*$/, ""); // drop trailing colon, ASCII or full-width
+  return { title, body: text.slice(m[0].length) };
+}
+
 function loadCheckedSteps(key) {
   if (!key || typeof window === "undefined") return new Set();
   try {
@@ -48,7 +62,8 @@ function openFixStepsPopout({ steps, checked }) {
   );
   if (!popup) return null;
 
-  const stepsJSON = JSON.stringify(steps);
+  const splitSteps = steps.map(splitTitle);
+  const stepsJSON = JSON.stringify(splitSteps);
   const checkedJSON = JSON.stringify([...checked]);
 
   popup.document.open();
@@ -114,12 +129,26 @@ function openFixStepsPopout({ steps, checked }) {
     flex-shrink: 0;
     transition: color 0.2s ease;
   }
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+  }
+  .title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    line-height: 1.3;
+  }
   .text {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     line-height: 1.5;
+    color: rgba(229,231,235,0.85);
     transition: color 0.2s ease;
   }
   li.checked { opacity: 0.7; }
+  li.checked .title,
   li.checked .text {
     text-decoration: line-through;
     text-decoration-color: rgba(107,114,128,0.6);
@@ -146,11 +175,17 @@ function escapeHtml(s) {
 function render() {
   list.innerHTML = steps.map((step, i) => {
     const isChecked = checked.has(i);
+    const titleHtml = step.title
+      ? '<strong class="title">' + escapeHtml(step.title) + '</strong>'
+      : '';
     return '<li class="' + (isChecked ? 'checked' : '') + '">'
       + '<label>'
       + '<input type="checkbox" data-i="' + i + '"' + (isChecked ? ' checked' : '') + '/>'
       + '<span class="num">' + (i + 1) + '</span>'
-      + '<span class="text">' + escapeHtml(step) + '</span>'
+      + '<div class="content">'
+      + titleHtml
+      + '<span class="text">' + escapeHtml(step.body) + '</span>'
+      + '</div>'
       + '</label></li>';
   }).join('');
   progress.textContent = checked.size + ' of ' + steps.length + ' done';
@@ -334,12 +369,18 @@ export default function AnswerView({
             <span className="section-icon">⚡</span> Verify The Pieces
           </h3>
           <ul>
-            {answer.fastChecks.map((check, i) => (
-              <li key={i}>
-                <span className="check-number">{i + 1}</span>
-                <span>{cite(check)}</span>
-              </li>
-            ))}
+            {answer.fastChecks.map((check, i) => {
+              const { title, body } = splitTitle(check);
+              return (
+                <li key={i}>
+                  <span className="check-number">{i + 1}</span>
+                  <div className="check-content">
+                    {title && <strong className="check-title">{cite(title)}</strong>}
+                    <span className="check-body">{cite(body)}</span>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -380,6 +421,7 @@ export default function AnswerView({
           <ul className="fix-step-list">
             {answer.fixSteps.map((step, i) => {
               const checked = checkedSteps.has(i);
+              const { title, body } = splitTitle(step);
               return (
                 <li key={i} className={`fix-step-item ${checked ? "checked" : ""}`}>
                   <label>
@@ -390,7 +432,10 @@ export default function AnswerView({
                       aria-label={`Mark step ${i + 1} complete`}
                     />
                     <span className="fix-step-number">{i + 1}</span>
-                    <span className="fix-step-text">{cite(step)}</span>
+                    <div className="fix-step-content">
+                      {title && <strong className="fix-step-title">{cite(title)}</strong>}
+                      <span className="fix-step-text">{cite(body)}</span>
+                    </div>
                   </label>
                 </li>
               );
