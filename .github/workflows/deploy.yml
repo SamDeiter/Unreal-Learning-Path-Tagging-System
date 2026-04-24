@@ -97,11 +97,10 @@ jobs:
         with:
           folder: path-builder/dist
           branch: gh-pages
-          # Preserve previously-deployed chunk files for one deploy cycle so
-          # tabs opened before the new deploy don't 404 on their lazy-loaded
-          # modules. Fresh index.html still swaps in immediately, carrying
-          # the new chunk hashes — old chunks just linger one deploy longer.
-          # clean-exclude takes glob patterns relative to the branch root.
-          clean-exclude: |
-            assets/*.js
-            assets/*.css
+          # NOTE: previously tried clean-exclude for chunk retention. The
+          # JamesIves action uses the same pattern for BOTH the delete filter
+          # AND the rsync copy filter — so excluding `assets/*.js` stopped
+          # the new build's chunks from ever being uploaded, and live HTML
+          # referenced chunks that never made it to the branch. Left clean
+          # at the default (true) and accept that open tabs need a reload
+          # after every deploy until a proper retention strategy is built.
