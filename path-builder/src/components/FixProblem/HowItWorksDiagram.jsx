@@ -25,7 +25,9 @@ function loadMermaid() {
           padding: 40,
           nodeSpacing: 110,
           rankSpacing: 130,
-          useMaxWidth: false,
+          // useMaxWidth: true makes Mermaid emit viewBox + width:100%, so the
+          // graph scales down to whatever column it's in instead of overflowing.
+          useMaxWidth: true,
         },
         themeVariables: {
           fontFamily:
