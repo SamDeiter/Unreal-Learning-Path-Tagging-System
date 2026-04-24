@@ -507,6 +507,8 @@ export default function useProblemFirst() {
             capturedAnswerData = {
               mostLikelyCause: result.data.mostLikelyCause,
               confidence: result.data.confidence,
+              howItWorks: result.data.howItWorks || "",
+              diagram: result.data.diagram || "",
               fastChecks: result.data.fastChecks || [],
               fixSteps: result.data.fixSteps || [],
               ifStillBrokenBranches: result.data.ifStillBrokenBranches || [],
