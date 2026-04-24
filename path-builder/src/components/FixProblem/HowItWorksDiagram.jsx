@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { devWarn } from "../../utils/logger";
+import { devError, devLog } from "../../utils/logger";
 
 let mermaidModulePromise = null;
 function loadMermaid() {
@@ -49,16 +49,19 @@ export default function HowItWorksDiagram({ source }) {
     diagramCounter += 1;
     const id = `how-it-works-diagram-${diagramCounter}`;
 
+    devLog("[HowItWorksDiagram] mounting with source:", source.slice(0, 120));
     (async () => {
       try {
         const mermaid = await loadMermaid();
+        devLog("[HowItWorksDiagram] mermaid loaded, rendering id=", id);
         const { svg } = await mermaid.render(id, source);
         if (cancelled || !containerRef.current) return;
         containerRef.current.innerHTML = svg;
         setError(false);
       } catch (err) {
         if (cancelled) return;
-        devWarn("[HowItWorksDiagram] render failed", err?.message || err);
+        // devError always logs (even in prod) so silent parse failures are visible.
+        devError("[HowItWorksDiagram] render failed:", err?.message || err, "\nsource was:", source);
         setError(true);
       }
     })();
