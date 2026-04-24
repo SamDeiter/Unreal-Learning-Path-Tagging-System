@@ -3,9 +3,47 @@
  * Populates the caseReport object sent to the backend for better diagnosis.
  * Shows a confidence boost indicator for each filled field.
  */
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import "./FixProblem.css";
+
+const MAX_LONG_EDGE_PX = 1024;
+const JPEG_QUALITY = 0.8;
+const ENCODED_MIME = "image/jpeg";
+
+/**
+ * Downscale to a 1024px long edge and JPEG-encode at 0.8.
+ * Returns { base64, mimeType } where base64 is the raw payload (no data: prefix).
+ * Resolves to null on any failure — screenshot then propagates as if absent.
+ */
+function downscaleAndEncode(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve(null);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => resolve(null);
+      img.onload = () => {
+        const longEdge = Math.max(img.width, img.height);
+        const scale = longEdge > MAX_LONG_EDGE_PX ? MAX_LONG_EDGE_PX / longEdge : 1;
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL(ENCODED_MIME, JPEG_QUALITY);
+        const comma = dataUrl.indexOf(",");
+        if (comma < 0) return resolve(null);
+        resolve({ base64: dataUrl.slice(comma + 1), mimeType: ENCODED_MIME });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 /** Scoring: how many confidence points each field contributes */
 const FIELD_SCORES = {
@@ -37,17 +75,13 @@ export default function CaseReportForm({ onUpdate, disabled }) {
     goal: "",
     logText: "",
   });
-  const [screenshot, setScreenshot] = useState(null); // { file, previewUrl }
+  const [screenshot, setScreenshot] = useState(null); // { file, previewUrl, base64, mimeType }
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleChange = useCallback(
-    (field, value) => {
-      const updated = { ...fields, [field]: value };
-      setFields(updated);
-
-      // Truncate log text if needed
-      let logText = updated.logText.trim() || undefined;
+  const buildCaseReport = useCallback(
+    (currentFields, currentScreenshot) => {
+      let logText = currentFields.logText.trim() || undefined;
       if (logText) {
         const lines = logText.split("\n");
         if (lines.length > MAX_LOG_LINES) {
@@ -58,30 +92,53 @@ export default function CaseReportForm({ onUpdate, disabled }) {
         }
       }
 
-      const caseReport = {
-        engineVersion: updated.engineVersion.trim() || undefined,
-        platform: updated.platform.trim() || undefined,
-        context: updated.context.trim() || undefined,
-        renderer: updated.renderer.trim() || undefined,
-        features: updated.features
-          ? updated.features
+      return {
+        engineVersion: currentFields.engineVersion.trim() || undefined,
+        platform: currentFields.platform.trim() || undefined,
+        context: currentFields.context.trim() || undefined,
+        renderer: currentFields.renderer.trim() || undefined,
+        features: currentFields.features
+          ? currentFields.features
               .split(",")
               .map((f) => f.trim())
               .filter(Boolean)
           : [],
-        whatChangedRecently: updated.whatChangedRecently.trim() || undefined,
-        goal: updated.goal.trim() || undefined,
+        whatChangedRecently: currentFields.whatChangedRecently.trim() || undefined,
+        goal: currentFields.goal.trim() || undefined,
         logText,
-        screenshotFile: screenshot?.file || undefined,
+        screenshotBase64: currentScreenshot?.base64 || undefined,
+        screenshotMimeType: currentScreenshot?.mimeType || undefined,
       };
+    },
+    []
+  );
 
+  const handleChange = useCallback(
+    (field, value) => {
+      const updated = { ...fields, [field]: value };
+      setFields(updated);
+      const caseReport = buildCaseReport(updated, screenshot);
       const hasData = Object.values(caseReport).some(
         (v) => v !== undefined && (!Array.isArray(v) || v.length > 0)
       );
       onUpdate(hasData ? caseReport : null);
     },
-    [fields, onUpdate, screenshot]
+    [fields, onUpdate, screenshot, buildCaseReport]
   );
+
+  // Propagate screenshot add/remove on its own — without this, dropping in an
+  // image and asking the question never updates parent state because handleChange
+  // only fires on text-field edits.
+  useEffect(() => {
+    const caseReport = buildCaseReport(fields, screenshot);
+    const hasData = Object.values(caseReport).some(
+      (v) => v !== undefined && (!Array.isArray(v) || v.length > 0)
+    );
+    onUpdate(hasData ? caseReport : null);
+    // Only fire when the encoded screenshot changes — not on every keystroke
+    // (handleChange already covers that).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screenshot?.base64]);
 
   // Compute confidence boost from filled fields
   const boost = useMemo(() => {
@@ -98,7 +155,7 @@ export default function CaseReportForm({ onUpdate, disabled }) {
   }, [fields, screenshot]);
 
   // --- Image handling ---
-  const handleImageFile = useCallback((file) => {
+  const handleImageFile = useCallback(async (file) => {
     if (!file) return;
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       alert("Please drop a PNG, JPEG, or WebP image.");
@@ -109,7 +166,16 @@ export default function CaseReportForm({ onUpdate, disabled }) {
       return;
     }
     const previewUrl = URL.createObjectURL(file);
+    // Show preview immediately so the user gets feedback while the encode runs.
     setScreenshot({ file, previewUrl });
+    const encoded = await downscaleAndEncode(file);
+    if (!encoded) {
+      alert("Could not process this image. Try a different file.");
+      URL.revokeObjectURL(previewUrl);
+      setScreenshot(null);
+      return;
+    }
+    setScreenshot({ file, previewUrl, base64: encoded.base64, mimeType: encoded.mimeType });
   }, []);
 
   const handleDrop = useCallback(

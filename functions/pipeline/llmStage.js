@@ -46,11 +46,23 @@ function extractJson(text) {
  * Call the Gemini API.
  * @returns {string} Raw generated text
  */
-async function callGeminiRaw(systemPrompt, userPrompt, apiKey, maxTokens = 1024, tools = null) {
+async function callGeminiRaw(
+  systemPrompt,
+  userPrompt,
+  apiKey,
+  maxTokens = 1024,
+  tools = null,
+  imagePart = null
+) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
 
+  const userParts = [{ text: userPrompt }];
+  if (imagePart && imagePart.inlineData?.data && imagePart.inlineData?.mimeType) {
+    userParts.push(imagePart);
+  }
+
   const payload = {
-    contents: [{ parts: [{ text: userPrompt }] }],
+    contents: [{ parts: userParts }],
     systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
       temperature: 0.2,
@@ -132,6 +144,7 @@ async function runStage({
   cacheParams = null,
   maxTokens = 1024,
   tools = null,
+  imagePart = null,
 }) {
   const schema = SCHEMAS[stage];
   if (!schema) {
@@ -160,7 +173,8 @@ async function runStage({
       userPrompt,
       apiKey,
       maxTokens,
-      tools
+      tools,
+      imagePart
     );
 
     // ── Step 3: Extract JSON ────────────────────────────────────────

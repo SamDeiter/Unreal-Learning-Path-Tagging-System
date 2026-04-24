@@ -175,6 +175,24 @@ async function handleProblemFirst(data, context, apiKey) {
 
   // Sanitize caseReport (kept minimal — the combined prompt will stitch
   // these into the user message only if present)
+  const ALLOWED_SCREENSHOT_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
+  const MAX_SCREENSHOT_BASE64_LEN = 5 * 1024 * 1024;
+  const rawScreenshotB64 =
+    caseReport && typeof caseReport.screenshotBase64 === "string"
+      ? caseReport.screenshotBase64
+      : "";
+  const rawScreenshotMime =
+    caseReport && typeof caseReport.screenshotMimeType === "string"
+      ? caseReport.screenshotMimeType
+      : "";
+  const screenshotBase64 =
+    rawScreenshotB64 &&
+    rawScreenshotB64.length <= MAX_SCREENSHOT_BASE64_LEN &&
+    ALLOWED_SCREENSHOT_MIME.has(rawScreenshotMime)
+      ? rawScreenshotB64
+      : "";
+  const screenshotMimeType = screenshotBase64 ? rawScreenshotMime : "";
+
   const safeCase = caseReport
     ? {
         engineVersion: String(caseReport.engineVersion || "").slice(0, 20),
@@ -187,6 +205,8 @@ async function handleProblemFirst(data, context, apiKey) {
         exclusions: Array.isArray(caseReport.exclusions)
           ? caseReport.exclusions.slice(0, 5).map((e) => String(e).slice(0, 100))
           : [],
+        screenshotBase64,
+        screenshotMimeType,
       }
     : null;
 
@@ -286,7 +306,11 @@ async function handleProblemFirst(data, context, apiKey) {
       ],
       evidence: [],
       query,
-      caseReport: safeCase,
+      // Redact the base64 — writeSession will persist this object and we don't
+      // want screenshot bytes living in Firestore session history.
+      caseReport: safeCase
+        ? { ...safeCase, screenshotBase64: "", screenshotMimeType: "" }
+        : null,
       _meta: { retrieved_count: 0, request_id: trace.request_id },
     };
     const refusalSessionId = await writeSession({
@@ -335,7 +359,15 @@ async function handleProblemFirst(data, context, apiKey) {
 
   const personaBlock = personaHint ? `\nPersona: ${personaHint}` : "";
 
-  const userPrompt = `Problem: "${query}"${personaBlock}${caseBlock}${tagBlock}${exclusionNote}${evidenceBlock}`;
+  const screenshotNote = safeCase?.screenshotBase64
+    ? "\nA screenshot is attached as an image part below. Use it to verify panel names, error text, node wiring, and exact values; cite EVIDENCE for any specific claim that goes beyond what the image shows."
+    : "";
+
+  const userPrompt = `Problem: "${query}"${personaBlock}${caseBlock}${tagBlock}${exclusionNote}${screenshotNote}${evidenceBlock}`;
+
+  const imagePart = safeCase?.screenshotBase64
+    ? { inlineData: { mimeType: safeCase.screenshotMimeType, data: safeCase.screenshotBase64 } }
+    : null;
 
   const answerResult = await runStage({
     stage: "tutor_answer",
@@ -343,12 +375,19 @@ async function handleProblemFirst(data, context, apiKey) {
     userPrompt,
     apiKey,
     trace,
-    cacheParams: { uid: userId, query: normalized, mode: "problem-first", engine },
+    // Skip the stage cache when a screenshot is present: the cache key doesn't
+    // include the image, so caching here would either feed a non-vision answer
+    // back to image queries or pollute later non-image queries with image-shaped
+    // responses. Vision queries hit Gemini fresh.
+    cacheParams: imagePart
+      ? null
+      : { uid: userId, query: normalized, mode: "problem-first", engine },
     // 1536 was tight on the old prompt; the new prompt (howItWorks + Mermaid
     // diagram + existing fields) plus gemini-2.5-flash's thinking-token
     // allocation routinely clipped the JSON mid-string. 8192 gives enough
     // headroom for ~3000 token JSON plus the thinking budget.
     maxTokens: 8192,
+    imagePart,
   });
 
   // ── Off-topic detection (error path) ────────────────────────────
