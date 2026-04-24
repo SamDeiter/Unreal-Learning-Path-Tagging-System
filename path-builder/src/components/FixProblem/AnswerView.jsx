@@ -374,10 +374,18 @@ export default function AnswerView({
   return (
     <div className="answer-view">
       {/* ─── Stepper progress indicator ───
-          Single-row dot-and-connector bar. Each dot is clickable. The active
-          step's label is called out below so "where am I?" is unambiguous
-          regardless of how many steps exist. */}
-      <nav className="answer-stepper" aria-label="Answer walkthrough progress">
+          Single-row dot-and-connector bar. The fill line underneath is driven
+          by --progress (percent of visited ground), so there's one source of
+          truth instead of per-node pseudo-elements. The active step's label
+          is called out below so "where am I?" is unambiguous. */}
+      <nav
+        className="answer-stepper"
+        aria-label="Answer walkthrough progress"
+        style={{
+          "--progress":
+            stepper.length > 1 ? `${(clampedIndex / (stepper.length - 1)) * 100}%` : "0%",
+        }}
+      >
         <ol className="stepper-track">
           {stepper.map((s, i) => {
             const state =

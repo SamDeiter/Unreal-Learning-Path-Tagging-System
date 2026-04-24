@@ -59,6 +59,19 @@ function loadMermaid() {
 // Monotonic id so concurrent renders don't clash inside mermaid's internal cache.
 let diagramCounter = 0;
 
+// Flip any LR (left-right) or RL flow direction to TB (top-bottom) before
+// handing the source to Mermaid. In an 860px column a 5-node horizontal
+// graph scales down to unreadable; stacking vertically uses the column
+// shape (tall, not wide) and keeps labels legible. Covers both the `graph`
+// and `flowchart` keywords, and the `---` / YAML frontmatter variants.
+function forceVerticalOrientation(source) {
+  if (!source || typeof source !== "string") return source;
+  return source.replace(
+    /^(\s*(?:graph|flowchart)\s+)(LR|RL)\b/im,
+    (_m, prefix) => `${prefix}TB`
+  );
+}
+
 export default function HowItWorksDiagram({ source }) {
   const containerRef = useRef(null);
   const [error, setError] = useState(false);
@@ -69,19 +82,25 @@ export default function HowItWorksDiagram({ source }) {
     diagramCounter += 1;
     const id = `how-it-works-diagram-${diagramCounter}`;
 
-    devLog("[HowItWorksDiagram] mounting with source:", source.slice(0, 120));
+    const verticalSource = forceVerticalOrientation(source);
+    devLog("[HowItWorksDiagram] mounting with source:", verticalSource.slice(0, 120));
     (async () => {
       try {
         const mermaid = await loadMermaid();
         devLog("[HowItWorksDiagram] mermaid loaded, rendering id=", id);
-        const { svg } = await mermaid.render(id, source);
+        const { svg } = await mermaid.render(id, verticalSource);
         if (cancelled || !containerRef.current) return;
         containerRef.current.innerHTML = svg;
         setError(false);
       } catch (err) {
         if (cancelled) return;
         // devError always logs (even in prod) so silent parse failures are visible.
-        devError("[HowItWorksDiagram] render failed:", err?.message || err, "\nsource was:", source);
+        devError(
+          "[HowItWorksDiagram] render failed:",
+          err?.message || err,
+          "\nsource was:",
+          verticalSource
+        );
         setError(true);
       }
     })();
@@ -91,15 +110,68 @@ export default function HowItWorksDiagram({ source }) {
     };
   }, [source]);
 
+  const openLarger = () => {
+    if (!containerRef.current) return;
+    const svgEl = containerRef.current.querySelector("svg");
+    if (!svgEl) return;
+    const svgMarkup = svgEl.outerHTML;
+    const width = Math.min(1200, window.screen.availWidth - 120);
+    const height = Math.min(900, window.screen.availHeight - 120);
+    const left = Math.max(0, Math.floor((window.screen.availWidth - width) / 2));
+    const top = Math.max(0, Math.floor((window.screen.availHeight - height) / 2));
+    const popup = window.open(
+      "",
+      "howItWorksDiagramPopout",
+      `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
+    if (!popup) return;
+    popup.document.open();
+    popup.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>How This Works — Diagram</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; padding: 0; background: #0f172a; color: #f8fafc;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { min-height: 100vh; display: flex; align-items: center;
+    justify-content: center; padding: 32px; box-sizing: border-box; }
+  svg { width: 100% !important; height: auto !important; max-width: 100% !important; }
+  .nodeLabel, .nodeLabel * { font-size: 1.2rem !important; font-weight: 600;
+    color: #f8fafc !important; fill: #f8fafc !important; }
+  .edgeLabel, .edgeLabel * { font-size: 1rem !important; color: #f8fafc !important;
+    fill: #f8fafc !important; background-color: #0f172a !important;
+    padding: 2px 6px !important; border-radius: 4px; }
+  .flowchart-link { stroke: #cbd5e1 !important; stroke-width: 1.6px; }
+  .node rect, .node polygon, .node circle { stroke-width: 2px; }
+</style>
+</head>
+<body><div class="wrap">${svgMarkup}</div></body>
+</html>`);
+    popup.document.close();
+  };
+
   if (!source || error) return null;
 
   return (
-    <div
-      ref={containerRef}
-      className="how-it-works-diagram"
-      role="img"
-      aria-label="System diagram illustrating the concepts described above"
-    />
+    <div className="how-it-works-diagram-shell">
+      <div
+        ref={containerRef}
+        className="how-it-works-diagram"
+        role="img"
+        aria-label="System diagram illustrating the concepts described above"
+      />
+      <button
+        type="button"
+        className="how-it-works-diagram-enlarge"
+        onClick={openLarger}
+        aria-label="Open diagram in a larger window"
+        title="View larger"
+      >
+        🔍 View larger
+      </button>
+    </div>
   );
 }
 
