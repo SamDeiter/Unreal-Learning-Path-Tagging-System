@@ -18,7 +18,7 @@ const { getCached, setCache } = require("./cache");
 const { sanitizeOutput } = require("./promptVersions");
 const { PROMPT_VERSION } = require("./promptVersions");
 
-const MODEL = "gemini-2.0-flash";
+const MODEL = "gemini-2.5-flash";
 
 /**
  * Extract JSON from LLM response text.
