@@ -151,6 +151,46 @@ describe("DiagnosisLoader", () => {
 
 import BridgeCard from "../components/GuidedPlayer/BridgeCard";
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. FeedbackModal
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import FeedbackModal from "../components/Feedback/FeedbackModal";
+
+describe("FeedbackModal", () => {
+  const mockUser = { uid: "test-user", email: "test@example.com" };
+  const onClose = vi.fn();
+
+  it("should render nothing when closed", () => {
+    const { container } = render(<FeedbackModal isOpen={false} onClose={onClose} user={mockUser} />);
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("should render accessibility features when open", () => {
+    render(<FeedbackModal isOpen={true} onClose={onClose} user={mockUser} />);
+
+    // Check for aria-hidden on decorative icons
+    const icons = document.querySelectorAll(".icon-inline");
+    icons.forEach((icon) => {
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    // Check for required label accessibility
+    expect(screen.getByText("(required)")).toBeTruthy();
+    expect(screen.getByText("(required)").classList.contains("sr-only")).toBe(true);
+
+    // Check character counter accessibility
+    const counter = document.querySelector(".char-counter");
+    expect(counter).toBeTruthy();
+    expect(counter.getAttribute("role")).toBe("status");
+    expect(counter.getAttribute("aria-live")).toBe("polite");
+
+    // Check linkage
+    const textarea = screen.getByLabelText(/Describe|Tell us/);
+    expect(textarea.getAttribute("aria-describedby")).toBe("feedback-char-count");
+  });
+});
+
 describe("BridgeCard", () => {
   it("should render a transition bridge", () => {
     const content = {
