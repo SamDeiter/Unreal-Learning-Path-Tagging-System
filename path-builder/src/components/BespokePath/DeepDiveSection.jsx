@@ -11,46 +11,9 @@
 
 import { useState, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { getFirebaseApp } from "../../services/firebaseConfig";
-
-/** Convert quoted, backtick-quoted, or **markdown bold** terms to bold elements. */
-function highlightKeyTerms(text) {
-  if (!text || typeof text !== "string") return text;
-  // Split by patterns: `backtick`, 'single quotes', "double quotes", **bold**
-  const parts = text.split(/(`[^`]+`|'(?=[A-Z])[^']{2,}'|"[^"]{2,}"|(?<!\w)\*\*[^*]+\*\*(?!\w))/g);
-  return parts.map((part, i) => {
-    if (!part) return null;
-    if (part.startsWith("`") && part.endsWith("`") && part.length > 2) {
-      return (
-        <strong key={i} className="ue-term">
-          {part.slice(1, -1)}
-        </strong>
-      );
-    }
-    if (part.startsWith("'") && part.endsWith("'") && part.length > 2) {
-      return (
-        <strong key={i} className="ue-term">
-          {part.slice(1, -1)}
-        </strong>
-      );
-    }
-    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-      return (
-        <strong key={i} className="ue-term">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    if (part.startsWith('"') && part.endsWith('"') && part.length > 2) {
-      return (
-        <strong key={i} className="ue-term">
-          {part.slice(1, -1)}
-        </strong>
-      );
-    }
-    return part;
-  });
-}
 
 /** Section type → emoji icon mapping */
 const SECTION_ICONS = {
@@ -144,7 +107,7 @@ export default function DeepDiveSection({
                   {icon} {section.title}
                 </h4>
                 <div className="deepdive-panel-content">
-                  <DeepDiveContent section={section} highlightFn={highlightKeyTerms} />
+                  <DeepDiveContent section={section} />
                 </div>
                 {/* Rating buttons */}
                 <div className="deepdive-rating">
@@ -188,64 +151,65 @@ export default function DeepDiveSection({
   );
 }
 
-/** Renders deep dive section content with appropriate formatting */
-function DeepDiveContent({ section, highlightFn }) {
-  const lines = section.content
-    .split("\n")
-    .filter(Boolean)
-    .map((l) => l.replace(/— ([a-z])/, (_, c) => "— " + c.toUpperCase()))
-    .map((l) => {
-      // In properties sections, auto-bold the property name before "—"
-      if (section.type === "properties" && l.includes("—")) {
-        return l.replace(
-          /^(•\s*)?([^—]+?)(\s*—)/,
-          (_, bullet, name, dash) => `${bullet || ""}**${name.trim()}**${dash}`
-        );
-      }
-      return l;
-    });
+/**
+ * Renders deep-dive section content as markdown (GFM).
+ *
+ * Gemini returns content with `##` headings, `-` bullets, numbered lists,
+ * **bold**, and occasional `code` spans. The old hand-rolled parser only
+ * understood `•` bullets and dumped everything else as literal text.
+ * ReactMarkdown + remark-gfm handles all of that; component overrides
+ * scope the styling to the existing .deepdive-* CSS namespace.
+ *
+ * For properties sections we still want the old "Name — description"
+ * auto-bold, so we pre-process those lines before handing to ReactMarkdown.
+ */
+function DeepDiveContent({ section }) {
+  const content =
+    section.type === "properties"
+      ? section.content
+          .split("\n")
+          .map((l) =>
+            l.includes("—")
+              ? l.replace(
+                  /^([-•*]\s*)?([^—]+?)(\s*—)/,
+                  (_, bullet, name, dash) => `${bullet || ""}**${name.trim()}**${dash}`
+                )
+              : l
+          )
+          .join("\n")
+      : section.content;
 
-  const isBullets = lines.some((l) => l.trim().startsWith("•"));
-  const isNumbered = lines.some((l) => /^\d+[.)]/.test(l.trim()));
-
-  if (isBullets) {
-    return (
-      <ul className="deepdive-bullets">
-        {lines.map((l, j) => (
-          <li key={j}>{highlightFn(l.replace(/^•\s*/, ""))}</li>
-        ))}
-      </ul>
-    );
-  }
-
-  if (isNumbered) {
-    const groups = [];
-    lines.forEach((l) => {
-      if (/^\d+[.)]/.test(l.trim())) {
-        groups.push({ text: l.replace(/^\d+[.)]\s*/, ""), subs: [] });
-      } else if (l.trim().startsWith("•") && groups.length > 0) {
-        groups[groups.length - 1].subs.push(l.replace(/^•\s*/, "").trim());
-      } else if (groups.length > 0) {
-        groups[groups.length - 1].subs.push(l.trim());
-      }
-    });
-    return (
-      <ol className="deepdive-steps">
-        {groups.map((g, j) => (
-          <li key={j}>
-            {highlightFn(g.text)}
-            {g.subs.length > 0 && (
-              <ul className="deepdive-sub-bullets">
-                {g.subs.map((s, k) => (
-                  <li key={k}>{highlightFn(s)}</li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ol>
-    );
-  }
-
-  return lines.map((p, j) => <p key={j}>{highlightFn(p)}</p>);
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        // Force any heading level to the same visual weight inside the panel
+        // (the panel already has its own title above, so nested h1/h2 would
+        // fight it). Wrap in a bolded paragraph for a consistent look.
+        h1: ({ children }) => <p className="deepdive-heading">{children}</p>,
+        h2: ({ children }) => <p className="deepdive-heading">{children}</p>,
+        h3: ({ children }) => <p className="deepdive-heading">{children}</p>,
+        h4: ({ children }) => <p className="deepdive-heading">{children}</p>,
+        ul: ({ children }) => <ul className="deepdive-bullets">{children}</ul>,
+        ol: ({ children }) => <ol className="deepdive-steps">{children}</ol>,
+        strong: ({ children }) => <strong className="ue-term">{children}</strong>,
+        code: ({ inline, children }) =>
+          inline ? (
+            <code className="ue-term">{children}</code>
+          ) : (
+            <pre className="deepdive-code">
+              <code>{children}</code>
+            </pre>
+          ),
+        // Safe link rendering — always new-tab + rel
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            {children}
+          </a>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 }
