@@ -657,18 +657,34 @@
 .how-it-works-diagram svg {
   width: 100%;
   height: auto;
-  /* On narrow viewports allow horizontal scroll via the container rather than
-     letting the SVG shrink below a legible size. */
-  min-width: 640px;
+  /* Keep the intrinsic size generous; on narrow viewports the container
+     scrolls horizontally rather than letting labels shrink below legibility. */
+  min-width: 820px;
 }
 
 .how-it-works-diagram .edgePath .path,
 .how-it-works-diagram .flowchart-link {
-  stroke-width: 1.6px;
+  stroke-width: 2.2px;
 }
 
-.how-it-works-diagram .nodeLabel {
-  font-size: 1rem;
+/* Node + edge label text. These must override Mermaid's inline font-size
+   because mermaid-dark stamps a small value on some labels directly. */
+.how-it-works-diagram .nodeLabel,
+.how-it-works-diagram .nodeLabel * {
+  font-size: 1.05rem !important;
+  font-weight: 600;
+}
+
+.how-it-works-diagram .edgeLabel,
+.how-it-works-diagram .edgeLabel * {
+  font-size: 0.95rem !important;
+  font-weight: 500;
+}
+
+.how-it-works-diagram .node rect,
+.how-it-works-diagram .node polygon,
+.how-it-works-diagram .node circle {
+  stroke-width: 2px;
 }
 
 /* Belt-and-braces: mermaid-dark sometimes falls back to its own inline

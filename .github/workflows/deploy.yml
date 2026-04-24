@@ -97,3 +97,11 @@ jobs:
         with:
           folder: path-builder/dist
           branch: gh-pages
+          # Preserve previously-deployed chunk files for one deploy cycle so
+          # tabs opened before the new deploy don't 404 on their lazy-loaded
+          # modules. Fresh index.html still swaps in immediately, carrying
+          # the new chunk hashes — old chunks just linger one deploy longer.
+          # clean-exclude takes glob patterns relative to the branch root.
+          clean-exclude: |
+            assets/*.js
+            assets/*.css
