@@ -344,7 +344,11 @@ async function handleProblemFirst(data, context, apiKey) {
     apiKey,
     trace,
     cacheParams: { uid: userId, query: normalized, mode: "problem-first", engine },
-    maxTokens: 1536,
+    // 1536 was tight on the old prompt; the new prompt (howItWorks + Mermaid
+    // diagram + existing fields) plus gemini-2.5-flash's thinking-token
+    // allocation routinely clipped the JSON mid-string. 8192 gives enough
+    // headroom for ~3000 token JSON plus the thinking budget.
+    maxTokens: 8192,
   });
 
   // ── Off-topic detection (error path) ────────────────────────────
