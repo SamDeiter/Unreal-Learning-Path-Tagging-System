@@ -20,12 +20,27 @@ function loadMermaid() {
         startOnLoad: false,
         theme: "dark",
         securityLevel: "strict",
-        flowchart: { curve: "basis", padding: 12 },
+        flowchart: {
+          curve: "basis",
+          padding: 24,
+          nodeSpacing: 60,
+          rankSpacing: 70,
+          useMaxWidth: true,
+        },
         themeVariables: {
+          fontFamily:
+            'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+          fontSize: "16px",
+          // Node fill: slightly lighter than page background so nodes pop.
           primaryColor: "#1e293b",
-          primaryBorderColor: "#475569",
-          primaryTextColor: "#e5e7eb",
-          lineColor: "#94a3b8",
+          // Node border: purple accent, matches ue-term highlight color.
+          primaryBorderColor: "#8b5cf6",
+          // Node text: high-contrast off-white.
+          primaryTextColor: "#f8fafc",
+          // Edge lines + edge-label text: readable slate, not muted gray.
+          lineColor: "#cbd5e1",
+          edgeLabelBackground: "#0f172a",
+          // Secondary/tertiary fills used by sub-clusters if the model ever emits them.
           secondaryColor: "#312e81",
           tertiaryColor: "#0f172a",
         },
