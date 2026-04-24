@@ -655,9 +655,20 @@
 }
 
 .how-it-works-diagram svg {
-  max-width: 100%;
+  width: 100%;
   height: auto;
-  min-width: 480px;
+  /* On narrow viewports allow horizontal scroll via the container rather than
+     letting the SVG shrink below a legible size. */
+  min-width: 640px;
+}
+
+.how-it-works-diagram .edgePath .path,
+.how-it-works-diagram .flowchart-link {
+  stroke-width: 1.6px;
+}
+
+.how-it-works-diagram .nodeLabel {
+  font-size: 1rem;
 }
 
 /* Belt-and-braces: mermaid-dark sometimes falls back to its own inline
@@ -1300,25 +1311,38 @@
 }
 
 /* ─── Citation Links ─── */
+/* Citation [N] markers need to read as clickable from a glance — previous
+   styling matched .ue-term too closely (same purple, only slightly bolder),
+   which made the bolded subsystem terms look like links they aren't.
+   Persistent underline + clearer pill background fixes the affordance. */
 .citation-link {
-  display: inline;
-  color: #a78bfa;
+  display: inline-block;
+  color: #c4b5fd;
   font-weight: 700;
-  font-size: 0.8em;
-  text-decoration: none;
-  padding: 0 2px;
-  border-radius: 3px;
-  background: rgba(167, 139, 250, 0.1);
+  font-size: 0.78em;
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 181, 253, 0.45);
+  text-underline-offset: 2px;
+  padding: 1px 5px;
+  margin: 0 1px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  line-height: 1;
+  vertical-align: baseline;
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    border-color 0.15s;
   cursor: pointer;
 }
 
-.citation-link:hover {
-  background: rgba(167, 139, 250, 0.25);
-  color: #c4b5fd;
-  text-decoration: underline;
+.citation-link:hover,
+.citation-link:focus-visible {
+  background: rgba(139, 92, 246, 0.35);
+  border-color: rgba(196, 181, 253, 0.7);
+  color: #f5f3ff;
+  text-decoration-color: #f5f3ff;
 }
 
 /* ─── Context Drawer (Log + Screenshot) ─── */

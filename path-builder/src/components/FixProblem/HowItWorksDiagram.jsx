@@ -22,15 +22,19 @@ function loadMermaid() {
         securityLevel: "strict",
         flowchart: {
           curve: "basis",
-          padding: 24,
-          nodeSpacing: 60,
-          rankSpacing: 70,
-          useMaxWidth: true,
+          padding: 32,
+          nodeSpacing: 90,
+          rankSpacing: 100,
+          // useMaxWidth:false emits an SVG with width/height attrs instead of
+          // inline max-width. Combined with the CSS rule `svg { width:100% }`
+          // below, this lets the diagram fill the container instead of
+          // rendering at its tiny natural size.
+          useMaxWidth: false,
         },
         themeVariables: {
           fontFamily:
             'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-          fontSize: "16px",
+          fontSize: "20px",
           // Node fill: slightly lighter than page background so nodes pop.
           primaryColor: "#1e293b",
           // Node border: purple accent, matches ue-term highlight color.
