@@ -27,8 +27,12 @@ import {
   query,
   orderBy,
   limit,
+  collectionGroup,
+  where,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "./firebaseConfig";
+import { isAdmin } from "./accessControl";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -226,8 +230,11 @@ async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+    const user = getAuth(app).currentUser;
+    if (!user) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    const docRef = doc(db, "token_usage", user.uid, "usage", dateKey);
     await setDoc(
       docRef,
       {
@@ -256,10 +263,47 @@ export async function fetchCloudStats(days = 30) {
   try {
     const app = getFirebaseApp();
     if (!app) return [];
+    const user = getAuth(app).currentUser;
+    if (!user) return [];
+
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const admin = await isAdmin();
+
+    let q;
+    if (admin) {
+      // Global stats for admins: aggregate across all user usage subcollections
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      const cutoffKey = cutoff.toISOString().slice(0, 10);
+
+      q = query(collectionGroup(db, "usage"), where("date", ">=", cutoffKey), orderBy("date", "desc"));
+    } else {
+      // User-specific stats
+      q = query(collection(db, "token_usage", user.uid, "usage"), orderBy("date", "desc"), limit(days));
+    }
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    if (admin) {
+      // Aggregate by date for admins
+      const aggregated = {};
+      docs.forEach((d) => {
+        const key = d.date;
+        if (!aggregated[key]) {
+          aggregated[key] = { ...d, calls: 0, totalInput: 0, totalOutput: 0, estimatedCost: 0 };
+        }
+        aggregated[key].calls += d.calls || 0;
+        aggregated[key].totalInput += d.totalInput || 0;
+        aggregated[key].totalOutput += d.totalOutput || 0;
+        aggregated[key].estimatedCost += d.estimatedCost || 0;
+      });
+      return Object.values(aggregated)
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, days);
+    }
+
+    return docs;
   } catch (err) {
     console.warn("[TokenTracker] Failed to fetch cloud stats:", err.message);
     return [];
