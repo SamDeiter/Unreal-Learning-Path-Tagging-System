@@ -221,12 +221,21 @@ export default function LessonPage() {
     widgetHtml,
   } = lesson;
 
-  const rootCauses = Array.isArray(diagnosis.root_causes) ? diagnosis.root_causes : [];
-  const signals = Array.isArray(diagnosis.signals_to_watch_for)
-    ? diagnosis.signals_to_watch_for
+  // ES default-assignment only fires for undefined, not null — the backend
+  // can return diagnosis/objectives as null when a stage refuses or the LLM
+  // omits the block, so fall back explicitly.
+  const safeDiagnosis = diagnosis || {};
+  const safeObjectives = objectives || {};
+  const rootCauses = Array.isArray(safeDiagnosis.root_causes) ? safeDiagnosis.root_causes : [];
+  const signals = Array.isArray(safeDiagnosis.signals_to_watch_for)
+    ? safeDiagnosis.signals_to_watch_for
     : [];
-  const fixSpecific = Array.isArray(objectives.fix_specific) ? objectives.fix_specific : [];
-  const transferable = Array.isArray(objectives.transferable) ? objectives.transferable : [];
+  const fixSpecific = Array.isArray(safeObjectives.fix_specific)
+    ? safeObjectives.fix_specific
+    : [];
+  const transferable = Array.isArray(safeObjectives.transferable)
+    ? safeObjectives.transferable
+    : [];
 
   return (
     <div className="lesson-page">

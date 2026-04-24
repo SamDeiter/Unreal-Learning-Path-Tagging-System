@@ -177,20 +177,12 @@ const TutorAnswerSchema = z
       .default({ transferable: [], fixSpecific: [] }),
     pathSummary: z.string().default(""),
   })
-  .passthrough()
-  // Gemini silently skipped howItWorks on the first prod run despite a
-  // substance-requirement bullet. Schema-level enforcement kicks runStage's
-  // one-shot repair retry into gear, giving the model a second chance with
-  // an explicit validation error. NO_DATA_AVAILABLE legitimately has nothing
-  // to teach, so it's exempt.
-  .refine(
-    (val) => val.confidence === "NO_DATA_AVAILABLE" || val.howItWorks.trim().length >= 40,
-    {
-      message:
-        "howItWorks must be 2-4 sentences (≥40 chars) naming the subsystem components, unless confidence is NO_DATA_AVAILABLE",
-      path: ["howItWorks"],
-    }
-  );
+  .passthrough();
+// Note: previously had a .refine() requiring howItWorks to be populated, but
+// that triggered runStage's repair retry — a 2nd Gemini call — every time the
+// model omitted the field. Under Gemini quota pressure this amplified 429s
+// into 500s on the user's query. Rely on the prompt to do the job instead;
+// UI renders gracefully when howItWorks is empty.
 
 // ─── Schema Registry (lookup by stage name) ─────────────────────────────────
 
