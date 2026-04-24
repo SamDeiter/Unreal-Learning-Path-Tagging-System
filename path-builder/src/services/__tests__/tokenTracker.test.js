@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { recordTokenUsage, fetchCloudStats } from "../tokenTracker";
 import { getAuth } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDocs, collection, collectionGroup, query } from "firebase/firestore";
+import { doc, getDocs, collection, collectionGroup } from "firebase/firestore";
 import { isAdmin } from "../accessControl";
 
 vi.mock("firebase/auth", () => ({
