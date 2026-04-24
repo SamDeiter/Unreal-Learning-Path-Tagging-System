@@ -22,9 +22,9 @@ function loadMermaid() {
         securityLevel: "strict",
         flowchart: {
           curve: "basis",
-          padding: 40,
-          nodeSpacing: 110,
-          rankSpacing: 130,
+          padding: 18,
+          nodeSpacing: 50,
+          rankSpacing: 70,
           // useMaxWidth: true makes Mermaid emit viewBox + width:100%, so the
           // graph scales down to whatever column it's in instead of overflowing.
           useMaxWidth: true,
@@ -32,7 +32,10 @@ function loadMermaid() {
         themeVariables: {
           fontFamily:
             'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-          fontSize: "26px",
+          // Kept close to the CSS-forced label size (1.05rem ≈ 17px). Previously
+          // 26px made Mermaid lay out oversized nodes that then scaled down and
+          // left wasted whitespace inside each box.
+          fontSize: "16px",
           // Node fill: slightly lighter than page background so nodes pop.
           primaryColor: "#1e293b",
           // Node border: purple accent, matches ue-term highlight color.

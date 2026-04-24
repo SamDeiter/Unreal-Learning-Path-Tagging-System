@@ -55,10 +55,17 @@ function loadCheckedSteps(key) {
 function openFixStepsPopout({ steps, checked }) {
   if (typeof window === "undefined") return null;
   const estimatedHeight = Math.min(820, 160 + steps.length * 78);
+  const width = 560;
+  // Right-edge anchored, roughly vertically centered on the current screen.
+  // Chrome ignores size hints unless `popup=yes` is present — without it the
+  // window reopens in whatever state the last browser window was in (often
+  // maximized), which is why this opened full-screen before.
+  const left = Math.max(0, (window.screen.availWidth || 1280) - width - 40);
+  const top = Math.max(0, Math.floor(((window.screen.availHeight || 800) - estimatedHeight) / 2));
   const popup = window.open(
     "",
     "fixStepsPopout",
-    `width=560,height=${estimatedHeight},resizable=yes,scrollbars=yes`
+    `popup=yes,width=${width},height=${estimatedHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
   );
   if (!popup) return null;
 
@@ -366,25 +373,50 @@ export default function AnswerView({
 
   return (
     <div className="answer-view">
-      {/* ─── Stepper progress indicator (clickable breadcrumb) ─── */}
+      {/* ─── Stepper progress indicator ───
+          Single-row dot-and-connector bar. Each dot is clickable. The active
+          step's label is called out below so "where am I?" is unambiguous
+          regardless of how many steps exist. */}
       <nav className="answer-stepper" aria-label="Answer walkthrough progress">
-        {stepper.map((s, i) => {
-          const state =
-            i === clampedIndex ? "active" : i < clampedIndex ? "visited" : "upcoming";
-          return (
-            <button
-              key={s.id}
-              type="button"
-              className={`stepper-pill stepper-pill-${state}`}
-              onClick={() => goTo(i)}
-              aria-current={i === clampedIndex ? "step" : undefined}
-            >
-              <span className="stepper-pill-num">{i + 1}</span>
-              <span className="stepper-pill-icon">{s.icon}</span>
-              <span className="stepper-pill-label">{s.label}</span>
-            </button>
-          );
-        })}
+        <ol className="stepper-track">
+          {stepper.map((s, i) => {
+            const state =
+              i === clampedIndex ? "active" : i < clampedIndex ? "visited" : "upcoming";
+            return (
+              <li key={s.id} className={`stepper-node stepper-node-${state}`}>
+                <button
+                  type="button"
+                  className="stepper-dot"
+                  onClick={() => goTo(i)}
+                  aria-current={i === clampedIndex ? "step" : undefined}
+                  aria-label={`Step ${i + 1}: ${s.label}`}
+                  title={s.label}
+                >
+                  {state === "visited" ? (
+                    <span className="stepper-dot-check" aria-hidden="true">
+                      ✓
+                    </span>
+                  ) : (
+                    <span className="stepper-dot-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <div className="stepper-caption">
+          <span className="stepper-caption-counter">
+            Step {clampedIndex + 1} of {stepper.length}
+          </span>
+          <span className="stepper-caption-label">
+            <span className="stepper-caption-icon" aria-hidden="true">
+              {currentStep.icon}
+            </span>
+            {currentStep.label}
+          </span>
+        </div>
       </nav>
 
       {/* ─── Active step content ─── */}
