@@ -212,20 +212,15 @@ export default function LessonPage() {
     return <LessonSkeleton />;
   }
 
-  const {
-    topic,
-    query,
-    diagnosis = {},
-    objectives = {},
-    takeaways = [],
-    widgetHtml,
-  } = lesson;
+  const { topic, query, diagnosis, objectives, takeaways, widgetHtml } = lesson;
 
-  // ES default-assignment only fires for undefined, not null — the backend
-  // can return diagnosis/objectives as null when a stage refuses or the LLM
-  // omits the block, so fall back explicitly.
+  // ES default-assignment on destructure only fires for undefined, not null.
+  // Backend can return any of these as null (refusal paths, sparse answers,
+  // partial LLM output) so coerce explicitly — using `|| fallback` handles
+  // both undefined and null.
   const safeDiagnosis = diagnosis || {};
   const safeObjectives = objectives || {};
+  const safeTakeaways = Array.isArray(takeaways) ? takeaways : [];
   const rootCauses = Array.isArray(safeDiagnosis.root_causes) ? safeDiagnosis.root_causes : [];
   const signals = Array.isArray(safeDiagnosis.signals_to_watch_for)
     ? safeDiagnosis.signals_to_watch_for
@@ -333,11 +328,11 @@ export default function LessonPage() {
         </section>
       )}
 
-      {takeaways.length > 0 && (
+      {safeTakeaways.length > 0 && (
         <section className="lesson-section lesson-takeaways">
           <h2 className="lesson-section__title">Key takeaways</h2>
           <ol className="lesson-takeaways__list">
-            {takeaways.map((t, i) => (
+            {safeTakeaways.map((t, i) => (
               <li key={`tk-${i}`}>{t}</li>
             ))}
           </ol>
