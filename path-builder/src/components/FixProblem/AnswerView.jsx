@@ -243,12 +243,14 @@ export default function AnswerView({
   );
 
   const [checkedSteps, setCheckedSteps] = useState(() => loadCheckedSteps(stepsKey));
+  const [stepIndex, setStepIndex] = useState(0);
   // Reset state when stepsKey changes — React-recommended alternative to
   // setState-in-effect (https://react.dev/learn/you-might-not-need-an-effect).
   const [prevStepsKey, setPrevStepsKey] = useState(stepsKey);
   if (prevStepsKey !== stepsKey) {
     setPrevStepsKey(stepsKey);
     setCheckedSteps(loadCheckedSteps(stepsKey));
+    setStepIndex(0);
   }
 
   useEffect(() => {
@@ -330,196 +332,276 @@ export default function AnswerView({
   const doneCount = checkedSteps.size;
   const allStepsDone = totalSteps > 0 && doneCount === totalSteps;
 
+  // Build the stepper sequence from whatever sections the answer actually has.
+  // Order follows the canonical tutor flow (concept → verify → act → reflect).
+  const stepper = [];
+  stepper.push({ id: "cause", label: "Most Likely Cause", icon: "🎯" });
+  if (answer.howItWorks) {
+    stepper.push({ id: "howItWorks", label: "How This Works", icon: "🧭" });
+  }
+  if (answer.fastChecks?.length > 0) {
+    stepper.push({ id: "verify", label: "Verify The Pieces", icon: "⚡" });
+  }
+  if (answer.fixSteps?.length > 0) {
+    stepper.push({ id: "fix", label: "Fix Steps", icon: "🔧" });
+  }
+  if (answer.ifStillBrokenBranches?.length > 0) {
+    stepper.push({ id: "branches", label: "If Still Broken", icon: "🔀" });
+  }
+  const hasTakeaway =
+    answer.learnPath?.objectives?.transferable?.length > 0 ||
+    answer.whyThisResult?.length > 0;
+  if (hasTakeaway) {
+    stepper.push({ id: "takeaway", label: "Takeaway", icon: "🔄" });
+  }
+
+  const clampedIndex = Math.min(stepIndex, stepper.length - 1);
+  const currentStep = stepper[clampedIndex];
+  const isFirst = clampedIndex === 0;
+  const isLast = clampedIndex === stepper.length - 1;
+
+  const goPrev = () => setStepIndex((i) => Math.max(0, i - 1));
+  const goNext = () => setStepIndex((i) => Math.min(stepper.length - 1, i + 1));
+  const goTo = (i) => setStepIndex(i);
+
   return (
     <div className="answer-view">
-      {/* ─── Header ─── */}
-      <div className="answer-header">
-        <h2 className="answer-title">
-          <span className="answer-icon">🎯</span> Most Likely Cause
-        </h2>
-        <span
-          className="answer-confidence-badge"
-          style={{
-            background: `${confidenceColor}22`,
-            color: confidenceColor,
-            border: `1px solid ${confidenceColor}44`,
-          }}
-        >
-          {answer.confidence} confidence
-        </span>
-      </div>
-
-      <p className="answer-cause">{cite(answer.mostLikelyCause)}</p>
-
-      {/* ─── How It Works (concept primer before verification) ─── */}
-      {answer.howItWorks && (
-        <div className="answer-section answer-how-it-works">
-          <h3>
-            <span className="section-icon">🧭</span> How This Works
-          </h3>
-          <p className="how-it-works-body">{cite(answer.howItWorks)}</p>
-          {answer.diagram && <HowItWorksDiagram source={answer.diagram} />}
-        </div>
-      )}
-
-      {/* ─── Verify The Pieces (existence / wiring checks tied to howItWorks) ─── */}
-      {answer.fastChecks?.length > 0 && (
-        <div className="answer-section answer-fast-checks">
-          <h3>
-            <span className="section-icon">⚡</span> Verify The Pieces
-          </h3>
-          <ul>
-            {answer.fastChecks.map((check, i) => {
-              const { title, body } = splitTitle(check);
-              return (
-                <li key={i}>
-                  <span className="check-number">{i + 1}</span>
-                  <div className="check-content">
-                    {title && <strong className="check-title">{cite(title)}</strong>}
-                    <span className="check-body">{cite(body)}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {/* ─── Fix Steps (interactive checklist) ─── */}
-      {answer.fixSteps?.length > 0 && (
-        <div className="answer-section answer-fix-steps">
-          <h3>
-            <span className="section-icon">🔧</span>
-            <span>Fix Steps</span>
-            <span
-              className="fix-step-progress"
-              aria-live="polite"
-              aria-label={`${doneCount} of ${totalSteps} steps completed`}
+      {/* ─── Stepper progress indicator (clickable breadcrumb) ─── */}
+      <nav className="answer-stepper" aria-label="Answer walkthrough progress">
+        {stepper.map((s, i) => {
+          const state =
+            i === clampedIndex ? "active" : i < clampedIndex ? "visited" : "upcoming";
+          return (
+            <button
+              key={s.id}
+              type="button"
+              className={`stepper-pill stepper-pill-${state}`}
+              onClick={() => goTo(i)}
+              aria-current={i === clampedIndex ? "step" : undefined}
             >
-              {doneCount} of {totalSteps} done
-            </span>
-            {doneCount > 0 && (
+              <span className="stepper-pill-num">{i + 1}</span>
+              <span className="stepper-pill-icon">{s.icon}</span>
+              <span className="stepper-pill-label">{s.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* ─── Active step content ─── */}
+      <div className="answer-step-panel" key={currentStep.id}>
+        {currentStep.id === "cause" && (
+          <>
+            <div className="answer-header">
+              <h2 className="answer-title">
+                <span className="answer-icon">🎯</span> Most Likely Cause
+              </h2>
+              <span
+                className="answer-confidence-badge"
+                style={{
+                  background: `${confidenceColor}22`,
+                  color: confidenceColor,
+                  border: `1px solid ${confidenceColor}44`,
+                }}
+              >
+                {answer.confidence} confidence
+              </span>
+            </div>
+            <p className="answer-cause">{cite(answer.mostLikelyCause)}</p>
+          </>
+        )}
+
+        {currentStep.id === "howItWorks" && (
+          <div className="answer-section answer-how-it-works">
+            <h3>
+              <span className="section-icon">🧭</span> How This Works
+            </h3>
+            <p className="how-it-works-body">{cite(answer.howItWorks)}</p>
+            {answer.diagram && <HowItWorksDiagram source={answer.diagram} />}
+          </div>
+        )}
+
+        {currentStep.id === "verify" && (
+          <div className="answer-section answer-fast-checks">
+            <h3>
+              <span className="section-icon">⚡</span> Verify The Pieces
+            </h3>
+            <ul>
+              {answer.fastChecks.map((check, i) => {
+                const { title, body } = splitTitle(check);
+                return (
+                  <li key={i}>
+                    <span className="check-number">{i + 1}</span>
+                    <div className="check-content">
+                      {title && <strong className="check-title">{cite(title)}</strong>}
+                      <span className="check-body">{cite(body)}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {currentStep.id === "fix" && (
+          <div className="answer-section answer-fix-steps">
+            <h3>
+              <span className="section-icon">🔧</span>
+              <span>Fix Steps</span>
+              <span
+                className="fix-step-progress"
+                aria-live="polite"
+                aria-label={`${doneCount} of ${totalSteps} steps completed`}
+              >
+                {doneCount} of {totalSteps} done
+              </span>
+              {doneCount > 0 && (
+                <button
+                  type="button"
+                  className="fix-step-reset"
+                  onClick={resetSteps}
+                  title="Uncheck every step"
+                >
+                  Reset
+                </button>
+              )}
               <button
                 type="button"
-                className="fix-step-reset"
-                onClick={resetSteps}
-                title="Uncheck every step"
+                className="fix-step-popout"
+                onClick={openPopout}
+                title="Open checklist in a resizable window"
+                aria-label="Open Fix Steps in a new window"
               >
-                Reset
+                ↗ Pop out
               </button>
-            )}
-            <button
-              type="button"
-              className="fix-step-popout"
-              onClick={openPopout}
-              title="Open checklist in a resizable window"
-              aria-label="Open Fix Steps in a new window"
-            >
-              ↗ Pop out
-            </button>
-          </h3>
-          <ul className="fix-step-list">
-            {answer.fixSteps.map((step, i) => {
-              const checked = checkedSteps.has(i);
-              const { title, body } = splitTitle(step);
-              return (
-                <li key={i} className={`fix-step-item ${checked ? "checked" : ""}`}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleStep(i)}
-                      aria-label={`Mark step ${i + 1} complete`}
-                    />
-                    <span className="fix-step-number">{i + 1}</span>
-                    <div className="fix-step-content">
-                      {title && <strong className="fix-step-title">{cite(title)}</strong>}
-                      <span className="fix-step-text">{cite(body)}</span>
-                    </div>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-          {allStepsDone && (
-            <div className="fix-steps-complete" role="status">
-              🎉 Nice — every step tried. Did this resolve it? Let me know below so I can
-              improve.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ─── If Still Broken ─── */}
-      {answer.ifStillBrokenBranches?.length > 0 && (
-        <div className="answer-section answer-branches">
-          <h3>
-            <span className="section-icon">🔀</span> If Still Broken
-          </h3>
-          <div className="branch-list">
-            {answer.ifStillBrokenBranches.map((branch, i) => (
-              <div key={i} className="branch-item">
-                <span className="branch-condition">If {cite(branch.condition)}:</span>
-                <span className="branch-action">{cite(branch.action)}</span>
+            </h3>
+            <ul className="fix-step-list">
+              {answer.fixSteps.map((step, i) => {
+                const checked = checkedSteps.has(i);
+                const { title, body } = splitTitle(step);
+                return (
+                  <li key={i} className={`fix-step-item ${checked ? "checked" : ""}`}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleStep(i)}
+                        aria-label={`Mark step ${i + 1} complete`}
+                      />
+                      <span className="fix-step-number">{i + 1}</span>
+                      <div className="fix-step-content">
+                        {title && <strong className="fix-step-title">{cite(title)}</strong>}
+                        <span className="fix-step-text">{cite(body)}</span>
+                      </div>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            {allStepsDone && (
+              <div className="fix-steps-complete" role="status">
+                🎉 Nice — every step tried. Did this resolve it? Let me know on the
+                Takeaway step.
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ─── Why This Result (collapsible — reduces cognitive load on main flow) ─── */}
-      {answer.whyThisResult?.length > 0 && (
-        <details className="answer-section answer-reasoning answer-reasoning-collapsible">
-          <summary>
-            <span className="section-icon">💡</span>
-            <span className="reasoning-summary-label">How the AI reached this conclusion</span>
-          </summary>
-          <ul className="reasoning-list">
-            {answer.whyThisResult.map((reason, i) => (
-              <li key={i}>
-                <span>{cite(reason)}</span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+        {currentStep.id === "branches" && (
+          <div className="answer-section answer-branches">
+            <h3>
+              <span className="section-icon">🔀</span> If Still Broken
+            </h3>
+            <div className="branch-list">
+              {answer.ifStillBrokenBranches.map((branch, i) => (
+                <div key={i} className="branch-item">
+                  <span className="branch-condition">If {cite(branch.condition)}:</span>
+                  <span className="branch-action">{cite(branch.action)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* ─── Skills You'll Build (takeaway — placed after reasoning) ─── */}
-      {answer.learnPath?.objectives?.transferable?.length > 0 && (
-        <div className="answer-section answer-skills">
-          <h3>
-            <span className="section-icon">🔄</span> What you&apos;ll take away from this
-          </h3>
-          <p className="skills-intro">
-            Beyond fixing this specific issue, here&apos;s the transferable skill you&apos;ll build:
-          </p>
-          <ul className="skills-list">
-            {answer.learnPath.objectives.transferable.map((skill, i) => (
-              <li key={i}>
-                <span>{cite(skill)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {currentStep.id === "takeaway" && (
+          <>
+            {answer.learnPath?.objectives?.transferable?.length > 0 && (
+              <div className="answer-section answer-skills">
+                <h3>
+                  <span className="section-icon">🔄</span> What you&apos;ll take away from this
+                </h3>
+                <p className="skills-intro">
+                  Beyond fixing this specific issue, here&apos;s the transferable skill
+                  you&apos;ll build:
+                </p>
+                <ul className="skills-list">
+                  {answer.learnPath.objectives.transferable.map((skill, i) => (
+                    <li key={i}>
+                      <span>{cite(skill)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-      {/* ─── Evidence Panel ─── */}
-      <EvidencePanel evidence={answer.evidence} />
+            {answer.whyThisResult?.length > 0 && (
+              <details className="answer-section answer-reasoning answer-reasoning-collapsible">
+                <summary>
+                  <span className="section-icon">💡</span>
+                  <span className="reasoning-summary-label">
+                    How the AI reached this conclusion
+                  </span>
+                </summary>
+                <ul className="reasoning-list">
+                  {answer.whyThisResult.map((reason, i) => (
+                    <li key={i}>
+                      <span>{cite(reason)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
 
-      {/* ─── Actions ─── */}
-      <div className="answer-actions">
-        <button className="answer-action-btn primary" onClick={onBackToVideos}>
-          📚 Browse Related Resources
+            <div className="answer-actions">
+              <button className="answer-action-btn primary" onClick={onBackToVideos}>
+                📚 Browse Related Resources
+              </button>
+              <button className="answer-action-btn secondary" onClick={onStartOver}>
+                ← Ask Another Question
+              </button>
+            </div>
+
+            <FeedbackPanel onFeedback={onFeedback} isRerunning={isRerunning} />
+          </>
+        )}
+      </div>
+
+      {/* ─── Stepper navigation ─── */}
+      <div className="answer-stepper-nav">
+        <button
+          type="button"
+          className="stepper-nav-btn stepper-nav-prev"
+          onClick={goPrev}
+          disabled={isFirst}
+          aria-label="Previous section"
+        >
+          ← Previous
         </button>
-        <button className="answer-action-btn secondary" onClick={onStartOver}>
-          ← Ask Another Question
+        <span className="stepper-nav-counter">
+          {clampedIndex + 1} of {stepper.length}
+        </span>
+        <button
+          type="button"
+          className="stepper-nav-btn stepper-nav-next"
+          onClick={goNext}
+          disabled={isLast}
+          aria-label="Next section"
+        >
+          Next →
         </button>
       </div>
 
-      {/* ─── Feedback ─── */}
-      <FeedbackPanel onFeedback={onFeedback} isRerunning={isRerunning} />
-
-      {/* ─── Official Docs (bottom of page) ─── */}
+      {/* ─── Persistent reference material below the stepper ─── */}
+      <EvidencePanel evidence={answer.evidence} />
       <OfficialDocsSummary data={vertexAIDocs} isLoading={vertexAILoading} error={vertexAIError} />
     </div>
   );
