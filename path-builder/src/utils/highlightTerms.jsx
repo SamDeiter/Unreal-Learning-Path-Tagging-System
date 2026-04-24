@@ -63,11 +63,15 @@ const UE5_TERMS = [
   "UMG",
 ];
 
-// Build regex: match quoted terms OR known UE5 terms
+// Build regex: match **bold** markdown, quoted terms, menu paths, OR known UE5 terms
+const boldMdPattern = "\\*\\*([^*\\n]+?)\\*\\*";
 const quotedPattern = "'([^']{2,60})'";
 const menuPathPattern = "([A-Z][\\w ]+(?:\\s*(?:→|->|>)\\s*[A-Z][\\w ]+)+)";
 const termsPattern = UE5_TERMS.map((t) => `\\b${t}\\b`).join("|");
-const HIGHLIGHT_RE = new RegExp(`${quotedPattern}|${menuPathPattern}|${termsPattern}`, "gi");
+const HIGHLIGHT_RE = new RegExp(
+  `${boldMdPattern}|${quotedPattern}|${menuPathPattern}|${termsPattern}`,
+  "gi"
+);
 
 /**
  * Takes a plain text string and returns React elements with
@@ -90,9 +94,10 @@ export default function highlightTerms(text) {
     }
 
     // Determine display text
-    const quoted = match[1]; // Group 1: content inside single quotes
-    const menuPath = match[2]; // Group 2: menu path like Edit → Settings
-    const display = quoted || menuPath || match[0];
+    const boldMd = match[1];   // Group 1: **bold** markdown content
+    const quoted = match[2];   // Group 2: content inside single quotes
+    const menuPath = match[3]; // Group 3: menu path like Edit → Settings
+    const display = boldMd || quoted || menuPath || match[0];
 
     parts.push(
       <strong key={match.index} className="hl-term">
