@@ -177,7 +177,20 @@ const TutorAnswerSchema = z
       .default({ transferable: [], fixSpecific: [] }),
     pathSummary: z.string().default(""),
   })
-  .passthrough();
+  .passthrough()
+  // Gemini silently skipped howItWorks on the first prod run despite a
+  // substance-requirement bullet. Schema-level enforcement kicks runStage's
+  // one-shot repair retry into gear, giving the model a second chance with
+  // an explicit validation error. NO_DATA_AVAILABLE legitimately has nothing
+  // to teach, so it's exempt.
+  .refine(
+    (val) => val.confidence === "NO_DATA_AVAILABLE" || val.howItWorks.trim().length >= 40,
+    {
+      message:
+        "howItWorks must be 2-4 sentences (≥40 chars) naming the subsystem components, unless confidence is NO_DATA_AVAILABLE",
+      path: ["howItWorks"],
+    }
+  );
 
 // ─── Schema Registry (lookup by stage name) ─────────────────────────────────
 

@@ -110,19 +110,20 @@ STRICT GROUNDING RULES:
 - Cite passages with [n]. Only use numbers that appear in the EVIDENCE block. Uncited specific claims will be flagged as ungrounded.
 - Blueprint instructions describe visually ("Right-click → Add Node → [Node Name], connect [Pin A] to [Pin B]") and cite the passage they came from.
 - C++ goes in \`\`\`cpp fenced blocks.
-- If the EVIDENCE block is empty, irrelevant, or contradicts the problem: set confidence="NO_DATA_AVAILABLE", make whyThisResult explain exactly what is missing and what the learner could capture (screenshot, exact error text, project settings), and leave fixSteps with a SINGLE step asking for that specific info. Do NOT fabricate steps.
+- NO_DATA path: if the EVIDENCE block is empty, irrelevant, or contradicts the problem, set confidence="NO_DATA_AVAILABLE", set howItWorks="" and diagram="", set whyThisResult to explain exactly what is missing (screenshot, exact error text, project settings), and leave fixSteps with a SINGLE step asking for that info. Do NOT fabricate steps.
+
+HARD REQUIREMENTS (these fields MUST be populated on every non-NO_DATA response — empty strings are NOT acceptable):
+- howItWorks: EXACTLY 2-4 sentences teaching the subsystem. Name every component involved (PlayerController, Pawn, Input Component, Action Mapping, etc.), explain how they connect, and state WHY the wiring exists. Write this BEFORE thinking about the fix. This primer is the mental model the learner needs — without it the rest of the answer is procedural and doesn't teach. Grounded in EVIDENCE, cite with [n]. Example for "Character will not jump": "In UE5 a Pawn receives input only after a PlayerController possesses it, which routes keypresses through an Input Component to Action Mappings defined in Project Settings [8]. The Character class ships with a built-in Jump() method, so your Blueprint just needs an Input Action Jump event that calls Jump on Pressed and Stop Jumping on Released [5]."
+- diagram: a Mermaid flowchart showing the same components named in howItWorks. Default behavior is EMIT a diagram — only skip (empty string) when howItWorks names just 1-2 components with no clear flow between them.
+  * Syntax: \`flowchart LR\` or \`flowchart TD\` ONLY. No other Mermaid chart types.
+  * Maximum 10 nodes. Node labels ≤ 4 words.
+  * Every node = a component named in howItWorks. Do NOT invent components.
+  * Edges carry short labels (e.g. "possesses", "routes input", "fires").
+  * Raw Mermaid source as a plain JSON string (use \\n for line breaks). NO \`\`\`mermaid fences.
+  * Example value: "flowchart LR\\n  PC[PlayerController] -- possesses --> P[Pawn]\\n  P -- routes to --> IC[Input Component]\\n  IC -- fires --> AM[Action Mapping Jump]\\n  AM -- calls --> J[Jump method]"
 
 SUBSTANCE REQUIREMENTS:
-- howItWorks (2-4 sentences): plain-language primer on the subsystem this problem lives in. Name the components involved (e.g. "Pawns receive input through a PlayerController, which routes it through an Input Component to Action Mappings defined in Project Settings"), state WHY the wiring exists. This is the mental model the learner needs BEFORE verifying or fixing. Grounded in EVIDENCE, not common knowledge. Cite with [n].
-- diagram (Mermaid flowchart source, OPTIONAL): when howItWorks names 3+ components with a clear data/control flow between them, emit a Mermaid flowchart that visualizes that flow. Rules:
-  * Syntax: \`flowchart LR\` or \`flowchart TD\` only. No other chart types.
-  * Maximum 10 nodes. Keep node labels ≤ 4 words.
-  * Every node MUST correspond to a component named in howItWorks. Do NOT invent components that aren't in howItWorks or evidence.
-  * Edges should carry short labels naming the signal/data on the arrow (e.g. "input event", "possesses", "routes to").
-  * Output the raw Mermaid source as a plain string. Do NOT wrap in \`\`\`mermaid fences — the client adds those as needed.
-  * Example: "flowchart LR\\n  PC[PlayerController] -- possesses --> P[Pawn]\\n  P -- routes input --> IC[Input Component]\\n  IC -- fires --> AM[Action Mapping]"
-  * If howItWorks has fewer than 3 components or the flow isn't clearly directional, emit an empty string.
-- fastChecks (2-3): for each named piece in howItWorks, give a single check that confirms it EXISTS and is wired correctly. Each check points at a location the learner can open (menu path, asset, property) and names the telltale "yes, it's there" signal. Do NOT list generic debugging tips here.
+- fastChecks (2-3): for each named piece in howItWorks, give a single check confirming it EXISTS and is wired correctly. Each check points at a location the learner can open (menu path, asset, property) and names the telltale "yes, it's there" signal. Do NOT list generic debugging tips.
 - fixSteps (3-6): ordered, specific; each step names menu path, the button/node/property, and the value. Only used when a fastCheck failed.
 - ifStillBroken (2-3): condition = observable symptom after trying the fix; action = what to try next.
 - whyThisResult (2-3): reasoning chain from symptoms to cause; what ruled out alternatives.
@@ -130,13 +131,13 @@ SUBSTANCE REQUIREMENTS:
 - objectives.fixSpecific (2-4): terser actionable phrases for this specific problem.
 - pathSummary: 2-3 sentences describing what the learner will work through to solve this.
 
-Return ONLY valid JSON matching this shape:
+Return ONLY valid JSON matching this shape (howItWorks and diagram are populated strings, never empty, unless confidence is NO_DATA_AVAILABLE):
 {
   "systems": ["subsystem labels"],
   "mostLikelyCause": "one sentence",
   "confidence": "high|med|low|NO_DATA_AVAILABLE",
-  "howItWorks": "2-4 sentences",
-  "diagram": "flowchart LR\\n  ... (Mermaid source, or empty string)",
+  "howItWorks": "2-4 sentences naming components and the wiring between them",
+  "diagram": "flowchart LR\\n  ... (Mermaid source, empty only for 1-2-component answers)",
   "fastChecks": ["str"],
   "fixSteps": ["str"],
   "ifStillBroken": [{"condition":"str","action":"str"}],
