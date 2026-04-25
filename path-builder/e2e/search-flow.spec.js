@@ -16,8 +16,12 @@ test.describe("Search flow", () => {
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
     // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Expand the rich input section
+    await page.getByText("Attach a screenshot or error log").click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
