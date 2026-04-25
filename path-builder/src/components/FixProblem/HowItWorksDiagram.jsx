@@ -22,20 +22,39 @@ function loadMermaid() {
         securityLevel: "strict",
         flowchart: {
           curve: "basis",
-          padding: 18,
+          // Bumped padding so labels never butt against the rect edge even
+          // when the browser's measurement of bold text is a fraction of a
+          // pixel wider than Mermaid's prediction.
+          padding: 24,
           nodeSpacing: 50,
           rankSpacing: 70,
           // useMaxWidth: true makes Mermaid emit viewBox + width:100%, so the
           // graph scales down to whatever column it's in instead of overflowing.
           useMaxWidth: true,
         },
+        // themeCSS is applied INSIDE the SVG before Mermaid measures node
+        // bounding boxes. Without it, CSS-forced font-weight:600 + 1.05rem
+        // makes painted text wider than the rect Mermaid sized for the
+        // default 400-weight 16px font, clipping ends like "PlayerControlle".
+        // Match the painting CSS exactly so measurement and render agree.
+        themeCSS: `
+          .nodeLabel, .nodeLabel * {
+            font-size: 17px !important;
+            font-weight: 600 !important;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+          }
+          .edgeLabel, .edgeLabel * {
+            font-size: 15px !important;
+            font-weight: 500 !important;
+          }
+        `,
         themeVariables: {
           fontFamily:
             'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-          // Kept close to the CSS-forced label size (1.05rem ≈ 17px). Previously
-          // 26px made Mermaid lay out oversized nodes that then scaled down and
-          // left wasted whitespace inside each box.
-          fontSize: "16px",
+          // 17px matches the CSS-rendered label size (1.0625rem). Mermaid
+          // uses this for its initial measurement pass; themeCSS above keeps
+          // the rendered text in sync.
+          fontSize: "17px",
           // Node fill: slightly lighter than page background so nodes pop.
           primaryColor: "#1e293b",
           // Node border: purple accent, matches ue-term highlight color.

@@ -919,14 +919,15 @@
   color: #f5f3ff;
 }
 
-/* Mermaid with useMaxWidth: true writes `max-width: <intrinsic>px` directly
-   onto the SVG's inline style — which beats stylesheet rules. Without
-   !important, the diagram stays pinned to its tiny intrinsic width and
-   the text is unreadable. Force our 100% fill instead. */
+/* Mermaid with useMaxWidth:true emits inline width:100% + max-width:<intrinsic>.
+   Now that themeCSS pre-aligns Mermaid's measurement to the painted CSS, the
+   intrinsic dimensions are correct — we just preserve aspect ratio and cap
+   the panel height so a 5-node TD diagram doesn't push the rest of the
+   answer past the fold. */
 .how-it-works-diagram svg {
-  width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
+  max-height: 520px;
 }
 
 .how-it-works-diagram .edgePath .path,
@@ -934,43 +935,36 @@
   stroke-width: 2.2px;
 }
 
-/* Node + edge label text. These must override Mermaid's inline font-size
-   because mermaid-dark stamps a small value on some labels directly. */
+/* Node + edge label text — sizes/weights MUST match the themeCSS fed to
+   Mermaid in HowItWorksDiagram.jsx. Mermaid uses that themeCSS to measure
+   node-rect widths; if the painted CSS differs, bold text overflows the
+   rect and clips at the edge ("PlayerControlle", "Characte"). */
 .how-it-works-diagram .nodeLabel,
 .how-it-works-diagram .nodeLabel * {
-  font-size: 1.05rem !important;
-  font-weight: 600;
-}
-
-.how-it-works-diagram .edgeLabel,
-.how-it-works-diagram .edgeLabel * {
-  font-size: 0.95rem !important;
-  font-weight: 500;
-}
-
-.how-it-works-diagram .node rect,
-.how-it-works-diagram .node polygon,
-.how-it-works-diagram .node circle {
-  stroke-width: 2px;
-}
-
-/* Belt-and-braces: mermaid-dark sometimes falls back to its own inline
-   colors for labels, which can be too dim against our panel. These
-   overrides ensure node + edge text always hit our contrast target. */
-.how-it-works-diagram .nodeLabel,
-.how-it-works-diagram .nodeLabel *,
-.how-it-works-diagram .edgeLabel,
-.how-it-works-diagram .edgeLabel * {
+  font-size: 17px !important;
+  font-weight: 600 !important;
   color: #f8fafc !important;
   fill: #f8fafc !important;
-  font-weight: 500;
+}
+
+.how-it-works-diagram .edgeLabel,
+.how-it-works-diagram .edgeLabel * {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #f8fafc !important;
+  fill: #f8fafc !important;
 }
 
 .how-it-works-diagram .edgeLabel {
   background-color: #0f172a !important;
   padding: 2px 6px !important;
   border-radius: 4px;
-  font-size: 0.82rem;
+}
+
+.how-it-works-diagram .node rect,
+.how-it-works-diagram .node polygon,
+.how-it-works-diagram .node circle {
+  stroke-width: 2px;
 }
 
 .how-it-works-diagram .flowchart-link {
