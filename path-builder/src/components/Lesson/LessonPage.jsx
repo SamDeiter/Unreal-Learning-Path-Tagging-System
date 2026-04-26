@@ -204,7 +204,7 @@ export default function LessonPage() {
     if (route.mode === "invalid") {
       return (
         <LessonError
-          message="No lesson was specified. Open a lesson from the Learn Why chat."
+          message="No lesson was specified. Open a lesson from the Tutor chat."
           onBack={handleBack}
         />
       );
