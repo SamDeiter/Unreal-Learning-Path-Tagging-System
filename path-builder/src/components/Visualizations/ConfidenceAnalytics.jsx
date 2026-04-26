@@ -127,7 +127,7 @@ function ConfidenceAnalytics() {
         <div className="ca-loading">Loading analytics…</div>
       ) : total === 0 ? (
         <div className="ca-empty">
-          No confidence routing data yet. Submit a query on the "Tutor" tab to start
+          No confidence routing data yet. Submit a query on the "Fix a Problem" tab to start
           collecting analytics.
         </div>
       ) : (

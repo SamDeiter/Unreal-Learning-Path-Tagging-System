@@ -18,6 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Tutor
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Expand the input section (it's hidden in a <details> by default)
+    const expander = page.locator("summary").filter({ hasText: /Attach a screenshot or error log/ });
+    await expander.click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
