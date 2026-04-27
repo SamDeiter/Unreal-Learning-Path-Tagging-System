@@ -190,11 +190,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           <h2>
             <Search size={22} className="icon-inline" /> What's the problem?
           </h2>
-          <div className="engine-toggle">
+          <div className="engine-toggle" role="group" aria-label="Target engine">
             <button
               type="button"
               className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
               onClick={() => setEngine("UE5")}
+              aria-pressed={engine === "UE5"}
             >
               UE5
             </button>
@@ -202,6 +203,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               type="button"
               className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
               onClick={() => setEngine("UEFN")}
+              aria-pressed={engine === "UEFN"}
             >
               UEFN
             </button>
