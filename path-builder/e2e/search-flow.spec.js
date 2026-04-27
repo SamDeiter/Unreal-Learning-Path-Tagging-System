@@ -18,7 +18,12 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (Bespoke/Problem-First)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+
+    // Expand the rich input section (nested in <details>)
+    // Use a specific locator to avoid matching the sidebar's optional log summary
+    await page.locator(".pf-input-main summary:has-text('Attach a screenshot')").click();
+
+    await page.getByLabel("Problem description").waitFor({ state: "visible", timeout: 5_000 });
   });
 
   test("should accept a search query", async ({ page }) => {
