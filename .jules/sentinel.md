@@ -2,3 +2,8 @@
 **Vulnerability:** The `analytics_events` collection was readable by any authenticated user, potentially leaking search queries and session data. The `path_builder_invites` collection allowed client-side updates to `usedCount` and `lastUsedAt` without server-side validation of the increment or timestamp.
 **Learning:** Even when documentation (like `analyticsQueryService.js`) claims a collection is admin-only, the Firestore rules are the actual source of truth and must be explicitly audited. Implicit trust in "authenticated users" is often too broad for sensitive telemetry.
 **Prevention:** Always restrict read access to the minimum necessary persona (e.g., `isAdmin()`). For sensitive counters or metadata updates (like invite consumption), use `request.resource.data.field == resource.data.field + 1` and `request.resource.data.timestamp == request.time` to ensure data integrity and prevent replay or bulk-increment attacks.
+
+## 2026-04-08 - [User Isolation for API Usage Tracking]
+**Vulnerability:** API token usage and cost metrics were stored in a flat collection keyed by date (`token_usage/{dateKey}`), allowing any authenticated user to read aggregated app-wide costs and overwrite data, causing data corruption and information leakage.
+**Learning:** Document structures using non-unique keys (like dates) as primary document IDs cannot support per-user security rules in Firestore without a parent user namespace.
+**Prevention:** Always namespace user-owned telemetry or analytics under a `{userId}` prefix (e.g., `token_usage/{userId}/daily/{dateKey}`) and enforce `request.auth.uid == userId` in security rules to ensure strict data isolation.
