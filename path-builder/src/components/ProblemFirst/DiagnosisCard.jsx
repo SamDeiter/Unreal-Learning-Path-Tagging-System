@@ -16,7 +16,7 @@ export default function DiagnosisCard({ diagnosis }) {
   return (
     <div className="diagnosis-card">
       <div className="diagnosis-header">
-        <h3>🔬 Diagnosis</h3>
+        <h3><span aria-hidden="true">🔬</span> Diagnosis</h3>
         <span className="diagnosis-id">ID: {diagnosis.diagnosis_id?.slice(-8) || "N/A"}</span>
       </div>
 
@@ -26,7 +26,7 @@ export default function DiagnosisCard({ diagnosis }) {
         {/* Root Causes - Most Important */}
         <details className="diagnosis-section root-causes">
           <summary>
-            <span className="icon">🎯</span>
+            <span className="icon" aria-hidden="true">🎯</span>
             Root Causes
             <span className="count">({rootCausesCount})</span>
           </summary>
@@ -40,7 +40,7 @@ export default function DiagnosisCard({ diagnosis }) {
         {/* Signals to Watch For */}
         <details className="diagnosis-section signals">
           <summary>
-            <span className="icon">👁️</span>
+            <span className="icon" aria-hidden="true">👁️</span>
             Signals to Watch For
             <span className="count">({signalsCount})</span>
           </summary>
@@ -54,7 +54,7 @@ export default function DiagnosisCard({ diagnosis }) {
         {/* Variables That Matter */}
         <details className="diagnosis-section variables-matter">
           <summary>
-            <span className="icon">✅</span>
+            <span className="icon" aria-hidden="true">✅</span>
             Variables That Matter
             <span className="count">({varMatterCount})</span>
           </summary>
@@ -68,7 +68,7 @@ export default function DiagnosisCard({ diagnosis }) {
         {/* Variables That Don't Matter */}
         <details className="diagnosis-section variables-dont-matter">
           <summary>
-            <span className="icon">❌</span>
+            <span className="icon" aria-hidden="true">❌</span>
             Variables That Don't
             <span className="count">({varDontCount})</span>
           </summary>
@@ -83,7 +83,7 @@ export default function DiagnosisCard({ diagnosis }) {
         {diagnosis.generalization_scope?.length > 0 && (
           <details className="diagnosis-section generalization" open>
             <summary>
-              <span className="icon">🔄</span>
+              <span className="icon" aria-hidden="true">🔄</span>
               Where Else This Applies
               <span className="count">({diagnosis.generalization_scope.length})</span>
             </summary>

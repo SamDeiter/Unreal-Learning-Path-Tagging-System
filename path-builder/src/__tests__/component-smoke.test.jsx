@@ -107,7 +107,7 @@ describe("DiagnosisCard", () => {
     };
 
     render(<DiagnosisCard diagnosis={diagnosis} />);
-    expect(screen.getByText("🔬 Diagnosis")).toBeTruthy();
+    expect(screen.getByText(/Diagnosis/)).toBeTruthy();
     expect(screen.getByText("Lumen reflections are flickering")).toBeTruthy();
     expect(screen.getByText(/Root Causes/)).toBeTruthy();
   });
