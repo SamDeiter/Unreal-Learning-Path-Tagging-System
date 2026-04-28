@@ -12,7 +12,6 @@
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
-const functionsV1 = require("firebase-functions");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 
@@ -24,6 +23,7 @@ const { runStage } = require("../pipeline/llmStage");
 const { createTrace } = require("../pipeline/telemetry");
 const { normalizeQuery } = require("../pipeline/cache");
 const { wrapEvidence } = require("../pipeline/promptVersions");
+const vertex = require("../utils/vertex");
 
 const { readSkillState, buildSkillStateSnippet } = require("./skillStateReader");
 const {
@@ -37,23 +37,11 @@ const db = admin.firestore();
 
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIMENSION = 768;
-const SYNTH_MODEL = "gemini-2.0-flash";
-const EMBED_URL = `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent`;
-const SYNTH_URL = `https://generativelanguage.googleapis.com/v1beta/models/${SYNTH_MODEL}:generateContent`;
+const SYNTH_MODEL = "gemini-2.5-flash";
 
 const WIDGET_TIMEOUT_MS = 25000;
 const SPOKE_EMBED_TIMEOUT_MS = 10000;
 const SPOKE_SYNTH_TIMEOUT_MS = 30000;
-
-function getApiKey() {
-  let key = process.env.GEMINI_API_KEY;
-  if (!key) key = functionsV1.config().gemini?.api_key;
-  return key || null;
-}
-
-function fetchDynamic(...args) {
-  return import("node-fetch").then(({ default: f }) => f(...args));
-}
 
 function stripWidgetFences(raw) {
   if (!raw || typeof raw !== "string") return null;
@@ -71,18 +59,16 @@ function stripWidgetFences(raw) {
   return out;
 }
 
-async function embedQueryVector(text, apiKey) {
-  const resp = await fetchDynamic(`${EMBED_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: `models/${EMBED_MODEL}`,
+async function embedQueryVector(text) {
+  const resp = await vertex.embedContent(
+    EMBED_MODEL,
+    {
       content: { parts: [{ text }] },
       taskType: "RETRIEVAL_QUERY",
       outputDimensionality: EMBED_DIMENSION,
-    }),
-    signal: AbortSignal.timeout(SPOKE_EMBED_TIMEOUT_MS),
-  });
+    },
+    { signal: AbortSignal.timeout(SPOKE_EMBED_TIMEOUT_MS) }
+  );
   if (!resp.ok) throw new Error(`embed_failed_${resp.status}`);
   const body = await resp.json();
   const vec = body?.embedding?.values;
@@ -123,10 +109,9 @@ function buildChunkContext(chunks) {
     .join("\n\n");
 }
 
-async function runSpoke(topic, learnerLevel, apiKey, bandDirectives = {}) {
+async function runSpoke(topic, learnerLevel, bandDirectives = {}) {
   const vec = await embedQueryVector(
-    `Unreal Engine 5 tutorial about: ${topic}. Difficulty: ${learnerLevel}.`,
-    apiKey
+    `Unreal Engine 5 tutorial about: ${topic}. Difficulty: ${learnerLevel}.`
   );
   const [seg, epic] = await Promise.all([
     knn("segment_embeddings", vec, 5).catch(() => []),
@@ -160,10 +145,9 @@ Rules:
 - For each incorrect option, the explanation should address WHY that choice is tempting (the likely misconception) and point to the correct mental model.
 - Keep each explanation to 1-3 sentences. No markdown, no fences.`;
 
-  const resp = await fetchDynamic(`${SYNTH_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const resp = await vertex.generateContent(
+    SYNTH_MODEL,
+    {
       contents: [
         { role: "user", parts: [{ text: `${systemPrompt}\n\n## Chunks\n\n${buildChunkContext(chunks)}` }] },
       ],
@@ -172,9 +156,9 @@ Rules:
         maxOutputTokens: 2048,
         responseMimeType: "application/json",
       },
-    }),
-    signal: AbortSignal.timeout(SPOKE_SYNTH_TIMEOUT_MS),
-  });
+    },
+    { signal: AbortSignal.timeout(SPOKE_SYNTH_TIMEOUT_MS) }
+  );
   if (!resp.ok) throw new Error(`spoke_synth_failed_${resp.status}`);
   const body = await resp.json();
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -191,7 +175,7 @@ Rules:
   };
 }
 
-async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", readingLevelBlock = "", apiKey, trace, normalized }) {
+async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", readingLevelBlock = "", trace, normalized }) {
   const result = await runStage({
     stage: "diagnosis",
     systemPrompt:
@@ -199,7 +183,6 @@ async function runDiagnosis({ query, learnerBlock, affectiveBlock = "", readingL
       `UE5 expert. Diagnose UE5 problems with specific settings and Editor workflows. Teach WHY the problem occurs, not just the fix. If an AFFECTIVE SIGNAL block is present, treat it as the highest-priority directive for this response — it overrides depth/difficulty defaults.${affectiveBlock}${learnerBlock}${readingLevelBlock}
 JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"],"signals_to_watch_for":["str"],"scope":["str"],"cited_sources":[{"ref":"int","detail":"str"}]}`,
     userPrompt: `Problem: ${query}`,
-    apiKey,
     trace,
     cacheParams: { query: normalized, mode: "lesson_diagnosis" },
     maxTokens: 1024,
@@ -218,7 +201,7 @@ JSON:{"diagnosis_id":"diag_<uuid>","problem_summary":"str","root_causes":["str"]
   };
 }
 
-async function runObjectives({ query, diagnosis, apiKey, trace, normalized }) {
+async function runObjectives({ query, diagnosis, trace, normalized }) {
   if (!diagnosis) return null;
   const result = await runStage({
     stage: "objectives",
@@ -227,7 +210,6 @@ async function runObjectives({ query, diagnosis, apiKey, trace, normalized }) {
       `Create UE5 learning objectives. MUST include >=1 transferable skill (anti-tutorial-hell).
 JSON:{"fix_specific":["str"],"transferable":["str"]}`,
     userPrompt: `Problem:${String(query).slice(0, 200)}\nCauses:${(diagnosis.root_causes || []).slice(0, 3).join(";")}`,
-    apiKey,
     trace,
     cacheParams: { query: normalized, mode: "lesson_objectives" },
   });
@@ -239,7 +221,7 @@ JSON:{"fix_specific":["str"],"transferable":["str"]}`,
   };
 }
 
-async function runTakeaways({ query, topic, apiKey }) {
+async function runTakeaways({ query, topic }) {
   const prompt = `You are a UE5 instructor highlighting 3 key takeaways for a learner.
 The learner asked: "${query}"
 Topic: "${topic}"
@@ -250,15 +232,14 @@ Generate exactly 3 actionable takeaways. Each:
 - No emojis, no markdown
 Return ONLY a JSON array of 3 strings.`;
 
-  const resp = await fetchDynamic(`${SYNTH_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const resp = await vertex.generateContent(
+    SYNTH_MODEL,
+    {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
-    }),
-    signal: AbortSignal.timeout(15000),
-  });
+    },
+    { signal: AbortSignal.timeout(15000) }
+  );
   if (!resp.ok) throw new Error(`takeaways_failed_${resp.status}`);
   const body = await resp.json();
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -269,7 +250,7 @@ Return ONLY a JSON array of 3 strings.`;
   return arr.slice(0, 3).map((s) => String(s));
 }
 
-async function runWidget({ topic, diagnosis, objectives, learnerLevel, apiKey }) {
+async function runWidget({ topic, diagnosis, objectives, learnerLevel }) {
   const objectiveList = [
     ...((objectives && objectives.fix_specific) || []),
     ...((objectives && objectives.transferable) || []),
@@ -281,18 +262,17 @@ async function runWidget({ topic, diagnosis, objectives, learnerLevel, apiKey })
     learnerLevel,
   });
 
-  const resp = await fetchDynamic(`${SYNTH_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const resp = await vertex.generateContent(
+    SYNTH_MODEL,
+    {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.8,
         maxOutputTokens: 6144,
       },
-    }),
-    signal: AbortSignal.timeout(WIDGET_TIMEOUT_MS),
-  });
+    },
+    { signal: AbortSignal.timeout(WIDGET_TIMEOUT_MS) }
+  );
   if (!resp.ok) throw new Error(`widget_failed_${resp.status}`);
   const body = await resp.json();
   const raw = body?.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -485,7 +465,6 @@ exports.generateLesson = onCall(
     timeoutSeconds: 120,
     memory: "1GiB",
     minInstances: 0,
-    secrets: ["GEMINI_API_KEY"],
   },
   async (request) => {
     requireAppCheck(request, { allowInvalid: false });
@@ -515,9 +494,6 @@ exports.generateLesson = onCall(
     }
     const query = validation.clean;
     const normalized = normalizeQuery(query);
-
-    const apiKey = getApiKey();
-    if (!apiKey) throw new HttpsError("failed-precondition", "Server configuration error: API Key missing.");
 
     const trace = createTrace(userId, "generateLesson");
     const learnerState = await readSkillState(userId);
@@ -557,7 +533,6 @@ exports.generateLesson = onCall(
         learnerBlock,
         affectiveBlock,
         readingLevelBlock: readingLevelPromptBlock,
-        apiKey,
         trace,
         normalized,
       })
@@ -565,7 +540,7 @@ exports.generateLesson = onCall(
     const diagnosis = diagnosisSettled && !diagnosisSettled.__error ? diagnosisSettled : null;
 
     const objectivesSettled = await settledValue(
-      runObjectives({ query, diagnosis, apiKey, trace, normalized })
+      runObjectives({ query, diagnosis, trace, normalized })
     );
     const objectives =
       objectivesSettled && !objectivesSettled.__error ? objectivesSettled : null;
@@ -602,15 +577,14 @@ exports.generateLesson = onCall(
     };
 
     const [spokeSettled, takeawaysSettled, widgetSettled] = await Promise.all([
-      settledValue(runSpoke(topic, learnerLevel, apiKey, bandDirectives)),
-      settledValue(runTakeaways({ query, topic, apiKey })),
+      settledValue(runSpoke(topic, learnerLevel, bandDirectives)),
+      settledValue(runTakeaways({ query, topic })),
       settledValue(
         runWidget({
           topic,
           diagnosis,
           objectives,
           learnerLevel,
-          apiKey,
         })
       ),
     ]);

@@ -1,33 +1,29 @@
 const functions = require("firebase-functions");
 
-// Import utility functions
 const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 /**
  * Cloud Function: generateCourseMetadata
- * Generates course metadata and quiz questions from video content
- *
- * Uses Gemini API with server-side key (secure)
+ * Generates course metadata and quiz questions from video content.
+ * Auth via Vertex AI / ADC.
  */
 exports.generateCourseMetadata = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 120,
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    // App Check enforcement (permissive during rollout)
     requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: false });
-    // 1. Authentication check (optional - allow for testing)
     const userId = requireAuth(context);
 
-    const { systemPrompt, userPrompt, temperature = 0.3, model = "gemini-1.5-flash" } = data;
+    // gemini-1.5-flash is no longer recommended; default to 2.0-flash on Vertex.
+    const { systemPrompt, userPrompt, temperature = 0.3, model = "gemini-2.5-flash" } = data;
 
-    // 2. Input validation
     if (!systemPrompt || !userPrompt) {
       throw new functions.https.HttpsError(
         "invalid-argument",
@@ -35,7 +31,6 @@ exports.generateCourseMetadata = functions
       );
     }
 
-    // 3. Rate limiting check
     const rateLimitCheck = await checkRateLimit(userId, "courseMetadata");
     if (!rateLimitCheck.allowed) {
       throw new functions.https.HttpsError(
@@ -49,26 +44,6 @@ exports.generateCourseMetadata = functions
     }
 
     try {
-      // 4. Get API key from Secrets
-      let apiKey = process.env.GEMINI_API_KEY;
-
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
-
-      if (!apiKey) {
-        logger.error("[ERROR] GEMINI_API_KEY secret is not set.");
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
-      logger.info("[DEBUG] API key found, calling Gemini API...");
-
-      // 5. Call Gemini API
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
       const payload = {
         contents: [{ parts: [{ text: userPrompt }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -78,19 +53,15 @@ exports.generateCourseMetadata = functions
         },
       };
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await vertex.generateContent(model, payload);
 
       if (!response.ok) {
         const errorText = await response.text();
         logger.error(
-          `[ERROR] Gemini API failed: ${response.status} ${response.statusText}`,
+          `[ERROR] Vertex Gemini failed: ${response.status} ${response.statusText}`,
           errorText
         );
-        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+        throw new Error(`Vertex Gemini error: ${response.status} ${response.statusText}`);
       }
 
       const responseData = await response.json();
@@ -101,14 +72,11 @@ exports.generateCourseMetadata = functions
         throw new Error("No content generated from Gemini");
       }
 
-      // 6. Log usage
       await logApiUsage(userId, {
         model: model,
         type: "courseMetadata",
         firestoreReads: 3, firestoreWrites: 1,
       });
-
-      logger.info("[DEBUG] Successfully generated course metadata");
 
       return {
         success: true,

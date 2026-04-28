@@ -1,18 +1,13 @@
 /**
  * queryEmbedding.js — one canonical query-embedding helper for the RAG pipeline.
  *
- * Why this exists:
- *   Prior to the audit (2026-04-22), handleProblemFirst.js embedded the query a
- *   second time with `text-embedding-004` purely for the diagnosis cache, while
- *   every other embedding call in the system used `gemini-embedding-001`. That
- *   meant two model endpoints, two vector spaces, and a latent footgun if
- *   anyone reused the cached embedding for cross-collection lookup.
+ * Backed by Vertex AI (gemini-embedding-001 / 768d / RETRIEVAL_QUERY) so it
+ * matches the doc-side embedding model used to populate Firestore. ADC auth.
  *
- *   Everything — embedQuery CF, generateSpoke, generateLesson, and all the
- *   Python builders that populate Firestore — indexes with
- *   gemini-embedding-001 / 768d / RETRIEVAL_DOCUMENT. Queries must use the same
- *   model with RETRIEVAL_QUERY for asymmetric pairing.
+ * The `apiKey` parameter is retained for call-site compatibility but ignored.
  */
+
+const vertex = require("../utils/vertex");
 
 const MODEL = "gemini-embedding-001";
 const DIMENSION = 768;
@@ -23,27 +18,20 @@ const DIMENSION = 768;
  * lookup not available" and continue.
  *
  * @param {string} query
- * @param {string} apiKey - Gemini API key
+ * @param {string} [_apiKey] - Ignored; ADC is used. Kept for call-site stability.
  * @returns {Promise<number[]|null>}
  */
-async function embedQueryText(query, apiKey) {
-  if (!query || typeof query !== "string" || !apiKey) return null;
-  const fetchFn = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+async function embedQueryText(query, _apiKey) {
+  if (!query || typeof query !== "string") return null;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:embedContent?key=${apiKey}`;
   const payload = {
-    model: `models/${MODEL}`,
     content: { parts: [{ text: query }] },
     taskType: "RETRIEVAL_QUERY",
     outputDimensionality: DIMENSION,
   };
 
   try {
-    const response = await fetchFn(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const response = await vertex.embedContent(MODEL, payload);
     if (!response.ok) {
       // eslint-disable-next-line no-console
       console.warn(

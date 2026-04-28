@@ -1,5 +1,9 @@
 /**
  * Tests for expandQuery.js — Firestore cache, expansion limits, and error handling.
+ *
+ * Vertex migration: previous tests stubbed `global.fetch`; we now mock the
+ * `utils/vertex` module's `generateContent` so the test surface matches what
+ * the function actually calls.
  */
 
 // Mock firebase-functions
@@ -9,7 +13,6 @@ jest.mock("firebase-functions", () => ({
       onCall: (handler) => handler,
     },
   }),
-  config: () => ({ gemini: { api_key: "test-key" } }),
   https: {
     HttpsError: class HttpsError extends Error {
       constructor(code, message) {
@@ -24,7 +27,6 @@ jest.mock("../../utils/sanitizeInput", () => ({
   sanitizeAndValidate: (query) => ({ blocked: false, clean: query }),
 }));
 
-// Mock the Firestore-backed cache
 const mockGetCached = jest.fn().mockResolvedValue(null);
 const mockSetCache = jest.fn().mockResolvedValue(undefined);
 
@@ -51,18 +53,18 @@ jest.mock("../../utils/appCheckMiddleware", () => ({
   requireAppCheck: jest.fn(),
 }));
 
-// Mock global fetch
-global.fetch = jest.fn();
-
-// Set API key
-process.env.GEMINI_API_KEY = "test-key";
+const mockVertexGenerate = jest.fn();
+jest.mock("../../utils/vertex", () => ({
+  generateContent: (...args) => mockVertexGenerate(...args),
+  embedContent: jest.fn(),
+}));
 
 function makeContext() {
   return { auth: { uid: "test-user" }, app: {} };
 }
 
 function mockGeminiResponse(expansions) {
-  global.fetch.mockResolvedValue({
+  mockVertexGenerate.mockResolvedValue({
     ok: true,
     json: async () => ({
       candidates: [
@@ -82,14 +84,12 @@ describe("expandQuery", () => {
   beforeEach(() => {
     jest.resetModules();
 
-    // Re-apply all mocks after resetModules
     jest.mock("firebase-functions", () => ({
       runWith: () => ({
         https: {
           onCall: (handler) => handler,
         },
       }),
-      config: () => ({ gemini: { api_key: "test-key" } }),
       https: {
         HttpsError: class HttpsError extends Error {
           constructor(code, message) {
@@ -127,8 +127,12 @@ describe("expandQuery", () => {
       requireAppCheck: jest.fn(),
     }));
 
-    global.fetch = jest.fn();
-    process.env.GEMINI_API_KEY = "test-key";
+    jest.mock("../../utils/vertex", () => ({
+      generateContent: (...args) => mockVertexGenerate(...args),
+      embedContent: jest.fn(),
+    }));
+
+    mockVertexGenerate.mockReset();
     mockGetCached.mockReset().mockResolvedValue(null);
     mockSetCache.mockReset().mockResolvedValue(undefined);
 
@@ -151,8 +155,7 @@ describe("expandQuery", () => {
 
     expect(result.cached).toBe(true);
     expect(result.expansions).toContain("cached variant");
-    // fetch should NOT be called (cache hit)
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(mockVertexGenerate).not.toHaveBeenCalled();
   });
 
   test("writes to Firestore cache on cache miss", async () => {
@@ -190,7 +193,7 @@ describe("expandQuery", () => {
   });
 
   test("returns empty expansions on API error", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: false,
       status: 500,
       text: async () => "Server Error",
@@ -202,7 +205,7 @@ describe("expandQuery", () => {
   });
 
   test("returns empty expansions on network failure", async () => {
-    global.fetch.mockRejectedValue(new Error("Network error"));
+    mockVertexGenerate.mockRejectedValue(new Error("Network error"));
 
     const result = await expandQuery({ query: "network fail" }, makeContext());
     expect(result.success).toBe(true);
@@ -210,7 +213,7 @@ describe("expandQuery", () => {
   });
 
   test("returns empty expansions on unparseable response", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: true,
       json: async () => ({
         candidates: [
@@ -232,8 +235,6 @@ describe("expandQuery", () => {
     mockGetCached.mockRejectedValue(new Error("Firestore down"));
     mockGeminiResponse(["fallback variant"]);
 
-    // getCached failure is caught inside the cache module itself,
-    // returning null. The function should proceed to call Gemini.
     mockGetCached.mockResolvedValue(null);
     const result = await expandQuery({ query: "cache fail" }, makeContext());
     expect(result.success).toBe(true);

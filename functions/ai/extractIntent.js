@@ -41,7 +41,6 @@ IMPORTANT: Return ONLY the JSON object. No markdown, no explanation, just the JS
 
 exports.extractIntent = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 60,
     memory: "512MB",
   })
@@ -71,15 +70,6 @@ exports.extractIntent = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const trace = createTrace(userId, "extractIntent");
       const normalized = normalizeQuery(query);
 
@@ -89,7 +79,6 @@ exports.extractIntent = functions
         stage: "intent",
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        apiKey,
         trace,
         cacheParams: { query: normalized, mode: "standalone_intent" },
       });
@@ -109,7 +98,7 @@ exports.extractIntent = functions
       }
 
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "intentExtraction",
         query: query.substring(0, 50),
         firestoreReads: 2, firestoreWrites: 1,

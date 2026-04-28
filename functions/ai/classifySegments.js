@@ -4,6 +4,7 @@ const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 /**
  * classifySegments — Lightweight Gemini relay for Bespoke Path Stage 2.
@@ -14,7 +15,6 @@ const { requireAppCheck } = require("../utils/appCheckMiddleware");
  */
 exports.classifySegments = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 120, // Bumped for optional grounding call
     memory: "512MB",
   })
@@ -44,17 +44,7 @@ exports.classifySegments = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       // ── Call 1: Structured JSON response (existing behavior) ──
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
       const body = {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
@@ -64,22 +54,18 @@ exports.classifySegments = functions
         },
       };
 
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const resp = await vertex.generateContent("gemini-2.5-flash", body);
 
       if (!resp.ok) {
         const errText = await resp.text();
-        throw new Error(`Gemini API ${resp.status}: ${errText}`);
+        throw new Error(`Vertex Gemini ${resp.status}: ${errText}`);
       }
 
       const json = await resp.json();
       const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "classifySegments",
         promptLength: prompt.length,
         firestoreReads: 3, firestoreWrites: 2,
@@ -129,18 +115,14 @@ exports.classifySegments = functions
 
             const groundingBody = {
               contents: [{ parts: [{ text: verifyPrompt }] }],
-              tools: [{ google_search: {} }],
+              tools: [{ googleSearch: {} }],
               generationConfig: {
                 temperature: 0.1,
                 maxOutputTokens: 1024,
               },
             };
 
-            const groundResp = await fetch(url, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(groundingBody),
-            });
+            const groundResp = await vertex.generateContent("gemini-2.5-flash", groundingBody);
 
             logger.info(
               JSON.stringify({
@@ -193,7 +175,7 @@ exports.classifySegments = functions
               }
 
               await logApiUsage(userId, {
-                model: "gemini-2.0-flash",
+                model: "gemini-2.5-flash",
                 type: "classifySegments_grounding",
                 promptLength: verifyPrompt.length,
                 firestoreReads: 3, firestoreWrites: 2,

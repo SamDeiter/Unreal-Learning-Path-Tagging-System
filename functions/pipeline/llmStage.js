@@ -17,6 +17,7 @@ const { SCHEMAS } = require("./schemas");
 const { getCached, setCache } = require("./cache");
 const { sanitizeOutput } = require("./promptVersions");
 const { PROMPT_VERSION } = require("./promptVersions");
+const vertex = require("../utils/vertex");
 
 const MODEL = "gemini-2.5-flash";
 
@@ -43,8 +44,12 @@ function extractJson(text) {
 }
 
 /**
- * Call the Gemini API.
- * @returns {string} Raw generated text
+ * Call the Gemini API via Vertex AI (ADC-authenticated).
+ *
+ * The `apiKey` parameter is retained for call-site compatibility but ignored —
+ * auth is now ADC. Once every caller stops threading apiKey through, drop it.
+ *
+ * @returns {{text: string, usageMetadata: object}}
  */
 async function callGeminiRaw(
   systemPrompt,
@@ -54,7 +59,7 @@ async function callGeminiRaw(
   tools = null,
   imagePart = null
 ) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+  void apiKey;
 
   const userParts = [{ text: userPrompt }];
   if (imagePart && imagePart.inlineData?.data && imagePart.inlineData?.mimeType) {
@@ -71,10 +76,8 @@ async function callGeminiRaw(
     },
   };
 
-  // Add tools (e.g., Google Search grounding) if provided
   if (tools) {
     payload.tools = tools;
-    // Cannot use responseMimeType with grounding tools
     delete payload.generationConfig.responseMimeType;
   }
 
@@ -82,19 +85,14 @@ async function callGeminiRaw(
   const timeoutId = setTimeout(() => controller.abort(), 30000);
   let response;
   try {
-    response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+    response = await vertex.generateContent(MODEL, payload, { signal: controller.signal });
   } finally {
     clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gemini API error ${response.status}: ${errorText.slice(0, 200)}`);
+    throw new Error(`Vertex Gemini error ${response.status}: ${errorText.slice(0, 200)}`);
   }
 
   const data = await response.json();

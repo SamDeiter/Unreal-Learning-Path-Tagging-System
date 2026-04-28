@@ -149,7 +149,7 @@ Return ONLY valid JSON matching this shape (howItWorks and diagram are populated
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
-async function handleProblemFirst(data, context, apiKey) {
+async function handleProblemFirst(data, context) {
   const {
     query: rawQuery,
     personaHint,
@@ -231,7 +231,7 @@ async function handleProblemFirst(data, context, apiKey) {
   // On hit, return the cached response immediately.
   let queryEmbedding = null;
   try {
-    queryEmbedding = await embedQueryText(query, apiKey);
+    queryEmbedding = await embedQueryText(query);
     if (queryEmbedding) {
       const cacheResult = await findCachedDiagnosis(userId, queryEmbedding);
       if (cacheResult.hit && cacheResult.result) {
@@ -373,7 +373,6 @@ async function handleProblemFirst(data, context, apiKey) {
     stage: "tutor_answer",
     systemPrompt,
     userPrompt,
-    apiKey,
     trace,
     // Skip the stage cache when a screenshot is present: the cache key doesn't
     // include the image, so caching here would either feed a non-vision answer
@@ -562,7 +561,7 @@ async function handleProblemFirst(data, context, apiKey) {
 
   // Analytics — one write, not six
   logApiUsage(userId, {
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     type: "tutor_answer",
     estimatedTokens: 1200,
     firestoreReads: 2,

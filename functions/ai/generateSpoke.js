@@ -18,37 +18,28 @@ const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { logApiUsage } = require("../utils/apiUsage");
 const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 const db = admin.firestore();
 
 // ── Config ──────────────────────────────────────────────────────────────
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIMENSION = 768;
-const SYNTH_MODEL = "gemini-2.0-flash";
-
-const EMBED_URL = `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent`;
-const SYNTH_URL = `https://generativelanguage.googleapis.com/v1beta/models/${SYNTH_MODEL}:generateContent`;
+const SYNTH_MODEL = "gemini-2.5-flash";
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 /**
- * Embed a text query into a 768-dim vector using Gemini.
+ * Embed a text query into a 768-dim vector via Vertex AI.
  */
-async function embedText(text, apiKey) {
-  const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
-  const url = `${EMBED_URL}?key=${apiKey}`;
-
+async function embedText(text) {
   const payload = {
-    model: `models/${EMBED_MODEL}`,
     content: { parts: [{ text }] },
     taskType: "RETRIEVAL_QUERY",
     outputDimensionality: EMBED_DIMENSION,
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+  const response = await vertex.embedContent(EMBED_MODEL, payload, {
     signal: AbortSignal.timeout(10000),
   });
 
@@ -101,10 +92,7 @@ async function vectorSearch(collectionName, queryVector, topK = 8) {
 /**
  * Call Gemini to synthesize a mini-lesson from transcript chunks.
  */
-async function synthesizeLesson(gapTopic, difficulty, chunks, apiKey) {
-  const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
-  const url = `${SYNTH_URL}?key=${apiKey}`;
-
+async function synthesizeLesson(gapTopic, difficulty, chunks) {
   // Build context from retrieved chunks
   const chunkContext = chunks
     .map((c, i) => {
@@ -164,10 +152,7 @@ Rules:
     },
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+  const response = await vertex.generateContent(SYNTH_MODEL, payload, {
     signal: AbortSignal.timeout(30000),
   });
 
@@ -201,7 +186,6 @@ exports.generateSpoke = onCall(
     timeoutSeconds: 60,
     memory: "512MiB",
     minInstances: 0,
-    secrets: ["GEMINI_API_KEY"],
   },
   async (request) => {
     // App Check enforcement (permissive during rollout)
@@ -253,21 +237,10 @@ exports.generateSpoke = onCall(
       }
     }
 
-    // 5. Get API key
-    let apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      const functions = require("firebase-functions");
-      apiKey = functions.config().gemini?.api_key;
-    }
-    if (!apiKey) {
-      throw new HttpsError("internal", "Gemini API key not configured");
-    }
-
-    // 6. Embed the gap topic
+    // 5. Embed the gap topic via Vertex
     logger.info(`[generateSpoke] Embedding topic: "${cleanTopic}"`);
     const queryVector = await embedText(
-      `Unreal Engine 5 tutorial about: ${cleanTopic}. Difficulty: ${difficulty}. ${pathContext}`,
-      apiKey
+      `Unreal Engine 5 tutorial about: ${cleanTopic}. Difficulty: ${difficulty}. ${pathContext}`
     );
 
     // 7. Vector search — search both segments and epic embeddings
@@ -290,7 +263,7 @@ exports.generateSpoke = onCall(
 
     // 8. Gemini synthesis
     logger.info("[generateSpoke] Synthesizing lesson with Gemini...");
-    const lesson = await synthesizeLesson(cleanTopic, difficulty, allResults, apiKey);
+    const lesson = await synthesizeLesson(cleanTopic, difficulty, allResults);
 
     // 9. Build response
     const spoke = {

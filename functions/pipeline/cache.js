@@ -57,7 +57,7 @@ function buildCacheKey(stage, keyParams) {
     engine_version: keyParams.engine_version || "",
     platform: keyParams.platform || "",
     locale: keyParams.locale || "en",
-    model: keyParams.model || "gemini-2.0-flash",
+    model: keyParams.model || "gemini-2.5-flash",
     // Spread any extra fields (tags, has_passages, etc.)
     ...Object.fromEntries(
       Object.entries(keyParams).filter(

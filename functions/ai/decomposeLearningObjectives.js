@@ -61,7 +61,6 @@ Return ONLY the JSON object.`;
 
 exports.decomposeLearningObjectives = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 60,
     memory: "512MB",
   })
@@ -91,15 +90,6 @@ exports.decomposeLearningObjectives = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const trace = createTrace(userId, "decomposeLearningObjectives");
       const normalized = normalizeQuery(intent.problem_description || "");
 
@@ -126,7 +116,6 @@ REMEMBER: At least ONE transferable objective is REQUIRED!`;
         stage: "objectives",
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        apiKey,
         trace,
         cacheParams: { query: normalized, mode: "standalone_objectives" },
       });
@@ -141,7 +130,7 @@ REMEMBER: At least ONE transferable objective is REQUIRED!`;
       }
 
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "objectives",
         intentId: intent.intent_id,
         diagnosisId: diagnosis.diagnosis_id,

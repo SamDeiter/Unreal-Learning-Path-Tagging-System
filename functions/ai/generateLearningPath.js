@@ -167,7 +167,6 @@ function buildVideoContext(query, maxVideos = 20) {
  */
 exports.generateLearningPath = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 120,
     memory: "512MB",
   })
@@ -197,15 +196,6 @@ exports.generateLearningPath = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const trace = createTrace(userId, "generateLearningPath");
       const normalized = normalizeQuery(query);
 
@@ -299,7 +289,6 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
         stage: "learning_path",
         systemPrompt,
         userPrompt,
-        apiKey,
         trace,
         cacheParams: { query: normalized, mode: "onboarding", tags: tags.slice(0, 5) },
         maxTokens: 8192,
@@ -338,7 +327,7 @@ Use REAL Epic documentation URLs and real YouTube video IDs.`;
 
       // Log usage
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "learningPath",
         function: "generateLearningPath",
         query: query,

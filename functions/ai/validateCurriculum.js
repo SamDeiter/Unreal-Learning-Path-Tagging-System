@@ -45,7 +45,6 @@ Be strict but fair. If the content teaches ANY transferable diagnostic skill, it
 
 exports.validateCurriculum = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 60,
     memory: "512MB",
   })
@@ -75,15 +74,6 @@ exports.validateCurriculum = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const trace = createTrace(userId, "validateCurriculum");
 
       const userPrompt = `Validate this UE5 learning curriculum:
@@ -117,7 +107,6 @@ Does this curriculum meet the anti-tutorial-hell requirements?
         stage: "validation",
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        apiKey,
         trace,
         cacheParams: null, // Validation should always run fresh
       });
@@ -132,7 +121,7 @@ Does this curriculum meet the anti-tutorial-hell requirements?
       }
 
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "validation",
         approved: result.data.approved,
         firestoreReads: 2, firestoreWrites: 1,

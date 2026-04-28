@@ -56,7 +56,6 @@ function matchAtoms(detectedTags = [], atomGraph = null) {
 
 exports.generateDiagnosis = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 120,
     memory: "512MB",
   })
@@ -86,15 +85,6 @@ exports.generateDiagnosis = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) apiKey = functions.config().gemini?.api_key;
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const trace = createTrace(userId, "generateDiagnosis");
       const normalized = normalizeQuery(intent.problem_description || "");
 
@@ -138,7 +128,6 @@ This diagnosis should teach the developer to recognize and solve similar problem
         stage: "diagnosis",
         systemPrompt: SYSTEM_PROMPT,
         userPrompt,
-        apiKey,
         trace,
         cacheParams: {
           query: normalized,
@@ -158,7 +147,7 @@ This diagnosis should teach the developer to recognize and solve similar problem
       }
 
       await logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "diagnosis",
         intentId: intent.intent_id,
         firestoreReads: 2, firestoreWrites: 1,

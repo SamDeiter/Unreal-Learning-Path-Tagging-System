@@ -18,10 +18,9 @@ const { detectMode } = require("./routing");
  *
  * @param {object} data - Request data containing { query, persona? }
  * @param {object} context - Firebase callable context
- * @param {string} apiKey - Gemini API key
  * @returns {Promise<object>} Roadmap response
  */
-async function handleGoalBuild(data, context, apiKey) {
+async function handleGoalBuild(data, context) {
   const { query, persona } = data;
 
   if (!query || query.trim().length < 5) {
@@ -51,7 +50,7 @@ async function handleGoalBuild(data, context, apiKey) {
   try {
     const { milestones, title, learnerLevel } = await generateRoadmap(
       query,
-      apiKey,
+      null,
       { persona, learnerContext, learnerState }
     );
 

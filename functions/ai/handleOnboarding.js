@@ -67,7 +67,7 @@ async function fetchOnboardingContext(queries, _data) {
  *
  * The client orchestrates:  CF plan → local search → CF assemble
  */
-async function handleOnboarding(data, context, apiKey) {
+async function handleOnboarding(data, context) {
   const { persona, onboardingStep } = data;
   const userId = requireAuth(context);
   const trace = createTrace(userId, "onboarding_gen");
@@ -107,7 +107,6 @@ async function handleOnboarding(data, context, apiKey) {
         stage: "onboarding_planner",
         systemPrompt: ONBOARDING_PLANNER_PROMPT + learnerBlock,
         userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
-        apiKey,
         trace,
         cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_planner" },
       });
@@ -168,7 +167,6 @@ async function handleOnboarding(data, context, apiKey) {
         stage: "onboarding_path",
         systemPrompt: ONBOARDING_ASSEMBLER_PROMPT + learnerBlock,
         userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
-        apiKey,
         trace,
         cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_assembler" },
       });
@@ -176,7 +174,7 @@ async function handleOnboarding(data, context, apiKey) {
       trace.toLog();
 
       logApiUsage(userId, {
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         type: "onboarding_rag",
         archetype,
         passageCount: passages.length,
@@ -218,7 +216,6 @@ async function handleOnboarding(data, context, apiKey) {
       stage: "onboarding_planner",
       systemPrompt: ONBOARDING_PLANNER_PROMPT + learnerBlock,
       userPrompt: `User Persona: "${String(persona).slice(0, 500)}"`,
-      apiKey,
       trace,
       cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_planner" },
     });
@@ -272,7 +269,6 @@ async function handleOnboarding(data, context, apiKey) {
       stage: "onboarding_path",
       systemPrompt: ONBOARDING_ASSEMBLER_PROMPT + learnerBlock,
       userPrompt: `Create a path for a ${archetype}.\n\nUser says: "${String(persona).slice(0, 300)}"\n\nAvailable Content:\n${contextBlock}`,
-      apiKey,
       trace,
       cacheParams: { persona: String(persona).slice(0, 200), mode: "onboarding_assembler" },
     });
@@ -280,7 +276,7 @@ async function handleOnboarding(data, context, apiKey) {
     trace.toLog();
 
     logApiUsage(userId, {
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       type: "onboarding_rag",
       archetype,
       passageCount: passages.length,

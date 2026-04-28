@@ -11,10 +11,10 @@ const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 exports.rerankPassages = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 20,
     memory: "512MB",
   })
@@ -50,14 +50,6 @@ exports.rerankPassages = functions
     // Cap at 30 passages to keep prompt reasonable
     const truncated = passages.slice(0, 30);
 
-    let apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) apiKey = functions.config().gemini?.api_key;
-    if (!apiKey) {
-      throw new functions.https.HttpsError("internal", "Gemini API key not configured");
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
     // Build numbered passage list
     const passageList = truncated
       .map((p, i) => {
@@ -83,23 +75,18 @@ Return ONLY a JSON array of objects: [{"index": 0, "score": 8}, {"index": 1, "sc
 Include ALL ${truncated.length} passages.`;
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 600,
-            responseMimeType: "application/json",
-          },
-        }),
+      const response = await vertex.generateContent("gemini-2.5-flash", {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 600,
+          responseMimeType: "application/json",
+        },
       });
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error(`[rerankPassages] API error ${response.status}:`, errText.substring(0, 300));
-        // Graceful fallback: return passages in original order
+        console.error(`[rerankPassages] Vertex error ${response.status}:`, errText.substring(0, 300));
         return { success: true, reranked: truncated, fallback: true };
       }
 

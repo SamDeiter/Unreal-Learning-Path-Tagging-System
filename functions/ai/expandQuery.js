@@ -13,10 +13,10 @@ const { checkRateLimit, checkGlobalRateLimit } = require("../utils/rateLimit");
 const { requireAuth } = require("../utils/authGuard");
 const { logApiUsage } = require("../utils/apiUsage");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 exports.expandQuery = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 15,
     memory: "512MB",
   })
@@ -53,14 +53,6 @@ exports.expandQuery = functions
       return { success: true, expansions: cached.expansions, cached: true };
     }
 
-    let apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) apiKey = functions.config().gemini?.api_key;
-    if (!apiKey) {
-      throw new functions.https.HttpsError("internal", "Gemini API key not configured");
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
     const prompt = `You are a search query optimizer for Unreal Engine 5 technical content.
 
 Given this user query: "${validation.clean}"
@@ -76,23 +68,18 @@ Rules:
 Example: ["ray traced reflections noise", "lumen GI artifact flickering", "screen space reflections quality settings"]`;
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 200,
-            responseMimeType: "application/json",
-          },
-        }),
+      const response = await vertex.generateContent("gemini-2.5-flash", {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 200,
+          responseMimeType: "application/json",
+        },
       });
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error(`[expandQuery] API error ${response.status}:`, errText.substring(0, 300));
-        // Graceful fallback: return empty expansions (search still works with original query)
+        console.error(`[expandQuery] Vertex error ${response.status}:`, errText.substring(0, 300));
         return { success: true, expansions: [] };
       }
 

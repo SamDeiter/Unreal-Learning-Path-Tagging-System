@@ -14,16 +14,13 @@ const { handleGoalBuild } = require("./handleGoalBuild");
 
 exports.queryLearningPath = functions
   .runWith({
-    secrets: ["GEMINI_API_KEY"],
     timeoutSeconds: 180,
     memory: "512MB",
   })
   .https.onCall(async (data, context) => {
-    // App Check enforcement (permissive during rollout)
     requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: false });
     const userId = requireAuth(context);
 
-    // Rate limiting
     const rateLimitCheck = await checkRateLimit(userId, "query");
     if (!rateLimitCheck.allowed) {
       throw new functions.https.HttpsError(
@@ -37,26 +34,15 @@ exports.queryLearningPath = functions
     }
 
     try {
-      let apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        apiKey = functions.config().gemini?.api_key;
-      }
-      if (!apiKey) {
-        throw new functions.https.HttpsError(
-          "failed-precondition",
-          "Server configuration error: API Key missing."
-        );
-      }
-
       const mode = detectMode(data);
       logger.info(JSON.stringify({ severity: "INFO", message: "query_start", mode, user: userId }));
 
       if (mode === "goal-build") {
-        return await handleGoalBuild(data, context, apiKey);
+        return await handleGoalBuild(data, context);
       } else if (mode === "problem-first") {
-        return await handleProblemFirst(data, context, apiKey);
+        return await handleProblemFirst(data, context);
       } else if (mode === "onboarding") {
-        return await handleOnboarding(data, context, apiKey);
+        return await handleOnboarding(data, context);
       } else {
         throw new functions.https.HttpsError(
           "invalid-argument",

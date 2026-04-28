@@ -30,19 +30,18 @@
  * - No rate limiting beyond the admin gate; intended for occasional runs.
  */
 
-const functionsV1 = require("firebase-functions");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const vertex = require("../utils/vertex");
 
 const BOOTSTRAP_ADMIN_EMAILS = [
   "sam.deiter@epicgames.com",
   "samdeiter@gmail.com",
 ];
 
-const SYNTH_MODEL = "gemini-2.0-flash";
-const SYNTH_URL = `https://generativelanguage.googleapis.com/v1beta/models/${SYNTH_MODEL}:generateContent`;
+const SYNTH_MODEL = "gemini-2.5-flash";
 const SYNTH_TIMEOUT_MS = 30000;
 
 const DEFAULT_MAX_SIGNALS = 500;
@@ -51,16 +50,6 @@ const MAX_TAGS_FILTER = 20;
 const MAX_EXAMPLES_PER_PROMPT = 25;
 const MAX_NAME_LEN = 100;
 const MAX_DESC_LEN = 400;
-
-function getApiKey() {
-  let key = process.env.GEMINI_API_KEY;
-  if (!key) key = functionsV1.config().gemini?.api_key;
-  return key || null;
-}
-
-function fetchDynamic(...args) {
-  return import("node-fetch").then(({ default: f }) => f(...args));
-}
 
 function sanitizeTags(arr) {
   if (!Array.isArray(arr)) return [];
@@ -179,21 +168,20 @@ function parseGeminiJson(text) {
   }
 }
 
-async function synthesizeGroup({ tag, signals, apiKey }) {
+async function synthesizeGroup({ tag, signals }) {
   const prompt = buildPromptForGroup(tag, signals);
-  const resp = await fetchDynamic(`${SYNTH_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const resp = await vertex.generateContent(
+    SYNTH_MODEL,
+    {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 1024,
         responseMimeType: "application/json",
       },
-    }),
-    signal: AbortSignal.timeout(SYNTH_TIMEOUT_MS),
-  });
+    },
+    { signal: AbortSignal.timeout(SYNTH_TIMEOUT_MS) }
+  );
   if (!resp.ok) throw new Error(`mine_synth_failed_${resp.status}`);
   const body = await resp.json();
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -265,7 +253,6 @@ exports.mineMisconceptions = onCall(
     timeoutSeconds: 300,
     memory: "512MiB",
     minInstances: 0,
-    secrets: ["GEMINI_API_KEY"],
   },
   async (request) => {
     requireAppCheck(request, { allowInvalid: false });
@@ -280,9 +267,6 @@ exports.mineMisconceptions = onCall(
     if (!callerIsAdmin) {
       throw new HttpsError("permission-denied", "Admins only.");
     }
-
-    const apiKey = getApiKey();
-    if (!apiKey) throw new HttpsError("failed-precondition", "GEMINI_API_KEY missing.");
 
     const data = request.data || {};
     const tagFilter = sanitizeTags(data.tags);
@@ -335,7 +319,7 @@ exports.mineMisconceptions = onCall(
         continue;
       }
       try {
-        const synthesized = await synthesizeGroup({ tag, signals: groupSignals, apiKey });
+        const synthesized = await synthesizeGroup({ tag, signals: groupSignals });
         if (synthesized.length === 0) {
           skippedTags.push(tag);
           continue;

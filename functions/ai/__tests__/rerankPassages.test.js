@@ -1,8 +1,10 @@
 /**
  * Tests for rerankPassages.js — scoring, sorting, fallback, and text escaping.
+ *
+ * Vertex migration: previous tests stubbed `global.fetch`; we now mock
+ * `utils/vertex.generateContent` directly.
  */
 
-// Mock firebase-functions
 const mockOnCall = jest.fn();
 jest.mock("firebase-functions", () => ({
   runWith: () => ({
@@ -13,7 +15,6 @@ jest.mock("firebase-functions", () => ({
       },
     },
   }),
-  config: () => ({ gemini: { api_key: "test-key" } }),
   https: {
     HttpsError: class HttpsError extends Error {
       constructor(code, message) {
@@ -45,11 +46,11 @@ jest.mock("../../utils/appCheckMiddleware", () => ({
   requireAppCheck: jest.fn(),
 }));
 
-// Mock global fetch
-global.fetch = jest.fn();
-
-// Set API key
-process.env.GEMINI_API_KEY = "test-key";
+const mockVertexGenerate = jest.fn();
+jest.mock("../../utils/vertex", () => ({
+  generateContent: (...args) => mockVertexGenerate(...args),
+  embedContent: jest.fn(),
+}));
 
 const { rerankPassages } = require("../rerankPassages");
 
@@ -59,7 +60,7 @@ function makeContext() {
 
 describe("rerankPassages", () => {
   beforeEach(() => {
-    global.fetch.mockReset();
+    mockVertexGenerate.mockReset();
   });
 
   test("returns empty array for empty passages", async () => {
@@ -75,7 +76,7 @@ describe("rerankPassages", () => {
   });
 
   test("sorts passages by Gemini scores", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: true,
       json: async () => ({
         candidates: [
@@ -110,7 +111,7 @@ describe("rerankPassages", () => {
   });
 
   test("clamps scores to [0, 10]", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: true,
       json: async () => ({
         candidates: [
@@ -137,7 +138,7 @@ describe("rerankPassages", () => {
   });
 
   test("returns fallback with success: false on fetch error", async () => {
-    global.fetch.mockRejectedValue(new Error("Network error"));
+    mockVertexGenerate.mockRejectedValue(new Error("Network error"));
 
     const passages = [{ text: "A" }, { text: "B" }];
     const result = await rerankPassages({ query: "test", passages }, makeContext());
@@ -148,7 +149,7 @@ describe("rerankPassages", () => {
   });
 
   test("returns fallback on non-ok response", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: false,
       status: 500,
       text: async () => "Internal Server Error",
@@ -156,12 +157,12 @@ describe("rerankPassages", () => {
 
     const passages = [{ text: "A" }];
     const result = await rerankPassages({ query: "test", passages }, makeContext());
-    expect(result.success).toBe(true); // API error still returns success: true with fallback
+    expect(result.success).toBe(true);
     expect(result.fallback).toBe(true);
   });
 
   test("returns fallback on unparseable JSON response", async () => {
-    global.fetch.mockResolvedValue({
+    mockVertexGenerate.mockResolvedValue({
       ok: true,
       json: async () => ({
         candidates: [
@@ -182,8 +183,8 @@ describe("rerankPassages", () => {
 
   test("escapes special characters in passage text", async () => {
     let capturedBody;
-    global.fetch.mockImplementation(async (_url, opts) => {
-      capturedBody = JSON.parse(opts.body);
+    mockVertexGenerate.mockImplementation(async (_model, body) => {
+      capturedBody = body;
       return {
         ok: true,
         json: async () => ({
@@ -204,8 +205,8 @@ describe("rerankPassages", () => {
 
   test("caps passages at 30", async () => {
     let capturedBody;
-    global.fetch.mockImplementation(async (_url, opts) => {
-      capturedBody = JSON.parse(opts.body);
+    mockVertexGenerate.mockImplementation(async (_model, body) => {
+      capturedBody = body;
       return {
         ok: true,
         json: async () => ({

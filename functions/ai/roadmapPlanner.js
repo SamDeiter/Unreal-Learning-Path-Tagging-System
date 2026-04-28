@@ -8,8 +8,8 @@
  * Architecture: "LLM plans the roadmap, RAG fills each node."
  */
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { logger } = require("firebase-functions");
+const vertex = require("../utils/vertex");
 
 // ── Milestone schema for validation ─────────────────────────────────
 
@@ -79,23 +79,13 @@ Each milestone object must have exactly these fields:
  * Generate a learning roadmap from a broad learner goal.
  *
  * @param {string} goal - The learner's broad goal
- * @param {string} apiKey - Gemini API key
+ * @param {string} [_apiKey] - Ignored; ADC is used. Kept for call-site stability.
  * @param {object} [options]
  * @param {string} [options.persona] - Optional persona ID for bias
  * @returns {Promise<{milestones: object[], title: string, learnerLevel: string}>}
  */
-async function generateRoadmap(goal, apiKey, options = {}) {
+async function generateRoadmap(goal, _apiKey, options = {}) {
   const { persona } = options;
-
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      temperature: 0.4,
-      maxOutputTokens: 4096,
-      responseMimeType: "application/json",
-    },
-  });
 
   const prompt = buildRoadmapPrompt(goal, persona);
 
@@ -106,8 +96,20 @@ async function generateRoadmap(goal, apiKey, options = {}) {
     persona: persona || "none",
   }));
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const resp = await vertex.generateContent("gemini-2.5-flash", {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.4,
+      maxOutputTokens: 4096,
+      responseMimeType: "application/json",
+    },
+  });
+  if (!resp.ok) {
+    const errBody = await resp.text();
+    throw new Error(`roadmap_planner_vertex_${resp.status}: ${errBody.slice(0, 200)}`);
+  }
+  const body = await resp.json();
+  const text = body?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
   // Parse JSON — handle potential markdown fences
   let milestones;
