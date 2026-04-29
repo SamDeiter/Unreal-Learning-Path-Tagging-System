@@ -11,6 +11,82 @@
 const crypto = require("crypto");
 const { PROMPT_VERSION } = require("./promptVersions");
 
+// Lazy-load firebase-admin's Firestore so this module stays importable in
+// contexts that haven't initialized admin yet (tests, scripts).
+let _admin = null;
+function getAdmin() {
+  if (!_admin) {
+    // eslint-disable-next-line global-require
+    _admin = require("firebase-admin");
+  }
+  return _admin;
+}
+
+/**
+ * Increment token-usage counters for a stage in today's daily rollup doc.
+ *
+ * Writes to `usage_metrics/{YYYY-MM-DD}` using FieldValue.increment so concurrent
+ * requests stay correct. Fire-and-forget — callers should NOT await this in the
+ * request hot path. Always pass `.catch(console.error)`.
+ *
+ * @param {object} params
+ * @param {string} params.stage             Stage name (e.g. "diagnosis")
+ * @param {number} [params.promptTokens]    Default 0
+ * @param {number} [params.candidatesTokens] Default 0
+ * @param {number} [params.cachedTokens]    Default 0
+ * @param {boolean} [params.error]          If true, increment errors.<stage> and skip token counters
+ * @returns {Promise<void>}
+ */
+async function recordUsageRollup({
+  stage,
+  promptTokens = 0,
+  candidatesTokens = 0,
+  cachedTokens = 0,
+  error = false,
+} = {}) {
+  if (!stage) return;
+  const admin = getAdmin();
+  const db = admin.firestore();
+  const FieldValue = admin.firestore.FieldValue;
+
+  // YYYY-MM-DD in UTC so daily buckets line up regardless of caller timezone.
+  const todayId = new Date().toISOString().slice(0, 10);
+  const docRef = db.collection("usage_metrics").doc(todayId);
+
+  if (error) {
+    await docRef.set(
+      {
+        errors: { [stage]: FieldValue.increment(1) },
+        totals: { errorCount: FieldValue.increment(1) },
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return;
+  }
+
+  await docRef.set(
+    {
+      stages: {
+        [stage]: {
+          promptTokens: FieldValue.increment(promptTokens),
+          candidatesTokens: FieldValue.increment(candidatesTokens),
+          cachedTokens: FieldValue.increment(cachedTokens),
+          requestCount: FieldValue.increment(1),
+        },
+      },
+      totals: {
+        promptTokens: FieldValue.increment(promptTokens),
+        candidatesTokens: FieldValue.increment(candidatesTokens),
+        cachedTokens: FieldValue.increment(cachedTokens),
+        requestCount: FieldValue.increment(1),
+      },
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+}
+
 /**
  * Create a new trace for a pipeline invocation.
  * @param {string} userId - The authenticated user ID
@@ -70,6 +146,25 @@ function createTrace(userId, mode) {
     },
 
     /**
+     * Attach Gemini token-usage numbers to the current stage record so they
+     * surface in the admin _debug payload. Purely additive — does not alter
+     * existing fields.
+     *
+     * @param {object} usage
+     * @param {number} [usage.promptTokens=0]
+     * @param {number} [usage.candidatesTokens=0]
+     * @param {number} [usage.cachedTokens=0]
+     */
+    recordTokenUsage({ promptTokens = 0, candidatesTokens = 0, cachedTokens = 0 } = {}) {
+      if (!_currentStage) return;
+      _currentStage.tokenUsage = {
+        promptTokens,
+        candidatesTokens,
+        cachedTokens,
+      };
+    },
+
+    /**
      * Write structured log to Cloud Functions stdout.
      */
     toLog() {
@@ -112,6 +207,7 @@ function createTrace(userId, mode) {
           cache_hit: s.cache_hit,
           model: s.model,
           error: s.error || null,
+          tokenUsage: s.tokenUsage || null,
         })),
       };
     },
@@ -136,4 +232,4 @@ function isAdmin(context) {
   return false;
 }
 
-module.exports = { createTrace, isAdmin };
+module.exports = { createTrace, isAdmin, recordUsageRollup };

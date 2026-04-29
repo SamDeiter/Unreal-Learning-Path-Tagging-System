@@ -17,7 +17,20 @@ const { SCHEMAS } = require("./schemas");
 const { getCached, setCache } = require("./cache");
 const { sanitizeOutput } = require("./promptVersions");
 const { PROMPT_VERSION } = require("./promptVersions");
+const { recordUsageRollup } = require("./telemetry");
 const vertex = require("../utils/vertex");
+
+/**
+ * Normalize a Vertex usageMetadata blob into our internal counter shape.
+ * Defaults each field to 0 so missing keys don't poison FieldValue.increment.
+ */
+function normalizeUsage(usageMetadata = {}) {
+  return {
+    promptTokens: Number(usageMetadata.promptTokenCount) || 0,
+    candidatesTokens: Number(usageMetadata.candidatesTokenCount) || 0,
+    cachedTokens: Number(usageMetadata.cachedContentTokenCount) || 0,
+  };
+}
 
 const MODEL = "gemini-2.5-flash";
 
@@ -175,6 +188,9 @@ async function runStage({
       imagePart
     );
 
+    // Track token usage across the whole stage (primary + optional repair).
+    const totalUsage = normalizeUsage(usageMetadata);
+
     // ── Step 3: Extract JSON ────────────────────────────────────────
     const jsonStr = extractJson(rawText);
     let parsed;
@@ -189,7 +205,14 @@ async function runStage({
     if (validation.success) {
       const sanitized = sanitizeOutput(validation.data);
       if (cacheParams) await setCache(stage, cacheParams, sanitized);
-      if (trace) trace.endStage({ model: MODEL, cache_hit: false });
+      if (trace) {
+        trace.recordTokenUsage(totalUsage);
+        trace.endStage({ model: MODEL, cache_hit: false });
+      }
+      // Fire-and-forget daily rollup; do not block response.
+      recordUsageRollup({ stage, ...totalUsage }).catch((e) =>
+        console.error(JSON.stringify({ severity: "WARNING", message: "usage_rollup_failed", stage, error: e.message }))
+      );
       return { success: true, data: sanitized, cached: false, usageMetadata };
     }
 
@@ -206,12 +229,18 @@ async function runStage({
     );
 
     const repairPrompt = buildRepairPrompt(jsonStr, validation.error.issues, stage);
-    const { text: repairText } = await callGeminiRaw(
+    const { text: repairText, usageMetadata: repairUsage } = await callGeminiRaw(
       systemPrompt,
       repairPrompt,
       apiKey,
       maxTokens
     );
+
+    // Accumulate repair-call tokens onto the stage total.
+    const repairUsageNorm = normalizeUsage(repairUsage);
+    totalUsage.promptTokens += repairUsageNorm.promptTokens;
+    totalUsage.candidatesTokens += repairUsageNorm.candidatesTokens;
+    totalUsage.cachedTokens += repairUsageNorm.cachedTokens;
 
     const repairJsonStr = extractJson(repairText);
     let repairParsed;
@@ -225,7 +254,13 @@ async function runStage({
     if (repairValidation.success) {
       const sanitized = sanitizeOutput(repairValidation.data);
       if (cacheParams) await setCache(stage, cacheParams, sanitized);
-      if (trace) trace.endStage({ model: MODEL, cache_hit: false, retries: 1 });
+      if (trace) {
+        trace.recordTokenUsage(totalUsage);
+        trace.endStage({ model: MODEL, cache_hit: false, retries: 1 });
+      }
+      recordUsageRollup({ stage, ...totalUsage }).catch((e) =>
+        console.error(JSON.stringify({ severity: "WARNING", message: "usage_rollup_failed", stage, error: e.message }))
+      );
       return { success: true, data: sanitized, cached: false, repaired: true, usageMetadata };
     }
 
@@ -246,11 +281,24 @@ async function runStage({
         ...structuredError,
       })
     );
-    if (trace) trace.endStage({ model: MODEL, cache_hit: false, retries: 1, error: "validation_exhausted" });
+    if (trace) {
+      trace.recordTokenUsage(totalUsage);
+      trace.endStage({ model: MODEL, cache_hit: false, retries: 1, error: "validation_exhausted" });
+    }
+    // Tokens were still spent even on validation failure — record them, plus an error tick.
+    recordUsageRollup({ stage, ...totalUsage }).catch((e) =>
+      console.error(JSON.stringify({ severity: "WARNING", message: "usage_rollup_failed", stage, error: e.message }))
+    );
+    recordUsageRollup({ stage, error: true }).catch((e) =>
+      console.error(JSON.stringify({ severity: "WARNING", message: "usage_rollup_failed", stage, error: e.message }))
+    );
     return { success: false, error: structuredError };
 
   } catch (err) {
     if (trace) trace.endStage({ model: MODEL, error: err.message });
+    recordUsageRollup({ stage, error: true }).catch((e) =>
+      console.error(JSON.stringify({ severity: "WARNING", message: "usage_rollup_failed", stage, error: e.message }))
+    );
     throw err;
   }
 }

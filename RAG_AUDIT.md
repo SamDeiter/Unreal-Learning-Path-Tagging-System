@@ -108,23 +108,25 @@ Key divergences between intended and actual behavior are listed in §3.
 > Each finding has a severity (S1=blocking, S2=high, S3=medium, S4=low) and the
 > exact file + line.
 
-### 3.1 Embedding-model split — query/cache incoherent with index  **[S2]**
+### 3.1 Embedding-model split — query/cache incoherent with index  **[S2 — RESOLVED 2026-04-29]**
 
-`functions/ai/handleProblemFirst.js:165` hard-codes
-`text-embedding-004` for the diagnosis-cache embedding. Every other embedding
-call (`embedQuery.js:13`, `generateSpoke.js:25`, `generateLesson.js:38`, and all
-Python builders) uses `gemini-embedding-001`. TE-004 and gemini-embedding-001
-are different vector spaces. Consequences:
+> **Status:** Resolved. `functions/ai/handleProblemFirst.js:234` now uses the canonical
+> `embedQueryText` helper from `functions/pipeline/queryEmbedding.js`, which calls
+> `gemini-embedding-001` via Vertex AI. Repo-wide grep for `text-embedding-004` returns
+> zero hits in `functions/`. Verified during the 2026-04-29 RAG-improvement session.
+
+**Original finding (kept for history):**
+`functions/ai/handleProblemFirst.js:165` previously hard-coded `text-embedding-004`
+for the diagnosis-cache embedding. Every other embedding call (`embedQuery.js:13`,
+`generateSpoke.js:25`, `generateLesson.js:38`, and all Python builders) used
+`gemini-embedding-001`. TE-004 and gemini-embedding-001 are different vector spaces.
+Consequences:
 
 - Two HTTP round-trips per query (embedQuery + the handler's hard-coded call) to
-  two different model endpoints — adds 200–400ms per call.
-- `cached_diagnoses` ends up self-consistent (writes and reads both TE-004)
-  but conceptually isolated from the rest of the system — harder to reason
+  two different model endpoints — added 200–400ms per call.
+- `cached_diagnoses` ended up self-consistent (writes and reads both TE-004)
+  but conceptually isolated from the rest of the system — hard to reason
   about and a footgun for anyone reusing the embedding for other lookups.
-
-**Fix:** Unify on `gemini-embedding-001` via a shared helper.
-(Implemented: `functions/pipeline/queryEmbedding.js`, used by the patched
-handler.)
 
 ### 3.2 Citations are generated but never validated  **[S2]**
 

@@ -31,13 +31,15 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const DATASET_PATH = path.join(__dirname, "rag_golden.jsonl");
 const REPORT_PATH = path.join(__dirname, "rag_report.json");
-const EMBEDDINGS_PATH = path.join(
-  ROOT,
-  "path-builder",
-  "src",
-  "data",
-  "epic_learning_embeddings.json"
-);
+const DATA_DIR = path.join(ROOT, "path-builder", "src", "data");
+
+// All three retrievable corpora that the production pipeline reads from.
+// `expected_sources` in golden cases use these labels.
+const EMBEDDING_SOURCES = [
+  { file: "epic_learning_embeddings.json", rootKey: "chunks", source: "epic_learning" },
+  { file: "segment_embeddings.json", rootKey: "segments", source: "transcript" },
+  { file: "docs_embeddings.json", rootKey: "docs", source: "epic_docs" },
+];
 
 const EMBED_MODEL = "gemini-embedding-001";
 const DIMENSION = 768;
@@ -83,23 +85,49 @@ function loadDataset(filterId = null) {
 }
 
 // ── Embedding ──────────────────────────────────────────────────────────────
-async function embedQuery(query, apiKey) {
+//
+// Vertex AI / ADC. Locally requires `gcloud auth application-default login`.
+// Project + region overridable via VERTEX_PROJECT_ID / VERTEX_LOCATION envs.
+const PROJECT_ID = process.env.VERTEX_PROJECT_ID || "development-317819";
+const LOCATION = process.env.VERTEX_LOCATION || "us-central1";
+
+let _vertexAuth = null;
+function getVertexAuth() {
+  if (!_vertexAuth) {
+    const { GoogleAuth } = require("google-auth-library");
+    _vertexAuth = new GoogleAuth({
+      scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+    });
+  }
+  return _vertexAuth;
+}
+
+async function embedQuery(query) {
   const fetchFn = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent?key=${apiKey}`;
+  const client = await getVertexAuth().getClient();
+  const tokenResponse = await client.getAccessToken();
+  const token = typeof tokenResponse === "string" ? tokenResponse : tokenResponse?.token;
+  if (!token) throw new Error("Failed to obtain ADC access token");
+
+  // Vertex embedding goes through :predict (not :embedContent — that endpoint
+  // doesn't support gemini-embedding-001 on Vertex). Different payload + response
+  // shape than the AI Studio REST API.
+  const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/${EMBED_MODEL}:predict`;
   const payload = {
-    model: `models/${EMBED_MODEL}`,
-    content: { parts: [{ text: query }] },
-    taskType: "RETRIEVAL_QUERY",
-    outputDimensionality: DIMENSION,
+    instances: [{ task_type: "RETRIEVAL_QUERY", content: query }],
+    parameters: { outputDimensionality: DIMENSION },
   };
   const r = await fetchFn(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
   });
   if (!r.ok) throw new Error(`embedQuery HTTP ${r.status}: ${await r.text()}`);
   const body = await r.json();
-  const values = body?.embedding?.values;
+  const values = body?.predictions?.[0]?.embeddings?.values;
   if (!Array.isArray(values) || values.length !== DIMENSION) {
     throw new Error(`Bad embedding response (len=${values?.length})`);
   }
@@ -122,22 +150,39 @@ function cosineSim(a, b) {
 let _chunksCache = null;
 function loadChunks() {
   if (_chunksCache) return _chunksCache;
-  if (!fs.existsSync(EMBEDDINGS_PATH)) {
+  const all = [];
+  const loaded = [];
+  for (const { file, rootKey, source } of EMBEDDING_SOURCES) {
+    const fp = path.join(DATA_DIR, file);
+    if (!fs.existsSync(fp)) {
+      console.error(`[harness] WARNING: ${file} not found at ${fp}; skipping that corpus`);
+      continue;
+    }
+    const raw = JSON.parse(fs.readFileSync(fp, "utf-8"));
+    const root = raw[rootKey] || {};
+    let added = 0;
+    for (const [id, c] of Object.entries(root)) {
+      if (!Array.isArray(c?.embedding)) continue;
+      all.push({
+        id,
+        embedding: c.embedding,
+        title: c.title || c.video_title || "",
+        url: c.url || c.source_url || "",
+        source: c.source || source,
+        section: c.section || c.video_title || "",
+      });
+      added++;
+    }
+    loaded.push(`${source}=${added}`);
+  }
+  if (all.length === 0) {
     throw new Error(
-      `Local embeddings not found at ${EMBEDDINGS_PATH}. Run scripts/embed_epic_learning.py first.`
+      `No local embeddings found in ${DATA_DIR}. Run scripts/embed_epic_learning.py and friends first.`
     );
   }
-  const raw = JSON.parse(fs.readFileSync(EMBEDDINGS_PATH, "utf-8"));
-  const entries = Object.entries(raw.chunks || {}).map(([id, c]) => ({
-    id,
-    embedding: c.embedding,
-    title: c.title || "",
-    url: c.url || c.source_url || "",
-    source: c.source || "epic_learning",
-    section: c.section || "",
-  }));
-  _chunksCache = entries;
-  return entries;
+  console.error(`[harness] Loaded ${all.length} chunks (${loaded.join(", ")})`);
+  _chunksCache = all;
+  return all;
 }
 
 function topKRetrieval(queryVec, k) {
@@ -167,10 +212,15 @@ function scoreRetrieval(topK, testCase) {
 
   topK.forEach((r, i) => {
     const rank = i + 1;
-    const urlLower = (r.url || "").toLowerCase();
+    // Match substrings against url + title + section so transcript chunks (no URL)
+    // can still hit on video_title/section. Field name kept as `expected_url_substrings`
+    // for backward compat — semantically these are content markers.
+    const matchHaystack = [r.url || "", r.title || "", r.section || ""]
+      .join(" ")
+      .toLowerCase();
     const idMatch = wantedIds.size > 0 && wantedIds.has(r.id);
     const urlMatch =
-      wantedUrlSubs.length > 0 && wantedUrlSubs.some((s) => urlLower.includes(s));
+      wantedUrlSubs.length > 0 && wantedUrlSubs.some((s) => matchHaystack.includes(s));
     const hit = idMatch || urlMatch;
     if (hit) {
       hitCount++;
@@ -196,11 +246,6 @@ function scoreRetrieval(topK, testCase) {
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
   const args = parseArgs(process.argv);
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    console.error("Set GEMINI_API_KEY (or GOOGLE_API_KEY) before running the harness.");
-    process.exit(2);
-  }
 
   const cases = loadDataset(args.case);
   if (cases.length === 0) {
@@ -221,8 +266,24 @@ async function main() {
       continue;
     }
 
+    // Ambiguous cases (no expected chunks AND no expected URL substrings) are
+    // scored on pipeline behavior (clarification vs fabrication), not retrieval.
+    // Skip in retrieval-only mode — counting them as misses is a measurement
+    // bug, not a real signal.
+    const hasRetrievalTarget =
+      (tc.expected_chunk_ids?.length ?? 0) > 0 ||
+      (tc.expected_url_substrings?.length ?? 0) > 0;
+    if (!hasRetrievalTarget && args.retrievalOnly) {
+      results.push({
+        id: tc.id,
+        query: tc.query,
+        skipped: "ambiguous case (no retrieval target) — run with --e2e to score",
+      });
+      continue;
+    }
+
     try {
-      const qVec = await embedQuery(tc.query, apiKey);
+      const qVec = await embedQuery(tc.query);
       const topK = topKRetrieval(qVec, args.k);
       const retrieval = scoreRetrieval(topK, tc);
 
