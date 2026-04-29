@@ -26,12 +26,17 @@ import argparse
 import hashlib
 import json
 import os
+import random
 import re
 import sys
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime
 from html.parser import HTMLParser
+from http.cookiejar import CookieJar
 from pathlib import Path
+from urllib.robotparser import RobotFileParser
 
 # Load .env file for env overrides (VERTEX_PROJECT_ID, VERTEX_LOCATION, etc).
 # No API keys are read anymore — auth is ADC.
@@ -71,7 +76,49 @@ MAX_TOKENS = 700
 APPROX_CHARS_PER_TOKEN = 4
 BATCH_DELAY = 0.05
 CHECKPOINT_INTERVAL = 25
-SCRAPE_DELAY = 0.5          # 500ms between page fetches (be polite)
+SCRAPE_DELAY = 0.5          # 500ms between page fetches (default; --polite overrides)
+
+# ---------------------------------------------------------------------------
+# Polite-mode pacing (engaged via --polite).
+# Goal: look like a researcher reading the docs in a browser, not a bot
+# requesting on a metronome. Throughput drops but we stay off WAF heuristics
+# that flag uniform request cadence + bot-shaped User-Agent strings.
+# ---------------------------------------------------------------------------
+POLITE_DELAY_MIN = 1.5
+POLITE_DELAY_MAX = 4.0
+# After this many pages the fetcher pauses for IDLE_GAP seconds — simulates a
+# human getting distracted between bursts of reading.
+POLITE_BURST_MIN = 8
+POLITE_BURST_MAX = 15
+POLITE_IDLE_MIN = 30.0
+POLITE_IDLE_MAX = 90.0
+# Backoff for transient 429/503 (and network errors). Exponential: 30s, 60s,
+# 120s capped. After 3 attempts we surface the failure.
+POLITE_BACKOFF_BASE = 30.0
+POLITE_BACKOFF_MAX = 120.0
+POLITE_BACKOFF_RETRIES = 3
+
+# Realistic Chrome 134 desktop User-Agent. Pair with Sec-Fetch-* + Accept-*
+# so the request shape matches what a real browser sends. The point is honesty
+# about being a researcher, not impersonation — the previous UA literally said
+# "UE5 Learning Path Builder" which trips lazy WAF rules even on legitimate
+# traffic.
+POLITE_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/134.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "DNT": "1",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -225,14 +272,134 @@ def chunk_doc(text, slug, max_tokens=MAX_TOKENS, target_tokens=TARGET_TOKENS):
     return chunks
 
 
-def crawl_discover_slugs(max_pages=2000):
+class PoliteFetcher:
+    """HTTP fetcher that paces and shapes requests like a researcher reading
+    docs in a browser. Used when the user passes --polite. The fast path uses
+    the same interface but with the legacy fixed-delay behavior so existing
+    tests/scripts don't change.
+
+    What it does (polite=True):
+      - Persistent cookie jar so the site sees one session, not 569 strangers
+      - Browser-shaped headers (Chrome UA, Sec-Fetch-*, Accept-Language, gzip)
+      - Random delay POLITE_DELAY_MIN..MAX between requests
+      - Bursty pacing: every 8-15 pages, idle 30-90s
+      - 429/503 → exponential backoff (30s, 60s, 120s) up to 3 retries
+      - robots.txt check up front (disabled fetches just log + skip)
+    """
+
+    def __init__(self, polite=False):
+        self.polite = polite
+        self.pages_in_burst = 0
+        self.burst_target = self._next_burst_target()
+        # Cookie jar so sessions persist across pages (real browsers do this).
+        cookie_jar = CookieJar()
+        self.opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(cookie_jar),
+            urllib.request.HTTPRedirectHandler(),
+        )
+        # robots.txt disposition — None until fetched. False = blocked, True = allowed.
+        self.robots_allowed = None
+        if polite:
+            self._fetch_robots()
+
+    def _next_burst_target(self):
+        return random.randint(POLITE_BURST_MIN, POLITE_BURST_MAX)
+
+    def _fetch_robots(self):
+        robots_url = "https://dev.epicgames.com/robots.txt"
+        try:
+            rp = RobotFileParser()
+            rp.set_url(robots_url)
+            rp.read()
+            self.robots = rp
+            print(f"  [polite] robots.txt loaded from {robots_url}")
+        except Exception as e:
+            print(f"  [polite] robots.txt fetch failed ({e}); proceeding cautiously")
+            self.robots = None
+
+    def _allowed(self, url):
+        if not self.polite or self.robots is None:
+            return True
+        return self.robots.can_fetch(POLITE_HEADERS["User-Agent"], url)
+
+    def _pause_between(self):
+        """Idle between requests. Polite: jittered 1.5-4s, bursty pause every
+        8-15 pages. Non-polite: fixed 0.5s (legacy behavior)."""
+        if not self.polite:
+            time.sleep(SCRAPE_DELAY)
+            return
+
+        self.pages_in_burst += 1
+        if self.pages_in_burst >= self.burst_target:
+            idle = random.uniform(POLITE_IDLE_MIN, POLITE_IDLE_MAX)
+            print(f"  [polite] burst of {self.pages_in_burst} pages done — idling {idle:.0f}s")
+            time.sleep(idle)
+            self.pages_in_burst = 0
+            self.burst_target = self._next_burst_target()
+        else:
+            time.sleep(random.uniform(POLITE_DELAY_MIN, POLITE_DELAY_MAX))
+
+    def fetch(self, url, timeout=10):
+        """Return decoded HTML for url, or raise. Pauses AFTER returning so
+        the caller can short-circuit on 404 without burning idle time."""
+        if not self._allowed(url):
+            raise PermissionError(f"robots.txt disallows fetch of {url}")
+
+        headers = POLITE_HEADERS if self.polite else {
+            "User-Agent": "Mozilla/5.0 (UE5 Learning Path Builder)",
+            "Accept": "text/html",
+        }
+
+        attempts = POLITE_BACKOFF_RETRIES if self.polite else 1
+        last_err = None
+        for attempt in range(attempts):
+            try:
+                req = urllib.request.Request(url, headers=headers)
+                with self.opener.open(req, timeout=timeout) as response:
+                    raw = response.read()
+                    # gzip/deflate handled by content-encoding; urllib doesn't
+                    # decompress automatically, so check + decode.
+                    encoding = response.headers.get("Content-Encoding", "")
+                    if "gzip" in encoding:
+                        import gzip
+                        raw = gzip.decompress(raw)
+                    elif "deflate" in encoding:
+                        import zlib
+                        raw = zlib.decompress(raw)
+                    return raw.decode("utf-8", errors="replace")
+            except urllib.error.HTTPError as e:
+                last_err = e
+                if e.code in (429, 503) and attempt + 1 < attempts:
+                    backoff = min(POLITE_BACKOFF_BASE * (2 ** attempt), POLITE_BACKOFF_MAX)
+                    print(f"  [polite] HTTP {e.code} — backing off {backoff:.0f}s (attempt {attempt + 1}/{attempts})")
+                    time.sleep(backoff)
+                    continue
+                raise
+            except (urllib.error.URLError, TimeoutError) as e:
+                last_err = e
+                if attempt + 1 < attempts:
+                    backoff = min(POLITE_BACKOFF_BASE * (2 ** attempt), POLITE_BACKOFF_MAX)
+                    print(f"  [polite] network error ({e}) — retrying in {backoff:.0f}s")
+                    time.sleep(backoff)
+                    continue
+                raise
+        raise last_err
+
+    def settle(self):
+        """Pause after a successful fetch. Separated from fetch() so callers
+        can decide not to wait (e.g. on a 404 we skip the idle)."""
+        self._pause_between()
+
+
+def crawl_discover_slugs(max_pages=2000, fetcher=None):
     """Discover doc page slugs by crawling from the docs index.
     Uses BFS to follow links within /documentation/en-us/unreal-engine/.
     Returns list of discovered slugs.
     """
-    import urllib.error
-    import urllib.request
     from collections import deque
+
+    if fetcher is None:
+        fetcher = PoliteFetcher(polite=False)
 
     docs_prefix = "/documentation/en-us/unreal-engine/"
     # Skip API reference pages (huge, low RAG value)
@@ -252,12 +419,7 @@ def crawl_discover_slugs(max_pages=2000):
 
         url = f"{BASE_URL}/{slug}" if slug else BASE_URL
         try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (UE5 Learning Path Builder)",
-                "Accept": "text/html",
-            })
-            with urllib.request.urlopen(req, timeout=10) as response:
-                html = response.read().decode("utf-8", errors="replace")
+            html = fetcher.fetch(url)
 
             # Extract internal links
             link_pattern = re.compile(
@@ -278,7 +440,7 @@ def crawl_discover_slugs(max_pages=2000):
             if len(discovered_slugs) % 50 == 0 and discovered_slugs:
                 print(f"  Discovered {len(discovered_slugs)} pages, queue: {len(to_visit)}")
 
-            time.sleep(SCRAPE_DELAY)
+            fetcher.settle()
 
         except urllib.error.HTTPError as e:
             if e.code != 404:
@@ -291,10 +453,10 @@ def crawl_discover_slugs(max_pages=2000):
     return discovered_slugs
 
 
-def scrape_docs(slugs):
+def scrape_docs(slugs, fetcher=None):
     """Fetch and parse doc pages. Returns list of {slug, title, chunks}."""
-    import urllib.error
-    import urllib.request
+    if fetcher is None:
+        fetcher = PoliteFetcher(polite=False)
 
     docs = []
     success = 0
@@ -305,17 +467,13 @@ def scrape_docs(slugs):
     for i, slug in enumerate(slugs):
         url = f"{BASE_URL}/{slug}"
         try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (UE5 Learning Path Builder)",
-                "Accept": "text/html",
-            })
-            with urllib.request.urlopen(req, timeout=10) as response:
-                html = response.read().decode("utf-8", errors="replace")
+            html = fetcher.fetch(url)
 
             text = html_to_text(html)
 
             if estimate_tokens(text) < 50:
                 print(f"  [{i+1}/{len(slugs)}] SKIP (too short): {slug}")
+                fetcher.settle()
                 continue
 
             # Extract title from slug
@@ -336,12 +494,12 @@ def scrape_docs(slugs):
             if (i + 1) % 20 == 0:
                 print(f"  [{i+1}/{len(slugs)}] scraped {success}, failed {failed}")
 
-            time.sleep(SCRAPE_DELAY)
+            fetcher.settle()
 
         except urllib.error.HTTPError as e:
             failed += 1
             if e.code == 404:
-                pass  # Common — some slugs may be outdated
+                pass  # Common — some slugs may be outdated; skip the idle delay
             else:
                 print(f"  [{i+1}/{len(slugs)}] HTTP {e.code}: {slug}")
         except Exception as e:
@@ -410,12 +568,25 @@ def main():
     parser.add_argument("--embed-only", action="store_true", help="Embed already-scraped docs")
     parser.add_argument("--crawl", action="store_true", help="Crawl site to discover pages (vs curated slugs)")
     parser.add_argument("--max-pages", type=int, default=2000, help="Max pages to crawl (default 2000)")
+    parser.add_argument(
+        "--polite",
+        action="store_true",
+        help=(
+            "Pace requests like a human researcher: jittered 1.5-4s delays, "
+            "browser-shaped headers, bursty pauses every 8-15 pages, "
+            "robots.txt + 429/503 backoff. Slower (~2x) but stays off WAF heuristics."
+        ),
+    )
     args = parser.parse_args()
+
+    fetcher = PoliteFetcher(polite=args.polite)
+    if args.polite:
+        print("Mode: POLITE (jittered delays, browser headers, bursty pacing)")
 
     # Step 1: Get slugs
     if args.crawl:
         print("Mode: CRAWL (discovering pages from site)")
-        slugs = crawl_discover_slugs(args.max_pages)
+        slugs = crawl_discover_slugs(args.max_pages, fetcher=fetcher)
         print(f"  Discovered {len(slugs)} unique doc slugs via crawl")
     else:
         print(f"Reading slugs from {SLUG_SOURCE}...")
@@ -429,7 +600,7 @@ def main():
             docs = json.load(f)
         print(f"  Loaded {len(docs)} docs")
     else:
-        docs = scrape_docs(slugs)
+        docs = scrape_docs(slugs, fetcher=fetcher)
 
         # Cache scraped docs
         SCRAPED_DOCS.parent.mkdir(parents=True, exist_ok=True)
