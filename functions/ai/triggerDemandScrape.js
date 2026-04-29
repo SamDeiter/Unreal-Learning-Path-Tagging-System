@@ -6,7 +6,7 @@
  * the scrape-demand-intel.yml workflow. The GITHUB_PAT secret is
  * stored in Firebase Functions secrets (never in code).
  *
- * Any authenticated user can trigger this (internal tool).
+ * Restricted to admins only.
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
@@ -27,9 +27,21 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
+    // Require authentication
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+    }
+
+    // Check if user is admin or in bootstrap list
+    const BOOTSTRAP_ADMIN_EMAILS = [
+      "sam.deiter@epicgames.com",
+      "samdeiter@gmail.com",
+    ];
+    const email = (request.auth.token?.email || "").toLowerCase();
+    const isAdmin = request.auth.token?.admin === true || BOOTSTRAP_ADMIN_EMAILS.includes(email);
+
+    if (!isAdmin) {
+      throw new HttpsError("permission-denied", "Only admins can trigger a demand scrape.");
     }
 
     // Get engine from request data (default to UE5)
