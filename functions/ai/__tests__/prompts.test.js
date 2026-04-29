@@ -19,7 +19,9 @@ describe("prompts exports", () => {
 
     it("contains critical safety keywords", () => {
       expect(UE5_GUARDRAIL).toContain("CRITICAL");
-      expect(UE5_GUARDRAIL).toContain("Unreal Engine 5");
+      // Guardrail tightened 2026-04-29 — uses "UE5" abbreviation throughout
+      // rather than "Unreal Engine 5" verbatim. Either spelling is fine.
+      expect(UE5_GUARDRAIL).toMatch(/UE5|Unreal Engine 5/);
       expect(UE5_GUARDRAIL).toContain("off_topic");
     });
 
