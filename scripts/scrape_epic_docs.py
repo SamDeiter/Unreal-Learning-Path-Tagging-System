@@ -3,7 +3,15 @@ Scrapes Epic Games UE5 documentation using curated URL slugs from
 UE5QuestionGenerator/src/utils/urlValidatorData.js.
 
 Converts HTML → plain text, chunks into ~500-token blocks, then
-embeds via Gemini text-embedding-004.
+embeds via Vertex AI gemini-embedding-001 (:predict endpoint).
+
+Auth: Vertex AI / ADC only. The legacy AI-Studio
+`generativelanguage.googleapis.com/.../embedContent` + GEMINI_API_KEY path
+was retired alongside the rest of the codebase (see commit c8d3ceb0,
+2026-04-28). Locally this requires:
+    gcloud auth application-default login
+Project + region overridable via VERTEX_PROJECT_ID / VERTEX_LOCATION envs;
+defaults to development-317819 / us-central1.
 
 Output: path-builder/src/data/docs_embeddings.json
 
@@ -11,6 +19,7 @@ Usage:
     python scripts/scrape_epic_docs.py --scrape-only    # Scrape docs, no embedding
     python scripts/scrape_epic_docs.py                   # Scrape + embed
     python scripts/scrape_epic_docs.py --resume          # Resume embedding
+    python scripts/scrape_epic_docs.py --auth-test       # Verify Vertex ADC auth
 """
 
 import argparse
@@ -24,7 +33,8 @@ from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
-# Load .env file for API keys
+# Load .env file for env overrides (VERTEX_PROJECT_ID, VERTEX_LOCATION, etc).
+# No API keys are read anymore — auth is ADC.
 try:
     from dotenv import load_dotenv
     load_dotenv(override=True)
@@ -44,7 +54,17 @@ BASE_URL = "https://dev.epicgames.com/documentation/en-us/unreal-engine"
 MODEL = "gemini-embedding-001"
 DIMENSION = 768
 TASK_TYPE = "RETRIEVAL_DOCUMENT"
-API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:embedContent"
+
+# Vertex AI / ADC. `:embedContent` on generativelanguage.googleapis.com no
+# longer supports gemini-embedding-001 — embeddings go through Vertex's
+# `:predict` endpoint with a different request/response shape (see
+# functions/utils/vertex.js and eval/rag_eval.js for the JS equivalents).
+PROJECT_ID = os.environ.get("VERTEX_PROJECT_ID", "development-317819")
+LOCATION = os.environ.get("VERTEX_LOCATION", "us-central1")
+API_URL = (
+    f"https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}"
+    f"/locations/{LOCATION}/publishers/google/models/{MODEL}:predict"
+)
 
 TARGET_TOKENS = 500
 MAX_TOKENS = 700
@@ -54,13 +74,29 @@ CHECKPOINT_INTERVAL = 25
 SCRAPE_DELAY = 0.5          # 500ms between page fetches (be polite)
 
 
-def get_api_key():
-    """Get Gemini API key from environment."""
-    key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    if not key:
-        print("ERROR: No API key found. Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
-        sys.exit(1)
-    return key
+# ---------------------------------------------------------------------------
+# Vertex ADC auth
+# ---------------------------------------------------------------------------
+# Locally requires `gcloud auth application-default login`. In Cloud
+# environments the runtime service account supplies credentials.
+_credentials = None
+
+
+def get_access_token():
+    """Return a fresh ADC bearer token for cloud-platform scope."""
+    global _credentials
+    # Imported lazily so `--auth-test` failures surface a useful error
+    # instead of an ImportError at module load time.
+    from google.auth import default as google_auth_default
+    from google.auth.transport.requests import Request as AuthRequest
+
+    if _credentials is None:
+        _credentials, _ = google_auth_default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+    if not _credentials.valid:
+        _credentials.refresh(AuthRequest())
+    return _credentials.token
 
 
 def extract_slugs():
@@ -318,29 +354,40 @@ def scrape_docs(slugs):
     return docs
 
 
-def embed_text(text, api_key):
-    """Call Gemini embedding API."""
-    import urllib.error
+def embed_text(text, _unused=None):
+    """Call Vertex AI :predict embedding endpoint via ADC.
+
+    The second positional arg is kept for backwards compatibility with the
+    old `embed_text(text, api_key)` signature — callers that still pass a
+    second value won't break, but the value is ignored. Auth comes from
+    `get_access_token()` (ADC).
+    """
     import urllib.request
 
-    url = f"{API_URL}?key={api_key}"
+    token = get_access_token()
     payload = {
-        "model": f"models/{MODEL}",
-        "content": {"parts": [{"text": text}]},
-        "taskType": TASK_TYPE,
-        "outputDimensionality": DIMENSION,
+        "instances": [{"task_type": TASK_TYPE, "content": text}],
+        "parameters": {"outputDimensionality": DIMENSION},
     }
 
     req = urllib.request.Request(
-        url,
+        API_URL,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
         method="POST",
     )
 
     with urllib.request.urlopen(req) as response:
         result = json.loads(response.read().decode("utf-8"))
-        values = result.get("embedding", {}).get("values", [])
+        predictions = result.get("predictions") or []
+        if not predictions:
+            raise ValueError(f"Empty predictions in Vertex response: {result}")
+        values = (
+            predictions[0].get("embeddings", {}).get("values", [])
+        )
         if len(values) != DIMENSION:
             raise ValueError(f"Expected {DIMENSION} dims, got {len(values)}")
         return values
@@ -411,8 +458,9 @@ def main():
     print(f"\n  Total doc chunks to embed: {len(all_chunks)}")
 
     # Step 4: Embed (with smart re-indexing via content hashing)
-    api_key = get_api_key()
-    print(f"  API key: {api_key[:8]}...{api_key[-4:]}")
+    # ADC auth — fetch a token up front to fail fast on misconfigured creds.
+    _ = get_access_token()
+    print(f"  Auth: Vertex ADC (project={PROJECT_ID}, location={LOCATION})")
 
     start_idx = 0
     existing = {}
@@ -446,7 +494,7 @@ def main():
             skipped += 1
             continue
         try:
-            vector = embed_text(chunk["text"], api_key)
+            vector = embed_text(chunk["text"])
             embeddings[chunk["id"]] = {
                 "embedding": vector,
                 "slug": chunk["slug"],
@@ -517,4 +565,12 @@ def main():
 
 
 if __name__ == "__main__":
+    # Lightweight auth smoke test — does not run the full pipeline. Useful
+    # for verifying ADC + Vertex `:predict` works end-to-end from Python
+    # without committing to a multi-hour scrape/embed run.
+    if "--auth-test" in sys.argv:
+        print(f"Auth test against {API_URL}")
+        vec = embed_text("test")
+        print(f"OK — {len(vec)} dims; first 3: {vec[:3]}")
+        sys.exit(0)
     main()

@@ -53,6 +53,7 @@ function parseArgs(argv) {
     k: 10,
     case: null,
     verbose: false,
+    rerank: "none", // none | gemini | managed
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
@@ -61,8 +62,13 @@ function parseArgs(argv) {
     else if (a === "--verbose") args.verbose = true;
     else if (a === "--k") args.k = Number(argv[++i]);
     else if (a === "--case") args.case = argv[++i];
+    else if (a.startsWith("--rerank=")) args.rerank = a.split("=")[1];
+    else if (a === "--rerank") args.rerank = argv[++i];
   }
   if (!args.retrievalOnly && !args.e2e) args.retrievalOnly = true;
+  if (!["none", "gemini", "managed"].includes(args.rerank)) {
+    throw new Error(`--rerank must be one of none|gemini|managed (got "${args.rerank}")`);
+  }
   return args;
 }
 
@@ -170,6 +176,7 @@ function loadChunks() {
         url: c.url || c.source_url || "",
         source: c.source || source,
         section: c.section || c.video_title || "",
+        text: c.text || c.content || "",
       });
       added++;
     }
@@ -192,10 +199,157 @@ function topKRetrieval(queryVec, k) {
     title: c.title,
     url: c.url,
     source: c.source,
+    section: c.section,
+    text: c.text,
     similarity: cosineSim(queryVec, c.embedding),
   }));
   scored.sort((a, b) => b.similarity - a.similarity);
   return scored.slice(0, k);
+}
+
+// ── Rerankers ──────────────────────────────────────────────────────────────
+//
+// rerank(query, candidates, mode, k) returns { topK, rerankElapsedMs }.
+// `candidates` is an array of objects shaped like topKRetrieval rows
+// (id, title, url, source, section, text, similarity). Returned topK
+// preserves that shape so downstream scoring is mode-agnostic.
+
+async function rerankWithGemini(query, candidates, k) {
+  const fetchFn = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+  const client = await getVertexAuth().getClient();
+  const tokenResponse = await client.getAccessToken();
+  const token = typeof tokenResponse === "string" ? tokenResponse : tokenResponse?.token;
+  if (!token) throw new Error("rerankWithGemini: failed to obtain ADC access token");
+
+  // Mirror production: cap at 30 passages, 300-char text, sanitize brackets/quotes.
+  const truncated = candidates.slice(0, 30);
+  const passageList = truncated
+    .map((p, i) => {
+      const safeText = String(p.text || "").slice(0, 300).replace(/[\[\]"\\]/g, "");
+      return `[${i}] ${safeText}`;
+    })
+    .join("\n");
+
+  // Verbatim from functions/ai/rerankPassages.js (lines 61–75).
+  const prompt = `You are a relevance scoring engine for Unreal Engine 5 technical content.
+
+Query: "${query}"
+
+Score each passage 0-10 for how relevant it is to answering this UE5 query.
+- 10 = directly answers the question or describes the exact solution
+- 7-9 = highly relevant context about the right subsystem/feature
+- 4-6 = somewhat related but not directly useful
+- 0-3 = irrelevant or wrong context
+
+Passages:
+${passageList}
+
+Return ONLY a JSON array of objects: [{"index": 0, "score": 8}, {"index": 1, "score": 3}, ...]
+Include ALL ${truncated.length} passages.`;
+
+  const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/gemini-2.5-flash:generateContent`;
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 600,
+      responseMimeType: "application/json",
+    },
+  };
+
+  const r = await fetchFn(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) {
+    throw new Error(`rerankWithGemini HTTP ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  }
+  const body = await r.json();
+  const text = body?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+  let scores;
+  try {
+    scores = JSON.parse(text);
+    if (!Array.isArray(scores)) scores = [];
+  } catch {
+    scores = [];
+  }
+  const scoreMap = new Map();
+  for (const s of scores) {
+    if (typeof s.index === "number" && typeof s.score === "number") {
+      scoreMap.set(s.index, Math.max(0, Math.min(10, s.score)));
+    }
+  }
+  const reranked = truncated
+    .map((p, i) => ({ ...p, _rerankScore: scoreMap.get(i) ?? 5 }))
+    .sort((a, b) => b._rerankScore - a._rerankScore);
+  return reranked.slice(0, k);
+}
+
+async function rerankWithManaged(query, candidates, k) {
+  const fetchFn = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+  const client = await getVertexAuth().getClient();
+  const tokenResponse = await client.getAccessToken();
+  const token = typeof tokenResponse === "string" ? tokenResponse : tokenResponse?.token;
+  if (!token) throw new Error("rerankWithManaged: failed to obtain ADC access token");
+
+  const truncated = candidates.slice(0, 30);
+  const records = truncated.map((p) => ({
+    id: String(p.id),
+    title: String(p.title || "").slice(0, 256),
+    content: String(p.text || "").slice(0, 1024),
+  }));
+
+  const url = `https://discoveryengine.googleapis.com/v1/projects/${PROJECT_ID}/locations/global/rankingConfigs/default_ranking_config:rank`;
+  const payload = {
+    model: "semantic-ranker-default@latest",
+    query,
+    topN: k,
+    records,
+  };
+
+  const r = await fetchFn(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-Goog-User-Project": PROJECT_ID,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) {
+    throw new Error(`rerankWithManaged HTTP ${r.status}: ${(await r.text()).slice(0, 500)}`);
+  }
+  const body = await r.json();
+  const ranked = Array.isArray(body?.records) ? body.records : [];
+
+  // Map back to original candidate objects by id, preserving the score from the API.
+  const byId = new Map(truncated.map((p) => [String(p.id), p]));
+  const out = [];
+  for (const r0 of ranked) {
+    const original = byId.get(String(r0.id));
+    if (original) out.push({ ...original, _rerankScore: r0.score });
+  }
+  return out.slice(0, k);
+}
+
+async function rerank(query, candidates, mode, k) {
+  const t0 = Date.now();
+  let topK;
+  if (mode === "none") {
+    // Already cosine-sorted; just take top-k.
+    topK = candidates.slice(0, k);
+  } else if (mode === "gemini") {
+    topK = await rerankWithGemini(query, candidates, k);
+  } else if (mode === "managed") {
+    topK = await rerankWithManaged(query, candidates, k);
+  } else {
+    throw new Error(`Unknown rerank mode: ${mode}`);
+  }
+  return { topK, rerankElapsedMs: Date.now() - t0 };
 }
 
 // ── Metrics ────────────────────────────────────────────────────────────────
@@ -284,14 +438,19 @@ async function main() {
 
     try {
       const qVec = await embedQuery(tc.query);
-      const topK = topKRetrieval(qVec, args.k);
+      // For rerank modes, pull a bigger candidate pool (production caps at 30).
+      // For mode=none, skip the cost of grabbing 30 if the user only asked for k.
+      const poolSize = args.rerank === "none" ? args.k : 30;
+      const candidates = topKRetrieval(qVec, poolSize);
+      const { topK, rerankElapsedMs } = await rerank(tc.query, candidates, args.rerank, args.k);
       const retrieval = scoreRetrieval(topK, tc);
 
       if (args.verbose) {
         console.log(`\n[${tc.id}] ${tc.query}`);
         topK.forEach((r, i) => {
+          const tail = r._rerankScore !== undefined ? ` rscore=${r._rerankScore}` : "";
           console.log(
-            `  ${i + 1}. sim=${r.similarity.toFixed(3)} src=${r.source} id=${r.id} ${r.title || r.url}`
+            `  ${i + 1}. sim=${(r.similarity ?? 0).toFixed(3)}${tail} src=${r.source} id=${r.id} ${r.title || r.url}`
           );
         });
         console.log("  score:", retrieval);
@@ -302,7 +461,14 @@ async function main() {
         query: tc.query,
         kind: tc.kind,
         retrieval,
-        topK: args.verbose ? topK : topK.map((r) => ({ id: r.id, similarity: r.similarity })),
+        rerank_elapsed_ms: rerankElapsedMs,
+        topK: args.verbose
+          ? topK
+          : topK.map((r) => ({
+              id: r.id,
+              similarity: r.similarity,
+              ...(r._rerankScore !== undefined ? { rerankScore: r._rerankScore } : {}),
+            })),
       });
     } catch (err) {
       results.push({ id: tc.id, query: tc.query, error: err.message });
@@ -320,9 +486,18 @@ async function main() {
       ? coverageScored.reduce((a, r) => a + r.retrieval.coverage, 0) / coverageScored.length
       : null;
 
+  const rerankElapsed = scored
+    .map((r) => r.rerank_elapsed_ms)
+    .filter((v) => typeof v === "number");
+  const meanRerankMs =
+    rerankElapsed.length > 0
+      ? rerankElapsed.reduce((a, b) => a + b, 0) / rerankElapsed.length
+      : null;
+
   const summary = {
     run_at: new Date().toISOString(),
     mode: args.e2e ? "e2e" : "retrieval-only",
+    rerank_mode: args.rerank,
     k: args.k,
     cases_total: cases.length,
     cases_scored: scored.length,
@@ -331,6 +506,7 @@ async function main() {
     "hit@k": Number(hitRate.toFixed(3)),
     "mrr@k": Number(mrr.toFixed(3)),
     "coverage@k": coverage !== null ? Number(coverage.toFixed(3)) : null,
+    mean_rerank_elapsed_ms: meanRerankMs !== null ? Number(meanRerankMs.toFixed(1)) : null,
     threshold: HIT_THRESHOLD,
   };
 
