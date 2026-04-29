@@ -2,3 +2,8 @@
 **Vulnerability:** The `analytics_events` collection was readable by any authenticated user, potentially leaking search queries and session data. The `path_builder_invites` collection allowed client-side updates to `usedCount` and `lastUsedAt` without server-side validation of the increment or timestamp.
 **Learning:** Even when documentation (like `analyticsQueryService.js`) claims a collection is admin-only, the Firestore rules are the actual source of truth and must be explicitly audited. Implicit trust in "authenticated users" is often too broad for sensitive telemetry.
 **Prevention:** Always restrict read access to the minimum necessary persona (e.g., `isAdmin()`). For sensitive counters or metadata updates (like invite consumption), use `request.resource.data.field == resource.data.field + 1` and `request.resource.data.timestamp == request.time` to ensure data integrity and prevent replay or bulk-increment attacks.
+
+## 2026-04-29 - [Restricted Administrative Cloud Functions]
+**Vulnerability:** The `triggerDemandScrape` Cloud Function was accessible to any authenticated user, allowing non-admin users to trigger external GitHub Action workflows.
+**Learning:** While most AI-related Cloud Functions are intended for all users (with rate limits), administrative or operational triggers must be explicitly gated with admin-level checks (custom claims or bootstrap lists).
+**Prevention:** Always implement `isAdmin()` or equivalent authorization checks on Cloud Functions that perform sensitive operations, trigger expensive workflows, or interact with external system APIs.
