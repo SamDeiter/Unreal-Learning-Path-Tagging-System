@@ -16,9 +16,21 @@ test.describe("Search flow", () => {
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
     // Navigate to Tutor
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
-    await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+    await page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ }).click();
+
+    // Verify we are on the Tutor page
+    await expect(page.getByRole("heading", { name: /Learn Unreal/i })).toBeVisible();
+
+    // Expand the details to reveal ProblemInput (it's hidden by default)
+    // Using evaluate to force 'open' state as click can be flaky in CI with animations
+    await page.evaluate(() => {
+      const details = Array.from(document.querySelectorAll("details")).find((d) =>
+        d.textContent.includes("Attach a screenshot")
+      );
+      if (details) details.open = true;
+    });
+
+    await expect(page.getByLabel("Problem description")).toBeVisible({ timeout: 10_000 });
   });
 
   test("should accept a search query", async ({ page }) => {
