@@ -14,6 +14,11 @@ deeper context.
   Mark items resolved as fixes land.
 - [skillState-schema.md](./skillState-schema.md) — Firestore schema for the
   PFA knowledge tracing layer.
+- [tag-governance.md](./tag-governance.md) — Rules for keeping the tag
+  taxonomy clean (canonical names, deprecation, schema rot prevention).
+- [conceptual-augmentation-prompt.md](./conceptual-augmentation-prompt.md) —
+  Pillar 5 prompt template for transforming raw transcripts into
+  conceptually-augmented learning guides.
 
 ## Historical / pinned-in-time
 
