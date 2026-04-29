@@ -306,18 +306,52 @@ class PoliteFetcher:
         return random.randint(POLITE_BURST_MIN, POLITE_BURST_MAX)
 
     def _fetch_robots(self):
+        """Try to fetch + parse robots.txt. If the URL returns HTML (e.g. a
+        Cloudflare challenge page) or anything that isn't recognizably a
+        robots policy, treat it as "no policy published" rather than failing
+        closed — RobotFileParser's `can_fetch()` returns False on garbage
+        input, which would block ALL fetches even though the site has not
+        actually disallowed anything.
+        """
         robots_url = "https://dev.epicgames.com/robots.txt"
         try:
+            req = urllib.request.Request(
+                robots_url,
+                headers={"User-Agent": POLITE_HEADERS["User-Agent"]},
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                content_type = response.headers.get("Content-Type", "").lower()
+                body = response.read().decode("utf-8", errors="replace")
+
+            # Sanity-check the body: a real robots.txt is text/plain and
+            # contains "user-agent:" near the top. CF challenge pages are
+            # HTML and obviously won't match.
+            looks_like_robots = (
+                "text/plain" in content_type
+                or "user-agent:" in body[:1024].lower()
+                or "disallow:" in body[:1024].lower()
+                or "allow:" in body[:1024].lower()
+            )
+            if not looks_like_robots:
+                print(
+                    f"  [polite] robots.txt at {robots_url} is not a real policy "
+                    f"(content-type={content_type or 'unknown'}, "
+                    f"first bytes look like {body[:60]!r}). Treating as no-policy → allow."
+                )
+                self.robots = None
+                return
+
             rp = RobotFileParser()
-            rp.set_url(robots_url)
-            rp.read()
+            rp.parse(body.splitlines())
             self.robots = rp
             print(f"  [polite] robots.txt loaded from {robots_url}")
         except Exception as e:
-            print(f"  [polite] robots.txt fetch failed ({e}); proceeding cautiously")
+            print(f"  [polite] robots.txt fetch failed ({e}); proceeding without policy")
             self.robots = None
 
     def _allowed(self, url):
+        # No policy → allow. Polite mode still throttles + identifies itself
+        # via User-Agent, so we're not pretending the site doesn't exist.
         if not self.polite or self.robots is None:
             return True
         return self.robots.can_fetch(POLITE_HEADERS["User-Agent"], url)
@@ -611,6 +645,19 @@ def main():
     if args.scrape_only:
         print("\n[SCRAPE ONLY] No embeddings generated.")
         return
+
+    # Refuse to clobber the production embeddings file when scrape produced
+    # nothing (e.g. site is blocking us). The previous behavior silently
+    # rewrote OUTPUT_FILE because the embed-cache path treated 0 chunks as
+    # "no work to do" and merged with whatever was already on disk in a way
+    # that mangled the file. Better to fail loudly here.
+    if not docs and OUTPUT_FILE.exists():
+        print(
+            f"\nABORT: scrape produced 0 docs but {OUTPUT_FILE} exists. "
+            f"Refusing to overwrite the production embeddings with an empty result. "
+            f"Investigate the scrape failures above before re-running."
+        )
+        sys.exit(1)
 
     # Step 3: Flatten chunks for embedding
     all_chunks = []
