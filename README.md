@@ -164,7 +164,7 @@ npm run test:watch   # Watch mode
 npm run test:e2e     # Playwright E2E browser tests (9 tests, ~13s)
 ```
 
-Tests are organized in 7 phases — see [CHANGES.md](./CHANGES.md) for details. CI runs automatically via GitHub Actions on push/PR.
+Tests are organized in 7 phases — see [docs/CHANGES.md](./docs/CHANGES.md) for details. CI runs automatically via GitHub Actions on push/PR.
 
 ### Run Linters
 
