@@ -175,13 +175,17 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
             <div className="feedback-form-group">
               <label htmlFor="feedback-desc">
                 {type === "bug"
-                  ? "Describe the issue and steps to reproduce:"
-                  : "Tell us about your suggestion:"}
+                  ? "Describe the issue and steps to reproduce"
+                  : "Tell us about your suggestion"}
+                <span className="required-star" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> (required)</span>
               </label>
               <textarea
                 id="feedback-desc"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
                 placeholder={
                   type === "bug"
                     ? "e.g., When I click 'Next', the screen goes black..."
@@ -189,7 +193,18 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 }
                 required
                 rows={5}
+                maxLength={2000}
+                aria-required="true"
+                aria-describedby="feedback-char-count"
               />
+              <div
+                id="feedback-char-count"
+                className={`char-count ${description.length >= 1900 ? "near-limit" : ""}`}
+                role="status"
+                aria-live="polite"
+              >
+                {description.length} / 2000 characters
+              </div>
             </div>
 
             <div className="feedback-form-group">
