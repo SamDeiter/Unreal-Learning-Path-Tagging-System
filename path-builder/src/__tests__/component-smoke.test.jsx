@@ -146,7 +146,22 @@ describe("DiagnosisLoader", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 5. BridgeCard
+// 5. FeedbackModal
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import FeedbackModal from "../components/Feedback/FeedbackModal";
+
+describe("FeedbackModal", () => {
+  const mockUser = { uid: "test-user", email: "test@example.com" };
+  it("renders character counter and required fields", () => {
+    render(<FeedbackModal isOpen={true} onClose={() => {}} user={mockUser} />);
+    expect(screen.getByText(/0 \/ 2000 characters/)).toBeTruthy();
+    expect(screen.getByText("(required)")).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. BridgeCard
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import BridgeCard from "../components/GuidedPlayer/BridgeCard";
