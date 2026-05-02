@@ -482,7 +482,7 @@ export default function BespokePath() {
       {/* Query Input Section */}
       <div className="bespoke-hero">
         <h2 className="bespoke-title">
-          <span className="bespoke-icon">🔧</span> Fix a Problem
+          <span className="bespoke-icon">🎓</span> Tutor
         </h2>
         <p className="bespoke-subtitle">
           Describe your UE5 problem and get an expert-curated learning path with video clips, docs,
