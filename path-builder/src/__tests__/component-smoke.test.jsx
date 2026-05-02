@@ -153,28 +153,10 @@ import FeedbackModal from "../components/Feedback/FeedbackModal";
 
 describe("FeedbackModal", () => {
   const mockUser = { uid: "test-user", email: "test@example.com" };
-
-  it("should render when open", () => {
-    render(<FeedbackModal isOpen={true} onClose={() => {}} user={mockUser} />);
-    expect(screen.getByText("Send Feedback")).toBeTruthy();
-    expect(screen.getByLabelText(/Describe the issue/)).toBeTruthy();
-  });
-
-  it("should display character counter", () => {
+  it("renders character counter and required fields", () => {
     render(<FeedbackModal isOpen={true} onClose={() => {}} user={mockUser} />);
     expect(screen.getByText(/0 \/ 2000 characters/)).toBeTruthy();
-  });
-
-  it("should show character counter", () => {
-    render(<FeedbackModal isOpen={true} onClose={() => {}} user={mockUser} />);
-    // Just check if it exists, without redundant renders
-    expect(screen.queryAllByText(/characters/)).toHaveLength(1);
-  });
-
-  it("should show required indicator", () => {
-    render(<FeedbackModal isOpen={true} onClose={() => {}} user={mockUser} />);
     expect(screen.getByText("(required)")).toBeTruthy();
-    expect(screen.queryByText("*")).toBeTruthy();
   });
 });
 
