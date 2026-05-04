@@ -18,7 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (Fix a Problem)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+
+    // Reveal the rich problem input (hidden behind details)
+    const summary = page.locator("summary:has-text('Attach a screenshot')");
+    await summary.click();
+    await page.getByLabel("Problem description").waitFor({ state: "visible", timeout: 5_000 });
   });
 
   test("should accept a search query", async ({ page }) => {

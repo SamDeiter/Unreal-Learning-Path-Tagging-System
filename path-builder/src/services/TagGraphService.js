@@ -324,7 +324,7 @@ class TagGraphService {
       }
     }
 
-    const meta = { tagSet, allCourseTags, suffixMap };
+    const meta = { tagSet, suffixMap };
     this._courseMetadataCache.set(course, meta);
     return meta;
   }
@@ -495,10 +495,10 @@ class TagGraphService {
     let graphPropagation = 0;
     const MAX_GRAPH_PER_TAG = 15;
 
+    // 1. Direct matches & Gemini bonus (scored on deduplicated target set)
     for (const targetTagId of targetSet) {
       const targetSuffix = targetTagId.split(".").pop();
 
-      // ---- 1. Direct tag matches (highest weight: 25 pts each) ----
       if (tagSet.has(targetTagId)) {
         directOverlap += 25;
         topContributors.push({
@@ -518,12 +518,15 @@ class TagGraphService {
         });
       }
 
-      // ---- 2. Gemini bonus (AI-curated, high quality) ----
       if (targetSuffix) {
         if (geminiTags.some((gt) => gt === targetSuffix || gt.includes(targetSuffix))) {
           geminiBonus += 10;
         }
       }
+    }
+
+    // 2. Graph propagation (scored on raw input array for parity with V2 logic)
+    for (const targetTagId of targetTagIds) {
 
       // ---- 3. Graph propagation (secondary, capped) ----
       let tagGraphCredit = 0;
