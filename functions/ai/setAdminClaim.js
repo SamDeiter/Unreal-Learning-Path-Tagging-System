@@ -2,16 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
-
-/**
- * Bootstrap admin list — used ONLY for initial claim seeding.
- * Once claims are set, this list is irrelevant; future admins
- * are managed by existing admins calling this function.
- */
-const BOOTSTRAP_ADMIN_EMAILS = [
-  "sam.deiter@epicgames.com",
-  "samdeiter@gmail.com",
-];
+const { checkIsAdmin } = require("../utils/adminGuard");
 
 /**
  * setAdminClaim — Callable Cloud Function to grant or revoke admin claims.
@@ -37,12 +28,7 @@ exports.setAdminClaim = functions
     }
 
     // Check caller is admin (custom claim) or in bootstrap list
-    const callerEmail = context.auth.token?.email || "";
-    const callerIsAdmin =
-      context.auth.token?.admin === true ||
-      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail.toLowerCase());
-
-    if (!callerIsAdmin) {
+    if (!checkIsAdmin(context.auth)) {
       throw new functions.https.HttpsError(
         "permission-denied",
         "Only admins can manage admin claims."
