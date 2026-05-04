@@ -482,6 +482,9 @@ class TagGraphService {
     };
     if (!course || !targetTagIds || targetTagIds.length === 0) return empty;
 
+    // Maintain V2 behavior: deduplicate target tags to avoid score inflation
+    const targetSet = new Set(targetTagIds.map((t) => t.toLowerCase()));
+
     // Use cached course metadata (tag sets, suffix maps)
     const { tagSet, suffixMap } = this._getCourseMetadata(course);
     const geminiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
@@ -492,16 +495,15 @@ class TagGraphService {
     let graphPropagation = 0;
     const MAX_GRAPH_PER_TAG = 15;
 
-    for (const targetTagId of targetTagIds) {
-      const targetLower = targetTagId.toLowerCase();
-      const targetSuffix = targetLower.split(".").pop();
+    for (const targetTagId of targetSet) {
+      const targetSuffix = targetTagId.split(".").pop();
 
       // ---- 1. Direct tag matches (highest weight: 25 pts each) ----
-      if (tagSet.has(targetLower)) {
+      if (tagSet.has(targetTagId)) {
         directOverlap += 25;
         topContributors.push({
           sourceQueryTagId: targetTagId,
-          targetCourseTagId: targetLower,
+          targetCourseTagId: targetTagId,
           path: [],
           contribution: 25,
         });
