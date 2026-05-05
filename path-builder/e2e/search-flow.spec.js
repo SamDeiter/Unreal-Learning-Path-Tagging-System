@@ -18,6 +18,9 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (bespoke)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Open the rich input section (it's inside a <details> block now)
+    await page.getByText("Attach a screenshot or error log").click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
