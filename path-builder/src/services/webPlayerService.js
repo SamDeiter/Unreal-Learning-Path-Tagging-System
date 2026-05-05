@@ -84,6 +84,52 @@ export function prepareStepData(steps, bridges = [], augmentations = []) {
     // Video extraction — mirrors scormPackager logic
     const video = extractVideoInfo(step);
 
+    // Surface canonical source URL when available. For docs-shaped steps
+    // this is the only authoritative pointer to real content; without it
+    // a step whose summary failed the quality gate has nothing to show.
+    const sourceUrl =
+      step.url ||
+      step._url ||
+      step.segment?.url ||
+      step.sourceUrl ||
+      "";
+
+    // Section heading from the underlying doc chunk, if any.
+    const sectionName =
+      step.doc_meta?.section ||
+      step.segment?.doc_meta?.section ||
+      step.section ||
+      "";
+
+    // Topical chips — dedupe + cap. Filter out single-word stub tags
+    // ("one", "per", "file") that the doc tagger emits.
+    const rawTags = [
+      ...(Array.isArray(step.canonical_tags) ? step.canonical_tags : []),
+      ...(Array.isArray(step.extracted_tags) ? step.extracted_tags : []),
+      ...(Array.isArray(step.gemini_system_tags) ? step.gemini_system_tags : []),
+      ...(Array.isArray(step.ai_tags) ? step.ai_tags : []),
+      ...(Array.isArray(step.segment?.ai_tags) ? step.segment.ai_tags : []),
+    ];
+    const STOP_TAGS = new Set(["one", "per", "the", "and", "for", "with", "from"]);
+    const displayTags = Array.from(
+      new Set(
+        rawTags
+          .filter((t) => typeof t === "string" && t.length > 2)
+          .map((t) => t.split(".").pop().replace(/_/g, " ").trim())
+          .filter((t) => !STOP_TAGS.has(t.toLowerCase())),
+      ),
+    ).slice(0, 8);
+
+    // Gemini-extracted learning outcomes — useful even when the descriptive
+    // summary is junk, because they describe what the learner will be able
+    // to do after this step.
+    const outcomes = (
+      step.gemini_outcomes ||
+      step.gemini_enriched?.outcomes ||
+      step.segment?.gemini_outcomes ||
+      []
+    ).filter((o) => typeof o === "string" && o.length > 8).slice(0, 5);
+
     // Merge augmentation data if available for this step.
     // Augmentation fields (whyThisMatters, whatToDo, commonMistake, takeaway,
     // prerequisites) are the exact keys LessonCard already renders.
@@ -99,6 +145,11 @@ export function prepareStepData(steps, bridges = [], augmentations = []) {
       bridgeText,
       video,
       index: idx,
+      // Always-on metadata fields — consumers conditionally render.
+      ...(sourceUrl && { sourceUrl }),
+      ...(sectionName && { sectionName }),
+      ...(displayTags.length > 0 && { displayTags }),
+      ...(outcomes.length > 0 && { outcomes }),
       // Augmentation-enriched fields — only set when augmentation data exists
       ...(aug.whyThisMatters && { whyThisMatters: aug.whyThisMatters }),
       ...(aug.whatToDo?.length && { whatToDo: aug.whatToDo }),

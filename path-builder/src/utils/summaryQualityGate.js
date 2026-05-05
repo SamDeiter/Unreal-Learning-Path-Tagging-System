@@ -115,9 +115,22 @@ export function ensureQualitySummary(rawText, stepTitle = "this topic", category
     };
   }
 
+  // Step 6: Title-fragment detection — text with no sentence-terminating
+  // punctuation anywhere is almost always a page-title fragment or a
+  // mid-word truncation from a bad scrape (e.g. "...Table of Conte").
+  // A real summary has at least one '.', '!' or '?'.
+  const trimmed = cleaned.trim();
+  if (!/[.!?]/.test(trimmed)) {
+    return {
+      text: generatePlaceholder(stepTitle, category, hints),
+      wasReplaced: true,
+      reason: "no_sentence_terminator",
+    };
+  }
+
   // Passed all checks — return cleaned text
   return {
-    text: cleaned.trim(),
+    text: trimmed,
     wasReplaced: false,
     reason: "",
   };

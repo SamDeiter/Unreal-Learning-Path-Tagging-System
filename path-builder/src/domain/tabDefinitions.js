@@ -10,6 +10,7 @@ export const PRIMARY_TABS = [
   { key: "adaptive", label: "Adaptive Path", icon: "🎯", tooltip: "Dynamic learning paths based on your current knowledge" },
   { key: "path-builders", label: "Path Builders", icon: "🛤️", expandable: true, tooltip: "Choose between different path generation engines" },
   { key: "bespoke", label: "Tutor", icon: "🎓", tooltip: "Work through a problem with a guided tutor — understand the why, not just the fix" },
+  { key: "concept/understanding-ue-version-migrations", label: "Migration Hub", icon: "🔀", tooltip: "What your 5.6 tutorials don't say — verified deltas in 5.7" },
   { key: "augmentation", label: "Augmentation", icon: "🔬", tooltip: "Experiment with AI models to improve content" },
   { key: "personas", label: "Onboarding", icon: "🚀", tooltip: "Configure your expertise level and learning goals" },
 ];

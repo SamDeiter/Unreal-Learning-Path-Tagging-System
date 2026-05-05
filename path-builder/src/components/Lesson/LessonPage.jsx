@@ -237,7 +237,7 @@ export default function LessonPage() {
       <header className="lesson-hero">
         <div className="lesson-hero__eyebrow">Lesson</div>
         <h1 className="lesson-hero__title">{topic || query || "Lesson"}</h1>
-        {diagnosis.problem_summary && (
+        {diagnosis?.problem_summary && (
           <p className="lesson-hero__summary">{diagnosis.problem_summary}</p>
         )}
       </header>

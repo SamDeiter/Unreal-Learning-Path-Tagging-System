@@ -1,0 +1,5447 @@
+[
+  {
+    "key": "UE-193804",
+    "summary": "DNACalibLibTest references the Private directory of DNCalibLib module",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20270",
+        "name": "MetaHuman",
+        "description": "Issues for MetaHuman team - FYI MetaHuman has their own Jira space, so this is for connecting UE Jiras to MetaHuman Jiras"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "DNACalibLibTest references the Private directory of DNCalibLib"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "UBT is working towards adding a new setting to check if modules are referencing the private directories of other modules. (-ModuleIncludePrivateWarningLevel=Warning). Eventually this check is to be enabled by default"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Additionally our reasons for adding adding this check are:"
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Prevent hotfix issues created by outside-of-epic-plugins having the ability to reference Private files"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Speed up compile times by having a smaller surface area of cross dependencies"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Also benefits C++20 header units if/when implemented"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "I've tried to assign the Component that describes the module including the path first, please change the component if inappropriate. I wasn't completely sure on the component for this Plugin, assigned MetaHuman based on "
+            },
+            {
+              "type": "text",
+              "text": "https://p4-swarm.epicgames.net/changes/24557082",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://p4-swarm.epicgames.net/changes/24557082"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Fixing:"
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Check that the private include path and the included headers are actually necessary, if not then simply removing the entry in the Module.Build.cs will resolve the warning. There is a slim chance this will be the case"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Headers will need to be refactored in the included module to move the required references in the Private/ headers to Public/ or Internal/ headers instead, the private Include Path will then need to be removed from the Module.Build.cs and replaced with PublicIncludePathModuleNames or PrivateIncludePathModuleNames depending on the usage. This is the most likely fix"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "This will most likely require changes from the code owners of the module being referenced to ensure other modules aren't affected negatively and that APIs aren't exposed publicly when they should be internal only"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Internal/ is only available for other engine modules (anything under the Engine/ directory)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Internal/ for all intents should be treated as Public/, any headers in those directories can not be modified in hotfixes"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Be careful, there are some private include paths that when replaced with module references could violate rules against including editor or client only modules where they should not be referenced"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "It's very easy to accidently break other platform compiles & projects like fortnite when changing include paths, run an engine preflight with enough coverage to ensure there are no side effects"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "40262",
+        "description": "",
+        "name": "5.8",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Backlogged",
+      "id": "11014",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.5MassMoveTo5.6",
+      "5.6MassMoveTo5.7"
+    ]
+  },
+  {
+    "key": "UE-275497",
+    "summary": "Mesh sections not always being exposed to tag consumers",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20297",
+        "name": "UE - Anim - Mutable",
+        "description": "Issues relating to Mutable character configuration system plugin"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In the past each mesh section had a tag that did represent it. That made the setup of tags for each one of them not required as the consumers could navigate the tree of sections and tags and select the ones to be used. That does seem to no longer be the case."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "40262",
+        "description": "",
+        "name": "5.8",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/closed.png",
+      "name": "Closed",
+      "id": "6",
+      "statusCategory": {
+        "id": 3,
+        "key": "done",
+        "colorName": "green",
+        "name": "Done"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7"
+    ]
+  },
+  {
+    "key": "UE-176234",
+    "summary": "Syncing issue when stopping and blending out a non-looping montage to an anim graph",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When syncing from a non-repeating montage that is blending out to an anim graph, the anim montage is marked as a follower due to having its PrevMaker as an AnimBoundary(-1), furthermore in this case we cannot assume there is any valid sync data before reaching the first marker."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In this case we would want to ignore syncing and just blend out normally as this will not cause any jarring pop outs."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/closed.png",
+      "name": "Closed",
+      "id": "6",
+      "statusCategory": {
+        "id": 3,
+        "key": "done",
+        "colorName": "green",
+        "name": "Done"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7"
+    ]
+  },
+  {
+    "key": "UE-221812",
+    "summary": "cannot copy paste in an empty pose search database",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "copy paste between pose search databases doesn't work if the receiving database is empty"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "MotionMatching"
+    ]
+  },
+  {
+    "key": "UE-207725",
+    "summary": "Motion Matching DB - Multiselecting assets then clicking eye ball, pose reselect, or mirror icons only changes 1 not the whole selection",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": null,
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-203622",
+    "summary": "[PCG] Support all editor viewports as runtime generation sources",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20513",
+        "name": "UE - World Creation - Procedural Tools - PCG Core",
+        "description": "Issues related to Core PCG systems and backend"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Right now we only support the active/main viewport as an editor camera generation source. Ideally all visible viewports would behave as generation sources."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "See this thread for some discussion: "
+            },
+            {
+              "type": "text",
+              "text": "https://epicgames.slack.com/archives/C044MUDHGSE/p1704747932003799",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://epicgames.slack.com/archives/C044MUDHGSE/p1704747932003799"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11868?size=medium",
+      "name": "4 - Minor",
+      "id": "11006"
+    },
+    "status": {
+      "description": "The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/closed.png",
+      "name": "Closed",
+      "id": "6",
+      "statusCategory": {
+        "id": 3,
+        "key": "done",
+        "colorName": "green",
+        "name": "Done"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7"
+    ]
+  },
+  {
+    "key": "UE-241249",
+    "summary": "GitHub 12815 : Rewind Debugger: display tooltip when mousing over event points",
+    "issuetype": {
+      "id": "11148",
+      "description": "Pull requests submitted through Unreal Engine Github that are automatically reflected in jira",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11759?size=medium",
+      "name": "GitHub PR",
+      "subtask": false,
+      "avatarId": 11759,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "See "
+            },
+            {
+              "type": "text",
+              "text": "https://github.com/EpicGames/UnrealEngine/pull/12815",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://github.com/EpicGames/UnrealEngine/pull/12815"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " (shelved in CL "
+            },
+            {
+              "type": "text",
+              "text": "39574906",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://p4-swarm.epicgames.net/changes/39574906"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ")"
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The Body Text for the Pull Request is only available on GitHub, please follow the above link to the Pull Request to see the full text."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Modified Files:"
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "//UE5/Main/Engine/Plugins/Animation/GameplayInsights/Source/GameplayInsights/Private/SEventTimelineView.cpp (text)"
+                },
+                {
+                  "type": "hardBreak"
+                },
+                {
+                  "type": "text",
+                  "text": "//UE5/Main/Engine/Plugins/Animation/GameplayInsights/Source/GameplayInsights/Public/SEventTimelineView.h (text)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Please include a #12815 tag and #contrib 12815 somewhere in the description of any p4 changelists related to this pull request. So that GitHub can cross-reference, attribute the commit to the user who created the pull request, and automatically close the pull request when this ticket is marked as fixed."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "GitHub",
+      "triagebot_triaged"
+    ]
+  },
+  {
+    "key": "UE-86925",
+    "summary": "GitHub 6560 : Factor blend weights into BlendSpace playrate when using sync markers as Leader",
+    "issuetype": {
+      "id": "11148",
+      "description": "Pull requests submitted through Unreal Engine Github that are automatically reflected in jira",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11759?size=medium",
+      "name": "GitHub PR",
+      "subtask": false,
+      "avatarId": 11759,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "See "
+            },
+            {
+              "type": "text",
+              "text": "https://github.com/EpicGames/UnrealEngine/pull/6560",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://github.com/EpicGames/UnrealEngine/pull/6560"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " (shelved in CL 11029621)"
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Animations of different lengths in a BlendSpace currently do no length adjustment when the Leader, which gives a jarring snap when the highest weighted animation changes. Essentially, having sync markers directly breaks rate adjustments from differing lengths and most interpolation options."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "While MoveDelta can't be used like it is for the non-sync'd case, it can be adjusted by a factor of the length difference from the default for the Leader-case. This fixes the problem and also works with the interpolation options. From tests with sync-markers, this looks like it works correctly and gives a substantially better result with different length animations, and re-enables interpolation options."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "As I understand Leader/Follower, it should be fine for the Leader to manipulate its play-rate in this way as in this case this instance would be the authority on playback anyway. "
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Modified Files:"
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "//UE4/Main/Engine/Source/Runtime/Engine/Private/Animation/BlendSpaceBase.cpp (edit)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The support team will close the pull request when this ticket is marked fixed. Please include a #6560 tag somewhere in the description of any p4 changelists related to this pull request, so that GitHub can cross-reference it."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "The ticket's information is being confirmed.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Needs Triage",
+      "id": "11013",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.5MassMoveTo5.6",
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "GitHub"
+    ]
+  },
+  {
+    "key": "UE-131617",
+    "summary": "Attribute tracing support",
+    "issuetype": {
+      "id": "11003",
+      "description": "The sub-task of the issue",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11859?size=medium",
+      "name": "Sub-task",
+      "subtask": true,
+      "avatarId": 11859,
+      "hierarchyLevel": -1
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": null,
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-135336",
+    "summary": "Look into performance of Blend Profiles system in real world scenarios",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20356",
+        "name": "UE - Anim - Runtime - Anim Blueprints",
+        "description": "Anything related to animation blueprints"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Blend Profiles store per bone blend override information in a linear array (ProfileEntries)"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Which is then searched linearly at runtime to get the FBlendProfileBoneEntry for each bone that has one."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This linear array is potentially very large - eg if I apply one setting to all of the upper body recursively from the spine, that could include hundreds of entries, and in the worst case, it could have one entry for every bone in the skeleton."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In the worst case this algorithm is O(n^2):"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "for each bone, look up bone in blend profile array, do blending."
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "When the task itself could be O"
+            },
+            {
+              "type": "emoji",
+              "attrs": {
+                "shortName": ":thumbsdown:",
+                "id": "1f44e",
+                "text": "\ud83d\udc4e"
+              }
+            },
+            {
+              "type": "text",
+              "text": " if it were not for the linear array lookup."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-130733",
+    "summary": "Add information to Anim Node Functions for binding newly created functions to Anim Nodes",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20356",
+        "name": "UE - Anim - Runtime - Anim Blueprints",
+        "description": "Anything related to animation blueprints"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Currently there is no way for users to know that they have to match a Function's signature to be able to bind said function, to an Anim Node Function. It is unclear that users have to adjust the Function's signature in order to bind it. "
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Surfacing this information more clearly would help users understand what they need to do in order to bind new Functions to Anim Nodes. "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0",
+      "ReviewFor5.5"
+    ]
+  },
+  {
+    "key": "UE-250532",
+    "summary": "Move CalculateInvRefMatrices  to SkeletalMesh serialize ",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This could improve load performance"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-167565",
+    "summary": "Motion Matching - Add way to display foot phase histogram for clips in Database.",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Investigate if we can add a visual debug draw of the foot phase for selected animation clips in the database. Once done, Pass to Roland to implement the UI side."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "MotionMatching"
+    ]
+  },
+  {
+    "key": "UE-167563",
+    "summary": "Motion Matching - Add option in Database to view current root motion speed of the root joint for a selected clip",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add a way to toggle on and off display of the current frames root motion speed in meters per second to a selected clip. If multiple clips are selected this shouldn't be shown."
+            }
+          ]
+        },
+        {
+          "type": "mediaSingle",
+          "attrs": {
+            "layout": "center"
+          },
+          "content": [
+            {
+              "type": "media",
+              "attrs": {
+                "type": "file",
+                "id": "3de0efca-fb86-4b3f-9ae5-7d1920947485",
+                "collection": "",
+                "height": 183,
+                "width": 200
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "MotionMatching"
+    ]
+  },
+  {
+    "key": "UE-210780",
+    "summary": "Deprecate Motion Trajectory Plugin",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Motion Trajectory component + trajectory library functions should be deprecated."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The preferred workflow is to use Pose Search function libraries within Anim Blueprint's event graph."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-202688",
+    "summary": "AnimNext: Write Decorator for Encoder / Decoder Network",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20203",
+        "name": "UE - Anim - Runtime - UAF",
+        "description": "Issues related to the animation runtime under the unreal animation framework"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "To test the decorator system we should be able to create types that do not use standard animation poses.\u00a0 The purpose of this task is to create a decorator that uses an encoder / decoder network and passes encoded poses. This will prove out the ability of anim next to work in a wider range of situations.\u00a0"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-240683",
+    "summary": "(AnimNext)StateTree should call stop",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20203",
+        "name": "UE - Anim - Runtime - UAF",
+        "description": "Issues related to the animation runtime under the unreal animation framework"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Stand up the StateTree debugger so that it functions with instances executed during the AnimNext runtime."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-157054",
+    "summary": "Add the ability to preview / debug AnimGraph's behavior in Child Animation Blueprint",
+    "issuetype": {
+      "id": "11005",
+      "description": "A task that needs to be done.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11832?size=medium",
+      "name": "Task",
+      "subtask": false,
+      "avatarId": 11832,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20356",
+        "name": "UE - Anim - Runtime - Anim Blueprints",
+        "description": "Anything related to animation blueprints"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "AnimGraph cannot be opened for AnimBP that inherits from other AnimBP."
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "So, you cannot preview and debug AnimGraph of Child AnimBP by Persona alone."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "You can indirectly debug and preview by attaching\u00a0the parent AnimBP to the Child AnimBP running on the level, but this is inefficient for adjusting the behavior of the Child AnimBP."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "With the addition of Template AnimBP, the demand for this feature should be significantly higher than in UE4."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0",
+      "ReviewFor5.5"
+    ]
+  },
+  {
+    "key": "UE-234123",
+    "summary": "Can't get accurate Anim Notify State elapsed duration while in a montage.",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When GetCurrentAnimationNotifyStateTimeRatio is used inside of a montage it can return the wrong time ratio in certain cases."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-216762",
+    "summary": "Grooms aren't attached to MetaHuman when debugging in the Rewind Debugger",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Grooms don't remain attached to MetaHumans when debugging in the Rewind Debugger. "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-233563",
+    "summary": "New items do not display while searching in Find/Replace tab",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "New added items (e.g. Curve, Notify) do not display in* Results* column in "
+            },
+            {
+              "type": "text",
+              "text": "Find/Replace",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " tab after first searching having happened there (for more visibility see attached "
+            },
+            {
+              "type": "text",
+              "text": "FirstVersionWhileSearching.gif",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ")."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The bug occurred while passing the test case "
+            },
+            {
+              "type": "text",
+              "text": "Animation - Animation Curves - Renaming/Removing the Curve within Find/Replace tab (batch of tracks)",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://epicgames.qmetry.com/#/test-case/750092/1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "See log messages from Output Log in attached file  "
+            }
+          ]
+        },
+        {
+          "type": "mediaGroup",
+          "content": [
+            {
+              "type": "media",
+              "attrs": {
+                "type": "file",
+                "id": "ff767727-0fcf-4571-afc3-7d458a955baf",
+                "collection": ""
+              }
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression is "
+            },
+            {
+              "type": "text",
+              "text": "No",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " as it's reproduced on the older build //UE5/Release-5.5 CL 38459442. "
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate - 5/5 attempts. "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-240691",
+    "summary": "Mac Crash when using PSD_AnimCompositeTest_AH for Motion Matching",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate 5/5"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression to be tested\u00a0"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Tested with other databases and no crash occurred\u00a0"
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "Tested with Windows and no crash occurred\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Mac Crash when using PSD_AnimCompositeTest_AH for Motion Matching"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0",
+      "Crash"
+    ]
+  },
+  {
+    "key": "UE-210483",
+    "summary": "Undo/Redo actions don't work properly in Find/Replace tab",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Undo/Redo actions don't work properly in "
+            },
+            {
+              "type": "text",
+              "text": "Find/Replace",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " tab, meanwhile in "
+            },
+            {
+              "type": "text",
+              "text": "Curve Debugger",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " tab curve's name changes according to Undo/Redo actions (see attached file "
+            },
+            {
+              "type": "text",
+              "text": "QAGame.log",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ")."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "For more visibility see attached "
+            },
+            {
+              "type": "text",
+              "text": "UndoRedoFindReplaceTab.gif",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression No, the issue is reproduced on UE5-Release-5.3.2 CL 29314046."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate - 5/5 attempts."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-206589",
+    "summary": "Motion Matching Database editor Preview viewport doesn't display static mesh attachments",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Many of the animation asset editors don't display static mesh attachments in the way that the anim sequence or anim bp editor do.\u00a0 This prevents users from previewing characters that are built from static meshes (eg. the mech in the valley of the ancient demo)."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-215417",
+    "summary": "Run Construction Script in Sequencer could trigger AnimNotify every frame",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20329",
+        "name": "UE - Anim"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When the \"Run Construction Script in Sequencer\" flag is enabled for an actor and it is bound to a level sequence, the animation sequence's montage instance is recreated every frame during playback."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Such newly initialized animation montage does not have any playback context, but by calling FAnimMontageInstance::SetSequencerMontagePosition(), the instance is set to the expected frame of the playing sequencer. This function also calls another function, SetNextPositionWithEvents(InFromPosition, InToPosition), to try evaluating events between the previous time position and the current time position to trigger anim notifies."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "However, instead of evaluating AnimNotifies between the previous frame and the current frame, the instance refers to the previous play position of the instance (which is always 0.0 in this scenario where a montage instance is created every frame) and InToPosition to list events for handling. As a result, this causes the AnimNotifies to be triggered every frame after the Notify frame has passed."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "I don't think this is the best fix, but here's a temporary fix for this issue is to modify the following line in Engine\\Source\\Runtime\\Engine\\Private\\Animation\\AnimMontage.cpp around line 2416:"
+            }
+          ]
+        },
+        {
+          "type": "codeBlock",
+          "attrs": {
+            "language": "java"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "- const float PreviousSubStepPosition = Position;\r\n+ const float PreviousSubStepPosition = ForcedNextFromPosition.IsSet() ? ForcedNextFromPosition.GetValue() : Position;"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "The ticket's information is being confirmed.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Needs Triage",
+      "id": "11013",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-185715",
+    "summary": "Sync Group Name To Require Valid Markers Rule doesn't transition when 'Can Enter Transition' box is checked",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20356",
+        "name": "UE - Anim - Runtime - Anim Blueprints",
+        "description": "Anything related to animation blueprints"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When using only the \"Sync Group Name To Require Valid Markers Rule\" transition rule, even with the Can Enter Transition box set to True, the transition will never take. "
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The transition will only take if Automatic rules are set to true or there's a bool set to true, connected to the Result node. "
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Project for Repro",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://drive.google.com/file/d/16sfuVILyK7teuZs_ThEnxb_qVgeqg82c/view?usp=share_link"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate: 3/3"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "The ticket's information is being confirmed.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Needs Triage",
+      "id": "11013",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-197891",
+    "summary": "Montage Editor calls NotifyEnds of AnimNotifyState even when paused",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20329",
+        "name": "UE - Anim"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In the Animation Montage Editor, NotifyEnd is unexpectedly called when a time marker is in the middle of an AnimNotifyState and the animation preview gets paused. Because the Animation Montage Editor does not fill AnimInstance->NotifyQueue when it is paused. As a result, any existing AnimNotifyState that was in effect at the last frame is considered finished."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This can be inconsistent behavior. The other editors, such as the Animation Sequence editor, do NOT call NotifyEnd in the same scenario. (The downside is that NotifyTick is always called, even when the animation preview is paused.)"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "If we let the Animation Montage editor behave the same as the other animation editor, the possible solution is to call HandleEvents() function from FAnimMontageInstance::Advance()\u00a0 in AnimMontage.cpp even when bPlaying is false."
+            }
+          ]
+        },
+        {
+          "type": "codeBlock",
+          "attrs": {
+            "language": "java"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementParams* OutRootMotionParams, bool bBlendRootMotion)\r\n{\r\n    SCOPE_CYCLE_COUNTER(STAT_AnimMontageInstance_Advance);\tFScopeCycleCounterUObject MontageScope(Montage);\r\n    if (IsValid())\r\n    {\r\n        // with custom curves, we can't just filter by weight\r\n        // also if you have custom curve with longer 0, you'll likely to pause montage during that blending time\r\n        // I think that is a bug. It still should move, the weight might come back later.\r\n        if (bPlaying)\r\n        {\r\n            // ... skip ...\r\n        }\r\n+       else\r\n+       {\r\n+ \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 HandleEvents(Position, Position, nullptr);\r\n+       }\r\n     }\r\n}"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The customer who reported this issue confirms that it can be fixed by calling HandleEvents() in a case where bPlaying is false."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "The ticket's information is being confirmed.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Needs Triage",
+      "id": "11013",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-276205",
+    "summary": "Large number of TagTracker errors present in Insights Trace viewer Log ",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20353",
+        "name": "UE - Foundation - Insights",
+        "description": "Issues relating to Unreal Insights"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When opening an insights viewer log, there is a large amount of TagTracker errors. Logs attached from Main and Release Branch."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Reproduced in Release-5.6 @ CL 42152923"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro: 5/5"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-239869",
+    "summary": "Rewind Debugger doesn't correctly match tracks in multiplayer games",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Rewind debugger currently assumes that the name of an actor on each client and the server will be the same, for the same actor."
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "In fact, for each player, on their local client, their actor is named with suffix _C_0, _"
+            },
+            {
+              "type": "text",
+              "text": "and the replicated character from the other client is named",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "_ _C_1"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "So when you select the _C_0 character in rewind debugger, you see tracks from two different characters."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "We need to use a different mechanism to find the characters that go with each other\u00a0"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-217950",
+    "summary": "Pose Search Schema changes in the MM editor is not updating the Asset Browser",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate: 5/5"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression: No these are new UX changes and Asset browser got added to the MM editor for 5.5"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.7MassMoveTo5.8",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-225122",
+    "summary": "SkipRedundantTransformUpdate causes control rig control actors to skip necessary transform update",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20581",
+        "name": "UE - Rendering - Architecture",
+        "description": "A catch-all for anything that doesn't fit another rendering architecture category. Use this component when you're not sure, e.g. issues related to texture and mesh streaming, skin cache, scene captures, virtual texturing etc."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Basically what is happening is that"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "if the actor is originally at\u00a0 X=100, and I do SetActorTransform X=0 at tick 1 and SetActorTransform back to x = 100 at tick2, it appears that only the X=0 is committed. The X=100 in tick 2 is skipped because it still sees that the FPrimitiveSceneProxy is still at X=100, probably due to gamethread read vs render thread write in FScene::UpdatePrimitiveTransformInternal(), that was introduced in "
+            },
+            {
+              "type": "text",
+              "text": "https://p4-swarm.epicgames.net/changes/16092533",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://p4-swarm.epicgames.net/changes/16092533"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.5MassMoveTo5.6",
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-213655",
+    "summary": "Inside the asset tab you can't add a blendspace 1D from the dropdown",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate: 3/3"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression: No the UI is new for the MM editor so there is no regression for this "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-239570",
+    "summary": "Add Tooltips to Visual Logger rewind debugger track",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "We'd like to have tooltips that show the description/comment for events in the visual logger tracks in rewind debugger"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11868?size=medium",
+      "name": "4 - Minor",
+      "id": "11006"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Ready for QA",
+      "id": "11066",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-235161",
+    "summary": "[UE 5.5] Editor Preferences - Plugins section displays \"Rewind Debugger\" category twice",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "How to Reproduce:",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "orderedList",
+          "attrs": {
+            "order": 1
+          },
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Launch RelTestB."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Enable the\u00a0Pose Search\u00a0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Plugin",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://stage.edc-dev.net/documentation/en-us/unreal-engine/working-with-plugins-in-unreal-engine"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Navigate in the Menu Bar to Edit > Plugins and locate the Pose Search Plugin in the Animation section, or use the Search Bar. Enable the Plugin and restart the editor."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Download the\u00a0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "Game Animation Sample Project",
+                      "marks": [
+                        {
+                          "type": "link",
+                          "attrs": {
+                            "href": "https://www.unrealengine.com/marketplace/en-US/product/game-animation-sample"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "\u00a0from the\u00a0Unreal Engine Marketplace."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Open Game Animation Sample Project."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "From Unreal Engine's main menu, go to Edit > Editor Preferences."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Scroll down to the Plugins section and locate the Rewind Debugger category."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Actual Result:",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "The Rewind Debugger category appears twice in the Plugins section, potentially due to the VisualLogger option being listed separately."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Expected Result:",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "The Plugins section under Editor Preferences displays a single Rewind Debugger category, with all related settings consolidated under one entry. No duplicate categories or split options (e.g., VisualLogger) are present."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "mediaSingle",
+          "attrs": {
+            "layout": "center"
+          },
+          "content": [
+            {
+              "type": "media",
+              "attrs": {
+                "type": "file",
+                "id": "4d6a5283-6034-4707-be4d-88b6a72c9551",
+                "collection": "",
+                "height": 183,
+                "width": 200
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11868?size=medium",
+      "name": "4 - Minor",
+      "id": "11006"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.5",
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "Editor",
+      "LQA",
+      "UI"
+    ]
+  },
+  {
+    "key": "UE-219722",
+    "summary": "Jitter on anim sequences compressed with ACL containing large scale on root",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20219",
+        "name": "UE - Anim - Runtime",
+        "description": "Issues related to core animation runtime, blending, anim graph nodes, anim instances, anim sequences"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The ACL codecs are generating jitter in the animations on the linked UDN.\u00a0 This may be related to the large scale that's being applied to the root bone in the skeleton.\u00a0 This appears to be a regression in 5.4."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-186410",
+    "summary": "Resizing the Rewind Debugger Details panel does not properly adjust when resizing with Pose Search track options in the panel",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Minor thing I noticed when using the Rewind Debugger Details panel; these were added in 5.3, so this isn't a regression.\u00a0"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11868?size=medium",
+      "name": "4 - Minor",
+      "id": "11006"
+    },
+    "status": {
+      "description": "The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/closed.png",
+      "name": "Closed",
+      "id": "6",
+      "statusCategory": {
+        "id": 3,
+        "key": "done",
+        "colorName": "green",
+        "name": "Done"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-171670",
+    "summary": "Root motion from montages does not get mirrored correctly",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A customer noticed that root motion did not mirror properly when using montages.\u00a0\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The issue is that the root motion mirroring code is only called from FAnimSync::TickAssetPlayerInstances .\u00a0\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The following code was suggested by the customer in \u00a0"
+            },
+            {
+              "type": "text",
+              "text": "UAnimInstance::Montage_Advance a{",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "}fter\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "MontageInstance->MontageSync_PostUpdate();{",
+              "marks": [
+                {
+                  "type": "em"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "}, A simplified version in another location might be more appropriate.\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "codeBlock",
+          "attrs": {
+            "language": "java"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "MontageInstance->MontageSync_PostUpdate();\r\nif(RootMotionParams != nullptr && !AnimInstanceProxy->Sync.GetUngroupedActivePlayersRead().IsEmpty())\r\n{\r\n   FAnimTickRecord TickRecord = AnimInstanceProxy->Sync.GetUngroupedActivePlayersRead()[0];\r\n   if (TickRecord.MirrorDataTable)\r\n   {\r\n      FTransform InTransform = RootMotionParams->GetRootMotionTransform();\r\n      if (bUsingBlendedRootMotion && !RootMotionBlendQueue.IsEmpty())\r\n      {\r\n         InTransform = RootMotionBlendQueue.Last().Transform;\r\n      }\r\n      FVector T = InTransform.GetTranslation();\r\n      T = FAnimationRuntime::MirrorVector(T, TickRecord.MirrorDataTable->MirrorAxis);\r\n      FQuat Q = InTransform.GetRotation();\r\n      Q = FAnimationRuntime::MirrorQuat(Q, TickRecord.MirrorDataTable->MirrorAxis);\r\n      FVector S = InTransform.GetScale3D();\r\n      FTransform MirroredTransform = FTransform(Q, T, S);\r\n      if (bUsingBlendedRootMotion && !RootMotionBlendQueue.IsEmpty())\r\n      {\r\n         // Defer blending in our root motion until after we get our slot weight updated\r\n         FQueuedRootMotionBlend& LastQueuedRootMotionBlend = RootMotionBlendQueue.Last();\r\n         LastQueuedRootMotionBlend.Transform = MirroredTransform;\r\n      }\r\n      else\r\n      {\r\n         RootMotionParams->Set(MirroredTransform);\r\n      }\r\n   }\r\n}"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "See attached diff for the full set of changes"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-250687",
+    "summary": "Trait Stacks don't update properly in the node when moved in the Details Panel ",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20203",
+        "name": "UE - Anim - Runtime - UAF",
+        "description": "Issues related to the animation runtime under the unreal animation framework"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate: 3/3"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression: No I don't think the correlation between the editor and the node has been brought up before so it wasn't working in 5.5"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-208066",
+    "summary": "Placing a section at the end of montage is not properly handled",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Placing a \u00a0section at the very end of a montage with no duration or animation assigned after it is not properly handled.\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Normally sections with 0 length are skipped and search continues since they do not pass the check for "
+            },
+            {
+              "type": "text",
+              "text": "UAnimMontage::IsWithinPos()",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ",\u00a0**\u00a0this is true for all cases except if the montage section is at the end (since the search passes before continuing reaching the last section)."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Therefore this causes issues when querying the current section and/or breaks a montage loop determined by linking sections together since the last section is never reached."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Therefore we need to either issue a warning when placing a section at the very end or properly handle that edge case."
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-216247",
+    "summary": "Linked ABP layer stomps over main ABP in Rewind Debugger",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "When a linked anim graph gets brought in through a linked anim interface, it stomps over main abp in rewind debugger with no way of getting main abp to show up again"
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "Needs More Info",
+      "id": "11049",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-227954",
+    "summary": "AnimNext: Crash when using a bad ref pose on RemapPose",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20203",
+        "name": "UE - Anim - Runtime - UAF",
+        "description": "Issues related to the animation runtime under the unreal animation framework"
+      }
+    ],
+    "description": null,
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11866?size=medium",
+      "name": "2 - Major",
+      "id": "11004"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-152514",
+    "summary": "Untagged allocations related to Anim - Gameplay component present in traces",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression - No, reproducible on //UE5/Release-5.0 CL 19684833"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate - 3/3"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Currently there are untagged allocs in Editor, Standalone Game and Packaged Game traces."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The amount of Untagged allocs related to Anim -\u00a0Gameplay:"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "attrs": {
+            "isNumberColumnEnabled": false,
+            "layout": "default"
+          },
+          "content": [
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Function (Callstack) group contain",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Editor",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Standalone",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Package",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "PoseSearch"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "26"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "26"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "ContextualAnimation"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "19"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "19"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "PoseSearchEditor"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "14"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "9"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "PoseSearch"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "MotionTrajectory"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "4"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "4"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "ContextualAnimationEditor"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Function (Callstack) group contain",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Editor",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Standalone",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Package",
+                          "marks": [
+                            {
+                              "type": "strong"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "AnimationWarpingRuntime"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "8"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "8"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "MotionWarping"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "6"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "6"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "AnimationModifierLibrary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "AnimationWarpingEditor"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "2"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "DynamicPlayRate"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "AnimationWarping"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "FMotionWarpingModule"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "-"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "attrs": {},
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "\u00a0"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Note:",
+              "marks": [
+                {
+                  "type": "strong"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "\u00a0Z_Construct_ from Packaged Game trace related to Anim - Gameplay will be covered in scope of\u00a0"
+            },
+            {
+              "type": "inlineCard",
+              "attrs": {
+                "url": "https://epicgames.atlassian.net/browse/UE-151876#icft=UE-151876"
+              }
+            },
+            {
+              "type": "text",
+              "text": "\u00a0for more details see\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "Untagged allocs - By Components",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://docs.google.com/spreadsheets/d/1aViW7Mw4EHFnpZIsvN5ykKVC45os6ouYtTLgRa9auP0/edit?usp=sharing"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "-\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "Helpfull doc for fix",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://docs.google.com/document/d/1plBNh-f7cauvp3J2azyWIBzC0opeisRiqi9ZhzW4H6M/edit"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Traces that were used to collect this information:"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "-\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "Editor Trace (A=112)",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://drive.google.com/file/d/10QWHafjNB0n7kElPP2JM8rLVTqp4OVcm/view?usp=sharing"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "-\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "Standalone Game Trace (A=119)",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://drive.google.com/file/d/1c7GQnjUjzgUfheKBYsscG9R6DF0CQ9tQ/view?usp=sharing"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "-\u00a0"
+            },
+            {
+              "type": "text",
+              "text": "Packaged Game Trace (A=19)",
+              "marks": [
+                {
+                  "type": "link",
+                  "attrs": {
+                    "href": "https://drive.google.com/file/d/1ElVVZ-gyapL8LPsgOmK-_dYQzX4Q86Io/view?usp=sharing"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "InsightsUntaggedAllocs"
+    ]
+  },
+  {
+    "key": "UE-221827",
+    "summary": "Rewind Debugger doesn't have a denomination for Clients, but has the server",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate: 3/3"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression: No, this is new to the feature to have the multiple server and client options working in the debugger on the sample"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "If I use this in the standalone method I don't get the server specification in the debugger "
+            },
+            {
+              "type": "hardBreak"
+            },
+            {
+              "type": "text",
+              "text": "If I use this in the listen server I get no server specification in the debugger"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Looks like it just duplicates the character for the client in the debugger. "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-213783",
+    "summary": "Pose Search Database/Schema search filters not visually updating when changed",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20541",
+        "name": "UE - Anim - Gameplay",
+        "description": "Issues relating to Locomotion, Contextual Animations, Root Motion, Intertial Blending. Do not use this component for gameplay framework related issues, that is a different team and have their own component; for eg - Gameplay."
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Regression is set to No due to this issue being present in //UE5/Release-5.4"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Repro Rate 4/4"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This behavior is not present in all search filter panels, but I have seen it in the Pose Search one and the Niagara preset search. I believe this re-used code that is also affecting the Niagara search filters as shown in me previous rejection of this issue: "
+            },
+            {
+              "type": "inlineCard",
+              "attrs": {
+                "url": "https://epicgames.atlassian.net/browse/UE-207010#icft=UE-207010"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0"
+    ]
+  },
+  {
+    "key": "UE-250071",
+    "summary": "Crash occurs when using the a.VisualizeLODs command with an AnimNext character in the level",
+    "issuetype": {
+      "id": "11004",
+      "description": "A problem which impairs or prevents the functions of the product.",
+      "iconUrl": "https://api.atlassian.com/ex/jira/9859ce76-d6ce-4f45-bb86-f8ae13a577a8/rest/api/2/universal_avatar/view/type/issuetype/avatar/11723?size=medium",
+      "name": "Bug",
+      "subtask": false,
+      "avatarId": 11723,
+      "hierarchyLevel": 0
+    },
+    "components": [
+      {
+        "id": "20203",
+        "name": "UE - Anim - Runtime - UAF",
+        "description": "Issues related to the animation runtime under the unreal animation framework"
+      }
+    ],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A crash will occur when using the \"a.visualizeLODs 1\" cvar with an AnimNext character active in the level. "
+            }
+          ]
+        }
+      ]
+    },
+    "fixVersions": [
+      {
+        "id": "47516",
+        "description": "Unreal Engine 6.0 Release",
+        "name": "6.0",
+        "archived": false,
+        "released": false
+      }
+    ],
+    "priority": {
+      "iconUrl": "https://epicgames.atlassian.net/rest/api/2/universal_avatar/view/type/priority/avatar/11867?size=medium",
+      "name": "3 - Normal",
+      "id": "11005"
+    },
+    "status": {
+      "description": "",
+      "iconUrl": "https://epicgames.atlassian.net/images/icons/statuses/generic.png",
+      "name": "To Do",
+      "id": "11002",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray",
+        "name": "To Do"
+      }
+    },
+    "labels": [
+      "5.6MassMoveTo5.7",
+      "5.9MassMoveTo6.0",
+      "crash"
+    ]
+  }
+]

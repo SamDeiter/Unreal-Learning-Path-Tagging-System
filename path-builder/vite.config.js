@@ -12,11 +12,12 @@ try {
 }
 const buildTime = new Date().toISOString();
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   base: "/Unreal-Learning-Path-Tagging-System/",
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   define: {
     __BUILD_HASH__: JSON.stringify(commitHash),
     __BUILD_TIME__: JSON.stringify(buildTime),

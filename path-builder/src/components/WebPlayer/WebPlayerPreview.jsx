@@ -18,7 +18,31 @@ import {
 import { fetchAugmentationsForSteps } from "../../services/augmentationContentService";
 import { generateQuizForPath } from "../../services/quizService";
 import LearnerView from "../LearnerView/LearnerView";
+import { EngineDeltaChip } from "../EngineDeltaChip/EngineDeltaChip";
+import { VideoSeries } from "../VideoSeries/VideoSeries";
+import { useUserEngineVersion } from "../../hooks/useUserEngineVersion";
+import videoEngineVersions from "../../data/video_engine_versions.json";
 import "./WebPlayerPreview.css";
+
+/** Resolve the videoId used by engineRefMentions across V1/V2 step shapes. */
+function resolveVideoCode(step) {
+  if (!step) return null;
+  const v = step.video || {};
+  return (
+    v.youtubeId
+    || v.courseCode
+    || v.code
+    || step.source?.id
+    || step.source?.code
+    || step.source?.docId
+    || step.code
+    || step.courseCode
+    || step.docId
+    || step._originalSegment?.id
+    || step._originalSegment?.code
+    || null
+  );
+}
 
 // ── Section Classification ─────────────────────────────────────────
 
@@ -149,6 +173,7 @@ export default function WebPlayerPreview({
   courses,
   onClose,
 }) {
+  const [userVersion] = useUserEngineVersion();
   const pathTitle = pathResult?.query
     ? `UE5 Learning Path: ${pathResult.query.substring(0, 60)}`
     : "Learning Path";
@@ -543,58 +568,27 @@ export default function WebPlayerPreview({
                       </div>
                     )}
 
-                    {/* Video embed */}
-                    {current.video && (
+                    {/* Video embed — series-aware. Renders multi-video courses
+                        as a numbered playlist; falls back to single-video for
+                        legacy shapes that only carry `current.video`. */}
+                    {(Array.isArray(current.videos) && current.videos.length > 0) || current.video ? (
                       <div className="wp-video-section">
                         <h2>🎬 Video Reference</h2>
-                        <div className="wp-video-embed">
-                          {current.video.driveId ? (
-                            <iframe
-                              src={`https://drive.google.com/file/d/${current.video.driveId}/preview`}
-                              allow="autoplay"
-                              allowFullScreen
-                              title={current.video.videoTitle || current.title}
-                            />
-                          ) : current.video.youtubeId ? (
-                            <iframe
-                              src={`https://www.youtube-nocookie.com/embed/${current.video.youtubeId}?rel=0&modestbranding=1${current.video.startSec ? `&start=${current.video.startSec}` : ""}`}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              title={current.video.videoTitle || current.title}
-                            />
-                          ) : null}
-                        </div>
-                        <div className="wp-video-meta">
-                          {current.video.videoTitle && (
-                            <span>{current.video.videoTitle}</span>
-                          )}
-                          {(current.video.startSec > 0 || current.video.endSec > 0) && (
-                            <span className="wp-timestamp">
-                              ⏱ {formatTime(current.video.startSec)} –{" "}
-                              {formatTime(current.video.endSec)}
-                            </span>
-                          )}
-                          {current.video.driveId && (
-                            <a
-                              href={`https://drive.google.com/file/d/${current.video.driveId}/view`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Open in Drive ↗
-                            </a>
-                          )}
-                          {current.video.youtubeId && (
-                            <a
-                              href={`https://www.youtube.com/watch?v=${current.video.youtubeId}${current.video.startSec ? `&t=${current.video.startSec}` : ""}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Watch on YouTube ↗
-                            </a>
-                          )}
-                        </div>
+                        <VideoSeries
+                          videos={
+                            Array.isArray(current.videos) && current.videos.length > 0
+                              ? current.videos
+                              : [current.video]
+                          }
+                          fallbackTitle={current.title}
+                        />
+                        {(current.video?.startSec > 0 || current.video?.endSec > 0) && (
+                          <div className="wp-timestamp">
+                            ⏱ {formatTime(current.video.startSec)} – {formatTime(current.video.endSec)}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ) : null}
 
                     {/* ── Prerequisites (shown first) ── */}
                     {current.prerequisites?.length > 0 && (
@@ -608,6 +602,23 @@ export default function WebPlayerPreview({
                       </details>
                     )}
 
+                    {/* Version-delta chip — verified engineRef mentions for
+                        this step. Renders nothing if no deltas resolve.
+                        Falls back to title lookup when code is missing
+                        (V1 path steps strip the source identifier). */}
+                    {(() => {
+                      const code = resolveVideoCode(current);
+                      const ver = code ? videoEngineVersions[code] || null : null;
+                      return (
+                        <EngineDeltaChip
+                          videoCode={code}
+                          videoTitle={current?.title}
+                          videoVersion={ver}
+                          userVersion={userVersion}
+                        />
+                      );
+                    })()}
+
                     {/* Step card */}
                     <div className="wp-step-card">
                       <div className="wp-step-meta">
@@ -615,6 +626,9 @@ export default function WebPlayerPreview({
                           {current.category}
                         </span>
                         {current.source && <span>Source: {current.source}</span>}
+                        {current.sectionName && (
+                          <span>Section: {current.sectionName}</span>
+                        )}
                       </div>
                       {current.summary ? (
                         <p className="wp-step-summary">{current.summary}</p>
@@ -622,6 +636,36 @@ export default function WebPlayerPreview({
                         <p className="wp-no-content">
                           <em>No content summary available for this step.</em>
                         </p>
+                      )}
+
+                      {current.outcomes?.length > 0 && (
+                        <div className="wp-step-outcomes">
+                          <h4 className="wp-step-outcomes__title">You&apos;ll be able to:</h4>
+                          <ul>
+                            {current.outcomes.map((o, i) => (
+                              <li key={i}>{o}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {current.displayTags?.length > 0 && (
+                        <div className="wp-step-tags">
+                          {current.displayTags.map((t) => (
+                            <span key={t} className="wp-step-tag">{t}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      {current.sourceUrl && (
+                        <a
+                          className="wp-step-source-link"
+                          href={current.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          📄 Read full documentation ↗
+                        </a>
                       )}
                     </div>
 

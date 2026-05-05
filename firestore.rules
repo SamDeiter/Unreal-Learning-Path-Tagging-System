@@ -257,6 +257,27 @@ service cloud.firestore {
       allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
     }
 
+    // Engine refs — version-delta catalog. Drafts are written by the extractor
+    // (Admin SDK); only "verified" entries are visible to learners. Client list
+    // queries MUST include where("status","==","verified") — Firestore rules
+    // can't filter results, only validate them, so an unfiltered list query
+    // is rejected outright with permission-denied even when matching docs exist.
+    match /engineRefs/{refId} {
+      allow read: if isAdmin()
+                  || (request.auth != null && resource.data.status == "verified");
+      allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
+    }
+
+    // Engine ref mentions — links engine refs to videos/steps. Visibility is
+    // governed by a denormalized `refStatus` field set at write time so list
+    // queries don't need cross-doc gets. Same query constraint as engineRefs:
+    // client must include where("refStatus","==","verified").
+    match /engineRefMentions/{mentionId} {
+      allow read: if isAdmin()
+                  || (request.auth != null && resource.data.refStatus == "verified");
+      allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
+    }
+
     // Default deny everything else
     match /{document=**} {
       allow read, write: if false;

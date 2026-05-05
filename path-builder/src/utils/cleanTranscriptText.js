@@ -39,7 +39,9 @@ export function cleanTranscriptText(text) {
     // Individual "Unreal Engine X.XX" mentions (catches 4.27, 5.7, etc.)
     /Unreal Engine\s+\d+\.\d+(?: Documentation)?/gi,
     /Epic Developer Community/gi,
-    /Table of Contents/gi,
+    // Tolerant Table-of-Contents match: scraped text often gets truncated
+    // mid-word ("Table of Conte"), so match any prefix of "Contents".
+    /Table of Cont(?:ents?|ent|en|e)?/gi,
     /##?\s*What's New\??/gi,
     // Community / nav links that leak into scraped text
     /Ask questions and help your peers\s*Developer Forums/gi,

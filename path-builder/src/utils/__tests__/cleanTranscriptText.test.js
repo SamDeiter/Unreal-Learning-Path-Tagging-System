@@ -107,6 +107,27 @@ describe("cleanTranscriptText", () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
+  // ── Docs scrape boilerplate ──────────────────────────────────────
+
+  it("strips truncated 'Table of Cont…' from scraped docs descriptions", () => {
+    // Real failing case: Epic docs scrape returns title + nav + truncated TOC.
+    // The full "Table of Contents" was already handled; this covers the
+    // truncated forms that result from upstream char-limit truncation.
+    const input = "One File Per Actor in Unreal Engine | Unreal Engine 5.7 Documentation | Epic Developer Community Table of Conte";
+    const result = cleanTranscriptText(input);
+    expect(result).not.toContain("Table of");
+    expect(result).not.toContain("Conte");
+    expect(result).not.toContain("Documentation");
+    expect(result).not.toContain("Epic Developer Community");
+  });
+
+  it("strips both full and partial 'Table of Cont(ents)' forms", () => {
+    expect(cleanTranscriptText("Intro paragraph about lighting. Table of Contents follows."))
+      .toContain("Intro paragraph about lighting.");
+    expect(cleanTranscriptText("Lumen overview text here. Table of Conten")).
+      not.toContain("Table of");
+  });
+
   // ── Combined patterns ────────────────────────────────────────────
 
   it("handles multiple filler patterns in one string", () => {

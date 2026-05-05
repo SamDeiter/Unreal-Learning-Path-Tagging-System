@@ -15,6 +15,10 @@
  */
 
 import { useState, forwardRef } from "react";
+import { EngineDeltaChip } from "../EngineDeltaChip/EngineDeltaChip";
+import { VideoSeries } from "../VideoSeries/VideoSeries";
+import { useUserEngineVersion } from "../../hooks/useUserEngineVersion";
+import videoEngineVersions from "../../data/video_engine_versions.json";
 import "./LessonCard.css";
 
 /** Format seconds → mm:ss */
@@ -39,6 +43,7 @@ const LessonCard = forwardRef(function LessonCard(
   ref
 ) {
   const [manualExpand, setManualExpand] = useState(true);
+  const [userVersion] = useUserEngineVersion();
 
   // When focused, always expanded; otherwise user-controlled
   const isExpanded = isFocused || manualExpand;
@@ -51,6 +56,25 @@ const LessonCard = forwardRef(function LessonCard(
   const video = step.video || null;
   const hasVideo = video && (video.driveId || video.youtubeId);
   const isVideoStep = step.completionType === "watch" || step.source === "video" || !!step.video;
+
+  // Resolve the videoId used by engineRefMentions: try every plausible field
+  // across video-, doc-, and segment-shaped steps.
+  const videoCode =
+    video?.youtubeId
+    || video?.courseCode
+    || video?.code
+    || step.source?.id
+    || step.source?.code
+    || step.source?.docId
+    || step.code
+    || step.courseCode
+    || step._originalSegment?.id
+    || step._originalSegment?.code
+    || null;
+  // engineVersion lookup may return null for doc steps — that's fine, the
+  // useEngineDeltas hook treats null as "unknown" and surfaces changes
+  // anyway when the user's version is at-or-past the change's `to`.
+  const videoVersion = videoCode ? videoEngineVersions[videoCode] || null : null;
 
   return (
     <div
@@ -81,40 +105,34 @@ const LessonCard = forwardRef(function LessonCard(
         </div>
       </div>
 
+      {/* Version-delta chip — surfaces verified engineRef mentions for this
+          item. Both videoCode and videoTitle are tried; videoVersion may be
+          null for docs; the resolver handles that. */}
+      <EngineDeltaChip
+        videoCode={videoCode}
+        videoTitle={step.title}
+        videoVersion={videoVersion}
+        userVersion={userVersion}
+      />
+
       {/* ── Body ── */}
       {isExpanded && (
         <div className="lesson-card__body">
-          {/* Inline Video — FIRST for watch steps */}
-          {hasVideo && isVideoStep && (
+          {/* Inline Video — FIRST for watch steps. Renders as a series when
+              the step carries a `videos` array (multi-lesson courses), or as
+              a single embed otherwise. */}
+          {isVideoStep && ((Array.isArray(step.videos) && step.videos.length > 0) || hasVideo) && (
             <section className="lesson-card__section lesson-card__section--video">
               <h4 className="lesson-card__section-title">🎬 Video</h4>
-              <div className="lesson-card__video">
-                {video.driveId ? (
-                  <iframe
-                    src={`https://drive.google.com/file/d/${video.driveId}/preview`}
-                    allow="autoplay"
-                    allowFullScreen
-                    title={video.videoTitle || step.title}
-                    className="lesson-card__video-frame"
-                  />
-                ) : video.youtubeId ? (
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0&modestbranding=1${video.startSec ? `&start=${video.startSec}` : ""}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={video.videoTitle || step.title}
-                    className="lesson-card__video-frame"
-                  />
-                ) : null}
-                <div className="lesson-card__video-meta">
-                  {video.videoTitle && <span>{video.videoTitle}</span>}
-                  {(video.startSec > 0 || video.endSec > 0) && (
-                    <span className="lesson-card__video-timestamp">
-                      ⏱ {formatTime(video.startSec)} – {formatTime(video.endSec)}
-                    </span>
-                  )}
+              <VideoSeries
+                videos={Array.isArray(step.videos) && step.videos.length > 0 ? step.videos : [video]}
+                fallbackTitle={step.title}
+              />
+              {(video?.startSec > 0 || video?.endSec > 0) && (
+                <div className="lesson-card__video-timestamp">
+                  ⏱ {formatTime(video.startSec)} – {formatTime(video.endSec)}
                 </div>
-              </div>
+              )}
             </section>
           )}
 

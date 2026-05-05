@@ -7,6 +7,7 @@
 import { signOutUser } from "../../services/googleAuthService";
 import { PRIMARY_TABS, SECONDARY_TABS, ANALYTICS_SUBTABS, PATH_BUILDER_TABS } from "../../domain/tabDefinitions";
 import AccessibilityPanel from "../Settings/AccessibilityPanel";
+import { EngineVersionPicker } from "../EngineVersionPicker/EngineVersionPicker";
 
 export default function AppSidebar({
   tabs,
@@ -154,6 +155,7 @@ export default function AppSidebar({
 
       {currentUser && (
         <div className="sidebar-user">
+          <EngineVersionPicker />
           <div className="sidebar-user-info">
             {currentUser.photoURL && (
               <img
