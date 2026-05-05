@@ -18,6 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Fix a Problem (labeled "Tutor" in sidebar)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // The rich ProblemInput is hidden behind a <details> summary in the new chat UI
+    const detailsSummary = page.locator("summary").filter({ hasText: /Attach a screenshot/ });
+    await detailsSummary.click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
