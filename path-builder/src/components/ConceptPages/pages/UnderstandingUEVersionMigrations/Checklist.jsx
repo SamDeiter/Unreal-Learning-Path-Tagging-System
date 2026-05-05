@@ -85,8 +85,8 @@ function deriveActionParts(ref) {
   ];
 }
 
-function ActionText({ ref, checked }) {
-  const parts = deriveActionParts(ref);
+function ActionText({ delta, checked }) {
+  const parts = deriveActionParts(delta);
   return (
     <span
       className={`font-body-base text-code-sm break-words min-w-0 ${
@@ -122,7 +122,7 @@ function ChecklistItem({ refItem, checked, onToggle, videoCount }) {
         className="form-checkbox bg-background border-outline-variant text-primary rounded-sm w-5 h-5 shrink-0"
       />
       <span className="flex-1 min-w-0 break-words">
-        <ActionText ref={refItem} checked={checked} />
+        <ActionText delta={refItem} checked={checked} />
       </span>
       <span className="hidden sm:inline-flex shrink-0 items-center gap-1.5">
         <span className="rounded-full bg-surface-container-high px-2 py-0.5 font-label-caps text-[0.65rem] tracking-widest font-bold text-on-surface-variant">
@@ -144,6 +144,7 @@ export function Checklist({ refs = [], userVersion = "5.7" }) {
   const [confirmingReset, setConfirmingReset] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage hydration on mount; standard pattern
     setChecks(readStorage());
     setHydrated(true);
   }, []);

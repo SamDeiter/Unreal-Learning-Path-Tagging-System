@@ -66,6 +66,7 @@ export function Simulator({ scripts = [], refs = [] }) {
 
   useEffect(() => {
     if (!activeScript) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fade transition on script switch
     setFading(true);
     setStepIndex(0);
     const t = setTimeout(() => setFading(false), 180);

@@ -40,6 +40,7 @@ function focusedWindow(userVersion) {
   return window.slice(winStart, winStart + 4);
 }
 
+// eslint-disable-next-line no-unused-vars
 function StatTile({ Icon, value, label, accent, border, glow, colSpan }) {
   return (
     <div
