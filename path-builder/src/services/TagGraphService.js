@@ -368,7 +368,7 @@ class TagGraphService {
     }
 
     // Get optimized course metadata (pre-built Sets and suffix maps)
-    const { allCourseTags, tagSet: courseTagSet, suffixMap: courseSuffixMap } = this._getCourseMetadata(course);
+    const { tagSet: courseTagSet, suffixMap: courseSuffixMap } = this._getCourseMetadata(course);
 
     // Deduplicate target tags
     const uniqueTargets = [...new Set(targetTagIds.map(t => t.toLowerCase()))];
@@ -574,7 +574,7 @@ class TagGraphService {
       if (suffix) suffixMap.set(suffix, tag);
     }
 
-    meta = { allCourseTags, tagSet, suffixMap };
+    meta = { tagSet, suffixMap };
     this._courseMetadataCache.set(course, meta);
     return meta;
   }
