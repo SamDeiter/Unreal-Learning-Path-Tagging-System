@@ -15,9 +15,13 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Tutor (formerly Fix a Problem / Learn Why)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // The advanced input (screenshot/log) is now in an expandable details section
+    await page.getByText(/Attach a screenshot/i).click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 

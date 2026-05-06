@@ -13,6 +13,7 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Feedback/FeedbackModal.css", () => ({}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +175,41 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. FeedbackModal
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import FeedbackModal from "../components/Feedback/FeedbackModal";
+
+describe("FeedbackModal", () => {
+  const user = { uid: "test-user", email: "test@example.com" };
+  const onClose = vi.fn();
+
+  it("should render when isOpen is true", () => {
+    render(<FeedbackModal isOpen={true} onClose={onClose} user={user} />);
+    expect(screen.getByText(/Send Feedback/i)).toBeTruthy();
+  });
+
+  it("should display character count", () => {
+    render(<FeedbackModal isOpen={true} onClose={onClose} user={user} />);
+    expect(screen.getByText("0/2000")).toBeTruthy();
+  });
+
+  it("should have accessibility attributes on type buttons", () => {
+    render(<FeedbackModal isOpen={true} onClose={onClose} user={user} />);
+    const bugBtn = screen.getByRole("button", { name: /Bug Report/i });
+    expect(bugBtn.getAttribute("aria-pressed")).toBe("true"); // Default is bug
+
+    const featureBtn = screen.getByRole("button", { name: /Feature Request/i });
+    expect(featureBtn.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("should show required indicator for description", () => {
+    render(<FeedbackModal isOpen={true} onClose={onClose} user={user} />);
+    expect(screen.getByText("(required)")).toBeTruthy();
+    expect(screen.getByText("(required)").classList.contains("sr-only")).toBe(true);
   });
 });
