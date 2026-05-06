@@ -11,6 +11,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const { checkIsAdmin } = require("../utils/adminGuard");
 
 const GITHUB_OWNER = "SamDeiter";
 const GITHUB_REPO = "Unreal-Learning-Path-Tagging-System";
@@ -27,9 +28,9 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+    // Require admin authentication
+    if (!checkIsAdmin(request.auth)) {
+      throw new HttpsError("permission-denied", "Only admins can trigger a scrape.");
     }
 
     // Get engine from request data (default to UE5)
