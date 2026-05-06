@@ -18,6 +18,10 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (formerly Fix a Problem / Learn Why)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // The advanced input (screenshot/log) is now in an expandable details section
+    await page.getByText(/Attach a screenshot/i).click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
