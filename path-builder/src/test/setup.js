@@ -7,6 +7,7 @@ import "@testing-library/jest-dom";
 globalThis.import = {
   meta: {
     env: {
+      VITE_E2E_BYPASS: "true",
       VITE_FIREBASE_API_KEY: "test-api-key",
       VITE_FIREBASE_AUTH_DOMAIN: "test.firebaseapp.com",
       VITE_FIREBASE_PROJECT_ID: "test-project",
