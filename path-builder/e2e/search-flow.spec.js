@@ -28,7 +28,7 @@ test.describe("Search flow", () => {
   });
 
   test("should show the Send button", async ({ page }) => {
-    const submitBtn = page.getByRole("button", { name: /Send/i });
+    const submitBtn = page.getByRole("button", { name: "Send", exact: true });
     await expect(submitBtn).toBeVisible();
   });
 
@@ -39,7 +39,7 @@ test.describe("Search flow", () => {
     const textarea = page.getByLabel("Chat input");
     await textarea.fill("How to fix black screen in UE5");
 
-    const submitBtn = page.getByRole("button", { name: /Send/i });
+    const submitBtn = page.getByRole("button", { name: "Send", exact: true });
     await submitBtn.click();
 
     await page.waitForTimeout(3_000);
