@@ -143,6 +143,26 @@ describe("DiagnosisLoader", () => {
     render(<DiagnosisLoader />);
     expect(screen.getByText(/Analyzing your problem/)).toBeTruthy();
   });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<DiagnosisLoader />);
+    const loaderCard = container.querySelector(".dx-loader-card");
+    expect(loaderCard.getAttribute("role")).toBe("status");
+    expect(loaderCard.getAttribute("aria-live")).toBe("polite");
+
+    const progressBar = container.querySelector(".dx-progress-bar");
+    expect(progressBar.getAttribute("role")).toBe("progressbar");
+    expect(progressBar.getAttribute("aria-valuenow")).toBe("1");
+    expect(progressBar.getAttribute("aria-valuemin")).toBe("1");
+    expect(progressBar.getAttribute("aria-valuemax")).toBe("3");
+    expect(progressBar.getAttribute("aria-valuetext")).toBe("Analyzing your problem...");
+
+    const spinner = container.querySelector(".dx-loader-spinner");
+    expect(spinner.getAttribute("aria-hidden")).toBe("true");
+
+    const phaseIcon = container.querySelector(".dx-phase-icon");
+    expect(phaseIcon.getAttribute("aria-hidden")).toBe("true");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
