@@ -1,0 +1,3 @@
+## 2026-05-08 - TagGraphService scoreCourseRelevance optimization
+**Learning:** In the `path-builder` application, the primary bottleneck for course search is the tag-graph scoring fallback. Repeated BFS expansions and string-based suffix matching for thousands of courses were causing significant overhead. Identity-based caching using `WeakMap` for course metadata and `Map` for static query tag expansions provides a massive speedup.
+**Action:** Always use `WeakMap` for caching properties of large data objects (like courses) and separate static graph traversal from the hot matching loop in batch scoring operations.
