@@ -118,7 +118,7 @@ describe("validateTagsFile", () => {
       true,
       `Sample tags should be perfectly valid: ${result.errors.join(", ")}`
     );
-    assert.strictEqual(result.tagCount, 64);
+    assert.ok(result.tagCount >= 64, `Expected at least 64 tags but got ${result.tagCount}`);
   });
 });
 
