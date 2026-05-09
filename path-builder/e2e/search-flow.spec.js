@@ -15,20 +15,20 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Fix a Problem (Tutor tab)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+    await page.getByLabel("Chat input").waitFor({ timeout: 5_000 });
   });
 
   test("should accept a search query", async ({ page }) => {
-    const textarea = page.getByLabel("Problem description");
+    const textarea = page.getByLabel("Chat input");
     await textarea.fill("Lumen reflections flickering in my level");
     await expect(textarea).toHaveValue(/Lumen reflections/);
   });
 
-  test("should show the Get Diagnosis button", async ({ page }) => {
-    const submitBtn = page.getByRole("button", { name: /Get Diagnosis/i });
+  test("should show the Send button", async ({ page }) => {
+    const submitBtn = page.locator("button.chat-input-send");
     await expect(submitBtn).toBeVisible();
   });
 
@@ -36,10 +36,10 @@ test.describe("Search flow", () => {
     const errors = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    const textarea = page.getByLabel("Problem description");
+    const textarea = page.getByLabel("Chat input");
     await textarea.fill("How to fix black screen in UE5");
 
-    const submitBtn = page.getByRole("button", { name: /Get Diagnosis/i });
+    const submitBtn = page.locator("button.chat-input-send");
     await submitBtn.click();
 
     await page.waitForTimeout(3_000);
