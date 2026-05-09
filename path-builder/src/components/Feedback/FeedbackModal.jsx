@@ -180,9 +180,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 {type === "bug"
                   ? "Describe the issue and steps to reproduce:"
                   : "Tell us about your suggestion:"}
-                <span className="required-star" aria-hidden="true">
-                  *
-                </span>
+                <span className="required-star" aria-hidden="true">*</span>
                 <span className="sr-only">(required)</span>
               </label>
               <textarea
@@ -199,12 +197,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 maxLength={2000}
                 aria-describedby="feedback-char-count"
               />
-              <div
-                id="feedback-char-count"
-                className="char-count"
-                role="status"
-                aria-live="polite"
-              >
+              <div id="feedback-char-count" className="char-count" role="status" aria-live="polite">
                 {description.length} / 2000 characters
               </div>
             </div>
