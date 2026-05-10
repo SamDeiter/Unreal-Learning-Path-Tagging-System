@@ -148,11 +148,12 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
               <p>Found a bug or have an idea? Let us know.</p>
             </div>
 
-            <div className="feedback-type-selector">
+            <div className="feedback-type-selector" role="group" aria-label="Feedback type">
               <button
                 type="button"
                 className={`type-btn ${type === "bug" ? "active" : ""}`}
                 onClick={() => setType("bug")}
+                aria-pressed={type === "bug"}
               >
                 <Bug size={16} /> Bug Report
               </button>
@@ -160,6 +161,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 type="button"
                 className={`type-btn ${type === "feature" ? "active" : ""}`}
                 onClick={() => setType("feature")}
+                aria-pressed={type === "feature"}
               >
                 <Lightbulb size={16} /> Feature Request
               </button>
@@ -167,6 +169,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 type="button"
                 className={`type-btn ${type === "general" ? "active" : ""}`}
                 onClick={() => setType("general")}
+                aria-pressed={type === "general"}
               >
                 <MessageSquare size={16} /> General
               </button>
@@ -175,8 +178,10 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
             <div className="feedback-form-group">
               <label htmlFor="feedback-desc">
                 {type === "bug"
-                  ? "Describe the issue and steps to reproduce:"
-                  : "Tell us about your suggestion:"}
+                  ? "Describe the issue and steps to reproduce"
+                  : "Tell us about your suggestion"}
+                <span className="required-star" aria-hidden="true" style={{ color: "#ef4444", marginLeft: "2px" }}>*</span>
+                <span style={{ position: "absolute", width: "1px", height: "1px", padding: "0", margin: "-1px", overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", borderWidth: "0" }}>(required)</span>:
               </label>
               <textarea
                 id="feedback-desc"
@@ -189,7 +194,11 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 }
                 required
                 rows={5}
+                aria-describedby="feedback-char-count"
               />
+              <div id="feedback-char-count" style={{ fontSize: "0.75rem", color: "#6b7280", textAlign: "right", marginTop: "0.25rem" }} role="status" aria-live="polite">
+                {description.length} characters
+              </div>
             </div>
 
             <div className="feedback-form-group">
@@ -233,7 +242,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
 
             <div className="feedback-actions">
               <button type="submit" className="feedback-submit" disabled={isSubmitting}>
-                {isSubmitting ? "Uploading..." : "Submit Feedback"}
+                {isSubmitting ? "Submitting..." : "Submit Feedback"}
               </button>
             </div>
           </form>
