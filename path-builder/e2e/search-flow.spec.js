@@ -15,10 +15,13 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Fix a Problem (Tutor tab)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+
+    // Reveal the ProblemInput fields (hidden by default in details block)
+    await page.getByText("Attach a screenshot or error log").click();
+    await page.getByLabel("Problem description").waitFor({ state: "visible", timeout: 5_000 });
   });
 
   test("should accept a search query", async ({ page }) => {

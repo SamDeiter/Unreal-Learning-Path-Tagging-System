@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { X, Upload, MessageSquare, AlertCircle, CheckCircle, Bug, Lightbulb } from "lucide-react";
+import {
+  X,
+  Upload,
+  MessageSquare,
+  AlertCircle,
+  CheckCircle,
+  Bug,
+  Lightbulb,
+  Loader2,
+} from "lucide-react";
 import "./FeedbackModal.css";
 
 import { devLog } from "../../utils/logger";
@@ -148,11 +157,12 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
               <p>Found a bug or have an idea? Let us know.</p>
             </div>
 
-            <div className="feedback-type-selector">
+            <div className="feedback-type-selector" role="group" aria-label="Feedback type">
               <button
                 type="button"
                 className={`type-btn ${type === "bug" ? "active" : ""}`}
                 onClick={() => setType("bug")}
+                aria-pressed={type === "bug"}
               >
                 <Bug size={16} /> Bug Report
               </button>
@@ -160,6 +170,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 type="button"
                 className={`type-btn ${type === "feature" ? "active" : ""}`}
                 onClick={() => setType("feature")}
+                aria-pressed={type === "feature"}
               >
                 <Lightbulb size={16} /> Feature Request
               </button>
@@ -167,6 +178,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 type="button"
                 className={`type-btn ${type === "general" ? "active" : ""}`}
                 onClick={() => setType("general")}
+                aria-pressed={type === "general"}
               >
                 <MessageSquare size={16} /> General
               </button>
@@ -190,6 +202,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 required
                 rows={5}
               />
+              <div className="char-count-display">{description.length} characters</div>
             </div>
 
             <div className="feedback-form-group">
@@ -233,7 +246,13 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
 
             <div className="feedback-actions">
               <button type="submit" className="feedback-submit" disabled={isSubmitting}>
-                {isSubmitting ? "Uploading..." : "Submit Feedback"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="spinner-icon icon-inline" /> Uploading...
+                  </>
+                ) : (
+                  "Submit Feedback"
+                )}
               </button>
             </div>
           </form>
