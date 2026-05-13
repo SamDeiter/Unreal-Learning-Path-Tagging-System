@@ -1,12 +1,11 @@
 
 import { describe, it } from "vitest";
 import { TagGraphService } from "../TagGraphService.js";
-import library from "../../data/video_library_enriched.json";
+import library from "../../../../content/video_library_enriched.json";
 
 describe("TagGraphService Performance Benchmark", () => {
   it("benchmarks scoreCourseRelevance", () => {
     const tgs = new TagGraphService();
-    // Assuming library is { courses: [...] } based on head output
     const courses = library.courses || [];
     const targetTagIds = [
         "rendering.lumen", "scripting.blueprint", "lighting.dynamic",
@@ -33,7 +32,6 @@ describe("TagGraphService Performance Benchmark", () => {
       }
       const end = performance.now();
       totalDuration += (end - start);
-      // Use TOTAL_SCORE to avoid it being optimized away if that ever happens
       if (TOTAL_SCORE === -1) console.log("impossible");
     }
 

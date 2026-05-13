@@ -464,7 +464,7 @@ class TagGraphService {
     if (!course || !targetTagIds || targetTagIds.length === 0) return empty;
 
     // Use cached metadata and expansion
-    const { tagSet: courseTagSet, suffixMap: courseSuffixMap } = this._getNormalizedCourseMetadata(course);
+    const { tagSet: courseTagSet, suffixMap: courseSuffixMap, geminiTags } = this._getNormalizedCourseMetadata(course);
 
     // Deduplicate target tags to avoid double-scoring
     const uniqueTargets = [...new Set(targetTagIds.map(t => t.toLowerCase()))];
@@ -498,7 +498,6 @@ class TagGraphService {
 
     // ---- 2. Gemini bonus (AI-curated, high quality) ----
     let geminiBonus = 0;
-    const { geminiTags } = this._getNormalizedCourseMetadata(course);
     if (geminiTags.length > 0) {
       for (const target of uniqueTargets) {
         const targetSuffix = target.split(".").pop();
