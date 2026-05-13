@@ -18,6 +18,12 @@ test.describe("Search flow", () => {
     // Navigate to Fix a Problem (labeled "Tutor")
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // The rich input fields (Problem description) are hidden by default within a <details> block
+    // labeled "Attach a screenshot or error log". We must click that to reveal the fields.
+    const details = page.locator("summary", { hasText: /Attach a screenshot or error log/ });
+    await details.click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
