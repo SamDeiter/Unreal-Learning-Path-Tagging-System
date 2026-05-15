@@ -15,10 +15,18 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Tutor (bespoke path)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
-    await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
+
+    // Reveal legacy input fields (wrapped in <details> for Chat-first UI)
+    const summary = page.locator("summary", { hasText: /Attach a screenshot/ });
+    await expect(summary).toBeVisible({ timeout: 15_000 });
+    await summary.click();
+
+    // Wait for the legacy input to be visible
+    const textarea = page.getByLabel("Problem description");
+    await expect(textarea).toBeVisible({ timeout: 10_000 });
   });
 
   test("should accept a search query", async ({ page }) => {

@@ -137,8 +137,8 @@ export function DeltaGallery({ refs, exposure }) {
   const [filter, setFilter] = useState("all");
   const sectionRef = useRef(null);
 
-  const safeRefs = Array.isArray(refs) ? refs : [];
-  const safeExposure = exposure ?? {};
+  const safeRefs = useMemo(() => (Array.isArray(refs) ? refs : []), [refs]);
+  const safeExposure = useMemo(() => exposure ?? {}, [exposure]);
 
   const sortedRefs = useMemo(() => {
     const severityRank = { breaking: 0, minor: 1 };
