@@ -28,8 +28,10 @@ export default function DiagnosisLoader({ query }) {
     };
   }, []);
 
+  const progressPercent = Math.round(((phase + 1) / PHASES.length) * 100);
+
   return (
-    <div className="dx-loader">
+    <div className="dx-loader" role="status" aria-live="polite">
       <div className="dx-loader-card">
         <h2 className="dx-loader-title">
           <span className="dx-loader-spinner" /> Diagnosing...
@@ -52,11 +54,15 @@ export default function DiagnosisLoader({ query }) {
         </div>
 
         {/* Progress bar */}
-        <div className="dx-progress-bar">
-          <div
-            className="dx-progress-fill"
-            style={{ width: `${((phase + 1) / PHASES.length) * 100}%` }}
-          />
+        <div
+          className="dx-progress-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow={progressPercent}
+          aria-valuetext={PHASES[phase].label}
+        >
+          <div className="dx-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
 
         {/* Echoed query */}
