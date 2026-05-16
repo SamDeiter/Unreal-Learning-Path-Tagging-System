@@ -6,7 +6,7 @@
  * exceptions that would otherwise only surface in production.
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
 vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
@@ -146,7 +146,33 @@ describe("DiagnosisLoader", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 5. BridgeCard
+// 5. ProblemInput
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import ProblemInput from "../components/ProblemFirst/ProblemInput";
+
+describe("ProblemInput", () => {
+  it("should handle character pluralization correctly", () => {
+    const onSubmit = vi.fn();
+    render(<ProblemInput onSubmit={onSubmit} />);
+
+    // Initially 0 characters
+    expect(screen.getByText("0 characters")).toBeTruthy();
+
+    const textarea = screen.getByLabelText("Problem description");
+
+    // 1 character
+    fireEvent.change(textarea, { target: { value: "A" } });
+    expect(screen.getByText("1 character")).toBeTruthy();
+
+    // 2 characters
+    fireEvent.change(textarea, { target: { value: "AB" } });
+    expect(screen.getByText("2 characters")).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. BridgeCard
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import BridgeCard from "../components/GuidedPlayer/BridgeCard";

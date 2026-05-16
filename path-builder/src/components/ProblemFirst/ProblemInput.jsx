@@ -163,7 +163,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === "Enter" && e.ctrlKey) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         handleSubmit();
       }
     },
@@ -225,7 +225,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           aria-label="Problem description"
         />
         <div className="char-count">
-          {problem.length} characters
+          {problem.length} character{problem.length !== 1 ? "s" : ""}
           {problem.length < 10 && problem.length > 0 && (
             <span className="warning"> (minimum 10)</span>
           )}
@@ -351,7 +351,8 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           )}
         </button>
         <span className="hint">
-          Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit
+          Press <kbd>{navigator.platform?.toUpperCase().indexOf("MAC") >= 0 ? "⌘" : "Ctrl"}</kbd> +{" "}
+          <kbd>Enter</kbd> to submit
         </span>
       </div>
 
