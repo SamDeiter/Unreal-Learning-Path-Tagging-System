@@ -15,9 +15,15 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Fix a Problem (Tutor tab)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Legacy fields are now in a details block for the 'Attach screenshot or error log' UI.
+    // We need to expand it to make the 'Problem description' visible for existing E2E tests.
+    const details = page.locator("details:has-text('Attach a screenshot or error log')");
+    await details.locator("summary").click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 

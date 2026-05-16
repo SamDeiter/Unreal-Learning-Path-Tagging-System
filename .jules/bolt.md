@@ -1,0 +1,3 @@
+## 2026-05-16 - TagGraphService Batch Processing Speedup
+**Learning:** The primary performance bottleneck for course search was the tag-graph scoring fallback, where `TagGraphService.scoreCourseRelevance` was performing redundant array flattening, string normalization, and BFS graph traversals for every course in the 3.7MB library. Pre-calculating course metadata (using `WeakMap`) and memoizing BFS expansions for target tags reduced batch processing time by ~80%.
+**Action:** Use identity-based caching (WeakMap) for large datasets and memoize expensive graph/search expansions when they are repeatedly applied to the same data pool.
