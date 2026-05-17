@@ -141,13 +141,9 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Token usage — client-side token tracking for cost dashboard
-    // Authenticated users can read/write their own daily stats
+    // Token usage — legacy global collection (admin-only to prevent IDOR)
     match /token_usage/{dateKey} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null
-        && request.resource.data.keys().size() <= 15;
-      allow delete: if false;
+      allow read, write: if isAdmin();
     }
 
     // Error logs — production crash monitoring
@@ -229,6 +225,15 @@ service cloud.firestore {
       match /lessons/{lessonId} {
         allow read: if request.auth != null && request.auth.uid == uid;
         allow write: if false; // Cloud Functions only (Admin SDK bypasses rules)
+      }
+
+      // Token usage — per-user token tracking for cost dashboard
+      // Authenticated users can read/write their own daily stats
+      match /token_usage/{dateKey} {
+        allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().size() <= 15;
+        allow delete: if false;
       }
     }
 
