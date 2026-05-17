@@ -18,6 +18,8 @@ test.describe("Search flow", () => {
     // Navigate to Fix a Problem (Tutor tab)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+    // Open the details to reveal the ProblemInput fields
+    await page.getByText("Attach a screenshot or error log").click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
