@@ -30,7 +30,7 @@
  * - No rate limiting beyond the admin gate; intended for occasional runs.
  */
 
-const { onCall } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
@@ -279,7 +279,6 @@ exports.mineMisconceptions = onCall(
           error: err && err.message ? err.message : String(err),
         })
       );
-      const { HttpsError } = require("firebase-functions/v2/https");
       throw new HttpsError("internal", "Failed to read signals.");
     });
 
