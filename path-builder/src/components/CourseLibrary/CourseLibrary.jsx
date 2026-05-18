@@ -18,6 +18,7 @@ import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "l
 import { getRelevanceBadge } from "../../services/ContentGapService";
 import { detectPersona, getPersonaById } from "../../services/PersonaService";
 import { trackPersonaDetected } from "../../services/analyticsService";
+import { MODIFIER_KEY } from "../../utils/osUtils";
 import "./CourseLibrary.css";
 
 // ... (highlightText helper remains same)
@@ -230,7 +231,7 @@ function CourseLibrary({ courses }) {
             ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Search courses... (Ctrl+K)"
+            placeholder={`Search courses... (${MODIFIER_KEY}+K)`}
             value={search}
             onChange={handleSearchChange}
           />

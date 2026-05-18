@@ -11,6 +11,7 @@ import { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { Search, User, Image, Terminal, XCircle, Tags } from "lucide-react";
 import tagGraphService from "../../services/TagGraphService";
+import { MODIFIER_KEY } from "../../utils/osUtils";
 
 import "./ProblemFirst.css";
 
@@ -163,7 +164,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === "Enter" && e.ctrlKey) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         handleSubmit();
       }
     },
@@ -282,7 +283,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           <div className="drop-prompt">
             <Terminal size={20} />
             <span>
-              Paste (<kbd>Ctrl+V</kbd>) an error log or build output
+              Paste (<kbd>{MODIFIER_KEY}+V</kbd>) an error log or build output
             </span>
           </div>
         )}
@@ -327,7 +328,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           <div className="drop-prompt">
             <Image size={20} />
             <span>
-              Paste (<kbd>Ctrl+V</kbd>) or drag a screenshot here
+              Paste (<kbd>{MODIFIER_KEY}+V</kbd>) or drag a screenshot here
             </span>
           </div>
         )}
@@ -351,7 +352,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           )}
         </button>
         <span className="hint">
-          Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit
+          Press <kbd>{MODIFIER_KEY}</kbd>+<kbd>Enter</kbd> to submit
         </span>
       </div>
 
