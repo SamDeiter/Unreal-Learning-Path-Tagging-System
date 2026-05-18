@@ -1,5 +1,4 @@
 const { requireAuth, requireAdmin } = require("../authGuard");
-const { HttpsError } = require("firebase-functions/v2/https");
 
 describe("authGuard", () => {
   describe("requireAuth", () => {
