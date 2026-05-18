@@ -15,9 +15,13 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Tutor
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Reveal the legacy ProblemInput via details summary
+    const summary = page.locator("summary", { hasText: /Attach a screenshot or error log/ });
+    await summary.click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
@@ -28,7 +32,7 @@ test.describe("Search flow", () => {
   });
 
   test("should show the Get Diagnosis button", async ({ page }) => {
-    const submitBtn = page.getByRole("button", { name: /Get Diagnosis/i });
+    const submitBtn = page.locator("button", { hasText: /Get Diagnosis/ });
     await expect(submitBtn).toBeVisible();
   });
 
@@ -39,7 +43,7 @@ test.describe("Search flow", () => {
     const textarea = page.getByLabel("Problem description");
     await textarea.fill("How to fix black screen in UE5");
 
-    const submitBtn = page.getByRole("button", { name: /Get Diagnosis/i });
+    const submitBtn = page.locator("button", { hasText: /Get Diagnosis/ });
     await submitBtn.click();
 
     await page.waitForTimeout(3_000);

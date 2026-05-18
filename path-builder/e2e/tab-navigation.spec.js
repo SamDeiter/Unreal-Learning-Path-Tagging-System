@@ -23,8 +23,8 @@ test.describe("Tab navigation", () => {
     await page.waitForTimeout(500);
   });
 
-  test("should navigate to the Fix a Problem tab", async ({ page }) => {
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Fix a Problem/ });
+  test("should navigate to the Tutor tab", async ({ page }) => {
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await expect(tab).toBeVisible();
     await tab.click();
     await page.waitForTimeout(1_000);
