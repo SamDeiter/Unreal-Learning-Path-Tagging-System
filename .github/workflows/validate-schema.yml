@@ -32,7 +32,8 @@ jobs:
       - name: Validate tags.json against schema
         run: |
           echo "🔍 Validating tags.json..."
-          ajv validate -s tags/schema.json -d tags/tags.json --all-errors || exit 1
+          # Include ajv-formats for date-time support
+          ajv validate -s tags/schema.json -d tags/tags.json -c ajv-formats --all-errors || exit 1
           echo "✅ tags.json is valid"
 
       - name: Validate categories.json structure

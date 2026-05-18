@@ -1,0 +1,4 @@
+## 2025-05-22 - Centralizing Admin Authorization & Preventing Error Leakage
+**Vulnerability:** The `triggerDemandScrape` Cloud Function was accessible to any authenticated user (missing authorization check) and leaked raw GitHub API error messages to the client (potential information disclosure).
+**Learning:** Admin authorization logic was duplicated across multiple files (`setAdminClaim.js`, `mineMisconceptions.js`), which led to a "permissive by default" oversight when implementing the new `triggerDemandScrape` function.
+**Prevention:** Centralize admin authorization into a shared `requireAdmin` utility that supports both Firebase Functions v1 and v2. Always mask detailed third-party API error responses in client-facing `HttpsError` objects while maintaining full diagnostic detail in server-side logs.
