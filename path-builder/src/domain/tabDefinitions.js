@@ -32,7 +32,7 @@ export const SECONDARY_TABS = [
 export const ANALYTICS_SUBTABS = [
   { key: "analytics-overview", label: "Overview", icon: "📊", tooltip: "High-level analytics summary" },
   { key: "analytics-demand", label: "Demand Intelligence", icon: "🔥", tooltip: "Analyze community demand vs existing content" },
-  { key: "analytics-uefn-demand", label: "UEFN Demand", icon: "🌌", tooltip: "Analyze community demand specific to UEFN & Verse" },
+  { key: "analytics-uefn-demand", label: "UEFN Demand Intelligence", icon: "🌌", tooltip: "Analyze community demand specific to UEFN & Verse" },
   { key: "analytics-insights", label: "Insights", icon: "💡", tooltip: "AI-generated strategic recommendations" },
   { key: "analytics-confidence", label: "Confidence", icon: "🧠", tooltip: "Measure AI confidence in tag accuracy" },
   { key: "analytics-coverage", label: "Coverage", icon: "🎯", tooltip: "Detailed content coverage by skill category" },
