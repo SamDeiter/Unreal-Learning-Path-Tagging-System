@@ -342,6 +342,7 @@ REQUIRED SEARCH SOURCES:
 - ${engine === "UEFN" ? "stackoverflow.com [fortnite-creative] tag" : "stackoverflow.com [unreal-engine5] tag"}
 - Epic Developer Community (dev.epicgames.com)
 - ${engine} tutorials and gamedev content on YouTube, TikTok, and Instagram
+- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"} hashtags for viral posts, threads, and questions (use site:x.com)
 - Udemy and Skillshare ${engine} courses
 
 CATEGORIES TO RESEARCH: ${batch.join(", ")}
@@ -355,7 +356,7 @@ Return a JSON array:
   "subtopic": "Specific subtopic within that category",
   "frequency": "high|medium|low",
   "sources": [{
-    "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch",
+    "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
     "title": "Post/thread title",
     "url": "URL",
     "date": "YYYY-MM-DD",
@@ -435,7 +436,8 @@ SEARCH THESE SOURCES:
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - Epic Developer Community
 - YouTube comments on ${engine} tutorials about ${category}
-- TikTok/Instagram ${engine} reels and gamedev content
+- TikTok/Instagram ${engine} reels and gamedev content
+- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative #VerseScript" : "#UnrealEngine #UE5 #gamedev"} for pain point discussions (use site:x.com)
 
 Focus on posts from the last 6 months.
 
