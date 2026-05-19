@@ -18,6 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Tutor (Bespoke Problem Solving)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // Reveal the legacy ProblemInput fields hidden inside <details>
+    const revealTrigger = page.getByText("Attach a screenshot or error log");
+    await revealTrigger.click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
