@@ -137,30 +137,30 @@ export function DeltaGallery({ refs, exposure }) {
   const [filter, setFilter] = useState("all");
   const sectionRef = useRef(null);
 
-  const safeRefs = Array.isArray(refs) ? refs : [];
-  const safeExposure = exposure ?? {};
-
   const sortedRefs = useMemo(() => {
+    const sr = Array.isArray(refs) ? refs : [];
+    const se = exposure ?? {};
     const severityRank = { breaking: 0, minor: 1 };
-    return [...safeRefs].sort((a, b) => {
-      const aCount = safeExposure[a.id]?.videoCount ?? 0;
-      const bCount = safeExposure[b.id]?.videoCount ?? 0;
+    return [...sr].sort((a, b) => {
+      const aCount = se[a.id]?.videoCount ?? 0;
+      const bCount = se[b.id]?.videoCount ?? 0;
       if (bCount !== aCount) return bCount - aCount;
       const aSev = severityRank[a.severity] ?? 99;
       const bSev = severityRank[b.severity] ?? 99;
       return aSev - bSev;
     });
-  }, [safeRefs, safeExposure]);
+  }, [refs, exposure]);
 
   const counts = useMemo(() => {
+    const sr = Array.isArray(refs) ? refs : [];
     const byKind = { workflow_step: 0, module: 0, blueprint_node: 0, class: 0 };
     let breaking = 0;
-    for (const r of safeRefs) {
+    for (const r of sr) {
       if (byKind[r.kind] != null) byKind[r.kind] += 1;
       if (r.severity === "breaking") breaking += 1;
     }
-    return { all: safeRefs.length, breaking, ...byKind };
-  }, [safeRefs]);
+    return { all: sr.length, breaking, ...byKind };
+  }, [refs]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return sortedRefs;
@@ -249,7 +249,7 @@ export function DeltaGallery({ refs, exposure }) {
               <DeltaCard
                 key={r.id}
                 refItem={r}
-                exposureEntry={safeExposure[r.id]}
+                exposureEntry={exposure?.[r.id]}
               />
             ))}
           </div>
