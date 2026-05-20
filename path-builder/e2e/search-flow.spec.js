@@ -15,9 +15,11 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to Tutor (Bespoke)
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+    // Problem description is hidden inside a details block in the new chat-first UI
+    await page.locator("summary", { hasText: "Attach a screenshot or error log" }).click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
