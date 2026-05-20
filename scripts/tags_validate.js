@@ -30,6 +30,7 @@ const VALID_TAG_TYPES = [
   "ui_surface",
   "category",
   "skill_level",
+  "extracted",
 ];
 const VALID_RELATIONS = ["symptom_of", "often_caused_by", "subtopic", "replaces", "related"];
 const VALID_ALIAS_TYPES = ["abbrev", "legacy", "community_term", "alternative"];
