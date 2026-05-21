@@ -146,6 +146,24 @@ async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true }
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const groundingMetadata = data.candidates?.[0]?.groundingMetadata || null;
 
+      // TEMP debug (remove once verified flag is firing): dump candidate keys,
+      // groundingMetadata keys, and a sample chunk so we can see the actual
+      // response shape — extractGroundingChunks returned 0 on the previous
+      // scrape and we need to know if the field is snake_case, missing, or
+      // grounding never fired at all.
+      if (useGrounding) {
+        const candidate = data.candidates?.[0] || {};
+        const topKeys = Object.keys(candidate);
+        const gmKeys = groundingMetadata ? Object.keys(groundingMetadata) : null;
+        const chunkSample =
+          groundingMetadata?.groundingChunks?.[0] ||
+          groundingMetadata?.grounding_chunks?.[0] ||
+          null;
+        console.log(
+          `  🔬 grounding debug — candidate keys: ${JSON.stringify(topKeys)} | gm keys: ${JSON.stringify(gmKeys)} | chunk: ${JSON.stringify(chunkSample).slice(0, 300)}`
+        );
+      }
+
       // If grounding returned empty text, retry once without grounding as fallback
       if (useGrounding && !text.trim()) {
         console.warn("  ⚠️ Grounded search returned empty text — retrying without grounding...");
