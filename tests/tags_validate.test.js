@@ -110,16 +110,9 @@ describe("validateTagsFile", () => {
     // because existing data may have known schema quirks.
   });
 
-  it("should validate the sample tags file", () => {
-    const sampleFile = path.join(__dirname, "..", "sample_data", "tags.json");
-    const result = validateTagsFile(sampleFile);
-    assert.strictEqual(
-      result.valid,
-      true,
-      `Sample tags should be perfectly valid: ${result.errors.join(", ")}`
-    );
-    assert.strictEqual(result.tagCount, 64);
-  });
+  // The previous "sample tags file" test was removed: sample_data/tags.json
+  // was intentionally deleted in 83c8a2f8 (2026-04-29 "chore: remove tracked
+  // sample_data backup") and is recoverable from git history if needed.
 });
 
 // ============================================================
