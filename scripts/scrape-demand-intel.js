@@ -175,10 +175,17 @@ function parseJSON(text) {
   try {
     return JSON.parse(cleaned);
   } catch {
-    // Try extracting JSON array from the response
-    const arrMatch = cleaned.match(/\[[\s\S]*\]/);
+    // Try extracting JSON array from the response. Anchor on `[{` so that
+    // prose preambles with bracketed citations like "[Source 1]" or
+    // "[fortnite-creative] tag" don't get swallowed as the array start.
+    const arrMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
     if (arrMatch) {
       try { return JSON.parse(arrMatch[0]); } catch { /* fall through */ }
+    }
+    // Fallback to the looser pattern in case the JSON contains only scalars
+    const looseArrMatch = cleaned.match(/\[[\s\S]*\]/);
+    if (looseArrMatch) {
+      try { return JSON.parse(looseArrMatch[0]); } catch { /* fall through */ }
     }
     // Try extracting JSON object
     const objMatch = cleaned.match(/\{[\s\S]*\}/);
@@ -188,7 +195,10 @@ function parseJSON(text) {
 
     // Truncated JSON repair: Gemini may hit token limit mid-object.
     // Find the last complete object boundary "},", trim after it, close array.
-    const arrStart = cleaned.indexOf("[");
+    // Anchor on "[{" rather than the first "[" so prose with bracketed text
+    // doesn't pin the start of the array to the wrong character.
+    const arrStartMatch = cleaned.match(/\[\s*\{/);
+    const arrStart = arrStartMatch ? arrStartMatch.index : -1;
     if (arrStart !== -1) {
       const partial = cleaned.slice(arrStart);
       // Find last complete object (ends with "}")
@@ -399,7 +409,17 @@ CATEGORIES TO RESEARCH: ${batch.join(", ")}
 
 For EACH category listed above, find ${TRENDING_PER_CATEGORY} real questions that people are asking. That means you should return exactly ${batch.length * TRENDING_PER_CATEGORY} questions total.
 
-Return a JSON array:
+YOUR RESPONSE MUST HAVE TWO PARTS:
+
+PART 1 — RESEARCH NOTES (prose, with citations):
+Walk through what you found. For each question, write a short paragraph that:
+  • States the question
+  • Names the exact post/thread/video title where you found it
+  • Explains briefly why this question matters
+Cite the source explicitly so the reader can verify (this also lets the grounding system attach the URL).
+
+PART 2 — JSON BLOCK:
+After the notes, output the structured data as a single JSON array:
 [{
   "question": "The exact question learners are asking",
   "category": "Which of the categories above this belongs to",
@@ -407,7 +427,7 @@ Return a JSON array:
   "frequency": "high|medium|low",
   "sources": [{
     "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
-    "title": "Post/thread title",
+    "title": "Post/thread title (MUST match a title you cited in Part 1)",
     "url": "URL",
     "date": "YYYY-MM-DD",
     "engagement": "e.g. 45 upvotes, 23 comments"
@@ -415,10 +435,10 @@ Return a JSON array:
 }]
 
 IMPORTANT RULES:
-- CRITICAL: Each question gets exactly ONE source entry — its PRIMARY platform where you found the strongest signal
-- Every question MUST have at least one source with a URL
+- Each question gets exactly ONE source entry — its PRIMARY platform where you found the strongest signal
+- Every question MUST have at least one source whose title was actually cited in Part 1
 - Focus on learning/tutorial questions, not engine bug reports
-- Return VALID JSON only.`;
+- The JSON block must be valid and parseable — do not put any non-JSON text inside the brackets.`;
 
       try {
         const result = await callGemini(prompt);
@@ -506,19 +526,29 @@ SEARCH THESE SOURCES:
 
 Focus on posts from the last 6 months.
 
-Return a JSON array of the top ${PAIN_POINT_LIMIT} pain points:
+YOUR RESPONSE MUST HAVE TWO PARTS:
+
+PART 1 — RESEARCH NOTES (prose, with citations):
+For each pain point you found, write a short paragraph that:
+  • Describes the struggle in plain language
+  • Names the exact post/thread/video title and where it was found
+  • Notes roughly how often this comes up
+Cite the source explicitly so the reader can verify (this also lets the grounding system attach the URL).
+
+PART 2 — JSON BLOCK:
+After the notes, output the structured data as a single JSON array of the top ${PAIN_POINT_LIMIT} pain points:
 [{
   "painPoint": "One-sentence description of the struggle",
   "sourceUrl": "URL where this was found",
-  "sourceTitle": "Title of the post/thread",
+  "sourceTitle": "Title of the post/thread (MUST match a title you cited in Part 1)",
   "relevance": "high|medium|low",
   "frequency": "How often this comes up"
 }]
 
 IMPORTANT RULES:
 - Focus on LEARNER confusion, not engine bugs
-- Include REAL source URLs you found via search
-- Return VALID JSON only`;
+- The sourceTitle MUST match a title you cited in Part 1
+- The JSON block must be valid and parseable — do not put any non-JSON text inside the brackets.`;
 
   try {
     const result = await callGemini(prompt);
