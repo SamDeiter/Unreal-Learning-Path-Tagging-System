@@ -571,15 +571,35 @@ ${researchResult.text}`;
   }
 }
 
+/**
+ * Build batches of categories, redistributing leftovers so no batch is too
+ * narrow to ground reliably. Empirically, single-category batches return
+ * zero groundingChunks roughly every time — so a naive
+ * `categories.length / SIGNALS_PER_BATCH` slicing for 7 categories at
+ * size 2 produces `[2, 2, 2, 1]` and the 1-cat tail kills its verified-URL
+ * coverage. Redistribute the leftover into the last batch so we get
+ * `[2, 2, 3]` instead. Every batch is at least `SIGNALS_PER_BATCH` wide.
+ */
+function buildSignalsBatches(categories, batchSize) {
+  if (categories.length <= batchSize) return [categories.slice()];
+  const batches = [];
+  for (let i = 0; i < categories.length; i += batchSize) {
+    batches.push(categories.slice(i, i + batchSize));
+  }
+  // If the trailing batch is short, fold it into the previous batch.
+  while (batches.length >= 2 && batches[batches.length - 1].length < batchSize) {
+    const tail = batches.pop();
+    batches[batches.length - 1] = batches[batches.length - 1].concat(tail);
+  }
+  return batches;
+}
+
 async function scrapeDemandSignals(categories) {
   console.log(
     `\n🔍 Scraping demand signals (questions + pain points) across ${categories.length} categories (batches of ${SIGNALS_PER_BATCH}, ${PARALLEL_CONCURRENCY} in parallel)...`
   );
 
-  const batches = [];
-  for (let i = 0; i < categories.length; i += SIGNALS_PER_BATCH) {
-    batches.push(categories.slice(i, i + SIGNALS_PER_BATCH));
-  }
+  const batches = buildSignalsBatches(categories, SIGNALS_PER_BATCH);
   const totalBatches = batches.length;
 
   const allQuestions = [];
