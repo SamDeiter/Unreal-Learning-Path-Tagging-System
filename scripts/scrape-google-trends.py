@@ -17,6 +17,7 @@ Environment Variables:
                                 (optional; if not set, saves local JSON only)
 """
 
+import argparse
 import json
 import os
 import sys
@@ -34,25 +35,15 @@ except ImportError:
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 
-BENCHMARKS_PATH = os.path.join(
-    ROOT_DIR, "path-builder", "src", "data", "demand_benchmarks.json"
-)
 REPORT_DIR = os.path.join(SCRIPT_DIR, "output")
-REPORT_PATH = os.path.join(REPORT_DIR, "google_trends_report.json")
 
 TIMEFRAME = "today 12-m"   # Last 12 months for stable averages
-GEO = ""                    # Worldwide (empty = global)
 MAX_RETRIES = 3
 RETRY_DELAY = 30            # seconds between retries
 BATCH_PAUSE = 15            # seconds between batches (rate limit avoidance)
 
-# Anchor keyword present in EVERY batch for cross-batch normalization
-ANCHOR_CATEGORY = "Blueprints"
-ANCHOR_QUERY = "unreal engine blueprints"
-
-# Search terms per category — Google Trends allows max 5 per query,
-# so with 1 anchor we get 4 real terms per batch.
-CATEGORY_QUERIES = {
+# UE5 category query map (anchor: Blueprints)
+UE5_CATEGORY_QUERIES = {
     "Blueprints":          "unreal engine blueprints",
     "Niagara":             "unreal engine niagara",
     "Materials":           "unreal engine materials",
@@ -71,6 +62,29 @@ CATEGORY_QUERIES = {
     "Virtual Production":  "unreal engine virtual production",
     "Level Design":        "unreal engine level design",
     "Gameplay Framework":  "unreal engine gameplay framework",
+}
+
+# UEFN category query map (anchor: Verse Programming)
+# Categories must match keys in demand_benchmarks_uefn.json
+UEFN_CATEGORY_QUERIES = {
+    "Verse Programming":        "UEFN verse programming",
+    "UEFN Devices":             "UEFN devices",
+    "Island Settings":          "UEFN island settings",
+    "Asset Management":         "UEFN assets",
+    "Level Design / Creative":  "UEFN level design",
+    "MetaHumans & Animation":   "UEFN metahuman",
+    "Revision Control":         "UEFN revision control",
+}
+
+# Named region buckets → ISO country code for pytrends `geo` parameter.
+# Empty string ("") = Worldwide.
+REGION_PRESETS = {
+    "worldwide": "",
+    "na":        "US",   # North America (US proxy)
+    "eu":        "GB",   # Europe (UK proxy — solid English-speaking signal)
+    "jp":        "JP",   # Japan
+    "br":        "BR",   # Brazil / LATAM proxy
+    "sea":       "ID",   # Southeast Asia (Indonesia proxy)
 }
 
 MAX_BATCH_SIZE = 4  # 4 real terms + 1 anchor = 5 per Google Trends query
@@ -232,11 +246,18 @@ def scale_to_100(raw_scores):
 # ── Output ────────────────────────────────────────────────────────────
 
 def write_to_firestore(db, trends_data, raw_scores, scaled_scores, related_queries):
-    """Write trends data to Firestore demand_intel/google_trends."""
+    """Write trends data to Firestore under the engine-specific collection.
+
+    Doc layout:
+      - Worldwide run → <collection>/google_trends          (default global doc)
+      - Regional run  → <collection>/google_trends_<region> (per-region doc)
+    """
     now = datetime.utcnow()
     doc_data = {
         "scrapedAt": now.isoformat() + "Z",
         "scrapedBy": "scrape-google-trends.py",
+        "engine": ENGINE,
+        "region": REGION,
         "timeframe": TIMEFRAME,
         "geo": GEO or "Worldwide",
         "categoryCount": len(scaled_scores),
@@ -254,14 +275,16 @@ def write_to_firestore(db, trends_data, raw_scores, scaled_scores, related_queri
         },
     }
 
-    # Write latest
-    db.document("demand_intel/google_trends").set(doc_data)
-    print(f"  ✅ Written to Firestore: demand_intel/google_trends")
+    suffix = "" if REGION == "worldwide" else f"_{REGION}"
+    latest_path = f"{COLLECTION}/google_trends{suffix}"
+    db.document(latest_path).set(doc_data)
+    print(f"  ✅ Written to Firestore: {latest_path}")
 
-    # Write historical snapshot
+    # Historical snapshot (per-region)
     date_str = now.strftime("%Y-%m-%d")
-    db.document(f"demand_intel/trends_history_{date_str}").set(doc_data)
-    print(f"  ✅ Written to Firestore: demand_intel/trends_history_{date_str}")
+    history_path = f"{COLLECTION}/trends_history_{date_str}{suffix}"
+    db.document(history_path).set(doc_data)
+    print(f"  ✅ Written to Firestore: {history_path}")
 
 
 def save_local_report(raw_scores, scaled_scores, batch_results, related_queries):
@@ -307,17 +330,14 @@ def print_results_table(scaled_scores, raw_scores):
 
 def main():
     print("=" * 60)
-    print("  📊 UE5 Google Trends Scraper — All 18 Categories")
+    print(f"  📊 {ENGINE} Google Trends Scraper — {len(CATEGORY_QUERIES)} categories")
     print("=" * 60)
+    print(f"  Engine:    {ENGINE}")
+    print(f"  Region:    {REGION} ({GEO or 'Worldwide'})")
     print(f"  Timeframe: {TIMEFRAME}")
-    print(f"  Geo:       {GEO or 'Worldwide'}")
     print(f"  Categories: {len(CATEGORY_QUERIES)}")
+    print(f"  Firestore: {COLLECTION}/google_trends{'' if REGION == 'worldwide' else '_' + REGION}")
     print()
-
-    # Validate benchmarks file exists
-    if not os.path.exists(BENCHMARKS_PATH):
-        print(f"  ⚠ Benchmarks file not found: {BENCHMARKS_PATH}")
-        print("    Using built-in category list.")
 
     # Init Firebase (optional)
     db = init_firebase()
@@ -380,11 +400,64 @@ def main():
         print("\n📤 Writing to Firestore...")
         write_to_firestore(db, batch_results, normalized, scaled, related_queries)
 
-    print("\n🎉 Done! Google Trends data scraped for all 18 categories.")
+    print(f"\n🎉 Done! Google Trends data scraped for {ENGINE} ({REGION}).")
     if db:
-        print("   Firestore: demand_intel/google_trends")
+        suffix = "" if REGION == "worldwide" else f"_{REGION}"
+        print(f"   Firestore: {COLLECTION}/google_trends{suffix}")
     print(f"   Local: {REPORT_PATH}")
 
 
+def _parse_args():
+    parser = argparse.ArgumentParser(description="Scrape Google Trends per engine/region.")
+    parser.add_argument(
+        "--engine",
+        choices=["UE5", "UEFN"],
+        default="UE5",
+        help="Engine to scrape (default: UE5).",
+    )
+    parser.add_argument(
+        "--region",
+        default="worldwide",
+        help=(
+            f"Region preset (one of {sorted(REGION_PRESETS.keys())}) or a raw "
+            "ISO country code (e.g. 'DE', 'KR'). Default: worldwide."
+        ),
+    )
+    return parser.parse_args()
+
+
+def _configure_run(args):
+    """Resolve CLI args into module-level config (ENGINE, REGION, GEO, etc.)."""
+    global ENGINE, REGION, GEO, COLLECTION
+    global CATEGORY_QUERIES, ANCHOR_CATEGORY, ANCHOR_QUERY, REPORT_PATH
+
+    ENGINE = args.engine
+    region_arg = (args.region or "worldwide").lower()
+
+    if region_arg in REGION_PRESETS:
+        REGION = region_arg
+        GEO = REGION_PRESETS[region_arg]
+    else:
+        # Treat as raw ISO country code
+        REGION = region_arg.lower()
+        GEO = region_arg.upper()
+
+    if ENGINE == "UEFN":
+        CATEGORY_QUERIES = UEFN_CATEGORY_QUERIES
+        ANCHOR_CATEGORY = "Verse Programming"
+        COLLECTION = "demand_intel_uefn"
+    else:
+        CATEGORY_QUERIES = UE5_CATEGORY_QUERIES
+        ANCHOR_CATEGORY = "Blueprints"
+        COLLECTION = "demand_intel"
+
+    ANCHOR_QUERY = CATEGORY_QUERIES[ANCHOR_CATEGORY]
+    region_suffix = "" if REGION == "worldwide" else f"_{REGION}"
+    REPORT_PATH = os.path.join(
+        REPORT_DIR, f"google_trends_report_{ENGINE.lower()}{region_suffix}.json"
+    )
+
+
 if __name__ == "__main__":
+    _configure_run(_parse_args())
     main()

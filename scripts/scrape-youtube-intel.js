@@ -28,11 +28,45 @@ const fs = require("fs");
 const path = require("path");
 const admin = require("firebase-admin");
 
+// ── CLI args ──────────────────────────────────────────────────────
+// Usage: node scrape-youtube-intel.js --engine UEFN --region jp
+const args = process.argv.slice(2);
+function getArg(name, fallback) {
+  const idx = args.indexOf(`--${name}`);
+  return idx >= 0 && args[idx + 1] ? args[idx + 1] : fallback;
+}
+const ENGINE = (getArg("engine", "UE5") || "UE5").toUpperCase();
+if (ENGINE !== "UE5" && ENGINE !== "UEFN") {
+  console.error(`❌ Invalid --engine "${ENGINE}". Must be UE5 or UEFN.`);
+  process.exit(1);
+}
+
+// Named region buckets → ISO country code (YouTube `regionCode` param).
+// "worldwide" omits the param.
+const REGION_PRESETS = {
+  worldwide: "",
+  na:        "US",
+  eu:        "GB",
+  jp:        "JP",
+  br:        "BR",
+  sea:       "ID",
+};
+const REGION_ARG = (getArg("region", "worldwide") || "worldwide").toLowerCase();
+const REGION = REGION_ARG in REGION_PRESETS ? REGION_ARG : REGION_ARG;
+const REGION_CODE = REGION in REGION_PRESETS
+  ? REGION_PRESETS[REGION]
+  : REGION_ARG.toUpperCase(); // raw ISO code passthrough
+
 // ── Paths ──────────────────────────────────────────────────────────
 const BENCHMARKS_PATH = path.join(
   __dirname,
-  "../path-builder/src/data/demand_benchmarks.json"
+  ENGINE === "UEFN"
+    ? "../path-builder/src/data/demand_benchmarks_uefn.json"
+    : "../path-builder/src/data/demand_benchmarks.json"
 );
+
+const COLLECTION = ENGINE === "UEFN" ? "demand_intel_uefn" : "demand_intel";
+const DOC_SUFFIX = REGION === "worldwide" ? "" : `_${REGION}`;
 
 // ── Config ─────────────────────────────────────────────────────────
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
@@ -79,7 +113,9 @@ function initFirestore() {
  * Cost: 100 quota units per call.
  */
 async function searchCategory(category) {
-  const query = `"Unreal Engine 5" ${category} tutorial`;
+  const query = ENGINE === "UEFN"
+    ? `UEFN ${category} tutorial`
+    : `"Unreal Engine 5" ${category} tutorial`;
   const url = new URL(YT_SEARCH_URL);
   url.searchParams.set("key", YOUTUBE_API_KEY);
   url.searchParams.set("part", "snippet");
@@ -87,7 +123,14 @@ async function searchCategory(category) {
   url.searchParams.set("q", query);
   url.searchParams.set("order", "viewCount");
   url.searchParams.set("maxResults", String(MAX_RESULTS_PER_CATEGORY));
-  url.searchParams.set("relevanceLanguage", "en");
+  // Regional run uses no language filter so we capture native-language content;
+  // worldwide stays English-only to match the existing UE5 baseline.
+  if (REGION === "worldwide") {
+    url.searchParams.set("relevanceLanguage", "en");
+  }
+  if (REGION_CODE) {
+    url.searchParams.set("regionCode", REGION_CODE);
+  }
   url.searchParams.set("videoDuration", "medium"); // 4-20 min (tutorial length)
 
   // Filter out competitor engines from results
@@ -300,6 +343,9 @@ function aggregateByCategory(videos, statsMap) {
 async function main() {
   console.log("🎬 YouTube Tutorial Demand Scraper");
   console.log("═".repeat(50));
+  console.log(`  Engine:    ${ENGINE}`);
+  console.log(`  Region:    ${REGION} (${REGION_CODE || "Worldwide"})`);
+  console.log(`  Firestore: ${COLLECTION}/youtube_metrics${DOC_SUFFIX}`);
 
   if (!YOUTUBE_API_KEY) {
     console.error("❌ YOUTUBE_API_KEY not set. Get one from https://console.cloud.google.com");
@@ -371,6 +417,9 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     generationTimeMs: Date.now() - startTime,
+    engine: ENGINE,
+    region: REGION,
+    regionCode: REGION_CODE || "",
     quotaUsed,
     quotaRemaining: 10000 - quotaUsed,
     summary: {
@@ -401,11 +450,12 @@ async function main() {
 
     try {
       // Write latest YouTube metrics (overwrite)
-      await db.doc("demand_intel/youtube_metrics").set(report);
-      console.log("  ✅ demand_intel/youtube_metrics updated");
+      const latestPath = `${COLLECTION}/youtube_metrics${DOC_SUFFIX}`;
+      await db.doc(latestPath).set(report);
+      console.log(`  ✅ ${latestPath} updated`);
 
       // Write historical snapshot
-      await db.doc(`demand_intel/youtube_history_${today}`).set({
+      await db.doc(`${COLLECTION}/youtube_history_${today}${DOC_SUFFIX}`).set({
         date: today,
         generatedAt: report.generatedAt,
         quotaUsed,
@@ -423,13 +473,16 @@ async function main() {
         ),
         breakoutCount: breakouts.length,
       });
-      console.log(`  ✅ demand_intel/youtube_history_${today} created`);
+      console.log(`  ✅ ${COLLECTION}/youtube_history_${today}${DOC_SUFFIX} created`);
     } catch (err) {
       console.error(`  ❌ Firestore write failed: ${err.message}`);
     }
   } else {
     console.log("\n⏭️  Skipping Firestore write (no service account)");
-    const outputPath = path.join(__dirname, "../youtube_intel_report.json");
+    const outputPath = path.join(
+      __dirname,
+      `../youtube_intel_report_${ENGINE.toLowerCase()}${DOC_SUFFIX}.json`
+    );
     fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
     console.log(`  📄 Saved report to ${outputPath}`);
   }

@@ -11,13 +11,26 @@
  * Every data point links back to its source.
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useDemandIntelligence } from "../../hooks/useDemandIntelligence";
 import { SOURCE_TYPES } from "../../services/demandIntelligenceService";
 import { computePlatformBreakdown, aggregatePlatformDemand, PLATFORM_META } from "../../utils/decayDetector";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getFirebaseApp } from "../../services/firebaseConfig";
 import "./UefnDemandDashboard.css";
+
+// ── Region Presets ─────────────────────────────────────────
+// Keep in sync with REGION_PRESETS in scripts/scrape-google-trends.py
+// and scripts/scrape-youtube-intel.js.
+const REGION_OPTIONS = [
+  { id: "worldwide", label: "🌍 Global",         desc: "Worldwide signal (default)" },
+  { id: "na",        label: "🇺🇸 North America",  desc: "United States proxy" },
+  { id: "eu",        label: "🇪🇺 Europe",         desc: "United Kingdom proxy" },
+  { id: "jp",        label: "🇯🇵 Japan / East Asia", desc: "Japan signal" },
+  { id: "br",        label: "🇧🇷 LATAM",          desc: "Brazil proxy" },
+  { id: "sea",       label: "🇮🇩 SE Asia",        desc: "Indonesia proxy" },
+];
 
 // ── Industry Vertical Taxonomy ─────────────────────────────
 const INDUSTRY_VERTICALS = {
@@ -907,6 +920,97 @@ function ProvenanceFooter({ provenance, generatedAt, stats, suggestions }) {
 
 // ── Main Dashboard ─────────────────────────────────────────
 
+/**
+ * Fetch per-region Trends + YouTube docs from Firestore.
+ * Returns { trendsByCategory, youtubeByCategory } or null while loading / on failure.
+ * The "worldwide" region returns null since the baked-in report already carries
+ * worldwide metrics on each suggestion.
+ */
+function useRegionalOverlay(region) {
+  const [overlay, setOverlay] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!region || region === "worldwide") {
+      setOverlay(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const app = getFirebaseApp();
+        const db = getFirestore(app);
+        const trendsRef = doc(db, "demand_intel_uefn", `google_trends_${region}`);
+        const ytRef = doc(db, "demand_intel_uefn", `youtube_metrics_${region}`);
+        const [trendsSnap, ytSnap] = await Promise.all([getDoc(trendsRef), getDoc(ytRef)]);
+
+        if (cancelled) return;
+
+        const trendsData = trendsSnap.exists() ? trendsSnap.data() : null;
+        const ytData = ytSnap.exists() ? ytSnap.data() : null;
+
+        setOverlay({
+          trendsByCategory: trendsData?.categoryTrends || null,
+          youtubeByCategory: ytData?.categoryMetrics || null,
+          trendsGeneratedAt: trendsData?.scrapedAt || null,
+          youtubeGeneratedAt: ytData?.generatedAt || null,
+        });
+      } catch (err) {
+        if (!cancelled) setError(err.message || String(err));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [region]);
+
+  return { overlay, loading, error };
+}
+
+/** Apply a region overlay to suggestions, replacing trendsMetrics/youtubeMetrics by category. */
+function applyRegionOverlay(suggestions, overlay) {
+  if (!overlay || !suggestions) return suggestions;
+  const { trendsByCategory, youtubeByCategory } = overlay;
+  if (!trendsByCategory && !youtubeByCategory) return suggestions;
+
+  return suggestions.map((s) => {
+    const next = { ...s };
+    if (trendsByCategory && trendsByCategory[s.category]) {
+      const t = trendsByCategory[s.category];
+      next.trendsMetrics = {
+        scaledScore: t.scaledScore || 0,
+        rawInterest: t.rawInterest || 0,
+      };
+    } else if (trendsByCategory) {
+      // We have regional trends but not for this category — drop the worldwide value
+      next.trendsMetrics = undefined;
+    }
+
+    if (youtubeByCategory && youtubeByCategory[s.category]) {
+      const m = youtubeByCategory[s.category];
+      next.youtubeMetrics = {
+        avgViews: m.avgViews || 0,
+        avgEngagement: m.avgEngagement || 0,
+        videoCount: m.videoCount || 0,
+        topVideoTitle: m.topVideo?.title || "",
+        topVideoViews: m.topVideo?.views || 0,
+        topVideoUrl: m.topVideo?.url || "",
+      };
+    } else if (youtubeByCategory) {
+      next.youtubeMetrics = undefined;
+    }
+    return next;
+  });
+}
+
 function UefnDemandDashboard() {
   const {
     report,
@@ -923,15 +1027,23 @@ function UefnDemandDashboard() {
 
   const [platformFilter, setPlatformFilter] = useState(null);
   const [showBlueOceansOnly, setShowBlueOceansOnly] = useState(false);
+  const [region, setRegion] = useState("worldwide");
+  const { overlay: regionOverlay, loading: regionLoading, error: regionError } = useRegionalOverlay(region);
+
+  // Apply region overlay to filtered suggestions
+  const overlaidSuggestions = useMemo(
+    () => applyRegionOverlay(filteredSuggestions, regionOverlay),
+    [filteredSuggestions, regionOverlay]
+  );
 
   let displaySuggestions = platformFilter
-    ? filteredSuggestions.filter((s) => {
+    ? overlaidSuggestions.filter((s) => {
         const b = computePlatformBreakdown(s);
         // Show suggestions that have any signal from this platform
         const score = typeof b[platformFilter] === "number" ? b[platformFilter] : 0;
         return score > 0;
       })
-    : filteredSuggestions;
+    : overlaidSuggestions;
 
   if (showBlueOceansOnly) {
     displaySuggestions = displaySuggestions.filter(
@@ -987,6 +1099,26 @@ function UefnDemandDashboard() {
       <div className="dashboard-header">
         <h2 data-tooltip="UEFN Demand Intelligence scans community forums, StackOverflow, Reddit, and your video library to identify the best topics to create content about.">📊 UEFN Demand Intelligence</h2>
         <div className="header-actions">
+          <select
+            className="region-selector"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            disabled={regionLoading}
+            data-tooltip="Filter YouTube and Google Trends signals by region. Non-global regions overlay region-specific search interest and tutorial viewership on top of the global community signals."
+          >
+            {REGION_OPTIONS.map((opt) => (
+              <option key={opt.id} value={opt.id}>{opt.label}</option>
+            ))}
+          </select>
+          {regionLoading && (
+            <span className="region-status region-status-loading" data-tooltip="Loading regional data...">⏳</span>
+          )}
+          {regionError && (
+            <span className="region-status region-status-error" data-tooltip={`Failed to load regional data: ${regionError}`}>⚠️</span>
+          )}
+          {region !== "worldwide" && !regionLoading && !regionError && !regionOverlay && (
+            <span className="region-status region-status-empty" data-tooltip="No regional scrape exists yet for this region. Trigger the YouTube/Trends workflows for this region in GitHub Actions.">∅ no data</span>
+          )}
           {report && (
             <span className="data-source-badge" data-tooltip={
               report._source === "firestore"
@@ -1083,17 +1215,18 @@ function UefnDemandDashboard() {
             {/* Left: Suggestions */}
             <div className="column-suggestions">
               <div className="column-header">
-                <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
-                <div className="filter-toggles" style={{ marginBottom: "12px", marginLeft: "2px" }}>
-                  <label className="blue-ocean-toggle" style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "500" }} data-tooltip="Filter for topics with >30 Monthly Search Volume and <30 Keyword Difficulty">
-                    <input 
-                      type="checkbox" 
-                      checked={showBlueOceansOnly} 
-                      onChange={(e) => setShowBlueOceansOnly(e.target.checked)}
-                      style={{ cursor: "pointer", width: "16px", height: "16px", accentColor: "#0ea5e9" }}
-                    />
-                    🌊 Show Blue Oceans Only
-                  </label>
+                <div className="column-header-top">
+                  <h3 data-tooltip="Topics ranked by opportunity score: high community demand × low coverage in your library = biggest opportunity">🎯 Top Course Opportunities</h3>
+                  <div className="filter-toggles">
+                    <label className="blue-ocean-toggle" data-tooltip="Filter for topics with >30 Monthly Search Volume and <30 Keyword Difficulty">
+                      <input
+                        type="checkbox"
+                        checked={showBlueOceansOnly}
+                        onChange={(e) => setShowBlueOceansOnly(e.target.checked)}
+                      />
+                      🌊 Blue Oceans Only
+                    </label>
+                  </div>
                 </div>
                 <div className="category-filters">
                   <button
