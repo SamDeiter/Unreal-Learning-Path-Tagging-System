@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UE Migration Hub | Engine Version 5.4</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-container-highest": "#353435",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#45464e",
+                        "on-tertiary": "#382f26",
+                        "tertiary-fixed": "#efe0d3",
+                        "secondary-container": "#3e495d",
+                        "on-surface": "#e5e2e2",
+                        "on-tertiary-fixed": "#221a13",
+                        "on-error-container": "#ffdad6",
+                        "background": "#141314",
+                        "inverse-on-surface": "#313031",
+                        "surface-bright": "#3a3939",
+                        "surface-tint": "#c5c6ce",
+                        "primary-container": "#0f1117",
+                        "primary-fixed": "#e2e2eb",
+                        "primary": "#c5c6ce",
+                        "tertiary": "#d3c4b8",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "surface": "#141314",
+                        "tertiary-fixed-dim": "#d3c4b8",
+                        "on-secondary-container": "#aeb9d0",
+                        "surface-container-lowest": "#0e0e0f",
+                        "secondary-fixed": "#d8e3fb",
+                        "inverse-surface": "#e5e2e2",
+                        "outline": "#909095",
+                        "surface-dim": "#141314",
+                        "secondary": "#bcc7de",
+                        "on-primary": "#2e3037",
+                        "surface-container-low": "#1c1b1c",
+                        "on-surface-variant": "#c7c6cb",
+                        "tertiary-container": "#171009",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#263143",
+                        "surface-container": "#201f20",
+                        "on-background": "#e5e2e2",
+                        "outline-variant": "#46464b",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#4f453c",
+                        "surface-container-high": "#2a2a2a",
+                        "on-primary-container": "#7b7c84",
+                        "inverse-primary": "#5d5e65",
+                        "on-tertiary-container": "#877b70",
+                        "surface-variant": "#353435",
+                        "on-primary-fixed": "#191b22",
+                        "primary-fixed-dim": "#c5c6ce",
+                        "on-secondary-fixed": "#111c2d",
+                        "amber-accent": "#FFB900",
+                        "emerald-accent": "#10B981",
+                        "coral-accent": "#FF4D4D"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "24px",
+                        "gutter": "16px",
+                        "margin": "32px",
+                        "lg": "40px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Space Grotesk"],
+                        "label-caps": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "code-sm": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glow-coral { filter: drop-shadow(0 0 4px #FF4D4D); }
+        .glow-amber { filter: drop-shadow(0 0 4px #FFB900); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-primary">
+<!-- TopAppBar -->
+<header class="flex flex-col w-full px-margin py-base max-w-full docked full-width top-0 bg-surface-container dark:bg-surface-container border-b border-outline-variant dark:border-outline-variant z-40 sticky">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<h1 class="font-display-lg text-headline-md font-bold text-primary dark:text-primary tracking-tight">Migration Hub | Engine Version 5.4</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-xs hover:bg-surface-container-high transition-colors rounded-lg">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pb-margin lg:pb-32">
+<!-- Hero Header -->
+<section class="relative w-full overflow-hidden min-h-[300px] flex flex-col justify-end px-margin py-lg border-b border-outline-variant">
+<div class="absolute inset-0 opacity-40 z-0">
+<img class="w-full h-full object-cover" data-alt="A highly detailed cinematic 3D render of a technical data center or futuristic server room. The environment is bathed in a dark aesthetic with glowing neon blue and secondary purple light trails reflecting off metallic surfaces. The composition emphasizes depth and technological complexity, using a professional dark mode color palette with sharp architectural lines to evoke a sense of high-end software engineering and system stability." src="https://lh3.googleusercontent.com/aida/ADBb0uh5_NwCplp7C2BN6czuukbx30WsQp1BO35ybS_t6DxAONqsMLQUDCbiN6JuC6KmuZ-2kzRhAKW-VMrWXrsUWAPcSd09-5m1dncMy-IHV6rwCyGhPPEA4h8vd9-8vT8yRN2oSwmQbpBVZyFRQP7iVFk6Piil49XpcFlpnKohjvDlw1NH4RCGFpuHY5vO1D8Lp06sOAjg0GiNIZgNR74WtoKdGGpL4rF3ajYEr7CsbKePOx7PrNgAJjNmaUQTe9zA37ysx_7cmfUhEqg"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10"></div>
+<div class="relative z-20">
+<p class="font-label-caps text-label-caps text-primary tracking-[0.2em] mb-xs">MIGRATION MODULE</p>
+<h2 class="font-display-lg text-display-lg max-w-2xl mb-base">Understanding UE Version Migrations</h2>
+<div class="flex items-center gap-base">
+<span class="px-gutter py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">v5.4</span>
+<span class="material-symbols-outlined text-outline" data-icon="arrow_forward">arrow_forward</span>
+<span class="px-gutter py-xs bg-primary text-on-primary font-label-caps text-label-caps rounded-full">v5.7</span>
+</div>
+</div>
+</section>
+<!-- Migration Stats (Bento Style) -->
+<section class="px-margin py-lg grid grid-cols-2 md:grid-cols-5 gap-gutter">
+<div class="col-span-2 md:col-span-1 bg-surface-container p-gutter border border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary mb-base" data-icon="movie">movie</span>
+<p class="text-on-surface-variant font-label-caps text-label-caps">Videos Affected</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">23</h3>
+</div>
+<div class="bg-surface-container p-gutter border border-coral-accent/30 rounded-xl hover:bg-surface-container-high transition-all relative overflow-hidden group">
+<div class="absolute inset-0 bg-coral-accent opacity-0 group-hover:opacity-5 transition-opacity"></div>
+<span class="material-symbols-outlined text-coral-accent mb-base glow-coral" data-icon="warning" data-weight="fill" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="text-on-surface-variant font-label-caps text-label-caps">Breaking</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">7</h3>
+</div>
+<div class="bg-surface-container p-gutter border border-amber-accent/30 rounded-xl hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-amber-accent mb-base glow-amber" data-icon="error_outline">error_outline</span>
+<p class="text-on-surface-variant font-label-caps text-label-caps">Minor</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">3</h3>
+</div>
+<div class="bg-surface-container p-gutter border border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mb-base" data-icon="delete_sweep">delete_sweep</span>
+<p class="text-on-surface-variant font-label-caps text-label-caps">Removed</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">2</h3>
+</div>
+<div class="bg-surface-container p-gutter border border-emerald-accent/30 rounded-xl hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-emerald-accent mb-base" data-icon="published_with_changes">published_with_changes</span>
+<p class="text-on-surface-variant font-label-caps text-label-caps">Replacement</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">6</h3>
+</div>
+</section>
+<!-- Interactive Timeline -->
+<section class="px-margin py-lg border-y border-outline-variant bg-surface-container-low">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-lg uppercase tracking-widest">Version Trajectory</h4>
+<div class="relative flex items-center justify-between">
+<div class="absolute h-1 w-full bg-outline-variant z-0 top-1/2 -translate-y-1/2"></div>
+<div class="absolute h-1 w-2/3 bg-primary z-10 top-1/2 -translate-y-1/2 transition-all"></div>
+<div class="relative z-20 flex flex-col items-center gap-xs">
+<div class="w-4 h-4 bg-primary rounded-full ring-4 ring-primary/20"></div>
+<span class="font-label-caps text-label-caps text-primary mt-base">5.4</span>
+</div>
+<div class="relative z-20 flex flex-col items-center gap-xs">
+<div class="w-4 h-4 bg-primary rounded-full ring-4 ring-primary/20"></div>
+<span class="font-label-caps text-label-caps text-primary mt-base">5.5</span>
+</div>
+<div class="relative z-20 flex flex-col items-center gap-xs">
+<div class="w-6 h-6 bg-background border-2 border-primary rounded-full flex items-center justify-center">
+<div class="w-3 h-3 bg-primary rounded-full animate-pulse shadow-[0_0_10px_#c5c6ce]"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface mt-base font-bold">5.6 [CURRENT]</span>
+</div>
+<div class="relative z-20 flex flex-col items-center gap-xs opacity-50">
+<div class="w-4 h-4 bg-outline-variant rounded-full"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-base">5.7</span>
+</div>
+</div>
+</section>
+<!-- Deltas List -->
+<section class="px-margin py-lg">
+<div class="flex items-center justify-between mb-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Change Deltas</h2>
+<div class="flex gap-xs">
+<span class="px-sm py-xs bg-surface-container-high rounded text-on-surface-variant font-label-caps text-[10px]">ALL</span>
+<span class="px-sm py-xs border border-outline-variant rounded text-on-surface-variant font-label-caps text-[10px]">BREAKING</span>
+</div>
+</div>
+<div class="flex flex-col gap-base">
+<!-- Card 1 -->
+<div class="bg-surface-container border-l-4 border-coral-accent p-gutter rounded-r-xl transition-all hover:translate-x-1 cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-xs mb-xs">
+<span class="px-sm py-[2px] bg-coral-accent/10 text-coral-accent font-label-caps text-[10px] rounded">BREAKING</span>
+<span class="px-sm py-[2px] bg-secondary-container/50 text-secondary-fixed-dim font-label-caps text-[10px] rounded">MODULE</span>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface">UnrealStats v2.0</h4>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</div>
+<p class="font-body-base text-code-sm text-on-surface-variant line-clamp-1">Global statistics overhead calculation has shifted from monolithic to modular aggregation.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border-l-4 border-amber-accent p-gutter rounded-r-xl transition-all hover:translate-x-1 cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-xs mb-xs">
+<span class="px-sm py-[2px] bg-amber-accent/10 text-amber-accent font-label-caps text-[10px] rounded">MINOR</span>
+<span class="px-sm py-[2px] bg-secondary-container/50 text-secondary-fixed-dim font-label-caps text-[10px] rounded">WORKFLOW</span>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface">Pixel Density Profiler</h4>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</div>
+<p class="font-body-base text-code-sm text-on-surface-variant line-clamp-1">Visualization modes now support 8K texture mip-stripping diagnostics by default.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border-l-4 border-emerald-accent p-gutter rounded-r-xl transition-all hover:translate-x-1 cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-xs mb-xs">
+<span class="px-sm py-[2px] bg-emerald-accent/10 text-emerald-accent font-label-caps text-[10px] rounded">STABLE</span>
+<span class="px-sm py-[2px] bg-secondary-container/50 text-secondary-fixed-dim font-label-caps text-[10px] rounded">CORE</span>
+</div>
+<h4 class="font-headline-md text-[18px] text-on-surface">PhysX -&gt; Chaos Deprecation</h4>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</div>
+<p class="font-body-base text-code-sm text-on-surface-variant line-clamp-1">Legacy PhysX modules are now strictly opt-in and require custom build flags.</p>
+</div>
+</div>
+</section>
+<!-- Interactive Walkthrough Simulator -->
+<section class="px-margin py-lg bg-surface-container-lowest">
+<div class="flex items-center gap-base mb-md">
+<span class="material-symbols-outlined text-primary" data-icon="model_training">model_training</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Tutorial vs. Reality</h2>
+</div>
+<div class="grid md:grid-cols-2 gap-gutter">
+<div class="bg-surface-container border border-outline-variant p-gutter rounded-xl">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-base flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="menu_book">menu_book</span> TUTORIAL SAYS
+                    </p>
+<div class="bg-primary-container p-sm rounded border border-outline-variant font-code-sm text-on-primary-container">
+<code>// Simple cast to physics asset<br/>Cast&lt;UPhysicsAsset&gt;(Obj);</code>
+</div>
+</div>
+<div class="bg-surface-container-high border border-primary/30 p-gutter rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-xs bg-primary text-on-primary font-label-caps text-[10px]">REALITY</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-base flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="code">code</span> UE 5.4+ IMPLEMENTATION
+                    </p>
+<div class="bg-background p-sm rounded border border-outline-variant font-code-sm text-emerald-accent">
+<code>// Use Chaos Subsystem Interface<br/>if (FChaosEngine::IsActive()) {<br/>  GetSubsystem&lt;UChaos&gt;();<br/>}</code>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Checks Quiz -->
+<section class="px-margin py-lg">
+<div class="bg-gradient-to-br from-surface-container to-surface-container-high border border-outline-variant p-md rounded-2xl">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Quick Quiz</h3>
+<p class="font-body-base text-code-sm text-on-surface-variant">Verify your migration knowledge.</p>
+</div>
+<div class="text-right">
+<span class="font-display-lg text-headline-md text-primary">03/10</span>
+</div>
+</div>
+<div class="bg-background/50 p-gutter rounded-xl border border-outline-variant mb-md">
+<p class="text-on-surface font-body-base mb-md">Which module replaces the legacy Cinematic Sequencer viewport in 5.4?</p>
+<div class="flex flex-col gap-base">
+<button class="w-full text-left p-sm border border-outline-variant rounded hover:bg-surface-container transition-all flex items-center justify-between group">
+<span class="text-on-surface-variant font-body-base text-code-sm">A. Movie Render Queue Pro</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity" data-icon="circle">circle</span>
+</button>
+<button class="w-full text-left p-sm border border-primary bg-primary/10 rounded flex items-center justify-between">
+<span class="text-primary font-body-base text-code-sm">B. CineCamera Rig Component</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</button>
+</div>
+</div>
+<div class="h-1.5 w-full bg-outline-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[30%]"></div>
+</div>
+</div>
+</section>
+<!-- Migration Plan Checklist -->
+<section class="px-margin py-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md">Migration Strategy</h2>
+<div class="space-y-lg">
+<div>
+<h4 class="font-label-caps text-label-caps text-coral-accent mb-base tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span> DO FIRST (CRITICAL)
+                    </h4>
+<div class="space-y-base">
+<label class="flex items-center gap-gutter p-gutter bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-high transition-all">
+<input checked="" class="form-checkbox bg-background border-outline-variant text-primary rounded-sm w-5 h-5" type="checkbox"/>
+<span class="text-on-surface font-body-base text-code-sm">Backup all Project Metadata and .uproject files</span>
+</label>
+<label class="flex items-center gap-gutter p-gutter bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-high transition-all">
+<input class="form-checkbox bg-background border-outline-variant text-primary rounded-sm w-5 h-5" type="checkbox"/>
+<span class="text-on-surface font-body-base text-code-sm">Run 'Validate Assets' tool on existing UE4 Content</span>
+</label>
+</div>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps text-primary mb-base tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span> WHEN YOU HAVE TIME
+                    </h4>
+<div class="space-y-base">
+<label class="flex items-center gap-gutter p-gutter bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-high transition-all">
+<input class="form-checkbox bg-background border-outline-variant text-primary rounded-sm w-5 h-5" type="checkbox"/>
+<span class="text-on-surface font-body-base text-code-sm">Optimize Nanite cluster density for static meshes</span>
+</label>
+<label class="flex items-center gap-gutter p-gutter bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-high transition-all">
+<input class="form-checkbox bg-background border-outline-variant text-primary rounded-sm w-5 h-5" type="checkbox"/>
+<span class="text-on-surface font-body-base text-code-sm">Explore Substrate material system refactoring</span>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Final Canvas Image Display -->
+<section class="px-margin py-lg">
+<div class="rounded-2xl overflow-hidden border border-outline-variant relative h-[250px] group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A sophisticated architectural visualization showing a cross-section of a digital 3D model with intricate wireframes and textured surfaces. The scene uses a technical high-contrast lighting setup with deep shadows and sharp highlights. The color palette is dominated by slate grays and muted blues, accented by thin glowing line-work in emerald green, creating a professional visualization of engine-level rendering capabilities." src="https://lh3.googleusercontent.com/aida/ADBb0uhKeVe_5R4MKcyN4gAfeBbkMTL0wnV4msBnb3TQNo9r9fP1bZGjGQ0hfVAh1dXm7KnzV5s6mLGxrw-lB-WAbV_WEjhcw7C59MjEGlE8i4dvuO24NeklmtPGBrXwNOVSKM8N0tYXRF7GY_XZDivwJugLNmL4JFyuPrIxbSgTVfDSETvDe23RKzIZ6OBeioDEo3URV31wKC2p6MG42F9cQhG-KmB0RvjLVXYK5P0gjOKkRpUJXU9m_NIT6QcnsszveyRyBb62Ez3ut8U"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent flex flex-col justify-end p-md">
+<p class="font-label-caps text-label-caps text-primary mb-xs">Advanced Visuals</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">Lumen &amp; Nanite Benchmarks</h3>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-gutter py-base bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant shadow-md z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-sm py-xs active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-caps text-[10px]">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-container-low transition-all p-xs rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="sync_alt">sync_alt</span>
+<span class="font-label-caps text-[10px]">Translation</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-container-low transition-all p-xs rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="font-label-caps text-[10px]">Validation</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-container-low transition-all p-xs rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+<span class="font-label-caps text-[10px]">Finalize</span>
+</a>
+</nav>
+</body></html>
