@@ -1,0 +1,114 @@
+name: Notify CI failure on master
+
+# Fires after every "CI - Tests" run completes on the master branch.
+# On failure: opens a GitHub issue (or appends to the existing open one)
+# tagged with `ci-failure` so a red CI can't sit unnoticed for days.
+# On success: closes any open `ci-failure` issues — silent recovery.
+#
+# Why workflow_run and not job-level: a separate workflow has its own GITHUB_TOKEN
+# scope and can post issues even when the failing workflow's permissions are
+# locked down. It also runs after the CI job's logs are already available.
+
+on:
+  workflow_run:
+    workflows: ["CI - Tests"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    # Only act on master pushes. PR-triggered runs already surface failures
+    # in the PR checks UI — no need to mirror them as issues.
+    if: github.event.workflow_run.head_branch == 'master' && github.event.workflow_run.event == 'push'
+
+    steps:
+      - name: Open or update CI failure issue
+        if: github.event.workflow_run.conclusion == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const sha = run.head_sha;
+            const shortSha = sha.slice(0, 8);
+            const runUrl = run.html_url;
+            const commitMsg = run.head_commit?.message?.split("\n")[0] || "(no message)";
+            const author = run.head_commit?.author?.name || run.actor?.login || "unknown";
+
+            const title = `CI failure on master @ ${shortSha}`;
+            const body = [
+              `**Workflow run:** ${runUrl}`,
+              `**Commit:** [\`${shortSha}\`](https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${sha}) — ${commitMsg}`,
+              `**Author:** ${author}`,
+              `**Conclusion:** ${run.conclusion}`,
+              ``,
+              `This issue was opened automatically by [.github/workflows/notify-ci-failure.yml](.github/workflows/notify-ci-failure.yml).`,
+              `It will be closed automatically by the same workflow once a subsequent CI run on master succeeds.`,
+            ].join("\n");
+
+            // Find an existing open ci-failure issue so we don't spam one per failing commit.
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "ci-failure",
+              per_page: 5,
+            });
+
+            if (existing.length > 0) {
+              const issue = existing[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Still red — another failure on master:\n\n${body}`,
+              });
+              core.info(`Appended comment to existing issue #${issue.number}`);
+              return;
+            }
+
+            const { data: created } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ["ci-failure"],
+            });
+            core.info(`Opened issue #${created.number}: ${title}`);
+
+      - name: Close CI failure issues on green
+        if: github.event.workflow_run.conclusion == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const sha = run.head_sha.slice(0, 8);
+            const runUrl = run.html_url;
+
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "ci-failure",
+              per_page: 30,
+            });
+
+            for (const issue of open) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Recovered — CI is green on master at [\`${sha}\`](${runUrl}). Closing.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+                state_reason: "completed",
+              });
+              core.info(`Closed issue #${issue.number}`);
+            }
