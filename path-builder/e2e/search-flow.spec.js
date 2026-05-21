@@ -18,6 +18,11 @@ test.describe("Search flow", () => {
     // Navigate to Fix a Problem (Tutor tab)
     const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
+
+    // The legacy ProblemInput is hidden behind a <details> block in the Chat-first UI
+    const details = page.locator("details").filter({ hasText: /Attach a screenshot or error log/ });
+    await details.locator("summary").click();
+
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
 
