@@ -35,7 +35,7 @@ const db = IS_E2E ? null : getFirestore(app);
 
 // ── Domain & Admin Check ─────────────────────────────────────────────
 
-const ALLOWED_DOMAINS = ["epicgames.com"];
+const ALLOWED_DOMAINS = ["epicgames.com", "xa.epicgames.com"];
 
 // TTL cache for admin claim checks (avoids refetching token on every call)
 let _adminCacheResult = null;
