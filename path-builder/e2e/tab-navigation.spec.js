@@ -23,8 +23,10 @@ test.describe("Tab navigation", () => {
     await page.waitForTimeout(500);
   });
 
-  test("should navigate to the Fix a Problem tab", async ({ page }) => {
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Fix a Problem/ });
+  test("should navigate to the Tutor tab", async ({ page }) => {
+    // Tab was renamed from "Fix a Problem" → "Tutor" in commit 24fd6e21
+    // (tutor pivot: product IS the digital tutor).
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await expect(tab).toBeVisible();
     await tab.click();
     await page.waitForTimeout(1_000);

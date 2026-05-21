@@ -15,8 +15,9 @@ test.describe("Search flow", () => {
     await page.waitForSelector(".auth-gate-authorized", { timeout: 15_000 });
     await page.waitForSelector("nav.sidebar-nav", { timeout: 10_000 });
 
-    // Navigate to Fix a Problem
-    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Learn Why/ });
+    // Navigate to the Tutor tab (formerly "Fix a Problem", briefly "Learn Why").
+    // Renamed in commit 24fd6e21 — product IS the digital tutor now.
+    const tab = page.locator("button.sidebar-tab").filter({ hasText: /Tutor/ });
     await tab.click();
     await page.getByLabel("Problem description").waitFor({ timeout: 5_000 });
   });
