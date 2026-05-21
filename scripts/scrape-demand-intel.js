@@ -146,10 +146,12 @@ async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true }
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const groundingMetadata = data.candidates?.[0]?.groundingMetadata || null;
 
-      // If grounding returned empty text, retry once without grounding as fallback
+      // If a grounded call returns empty text, do NOT auto-retry without
+      // grounding. The two-pass scrape relies on pass 1 carrying grounding
+      // chunks forward; an ungrounded retry strips them silently. Return
+      // empty and let the caller skip.
       if (useGrounding && !text.trim()) {
-        console.warn("  ⚠️ Grounded search returned empty text — retrying without grounding...");
-        return callGemini(prompt, { retries: 1, useGrounding: false });
+        console.warn("  ⚠️ Grounded search returned empty text — skipping (caller will handle).");
       }
 
       return { text, groundingMetadata };
@@ -409,16 +411,20 @@ REQUIRED SEARCH SOURCES:
 
 CATEGORIES TO RESEARCH: ${batch.join(", ")}
 
-For EACH category, identify ${TRENDING_PER_CATEGORY} real questions learners are currently asking. Total: ${batch.length * TRENDING_PER_CATEGORY} questions.
+For EACH of the ${batch.length} categories, find ${TRENDING_PER_CATEGORY} real questions. You MUST produce exactly ${batch.length * TRENDING_PER_CATEGORY} numbered entries — do not skip any category.
 
-Write a research summary in PROSE. For each question:
-  • State the question verbatim
-  • Cite the EXACT post/thread/video title and platform where you found it (e.g. "from a Reddit thread titled 'How do I X' on r/unrealengine")
-  • Note rough engagement signal (upvotes, comments, views)
-  • Tag the category and one subtopic
-  • Rate frequency (high/medium/low)
+Output format (prose, numbered list):
 
-Cite each source by name in the prose so the grounding system can attach the verified URL. Do NOT output JSON yet — that comes in a follow-up step.`;
+1. Category: <one of the categories above>
+   Question: "<verbatim question>"
+   Source: cite the EXACT post/thread/video title and platform (e.g. "from a Reddit thread titled 'How do I X' on r/unrealengine"). Include engagement (upvotes, comments, views).
+   Subtopic: <specific subtopic>
+   Frequency: high|medium|low
+
+2. Category: ...
+   (continue through entry ${batch.length * TRENDING_PER_CATEGORY})
+
+Cite each source by name so the grounding system attaches the verified URL. Do NOT output JSON yet.`;
 
       try {
         const researchResult = await callGemini(researchPrompt);
@@ -537,12 +543,19 @@ SEARCH THESE SOURCES:
 
 Focus on posts from the last 6 months.
 
-Write a research summary in PROSE describing the top ${PAIN_POINT_LIMIT} pain points. For each pain point:
-  • Describe the struggle in plain language
-  • Cite the EXACT post/thread/video title and platform where you found it
-  • Note how often this comes up and its relevance (high/medium/low)
+Find exactly ${PAIN_POINT_LIMIT} pain points. You MUST produce all ${PAIN_POINT_LIMIT} numbered entries — do not skip.
 
-Cite each source by name in the prose so the grounding system attaches the verified URL. Do NOT output JSON — that comes in a follow-up step.`;
+Output format (prose, numbered list):
+
+1. Pain point: <one-sentence description of the struggle>
+   Source: cite the EXACT post/thread/video title and platform (e.g. "from a Reddit thread titled 'X is broken' on r/FortniteCreative")
+   Frequency: how often this comes up
+   Relevance: high|medium|low
+
+2. Pain point: ...
+   (continue through entry ${PAIN_POINT_LIMIT})
+
+Cite each source by its actual title and platform so the grounding system attaches the verified URL. If you cannot find a real cited source for an item, omit that item rather than fabricating. Do NOT output JSON.`;
 
   try {
     const researchResult = await callGemini(researchPrompt);
