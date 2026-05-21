@@ -436,14 +436,19 @@ async function scrapeRedditEngagement(taxonomy) {
 
 // How many categories share one grounded research call.
 //
-// Empirically tuned down over two rounds. Size 5 (initial post-merge default)
-// produced a UEFN run where the 5-cat batch returned 0 groundingChunks —
-// 70 % drop in verified-URL coverage. Size 3 brought chunks back to ~37 but
-// still saw uneven per-batch distribution. Size 2 keeps each grounded call's
-// scope tight enough that Gemini reliably fires search on every batch — at
-// the cost of more calls (and more tokens). Quality is the priority, so we
-// pay that cost.
-const SIGNALS_PER_BATCH = 2;
+// Empirically tuned across four rounds of UEFN scrapes:
+//   - Size 5: 5-cat batch returned 0 groundingChunks (model didn't ground
+//     on the wider context). Net negative on verified-URL coverage.
+//   - Size 2: trailing 1-cat batch returned 0 grounded; redistribution
+//     fixed that but introduced fresh per-run variance — a 3-cat batch
+//     returned 2 questions + 0 pain points in one run.
+//   - Size 3: best balance observed so far. 37 grounded chunks, 39 items,
+//     no failed batches in the one test run we have.
+//
+// Gemini's grounded output is non-deterministic enough that we can't fully
+// stamp out variance with batch sizing alone. Size 3 is the configuration
+// that's behaved best across tests; accept the variance and move on.
+const SIGNALS_PER_BATCH = 3;
 
 async function scrapeDemandSignalsBatch(batch) {
   const researchPrompt = `Research what Unreal Engine (${engine}) learners are asking AND struggling with in:
