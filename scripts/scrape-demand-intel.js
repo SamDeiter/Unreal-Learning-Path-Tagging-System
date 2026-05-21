@@ -426,34 +426,19 @@ async function scrapeRedditEngagement(taxonomy) {
   return results;
 }
 
-// ── Scraping Functions ─────────────────────────────────────────────
+// ── Scraping Functions ───────────────────────────────
+//
+// One grounded research call per batch covers BOTH trending questions and
+// pain points for the same categories. Halves the number of grounded calls
+// (which is where the bulk of token cost lives — each grounded call eats
+// ~7K thinking tokens on top of prompt+output). The follow-up shape pass
+// extracts both arrays from the single prose summary.
 
-async function scrapeTrendingQuestions(categories) {
-  console.log(`\n🔍 Scraping trending questions across ${categories.length} categories...`);
+// How many categories share one grounded research call.
+const SIGNALS_PER_BATCH = 5;
 
-  const allQuestions = [];
-
-  // Build batches of categories
-  const TRENDING_BATCH = 6;
-  const batches = [];
-  for (let i = 0; i < categories.length; i += TRENDING_BATCH) {
-    batches.push(categories.slice(i, i + TRENDING_BATCH));
-  }
-  const totalBatches = batches.length;
-  console.log(`  Running ${totalBatches} batches (${PARALLEL_CONCURRENCY} in parallel)...`);
-
-  // Process batches with limited concurrency
-  for (let g = 0; g < batches.length; g += PARALLEL_CONCURRENCY) {
-    const group = batches.slice(g, g + PARALLEL_CONCURRENCY);
-
-    const promises = group.map(async (batch, idx) => {
-      const batchNum = g + idx + 1;
-      console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
-
-      // Two-pass: grounded prose research (chunks emit reliably when the
-      // model is writing prose with explicit citations), then a separate
-      // JSON-mode call to shape that prose into structured data.
-      const researchPrompt = `Research real questions Unreal Engine (${engine}) learners are asking in:
+async function scrapeDemandSignalsBatch(batch) {
+  const researchPrompt = `Research what Unreal Engine (${engine}) learners are asking AND struggling with in:
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - forums.unrealengine.com
 - stackoverflow.com [${engine === "UEFN" ? "fortnite-creative" : "unreal-engine5"}]
@@ -461,166 +446,53 @@ async function scrapeTrendingQuestions(categories) {
 - YouTube / TikTok / Instagram ${engine} tutorials
 - x.com hashtag ${engine === "UEFN" ? "#UEFN" : "#UnrealEngine"}
 
-Categories: ${batch.join(", ")}
-
-Produce exactly ${batch.length * TRENDING_PER_CATEGORY} numbered entries — ${TRENDING_PER_CATEGORY} per category. Format (prose, NOT JSON):
-
-1. Category: <name>
-   Question: "<verbatim>"
-   Source: <exact post/video title, platform, engagement>
-   Subtopic: <specific subtopic>
-   Frequency: high|medium|low
-
-Cite each source by its actual title so grounding can attach the URL.`;
-
-      try {
-        const researchResult = await callGemini(researchPrompt, { purpose: "trending-research" });
-        const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
-
-        if (!researchResult.text.trim()) {
-          console.warn(`    ⚠️ Batch ${batchNum}: empty research pass`);
-          return [];
-        }
-
-        const shapePrompt = `Convert this ${engine} learner-question research into a JSON array. Use ONLY the summary — do not invent.
-
-Schema:
-[{
-  "question": "The exact question",
-  "category": "One of the categories mentioned",
-  "subtopic": "Specific subtopic",
-  "frequency": "high|medium|low",
-  "sources": [{
-    "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
-    "title": "Title EXACTLY as cited",
-    "url": "",
-    "date": "",
-    "engagement": "e.g. 45 upvotes"
-  }]
-}]
-
-JSON only — no preamble.
-
-SUMMARY:
-${researchResult.text}`;
-
-        const shapeResult = await callGemini(shapePrompt, { useGrounding: false, purpose: "trending-shape" });
-        const parsed = parseJSON(shapeResult.text);
-
-        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          console.log(
-            `    ✅ Batch ${batchNum}: got ${parsed.length} questions` +
-              (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : " (0 grounded)")
-          );
-          // Carry the research-pass chunks through so the normalize step can
-          // rewrite each LLM-emitted URL with a verified vertexaisearch one.
-          return parsed.map((q) => ({ ...q, _groundedChunks: groundedChunks }));
-        } else {
-          console.warn(`    ⚠️ Batch ${batchNum}: shape pass empty or unparseable`);
-          return [];
-        }
-      } catch (err) {
-        console.error(`    ❌ Batch ${batchNum} failed: ${err.message}`);
-        return [];
-      }
-    });
-
-    // Wait for this group of parallel batches
-    const results = await Promise.allSettled(promises);
-    for (const r of results) {
-      if (r.status === "fulfilled" && r.value && r.value.length > 0) {
-        allQuestions.push(...r.value);
-      }
-    }
-
-    if (g + PARALLEL_CONCURRENCY < batches.length) {
-      await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
-    }
-  }
-
-  // Deduplicate and normalize
-  const seen = new Set();
-  const uniqueQuestions = allQuestions
-    .filter((q) => {
-      const key = (q.question || "").toLowerCase().trim();
-      if (seen.has(key) || !key) return false;
-      seen.add(key);
-      return true;
-    })
-    .map((q) => {
-      const chunks = Array.isArray(q._groundedChunks) ? q._groundedChunks : [];
-      return {
-        question: q.question || "",
-        category: q.category || "General",
-        subtopic: q.subtopic || "",
-        frequency: q.frequency || "medium",
-        sources: (q.sources || []).map((src) => {
-          // Replace LLM-emitted URL with a grounded one matched by title.
-          // No match → leave empty so the UI uses its search fallback.
-          const groundedUri = findGroundedUri(src.title, chunks);
-          return {
-            type: src.type || "unknown",
-            url: groundedUri,
-            title: src.title || "",
-            date: src.date || "",
-            engagement: src.engagement || "",
-            verified: Boolean(groundedUri),
-          };
-        }),
-      };
-    });
-
-  console.log(`  ✅ Total: ${uniqueQuestions.length} unique trending questions`);
-  return uniqueQuestions;
-}
-
-
-// How many categories share a single Gemini call. Mirrors the trending path,
-// where the wider query reliably triggers groundingChunks emission. The
-// previous one-category-per-call shape returned 0 chunks every time.
-const PAIN_POINTS_PER_BATCH = 5;
-
-async function scrapePainPointsBatch(categories) {
-  // Two-pass: grounded prose research first (chunks emit reliably on prose
-  // with citations), then JSON shaping over that prose.
-  const researchPrompt = `Research common struggles Unreal Engine (${engine}) learners face in:
-- forums.unrealengine.com
-- ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
-- dev.epicgames.com community
-- YouTube comments on ${engine} tutorials
-- TikTok / Instagram ${engine} reels
-- x.com hashtag ${engine === "UEFN" ? "#UEFN" : "#UnrealEngine"}
-
 Focus on posts from the last 6 months.
 
-Categories: ${categories.join(", ")}
+Categories: ${batch.join(", ")}
 
-Produce exactly ${categories.length * PAIN_POINT_LIMIT} numbered entries — ${PAIN_POINT_LIMIT} per category. Format (prose, NOT JSON):
+For EACH category, produce:
+  • ${TRENDING_PER_CATEGORY} trending questions learners are currently asking
+  • ${PAIN_POINT_LIMIT} common pain points / struggles
 
-1. Category: <name>
-   Pain point: <one-sentence description>
-   Source: <exact post/thread/video title, platform>
-   Frequency: how often
-   Relevance: high|medium|low
+Format (prose, NOT JSON):
 
-Cite each source by its actual title so grounding can attach the URL. If you can't find a real cited source for an item, omit it rather than fabricating.`;
+Category: <name>
+  Questions:
+  Q1. "<verbatim question>" — Source: <exact post/video title, platform, engagement> — Subtopic: <subtopic> — Frequency: high|medium|low
+  Q2. ...
+  Pain points:
+  P1. <one-sentence description> — Source: <exact post/thread title, platform> — Frequency: <how often> — Relevance: high|medium|low
+  P2. ...
+
+Repeat for every category.
+
+Cite each source by its real title and platform so grounding can attach the URL. If you can’t find a real cited source for an item, omit it rather than fabricating.`;
 
   try {
-    const researchResult = await callGemini(researchPrompt, { purpose: "pain-research" });
+    const researchResult = await callGemini(researchPrompt, { purpose: "signals-research" });
     const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
 
     if (!researchResult.text.trim()) {
-      console.warn(`    ⚠️ Pain-points batch [${categories.join(", ")}]: empty research pass`);
-      return {};
+      console.warn(`    ⚠️ Signals batch [${batch.join(", ")}]: empty research pass`);
+      return { questions: [], painPoints: {} };
     }
 
-    const shapePrompt = `Convert this ${engine} learner pain-point research into a JSON array. Use ONLY the summary — include only items with a cited source.
+    const shapePrompt = `Convert this ${engine} learner-demand research into a JSON array. Use ONLY items with a cited source in the summary — do not invent.
 
-Schema:
+Each item is either a question or a pain point. Schema:
 [{
+  "type": "question",
+  "category": "One of the categories named",
+  "question": "Verbatim question",
+  "subtopic": "Specific subtopic",
+  "frequency": "high|medium|low",
+  "sourceType": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
+  "sourceTitle": "Title EXACTLY as cited",
+  "engagement": "e.g. 45 upvotes"
+}, {
+  "type": "painPoint",
   "category": "One of the categories named",
   "painPoint": "One-sentence description",
-  "sourceUrl": "",
   "sourceTitle": "Title EXACTLY as cited",
   "relevance": "high|medium|low",
   "frequency": "how often"
@@ -631,81 +503,96 @@ JSON only — no preamble.
 SUMMARY:
 ${researchResult.text}`;
 
-    const shapeResult = await callGemini(shapePrompt, { useGrounding: false, purpose: "pain-shape" });
+    const shapeResult = await callGemini(shapePrompt, { useGrounding: false, purpose: "signals-shape" });
     const parsed = parseJSON(shapeResult.text);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-      console.warn(`    ⚠️ Pain-points batch [${categories.join(", ")}]: shape pass empty`);
-      return {};
+      console.warn(`    ⚠️ Signals batch [${batch.join(", ")}]: shape pass empty`);
+      return { questions: [], painPoints: {} };
     }
 
+    const known = new Set(batch);
+    const questions = [];
+    const painPoints = {};
+    for (const cat of batch) painPoints[cat] = [];
+
+    for (const item of parsed) {
+      if (!known.has(item.category)) continue;
+      const sourceTitle = item.sourceTitle || item.source_title || "";
+      const groundedUri = findGroundedUri(sourceTitle, groundedChunks);
+      const verified = Boolean(groundedUri);
+
+      if (item.type === "question") {
+        questions.push({
+          question: item.question || "",
+          category: item.category,
+          subtopic: item.subtopic || "",
+          frequency: item.frequency || "medium",
+          sources: [{
+            type: item.sourceType || "unknown",
+            url: groundedUri,
+            title: sourceTitle,
+            date: item.date || "",
+            engagement: item.engagement || "",
+            verified,
+          }],
+        });
+      } else if (item.type === "painPoint") {
+        if (painPoints[item.category].length >= PAIN_POINT_LIMIT) continue;
+        painPoints[item.category].push({
+          painPoint: item.painPoint || item.pain_point || "",
+          sourceUrl: groundedUri,
+          sourceTitle,
+          relevance: item.relevance || "medium",
+          frequency: item.frequency || "",
+          verified,
+        });
+      }
+    }
+
+    const ppCount = Object.values(painPoints).flat().length;
     console.log(
-      `    ✅ Pain-points batch [${categories.length} cats]: ${parsed.length} items` +
+      `    ✅ Signals batch [${batch.length} cats]: ${questions.length}q + ${ppCount}p` +
         (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : " (0 grounded)")
     );
 
-    // Bin parsed items by their declared category. Items whose category
-    // doesn't match any requested one are dropped (model occasionally
-    // invents a sibling category name).
-    const knownCats = new Set(categories);
-    const binned = {};
-    for (const cat of categories) binned[cat] = [];
-
-    for (const pp of parsed) {
-      const sourceTitle = pp.sourceTitle || pp.source_title || "";
-      const itemCategory = pp.category || "";
-      if (!knownCats.has(itemCategory)) continue;
-      if (binned[itemCategory].length >= PAIN_POINT_LIMIT) continue;
-      const groundedUri = findGroundedUri(sourceTitle, groundedChunks);
-      binned[itemCategory].push({
-        painPoint: pp.painPoint || pp.pain_point || "",
-        sourceUrl: groundedUri,
-        sourceTitle,
-        relevance: pp.relevance || "medium",
-        frequency: pp.frequency || "",
-        verified: Boolean(groundedUri),
-      });
-    }
-
-    return binned;
+    return { questions, painPoints };
   } catch (err) {
-    console.warn(`  ⚠️ Pain-points batch [${categories.join(", ")}] failed: ${err.message}`);
-    return {};
+    console.warn(`  ⚠️ Signals batch [${batch.join(", ")}] failed: ${err.message}`);
+    return { questions: [], painPoints: {} };
   }
 }
 
-async function scrapeAllPainPoints(categories) {
+async function scrapeDemandSignals(categories) {
   console.log(
-    `\n💬 Scraping pain points for ${categories.length} categories (batches of ${PAIN_POINTS_PER_BATCH}, ${PARALLEL_CONCURRENCY} in parallel)...`
+    `\n🔍 Scraping demand signals (questions + pain points) across ${categories.length} categories (batches of ${SIGNALS_PER_BATCH}, ${PARALLEL_CONCURRENCY} in parallel)...`
   );
 
-  // Build batches of categories that share a single Gemini call.
   const batches = [];
-  for (let i = 0; i < categories.length; i += PAIN_POINTS_PER_BATCH) {
-    batches.push(categories.slice(i, i + PAIN_POINTS_PER_BATCH));
+  for (let i = 0; i < categories.length; i += SIGNALS_PER_BATCH) {
+    batches.push(categories.slice(i, i + SIGNALS_PER_BATCH));
   }
   const totalBatches = batches.length;
 
-  const results = {};
-  for (const cat of categories) results[cat] = [];
+  const allQuestions = [];
+  const allPainPoints = {};
+  for (const cat of categories) allPainPoints[cat] = [];
 
-  // Process batches with limited concurrency (same pattern as trending).
   for (let g = 0; g < batches.length; g += PARALLEL_CONCURRENCY) {
     const group = batches.slice(g, g + PARALLEL_CONCURRENCY);
 
     const promises = group.map(async (batch, idx) => {
       const batchNum = g + idx + 1;
       console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
-      return scrapePainPointsBatch(batch);
+      return scrapeDemandSignalsBatch(batch);
     });
 
     const settled = await Promise.allSettled(promises);
     for (const r of settled) {
       if (r.status === "fulfilled" && r.value) {
-        for (const [cat, items] of Object.entries(r.value)) {
-          if (Array.isArray(items) && items.length > 0) {
-            results[cat] = items;
-          }
+        allQuestions.push(...(r.value.questions || []));
+        for (const [cat, items] of Object.entries(r.value.painPoints || {})) {
+          if (Array.isArray(items) && items.length > 0) allPainPoints[cat] = items;
         }
       }
     }
@@ -715,9 +602,20 @@ async function scrapeAllPainPoints(categories) {
     }
   }
 
-  const totalPainPoints = Object.values(results).flat().length;
-  console.log(`  ✅ Found ${totalPainPoints} pain points across ${categories.length} categories`);
-  return results;
+  // Deduplicate questions by their text.
+  const seen = new Set();
+  const uniqueQuestions = allQuestions.filter((q) => {
+    const key = (q.question || "").toLowerCase().trim();
+    if (seen.has(key) || !key) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const totalQ = uniqueQuestions.length;
+  const totalPP = Object.values(allPainPoints).flat().length;
+  console.log(`  ✅ Total: ${totalQ} unique trending questions, ${totalPP} pain points across ${categories.length} categories`);
+
+  return { trendingQuestions: uniqueQuestions, painPointsByCategory: allPainPoints };
 }
 
 // ── Coverage Analysis ─────────────────────────────────────────────
@@ -956,8 +854,7 @@ async function main() {
   }
   console.log("  ✅ Demand data loaded");
 
-  const trendingQuestions = await scrapeTrendingQuestions(categories);
-  const painPointsByCategory = await scrapeAllPainPoints(categories);
+  const { trendingQuestions, painPointsByCategory } = await scrapeDemandSignals(categories);
   const redditEngagement = await scrapeRedditEngagement(taxonomy);
 
   const db = initFirestore();
