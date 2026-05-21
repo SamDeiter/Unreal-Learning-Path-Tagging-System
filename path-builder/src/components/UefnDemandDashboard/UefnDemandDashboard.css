@@ -1,15 +1,17 @@
 /* ── UEFN Demand Intelligence Dashboard ─────────────────────── */
 
 .uefn-demand-dashboard {
-  max-width: 100% !important; box-sizing: border-box !important;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  box-sizing: border-box;
   padding: 1.5rem;
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   font-family: var(--font-body);
   min-height: 100vh;
   background: var(--kc-bg-surface-0);
   color: var(--kc-text-primary);
+  /* overflow visible so tooltips can escape; horizontal overflow guarded by min-width:0 on children */
+  overflow: visible;
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -73,6 +75,48 @@
 .refresh-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── Region Selector ─────────────────────────────────────── */
+
+.region-selector {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--kc-bg-surface-2);
+  border-radius: 8px;
+  background: var(--kc-bg-surface-1);
+  color: var(--kc-text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.region-selector:hover:not(:disabled) {
+  background: var(--kc-bg-surface-2);
+  color: var(--kc-text-primary);
+  border-color: var(--kc-bg-surface-3);
+}
+
+.region-selector:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.region-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.region-status-loading { color: #fbbf24; }
+.region-status-error   { color: var(--kc-tertiary); }
+.region-status-empty   {
+  color: var(--kc-text-tertiary);
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px dashed var(--kc-bg-surface-3);
 }
 
 /* ── Scrape Button States ──────────────────────────────── */
@@ -239,7 +283,6 @@
 /* ── Stats Bar ──────────────────────────────────────────── */
 
 .stats-bar {
-  max-width: 100% !important;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
@@ -278,24 +321,25 @@
 /* ── Two-Column Layout ──────────────────────────────────── */
 
 .dashboard-columns {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  gap: 1.5rem !important;
-  width: 100% !important;
-  height: 750px !important;
-  min-height: 750px !important;
-  margin-bottom: 2rem !important;
-  overflow: hidden !important;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1.5rem;
+  width: 100%;
+  height: 750px;
+  min-height: 750px;
+  margin-bottom: 2rem;
+  /* allow tooltips from inner cards to escape horizontally */
+  overflow: visible;
 }
 
 .dashboard-columns.single-column {
-  flex-direction: column !important;
+  flex-direction: column;
 }
 
 .dashboard-columns.single-column .column-suggestions {
-  width: 100% !important;
-  flex: 1 !important;
+  width: 100%;
+  flex: 1;
 }
 
 .dashboard-columns.single-column .trending-list .empty-state {
@@ -304,12 +348,18 @@
 
 .column-header {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 0.75rem;
+}
+
+.column-header-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  min-height: 125px; /* Alignment of list tops */ /* Force consistent header height */
-  flex-wrap: wrap;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .column-header h3 {
@@ -427,32 +477,37 @@
 /* ── Suggestion Cards ───────────────────────────────────── */
 
 .column-suggestions, .column-trending {
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100% !important;
-  background: rgba(15, 23, 42, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  /* visible so tooltips on edge cards aren't clipped by the column container.
+     Internal scrolling is owned by .suggestions-list / .trending-list. */
+  overflow: visible;
 }
 
 .column-suggestions {
-  flex: 3 !important;
-  width: 60% !important;
+  flex: 3 1 0;
+  min-width: 0;
 }
 
 .column-trending {
-  flex: 2 !important;
-  width: 40% !important;
+  flex: 2 1 0;
+  min-width: 0;
 }
 
 .suggestions-list {
-  flex: 1 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding-right: 4px !important;
-  scrollbar-gutter: stable !important;
+  flex: 1;
+  /* overflow-y: auto necessarily makes x a scroll container too;
+     keep x hidden so horizontal scrollbar never appears. Right-edge tooltips
+     handled below via .suggestion-metrics anchoring. */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 4px 4px 4px;
+  scrollbar-gutter: stable;
 }
 
 .suggestion-card {
@@ -501,7 +556,6 @@
   font-weight: 700;
   color: var(--kc-text-tertiary);
   min-width: 2rem;
-  margin-top: 1px; /* Align with title text better */
 }
 
 .suggestion-info {
@@ -525,9 +579,11 @@
 
 .suggestion-metrics {
   display: flex;
-  align-items: baseline; /* Align badges to the baseline of the metrics' first line (the numbers) */
-  gap: 0.85rem;
+  align-items: center;
+  gap: 0.6rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .metric {
@@ -773,11 +829,11 @@ a.source-question.source-link:hover {
 /* ── Trending Questions ─────────────────────────────────── */
 
 .trending-list {
-  flex: 1 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding-right: 4px !important;
-  scrollbar-gutter: stable !important;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 4px 4px 4px;
+  scrollbar-gutter: stable;
 }
 
 .trending-question {
@@ -856,11 +912,10 @@ a.source-question.source-link:hover {
 /* ── Granular Coverage Chart ────────────────────────────── */
 
 .granular-coverage {
-  max-width: 100% !important; margin: 1.5rem 0 !important;
   background: var(--kc-bg-surface-1);
   border-radius: 12px;
   padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  margin: 1.5rem 0;
 
   border: none;
   border-top: 1px solid var(--kc-glass-border-light);
@@ -1021,7 +1076,6 @@ a.source-question.source-link:hover {
 /* ── Provenance Footer ──────────────────────────────────── */
 
 .provenance-footer {
-  max-width: 100% !important;
   background: rgba(15, 23, 42, 0.5);
   border-radius: 10px;
   padding: 1rem 1.25rem;
@@ -1113,39 +1167,33 @@ a.source-question.source-link:hover {
 
 @media (max-width: 900px) {
   .dashboard-columns {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  gap: 1.5rem !important;
-  width: 100% !important;
-  height: 750px !important;
-  min-height: 750px !important;
-  margin-bottom: 2rem !important;
-  overflow: hidden !important;
-}
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+
+  .column-suggestions,
+  .column-trending {
+    width: 100%;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 400px;
+  }
 
   .stats-bar {
-  max-width: 100% !important;
     grid-template-columns: repeat(2, 1fr);
   }
 
   .suggestion-header {
     flex-wrap: wrap;
   }
-
-  .suggestion-metrics {
-  display: flex;
-  align-items: baseline; /* Align badges to the baseline of the metrics' first line (the numbers) */
-  gap: 0.85rem;
-  flex-shrink: 0;
-}
 }
 
 /* ── Platform Source Badges (on SuggestionCard) ───────── */
 
 .suggestion-meta-row {
   display: flex;
-  align-items: baseline; /* Align dots and category text to same baseline */
+  align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
   margin-top: 4px;
@@ -1165,8 +1213,6 @@ a.source-question.source-link:hover {
   height: 1rem;
   border-radius: 50%;
   opacity: 0.9;
-  position: relative;
-  top: 1px; /* Optical adjustment for baseline alignment of circles */
 }
 
 /* ── Platform Demand Breakdown Panel ──────────────────── */
@@ -1428,12 +1474,38 @@ a.source-question.source-link:hover {
 /* ── Industry Vertical Filter ──────────────────────────── */
 
 .industry-filter-row {
-  max-width: 100% !important;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-wrap: wrap;
   width: 100%;
+}
+
+/* Filter toggles row (Blue Ocean, etc.) */
+.filter-toggles {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.blue-ocean-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--kc-text-secondary);
+  font-weight: 500;
+  user-select: none;
+}
+
+.blue-ocean-toggle input[type="checkbox"] {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  accent-color: #0ea5e9;
+  margin: 0;
 }
 
 .filter-group-label {

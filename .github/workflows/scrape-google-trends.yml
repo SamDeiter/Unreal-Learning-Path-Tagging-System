@@ -3,14 +3,25 @@ name: Scrape Google Trends Intelligence
 on:
   schedule:
     # Weekly on Sundays at 06:00 UTC (after YouTube scraper at 05:00)
-    - cron: '0 6 * * 0'
-  workflow_dispatch:  # Manual trigger
+    - cron: "0 6 * * 0"
+  workflow_dispatch: # Manual trigger
+    inputs:
+      engine:
+        description: "Engine to scrape (UE5 or UEFN)"
+        required: false
+        default: "UE5"
+      region:
+        description: "Region preset (worldwide, na, eu, jp, br, sea) or raw ISO code"
+        required: false
+        default: "worldwide"
 
 permissions:
   contents: read
 
 jobs:
-  scrape-trends:
+  # UE5: worldwide-only (matches previous behavior)
+  scrape-trends-ue5:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.engine == 'UE5' || github.event.inputs.engine == ''))
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -21,19 +32,55 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: pip install pytrends firebase-admin google-cloud-firestore
 
-      - name: Run Google Trends scraper
+      - name: Run Google Trends scraper (UE5)
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: python scripts/scrape-google-trends.py
+        run: python scripts/scrape-google-trends.py --engine UE5 --region ${{ github.event.inputs.region || 'worldwide' }}
 
       - name: Upload local report artifact
         uses: actions/upload-artifact@v4
         with:
-          name: google-trends-report-${{ github.run_number }}
-          path: scripts/output/google_trends_report.json
+          name: google-trends-report-ue5-${{ github.run_number }}
+          path: scripts/output/google_trends_report_ue5*.json
+          retention-days: 90
+
+  # UEFN: fan out across regions on schedule, or scrape a single chosen region on dispatch
+  scrape-trends-uefn:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.engine == 'UEFN')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      # Stagger to stay friendly to pytrends rate limits
+      max-parallel: 2
+      matrix:
+        region: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.region || 'worldwide')) || fromJson('["worldwide","na","eu","jp","br","sea"]') }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pytrends firebase-admin google-cloud-firestore
+
+      - name: Run Google Trends scraper (UEFN ${{ matrix.region }})
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python scripts/scrape-google-trends.py --engine UEFN --region ${{ matrix.region }}
+
+      - name: Upload local report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-trends-report-uefn-${{ matrix.region }}-${{ github.run_number }}
+          path: scripts/output/google_trends_report_uefn*.json
           retention-days: 90

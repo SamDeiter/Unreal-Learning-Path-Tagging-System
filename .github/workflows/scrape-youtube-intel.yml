@@ -5,12 +5,23 @@ on:
     # Run daily at 5am UTC (1 hour before demand intel scrape)
     - cron: "0 5 * * *"
   workflow_dispatch: # Allow manual trigger from GitHub UI
+    inputs:
+      engine:
+        description: "Engine to scrape (UE5 or UEFN)"
+        required: false
+        default: "UE5"
+      region:
+        description: "Region preset (worldwide, na, eu, jp, br, sea) or raw ISO code"
+        required: false
+        default: "worldwide"
 
 permissions:
   contents: read
 
 jobs:
-  scrape:
+  # UE5: worldwide-only (matches previous behavior)
+  scrape-ue5:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.engine == 'UE5' || github.event.inputs.engine == ''))
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -27,12 +38,45 @@ jobs:
         run: npm install firebase-admin@13
         working-directory: scripts
 
-      - name: Run YouTube intelligence scraper
+      - name: Run YouTube intelligence scraper (UE5)
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node scripts/scrape-youtube-intel.js
+        run: node scripts/scrape-youtube-intel.js --engine UE5 --region ${{ github.event.inputs.region || 'worldwide' }}
 
       - name: Summary
         if: always()
-        run: echo "✅ YouTube intelligence scrape completed at $(date -u)"
+        run: echo "✅ YouTube intelligence (UE5) scrape completed at $(date -u)"
+
+  # UEFN: fan out across regions on schedule, or scrape a single chosen region on dispatch
+  scrape-uefn:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.engine == 'UEFN')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        region: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.region || 'worldwide')) || fromJson('["worldwide","na","eu","jp","br","sea"]') }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install firebase-admin
+        run: npm install firebase-admin@13
+        working-directory: scripts
+
+      - name: Run YouTube intelligence scraper (UEFN ${{ matrix.region }})
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/scrape-youtube-intel.js --engine UEFN --region ${{ matrix.region }}
+
+      - name: Summary
+        if: always()
+        run: echo "✅ YouTube intelligence (UEFN / ${{ matrix.region }}) scrape completed at $(date -u)"
