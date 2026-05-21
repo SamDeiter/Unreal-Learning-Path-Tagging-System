@@ -221,6 +221,56 @@ function parseJSON(text) {
   }
 }
 
+// ── Grounding metadata validation ──────────────────────────────────
+//
+// When Gemini answers with `tools: [{google_search: {}}]`, the real sources it
+// browsed land in `groundingMetadata.groundingChunks[].web.{uri,title}`. The
+// `uri` is a vertexaisearch.cloud.google.com redirect that resolves to the
+// actual page in a browser and is valid for ~30 days. The `title` is the real
+// page title, usually formatted "Page Title - hostname.com".
+//
+// LLM-emitted URLs inside the JSON body are NOT constrained to these — the
+// model will happily fabricate plausible-looking links. So at normalize time
+// we throw the LLM URL away and try to match the LLM-emitted source TITLE to
+// a grounding chunk title, substituting in the chunk's verified uri.
+//
+// If no match → leave url empty and let the UI fall back to a platform search.
+
+function extractGroundingChunks(groundingMetadata) {
+  if (!groundingMetadata) return [];
+  const chunks = groundingMetadata.groundingChunks || [];
+  return chunks
+    .map((c) => ({
+      uri: c.web?.uri || "",
+      title: c.web?.title || "",
+    }))
+    .filter((c) => c.uri && c.title);
+}
+
+function normalizeTitleForMatch(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/\s*[-|–—]\s*[a-z0-9.-]+\.[a-z]{2,}\s*$/i, "") // strip trailing " - hostname.com"
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function findGroundedUri(srcTitle, groundedChunks) {
+  const norm = normalizeTitleForMatch(srcTitle);
+  if (!norm || !groundedChunks.length) return "";
+  // exact normalized title match
+  for (const c of groundedChunks) {
+    if (normalizeTitleForMatch(c.title) === norm) return c.uri;
+  }
+  // substring either direction — guards against partial titles
+  for (const c of groundedChunks) {
+    const cn = normalizeTitleForMatch(c.title);
+    if (!cn) continue;
+    if (cn.includes(norm) || norm.includes(cn)) return c.uri;
+  }
+  return "";
+}
+
 // ── Reddit Public API ──────────────────────────────────────────────
 
 async function fetchRedditEngagement(subtopic) {
@@ -373,10 +423,16 @@ IMPORTANT RULES:
       try {
         const result = await callGemini(prompt);
         const parsed = parseJSON(result.text);
+        const groundedChunks = extractGroundingChunks(result.groundingMetadata);
 
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-          console.log(`    ✅ Batch ${batchNum}: got ${parsed.length} questions`);
-          return parsed;
+          console.log(
+            `    ✅ Batch ${batchNum}: got ${parsed.length} questions` +
+              (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : "")
+          );
+          // Annotate each question with the batch's grounded chunks so the
+          // normalize step downstream can rewrite hallucinated URLs.
+          return parsed.map((q) => ({ ...q, _groundedChunks: groundedChunks }));
         } else {
           console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable`);
           return [];
@@ -409,19 +465,28 @@ IMPORTANT RULES:
       seen.add(key);
       return true;
     })
-    .map((q) => ({
-      question: q.question || "",
-      category: q.category || "General",
-      subtopic: q.subtopic || "",
-      frequency: q.frequency || "medium",
-      sources: (q.sources || []).map((src) => ({
-        type: src.type || "unknown",
-        url: src.url || "",
-        title: src.title || "",
-        date: src.date || "",
-        engagement: src.engagement || "",
-      })),
-    }));
+    .map((q) => {
+      const chunks = Array.isArray(q._groundedChunks) ? q._groundedChunks : [];
+      return {
+        question: q.question || "",
+        category: q.category || "General",
+        subtopic: q.subtopic || "",
+        frequency: q.frequency || "medium",
+        sources: (q.sources || []).map((src) => {
+          // Replace LLM-emitted URL with a grounded one matched by title.
+          // No match → leave empty so the UI uses its search fallback.
+          const groundedUri = findGroundedUri(src.title, chunks);
+          return {
+            type: src.type || "unknown",
+            url: groundedUri,
+            title: src.title || "",
+            date: src.date || "",
+            engagement: src.engagement || "",
+            verified: Boolean(groundedUri),
+          };
+        }),
+      };
+    });
 
   console.log(`  ✅ Total: ${uniqueQuestions.length} unique trending questions`);
   return uniqueQuestions;
@@ -436,7 +501,7 @@ SEARCH THESE SOURCES:
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - Epic Developer Community
 - YouTube comments on ${engine} tutorials about ${category}
-- TikTok/Instagram ${engine} reels and gamedev content
+- TikTok/Instagram ${engine} reels and gamedev content
 - x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative #VerseScript" : "#UnrealEngine #UE5 #gamedev"} for pain point discussions (use site:x.com)
 
 Focus on posts from the last 6 months.
@@ -458,18 +523,26 @@ IMPORTANT RULES:
   try {
     const result = await callGemini(prompt);
     const parsed = parseJSON(result.text);
+    const groundedChunks = extractGroundingChunks(result.groundingMetadata);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
       return [];
     }
 
-    return parsed.slice(0, PAIN_POINT_LIMIT).map((pp) => ({
-      painPoint: pp.painPoint || pp.pain_point || "",
-      sourceUrl: pp.sourceUrl || pp.source_url || "",
-      sourceTitle: pp.sourceTitle || pp.source_title || "",
-      relevance: pp.relevance || "medium",
-      frequency: pp.frequency || "",
-    }));
+    return parsed.slice(0, PAIN_POINT_LIMIT).map((pp) => {
+      const sourceTitle = pp.sourceTitle || pp.source_title || "";
+      const groundedUri = findGroundedUri(sourceTitle, groundedChunks);
+      return {
+        painPoint: pp.painPoint || pp.pain_point || "",
+        // Drop the LLM-emitted sourceUrl; substitute a grounded uri when we
+        // can match by title, otherwise leave empty for the UI fallback.
+        sourceUrl: groundedUri,
+        sourceTitle,
+        relevance: pp.relevance || "medium",
+        frequency: pp.frequency || "",
+        verified: Boolean(groundedUri),
+      };
+    });
   } catch (err) {
     console.warn(`  ⚠️ Pain points for "${category}" failed: ${err.message}`);
     return [];

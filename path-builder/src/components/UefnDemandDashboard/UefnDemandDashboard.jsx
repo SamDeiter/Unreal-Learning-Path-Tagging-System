@@ -113,17 +113,31 @@ const SOURCE_LABELS = {
   [SOURCE_TYPES.EPIC_DEV_COMMUNITY]: "Dev Community",
 };
 
-/** Generates a contextual search URL if the AI failed to return a direct link */
+/**
+ * Resolve the URL to use for a source link.
+ *
+ * Background: source.url emitted by the Gemini scrape used to be trusted
+ * blindly and was frequently LLM-fabricated → 404s. The scraper now (a) drops
+ * the LLM URL and (b) substitutes a grounded URI from
+ * `groundingMetadata.groundingChunks` when the source title matches a chunk
+ * title, marking it `verified: true`. So:
+ *   - source.verified=true → source.url is a real grounded uri, use it.
+ *   - otherwise → build a platform-specific search URL that always resolves.
+ *
+ * Older scraped data (pre-grounding-validation) lacks `verified`, so we treat
+ * unflagged URLs as untrusted and route through the search fallback.
+ */
 function getFallbackUrl(source) {
-  if (source.url && source.url.startsWith("http")) return source.url;
+  if (source.verified && source.url && source.url.startsWith("http")) return source.url;
   if (!source.type || source.type === SOURCE_TYPES.COMMUNITY_INDEX) return "";
-  
+
   const query = encodeURIComponent(source.title || source.painPoint || source.relatedQuestion || "UEFN");
   switch (source.type) {
     case SOURCE_TYPES.REDDIT: return `https://www.reddit.com/r/unrealengine/search/?q=${query}`;
     case SOURCE_TYPES.YOUTUBE_COMMENTS: return `https://www.youtube.com/results?search_query=${query}`;
     case SOURCE_TYPES.EPIC_FORUM: return `https://forums.unrealengine.com/search?q=${query}`;
     case SOURCE_TYPES.STACKOVERFLOW: return `https://stackoverflow.com/search?q=${encodeURIComponent("[unreal-engine5] " + (source.title || ""))}`;
+    case SOURCE_TYPES.EPIC_DEV_COMMUNITY: return `https://www.google.com/search?q=${encodeURIComponent("site:dev.epicgames.com " + (source.title || "UEFN"))}`;
     default: return `https://www.google.com/search?q=${encodeURIComponent("UEFN " + (source.title || ""))}`;
   }
 }
