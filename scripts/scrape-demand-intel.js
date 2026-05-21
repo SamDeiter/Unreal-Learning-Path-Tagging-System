@@ -528,32 +528,40 @@ ${researchResult.text}`;
 }
 
 
-async function scrapePainPoints(category) {
-  // Two-pass: grounded prose research first (this is when Gemini reliably
-  // emits groundingChunks), then a JSON-shaping call over that prose.
-  const researchPrompt = `You are a ${engine} community research assistant. Search for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience with: "${category}"
+// How many categories share a single Gemini call. Mirrors the trending path,
+// where the wider query reliably triggers groundingChunks emission. The
+// previous one-category-per-call shape returned 0 chunks every time.
+const PAIN_POINTS_PER_BATCH = 5;
+
+async function scrapePainPointsBatch(categories) {
+  // Two-pass: grounded prose research first (chunks emit reliably on prose
+  // with citations), then JSON shaping over that prose.
+  const researchPrompt = `You are a ${engine} community research assistant. Search online communities for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience.
 
 SEARCH THESE SOURCES:
 - forums.unrealengine.com
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - Epic Developer Community
-- YouTube comments on ${engine} tutorials about ${category}
+- YouTube comments on ${engine} tutorials
 - TikTok/Instagram ${engine} reels and gamedev content
 - x.com / twitter.com posts with ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"}
 
 Focus on posts from the last 6 months.
 
-Find exactly ${PAIN_POINT_LIMIT} pain points. You MUST produce all ${PAIN_POINT_LIMIT} numbered entries — do not skip.
+CATEGORIES TO RESEARCH: ${categories.join(", ")}
+
+For EACH of the ${categories.length} categories, find ${PAIN_POINT_LIMIT} pain points. You MUST produce exactly ${categories.length * PAIN_POINT_LIMIT} numbered entries — do not skip any category.
 
 Output format (prose, numbered list):
 
-1. Pain point: <one-sentence description of the struggle>
+1. Category: <one of the categories above>
+   Pain point: <one-sentence description of the struggle>
    Source: cite the EXACT post/thread/video title and platform (e.g. "from a Reddit thread titled 'X is broken' on r/FortniteCreative")
    Frequency: how often this comes up
    Relevance: high|medium|low
 
-2. Pain point: ...
-   (continue through entry ${PAIN_POINT_LIMIT})
+2. Category: ...
+   (continue through entry ${categories.length * PAIN_POINT_LIMIT})
 
 Cite each source by its actual title and platform so the grounding system attaches the verified URL. If you cannot find a real cited source for an item, omit that item rather than fabricating. Do NOT output JSON.`;
 
@@ -562,13 +570,15 @@ Cite each source by its actual title and platform so the grounding system attach
     const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
 
     if (!researchResult.text.trim()) {
-      return [];
+      console.warn(`    ⚠️ Pain-points batch [${categories.join(", ")}]: empty research pass`);
+      return {};
     }
 
-    const shapePrompt = `Convert the following ${engine} learner pain-point research summary into a JSON array of the top ${PAIN_POINT_LIMIT} items. Use ONLY information from the summary — do not invent.
+    const shapePrompt = `Convert the following ${engine} learner pain-point research summary into a JSON array. Use ONLY information from the summary — do not invent. Include an entry for each pain point that has a cited source.
 
 Schema:
 [{
+  "category": "One of the categories named in the summary",
   "painPoint": "One-sentence description of the struggle",
   "sourceUrl": "",
   "sourceTitle": "Post/thread title EXACTLY as cited in the summary",
@@ -585,54 +595,82 @@ ${researchResult.text}`;
     const parsed = parseJSON(shapeResult.text);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-      return [];
+      console.warn(`    ⚠️ Pain-points batch [${categories.join(", ")}]: shape pass empty`);
+      return {};
     }
 
-    if (groundedChunks.length === 0) {
-      console.log(`    ⚠️ Pain points for "${category}": 0 grounded sources`);
-    }
+    console.log(
+      `    ✅ Pain-points batch [${categories.length} cats]: ${parsed.length} items` +
+        (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : " (0 grounded)")
+    );
 
-    return parsed.slice(0, PAIN_POINT_LIMIT).map((pp) => {
+    // Bin parsed items by their declared category. Items whose category
+    // doesn't match any requested one are dropped (model occasionally
+    // invents a sibling category name).
+    const knownCats = new Set(categories);
+    const binned = {};
+    for (const cat of categories) binned[cat] = [];
+
+    for (const pp of parsed) {
       const sourceTitle = pp.sourceTitle || pp.source_title || "";
+      const itemCategory = pp.category || "";
+      if (!knownCats.has(itemCategory)) continue;
+      if (binned[itemCategory].length >= PAIN_POINT_LIMIT) continue;
       const groundedUri = findGroundedUri(sourceTitle, groundedChunks);
-      return {
+      binned[itemCategory].push({
         painPoint: pp.painPoint || pp.pain_point || "",
-        // Drop the LLM-emitted sourceUrl; substitute a grounded uri when we
-        // can match by title, otherwise leave empty for the UI fallback.
         sourceUrl: groundedUri,
         sourceTitle,
         relevance: pp.relevance || "medium",
         frequency: pp.frequency || "",
         verified: Boolean(groundedUri),
-      };
-    });
+      });
+    }
+
+    return binned;
   } catch (err) {
-    console.warn(`  ⚠️ Pain points for "${category}" failed: ${err.message}`);
-    return [];
+    console.warn(`  ⚠️ Pain-points batch [${categories.join(", ")}] failed: ${err.message}`);
+    return {};
   }
 }
 
 async function scrapeAllPainPoints(categories) {
-  console.log(`\n💬 Scraping pain points for ${categories.length} categories (batches of ${BATCH_SIZE})...`);
+  console.log(
+    `\n💬 Scraping pain points for ${categories.length} categories (batches of ${PAIN_POINTS_PER_BATCH}, ${PARALLEL_CONCURRENCY} in parallel)...`
+  );
+
+  // Build batches of categories that share a single Gemini call.
+  const batches = [];
+  for (let i = 0; i < categories.length; i += PAIN_POINTS_PER_BATCH) {
+    batches.push(categories.slice(i, i + PAIN_POINTS_PER_BATCH));
+  }
+  const totalBatches = batches.length;
 
   const results = {};
+  for (const cat of categories) results[cat] = [];
 
-  for (let i = 0; i < categories.length; i += BATCH_SIZE) {
-    const batch = categories.slice(i, i + BATCH_SIZE);
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-    const totalBatches = Math.ceil(categories.length / BATCH_SIZE);
-    console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
+  // Process batches with limited concurrency (same pattern as trending).
+  for (let g = 0; g < batches.length; g += PARALLEL_CONCURRENCY) {
+    const group = batches.slice(g, g + PARALLEL_CONCURRENCY);
 
-    const batchResults = await Promise.allSettled(
-      batch.map((cat) => scrapePainPoints(cat))
-    );
-
-    batch.forEach((cat, idx) => {
-      const result = batchResults[idx];
-      results[cat] = result.status === "fulfilled" ? result.value : [];
+    const promises = group.map(async (batch, idx) => {
+      const batchNum = g + idx + 1;
+      console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
+      return scrapePainPointsBatch(batch);
     });
 
-    if (i + BATCH_SIZE < categories.length) {
+    const settled = await Promise.allSettled(promises);
+    for (const r of settled) {
+      if (r.status === "fulfilled" && r.value) {
+        for (const [cat, items] of Object.entries(r.value)) {
+          if (Array.isArray(items) && items.length > 0) {
+            results[cat] = items;
+          }
+        }
+      }
+    }
+
+    if (g + PARALLEL_CONCURRENCY < batches.length) {
       await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS));
     }
   }
