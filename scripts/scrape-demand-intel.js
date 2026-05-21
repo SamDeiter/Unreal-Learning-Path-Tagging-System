@@ -92,14 +92,67 @@ function initFirestore() {
   }
 }
 
+// ── Token usage tracking ───────────────────────────────────────────
+//
+// Captured from Gemini's `usageMetadata` field on every successful response.
+// Aggregated across all calls in this script run; printed at end of main().
+// Used to measure baseline cost and verify the impact of each tuning change.
+
+const tokenUsage = {
+  calls: 0,
+  grounded: 0,
+  ungrounded: 0,
+  promptTokens: 0,
+  candidatesTokens: 0,
+  totalTokens: 0,
+  byPurpose: {}, // { research: {calls, totalTokens}, shape: {...} }
+};
+
+function recordUsage(usageMetadata, { useGrounding, purpose }) {
+  if (!usageMetadata) return;
+  const promptT = usageMetadata.promptTokenCount || 0;
+  const candT = usageMetadata.candidatesTokenCount || 0;
+  const totalT = usageMetadata.totalTokenCount || promptT + candT;
+  tokenUsage.calls += 1;
+  if (useGrounding) tokenUsage.grounded += 1;
+  else tokenUsage.ungrounded += 1;
+  tokenUsage.promptTokens += promptT;
+  tokenUsage.candidatesTokens += candT;
+  tokenUsage.totalTokens += totalT;
+  if (purpose) {
+    const bucket = (tokenUsage.byPurpose[purpose] ||= { calls: 0, promptTokens: 0, candidatesTokens: 0, totalTokens: 0 });
+    bucket.calls += 1;
+    bucket.promptTokens += promptT;
+    bucket.candidatesTokens += candT;
+    bucket.totalTokens += totalT;
+  }
+}
+
+function logTokenSummary() {
+  const { calls, grounded, ungrounded, promptTokens, candidatesTokens, totalTokens, byPurpose } = tokenUsage;
+  console.log("\n📊 Gemini token usage");
+  console.log(`  Calls:           ${calls} (${grounded} grounded, ${ungrounded} ungrounded)`);
+  console.log(`  Prompt tokens:   ${promptTokens.toLocaleString()}`);
+  console.log(`  Output tokens:   ${candidatesTokens.toLocaleString()}`);
+  console.log(`  Total tokens:    ${totalTokens.toLocaleString()}`);
+  if (calls > 0) {
+    console.log(`  Avg per call:    ${Math.round(totalTokens / calls).toLocaleString()}`);
+  }
+  for (const [purpose, b] of Object.entries(byPurpose)) {
+    console.log(`  ${purpose.padEnd(16)} ${b.calls} call${b.calls === 1 ? "" : "s"}, ${b.totalTokens.toLocaleString()} tokens`);
+  }
+}
+
 // ── Gemini REST API with retry ─────────────────────────────────────
 
-async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true } = {}) {
+async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true, purpose = null } = {}) {
   if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
 
   const generationConfig = {
     temperature: 0.3,
-    maxOutputTokens: 16384,
+    // Cap output well above the largest realistic call (~4K for a wide
+    // pain-points batch). 16K headroom is overkill and masks runaway prompts.
+    maxOutputTokens: 8192,
   };
 
   // IMPORTANT: responseMimeType "application/json" conflicts with google_search
@@ -145,6 +198,7 @@ async function callGemini(prompt, { retries = MAX_RETRIES, useGrounding = true }
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const groundingMetadata = data.candidates?.[0]?.groundingMetadata || null;
+      recordUsage(data.usageMetadata, { useGrounding, purpose });
 
       // If a grounded call returns empty text, do NOT auto-retry without
       // grounding. The two-pass scrape relies on pass 1 carrying grounding
@@ -399,35 +453,28 @@ async function scrapeTrendingQuestions(categories) {
       // Two-pass: grounded prose research (chunks emit reliably when the
       // model is writing prose with explicit citations), then a separate
       // JSON-mode call to shape that prose into structured data.
-      const researchPrompt = `You are a ${engine} community research assistant. Search for REAL questions that Unreal Engine (${engine}) learners are currently asking in online communities.
+      const researchPrompt = `Research real questions Unreal Engine (${engine}) learners are asking in:
+- ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
+- forums.unrealengine.com
+- stackoverflow.com [${engine === "UEFN" ? "fortnite-creative" : "unreal-engine5"}]
+- dev.epicgames.com community
+- YouTube / TikTok / Instagram ${engine} tutorials
+- x.com hashtag ${engine === "UEFN" ? "#UEFN" : "#UnrealEngine"}
 
-REQUIRED SEARCH SOURCES:
-- ${engine === "UEFN" ? "Reddit r/FortniteCreative (recent posts with upvotes)" : "Reddit r/unrealengine (recent posts with upvotes)"}
-- forums.unrealengine.com (Epic official forums)
-- ${engine === "UEFN" ? "stackoverflow.com [fortnite-creative] tag" : "stackoverflow.com [unreal-engine5] tag"}
-- Epic Developer Community (dev.epicgames.com)
-- ${engine} tutorials and gamedev content on YouTube, TikTok, and Instagram
-- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"} hashtags
+Categories: ${batch.join(", ")}
 
-CATEGORIES TO RESEARCH: ${batch.join(", ")}
+Produce exactly ${batch.length * TRENDING_PER_CATEGORY} numbered entries — ${TRENDING_PER_CATEGORY} per category. Format (prose, NOT JSON):
 
-For EACH of the ${batch.length} categories, find ${TRENDING_PER_CATEGORY} real questions. You MUST produce exactly ${batch.length * TRENDING_PER_CATEGORY} numbered entries — do not skip any category.
-
-Output format (prose, numbered list):
-
-1. Category: <one of the categories above>
-   Question: "<verbatim question>"
-   Source: cite the EXACT post/thread/video title and platform (e.g. "from a Reddit thread titled 'How do I X' on r/unrealengine"). Include engagement (upvotes, comments, views).
+1. Category: <name>
+   Question: "<verbatim>"
+   Source: <exact post/video title, platform, engagement>
    Subtopic: <specific subtopic>
    Frequency: high|medium|low
 
-2. Category: ...
-   (continue through entry ${batch.length * TRENDING_PER_CATEGORY})
-
-Cite each source by name so the grounding system attaches the verified URL. Do NOT output JSON yet.`;
+Cite each source by its actual title so grounding can attach the URL.`;
 
       try {
-        const researchResult = await callGemini(researchPrompt);
+        const researchResult = await callGemini(researchPrompt, { purpose: "trending-research" });
         const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
 
         if (!researchResult.text.trim()) {
@@ -435,7 +482,7 @@ Cite each source by name so the grounding system attaches the verified URL. Do N
           return [];
         }
 
-        const shapePrompt = `Convert the following ${engine} learner-question research summary into a JSON array. Use ONLY information from the summary — do not invent.
+        const shapePrompt = `Convert this ${engine} learner-question research into a JSON array. Use ONLY the summary — do not invent.
 
 Schema:
 [{
@@ -445,19 +492,19 @@ Schema:
   "frequency": "high|medium|low",
   "sources": [{
     "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
-    "title": "Post/thread/video title EXACTLY as cited in the summary",
+    "title": "Title EXACTLY as cited",
     "url": "",
     "date": "",
-    "engagement": "e.g. 45 upvotes, 23 comments"
+    "engagement": "e.g. 45 upvotes"
   }]
 }]
 
-Return VALID JSON only — no preamble, no explanation.
+JSON only — no preamble.
 
-RESEARCH SUMMARY:
+SUMMARY:
 ${researchResult.text}`;
 
-        const shapeResult = await callGemini(shapePrompt, { useGrounding: false });
+        const shapeResult = await callGemini(shapePrompt, { useGrounding: false, purpose: "trending-shape" });
         const parsed = parseJSON(shapeResult.text);
 
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
@@ -536,37 +583,30 @@ const PAIN_POINTS_PER_BATCH = 5;
 async function scrapePainPointsBatch(categories) {
   // Two-pass: grounded prose research first (chunks emit reliably on prose
   // with citations), then JSON shaping over that prose.
-  const researchPrompt = `You are a ${engine} community research assistant. Search online communities for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience.
-
-SEARCH THESE SOURCES:
+  const researchPrompt = `Research common struggles Unreal Engine (${engine}) learners face in:
 - forums.unrealengine.com
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
-- Epic Developer Community
+- dev.epicgames.com community
 - YouTube comments on ${engine} tutorials
-- TikTok/Instagram ${engine} reels and gamedev content
-- x.com / twitter.com posts with ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"}
+- TikTok / Instagram ${engine} reels
+- x.com hashtag ${engine === "UEFN" ? "#UEFN" : "#UnrealEngine"}
 
 Focus on posts from the last 6 months.
 
-CATEGORIES TO RESEARCH: ${categories.join(", ")}
+Categories: ${categories.join(", ")}
 
-For EACH of the ${categories.length} categories, find ${PAIN_POINT_LIMIT} pain points. You MUST produce exactly ${categories.length * PAIN_POINT_LIMIT} numbered entries — do not skip any category.
+Produce exactly ${categories.length * PAIN_POINT_LIMIT} numbered entries — ${PAIN_POINT_LIMIT} per category. Format (prose, NOT JSON):
 
-Output format (prose, numbered list):
-
-1. Category: <one of the categories above>
-   Pain point: <one-sentence description of the struggle>
-   Source: cite the EXACT post/thread/video title and platform (e.g. "from a Reddit thread titled 'X is broken' on r/FortniteCreative")
-   Frequency: how often this comes up
+1. Category: <name>
+   Pain point: <one-sentence description>
+   Source: <exact post/thread/video title, platform>
+   Frequency: how often
    Relevance: high|medium|low
 
-2. Category: ...
-   (continue through entry ${categories.length * PAIN_POINT_LIMIT})
-
-Cite each source by its actual title and platform so the grounding system attaches the verified URL. If you cannot find a real cited source for an item, omit that item rather than fabricating. Do NOT output JSON.`;
+Cite each source by its actual title so grounding can attach the URL. If you can't find a real cited source for an item, omit it rather than fabricating.`;
 
   try {
-    const researchResult = await callGemini(researchPrompt);
+    const researchResult = await callGemini(researchPrompt, { purpose: "pain-research" });
     const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
 
     if (!researchResult.text.trim()) {
@@ -574,24 +614,24 @@ Cite each source by its actual title and platform so the grounding system attach
       return {};
     }
 
-    const shapePrompt = `Convert the following ${engine} learner pain-point research summary into a JSON array. Use ONLY information from the summary — do not invent. Include an entry for each pain point that has a cited source.
+    const shapePrompt = `Convert this ${engine} learner pain-point research into a JSON array. Use ONLY the summary — include only items with a cited source.
 
 Schema:
 [{
-  "category": "One of the categories named in the summary",
-  "painPoint": "One-sentence description of the struggle",
+  "category": "One of the categories named",
+  "painPoint": "One-sentence description",
   "sourceUrl": "",
-  "sourceTitle": "Post/thread title EXACTLY as cited in the summary",
+  "sourceTitle": "Title EXACTLY as cited",
   "relevance": "high|medium|low",
-  "frequency": "how often this comes up"
+  "frequency": "how often"
 }]
 
-Return VALID JSON only — no preamble.
+JSON only — no preamble.
 
-RESEARCH SUMMARY:
+SUMMARY:
 ${researchResult.text}`;
 
-    const shapeResult = await callGemini(shapePrompt, { useGrounding: false });
+    const shapeResult = await callGemini(shapePrompt, { useGrounding: false, purpose: "pain-shape" });
     const parsed = parseJSON(shapeResult.text);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
@@ -1015,6 +1055,7 @@ async function main() {
     console.log(`  📄 Saved report to ${outputPath}`);
   }
 
+  logTokenSummary();
   console.log(`\n🏁 Done in ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
 }
 
