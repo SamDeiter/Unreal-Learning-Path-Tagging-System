@@ -394,7 +394,10 @@ async function scrapeTrendingQuestions(categories) {
       const batchNum = g + idx + 1;
       console.log(`  📦 Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`);
 
-      const prompt = `You are a ${engine} community research assistant. Search for REAL questions that Unreal Engine (${engine}) learners are currently asking in online communities.
+      // Two-pass: grounded prose research (chunks emit reliably when the
+      // model is writing prose with explicit citations), then a separate
+      // JSON-mode call to shape that prose into structured data.
+      const researchPrompt = `You are a ${engine} community research assistant. Search for REAL questions that Unreal Engine (${engine}) learners are currently asking in online communities.
 
 REQUIRED SEARCH SOURCES:
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative (recent posts with upvotes)" : "Reddit r/unrealengine (recent posts with upvotes)"}
@@ -402,59 +405,65 @@ REQUIRED SEARCH SOURCES:
 - ${engine === "UEFN" ? "stackoverflow.com [fortnite-creative] tag" : "stackoverflow.com [unreal-engine5] tag"}
 - Epic Developer Community (dev.epicgames.com)
 - ${engine} tutorials and gamedev content on YouTube, TikTok, and Instagram
-- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"} hashtags for viral posts, threads, and questions (use site:x.com)
-- Udemy and Skillshare ${engine} courses
+- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"} hashtags
 
 CATEGORIES TO RESEARCH: ${batch.join(", ")}
 
-For EACH category listed above, find ${TRENDING_PER_CATEGORY} real questions that people are asking. That means you should return exactly ${batch.length * TRENDING_PER_CATEGORY} questions total.
+For EACH category, identify ${TRENDING_PER_CATEGORY} real questions learners are currently asking. Total: ${batch.length * TRENDING_PER_CATEGORY} questions.
 
-YOUR RESPONSE MUST HAVE TWO PARTS:
+Write a research summary in PROSE. For each question:
+  • State the question verbatim
+  • Cite the EXACT post/thread/video title and platform where you found it (e.g. "from a Reddit thread titled 'How do I X' on r/unrealengine")
+  • Note rough engagement signal (upvotes, comments, views)
+  • Tag the category and one subtopic
+  • Rate frequency (high/medium/low)
 
-PART 1 — RESEARCH NOTES (prose, with citations):
-Walk through what you found. For each question, write a short paragraph that:
-  • States the question
-  • Names the exact post/thread/video title where you found it
-  • Explains briefly why this question matters
-Cite the source explicitly so the reader can verify (this also lets the grounding system attach the URL).
+Cite each source by name in the prose so the grounding system can attach the verified URL. Do NOT output JSON yet — that comes in a follow-up step.`;
 
-PART 2 — JSON BLOCK:
-After the notes, output the structured data as a single JSON array:
+      try {
+        const researchResult = await callGemini(researchPrompt);
+        const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
+
+        if (!researchResult.text.trim()) {
+          console.warn(`    ⚠️ Batch ${batchNum}: empty research pass`);
+          return [];
+        }
+
+        const shapePrompt = `Convert the following ${engine} learner-question research summary into a JSON array. Use ONLY information from the summary — do not invent.
+
+Schema:
 [{
-  "question": "The exact question learners are asking",
-  "category": "Which of the categories above this belongs to",
-  "subtopic": "Specific subtopic within that category",
+  "question": "The exact question",
+  "category": "One of the categories mentioned",
+  "subtopic": "Specific subtopic",
   "frequency": "high|medium|low",
   "sources": [{
     "type": "reddit|epic_forum|stackoverflow|youtube|tiktok|instagram|udemy|twitch|twitter",
-    "title": "Post/thread title (MUST match a title you cited in Part 1)",
-    "url": "URL",
-    "date": "YYYY-MM-DD",
+    "title": "Post/thread/video title EXACTLY as cited in the summary",
+    "url": "",
+    "date": "",
     "engagement": "e.g. 45 upvotes, 23 comments"
   }]
 }]
 
-IMPORTANT RULES:
-- Each question gets exactly ONE source entry — its PRIMARY platform where you found the strongest signal
-- Every question MUST have at least one source whose title was actually cited in Part 1
-- Focus on learning/tutorial questions, not engine bug reports
-- The JSON block must be valid and parseable — do not put any non-JSON text inside the brackets.`;
+Return VALID JSON only — no preamble, no explanation.
 
-      try {
-        const result = await callGemini(prompt);
-        const parsed = parseJSON(result.text);
-        const groundedChunks = extractGroundingChunks(result.groundingMetadata);
+RESEARCH SUMMARY:
+${researchResult.text}`;
+
+        const shapeResult = await callGemini(shapePrompt, { useGrounding: false });
+        const parsed = parseJSON(shapeResult.text);
 
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
           console.log(
             `    ✅ Batch ${batchNum}: got ${parsed.length} questions` +
-              (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : "")
+              (groundedChunks.length ? ` (${groundedChunks.length} grounded sources)` : " (0 grounded)")
           );
-          // Annotate each question with the batch's grounded chunks so the
-          // normalize step downstream can rewrite hallucinated URLs.
+          // Carry the research-pass chunks through so the normalize step can
+          // rewrite each LLM-emitted URL with a verified vertexaisearch one.
           return parsed.map((q) => ({ ...q, _groundedChunks: groundedChunks }));
         } else {
-          console.warn(`    ⚠️ Batch ${batchNum}: empty or unparseable`);
+          console.warn(`    ⚠️ Batch ${batchNum}: shape pass empty or unparseable`);
           return [];
         }
       } catch (err) {
@@ -514,49 +523,60 @@ IMPORTANT RULES:
 
 
 async function scrapePainPoints(category) {
-  const prompt = `You are a ${engine} community research assistant. Search for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience with: "${category}"
+  // Two-pass: grounded prose research first (this is when Gemini reliably
+  // emits groundingChunks), then a JSON-shaping call over that prose.
+  const researchPrompt = `You are a ${engine} community research assistant. Search for the most common struggles and confusion points that Unreal Engine (${engine}) learners experience with: "${category}"
 
 SEARCH THESE SOURCES:
-- forums.unrealengine.com (Epic's official forums)
+- forums.unrealengine.com
 - ${engine === "UEFN" ? "Reddit r/FortniteCreative" : "Reddit r/unrealengine"}
 - Epic Developer Community
 - YouTube comments on ${engine} tutorials about ${category}
 - TikTok/Instagram ${engine} reels and gamedev content
-- x.com / twitter.com: search ${engine === "UEFN" ? "#UEFN #FortniteCreative #VerseScript" : "#UnrealEngine #UE5 #gamedev"} for pain point discussions (use site:x.com)
+- x.com / twitter.com posts with ${engine === "UEFN" ? "#UEFN #FortniteCreative" : "#UnrealEngine #UE5"}
 
 Focus on posts from the last 6 months.
 
-YOUR RESPONSE MUST HAVE TWO PARTS:
+Write a research summary in PROSE describing the top ${PAIN_POINT_LIMIT} pain points. For each pain point:
+  • Describe the struggle in plain language
+  • Cite the EXACT post/thread/video title and platform where you found it
+  • Note how often this comes up and its relevance (high/medium/low)
 
-PART 1 — RESEARCH NOTES (prose, with citations):
-For each pain point you found, write a short paragraph that:
-  • Describes the struggle in plain language
-  • Names the exact post/thread/video title and where it was found
-  • Notes roughly how often this comes up
-Cite the source explicitly so the reader can verify (this also lets the grounding system attach the URL).
-
-PART 2 — JSON BLOCK:
-After the notes, output the structured data as a single JSON array of the top ${PAIN_POINT_LIMIT} pain points:
-[{
-  "painPoint": "One-sentence description of the struggle",
-  "sourceUrl": "URL where this was found",
-  "sourceTitle": "Title of the post/thread (MUST match a title you cited in Part 1)",
-  "relevance": "high|medium|low",
-  "frequency": "How often this comes up"
-}]
-
-IMPORTANT RULES:
-- Focus on LEARNER confusion, not engine bugs
-- The sourceTitle MUST match a title you cited in Part 1
-- The JSON block must be valid and parseable — do not put any non-JSON text inside the brackets.`;
+Cite each source by name in the prose so the grounding system attaches the verified URL. Do NOT output JSON — that comes in a follow-up step.`;
 
   try {
-    const result = await callGemini(prompt);
-    const parsed = parseJSON(result.text);
-    const groundedChunks = extractGroundingChunks(result.groundingMetadata);
+    const researchResult = await callGemini(researchPrompt);
+    const groundedChunks = extractGroundingChunks(researchResult.groundingMetadata);
+
+    if (!researchResult.text.trim()) {
+      return [];
+    }
+
+    const shapePrompt = `Convert the following ${engine} learner pain-point research summary into a JSON array of the top ${PAIN_POINT_LIMIT} items. Use ONLY information from the summary — do not invent.
+
+Schema:
+[{
+  "painPoint": "One-sentence description of the struggle",
+  "sourceUrl": "",
+  "sourceTitle": "Post/thread title EXACTLY as cited in the summary",
+  "relevance": "high|medium|low",
+  "frequency": "how often this comes up"
+}]
+
+Return VALID JSON only — no preamble.
+
+RESEARCH SUMMARY:
+${researchResult.text}`;
+
+    const shapeResult = await callGemini(shapePrompt, { useGrounding: false });
+    const parsed = parseJSON(shapeResult.text);
 
     if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
       return [];
+    }
+
+    if (groundedChunks.length === 0) {
+      console.log(`    ⚠️ Pain points for "${category}": 0 grounded sources`);
     }
 
     return parsed.slice(0, PAIN_POINT_LIMIT).map((pp) => {
