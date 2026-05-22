@@ -5,12 +5,11 @@
  * Calls the GitHub REST API workflow_dispatch endpoint to trigger
  * the scrape-demand-intel.yml workflow. The GITHUB_PAT secret is
  * stored in Firebase Functions secrets (never in code).
- *
- * Any authenticated user can trigger this (internal tool).
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const { requireAdmin } = require("../utils/authGuard");
 
 const GITHUB_OWNER = "SamDeiter";
 const GITHUB_REPO = "Unreal-Learning-Path-Tagging-System";
@@ -27,10 +26,8 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
-    }
+    // Require admin privileges (replaces basic authentication check)
+    requireAdmin(request);
 
     // Get engine from request data (default to UE5)
     const { engine = "UE5" } = request.data || {};
@@ -61,10 +58,11 @@ exports.triggerDemandScrape = onCall(
 
     if (!response.ok) {
       const errorText = await response.text();
+      // SECURITY: Mask detailed GitHub API error details from the client
       logger.error(`[triggerDemandScrape] GitHub API error ${response.status}: ${errorText}`);
       throw new HttpsError(
         "internal",
-        `GitHub API error: ${response.status} — ${response.statusText}`
+        "Failed to trigger demand scrape via GitHub API."
       );
     }
 

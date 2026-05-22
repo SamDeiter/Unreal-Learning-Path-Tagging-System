@@ -1,0 +1,4 @@
+## 2026-04-23 - Centralized Authorization Guard Refactoring
+**Vulnerability:** Redundant definitions of bootstrap admin emails across multiple Cloud Functions and leakage of detailed GitHub API error messages in `triggerDemandScrape`.
+**Learning:** Redundancy in security logic (like auth checks) increases the risk of inconsistent enforcement. For example, `mineMisconceptions` had an admin check but `triggerDemandScrape` only required basic authentication, allowing any signed-in user to trigger potentially expensive or rate-limited scraping workflows.
+**Prevention:** Always use centralized authorization helpers (like `requireAdmin`) to ensure consistent policy enforcement. Sanitize or genericize external API error messages before returning them to the client to prevent information disclosure.
