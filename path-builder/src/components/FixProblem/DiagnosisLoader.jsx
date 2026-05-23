@@ -28,11 +28,13 @@ export default function DiagnosisLoader({ query }) {
     };
   }, []);
 
+  const progressValue = ((phase + 1) / PHASES.length) * 100;
+
   return (
-    <div className="dx-loader">
+    <div className="dx-loader" role="status" aria-live="polite">
       <div className="dx-loader-card">
         <h2 className="dx-loader-title">
-          <span className="dx-loader-spinner" /> Diagnosing...
+          <span className="dx-loader-spinner" aria-hidden="true" /> Diagnosing...
         </h2>
 
         {/* Progress phases */}
@@ -42,7 +44,9 @@ export default function DiagnosisLoader({ query }) {
               key={i}
               className={`dx-phase ${i < phase ? "done" : ""} ${i === phase ? "active" : ""} ${i > phase ? "pending" : ""}`}
             >
-              <span className="dx-phase-icon">{i < phase ? "✓" : p.icon}</span>
+              <span className="dx-phase-icon" aria-hidden="true">
+                {i < phase ? "✓" : p.icon}
+              </span>
               <div className="dx-phase-text">
                 <span className="dx-phase-label">{p.label}</span>
                 <span className="dx-phase-detail">{p.detail}</span>
@@ -52,11 +56,15 @@ export default function DiagnosisLoader({ query }) {
         </div>
 
         {/* Progress bar */}
-        <div className="dx-progress-bar">
-          <div
-            className="dx-progress-fill"
-            style={{ width: `${((phase + 1) / PHASES.length) * 100}%` }}
-          />
+        <div
+          className="dx-progress-bar"
+          role="progressbar"
+          aria-valuenow={progressValue}
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuetext={PHASES[phase].label}
+        >
+          <div className="dx-progress-fill" style={{ width: `${progressValue}%` }} />
         </div>
 
         {/* Echoed query */}
