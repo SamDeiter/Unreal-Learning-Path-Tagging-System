@@ -6,11 +6,12 @@
  * the scrape-demand-intel.yml workflow. The GITHUB_PAT secret is
  * stored in Firebase Functions secrets (never in code).
  *
- * Any authenticated user can trigger this (internal tool).
+ * Restricted to administrators only.
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const { requireAdmin } = require("../utils/authGuard");
 
 const GITHUB_OWNER = "SamDeiter";
 const GITHUB_REPO = "Unreal-Learning-Path-Tagging-System";
@@ -27,10 +28,8 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
-    }
+    // Require admin privileges
+    requireAdmin(request);
 
     // Get engine from request data (default to UE5)
     const { engine = "UE5" } = request.data || {};
@@ -45,27 +44,34 @@ exports.triggerDemandScrape = onCall(
 
     logger.info(`[triggerDemandScrape] Triggering ${engine} workflow dispatch by ${request.auth?.token?.email || "anonymous"}`);
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${pat}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Firebase-Cloud-Function",
-      },
-      body: JSON.stringify({ 
-        ref: "master",
-        inputs: { engine }
-      }),
-    });
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "Firebase-Cloud-Function",
+        },
+        body: JSON.stringify({
+          ref: "master",
+          inputs: { engine }
+        }),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      logger.error(`[triggerDemandScrape] GitHub API error ${response.status}: ${errorText}`);
-      throw new HttpsError(
-        "internal",
-        `GitHub API error: ${response.status} — ${response.statusText}`
-      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.error(`[triggerDemandScrape] GitHub API error ${response.status}: ${errorText}`);
+        // Mask GitHub API error details from the client
+        throw new HttpsError(
+          "internal",
+          "Failed to trigger demand scrape via GitHub API."
+        );
+      }
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      logger.error(`[triggerDemandScrape] Unexpected error: ${err.message}`);
+      throw new HttpsError("internal", "Failed to trigger demand scrape.");
     }
 
     logger.info("[triggerDemandScrape] Workflow dispatched successfully.");
