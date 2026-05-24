@@ -1,0 +1,4 @@
+## 2025-05-15 - Centralized Admin Authorization and Error Masking
+**Vulnerability:** Redundant and inconsistent authorization checks across Cloud Functions allowed unauthorized access to sensitive endpoints (like `triggerDemandScrape`) and risked information leakage via raw API error responses.
+**Learning:** Admin email lists were duplicated in individual function files, leading to a "Swiss Cheese" security model where some endpoints were secured while others remained permissive. Additionally, passing raw external API errors to the client could expose internal system details.
+**Prevention:** Centralize authorization helpers (like `requireAdmin`) and identity seeds in a single `authGuard` utility. Always mask internal error details from clients, logging them server-side instead to maintain security without sacrificing observability.
