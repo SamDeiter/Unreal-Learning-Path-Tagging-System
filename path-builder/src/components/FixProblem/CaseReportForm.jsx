@@ -222,7 +222,14 @@ export default function CaseReportForm({ onUpdate, disabled }) {
             {boost > 0 ? `+${boost} pts` : "—"}
           </span>
         </div>
-        <div className="case-boost-bar">
+        <div
+          className="case-boost-bar"
+          role="progressbar"
+          aria-valuenow={boost}
+          aria-valuemin="0"
+          aria-valuemax={MAX_BOOST}
+          aria-valuetext={`${boostPct}% confidence boost`}
+        >
           <div
             className={`case-boost-fill case-boost-fill-${boostLevel}`}
             style={{ width: `${boostPct}%` }}
@@ -357,6 +364,7 @@ export default function CaseReportForm({ onUpdate, disabled }) {
                   onClick={removeScreenshot}
                   disabled={disabled}
                   title="Remove screenshot"
+                  aria-label="Remove screenshot"
                 >
                   ✕
                 </button>
@@ -368,6 +376,12 @@ export default function CaseReportForm({ onUpdate, disabled }) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
                 role="button"
                 tabIndex={0}
               >
