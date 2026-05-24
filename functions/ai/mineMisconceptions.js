@@ -34,12 +34,8 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const { requireAdmin } = require("../utils/authGuard");
 const vertex = require("../utils/vertex");
-
-const BOOTSTRAP_ADMIN_EMAILS = [
-  "sam.deiter@epicgames.com",
-  "samdeiter@gmail.com",
-];
 
 const SYNTH_MODEL = "gemini-2.5-flash";
 const SYNTH_TIMEOUT_MS = 30000;
@@ -257,16 +253,8 @@ exports.mineMisconceptions = onCall(
   async (request) => {
     requireAppCheck(request, { allowInvalid: false });
 
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Must be signed in.");
-    }
-    const callerEmail = (request.auth.token?.email || "").toLowerCase();
-    const callerIsAdmin =
-      request.auth.token?.admin === true ||
-      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail);
-    if (!callerIsAdmin) {
-      throw new HttpsError("permission-denied", "Admins only.");
-    }
+    // Check caller is admin (via custom claim or bootstrap list)
+    requireAdmin(request);
 
     const data = request.data || {};
     const tagFilter = sanitizeTags(data.tags);

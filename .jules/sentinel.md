@@ -1,0 +1,4 @@
+## 2026-04-23 - [Centralized Admin Authorization]
+**Vulnerability:** Redundant definitions of admin authorization logic and bootstrap email lists across multiple Cloud Functions led to inconsistent security postures and potential IDOR/unauthorized access on internal tools like `triggerDemandScrape`.
+**Learning:** Hardcoded bootstrap lists should always be centralized in a shared auth utility to ensure a single source of truth and avoid "authorization drift" where some endpoints are more permissive than others due to outdated copies of the list.
+**Prevention:** Use a centralized `requireAdmin` guard that validates both custom claims (`admin: true`) and a shared bootstrap list. Ensure sensitive internal tools (even those that don't directly touch user data, like workflow triggers) are gated by this admin check.
