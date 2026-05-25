@@ -1,0 +1,4 @@
+## 2026-06-25 - Admin Authorization Centralization
+**Vulnerability:** Inconsistent and duplicated admin authorization logic across Cloud Functions, along with an authorization bypass in `triggerDemandScrape` that allowed any authenticated user to trigger expensive workflows. Additionally, `token_usage` Firestore rules allowed unauthorized global data modification.
+**Learning:** Hardcoding bootstrap admin lists in multiple files leads to drift and security gaps. Centralizing authorization logic into a shared helper (`requireAdmin`) ensures consistent enforcement across the API surface. Restricting client-side collection access to admins prevents IDOR-based data corruption in aggregate dashboards.
+**Prevention:** Always use centralized authorization guards for sensitive endpoints. Mask internal error details (e.g., GitHub API responses) from being returned to the client to prevent information leakage.
