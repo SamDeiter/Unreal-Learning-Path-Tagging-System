@@ -1,0 +1,3 @@
+## 2025-05-24 - Identity-based Caching and BFS Expansion Memoization
+**Learning:** In batch scoring operations (like course library matching), redundant graph traversals and string processing for the same course objects/tags are the primary bottlenecks. Using `WeakMap` for course-level metadata ensures garbage collection safety while providing $O(1)$ lookup for pre-calculated normalized tag and suffix sets. Memoizing 2-hop BFS results for tag IDs eliminates redundant graph traversals across all courses in a batch.
+**Action:** Always identify static data (tags, graph) and stable object references (courses) to apply identity-based or query-based caching in hot paths like iterative scoring loops.
