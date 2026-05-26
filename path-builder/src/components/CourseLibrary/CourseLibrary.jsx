@@ -18,6 +18,7 @@ import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "l
 import { getRelevanceBadge } from "../../services/ContentGapService";
 import { detectPersona, getPersonaById } from "../../services/PersonaService";
 import { trackPersonaDetected } from "../../services/analyticsService";
+import { MODIFIER_KEY } from "../../utils/osUtils";
 import "./CourseLibrary.css";
 
 // ... (highlightText helper remains same)
@@ -230,12 +231,20 @@ function CourseLibrary({ courses }) {
             ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Search courses... (Ctrl+K)"
+            placeholder={`Search courses... (${MODIFIER_KEY}+K)`}
             value={search}
             onChange={handleSearchChange}
           />
           {search && (
-            <button className="search-clear" onClick={() => { setSearch(""); setVisibleCount(PAGE_SIZE); }} title="Clear search">
+            <button
+              className="search-clear"
+              onClick={() => {
+                setSearch("");
+                setVisibleCount(PAGE_SIZE);
+              }}
+              title="Clear search"
+              aria-label="Clear search"
+            >
               <X size={14} />
             </button>
           )}
@@ -354,6 +363,7 @@ function CourseLibrary({ courses }) {
               onClick={(e) => handleAddCourse(e, course)}
               disabled={isInPath(course.code)}
               title={isInPath(course.code) ? "In path" : "Add to path"}
+              aria-label={isInPath(course.code) ? "Course already in path" : `Add ${course.title} to path`}
             >
               {isInPath(course.code) ? <Check size={16} /> : <Plus size={16} />}
             </button>
