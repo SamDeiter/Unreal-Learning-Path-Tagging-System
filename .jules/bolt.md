@@ -1,0 +1,3 @@
+## 2025-05-26 - Multi-layer Caching for Graph-based Relevance Scoring
+**Learning:** In the `TagGraphService.scoreCourseRelevance` hot path, which is called iteratively for thousands of courses, redundant BFS traversals and array-to-set conversions were the primary bottlenecks. Moving static graph expansions to a `Map` and course-specific tag normalization to a `WeakMap` transformed the complexity from $O(C \times (T + V + E))$ to $O(C \times T)$, where $C$ is the number of courses and $T$ is the number of query tags.
+**Action:** Always identify static vs. dynamic data in scoring loops. Use `WeakMap` for identity-based metadata caching of large objects (like courses) to avoid memory leaks while keeping the hot path lean.
