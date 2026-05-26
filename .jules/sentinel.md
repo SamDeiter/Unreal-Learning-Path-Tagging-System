@@ -1,0 +1,4 @@
+## 2026-04-23 - [Centralized Authorization Guard]
+**Vulnerability:** Redundant and inconsistent administrative authorization logic across Cloud Functions, with some sensitive endpoints (like `triggerDemandScrape`) being overly permissive.
+**Learning:** Duplicating sensitive logic like the `BOOTSTRAP_ADMIN_EMAILS` list across multiple files increases the risk of drift and security gaps. Permissive default access for resource-intensive workflows (like GitHub Action triggers) can lead to quota exhaustion or unauthorized system changes.
+**Prevention:** Centralize all authorization and authentication guards in a shared utility (e.g., `authGuard.js`). Ensure these guards support all used versions of the Cloud Function SDK (v1 context vs. v2 request). Use these centralized helpers to enforce the principle of least privilege across all sensitive endpoints.
