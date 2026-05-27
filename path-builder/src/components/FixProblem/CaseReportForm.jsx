@@ -368,6 +368,12 @@ export default function CaseReportForm({ onUpdate, disabled }) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
                 role="button"
                 tabIndex={0}
               >
