@@ -15,6 +15,7 @@ import { usePath } from "../../context/PathContext";
 import { filterCourses } from "../../utils/dataProcessing";
 import { matchCoursesToGoal } from "../../utils/courseMatchingUtils";
 import { Search, Sparkles, Clock, Clapperboard, Layers, Plus, X, Check } from "lucide-react";
+import { MODIFIER_KEY } from "../../utils/osUtils";
 import { getRelevanceBadge } from "../../services/ContentGapService";
 import { detectPersona, getPersonaById } from "../../services/PersonaService";
 import { trackPersonaDetected } from "../../services/analyticsService";
@@ -230,7 +231,7 @@ function CourseLibrary({ courses }) {
             ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Search courses... (Ctrl+K)"
+            placeholder={`Search courses... (${MODIFIER_KEY}+K)`}
             value={search}
             onChange={handleSearchChange}
           />
