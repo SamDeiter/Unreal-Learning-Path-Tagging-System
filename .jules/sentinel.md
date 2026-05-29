@@ -1,0 +1,4 @@
+## 2025-05-14 - Centralized Admin Authorization Guard
+**Vulnerability:** Redundant and inconsistent administrator authorization logic across multiple Cloud Functions (v1 and v2), and overly permissive access on the `triggerDemandScrape` endpoint which allowed any authenticated user to trigger GitHub workflows.
+**Learning:** Maintaining separate `BOOTSTRAP_ADMIN_EMAILS` lists in different function files leads to configuration drift and potential security gaps where some admin endpoints are less protected than others.
+**Prevention:** Centralize authorization guards in a shared utility that supports the project's mix of Cloud Functions v1 and v2. Use a single source of truth for fallback admin identifiers and ensure sensitive operational endpoints (like CI/CD triggers) require explicit admin privileges rather than general authentication.
