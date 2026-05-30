@@ -12,10 +12,9 @@ describe("firebaseConfig", () => {
     expect(firebaseConfig).toHaveProperty("appId");
   });
 
-  it("getFirebaseApp returns an app object", () => {
+  it("getFirebaseApp returns null in test/E2E mode", () => {
     const app = getFirebaseApp();
-    expect(app).toBeDefined();
-    expect(app.name).toBeDefined();
+    expect(app).toBeNull();
   });
 
   it("getFirebaseApp returns the same singleton on repeated calls", () => {

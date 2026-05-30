@@ -25,10 +25,13 @@ import {
   collection,
   getDocs,
   query,
+  where,
   orderBy,
   limit,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
+import { getCurrentUser } from "./googleAuthService";
+import { isAdmin } from "./accessControl";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -224,14 +227,22 @@ export function resetTokenTracker() {
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
+    const user = getCurrentUser();
+    if (!user) return;
+
     const app = getFirebaseApp();
     if (!app) return;
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+
+    // Use a unique document ID to prevent cross-user overwriting (IDOR fix)
+    const docId = `${dateKey}_${user.uid}`;
+    const docRef = doc(db, "token_usage", docId);
+
     await setDoc(
       docRef,
       {
         date: dateKey,
+        userId: user.uid,
         totalInput: dayData.totalInput,
         totalOutput: dayData.totalOutput,
         calls: dayData.calls,
@@ -249,17 +260,60 @@ async function syncDayToFirestore(dateKey, dayData) {
 
 /**
  * Fetch historical token usage from Firestore.
+ * Aggregates user-specific records into daily totals for the dashboard.
  * @param {number} days - Number of days to fetch (default 30)
  * @returns {Promise<Array>} Array of daily usage records
  */
 export async function fetchCloudStats(days = 30) {
   try {
+    const user = getCurrentUser();
+    if (!user) return [];
+
     const app = getFirebaseApp();
     if (!app) return [];
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+
+    const isUserAdmin = await isAdmin();
+
+    // If admin, they can read all. If not, they MUST filter by their userId
+    // to satisfy the Firestore security rules.
+    let q;
+    if (isUserAdmin) {
+      q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days * 50));
+    } else {
+      q = query(
+        collection(db, "token_usage"),
+        where("userId", "==", user.uid),
+        orderBy("date", "desc"),
+        limit(days)
+      );
+    }
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    // Aggregate by date
+    const dailyMap = {};
+    snapshot.docs.forEach((d) => {
+      const data = d.data();
+      const date = data.date;
+      if (!dailyMap[date]) {
+        dailyMap[date] = {
+          date,
+          totalInput: 0,
+          totalOutput: 0,
+          calls: 0,
+          estimatedCost: 0,
+        };
+      }
+      dailyMap[date].totalInput += data.totalInput || 0;
+      dailyMap[date].totalOutput += data.totalOutput || 0;
+      dailyMap[date].calls += data.calls || 0;
+      dailyMap[date].estimatedCost += data.estimatedCost || 0;
+    });
+
+    return Object.values(dailyMap)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, days);
   } catch (err) {
     console.warn("[TokenTracker] Failed to fetch cloud stats:", err.message);
     return [];
