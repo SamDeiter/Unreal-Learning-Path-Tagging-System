@@ -173,22 +173,25 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
             </div>
 
             <div className="feedback-form-group">
-              <label htmlFor="feedback-desc">
-                {type === "bug"
-                  ? "Describe the issue and steps to reproduce:"
-                  : "Tell us about your suggestion:"}
-              </label>
+              <div className="label-with-count">
+                <label htmlFor="feedback-desc">
+                  {type === "bug" ? "Issue description" : "Suggestion"}
+                  <span className="required-star" aria-hidden="true">*</span>
+                  <span className="sr-only">(required)</span>
+                </label>
+                <span id="desc-char-count" className="char-count" role="status" aria-live="polite">
+                  {description.length}/1000
+                </span>
+              </div>
               <textarea
                 id="feedback-desc"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={
-                  type === "bug"
-                    ? "e.g., When I click 'Next', the screen goes black..."
-                    : "e.g., It would be great if we could..."
-                }
+                placeholder={type === "bug" ? "Describe the issue..." : "Your suggestion..."}
                 required
-                rows={5}
+                rows={4}
+                maxLength={1000}
+                aria-describedby="desc-char-count"
               />
             </div>
 
