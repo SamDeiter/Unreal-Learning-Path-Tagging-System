@@ -9,6 +9,7 @@
  */
 import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
+import { MODIFIER_KEY } from "../../utils/osUtils";
 
 export default function ChatInput({
   onSend,
@@ -57,7 +58,7 @@ export default function ChatInput({
         </button>
       </div>
       <div className="chat-input-hint">
-        Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to send
+        Press <kbd>{MODIFIER_KEY}</kbd>+<kbd>Enter</kbd> to send
       </div>
     </div>
   );
