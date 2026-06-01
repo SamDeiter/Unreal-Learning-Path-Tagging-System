@@ -40,6 +40,7 @@ export default function AppSidebar({
                   <button
                     className={`sidebar-tab ${isAnyBuilderActive ? "active" : ""}`}
                     title={tab.tooltip}
+                    aria-expanded={buildersExpanded}
                     onClick={() => {
                       setBuildersExpanded(!buildersExpanded);
                       if (!isAnyBuilderActive) {
@@ -48,10 +49,11 @@ export default function AppSidebar({
                       }
                     }}
                   >
-                    <span className="sidebar-tab-icon">{tab.icon}</span>
+                    <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${buildersExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -65,7 +67,7 @@ export default function AppSidebar({
                           title={sub.tooltip}
                           onClick={() => setActiveTab(sub.key)}
                         >
-                          <span className="sidebar-tab-icon">{sub.icon}</span>
+                          <span className="sidebar-tab-icon" aria-hidden="true">{sub.icon}</span>
                           <span className="sidebar-tab-label">{sub.label}</span>
                         </button>
                       ))}
@@ -81,7 +83,7 @@ export default function AppSidebar({
                 title={tab.tooltip}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <span className="sidebar-tab-icon">{tab.icon}</span>
+                <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
                 <span className="sidebar-tab-label">{tab.label}</span>
               </button>
             );
@@ -101,6 +103,7 @@ export default function AppSidebar({
                   <button
                     className={`sidebar-tab sidebar-tab-sm ${isAnyAnalyticsActive ? "active" : ""}`}
                     title={tab.tooltip}
+                    aria-expanded={analyticsExpanded}
                     onClick={() => {
                       setAnalyticsExpanded(!analyticsExpanded);
                       if (!isAnyAnalyticsActive) {
@@ -109,10 +112,11 @@ export default function AppSidebar({
                       }
                     }}
                   >
-                    <span className="sidebar-tab-icon">{tab.icon}</span>
+                    <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
                     <span className="sidebar-tab-label">{tab.label}</span>
                     <span
                       className={`sidebar-expand-arrow ${analyticsExpanded ? "expanded" : ""}`}
+                      aria-hidden="true"
                     >
                       ▸
                     </span>
@@ -126,7 +130,7 @@ export default function AppSidebar({
                           title={sub.tooltip}
                           onClick={() => setActiveTab(sub.key)}
                         >
-                          <span className="sidebar-tab-icon">{sub.icon}</span>
+                          <span className="sidebar-tab-icon" aria-hidden="true">{sub.icon}</span>
                           <span className="sidebar-tab-label">{sub.label}</span>
                         </button>
                       ))}
@@ -142,7 +146,7 @@ export default function AppSidebar({
                 title={tab.tooltip}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <span className="sidebar-tab-icon">{tab.icon}</span>
+                <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
                 <span className="sidebar-tab-label">{tab.label}</span>
                 {tab.key === "admin-feedback" && newFeedbackCount > 0 && (
                   <span className="feedback-badge">{newFeedbackCount}</span>
@@ -183,7 +187,7 @@ export default function AppSidebar({
               className="retake-quiz-btn"
               onClick={onRetakeQuiz}
             >
-              🔄 Change Role
+              <span aria-hidden="true">🔄</span> Change Role
             </button>
             <button className="header-signout-btn" onClick={() => signOutUser()}>
               Sign Out
