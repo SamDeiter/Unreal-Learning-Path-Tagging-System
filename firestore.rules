@@ -142,10 +142,11 @@ service cloud.firestore {
     }
 
     // Token usage — client-side token tracking for cost dashboard
-    // Authenticated users can read/write their own daily stats
-    match /token_usage/{dateKey} {
-      allow read: if request.auth != null;
+    // Isolated per-user to prevent IDOR and data corruption
+    match /token_usage/{userId}/daily/{dateKey} {
+      allow read: if request.auth != null && request.auth.uid == userId;
       allow create, update: if request.auth != null
+        && request.auth.uid == userId
         && request.resource.data.keys().size() <= 15;
       allow delete: if false;
     }
