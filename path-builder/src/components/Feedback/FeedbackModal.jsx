@@ -130,12 +130,12 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
 
         {success ? (
           <div className="feedback-success">
-            <CheckCircle size={48} className="success-icon" />
+            <CheckCircle size={48} className="success-icon" aria-hidden="true" />
             <h3>Thank You!</h3>
             <p>Your feedback helps us improve the learning path.</p>
             {persistedTo === "firestore" && (
               <p style={{ fontSize: "0.8rem", opacity: 0.7, marginTop: "0.5rem" }}>
-                ✅ Saved to our database
+                <span aria-hidden="true">✅</span> Saved to our database
               </p>
             )}
           </div>
@@ -143,7 +143,7 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
           <form onSubmit={handleSubmit}>
             <div className="feedback-header">
               <h2 id="feedback-modal-title">
-                <MessageSquare size={24} className="icon-inline" /> Send Feedback
+                <MessageSquare size={24} className="icon-inline" aria-hidden="true" /> Send Feedback
               </h2>
               <p>Found a bug or have an idea? Let us know.</p>
             </div>
@@ -154,29 +154,33 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 className={`type-btn ${type === "bug" ? "active" : ""}`}
                 onClick={() => setType("bug")}
               >
-                <Bug size={16} /> Bug Report
+                <Bug size={16} aria-hidden="true" /> Bug Report
               </button>
               <button
                 type="button"
                 className={`type-btn ${type === "feature" ? "active" : ""}`}
                 onClick={() => setType("feature")}
               >
-                <Lightbulb size={16} /> Feature Request
+                <Lightbulb size={16} aria-hidden="true" /> Feature Request
               </button>
               <button
                 type="button"
                 className={`type-btn ${type === "general" ? "active" : ""}`}
                 onClick={() => setType("general")}
               >
-                <MessageSquare size={16} /> General
+                <MessageSquare size={16} aria-hidden="true" /> General
               </button>
             </div>
 
             <div className="feedback-form-group">
               <label htmlFor="feedback-desc">
                 {type === "bug"
-                  ? "Describe the issue and steps to reproduce:"
-                  : "Tell us about your suggestion:"}
+                  ? "Describe the issue and steps to reproduce"
+                  : "Tell us about your suggestion"}
+                <span className="required-asterisk" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only">(required)</span>:
               </label>
               <textarea
                 id="feedback-desc"
@@ -189,7 +193,16 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 }
                 required
                 rows={5}
+                aria-describedby="feedback-char-count"
               />
+              <div
+                id="feedback-char-count"
+                className={`char-counter ${description.length > 800 ? "near-limit" : ""}`}
+                role="status"
+                aria-live="polite"
+              >
+                {description.length} characters
+              </div>
             </div>
 
             <div className="feedback-form-group">
