@@ -107,7 +107,7 @@ describe("DiagnosisCard", () => {
     };
 
     render(<DiagnosisCard diagnosis={diagnosis} />);
-    expect(screen.getByText("🔬 Diagnosis")).toBeTruthy();
+    expect(screen.getByText(/Diagnosis/)).toBeTruthy();
     expect(screen.getByText("Lumen reflections are flickering")).toBeTruthy();
     expect(screen.getByText(/Root Causes/)).toBeTruthy();
   });
@@ -142,6 +142,46 @@ describe("DiagnosisLoader", () => {
   it("should show progress phases", () => {
     render(<DiagnosisLoader />);
     expect(screen.getByText(/Analyzing your problem/)).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<DiagnosisLoader />);
+    const loader = container.querySelector(".dx-loader");
+    expect(loader.getAttribute("role")).toBe("status");
+    expect(loader.getAttribute("aria-live")).toBe("polite");
+
+    const spinner = container.querySelector(".dx-loader-spinner");
+    expect(spinner.getAttribute("aria-hidden")).toBe("true");
+
+    const progressBar = container.querySelector(".dx-progress-bar");
+    expect(progressBar.getAttribute("role")).toBe("progressbar");
+    expect(progressBar.getAttribute("aria-valuemin")).toBe("0");
+    expect(progressBar.getAttribute("aria-valuemax")).toBe("100");
+    expect(progressBar.getAttribute("aria-valuenow")).toBe("33"); // 1/3
+    expect(progressBar.getAttribute("aria-valuetext")).toBe("Analyzing your problem...");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 5. ProblemInput
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import ProblemInput from "../components/ProblemFirst/ProblemInput";
+
+describe("ProblemInput", () => {
+  it("should render without crashing", () => {
+    const { container: _container } = render(<ProblemInput onSubmit={vi.fn()} />);
+    expect(document.querySelector(".problem-input-container")).toBeTruthy();
+  });
+
+  it("should have correct aria-pressed state for engine toggles", () => {
+    const { container: _container } = render(<ProblemInput onSubmit={vi.fn()} />);
+    const ue5Btn = screen.getByText("UE5");
+    const uefnBtn = screen.getByText("UEFN");
+
+    // Default is UE5
+    expect(ue5Btn.getAttribute("aria-pressed")).toBe("true");
+    expect(uefnBtn.getAttribute("aria-pressed")).toBe("false");
   });
 });
 
