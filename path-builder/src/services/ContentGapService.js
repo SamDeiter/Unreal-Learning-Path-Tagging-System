@@ -14,6 +14,32 @@
 
 import { personaScoringRules, getPersonaById } from "./PersonaService";
 
+// Cache for course metadata to avoid redundant tag extraction and lowercasing
+const metadataCache = new WeakMap();
+
+/**
+ * Normalizes course metadata for persona scoring.
+ * Extracts all tags and lowercases everything once.
+ */
+function getNormalizedMetadata(course) {
+  if (metadataCache.has(course)) {
+    return metadataCache.get(course);
+  }
+
+  const title = (course.title || "").toLowerCase();
+  const allTags = [
+    ...(course.canonical_tags || []),
+    ...(course.ai_tags || []),
+    ...(course.gemini_system_tags || []),
+    ...(course.transcript_tags || []),
+    ...(course.extracted_tags || []),
+  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+  const metadata = { title, allTags };
+  metadataCache.set(course, metadata);
+  return metadata;
+}
+
 /**
  * Analyze content gaps for a specific persona.
  *
@@ -43,14 +69,7 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
 
   // Score each course for this persona
   const scored = courses.map((course) => {
-    const title = (course.title || "").toLowerCase();
-    const allTags = [
-      ...(course.canonical_tags || []),
-      ...(course.ai_tags || []),
-      ...(course.gemini_system_tags || []),
-      ...(course.transcript_tags || []),
-      ...(course.extracted_tags || []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    const { title, allTags } = getNormalizedMetadata(course);
 
     let score = 0;
     const matchedBoosts = [];
@@ -145,14 +164,7 @@ export function getRelevanceBadge(course, personaId) {
   const rules = personaScoringRules[personaId];
   if (!rules) return { label: "", type: "neutral", score: 0 };
 
-  const title = (course.title || "").toLowerCase();
-  const allTags = [
-    ...(course.canonical_tags || []),
-    ...(course.ai_tags || []),
-    ...(course.gemini_system_tags || []),
-    ...(course.transcript_tags || []),
-    ...(course.extracted_tags || []),
-  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+  const { title, allTags } = getNormalizedMetadata(course);
 
   let score = 0;
   let hasPenalty = false;
