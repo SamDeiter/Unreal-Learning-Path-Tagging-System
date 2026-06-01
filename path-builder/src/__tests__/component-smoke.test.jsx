@@ -143,6 +143,20 @@ describe("DiagnosisLoader", () => {
     render(<DiagnosisLoader />);
     expect(screen.getByText(/Analyzing your problem/)).toBeTruthy();
   });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<DiagnosisLoader />);
+    const loader = container.querySelector(".dx-loader");
+    expect(loader.getAttribute("role")).toBe("status");
+    expect(loader.getAttribute("aria-live")).toBe("polite");
+
+    const progressBar = container.querySelector(".dx-progress-bar");
+    expect(progressBar.getAttribute("role")).toBe("progressbar");
+    expect(progressBar.getAttribute("aria-valuemin")).toBe("0");
+    expect(progressBar.getAttribute("aria-valuemax")).toBe("100");
+    expect(progressBar.getAttribute("aria-valuenow")).toBe("33");
+    expect(progressBar.getAttribute("aria-valuetext")).toBe("Analyzing your problem...");
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
