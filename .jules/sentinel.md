@@ -1,0 +1,4 @@
+## 2026-03-03 - Centralized Admin Authorization and Secured GitHub Workflow Dispatch
+**Vulnerability:** The `triggerDemandScrape` Cloud Function was accessible to any authenticated user, allowing potential abuse of GitHub Actions quota and unauthorized data scraping triggers. Additionally, the list of bootstrap admin emails was duplicated across multiple files, increasing the risk of logic drift and inconsistent authorization enforcement.
+**Learning:** In a growing serverless architecture, authorization logic often gets copy-pasted into new functions, leading to maintenance debt and security gaps. "Any authenticated user" is a common but dangerous default for internal tools.
+**Prevention:** Use a centralized authorization utility (like `requireAdmin`) that supports the project's specific SDK versions (v1/v2 context/request) and serves as the single source of truth for privileged access.
