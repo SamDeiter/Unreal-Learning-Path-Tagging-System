@@ -19,6 +19,7 @@ vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import LoadingSpinner from "../components/LoadingSpinner/LoadingSpinner";
+import ProblemInput from "../components/ProblemFirst/ProblemInput";
 
 describe("LoadingSpinner", () => {
   it("should render without crashing", () => {
@@ -174,5 +175,39 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. ProblemInput
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("ProblemInput", () => {
+  it("should render without crashing", () => {
+    const onSubmit = vi.fn();
+    const { container } = render(<ProblemInput onSubmit={onSubmit} />);
+    expect(container.querySelector(".problem-input-container")).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes", () => {
+    const onSubmit = vi.fn();
+    const { container } = render(<ProblemInput onSubmit={onSubmit} />);
+
+    // Engine toggle buttons
+    const ue5Btn = screen.getByText("UE5");
+    const uefnBtn = screen.getByText("UEFN");
+    expect(ue5Btn.getAttribute("aria-pressed")).toBe("true"); // Default is UE5
+    expect(uefnBtn.getAttribute("aria-pressed")).toBe("false");
+
+    // Character count
+    const charCount = container.querySelector(".char-count");
+    expect(charCount.getAttribute("role")).toBe("status");
+    expect(charCount.getAttribute("aria-live")).toBe("polite");
+
+    // Decorative icons (Search, Tags, Terminal, Image, XCircle)
+    const icons = container.querySelectorAll("svg");
+    icons.forEach((icon) => {
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+    });
   });
 });
