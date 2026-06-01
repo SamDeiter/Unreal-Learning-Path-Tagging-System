@@ -1,0 +1,4 @@
+## 2026-06-01 - XSS in markdownToHtml utility
+**Vulnerability:** A custom regex-based markdown parser in `markdownToHtml.js` was vulnerable to XSS. It failed to escape double/single quotes, allowing attribute injection in generated HTML tags (e.g., `[click me](" onmouseover="alert(1))`). It also lacked protocol validation for links, allowing `javascript:` URLs.
+**Learning:** Home-grown parsers that use simple string replacement are highly susceptible to injection attacks if they don't comprehensively escape all HTML-sensitive characters and validate URLs.
+**Prevention:** Always escape `&`, `<`, `>`, `"`, and `'` when generating HTML from user input. Implement a whitelist of safe protocols (e.g., `http:`, `https:`, `mailto:`, `tel:`) or specifically block dangerous ones for any URL-based attributes.
