@@ -1,18 +1,49 @@
-/**
- * ContentGapService — Analyzes content coverage per persona and flags gaps.
- *
- * Maps courses to persona pain points, required topics, and boost/penalty keywords.
- * Identifies:
- *   - coveredTopics: topics well-represented in the content library
- *   - missingTopics: required topics with zero or sparse coverage
- *   - tooTechnical: courses flagged as "not artist-friendly" for artist personas
- *   - artistFriendly: courses that match artist-oriented personas
- *   - relevanceScores: per-course persona relevance score
- *
- * Uses PersonaService scoring rules as the source of truth.
- */
-
 import { personaScoringRules, getPersonaById } from "./PersonaService";
+
+// Cache for normalized course metadata to avoid redundant string processing
+const courseMetadataCache = new WeakMap();
+
+// Cache for normalized persona rules
+const personaRulesCache = new Map();
+
+/**
+ * Get or create normalized course metadata
+ */
+function getNormalizedCourseMetadata(course) {
+  let metadata = courseMetadataCache.get(course);
+  if (!metadata) {
+    const title = (course.title || "").toLowerCase();
+    const allTags = [
+      ...(course.canonical_tags || []),
+      ...(course.ai_tags || []),
+      ...(course.gemini_system_tags || []),
+      ...(course.transcript_tags || []),
+      ...(course.extracted_tags || []),
+    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    metadata = { title, allTags };
+    courseMetadataCache.set(course, metadata);
+  }
+  return metadata;
+}
+
+/**
+ * Get or create normalized persona rules
+ */
+function getNormalizedPersonaRules(personaId) {
+  let normalized = personaRulesCache.get(personaId);
+  if (!normalized) {
+    const rules = personaScoringRules[personaId];
+    if (!rules) return null;
+
+    normalized = {
+      boostKeywords: (rules.boostKeywords || []).map((k) => k.toLowerCase()),
+      penaltyKeywords: (rules.penaltyKeywords || []).map((k) => k.toLowerCase()),
+      requiredTopics: (rules.requiredTopics || []).map((t) => t.toLowerCase()),
+    };
+    personaRulesCache.set(personaId, normalized);
+  }
+  return normalized;
+}
 
 /**
  * Analyze content gaps for a specific persona.
@@ -23,7 +54,7 @@ import { personaScoringRules, getPersonaById } from "./PersonaService";
  * @returns {{ coveredTopics: string[], missingTopics: string[], tooTechnical: object[], artistFriendly: object[], relevanceScores: object[], topGaps: string[] }}
  */
 export function analyzeGaps(personaId, courses = [], _tags = []) {
-  const rules = personaScoringRules[personaId];
+  const rules = getNormalizedPersonaRules(personaId);
   const persona = getPersonaById(personaId);
 
   if (!rules || !persona) {
@@ -37,27 +68,19 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
     };
   }
 
-  const boostKeywords = (rules.boostKeywords || []).map((k) => k.toLowerCase());
-  const penaltyKeywords = (rules.penaltyKeywords || []).map((k) => k.toLowerCase());
-  const requiredTopics = (rules.requiredTopics || []).map((t) => t.toLowerCase());
+  const { boostKeywords, penaltyKeywords, requiredTopics } = rules;
 
   // Score each course for this persona
   const scored = courses.map((course) => {
-    const title = (course.title || "").toLowerCase();
-    const allTags = [
-      ...(course.canonical_tags || []),
-      ...(course.ai_tags || []),
-      ...(course.gemini_system_tags || []),
-      ...(course.transcript_tags || []),
-      ...(course.extracted_tags || []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    const { title, allTags } = getNormalizedCourseMetadata(course);
 
     let score = 0;
     const matchedBoosts = [];
     const matchedPenalties = [];
 
     // Boost scoring
-    for (const keyword of boostKeywords) {
+    for (let i = 0; i < boostKeywords.length; i++) {
+      const keyword = boostKeywords[i];
       if (title.includes(keyword)) {
         score += 5;
         matchedBoosts.push(keyword);
@@ -68,7 +91,8 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
     }
 
     // Penalty scoring
-    for (const keyword of penaltyKeywords) {
+    for (let i = 0; i < penaltyKeywords.length; i++) {
+      const keyword = penaltyKeywords[i];
       if (title.includes(keyword) || allTags.some((t) => t.includes(keyword))) {
         score -= 10;
         matchedPenalties.push(keyword);
@@ -76,9 +100,13 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
     }
 
     // Check which required topics are covered
-    const coveredRequired = requiredTopics.filter(
-      (topic) => title.includes(topic) || allTags.some((t) => t.includes(topic))
-    );
+    const coveredRequired = [];
+    for (let i = 0; i < requiredTopics.length; i++) {
+      const topic = requiredTopics[i];
+      if (title.includes(topic) || allTags.some((t) => t.includes(topic))) {
+        coveredRequired.push(topic);
+      }
+    }
 
     return {
       code: course.code,
@@ -142,32 +170,42 @@ export function analyzeGaps(personaId, courses = [], _tags = []) {
  * @returns {{ label: string, type: "relevant"|"technical"|"neutral", score: number }}
  */
 export function getRelevanceBadge(course, personaId) {
-  const rules = personaScoringRules[personaId];
+  const rules = getNormalizedPersonaRules(personaId);
   if (!rules) return { label: "", type: "neutral", score: 0 };
 
-  const title = (course.title || "").toLowerCase();
-  const allTags = [
-    ...(course.canonical_tags || []),
-    ...(course.ai_tags || []),
-    ...(course.gemini_system_tags || []),
-    ...(course.transcript_tags || []),
-    ...(course.extracted_tags || []),
-  ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+  const { title, allTags } = getNormalizedCourseMetadata(course);
+  const { boostKeywords, penaltyKeywords } = rules;
 
   let score = 0;
   let hasPenalty = false;
 
-  for (const keyword of (rules.boostKeywords || [])) {
-    const kw = keyword.toLowerCase();
-    if (title.includes(kw)) score += 5;
-    else if (allTags.some((t) => t.includes(kw))) score += 3;
+  for (let i = 0; i < boostKeywords.length; i++) {
+    const kw = boostKeywords[i];
+    if (title.includes(kw)) {
+      score += 5;
+    } else {
+      for (let j = 0; j < allTags.length; j++) {
+        if (allTags[j].includes(kw)) {
+          score += 3;
+          break;
+        }
+      }
+    }
   }
 
-  for (const keyword of (rules.penaltyKeywords || [])) {
-    const kw = keyword.toLowerCase();
-    if (title.includes(kw) || allTags.some((t) => t.includes(kw))) {
+  for (let i = 0; i < penaltyKeywords.length; i++) {
+    const kw = penaltyKeywords[i];
+    if (title.includes(kw)) {
       score -= 10;
       hasPenalty = true;
+    } else {
+      for (let j = 0; j < allTags.length; j++) {
+        if (allTags[j].includes(kw)) {
+          score -= 10;
+          hasPenalty = true;
+          break;
+        }
+      }
     }
   }
 
