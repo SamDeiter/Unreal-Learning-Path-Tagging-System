@@ -143,6 +143,26 @@ describe("DiagnosisLoader", () => {
     render(<DiagnosisLoader />);
     expect(screen.getByText(/Analyzing your problem/)).toBeTruthy();
   });
+
+  it("should have correct accessibility attributes", () => {
+    const { container } = render(<DiagnosisLoader />);
+    const loader = container.querySelector(".dx-loader");
+    expect(loader.getAttribute("role")).toBe("status");
+    expect(loader.getAttribute("aria-live")).toBe("polite");
+
+    const progressbar = container.querySelector(".dx-progress-bar");
+    expect(progressbar.getAttribute("role")).toBe("progressbar");
+    expect(progressbar.getAttribute("aria-valuemin")).toBe("0");
+    expect(progressbar.getAttribute("aria-valuemax")).toBe("100");
+    expect(progressbar.getAttribute("aria-valuenow")).toBe("33"); // First phase of 3 (1/3 * 100)
+    expect(progressbar.getAttribute("aria-valuetext")).toBe("Analyzing your problem...");
+
+    const decorativeIcons = container.querySelectorAll('.dx-phase-icon[aria-hidden="true"]');
+    expect(decorativeIcons.length).toBe(3);
+
+    const spinner = container.querySelector('.dx-loader-spinner[aria-hidden="true"]');
+    expect(spinner).toBeTruthy();
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
