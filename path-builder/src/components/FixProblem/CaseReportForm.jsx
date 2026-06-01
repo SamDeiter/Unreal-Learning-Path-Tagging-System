@@ -79,39 +79,36 @@ export default function CaseReportForm({ onUpdate, disabled }) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  const buildCaseReport = useCallback(
-    (currentFields, currentScreenshot) => {
-      let logText = currentFields.logText.trim() || undefined;
-      if (logText) {
-        const lines = logText.split("\n");
-        if (lines.length > MAX_LOG_LINES) {
-          logText = lines.slice(-MAX_LOG_LINES).join("\n");
-        }
-        if (logText.length > MAX_LOG_CHARS) {
-          logText = logText.slice(-MAX_LOG_CHARS);
-        }
+  const buildCaseReport = useCallback((currentFields, currentScreenshot) => {
+    let logText = currentFields.logText.trim() || undefined;
+    if (logText) {
+      const lines = logText.split("\n");
+      if (lines.length > MAX_LOG_LINES) {
+        logText = lines.slice(-MAX_LOG_LINES).join("\n");
       }
+      if (logText.length > MAX_LOG_CHARS) {
+        logText = logText.slice(-MAX_LOG_CHARS);
+      }
+    }
 
-      return {
-        engineVersion: currentFields.engineVersion.trim() || undefined,
-        platform: currentFields.platform.trim() || undefined,
-        context: currentFields.context.trim() || undefined,
-        renderer: currentFields.renderer.trim() || undefined,
-        features: currentFields.features
-          ? currentFields.features
-              .split(",")
-              .map((f) => f.trim())
-              .filter(Boolean)
-          : [],
-        whatChangedRecently: currentFields.whatChangedRecently.trim() || undefined,
-        goal: currentFields.goal.trim() || undefined,
-        logText,
-        screenshotBase64: currentScreenshot?.base64 || undefined,
-        screenshotMimeType: currentScreenshot?.mimeType || undefined,
-      };
-    },
-    []
-  );
+    return {
+      engineVersion: currentFields.engineVersion.trim() || undefined,
+      platform: currentFields.platform.trim() || undefined,
+      context: currentFields.context.trim() || undefined,
+      renderer: currentFields.renderer.trim() || undefined,
+      features: currentFields.features
+        ? currentFields.features
+            .split(",")
+            .map((f) => f.trim())
+            .filter(Boolean)
+        : [],
+      whatChangedRecently: currentFields.whatChangedRecently.trim() || undefined,
+      goal: currentFields.goal.trim() || undefined,
+      logText,
+      screenshotBase64: currentScreenshot?.base64 || undefined,
+      screenshotMimeType: currentScreenshot?.mimeType || undefined,
+    };
+  }, []);
 
   const handleChange = useCallback(
     (field, value) => {
@@ -197,6 +194,16 @@ export default function CaseReportForm({ onUpdate, disabled }) {
     setIsDragging(false);
   }, []);
 
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fileInputRef.current?.click();
+      }
+    },
+    [fileInputRef]
+  );
+
   const removeScreenshot = useCallback(() => {
     if (screenshot?.previewUrl) URL.revokeObjectURL(screenshot.previewUrl);
     setScreenshot(null);
@@ -222,7 +229,14 @@ export default function CaseReportForm({ onUpdate, disabled }) {
             {boost > 0 ? `+${boost} pts` : "—"}
           </span>
         </div>
-        <div className="case-boost-bar">
+        <div
+          className="case-boost-bar"
+          role="progressbar"
+          aria-valuenow={boost}
+          aria-valuemin="0"
+          aria-valuemax={MAX_BOOST}
+          aria-valuetext={`${boostPct}% confidence boost`}
+        >
           <div
             className={`case-boost-fill case-boost-fill-${boostLevel}`}
             style={{ width: `${boostPct}%` }}
@@ -357,6 +371,7 @@ export default function CaseReportForm({ onUpdate, disabled }) {
                   onClick={removeScreenshot}
                   disabled={disabled}
                   title="Remove screenshot"
+                  aria-label="Remove screenshot"
                 >
                   ✕
                 </button>
@@ -367,9 +382,11 @@ export default function CaseReportForm({ onUpdate, disabled }) {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
+                onKeyDown={handleKeyDown}
                 onClick={() => fileInputRef.current?.click()}
                 role="button"
                 tabIndex={0}
+                aria-label="Upload screenshot"
               >
                 <span className="case-dropzone-icon">📷</span>
                 <span className="case-dropzone-text">Drop image here or click to browse</span>
