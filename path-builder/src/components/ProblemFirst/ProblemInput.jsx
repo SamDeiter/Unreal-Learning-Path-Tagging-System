@@ -181,20 +181,25 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
     []
   );
 
-  const randomPlaceholder = placeholderExamples[0];
+  const [placeholderIndex] = useState(() =>
+    Math.floor(Math.random() * placeholderExamples.length)
+  );
+
+  const randomPlaceholder = placeholderExamples[placeholderIndex];
 
   return (
     <div className="problem-input-container" onPaste={handlePaste}>
       <div className="problem-input-header">
         <div className="header-top-row">
           <h2>
-            <Search size={22} className="icon-inline" /> What's the problem?
+            <Search size={22} className="icon-inline" aria-hidden="true" /> What's the problem?
           </h2>
           <div className="engine-toggle">
             <button
               type="button"
               className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
               onClick={() => setEngine("UE5")}
+              aria-pressed={engine === "UE5"}
             >
               UE5
             </button>
@@ -202,6 +207,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               type="button"
               className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
               onClick={() => setEngine("UEFN")}
+              aria-pressed={engine === "UEFN"}
             >
               UEFN
             </button>
@@ -224,7 +230,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           disabled={isLoading}
           aria-label="Problem description"
         />
-        <div className="char-count">
+        <div className="char-count" role="status" aria-live="polite">
           {problem.length} characters
           {problem.length < 10 && problem.length > 0 && (
             <span className="warning"> (minimum 10)</span>
@@ -236,7 +242,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       {detectedTags.length > 0 && (
         <div className="detected-tags">
           <span className="label">
-            <Tags size={14} className="icon-inline" /> Detected:
+            <Tags size={14} className="icon-inline" aria-hidden="true" /> Detected:
           </span>
           <div className="tag-list">
             {detectedTags.map((match) => (
@@ -275,12 +281,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               aria-label="Remove error log"
               title="Clear error log"
             >
-              <XCircle size={20} />
+              <XCircle size={20} aria-hidden="true" />
             </button>
           </div>
         ) : (
           <div className="drop-prompt">
-            <Terminal size={20} />
+            <Terminal size={20} aria-hidden="true" />
             <span>
               Paste (<kbd>Ctrl+V</kbd>) an error log or build output
             </span>
@@ -320,12 +326,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               aria-label="Remove screenshot"
               title="Remove screenshot"
             >
-              <XCircle size={20} />
+              <XCircle size={20} aria-hidden="true" />
             </button>
           </div>
         ) : (
           <div className="drop-prompt">
-            <Image size={20} />
+            <Image size={20} aria-hidden="true" />
             <span>
               Paste (<kbd>Ctrl+V</kbd>) or drag a screenshot here
             </span>
@@ -344,10 +350,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         >
           {isLoading ? (
             <>
-              <span className="spinner" /> Diagnosing...
+              <span className="spinner" aria-hidden="true" /> Diagnosing...
             </>
           ) : (
-            <>Get Diagnosis →</>
+            <>
+              Get Diagnosis <span aria-hidden="true">→</span>
+            </>
           )}
         </button>
         <span className="hint">
@@ -358,7 +366,9 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       {/* Past question history */}
       {queryHistory.length > 0 && (
         <div className="query-history">
-          <span className="history-label">🕘 Recent questions:</span>
+          <span className="history-label">
+            <span aria-hidden="true">🕘</span> Recent questions:
+          </span>
           <div className="history-chips">
             {queryHistory.map((item, i) => {
               const q = item.query || item; // backward compat
@@ -383,7 +393,11 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                     title={isCached ? `${q} (cached — instant load)` : q}
                     disabled={isLoading}
                   >
-                    {isCached && <span className="cache-indicator">⚡</span>}
+                    {isCached && (
+                      <span className="cache-indicator" aria-hidden="true">
+                        ⚡
+                      </span>
+                    )}
                     {q.length > 50 ? q.slice(0, 50) + "…" : q}
                   </button>
                   <button
@@ -397,8 +411,9 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                       });
                     }}
                     title="Remove"
+                    aria-label="Remove recent question"
                   >
-                    ×
+                    <span aria-hidden="true">×</span>
                   </button>
                 </div>
               );
