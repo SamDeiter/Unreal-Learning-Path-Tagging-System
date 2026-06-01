@@ -8,17 +8,26 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+import LoadingSpinner from "../components/LoadingSpinner/LoadingSpinner";
+import ErrorBoundary from "../components/ErrorBoundary";
+import DiagnosisCard from "../components/ProblemFirst/DiagnosisCard";
+import DiagnosisLoader from "../components/FixProblem/DiagnosisLoader";
+import BridgeCard from "../components/GuidedPlayer/BridgeCard";
+import AppSidebar from "../components/AppSidebar/AppSidebar";
+
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
 vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
 
+vi.mock("../services/googleAuthService", () => ({
+  signOutUser: vi.fn(),
+}));
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
 // ═══════════════════════════════════════════════════════════════════════════════
-
-import LoadingSpinner from "../components/LoadingSpinner/LoadingSpinner";
 
 describe("LoadingSpinner", () => {
   it("should render without crashing", () => {
@@ -50,8 +59,6 @@ describe("LoadingSpinner", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // 2. ErrorBoundary
 // ═══════════════════════════════════════════════════════════════════════════════
-
-import ErrorBoundary from "../components/ErrorBoundary";
 
 describe("ErrorBoundary", () => {
   it("should render children when no error", () => {
@@ -86,8 +93,6 @@ describe("ErrorBoundary", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. DiagnosisCard
 // ═══════════════════════════════════════════════════════════════════════════════
-
-import DiagnosisCard from "../components/ProblemFirst/DiagnosisCard";
 
 describe("DiagnosisCard", () => {
   it("should render null when no diagnosis", () => {
@@ -126,8 +131,6 @@ describe("DiagnosisCard", () => {
 // 4. DiagnosisLoader
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import DiagnosisLoader from "../components/FixProblem/DiagnosisLoader";
-
 describe("DiagnosisLoader", () => {
   it("should render without crashing", () => {
     const { container } = render(<DiagnosisLoader />);
@@ -148,8 +151,6 @@ describe("DiagnosisLoader", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // 5. BridgeCard
 // ═══════════════════════════════════════════════════════════════════════════════
-
-import BridgeCard from "../components/GuidedPlayer/BridgeCard";
 
 describe("BridgeCard", () => {
   it("should render a transition bridge", () => {
@@ -174,5 +175,50 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AppSidebar
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("AppSidebar", () => {
+  const defaultProps = {
+    tabs: [],
+    activeTab: "adaptive",
+    setActiveTab: vi.fn(),
+    analyticsExpanded: false,
+    setAnalyticsExpanded: vi.fn(),
+    buildersExpanded: false,
+    setBuildersExpanded: vi.fn(),
+    newFeedbackCount: 0,
+    currentUser: null,
+    onRetakeQuiz: vi.fn(),
+  };
+
+  it("should render without crashing", () => {
+    render(<AppSidebar {...defaultProps} />);
+    expect(screen.getByText("UE5 LPB")).toBeTruthy();
+  });
+
+  it("should have aria-expanded and aria-hidden attributes on expandable sections", () => {
+    const { container } = render(
+      <AppSidebar {...defaultProps} buildersExpanded={true} analyticsExpanded={false} />
+    );
+
+    // Path Builders button - title from tabDefinitions.js
+    const buildersBtn = screen.getByTitle(/Choose between different path generation engines/i);
+    expect(buildersBtn.getAttribute("aria-expanded")).toBe("true");
+
+    // Analytics button - title from tabDefinitions.js
+    const analyticsBtn = screen.getByTitle(/Deep data insights into demand and coverage/i);
+    expect(analyticsBtn.getAttribute("aria-expanded")).toBe("false");
+
+    // Arrows
+    const arrows = container.querySelectorAll(".sidebar-expand-arrow");
+    expect(arrows.length).toBeGreaterThan(0);
+    arrows.forEach((arrow) => {
+      expect(arrow.getAttribute("aria-hidden")).toBe("true");
+    });
   });
 });
