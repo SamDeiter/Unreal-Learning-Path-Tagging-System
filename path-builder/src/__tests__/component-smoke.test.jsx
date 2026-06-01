@@ -151,6 +151,46 @@ describe("DiagnosisLoader", () => {
 
 import BridgeCard from "../components/GuidedPlayer/BridgeCard";
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. FeedbackModal
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import FeedbackModal from "../components/Feedback/FeedbackModal";
+
+vi.mock("../components/Feedback/FeedbackModal.css", () => ({}));
+
+describe("FeedbackModal", () => {
+  const defaultProps = {
+    isOpen: true,
+    onClose: vi.fn(),
+    user: { uid: "test-user", email: "test@example.com" },
+  };
+
+  it("should render when open", () => {
+    render(<FeedbackModal {...defaultProps} />);
+    expect(screen.getByText(/Send Feedback/)).toBeTruthy();
+  });
+
+  it("should display character count and required indicators", () => {
+    render(<FeedbackModal {...defaultProps} />);
+
+    // Check for character count
+    const charCount = screen.getByText(/0 characters/);
+    expect(charCount).toBeTruthy();
+    expect(charCount.getAttribute("role")).toBe("status");
+    expect(charCount.getAttribute("aria-live")).toBe("polite");
+
+    // Check for required asterisk and visually hidden text
+    expect(screen.getByText("*")).toBeTruthy();
+    expect(screen.getByText("(required)")).toBeTruthy();
+
+    // Check textarea accessibility attributes
+    const textarea = screen.getByLabelText(/Describe the issue|Tell us about your suggestion/);
+    expect(textarea.getAttribute("aria-required")).toBe("true");
+    expect(textarea.getAttribute("aria-describedby")).toBe("feedback-char-count");
+  });
+});
+
 describe("BridgeCard", () => {
   it("should render a transition bridge", () => {
     const content = {

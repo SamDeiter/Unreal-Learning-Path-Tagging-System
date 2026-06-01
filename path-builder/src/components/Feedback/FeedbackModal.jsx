@@ -177,6 +177,8 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                 {type === "bug"
                   ? "Describe the issue and steps to reproduce:"
                   : "Tell us about your suggestion:"}
+                <span className="required-asterisk" aria-hidden="true">*</span>
+                <span className="sr-only">(required)</span>
               </label>
               <textarea
                 id="feedback-desc"
@@ -188,8 +190,18 @@ export default function FeedbackModal({ isOpen, onClose, user }) {
                     : "e.g., It would be great if we could..."
                 }
                 required
+                aria-required="true"
+                aria-describedby="feedback-char-count"
                 rows={5}
               />
+              <div
+                id="feedback-char-count"
+                className="feedback-char-count"
+                role="status"
+                aria-live="polite"
+              >
+                {description.length} characters
+              </div>
             </div>
 
             <div className="feedback-form-group">
