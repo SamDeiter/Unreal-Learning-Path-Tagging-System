@@ -6,11 +6,19 @@
  * the scrape-demand-intel.yml workflow. The GITHUB_PAT secret is
  * stored in Firebase Functions secrets (never in code).
  *
- * Any authenticated user can trigger this (internal tool).
+ * Admins only (custom claim or bootstrap list).
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+
+/**
+ * Bootstrap admin list — used for initial claim seeding.
+ */
+const BOOTSTRAP_ADMIN_EMAILS = [
+  "sam.deiter@epicgames.com",
+  "samdeiter@gmail.com",
+];
 
 const GITHUB_OWNER = "SamDeiter";
 const GITHUB_REPO = "Unreal-Learning-Path-Tagging-System";
@@ -27,9 +35,20 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
+    // Require authentication
     if (!request.auth) {
-      throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+      throw new HttpsError("unauthenticated", "You must be signed in.");
+    }
+
+    // Require admin authorization (security fix: prevent unauthorized GH Action usage)
+    const callerEmail = (request.auth.token?.email || "").toLowerCase();
+    const callerIsAdmin =
+      request.auth.token?.admin === true ||
+      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail);
+
+    if (!callerIsAdmin) {
+      logger.warn(`[triggerDemandScrape] Unauthorized trigger attempt by ${callerEmail}`);
+      throw new HttpsError("permission-denied", "Only admins can trigger a demand scrape.");
     }
 
     // Get engine from request data (default to UE5)
