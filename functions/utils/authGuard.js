@@ -1,23 +1,55 @@
 /**
  * Auth guard utility for Cloud Functions.
- * Rejects unauthenticated calls to protect API quota.
+ * Rejects unauthenticated or unauthorized calls to protect API quota and sensitive tools.
  */
 const functions = require("firebase-functions");
 
 /**
  * Require authentication on a callable function.
- * @param {object} context - The Cloud Function context
+ * @param {object} request - The Cloud Function request (v2) or context (v1)
  * @returns {string} The authenticated user's UID
  * @throws {functions.https.HttpsError} if not authenticated
  */
-function requireAuth(context) {
-  if (!context.auth) {
+function requireAuth(request) {
+  if (!request.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
       "Authentication required."
     );
   }
-  return context.auth.uid;
+  return request.auth.uid;
 }
 
-module.exports = { requireAuth };
+/**
+ * Require admin privileges on a callable function.
+ * Supports custom claims (primary) and ADMIN_UID env var (fallback).
+ *
+ * @param {object} request - The Cloud Function request (v2) or context (v1)
+ * @returns {string} The authenticated user's UID
+ * @throws {functions.https.HttpsError} if not authenticated or not an admin
+ */
+function requireAdmin(request) {
+  const uid = requireAuth(request);
+
+  // 1. Check custom claim (Standard)
+  if (request.auth.token?.admin === true) {
+    return uid;
+  }
+
+  // 2. Check ADMIN_UID env var (Fallback for migration/bootstrap)
+  const adminUids = (process.env.ADMIN_UID || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (adminUids.includes(uid)) {
+    return uid;
+  }
+
+  throw new functions.https.HttpsError(
+    "permission-denied",
+    "Admin privileges required."
+  );
+}
+
+module.exports = { requireAuth, requireAdmin };
