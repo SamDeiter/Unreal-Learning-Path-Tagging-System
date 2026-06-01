@@ -28,6 +28,7 @@ import {
   orderBy,
   limit,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getFirebaseApp } from "./firebaseConfig";
 
 const TRACKER_KEY = "bespoke_token_tracker";
@@ -226,8 +227,14 @@ async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+
+    // Get current user UID for namespacing
+    const auth = getAuth(app);
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    const docRef = doc(db, "users", uid, "token_usage", dateKey);
     await setDoc(
       docRef,
       {
@@ -256,8 +263,18 @@ export async function fetchCloudStats(days = 30) {
   try {
     const app = getFirebaseApp();
     if (!app) return [];
+
+    // Get current user UID for namespacing
+    const auth = getAuth(app);
+    const uid = auth.currentUser?.uid;
+    if (!uid) return [];
+
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const q = query(
+      collection(db, "users", uid, "token_usage"),
+      orderBy("date", "desc"),
+      limit(days)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
