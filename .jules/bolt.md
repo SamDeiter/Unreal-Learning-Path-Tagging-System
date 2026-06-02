@@ -1,0 +1,3 @@
+## 2025-06-02 - [Identity-based Caching for Course Relevance Scoring]
+**Learning:** In batch scoring operations (like course relevance matching), pre-calculating and caching normalized metadata (tags, suffixes) using a `WeakMap` keyed by the course object significantly reduces O(N) overhead in the hot path. Additionally, caching graph traversal results (BFS expansions) for query tags avoids redundant graph walks across multiple courses.
+**Action:** Always implement identity-based metadata caching and graph traversal memoization when processing large collections against a fixed set of query parameters.
