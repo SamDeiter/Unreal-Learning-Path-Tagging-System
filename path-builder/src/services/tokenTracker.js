@@ -27,8 +27,11 @@ import {
   query,
   orderBy,
   limit,
+  where,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
+import { getCurrentUser } from "./googleAuthService";
+import { isAdmin } from "./accessControl";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -226,12 +229,20 @@ async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+
+    const user = getCurrentUser();
+    if (!user) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    // Use unique doc ID per user to prevent IDOR / data corruption
+    const docId = `${dateKey}_${user.uid}`;
+    const docRef = doc(db, "token_usage", docId);
+
     await setDoc(
       docRef,
       {
         date: dateKey,
+        userId: user.uid,
         totalInput: dayData.totalInput,
         totalOutput: dayData.totalOutput,
         calls: dayData.calls,
@@ -257,7 +268,23 @@ export async function fetchCloudStats(days = 30) {
     const app = getFirebaseApp();
     if (!app) return [];
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+
+    const user = getCurrentUser();
+    if (!user) return [];
+
+    let q;
+    // Admins can see all usage; regular users only see their own (enforced by rules)
+    if (await isAdmin()) {
+      q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days * 10));
+    } else {
+      q = query(
+        collection(db, "token_usage"),
+        where("userId", "==", user.uid),
+        orderBy("date", "desc"),
+        limit(days)
+      );
+    }
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
