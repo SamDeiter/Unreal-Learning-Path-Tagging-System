@@ -53,7 +53,19 @@ export default function AnalyticsCosts({ timeRange = "7d" }) {
         fetchCloudStats(daysToFetch),
         fetchFirestoreUsage(daysToFetch),
       ]);
-      setCloudCostHistory(cloudData);
+
+      // Aggregate cloud data by date (since we now have per-user docs)
+      const aggregated = cloudData.reduce((acc, doc) => {
+        const date = doc.date;
+        if (!acc[date]) {
+          acc[date] = { date, estimatedCost: 0, calls: 0 };
+        }
+        acc[date].estimatedCost += doc.estimatedCost || 0;
+        acc[date].calls += doc.calls || 0;
+        return acc;
+      }, {});
+
+      setCloudCostHistory(Object.values(aggregated).sort((a, b) => b.date.localeCompare(a.date)));
       setFirestoreUsage(fsUsage);
     } catch (e) {
       console.warn("[AnalyticsCosts] Cloud stats failed:", e.message);
