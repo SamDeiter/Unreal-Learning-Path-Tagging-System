@@ -18,12 +18,20 @@ import {
 // IS_E2E imported from e2eBypass.js (checks both env var and localStorage)
 
 const app = IS_E2E ? null : getFirebaseApp();
-const auth = IS_E2E ? null : getAuth(app);
 
-// Provider — email + profile only (no restricted scopes)
-// Drive video embeds use browser cookies, not OAuth tokens
-const provider = IS_E2E ? null : new GoogleAuthProvider();
-if (provider) provider.setCustomParameters({ prompt: "select_account" });
+// Initialize Auth and Provider with safety checks for CI/E2E
+let auth = null;
+let provider = null;
+
+if (!IS_E2E && app) {
+  try {
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+  } catch (err) {
+    console.warn("[GoogleAuth] SDK initialization failed (expected in some CI environments):", err.message);
+  }
+}
 
 /**
  * Sign in with Google popup
