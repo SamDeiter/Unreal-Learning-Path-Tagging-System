@@ -24,6 +24,12 @@ class TagGraphService {
     
     // Initialize related tag cache
     this._relatedCache = new Map();
+
+    // V2.1 Performance Caches:
+    // - _courseMetadata: Identity-based cache for normalized course tag sets and suffixes
+    // - _bfsCache: Cache for graph expansion results (reachable tags + contribution paths)
+    this._courseMetadata = new WeakMap();
+    this._bfsCache = new Map();
     
     // 1. Load edges from edges.json (handle flat array format)
     let rawEdges = Array.isArray(edgesData) ? edgesData : (edgesData?.edges || []);
@@ -343,6 +349,109 @@ class TagGraphService {
   }
 
   /**
+   * Performance: Pre-calculate and cache course metadata (normalized tag sets and suffixes).
+   * @private
+   */
+  _getCourseMetadata(course) {
+    if (this._courseMetadata.has(course)) return this._courseMetadata.get(course);
+
+    const allCourseTags = [
+      ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
+      ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
+      ...(Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : []),
+      ...(Array.isArray(course.transcript_tags) ? course.transcript_tags : []),
+      ...(Array.isArray(course.extracted_tags) ? course.extracted_tags : []),
+    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+    if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
+      Object.values(course.tags).forEach((v) => {
+        if (typeof v === "string") allCourseTags.push(v.toLowerCase());
+      });
+    }
+
+    const tagSet = new Set(allCourseTags);
+    const suffixSet = new Set();
+    for (const t of tagSet) {
+      const suffix = t.split(".").pop();
+      if (suffix && suffix.length > 2) suffixSet.add(suffix);
+    }
+
+    const metadata = { tagSet, suffixSet, geminiTags: (course.gemini_system_tags || []).map(t => t.toLowerCase()) };
+    this._courseMetadata.set(course, metadata);
+    return metadata;
+  }
+
+  /**
+   * Performance: Pre-calculate and cache graph expansion for a given tagId.
+   * @private
+   */
+  _getBfsExpansion(tagId) {
+    if (this._bfsCache.has(tagId)) return this._bfsCache.get(tagId);
+
+    const results = [];
+    const MAX_HOPS = 2;
+    const HOP_ATTENUATION = 0.5;
+
+    const visited = new Set([tagId]);
+    const parentMap = new Map();
+    let frontier = [{ id: tagId, hops: 0 }];
+
+    while (frontier.length > 0) {
+      const nextFrontier = [];
+      for (const { id, hops } of frontier) {
+        if (hops >= MAX_HOPS) continue;
+
+        const outgoing = (this.edgesBySource.get(id) || []).map((e) => ({
+          ...e,
+          direction: "forward",
+          neighborId: e.target,
+        }));
+        const incoming = (this.edgesByTarget.get(id) || []).map((e) => ({
+          ...e,
+          direction: "reverse",
+          neighborId: e.source,
+        }));
+
+        for (const edge of [...outgoing, ...incoming]) {
+          if (visited.has(edge.neighborId)) continue;
+          visited.add(edge.neighborId);
+
+          parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
+
+          const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
+          const dirWeight = edge.direction === "forward" ? typeWeights.forward : typeWeights.reverse;
+          const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
+          const edgeDataWeight = edge.weight || 0.5;
+
+          const creditMultiplier = dirWeight * hopMultiplier * edgeDataWeight;
+
+          // Reconstruct path
+          const path = [];
+          let cur = edge.neighborId;
+          while (parentMap.has(cur)) {
+            const p = parentMap.get(cur);
+            path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
+            cur = p.parentId;
+          }
+
+          results.push({
+            neighborId: edge.neighborId,
+            neighborSuffix: edge.neighborId.split(".").pop(),
+            creditMultiplier,
+            path
+          });
+
+          nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
+        }
+      }
+      frontier = nextFrontier;
+    }
+
+    this._bfsCache.set(tagId, results);
+    return results;
+  }
+
+  /**
    * V2: Score a course's relevance for a set of tags.
    * Uses edge-type weights, hop attenuation, and propagation caps.
    *
@@ -358,31 +467,17 @@ class TagGraphService {
     };
     if (!course || !targetTagIds || targetTagIds.length === 0) return empty;
 
-    // Combine ALL tag sources from the enriched video library
-    const allCourseTags = [
-      ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
-      ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
-      ...(Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : []),
-      ...(Array.isArray(course.transcript_tags) ? course.transcript_tags : []),
-      ...(Array.isArray(course.extracted_tags) ? course.extracted_tags : []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+    // Bolt Optimization: Deduplicate target tag IDs and normalize
+    const targetTagIdList = [...new Set(targetTagIds)].map(t => t.toLowerCase());
 
-    // Also include the legacy tags object fields
-    if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
-      Object.values(course.tags).forEach((v) => {
-        if (typeof v === "string") allCourseTags.push(v.toLowerCase());
-      });
-    }
-
-    const targetSet = new Set(targetTagIds.map((t) => t.toLowerCase()));
-    const courseTagSet = new Set(allCourseTags);
+    // Bolt Optimization: Identity-based metadata caching
+    const { tagSet, suffixSet, geminiTags } = this._getCourseMetadata(course);
     const topContributors = [];
 
     // ---- 1. Direct tag matches (highest weight: 25 pts each) ----
     let directOverlap = 0;
-    for (const target of targetSet) {
-      // Exact match on full tag ID
-      if (courseTagSet.has(target)) {
+    for (const target of targetTagIdList) {
+      if (tagSet.has(target)) {
         directOverlap += 25;
         topContributors.push({
           sourceQueryTagId: target,
@@ -393,30 +488,27 @@ class TagGraphService {
         continue;
       }
       // Check suffix match: "lumen" matches course tag "rendering.lumen"
-      const suffix = target.split(".").pop();
-      for (const ct of allCourseTags) {
-        const ctSuffix = ct.split(".").pop();
-        if (suffix === ctSuffix && suffix.length > 2) {
-          directOverlap += 15;
-          topContributors.push({
-            sourceQueryTagId: target,
-            targetCourseTagId: ct,
-            path: [],
-            contribution: 15,
-          });
-          break;
-        }
+      const targetSuffix = target.split(".").pop();
+      if (targetSuffix.length > 2 && suffixSet.has(targetSuffix)) {
+        directOverlap += 15;
+        // Optimization: Find the specific course tag for the contributor entry
+        const matchedTag = [...tagSet].find(ct => ct.endsWith(`.${targetSuffix}`) || ct === targetSuffix);
+        topContributors.push({
+          sourceQueryTagId: target,
+          targetCourseTagId: matchedTag || `*${targetSuffix}`,
+          path: [],
+          contribution: 15,
+        });
       }
     }
 
     // ---- 2. Gemini bonus (AI-curated, high quality) ----
     let geminiBonus = 0;
-    const geminiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
-    for (const target of targetSet) {
+    for (const target of targetTagIdList) {
       const targetSuffix = target.split(".").pop();
       if (
         geminiTags.some(
-          (gt) => gt.toLowerCase() === targetSuffix || gt.toLowerCase().includes(targetSuffix)
+          (gt) => gt === targetSuffix || gt.includes(targetSuffix)
         )
       ) {
         geminiBonus += 10;
@@ -426,87 +518,32 @@ class TagGraphService {
     // ---- 3. Graph propagation (secondary, capped) ----
     let graphPropagation = 0;
     const MAX_GRAPH_PER_TAG = 15;
-    const MAX_HOPS = 2;
-    const HOP_ATTENUATION = 0.5;
 
-    for (const tagId of targetTagIds) {
+    for (const tagId of targetTagIdList) {
       let tagGraphCredit = 0;
-      const visited = new Set([tagId]);
-      // Track parent references for lazy path reconstruction (avoids O(n*m) copies)
-      const parentMap = new Map();
-      let frontier = [{ id: tagId, hops: 0 }];
 
-      while (frontier.length > 0) {
-        const nextFrontier = [];
-        for (const { id, hops } of frontier) {
-          if (hops >= MAX_HOPS) continue;
+      // Bolt Optimization: BFS Expansion caching
+      const reachable = this._getBfsExpansion(tagId);
 
-          // Get edges from both directions
-          const outgoing = (this.edgesBySource.get(id) || []).map((e) => ({
-            ...e,
-            direction: "forward",
-            neighborId: e.target,
-          }));
-          const incoming = (this.edgesByTarget.get(id) || []).map((e) => ({
-            ...e,
-            direction: "reverse",
-            neighborId: e.source,
-          }));
-
-          for (const edge of [...outgoing, ...incoming]) {
-            if (visited.has(edge.neighborId)) continue;
-            visited.add(edge.neighborId);
-
-            // Store parent for path reconstruction on match
-            parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
-
-            // Edge-type weight based on direction
-            const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
-            const dirWeight =
-              edge.direction === "forward" ? typeWeights.forward : typeWeights.reverse;
-            const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
-            const edgeDataWeight = edge.weight || 0.5;
-
-            // Check if neighbor tag matches any course tag
-            const neighborTag = edge.neighborId.toLowerCase();
-            const neighborSuffix = neighborTag.split(".").pop();
-
-            let matched = false;
-            if (courseTagSet.has(neighborTag)) {
-              matched = true;
-            } else {
-              for (const ct of allCourseTags) {
-                if (ct.split(".").pop() === neighborSuffix && neighborSuffix.length > 2) {
-                  matched = true;
-                  break;
-                }
-              }
-            }
-
-            if (matched) {
-              const credit = 5 * dirWeight * hopMultiplier * edgeDataWeight;
-              tagGraphCredit += credit;
-              // Reconstruct path lazily from parentMap
-              const path = [];
-              let cur = edge.neighborId;
-              while (parentMap.has(cur)) {
-                const p = parentMap.get(cur);
-                path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
-                cur = p.parentId;
-              }
-              topContributors.push({
-                sourceQueryTagId: tagId,
-                targetCourseTagId: edge.neighborId,
-                path,
-                contribution: Math.round(credit * 100) / 100,
-              });
-            }
-
-            // Continue BFS — no path copy needed
-            nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
-          }
+      for (const entry of reachable) {
+        let matched = false;
+        if (tagSet.has(entry.neighborId)) {
+          matched = true;
+        } else if (entry.neighborSuffix.length > 2 && suffixSet.has(entry.neighborSuffix)) {
+          matched = true;
         }
-        frontier = nextFrontier;
+
+        if (matched) {
+          const credit = 5 * entry.creditMultiplier;
+          tagGraphCredit += credit;
+
+          topContributors.push({
+            sourceQueryTagId: tagId,
+            targetCourseTagId: entry.neighborId,
+            path: [...entry.path], // Clone path to prevent accidental mutations
+            contribution: Math.round(credit * 100) / 100,
+          });
+        }
       }
 
       // Cap per-tag graph contribution
@@ -534,6 +571,7 @@ class TagGraphService {
    */
   clearRelatedCache() {
     this._relatedCache.clear();
+    this._bfsCache.clear();
   }
 
   /**
