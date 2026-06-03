@@ -1,0 +1,4 @@
+## 2025-03-03 - Markdown XSS and Attribute Injection
+**Vulnerability:** A hand-rolled markdown-to-HTML converter used regex-based replacements that failed to escape double and single quotes, enabling attribute injection. It also lacked protocol validation for links, allowing `javascript:` and `data:` URLs.
+**Learning:** Custom regex parsers for HTML generation are high-risk. Even with basic tag escaping, omitting quote escaping allows an attacker to break out of attributes (like `href`) if the markdown is used in an attribute context, or if the parser itself generates attributes from unsanitized input.
+**Prevention:** Implement strict protocol allowlists for any user-provided URLs and ensure all HTML special characters (`&`, `<`, `>`, `"`, `'`) are escaped before applying markdown transformations.
