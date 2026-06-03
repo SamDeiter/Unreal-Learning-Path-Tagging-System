@@ -48,6 +48,39 @@ describe("LoadingSpinner", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// 1b. CaseReportForm
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import CaseReportForm from "../components/FixProblem/CaseReportForm";
+
+describe("CaseReportForm", () => {
+  it("should render without crashing", () => {
+    const onUpdate = vi.fn();
+    const { container } = render(<CaseReportForm onUpdate={onUpdate} />);
+    expect(container.querySelector(".case-report-card")).toBeTruthy();
+  });
+
+  it("should have correct accessibility attributes for boost meter", () => {
+    const onUpdate = vi.fn();
+    const { container } = render(<CaseReportForm onUpdate={onUpdate} />);
+    const boostMeter = container.querySelector(".case-boost-bar");
+    expect(boostMeter.getAttribute("role")).toBe("progressbar");
+    expect(boostMeter.getAttribute("aria-valuenow")).toBe("0");
+  });
+
+  it("should have accessible dropzone", () => {
+    const onUpdate = vi.fn();
+    const { container } = render(<CaseReportForm onUpdate={onUpdate} />);
+    const dropzone = container.querySelector(".case-dropzone");
+    if (dropzone) {
+      expect(dropzone.getAttribute("role")).toBe("button");
+      expect(dropzone.getAttribute("aria-label")).toBe("Upload screenshot");
+      expect(dropzone.getAttribute("tabindex")).toBe("0");
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // 2. ErrorBoundary
 // ═══════════════════════════════════════════════════════════════════════════════
 
