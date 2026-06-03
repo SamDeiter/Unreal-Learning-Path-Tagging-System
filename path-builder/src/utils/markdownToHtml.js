@@ -13,10 +13,13 @@ export function markdownToHtml(text) {
   let html = text;
 
   // Escape HTML entities first (but preserve markdown syntax)
+  // Added double and single quote escaping to prevent attribute injection
   html = html
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
 
   // Headers (### h3, ## h2, # h1) — order matters: longest prefix first
   html = html.replace(/^### (.+)$/gm, '<h3 style="color: var(--accent-orange, #d29922); font-size: 1rem; margin: 16px 0 8px;">$1</h3>');
@@ -37,7 +40,17 @@ export function markdownToHtml(text) {
   html = html.replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="list-style: disc; padding-left: 20px; margin: 8px 0;">$1</ul>');
 
   // Links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">$1</a>');
+  // SECURITY: Validate URL protocol to prevent javascript: or data: XSS
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // Protocol allowlist: http, https, mailto, tel, or relative/anchor
+    const isSafeProtocol = /^(?:https?|mailto|tel):|^(?:\/|#|\.\/)/i.test(url);
+    if (!isSafeProtocol) {
+      // If protocol is unsafe (like javascript: or data:), we return plain text
+      // rather than a dangerous <a> tag.
+      return `[${linkText}](${url})`;
+    }
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">${linkText}</a>`;
+  });
 
   // Paragraphs (double newlines)
   html = html.replace(/\n\n/g, '</p><p style="margin-bottom: 12px; color: var(--text-secondary, #8b949e);">');
