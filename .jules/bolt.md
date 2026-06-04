@@ -1,0 +1,3 @@
+## 2025-06-04 - Caching identity-based course metadata and BFS expansions
+**Learning:** In batch operations like `matchCoursesToCart`, the `scoreCourseRelevance` function is called for every course in the library (2400+). Re-calculating tag sets, suffixes, and especially BFS graph expansions (even if only 2 hops) for every call creates a massive bottleneck. Identity-based caching using `WeakMap` for courses and `Map` for tags reduced average execution time from ~0.05ms/course to ~0.007ms/course.
+**Action:** Always check for hot paths in batch processing services and implement caching for expensive transformations of static or semi-static data.
