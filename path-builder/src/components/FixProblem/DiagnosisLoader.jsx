@@ -29,7 +29,7 @@ export default function DiagnosisLoader({ query }) {
   }, []);
 
   return (
-    <div className="dx-loader">
+    <div className="dx-loader" role="status" aria-live="polite">
       <div className="dx-loader-card">
         <h2 className="dx-loader-title">
           <span className="dx-loader-spinner" /> Diagnosing...
@@ -52,7 +52,14 @@ export default function DiagnosisLoader({ query }) {
         </div>
 
         {/* Progress bar */}
-        <div className="dx-progress-bar">
+        <div
+          className="dx-progress-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax={PHASES.length}
+          aria-valuenow={phase + 1}
+          aria-valuetext={`Phase ${phase + 1} of ${PHASES.length}: ${PHASES[phase].label}`}
+        >
           <div
             className="dx-progress-fill"
             style={{ width: `${((phase + 1) / PHASES.length) * 100}%` }}
