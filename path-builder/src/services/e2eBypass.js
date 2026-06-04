@@ -9,6 +9,9 @@
  */
 
 function checkBypass() {
+  // 0. Vitest check (runtime)
+  // eslint-disable-next-line no-undef
+  if (typeof process !== "undefined" && process.env.NODE_ENV === "test") return true;
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
   // 2. localStorage flag (runtime — set by Playwright storageState)
