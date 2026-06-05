@@ -133,7 +133,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
 
   // Expose updateCartIdForQuery to parent via a ref-like pattern
   // The parent can call onSubmit and receive this function back
-    const handleSubmit = useCallback(
+  const handleSubmit = useCallback(
     (cachedCartId = null, overrideQuery = null) => {
       const queryText = (overrideQuery || problem).trim();
       if (queryText.length < 10) return;
@@ -158,7 +158,16 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
         updateCartIdForQuery,
       });
     },
-    [problem, engine, detectedTags, detectedPersona, onSubmit, pastedImage, errorLog, updateCartIdForQuery]
+    [
+      problem,
+      engine,
+      detectedTags,
+      detectedPersona,
+      onSubmit,
+      pastedImage,
+      errorLog,
+      updateCartIdForQuery,
+    ]
   );
 
   const handleKeyDown = useCallback(
@@ -190,11 +199,12 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
           <h2>
             <Search size={22} className="icon-inline" /> What's the problem?
           </h2>
-          <div className="engine-toggle">
+          <div className="engine-toggle" role="group" aria-label="Target engine">
             <button
               type="button"
               className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
               onClick={() => setEngine("UE5")}
+              aria-pressed={engine === "UE5"}
             >
               UE5
             </button>
@@ -202,14 +212,15 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
               type="button"
               className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
               onClick={() => setEngine("UEFN")}
+              aria-pressed={engine === "UEFN"}
             >
               UEFN
             </button>
           </div>
         </div>
         <p className="subtitle">
-          Describe your {engine} issue in plain English. We'll diagnose the root cause and teach you to
-          fix it.
+          Describe your {engine} issue in plain English. We'll diagnose the root cause and teach you
+          to fix it.
         </p>
       </div>
 
@@ -397,6 +408,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                       });
                     }}
                     title="Remove"
+                    aria-label={`Remove "${q}" from history`}
                   >
                     ×
                   </button>
