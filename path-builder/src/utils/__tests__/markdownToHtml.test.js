@@ -106,6 +106,30 @@ describe("markdownToHtml", () => {
     expect(result).toContain("&amp;");
   });
 
+  it("blocks dangerous link protocols", () => {
+    const js = markdownToHtml("[click me](javascript:alert('xss'))");
+    expect(js).not.toContain('href="javascript:');
+    expect(js).toContain('href="#"');
+
+    const data = markdownToHtml("[click me](data:text/html,<script>alert(1)</script>)");
+    expect(data).not.toContain('href="data:');
+    expect(data).toContain('href="#"');
+
+    const vbs = markdownToHtml("[click me](vbscript:alert(1))");
+    expect(vbs).not.toContain('href="vbscript:');
+    expect(vbs).toContain('href="#"');
+  });
+
+  it("escapes quotes to prevent attribute injection", () => {
+    const double = markdownToHtml('[click me](" onclick="alert(1))');
+    expect(double).not.toContain('onclick="alert(1)"');
+    expect(double).toContain('href="&quot; onclick=&quot;alert(1"');
+
+    const single = markdownToHtml("[click me](' onmouseover='alert(1))");
+    expect(single).not.toContain("onmouseover='alert(1)'");
+    expect(single).toContain('href="&#x27; onmouseover=&#x27;alert(1"');
+  });
+
   // ── Edge cases ─────────────────────────────────────────────────────
 
   it("returns null/undefined as-is", () => {

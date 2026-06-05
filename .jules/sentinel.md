@@ -1,0 +1,4 @@
+## 2026-06-05 - Brittle Markdown-to-HTML Parser Vulnerabilities
+**Vulnerability:** The custom regex-based markdown-to-HTML parser in `markdownToHtml.js` was vulnerable to XSS via dangerous URI protocols (e.g., `javascript:`) and HTML attribute injection via unescaped quotes in URLs.
+**Learning:** Manual parsers that use string replacement to generate HTML from user input are highly dangerous. Unlike `SpokeViewer.jsx`, which uses `DOMPurify`, this utility was used for SCORM exports where external sanitization was missing. Global escaping of quotes and explicit protocol validation are necessary layers of defense when a full sanitizer isn't used.
+**Prevention:** Prefer established libraries like `DOMPurify` or `react-markdown` for all HTML generation. If a custom parser is unavoidable, always escape all sensitive HTML characters (`&`, `<`, `>`, `"`, `'`) and validate URI protocols against a strict allow-list or block-list.
