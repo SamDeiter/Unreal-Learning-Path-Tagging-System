@@ -18,7 +18,11 @@ import { sanitizeQuery, checkRateLimit, recordQuery } from "../../services/secur
 import { generateBespokePath } from "../../services/bespokePathService";
 import { generateGapFillStep, generateBespokeGapStep } from "../../services/pathGapAnalyzer";
 import { findCachedPath, cachePath } from "../../services/pathCacheService";
-import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted } from "../../services/analyticsService";
+import {
+  trackSessionCompleted,
+  trackGapFillCompleted,
+  trackGapAutoFillCompleted,
+} from "../../services/analyticsService";
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
@@ -448,25 +452,33 @@ export default function AdaptivePath() {
     [pathData, query, fillResults, bulkFilling]
   );
 
-
   // ── RENDER: Input Stage ──
   if (!showLevelPicker && !pathLoading && !pendingGeneration && !pathData) {
     return (
       <div className="adaptive-path">
         <div className="adaptive-input-section">
-          <div className="adaptive-header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+          <div
+            className="adaptive-header-container"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginBottom: "1rem",
+            }}
+          >
             <div>
               <h1 className="adaptive-title">🎯 Adaptive Learning Path</h1>
               <p className="adaptive-subtitle">
-                Tell us what you want to learn about. We'll tailor a personalized path based on
-                your experience level.
+                Tell us what you want to learn about. We'll tailor a personalized path based on your
+                experience level.
               </p>
             </div>
-            <div className="engine-toggle">
+            <div className="engine-toggle" role="group" aria-label="Target engine">
               <button
                 type="button"
                 className={`toggle-btn ${engine === "UE5" ? "active" : ""}`}
                 onClick={() => setEngine("UE5")}
+                aria-pressed={engine === "UE5"}
               >
                 UE5
               </button>
@@ -474,6 +486,7 @@ export default function AdaptivePath() {
                 type="button"
                 className={`toggle-btn ${engine === "UEFN" ? "active" : ""}`}
                 onClick={() => setEngine("UEFN")}
+                aria-pressed={engine === "UEFN"}
               >
                 UEFN
               </button>
@@ -555,32 +568,52 @@ export default function AdaptivePath() {
         <div className="adaptive-error">
           {feasibilityFailed ? (
             <>
-              <div style={{
-                fontSize: '2.5rem',
-                marginBottom: '12px',
-                filter: 'grayscale(0.2)',
-              }}>🚫</div>
-              <h3 style={{
-                color: '#f0f0f0',
-                margin: '0 0 8px 0',
-                fontSize: '1.1rem',
-              }}>Topic Not Covered</h3>
-              <p className="adaptive-error-msg" style={{
-                color: '#94a3b8',
-                fontSize: '0.85rem',
-                lineHeight: 1.5,
-              }}>{pathError}</p>
-              <div style={{
-                marginTop: '16px',
-                padding: '12px',
-                background: 'rgba(99, 102, 241, 0.08)',
-                borderRadius: '8px',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-              }}>
-                <p style={{ color: '#a5b4fc', fontSize: '0.78rem', margin: '0 0 8px 0' }}>
+              <div
+                style={{
+                  fontSize: "2.5rem",
+                  marginBottom: "12px",
+                  filter: "grayscale(0.2)",
+                }}
+              >
+                🚫
+              </div>
+              <h3
+                style={{
+                  color: "#f0f0f0",
+                  margin: "0 0 8px 0",
+                  fontSize: "1.1rem",
+                }}
+              >
+                Topic Not Covered
+              </h3>
+              <p
+                className="adaptive-error-msg"
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "0.85rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                {pathError}
+              </p>
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "12px",
+                  background: "rgba(99, 102, 241, 0.08)",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(99, 102, 241, 0.2)",
+                }}
+              >
+                <p style={{ color: "#a5b4fc", fontSize: "0.78rem", margin: "0 0 8px 0" }}>
                   💡 Try one of these UE5 topics:
                 </p>
-                {['Blueprint communication', 'Niagara particle systems', 'Landscape & terrain', 'C++ gameplay programming'].map((suggestion) => (
+                {[
+                  "Blueprint communication",
+                  "Niagara particle systems",
+                  "Landscape & terrain",
+                  "C++ gameplay programming",
+                ].map((suggestion) => (
                   <button
                     key={suggestion}
                     onClick={() => {
@@ -589,27 +622,31 @@ export default function AdaptivePath() {
                       setFeasibilityFailed(false);
                     }}
                     style={{
-                      display: 'block',
-                      width: '100%',
-                      padding: '6px 10px',
-                      margin: '4px 0',
-                      background: 'rgba(99, 102, 241, 0.12)',
-                      border: '1px solid rgba(99, 102, 241, 0.25)',
-                      borderRadius: '6px',
-                      color: '#c7d2fe',
-                      fontSize: '0.78rem',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'background 0.2s',
+                      display: "block",
+                      width: "100%",
+                      padding: "6px 10px",
+                      margin: "4px 0",
+                      background: "rgba(99, 102, 241, 0.12)",
+                      border: "1px solid rgba(99, 102, 241, 0.25)",
+                      borderRadius: "6px",
+                      color: "#c7d2fe",
+                      fontSize: "0.78rem",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "background 0.2s",
                     }}
-                    onMouseOver={(e) => e.target.style.background = 'rgba(99, 102, 241, 0.25)'}
-                    onMouseOut={(e) => e.target.style.background = 'rgba(99, 102, 241, 0.12)'}
+                    onMouseOver={(e) => (e.target.style.background = "rgba(99, 102, 241, 0.25)")}
+                    onMouseOut={(e) => (e.target.style.background = "rgba(99, 102, 241, 0.12)")}
                   >
                     → {suggestion}
                   </button>
                 ))}
               </div>
-              <button className="adaptive-retry-btn" onClick={handleReset} style={{ marginTop: '16px' }}>
+              <button
+                className="adaptive-retry-btn"
+                onClick={handleReset}
+                style={{ marginTop: "16px" }}
+              >
                 Try Something Else
               </button>
             </>
@@ -743,7 +780,8 @@ export default function AdaptivePath() {
                       margin: "0 0 16px 0",
                     }}
                   >
-                    {aiWarning || "⚠️ Generated from AI knowledge — not from our verified course library"}
+                    {aiWarning ||
+                      "⚠️ Generated from AI knowledge — not from our verified course library"}
                     <br />
                     <span style={{ color: "#94a3b8", fontSize: "0.7rem" }}>
                       💡 Tip: Adding UE5-specific terms (e.g. &quot;horse <em>character in UE5</em>
@@ -773,7 +811,10 @@ export default function AdaptivePath() {
                       Here&apos;s a recap of everything covered in this learning path.
                     </p>
                     {[
-                      { label: "Prerequisites", categories: ["prerequisite", "foundation", "diagnosis"] },
+                      {
+                        label: "Prerequisites",
+                        categories: ["prerequisite", "foundation", "diagnosis"],
+                      },
                       { label: "Core Steps", categories: ["core", "fix"] },
                       { label: "Practice", categories: ["practice", "transfer"] },
                     ].map(({ label, categories }) => {
@@ -797,10 +838,19 @@ export default function AdaptivePath() {
                                 }}
                               >
                                 <strong style={{ color: "#e2e8f0", fontSize: "0.82rem" }}>
-                                  {step.title || step.segment?.title || step.segment?.videoTitle || `Step ${i + 1}`}
+                                  {step.title ||
+                                    step.segment?.title ||
+                                    step.segment?.videoTitle ||
+                                    `Step ${i + 1}`}
                                 </strong>
                                 {step.summary && (
-                                  <p style={{ color: "#94a3b8", fontSize: "0.75rem", margin: "4px 0 0" }}>
+                                  <p
+                                    style={{
+                                      color: "#94a3b8",
+                                      fontSize: "0.75rem",
+                                      margin: "4px 0 0",
+                                    }}
+                                  >
                                     {step.summary}
                                   </p>
                                 )}
