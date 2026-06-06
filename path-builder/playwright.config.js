@@ -1,5 +1,4 @@
 // @ts-check
-/* global process */
 import { defineConfig } from "@playwright/test";
 
 /**

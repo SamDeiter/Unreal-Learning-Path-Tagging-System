@@ -9,6 +9,12 @@
  */
 
 function checkBypass() {
+  // 0. Vitest check (runtime)
+  // Ensures unit tests never crash due to missing Firebase secrets
+  // Use globalThis to avoid ESLint no-undef errors for 'process'
+  const isTest = typeof globalThis.process !== "undefined" && globalThis.process.env?.NODE_ENV === "test";
+  if (isTest) return true;
+
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
   // 2. localStorage flag (runtime — set by Playwright storageState)
