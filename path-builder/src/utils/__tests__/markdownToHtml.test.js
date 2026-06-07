@@ -106,6 +106,42 @@ describe("markdownToHtml", () => {
     expect(result).toContain("&amp;");
   });
 
+  it("escapes quotes to prevent attribute breakout", () => {
+    const result = markdownToHtml('This has "quotes" and \'single quotes\'');
+    expect(result).toContain("&quot;");
+    expect(result).toContain("&#x27;");
+  });
+
+  it("handles malicious link with quotes in URL", () => {
+    const result = markdownToHtml('Click [here](url" onmouseover="alert(1))');
+    // The link should be neutralized because of the quote in the URL (it doesn't match the safe regex)
+    expect(result).toContain('href="about:blank"');
+  });
+
+  it("replaces javascript: protocols with about:blank", () => {
+    const result = markdownToHtml("[Click Me](javascript:alert('xss'))");
+    expect(result).toContain('href="about:blank"');
+    expect(result).not.toContain("javascript:");
+  });
+
+  it("replaces data: protocols with about:blank", () => {
+    const result = markdownToHtml("[Click Me](data:text/html,<html>)");
+    expect(result).toContain('href="about:blank"');
+    expect(result).not.toContain("data:");
+  });
+
+  it("allows safe protocols (http, https, mailto, tel)", () => {
+    expect(markdownToHtml("[Link](https://google.com)")).toContain('href="https://google.com"');
+    expect(markdownToHtml("[Link](http://google.com)")).toContain('href="http://google.com"');
+    expect(markdownToHtml("[Mail](mailto:test@example.com)")).toContain('href="mailto:test@example.com"');
+    expect(markdownToHtml("[Tel](tel:+123456)")).toContain('href="tel:+123456"');
+  });
+
+  it("allows relative paths and anchors", () => {
+    expect(markdownToHtml("[Link](/local/path)")).toContain('href="/local/path"');
+    expect(markdownToHtml("[Link](#anchor)")).toContain('href="#anchor"');
+  });
+
   // ── Edge cases ─────────────────────────────────────────────────────
 
   it("returns null/undefined as-is", () => {
