@@ -22,7 +22,7 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import { loadRecentQueries, saveRecentQuery, removeRecentQuery } from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -492,6 +492,7 @@ export default function AdaptivePath() {
                   handleStart();
                 }
               }}
+              aria-label="What do you want to learn?"
             />
             <button className="adaptive-start-btn" onClick={handleStart} disabled={!query.trim()}>
               🎯 Generate Path
@@ -502,9 +503,23 @@ export default function AdaptivePath() {
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
                 <div className="recent-queries-grid">
                   {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                    <div key={i} className="recent-query-item">
+                      <button className="recent-query-card" onClick={() => setQuery(q)}>
+                        {q}
+                      </button>
+                      <button
+                        className="recent-query-delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeRecentQuery(q);
+                          setRecentQueries(loadRecentQueries());
+                        }}
+                        aria-label={`Remove query: ${q}`}
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -680,7 +695,12 @@ export default function AdaptivePath() {
       <div className="adaptive-path bespoke-path">
         <div className="path-modal-overlay">
           <div className="path-modal-container">
-            <button className="path-modal-close" onClick={handleReset}>
+            <button
+              className="path-modal-close"
+              onClick={handleReset}
+              aria-label="Close learning path"
+              title="Close"
+            >
               <i className="fa-solid fa-xmark"></i>
             </button>
 
