@@ -36,8 +36,21 @@ export function markdownToHtml(text) {
   // Wrap consecutive <li> in <ul>
   html = html.replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="list-style: disc; padding-left: 20px; margin: 8px 0;">$1</ul>');
 
-  // Links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">$1</a>');
+  // Links [text](url) - Sanitized to prevent XSS/Attribute Injection
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // 1. Trim whitespace as browsers do
+    const trimmedUrl = url.trim();
+
+    // 2. Escape quotes in URL to prevent attribute injection
+    const safeUrl = trimmedUrl.replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+
+    // 3. Protocol validation (Allow http, https, mailto, tel, and relative paths)
+    // Prevents javascript:, data:, vbscript:, etc.
+    const isSafeProtocol = /^(https?|mailto|tel):|^(?![a-z0-9+.-]+:)/i.test(safeUrl);
+    const finalUrl = isSafeProtocol ? safeUrl : "#";
+
+    return `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">${linkText}</a>`;
+  });
 
   // Paragraphs (double newlines)
   html = html.replace(/\n\n/g, '</p><p style="margin-bottom: 12px; color: var(--text-secondary, #8b949e);">');
