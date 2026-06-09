@@ -11,7 +11,13 @@
 function checkBypass() {
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
-  // 2. localStorage flag (runtime — set by Playwright storageState)
+
+  // 2. Vitest / CI check (automatic bypass for unit tests)
+  /* eslint-disable no-undef */
+  if (typeof process !== "undefined" && process.env.NODE_ENV === "test") return true;
+  /* eslint-enable no-undef */
+
+  // 3. localStorage flag (runtime — set by Playwright storageState)
   if (typeof window !== "undefined") {
     try {
       return window.localStorage.getItem("e2e_auth_bypass") === "true";
