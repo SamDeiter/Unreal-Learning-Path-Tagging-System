@@ -1,0 +1,4 @@
+## 2025-05-15 - Token Usage Information Disclosure (IDOR)
+**Vulnerability:** The `token_usage` collection in Firestore was using shared document IDs (only the date) and lacked ownership checks in security rules. This allowed any authenticated user to read and overwrite other users' daily token usage statistics.
+**Learning:** Shared document IDs in collections that track user-specific metrics without explicit `userId` keys in the path or document data create immediate IDOR and data integrity risks. Even with authenticated write access, without `resource.data.userId == request.auth.uid` checks, users can manipulate each other's data.
+**Prevention:** Always use composite document IDs (e.g., `${userId}_${dateKey}`) or subcollections under `/users/{uid}` for per-user data. Enforce ownership in Firestore rules by validating that the `userId` field in the document matches the `request.auth.uid`.
