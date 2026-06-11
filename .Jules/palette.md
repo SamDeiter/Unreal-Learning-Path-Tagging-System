@@ -1,0 +1,3 @@
+## 2025-05-14 - [Individual History Deletion]
+**Learning:** Users expect consistent behavior across similar interfaces. If one search history (e.g., "Fix Problem") allows item deletion, other history lists (e.g., "Adaptive Path") should too, to maintain a sense of control and privacy. Additionally, focus states on hover-only elements are crucial for keyboard users to discover hidden actions.
+**Action:** Always audit similar UI patterns for feature parity. Use `:focus-within` on parent containers to reveal interactive elements that are usually only visible on hover, ensuring they are accessible to screen readers and keyboard-only users.
