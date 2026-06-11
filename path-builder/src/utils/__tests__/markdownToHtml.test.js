@@ -106,6 +106,24 @@ describe("markdownToHtml", () => {
     expect(result).toContain("&amp;");
   });
 
+  it("prevents javascript: protocol in links", () => {
+    const result = markdownToHtml("[click](javascript:alert(1))");
+    expect(result).not.toContain('href="javascript:alert(1)"');
+  });
+
+  it("prevents attribute injection in links via double quotes", () => {
+    const result = markdownToHtml('[click](https://example.com" onmouseover="alert(1))');
+    expect(result).not.toContain('onmouseover="alert(1)"');
+    expect(result).toContain('href="https://example.com&quot; onmouseover=&quot;alert(1"');
+  });
+
+  it("allows safe protocols and relative paths", () => {
+    expect(markdownToHtml("[safe](https://example.com)")).toContain('href="https://example.com"');
+    expect(markdownToHtml("[mail](mailto:test@example.com)")).toContain('href="mailto:test@example.com"');
+    expect(markdownToHtml("[relative](/path)")).toContain('href="/path"');
+    expect(markdownToHtml("[dot-relative](./path)")).toContain('href="./path"');
+  });
+
   // ── Edge cases ─────────────────────────────────────────────────────
 
   it("returns null/undefined as-is", () => {

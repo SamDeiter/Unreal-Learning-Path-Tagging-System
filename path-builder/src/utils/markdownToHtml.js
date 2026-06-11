@@ -36,8 +36,15 @@ export function markdownToHtml(text) {
   // Wrap consecutive <li> in <ul>
   html = html.replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="list-style: disc; padding-left: 20px; margin: 8px 0;">$1</ul>');
 
-  // Links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">$1</a>');
+  // Links [text](url) — with protocol whitelist and quote escaping for safety
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    const safeUrl = url.replace(/"/g, "&quot;");
+    const isSafe = /^(https?|mailto|tel):|^\/|^\./i.test(safeUrl);
+    // Link text is already entity-escaped at the top of the function
+    return isSafe
+      ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">${text}</a>`
+      : text;
+  });
 
   // Paragraphs (double newlines)
   html = html.replace(/\n\n/g, '</p><p style="margin-bottom: 12px; color: var(--text-secondary, #8b949e);">');
