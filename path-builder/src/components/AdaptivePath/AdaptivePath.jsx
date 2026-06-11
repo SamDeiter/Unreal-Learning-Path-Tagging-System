@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { X } from "lucide-react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import usePathQuiz from "../../hooks/usePathQuiz";
 import usePathStepActions from "../../hooks/usePathStepActions";
@@ -22,7 +23,11 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import {
+  loadRecentQueries,
+  saveRecentQuery,
+  removeRecentQuery,
+} from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -416,6 +421,12 @@ export default function AdaptivePath() {
     window.open(searchUrl, "_blank", "noopener,noreferrer");
   }, []);
 
+  const handleRemoveRecentQuery = useCallback((q, e) => {
+    e.stopPropagation();
+    removeRecentQuery(q);
+    setRecentQueries(loadRecentQueries());
+  }, []);
+
   const handleFillAllGaps = useCallback(
     async (blindSpots = []) => {
       if (!pathData || bulkFilling) return;
@@ -502,9 +513,19 @@ export default function AdaptivePath() {
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
                 <div className="recent-queries-grid">
                   {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                    <div key={i} className="recent-query-wrapper">
+                      <button className="recent-query-card" onClick={() => setQuery(q)}>
+                        {q}
+                      </button>
+                      <button
+                        className="recent-query-delete"
+                        onClick={(e) => handleRemoveRecentQuery(q, e)}
+                        aria-label={`Remove recent query: ${q}`}
+                        title="Remove"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
