@@ -1,0 +1,3 @@
+## 2025-05-15 - Caching BFS and Metadata in TagGraphService
+**Learning:** Graph traversals (BFS) in `scoreCourseRelevance` were the primary bottleneck during batch scoring. Using a raw array as a `Map` key is fragile because array references change; stringifying and sorting the tag IDs (`sort().join('|')`) provides a robust cache key. Additionally, unbounded caches lead to memory leaks; a simple FIFO eviction (`size >= 50`) keeps memory stable.
+**Action:** Always use stringified/stable keys for caches involving complex objects/arrays, and always implement a size limit or eviction strategy for non-Weak caches.
