@@ -24,6 +24,7 @@ class TagGraphService {
     
     // Initialize related tag cache
     this._relatedCache = new Map();
+    this._expansionCache = new Map(); // BFS results for scoreCourseRelevance
     
     // 1. Load edges from edges.json (handle flat array format)
     let rawEdges = Array.isArray(edgesData) ? edgesData : (edgesData?.edges || []);
@@ -343,6 +344,88 @@ class TagGraphService {
   }
 
   /**
+   * Perform a BFS expansion for a tag ID and cache the results.
+   * Internal helper for scoreCourseRelevance.
+   * @param {string} tagId
+   * @returns {Array<{neighborId: string, credit: number, path: Array}>}
+   */
+  _getGraphExpansion(tagId) {
+    if (this._expansionCache.has(tagId)) {
+      return this._expansionCache.get(tagId);
+    }
+
+    const MAX_HOPS = 2;
+    const HOP_ATTENUATION = 0.5;
+    const expansion = [];
+    const visited = new Set([tagId]);
+    const parentMap = new Map();
+    let frontier = [{ id: tagId, hops: 0 }];
+
+    while (frontier.length > 0) {
+      const nextFrontier = [];
+      for (const { id, hops } of frontier) {
+        if (hops >= MAX_HOPS) continue;
+
+        // Get edges from both directions
+        const outgoing = (this.edgesBySource.get(id) || []).map((e) => ({
+          ...e,
+          direction: "forward",
+          neighborId: e.target,
+        }));
+        const incoming = (this.edgesByTarget.get(id) || []).map((e) => ({
+          ...e,
+          direction: "reverse",
+          neighborId: e.source,
+        }));
+
+        for (const edge of [...outgoing, ...incoming]) {
+          if (visited.has(edge.neighborId)) continue;
+          visited.add(edge.neighborId);
+
+          // Store parent for path reconstruction on match
+          parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
+
+          // Edge-type weight based on direction
+          const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
+          const dirWeight = edge.direction === "forward" ? typeWeights.forward : typeWeights.reverse;
+          const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
+          const edgeDataWeight = edge.weight || 0.5;
+
+          const credit = 5 * dirWeight * hopMultiplier * edgeDataWeight;
+
+          // Reconstruct path lazily from parentMap
+          const path = [];
+          let cur = edge.neighborId;
+          while (parentMap.has(cur)) {
+            const p = parentMap.get(cur);
+            path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
+            cur = p.parentId;
+          }
+
+          expansion.push({
+            neighborId: edge.neighborId,
+            credit,
+            path: [...path], // Clone to be safe
+          });
+
+          // Continue BFS
+          nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
+        }
+      }
+      frontier = nextFrontier;
+    }
+
+    // Limit cache size to prevent memory leaks if many unique tags are queried
+    if (this._expansionCache.size > 200) {
+      const firstKey = this._expansionCache.keys().next().value;
+      this._expansionCache.delete(firstKey);
+    }
+
+    this._expansionCache.set(tagId, expansion);
+    return expansion;
+  }
+
+  /**
    * V2: Score a course's relevance for a set of tags.
    * Uses edge-type weights, hop attenuation, and propagation caps.
    *
@@ -426,87 +509,38 @@ class TagGraphService {
     // ---- 3. Graph propagation (secondary, capped) ----
     let graphPropagation = 0;
     const MAX_GRAPH_PER_TAG = 15;
-    const MAX_HOPS = 2;
-    const HOP_ATTENUATION = 0.5;
 
     for (const tagId of targetTagIds) {
       let tagGraphCredit = 0;
-      const visited = new Set([tagId]);
-      // Track parent references for lazy path reconstruction (avoids O(n*m) copies)
-      const parentMap = new Map();
-      let frontier = [{ id: tagId, hops: 0 }];
 
-      while (frontier.length > 0) {
-        const nextFrontier = [];
-        for (const { id, hops } of frontier) {
-          if (hops >= MAX_HOPS) continue;
+      // Use cached graph expansion to avoid O(N_courses * N_BFS) redundant traversals
+      const expansion = this._getGraphExpansion(tagId);
 
-          // Get edges from both directions
-          const outgoing = (this.edgesBySource.get(id) || []).map((e) => ({
-            ...e,
-            direction: "forward",
-            neighborId: e.target,
-          }));
-          const incoming = (this.edgesByTarget.get(id) || []).map((e) => ({
-            ...e,
-            direction: "reverse",
-            neighborId: e.source,
-          }));
+      for (const entry of expansion) {
+        const neighborTag = entry.neighborId.toLowerCase();
+        const neighborSuffix = neighborTag.split(".").pop();
 
-          for (const edge of [...outgoing, ...incoming]) {
-            if (visited.has(edge.neighborId)) continue;
-            visited.add(edge.neighborId);
-
-            // Store parent for path reconstruction on match
-            parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
-
-            // Edge-type weight based on direction
-            const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
-            const dirWeight =
-              edge.direction === "forward" ? typeWeights.forward : typeWeights.reverse;
-            const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
-            const edgeDataWeight = edge.weight || 0.5;
-
-            // Check if neighbor tag matches any course tag
-            const neighborTag = edge.neighborId.toLowerCase();
-            const neighborSuffix = neighborTag.split(".").pop();
-
-            let matched = false;
-            if (courseTagSet.has(neighborTag)) {
+        let matched = false;
+        if (courseTagSet.has(neighborTag)) {
+          matched = true;
+        } else {
+          for (const ct of allCourseTags) {
+            if (ct.split(".").pop() === neighborSuffix && neighborSuffix.length > 2) {
               matched = true;
-            } else {
-              for (const ct of allCourseTags) {
-                if (ct.split(".").pop() === neighborSuffix && neighborSuffix.length > 2) {
-                  matched = true;
-                  break;
-                }
-              }
+              break;
             }
-
-            if (matched) {
-              const credit = 5 * dirWeight * hopMultiplier * edgeDataWeight;
-              tagGraphCredit += credit;
-              // Reconstruct path lazily from parentMap
-              const path = [];
-              let cur = edge.neighborId;
-              while (parentMap.has(cur)) {
-                const p = parentMap.get(cur);
-                path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
-                cur = p.parentId;
-              }
-              topContributors.push({
-                sourceQueryTagId: tagId,
-                targetCourseTagId: edge.neighborId,
-                path,
-                contribution: Math.round(credit * 100) / 100,
-              });
-            }
-
-            // Continue BFS — no path copy needed
-            nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
           }
         }
-        frontier = nextFrontier;
+
+        if (matched) {
+          tagGraphCredit += entry.credit;
+          topContributors.push({
+            sourceQueryTagId: tagId,
+            targetCourseTagId: entry.neighborId,
+            path: entry.path,
+            contribution: Math.round(entry.credit * 100) / 100,
+          });
+        }
       }
 
       // Cap per-tag graph contribution
@@ -534,6 +568,7 @@ class TagGraphService {
    */
   clearRelatedCache() {
     this._relatedCache.clear();
+    this._expansionCache.clear();
   }
 
   /**
