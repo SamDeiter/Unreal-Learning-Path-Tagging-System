@@ -22,7 +22,7 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import { loadRecentQueries, saveRecentQuery, removeRecentQuery } from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -501,10 +501,24 @@ export default function AdaptivePath() {
               <div className="recent-queries-section">
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
                 <div className="recent-queries-grid">
-                  {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                  {recentQueries.map((q) => (
+                    <div key={q} className="recent-query-wrapper">
+                      <button className="recent-query-card" onClick={() => setQuery(q)}>
+                        {q}
+                      </button>
+                      <button
+                        className="recent-query-delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeRecentQuery(q);
+                          setRecentQueries(loadRecentQueries());
+                        }}
+                        aria-label="Remove from history"
+                        title="Remove from history"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
