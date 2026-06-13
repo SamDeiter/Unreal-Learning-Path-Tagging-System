@@ -61,6 +61,18 @@ class TagGraphService {
     this.errorSignatureIndex = this._buildErrorSignatureIndex();
     this.termIndex = this._buildTermIndex();
 
+    // 5b. Build optimized lookup structures for extraction performance
+    this.phraseIndex = this.termIndex.filter((e) => e.isPhrase);
+    this.termMap = new Map();
+    for (const entry of this.termIndex) {
+      if (!entry.isPhrase) {
+        if (!this.termMap.has(entry.term)) {
+          this.termMap.set(entry.term, []);
+        }
+        this.termMap.get(entry.term).push(entry);
+      }
+    }
+
     // 6. Define weights for graph propagation
     this.edgeWeights = {
       subtopic: { forward: 0.8, reverse: 0.1 },
@@ -188,6 +200,16 @@ class TagGraphService {
       if (a.isPhrase !== b.isPhrase) return a.isPhrase ? -1 : 1;
       return b.term.length - a.term.length;
     });
+
+    // Pre-compile regex for phrases to avoid repeated RegExp instantiation in extraction loop
+    for (const entry of index) {
+      if (entry.isPhrase) {
+        entry.regex = new RegExp(
+          `\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+          "i"
+        );
+      }
+    }
 
     return index;
   }
@@ -572,36 +594,12 @@ class TagGraphService {
       ui_term: 0.65,
     };
 
-    for (const entry of (this.termIndex || [])) {
+    // Part 1: Match phrases using pre-compiled regex
+    for (const entry of (this.phraseIndex || [])) {
       if (seen.has(entry.tagId)) continue;
 
-      let matched = false;
-
-      if (entry.isPhrase) {
-        // Phrase matching: check if phrase appears with word boundaries
-        const phraseRegex = new RegExp(
-          `\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
-          "i"
-        );
-        if (phraseRegex.test(normalized)) {
-          matched = true;
-        }
-      } else {
-        // Single-word matching: check word set (exact whole-word, no substring)
-        if (queryWords.has(entry.term)) {
-          matched = true;
-        } else {
-          // Also check depluralized query words against this term
-          for (const qw of queryWords) {
-            if (depluralize(qw) === entry.term || qw === depluralize(entry.term)) {
-              matched = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (matched) {
+      // Phrase matching: check if phrase appears with word boundaries
+      if (entry.regex && entry.regex.test(normalized)) {
         seen.add(entry.tagId);
         const confidence = TYPE_CONFIDENCE[entry.termType] || 0.5;
         matches.push({
@@ -612,6 +610,38 @@ class TagGraphService {
           confidence,
         });
       }
+    }
+
+    // Part 2: Match single words using O(1) termMap lookup
+    for (const qw of queryWords) {
+      const depluralizedQw = depluralize(qw);
+      const candidates = [qw];
+      if (depluralizedQw !== qw) candidates.push(depluralizedQw);
+
+      for (const candidate of candidates) {
+        const entries = this.termMap.get(candidate);
+        if (entries) {
+          for (const entry of entries) {
+            if (!seen.has(entry.tagId)) {
+              seen.add(entry.tagId);
+              const confidence = TYPE_CONFIDENCE[entry.termType] || 0.5;
+              matches.push({
+                tagId: entry.tagId,
+                tag: this.getTag(entry.tagId),
+                matchedTerm: entry.originalTerm,
+                matchType: entry.termType,
+                confidence,
+              });
+            }
+          }
+        }
+      }
+
+      // Also check if any term in the index (depluralized) matches the current query word
+      // To keep this O(1), we'd need to index depluralized terms too.
+      // But wait, the index already contains depluralized variants!
+      // See _buildTermIndex: it calls index.push for the depluralized variant too.
+      // So we don't need a linear scan here either.
     }
 
     // Step 4: Apply negative intent — exclude tags matched by negated terms
