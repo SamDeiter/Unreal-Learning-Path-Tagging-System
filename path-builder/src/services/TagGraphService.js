@@ -59,7 +59,9 @@ class TagGraphService {
 
     // 5. Build indices for matching
     this.errorSignatureIndex = this._buildErrorSignatureIndex();
-    this.termIndex = this._buildTermIndex();
+    const { phraseIndex, termMap } = this._buildTermIndex();
+    this.phraseIndex = phraseIndex;
+    this.termMap = termMap;
 
     // 6. Define weights for graph propagation
     this.edgeWeights = {
@@ -111,10 +113,10 @@ class TagGraphService {
   /**
    * V2: Build a term index for whole-word/phrase matching.
    * Maps normalized terms to { tagId, termType, originalTerm }.
-   * @returns {Array<{term: string, tagId: string, termType: string, originalTerm: string, isPhrase: boolean}>}
+   * @returns {{ phraseIndex: Array, termMap: Map }}
    */
   _buildTermIndex() {
-    const index = [];
+    const rawIndex = [];
     const addTerm = (term, tagId, termType, original) => {
       if (!term || typeof term !== "string") return;
       const normalized = term.toLowerCase().trim();
@@ -124,7 +126,7 @@ class TagGraphService {
       const words = normalized.split(/\s+/);
       const depluralized = words.map((w) => depluralize(w)).join(" ");
 
-      index.push({
+      rawIndex.push({
         term: normalized,
         tagId,
         termType,
@@ -134,7 +136,7 @@ class TagGraphService {
 
       // Add depluralized if different
       if (depluralized !== normalized) {
-        index.push({
+        rawIndex.push({
           term: depluralized,
           tagId,
           termType,
@@ -145,37 +147,31 @@ class TagGraphService {
     };
 
     for (const tag of this.tags) {
-      // display_name
       addTerm(tag.display_name, tag.tag_id, "display_name", tag.display_name);
 
-      // tag_id suffix (e.g., "blueprint" from "scripting.blueprint")
       const suffix = tag.tag_id.split(".").pop();
       if (suffix && suffix.length > 2) {
         addTerm(suffix.replace(/_/g, " "), tag.tag_id, "tag_id_suffix", suffix);
       }
 
-      // synonyms
       if (tag.synonyms) {
         for (const syn of tag.synonyms) {
           addTerm(syn, tag.tag_id, "synonym", syn);
         }
       }
 
-      // aliases
       if (tag.aliases) {
         for (const alias of tag.aliases) {
           addTerm(alias.value, tag.tag_id, "alias", alias.value);
         }
       }
 
-      // signals.ui_terms
       if (tag.signals?.ui_terms) {
         for (const term of tag.signals.ui_terms) {
           addTerm(term, tag.tag_id, "ui_term", term);
         }
       }
 
-      // signals.error_signatures
       if (tag.signals?.error_signatures) {
         for (const sig of tag.signals.error_signatures) {
           addTerm(sig, tag.tag_id, "error_sig", sig);
@@ -183,13 +179,27 @@ class TagGraphService {
       }
     }
 
-    // Sort: phrases first (longer matches are more specific), then by length desc
-    index.sort((a, b) => {
-      if (a.isPhrase !== b.isPhrase) return a.isPhrase ? -1 : 1;
-      return b.term.length - a.term.length;
-    });
+    const phraseIndex = [];
+    const termMap = new Map();
 
-    return index;
+    for (const entry of rawIndex) {
+      if (entry.isPhrase) {
+        // Pre-compile regex for phrase matching (word boundaries)
+        const regex = new RegExp(`\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        phraseIndex.push({ ...entry, regex });
+      } else {
+        // Multi-map style: one term can map to multiple tags
+        if (!termMap.has(entry.term)) {
+          termMap.set(entry.term, []);
+        }
+        termMap.get(entry.term).push(entry);
+      }
+    }
+
+    // Sort phrases by length desc (longer = more specific)
+    phraseIndex.sort((a, b) => b.term.length - a.term.length);
+
+    return { phraseIndex, termMap };
   }
 
   /**
@@ -555,8 +565,14 @@ class TagGraphService {
     // Step 1: Normalize the query (expand abbreviations, detect negatives)
     const { normalized, negatedTerms } = normalizeQuery(text);
 
-    // Step 2: Build word set and full text for matching
-    const queryWords = new Set(normalized.split(/\s+/).filter((w) => w.length > 1));
+    // Step 2: Build word set for matching
+    const queryWords = normalized.split(/\s+/).filter((w) => w.length > 1);
+    const queryWordSet = new Set(queryWords);
+
+    // Also include depluralized variants in the lookup set for O(1) matching
+    for (const w of queryWords) {
+      queryWordSet.add(depluralize(w));
+    }
 
     // Step 3: Match against term index using word-boundary matching
     const matches = [];
@@ -572,36 +588,10 @@ class TagGraphService {
       ui_term: 0.65,
     };
 
-    for (const entry of (this.termIndex || [])) {
+    // 3a. O(N_phrases) loop for phrase matching (using pre-compiled regex)
+    for (const entry of (this.phraseIndex || [])) {
       if (seen.has(entry.tagId)) continue;
-
-      let matched = false;
-
-      if (entry.isPhrase) {
-        // Phrase matching: check if phrase appears with word boundaries
-        const phraseRegex = new RegExp(
-          `\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
-          "i"
-        );
-        if (phraseRegex.test(normalized)) {
-          matched = true;
-        }
-      } else {
-        // Single-word matching: check word set (exact whole-word, no substring)
-        if (queryWords.has(entry.term)) {
-          matched = true;
-        } else {
-          // Also check depluralized query words against this term
-          for (const qw of queryWords) {
-            if (depluralize(qw) === entry.term || qw === depluralize(entry.term)) {
-              matched = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (matched) {
+      if (entry.regex.test(normalized)) {
         seen.add(entry.tagId);
         const confidence = TYPE_CONFIDENCE[entry.termType] || 0.5;
         matches.push({
@@ -611,6 +601,26 @@ class TagGraphService {
           matchType: entry.termType,
           confidence,
         });
+      }
+    }
+
+    // 3b. O(N_words) lookup for single-word matching (using Map)
+    for (const word of queryWordSet) {
+      const entries = this.termMap.get(word);
+      if (entries) {
+        for (const entry of entries) {
+          if (!seen.has(entry.tagId)) {
+            seen.add(entry.tagId);
+            const confidence = TYPE_CONFIDENCE[entry.termType] || 0.5;
+            matches.push({
+              tagId: entry.tagId,
+              tag: this.getTag(entry.tagId),
+              matchedTerm: entry.originalTerm,
+              matchType: entry.termType,
+              confidence,
+            });
+          }
+        }
       }
     }
 
