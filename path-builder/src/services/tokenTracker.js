@@ -27,8 +27,10 @@ import {
   query,
   orderBy,
   limit,
+  where,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
+import { getCurrentUser } from "./googleAuthService";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -220,17 +222,25 @@ export function resetTokenTracker() {
 
 /**
  * Sync a day's token data to Firestore for persistent storage.
- * Writes to: token_usage/{date}
+ * Writes to: token_usage/{userId}_{date}
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
     const app = getFirebaseApp();
     if (!app) return;
+
+    const user = getCurrentUser();
+    if (!user?.uid) return;
+
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    // Use composite ID to ensure per-user isolation in the same collection
+    const docId = `${user.uid}_${dateKey}`;
+    const docRef = doc(db, "token_usage", docId);
+
     await setDoc(
       docRef,
       {
+        userId: user.uid,
         date: dateKey,
         totalInput: dayData.totalInput,
         totalOutput: dayData.totalOutput,
@@ -256,8 +266,17 @@ export async function fetchCloudStats(days = 30) {
   try {
     const app = getFirebaseApp();
     if (!app) return [];
+
+    const user = getCurrentUser();
+    if (!user?.uid) return [];
+
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const q = query(
+      collection(db, "token_usage"),
+      where("userId", "==", user.uid),
+      orderBy("date", "desc"),
+      limit(days)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
