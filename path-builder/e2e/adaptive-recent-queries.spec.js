@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Adaptive Path: Recent query deletion', async ({ page }) => {
   // 1. Navigate to the app and bypass auth/onboarding
-  await page.goto('http://localhost:5173/Unreal-Learning-Path-Tagging-System/');
+  await page.goto('./');
 
   await page.evaluate(() => {
     localStorage.setItem('e2e_auth_bypass', 'true');
