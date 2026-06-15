@@ -1,4 +1,4 @@
-import { describe, it, expect, bench } from "vitest";
+import { describe, bench } from "vitest";
 import tagGraphService from "../TagGraphService";
 
 describe("TagGraphService Benchmark", () => {
