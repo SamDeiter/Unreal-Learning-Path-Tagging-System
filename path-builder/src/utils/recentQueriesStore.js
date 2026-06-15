@@ -31,6 +31,16 @@ export function saveRecentQuery(q) {
 }
 
 /**
+ * Remove a single query from localStorage.
+ * @param {string} q
+ */
+export function removeRecentQuery(q) {
+  const current = loadRecentQueries();
+  const updated = current.filter((x) => x !== q);
+  localStorage.setItem(RECENT_QUERIES_KEY, JSON.stringify(updated));
+}
+
+/**
  * Clear all recent queries from localStorage.
  */
 export function clearRecentQueries() {
