@@ -106,6 +106,18 @@ describe("markdownToHtml", () => {
     expect(result).toContain("&amp;");
   });
 
+  it("prevents javascript: protocol in links", () => {
+    const result = markdownToHtml("[Click me](javascript:alert('xss'))");
+    expect(result).not.toContain('href="javascript:');
+  });
+
+  it("prevents attribute injection in links", () => {
+    const result = markdownToHtml('[Inject](https://example.com" onmouseover="alert(1))');
+    expect(result).not.toContain('onmouseover="alert(1)"');
+    // It should ideally escape the quote
+    expect(result).toContain('href="https://example.com&quot; onmouseover=&quot;alert(1"');
+  });
+
   // ── Edge cases ─────────────────────────────────────────────────────
 
   it("returns null/undefined as-is", () => {
