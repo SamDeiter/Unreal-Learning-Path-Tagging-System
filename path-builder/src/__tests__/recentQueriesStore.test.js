@@ -3,6 +3,7 @@ import {
   loadRecentQueries,
   saveRecentQuery,
   clearRecentQueries,
+  removeRecentQuery,
   RECENT_QUERIES_KEY,
   MAX_RECENT,
 } from "../utils/recentQueriesStore";
@@ -80,5 +81,11 @@ describe("recentQueriesStore", () => {
       clearRecentQueries();
       expect(loadRecentQueries()).toEqual([]);
     });
+  });
+
+  it("removeRecentQuery removes specific query", () => {
+    saveRecentQuery("q1"); saveRecentQuery("q2");
+    removeRecentQuery("q1");
+    expect(loadRecentQueries()).toEqual(["q2"]);
   });
 });
