@@ -1,0 +1,3 @@
+## 2025-06-16 - TagGraphService Redundant Computations
+**Learning:** `TagGraphService.scoreCourseRelevance` is frequently called in loops (e.g., scoring 500+ courses against a query). The original implementation performed a BFS graph expansion for every target tag *per course*, leading to $O(C * T * (V+E))$ complexity where $C$ is courses and $T$ is target tags. Additionally, `extractTagsFromText` used linear $O(N)$ regex matching for every query.
+**Action:** Implement BFS expansion caching for tags and metadata caching (WeakMap) for courses to move invariant work out of the per-course loop. Partition term indexing into $O(1)$ Map for single words and pre-compiled Regex for phrases to avoid $O(N)$ search space and regex compilation overhead.
