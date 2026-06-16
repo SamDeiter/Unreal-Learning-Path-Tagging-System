@@ -37,9 +37,11 @@ describe("TagGraphService", () => {
       expect(tagGraphService.edgesByTarget).toBeInstanceOf(Map);
     });
 
-    it("should build a term index for text matching", () => {
-      expect(Array.isArray(tagGraphService.termIndex)).toBe(true);
-      expect(tagGraphService.termIndex.length).toBeGreaterThan(0);
+    it("should build term indices for text matching", () => {
+      expect(Array.isArray(tagGraphService.phraseIndex)).toBe(true);
+      expect(tagGraphService.termMap).toBeInstanceOf(Map);
+      expect(tagGraphService.phraseIndex.length).toBeGreaterThan(0);
+      expect(tagGraphService.termMap.size).toBeGreaterThan(0);
     });
 
     it("should have edge type weight configuration", () => {
@@ -388,33 +390,27 @@ describe("TagGraphService", () => {
     });
   });
 
-  // -- _buildTermIndex (internal, sort behavior) --
+  // -- _buildTermIndices (internal, sort behavior) --
 
-  describe("_buildTermIndex", () => {
-    it("should sort phrases before single words", () => {
-      let lastWasPhrase = true;
-      let phasePassed = false;
-      for (const entry of tagGraphService.termIndex) {
-        if (!entry.isPhrase && lastWasPhrase) {
-          phasePassed = true; // transition from phrases to words
-        }
-        if (phasePassed && entry.isPhrase) {
-          // A phrase after we moved to single words = sorting error
-          // (this could happen for different-length phrases, so just check first transition)
-          break;
-        }
-        lastWasPhrase = entry.isPhrase;
+  describe("_buildTermIndices", () => {
+    it("should sort phrases by length descending", () => {
+      for (let i = 1; i < tagGraphService.phraseIndex.length; i++) {
+        expect(tagGraphService.phraseIndex[i].term.length).toBeLessThanOrEqual(
+          tagGraphService.phraseIndex[i - 1].term.length
+        );
       }
     });
 
-    it("should include tag_id suffix terms", () => {
-      const suffixEntries = tagGraphService.termIndex.filter((e) => e.termType === "tag_id_suffix");
-      expect(suffixEntries.length).toBeGreaterThan(0);
+    it("should include tag_id suffix terms in termMap or phraseIndex", () => {
+      const suffixInPhrases = tagGraphService.phraseIndex.filter((e) => e.termType === "tag_id_suffix");
+      const suffixInMap = Array.from(tagGraphService.termMap.values()).flat().filter((e) => e.termType === "tag_id_suffix");
+      expect(suffixInPhrases.length + suffixInMap.length).toBeGreaterThan(0);
     });
 
-    it("should include display_name terms", () => {
-      const dnEntries = tagGraphService.termIndex.filter((e) => e.termType === "display_name");
-      expect(dnEntries.length).toBeGreaterThan(0);
+    it("should include display_name terms in termMap or phraseIndex", () => {
+      const dnInPhrases = tagGraphService.phraseIndex.filter((e) => e.termType === "display_name");
+      const dnInMap = Array.from(tagGraphService.termMap.values()).flat().filter((e) => e.termType === "display_name");
+      expect(dnInPhrases.length + dnInMap.length).toBeGreaterThan(0);
     });
   });
 });
