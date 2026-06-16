@@ -37,4 +37,9 @@ export function clearRecentQueries() {
   localStorage.removeItem(RECENT_QUERIES_KEY);
 }
 
+export function removeRecentQuery(q) {
+  const current = loadRecentQueries().filter((x) => x !== q);
+  localStorage.setItem(RECENT_QUERIES_KEY, JSON.stringify(current));
+}
+
 export { RECENT_QUERIES_KEY, MAX_RECENT };
