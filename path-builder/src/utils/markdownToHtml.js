@@ -36,8 +36,26 @@ export function markdownToHtml(text) {
   // Wrap consecutive <li> in <ul>
   html = html.replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="list-style: disc; padding-left: 20px; margin: 8px 0;">$1</ul>');
 
-  // Links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">$1</a>');
+  // Links [text](url) — with protocol whitelist and attribute injection protection
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    // Escape double quotes in the URL to prevent attribute injection
+    const safeUrl = url.replace(/"/g, "&quot;");
+
+    // Block dangerous protocols (javascript:, data:, vbscript:)
+    const isDangerous = /^(javascript|data|vbscript):/i.test(safeUrl);
+
+    // We allow absolute URLs with safe protocols and all relative paths.
+    // A relative path is any path that doesn't look like a protocol-prefixed URL
+    // (i.e., doesn't have a colon in the first few characters) OR starts with a safe protocol.
+    const isSafeProtocol = /^(https?|mailto|tel):/i.test(safeUrl);
+    const isLikelyRelative = !/^[a-z0-9+.-]+:/i.test(safeUrl);
+
+    if (isDangerous || (!isSafeProtocol && !isLikelyRelative)) {
+      return `<a href="#" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">${text}</a>`;
+    }
+
+    return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--accent, #58a6ff);">${text}</a>`;
+  });
 
   // Paragraphs (double newlines)
   html = html.replace(/\n\n/g, '</p><p style="margin-bottom: 12px; color: var(--text-secondary, #8b949e);">');
