@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   loadRecentQueries,
   saveRecentQuery,
+  deleteRecentQuery,
   clearRecentQueries,
   RECENT_QUERIES_KEY,
   MAX_RECENT,
@@ -70,6 +71,21 @@ describe("recentQueriesStore", () => {
     it("trims whitespace from queries", () => {
       saveRecentQuery("  padded query  ");
       expect(loadRecentQueries()).toEqual(["padded query"]);
+    });
+  });
+
+  describe("deleteRecentQuery", () => {
+    it("deletes a specific query", () => {
+      saveRecentQuery("q1");
+      saveRecentQuery("q2");
+      deleteRecentQuery("q1");
+      expect(loadRecentQueries()).toEqual(["q2"]);
+    });
+
+    it("ignores non-existent queries", () => {
+      saveRecentQuery("q1");
+      deleteRecentQuery("q3");
+      expect(loadRecentQueries()).toEqual(["q1"]);
     });
   });
 
