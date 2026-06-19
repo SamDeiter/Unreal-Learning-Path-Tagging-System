@@ -124,22 +124,32 @@ class TagGraphService {
       const words = normalized.split(/\s+/);
       const depluralized = words.map((w) => depluralize(w)).join(" ");
 
+      const isPhrase = words.length > 1;
+      const regex = isPhrase
+        ? new RegExp(`\\b${normalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
+        : null;
+
       index.push({
         term: normalized,
         tagId,
         termType,
         originalTerm: original || term,
-        isPhrase: words.length > 1,
+        isPhrase,
+        regex,
       });
 
       // Add depluralized if different
       if (depluralized !== normalized) {
+        const deplurIsPhrase = depluralized.split(/\s+/).length > 1;
         index.push({
           term: depluralized,
           tagId,
           termType,
           originalTerm: original || term,
-          isPhrase: words.length > 1,
+          isPhrase: deplurIsPhrase,
+          regex: deplurIsPhrase
+            ? new RegExp(`\\b${depluralized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
+            : null,
         });
       }
     };
@@ -578,12 +588,8 @@ class TagGraphService {
       let matched = false;
 
       if (entry.isPhrase) {
-        // Phrase matching: check if phrase appears with word boundaries
-        const phraseRegex = new RegExp(
-          `\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
-          "i"
-        );
-        if (phraseRegex.test(normalized)) {
+        // Phrase matching: check if phrase appears with word boundaries using pre-compiled regex
+        if (entry.regex && entry.regex.test(normalized)) {
           matched = true;
         }
       } else {
