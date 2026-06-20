@@ -106,7 +106,8 @@
 }
 
 .recent-query-card {
-  padding: 14px 16px;
+  position: relative;
+  padding: 14px 40px 14px 16px; /* Right padding for delete button */
   background: #161b22;
   border: 1px solid #21262d;
   border-radius: 12px;
@@ -117,19 +118,59 @@
   font-family: inherit;
   font-size: 0.85rem;
   line-height: 1.4;
-  overflow: hidden;
+}
+
+.recent-query-text {
+  display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-clamp: 2;
-  display: -webkit-box;
+  overflow: hidden;
 }
 
-.recent-query-card:hover {
+.recent-query-card:hover,
+.recent-query-card:focus-visible {
+  outline: none;
   border-color: #58a6ff;
   background: #1c2128;
   color: var(--text-primary, #e6edf3);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.recent-query-delete-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted, #6e7681);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.recent-query-card:hover .recent-query-delete-btn {
+  opacity: 1;
+}
+
+.recent-query-delete-btn:hover {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: rgba(248, 81, 73, 0.4);
+  color: #f85149;
+}
+
+.recent-query-delete-btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-blue, #58a6ff);
+  outline-offset: 2px;
 }
 
 /* ── Loading State ── */

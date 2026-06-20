@@ -2,10 +2,11 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   loadRecentQueries,
   saveRecentQuery,
+  deleteRecentQuery,
   clearRecentQueries,
   RECENT_QUERIES_KEY,
   MAX_RECENT,
-} from "../utils/recentQueriesStore";
+} from "../recentQueriesStore";
 
 describe("recentQueriesStore", () => {
   beforeEach(() => {
@@ -70,6 +71,21 @@ describe("recentQueriesStore", () => {
     it("trims whitespace from queries", () => {
       saveRecentQuery("  padded query  ");
       expect(loadRecentQueries()).toEqual(["padded query"]);
+    });
+  });
+
+  describe("deleteRecentQuery", () => {
+    it("removes a specific query", () => {
+      saveRecentQuery("q1");
+      saveRecentQuery("q2");
+      deleteRecentQuery("q1");
+      expect(loadRecentQueries()).toEqual(["q2"]);
+    });
+
+    it("does nothing if query doesn't exist", () => {
+      saveRecentQuery("q1");
+      deleteRecentQuery("q3");
+      expect(loadRecentQueries()).toEqual(["q1"]);
     });
   });
 

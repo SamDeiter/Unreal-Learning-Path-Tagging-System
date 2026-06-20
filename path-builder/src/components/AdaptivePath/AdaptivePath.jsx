@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { X } from "lucide-react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import usePathQuiz from "../../hooks/usePathQuiz";
 import usePathStepActions from "../../hooks/usePathStepActions";
@@ -22,7 +23,11 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import {
+  loadRecentQueries,
+  saveRecentQuery,
+  deleteRecentQuery,
+} from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -67,6 +72,15 @@ export default function AdaptivePath() {
 
   // Load recent queries on mount
   useEffect(() => {
+    setRecentQueries(loadRecentQueries());
+  }, []);
+
+  /**
+   * Handle deleting a recent query
+   */
+  const handleDeleteRecentQuery = useCallback((e, q) => {
+    e.stopPropagation();
+    deleteRecentQuery(q);
     setRecentQueries(loadRecentQueries());
   }, []);
 
@@ -502,9 +516,31 @@ export default function AdaptivePath() {
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
                 <div className="recent-queries-grid">
                   {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                    <div
+                      key={i}
+                      className="recent-query-card"
+                      onClick={() => setQuery(q)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.target !== e.currentTarget) return;
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setQuery(q);
+                        }
+                      }}
+                      aria-label={`Load previous query: ${q}`}
+                    >
+                      <span className="recent-query-text">{q}</span>
+                      <button
+                        className="recent-query-delete-btn"
+                        onClick={(e) => handleDeleteRecentQuery(e, q)}
+                        aria-label={`Delete query: ${q}`}
+                        title="Remove from history"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
