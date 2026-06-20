@@ -24,6 +24,12 @@ class TagGraphService {
     
     // Initialize related tag cache
     this._relatedCache = new Map();
+
+    // Cache for processed course metadata
+    this._courseMetadataCache = new WeakMap();
+
+    // Cache for BFS graph expansions
+    this._expansionCache = new Map();
     
     // 1. Load edges from edges.json (handle flat array format)
     let rawEdges = Array.isArray(edgesData) ? edgesData : (edgesData?.edges || []);
@@ -54,14 +60,8 @@ class TagGraphService {
 
     // 4. Build lookup maps for O(1) access
     this.tagMap = new Map(this.tags.map((t) => [t.tag_id, t]));
-    this.edgesBySource = this._buildEdgeMap("source");
-    this.edgesByTarget = this._buildEdgeMap("target");
 
-    // 5. Build indices for matching
-    this.errorSignatureIndex = this._buildErrorSignatureIndex();
-    this.termIndex = this._buildTermIndex();
-
-    // 6. Define weights for graph propagation
+    // 5. Define weights for graph propagation
     this.edgeWeights = {
       subtopic: { forward: 0.8, reverse: 0.1 },
       related: { forward: 0.5, reverse: 0.5 },
@@ -70,21 +70,44 @@ class TagGraphService {
       often_caused_by: { forward: 0.6, reverse: 0.4 },
       replaces: { forward: 0.5, reverse: 0.15 },
     };
+
+    this.edgesBySource = this._buildEdgeMap("source");
+    this.edgesByTarget = this._buildEdgeMap("target");
+
+    // 6. Build indices for matching
+    this.errorSignatureIndex = this._buildErrorSignatureIndex();
+    this._buildTermIndices();
   }
 
   /**
-   * Build an edge map keyed by source or target
+   * Build an edge map keyed by source or target.
+   * Pre-calculates neighborId, neighborSuffix, and combined weights.
    * @param {string} key - 'source' or 'target'
    * @returns {Map<string, Array>}
    */
   _buildEdgeMap(key) {
     const map = new Map();
+    const isSource = key === "source";
+    const direction = isSource ? "forward" : "reverse";
+
     for (const edge of (this.edges || [])) {
       const id = edge[key];
       if (!map.has(id)) {
         map.set(id, []);
       }
-      map.get(id).push(edge);
+
+      const neighborId = isSource ? edge.target : edge.source;
+      const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
+      const dirWeight = isSource ? typeWeights.forward : typeWeights.reverse;
+
+      map.get(id).push({
+        ...edge,
+        neighborId,
+        neighborIdLower: neighborId.toLowerCase(),
+        neighborSuffix: neighborId.split(".").pop(),
+        direction,
+        combinedWeight: dirWeight * (edge.weight || 0.5),
+      });
     }
     return map;
   }
@@ -109,73 +132,81 @@ class TagGraphService {
   }
 
   /**
-   * V2: Build a term index for whole-word/phrase matching.
-   * Maps normalized terms to { tagId, termType, originalTerm }.
-   * @returns {Array<{term: string, tagId: string, termType: string, originalTerm: string, isPhrase: boolean}>}
+   * V2: Build optimized term indices for whole-word/phrase matching.
+   * Partitions terms into phraseIndex (regex) and termMap (Map lookup).
    */
-  _buildTermIndex() {
-    const index = [];
+  _buildTermIndices() {
+    this.phraseIndex = [];
+    this.termMap = new Map();
+    // Maintain legacy termIndex for backward compatibility if needed, but we'll use phraseIndex/termMap internally
+    this.termIndex = [];
+
     const addTerm = (term, tagId, termType, original) => {
       if (!term || typeof term !== "string") return;
       const normalized = term.toLowerCase().trim();
       if (normalized.length < 2) return;
 
-      // Also add de-pluralized variant
       const words = normalized.split(/\s+/);
+      const isPhrase = words.length > 1;
       const depluralized = words.map((w) => depluralize(w)).join(" ");
 
-      index.push({
+      const entry = {
         term: normalized,
         tagId,
         termType,
         originalTerm: original || term,
-        isPhrase: words.length > 1,
-      });
+        isPhrase,
+      };
+
+      this.termIndex.push(entry);
+
+      if (isPhrase) {
+        this.phraseIndex.push({
+          ...entry,
+          regex: new RegExp(`\\b${normalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"),
+        });
+      } else {
+        if (!this.termMap.has(normalized)) this.termMap.set(normalized, []);
+        this.termMap.get(normalized).push(entry);
+      }
 
       // Add depluralized if different
       if (depluralized !== normalized) {
-        index.push({
-          term: depluralized,
-          tagId,
-          termType,
-          originalTerm: original || term,
-          isPhrase: words.length > 1,
-        });
+        const depEntry = { ...entry, term: depluralized };
+        this.termIndex.push(depEntry);
+        if (isPhrase) {
+          this.phraseIndex.push({
+            ...depEntry,
+            regex: new RegExp(`\\b${depluralized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"),
+          });
+        } else {
+          if (!this.termMap.has(depluralized)) this.termMap.set(depluralized, []);
+          this.termMap.get(depluralized).push(depEntry);
+        }
       }
     };
 
     for (const tag of this.tags) {
-      // display_name
       addTerm(tag.display_name, tag.tag_id, "display_name", tag.display_name);
-
-      // tag_id suffix (e.g., "blueprint" from "scripting.blueprint")
       const suffix = tag.tag_id.split(".").pop();
       if (suffix && suffix.length > 2) {
         addTerm(suffix.replace(/_/g, " "), tag.tag_id, "tag_id_suffix", suffix);
       }
-
-      // synonyms
       if (tag.synonyms) {
         for (const syn of tag.synonyms) {
           addTerm(syn, tag.tag_id, "synonym", syn);
         }
       }
-
-      // aliases
       if (tag.aliases) {
         for (const alias of tag.aliases) {
           addTerm(alias.value, tag.tag_id, "alias", alias.value);
         }
       }
-
-      // signals.ui_terms
       if (tag.signals?.ui_terms) {
         for (const term of tag.signals.ui_terms) {
           addTerm(term, tag.tag_id, "ui_term", term);
         }
       }
-
-      // signals.error_signatures
       if (tag.signals?.error_signatures) {
         for (const sig of tag.signals.error_signatures) {
           addTerm(sig, tag.tag_id, "error_sig", sig);
@@ -184,12 +215,12 @@ class TagGraphService {
     }
 
     // Sort: phrases first (longer matches are more specific), then by length desc
-    index.sort((a, b) => {
+    this.termIndex.sort((a, b) => {
       if (a.isPhrase !== b.isPhrase) return a.isPhrase ? -1 : 1;
       return b.term.length - a.term.length;
     });
 
-    return index;
+    this.phraseIndex.sort((a, b) => b.term.length - a.term.length);
   }
 
   /**
@@ -343,6 +374,109 @@ class TagGraphService {
   }
 
   /**
+   * Internal: Get processed tag sets and suffix maps for a course with caching.
+   * @param {Object} course
+   * @returns {{ tagSet: Set, suffixMap: Map, geminiTags: string[] }}
+   */
+  _getCourseMetadata(course) {
+    if (this._courseMetadataCache.has(course)) {
+      return this._courseMetadataCache.get(course);
+    }
+
+    const allCourseTags = [
+      ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
+      ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
+      ...(Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : []),
+      ...(Array.isArray(course.transcript_tags) ? course.transcript_tags : []),
+      ...(Array.isArray(course.extracted_tags) ? course.extracted_tags : []),
+    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
+
+    if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
+      Object.values(course.tags).forEach((v) => {
+        if (typeof v === "string") allCourseTags.push(v.toLowerCase());
+      });
+    }
+
+    const tagSet = new Set(allCourseTags);
+    const suffixMap = new Map();
+    for (const tag of tagSet) {
+      const suffix = tag.split(".").pop();
+      if (suffix.length > 2) {
+        if (!suffixMap.has(suffix)) suffixMap.set(suffix, []);
+        suffixMap.get(suffix).push(tag);
+      }
+    }
+
+    const geminiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
+
+    const metadata = { tagSet, suffixMap, geminiTags };
+    this._courseMetadataCache.set(course, metadata);
+    return metadata;
+  }
+
+  /**
+   * Internal: Perform BFS expansion for a tag with caching.
+   * @param {string} tagId
+   * @returns {Array<{neighborId: string, neighborIdLower: string, neighborSuffix: string, path: Array, credit: number}>}
+   */
+  _getGraphExpansion(tagId) {
+    if (this._expansionCache.has(tagId)) {
+      return this._expansionCache.get(tagId);
+    }
+
+    const expansion = [];
+    const MAX_HOPS = 2;
+    const HOP_ATTENUATION = 0.5;
+
+    const visited = new Set([tagId]);
+    const parentMap = new Map();
+    let frontier = [{ id: tagId, hops: 0 }];
+
+    while (frontier.length > 0) {
+      const nextFrontier = [];
+      for (const { id, hops } of frontier) {
+        if (hops >= MAX_HOPS) continue;
+
+        const outgoing = this.edgesBySource.get(id) || [];
+        const incoming = this.edgesByTarget.get(id) || [];
+
+        for (const edge of [...outgoing, ...incoming]) {
+          if (visited.has(edge.neighborId)) continue;
+          visited.add(edge.neighborId);
+
+          parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
+
+          const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
+          const creditBase = 5 * edge.combinedWeight * hopMultiplier;
+
+          // Reconstruct path lazily
+          const path = [];
+          let cur = edge.neighborId;
+          while (parentMap.has(cur)) {
+            const p = parentMap.get(cur);
+            path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
+            cur = p.parentId;
+          }
+
+          expansion.push({
+            neighborId: edge.neighborId,
+            neighborIdLower: edge.neighborIdLower,
+            neighborSuffix: edge.neighborSuffix,
+            path,
+            credit: creditBase,
+          });
+
+          nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
+        }
+      }
+      frontier = nextFrontier;
+    }
+
+    this._expansionCache.set(tagId, expansion);
+    return expansion;
+  }
+
+  /**
    * V2: Score a course's relevance for a set of tags.
    * Uses edge-type weights, hop attenuation, and propagation caps.
    *
@@ -358,30 +492,13 @@ class TagGraphService {
     };
     if (!course || !targetTagIds || targetTagIds.length === 0) return empty;
 
-    // Combine ALL tag sources from the enriched video library
-    const allCourseTags = [
-      ...(Array.isArray(course.canonical_tags) ? course.canonical_tags : []),
-      ...(Array.isArray(course.ai_tags) ? course.ai_tags : []),
-      ...(Array.isArray(course.gemini_system_tags) ? course.gemini_system_tags : []),
-      ...(Array.isArray(course.transcript_tags) ? course.transcript_tags : []),
-      ...(Array.isArray(course.extracted_tags) ? course.extracted_tags : []),
-    ].map((t) => (typeof t === "string" ? t.toLowerCase() : ""));
-
-    // Also include the legacy tags object fields
-    if (course.tags && typeof course.tags === "object" && !Array.isArray(course.tags)) {
-      Object.values(course.tags).forEach((v) => {
-        if (typeof v === "string") allCourseTags.push(v.toLowerCase());
-      });
-    }
-
+    const { tagSet: courseTagSet, suffixMap: courseSuffixMap, geminiTags } = this._getCourseMetadata(course);
     const targetSet = new Set(targetTagIds.map((t) => t.toLowerCase()));
-    const courseTagSet = new Set(allCourseTags);
     const topContributors = [];
 
     // ---- 1. Direct tag matches (highest weight: 25 pts each) ----
     let directOverlap = 0;
     for (const target of targetSet) {
-      // Exact match on full tag ID
       if (courseTagSet.has(target)) {
         directOverlap += 25;
         topContributors.push({
@@ -392,33 +509,27 @@ class TagGraphService {
         });
         continue;
       }
-      // Check suffix match: "lumen" matches course tag "rendering.lumen"
+
       const suffix = target.split(".").pop();
-      for (const ct of allCourseTags) {
-        const ctSuffix = ct.split(".").pop();
-        if (suffix === ctSuffix && suffix.length > 2) {
+      if (suffix.length > 2) {
+        const matches = courseSuffixMap.get(suffix);
+        if (matches) {
           directOverlap += 15;
           topContributors.push({
             sourceQueryTagId: target,
-            targetCourseTagId: ct,
+            targetCourseTagId: matches[0],
             path: [],
             contribution: 15,
           });
-          break;
         }
       }
     }
 
     // ---- 2. Gemini bonus (AI-curated, high quality) ----
     let geminiBonus = 0;
-    const geminiTags = (course.gemini_system_tags || []).map((t) => t.toLowerCase());
     for (const target of targetSet) {
       const targetSuffix = target.split(".").pop();
-      if (
-        geminiTags.some(
-          (gt) => gt.toLowerCase() === targetSuffix || gt.toLowerCase().includes(targetSuffix)
-        )
-      ) {
+      if (geminiTags.some((gt) => gt === targetSuffix || gt.includes(targetSuffix))) {
         geminiBonus += 10;
       }
     }
@@ -426,90 +537,35 @@ class TagGraphService {
     // ---- 3. Graph propagation (secondary, capped) ----
     let graphPropagation = 0;
     const MAX_GRAPH_PER_TAG = 15;
-    const MAX_HOPS = 2;
-    const HOP_ATTENUATION = 0.5;
 
     for (const tagId of targetTagIds) {
       let tagGraphCredit = 0;
-      const visited = new Set([tagId]);
-      // Track parent references for lazy path reconstruction (avoids O(n*m) copies)
-      const parentMap = new Map();
-      let frontier = [{ id: tagId, hops: 0 }];
+      const expansion = this._getGraphExpansion(tagId);
 
-      while (frontier.length > 0) {
-        const nextFrontier = [];
-        for (const { id, hops } of frontier) {
-          if (hops >= MAX_HOPS) continue;
+      for (const entry of expansion) {
+        let matched = false;
+        let matchedTagId = entry.neighborId;
 
-          // Get edges from both directions
-          const outgoing = (this.edgesBySource.get(id) || []).map((e) => ({
-            ...e,
-            direction: "forward",
-            neighborId: e.target,
-          }));
-          const incoming = (this.edgesByTarget.get(id) || []).map((e) => ({
-            ...e,
-            direction: "reverse",
-            neighborId: e.source,
-          }));
-
-          for (const edge of [...outgoing, ...incoming]) {
-            if (visited.has(edge.neighborId)) continue;
-            visited.add(edge.neighborId);
-
-            // Store parent for path reconstruction on match
-            parentMap.set(edge.neighborId, { parentId: id, edgeType: edge.relation });
-
-            // Edge-type weight based on direction
-            const typeWeights = this.edgeWeights[edge.relation] || { forward: 0.2, reverse: 0.1 };
-            const dirWeight =
-              edge.direction === "forward" ? typeWeights.forward : typeWeights.reverse;
-            const hopMultiplier = Math.pow(HOP_ATTENUATION, hops);
-            const edgeDataWeight = edge.weight || 0.5;
-
-            // Check if neighbor tag matches any course tag
-            const neighborTag = edge.neighborId.toLowerCase();
-            const neighborSuffix = neighborTag.split(".").pop();
-
-            let matched = false;
-            if (courseTagSet.has(neighborTag)) {
-              matched = true;
-            } else {
-              for (const ct of allCourseTags) {
-                if (ct.split(".").pop() === neighborSuffix && neighborSuffix.length > 2) {
-                  matched = true;
-                  break;
-                }
-              }
-            }
-
-            if (matched) {
-              const credit = 5 * dirWeight * hopMultiplier * edgeDataWeight;
-              tagGraphCredit += credit;
-              // Reconstruct path lazily from parentMap
-              const path = [];
-              let cur = edge.neighborId;
-              while (parentMap.has(cur)) {
-                const p = parentMap.get(cur);
-                path.unshift({ from: p.parentId, to: cur, edgeType: p.edgeType });
-                cur = p.parentId;
-              }
-              topContributors.push({
-                sourceQueryTagId: tagId,
-                targetCourseTagId: edge.neighborId,
-                path,
-                contribution: Math.round(credit * 100) / 100,
-              });
-            }
-
-            // Continue BFS — no path copy needed
-            nextFrontier.push({ id: edge.neighborId, hops: hops + 1 });
+        if (courseTagSet.has(entry.neighborIdLower)) {
+          matched = true;
+        } else if (entry.neighborSuffix.length > 2) {
+          const suffixMatches = courseSuffixMap.get(entry.neighborSuffix);
+          if (suffixMatches) {
+            matched = true;
+            matchedTagId = suffixMatches[0];
           }
         }
-        frontier = nextFrontier;
-      }
 
-      // Cap per-tag graph contribution
+        if (matched) {
+          tagGraphCredit += entry.credit;
+          topContributors.push({
+            sourceQueryTagId: tagId,
+            targetCourseTagId: matchedTagId,
+            path: entry.path,
+            contribution: Math.round(entry.credit * 100) / 100,
+          });
+        }
+      }
       graphPropagation += Math.min(tagGraphCredit, MAX_GRAPH_PER_TAG);
     }
 
@@ -534,6 +590,7 @@ class TagGraphService {
    */
   clearRelatedCache() {
     this._relatedCache.clear();
+    this._expansionCache.clear();
   }
 
   /**
@@ -572,45 +629,43 @@ class TagGraphService {
       ui_term: 0.65,
     };
 
-    for (const entry of (this.termIndex || [])) {
+    // Step 3a: Phrase matching (longer matches first)
+    for (const entry of (this.phraseIndex || [])) {
       if (seen.has(entry.tagId)) continue;
-
-      let matched = false;
-
-      if (entry.isPhrase) {
-        // Phrase matching: check if phrase appears with word boundaries
-        const phraseRegex = new RegExp(
-          `\\b${entry.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
-          "i"
-        );
-        if (phraseRegex.test(normalized)) {
-          matched = true;
-        }
-      } else {
-        // Single-word matching: check word set (exact whole-word, no substring)
-        if (queryWords.has(entry.term)) {
-          matched = true;
-        } else {
-          // Also check depluralized query words against this term
-          for (const qw of queryWords) {
-            if (depluralize(qw) === entry.term || qw === depluralize(entry.term)) {
-              matched = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (matched) {
+      if (entry.regex.test(normalized)) {
         seen.add(entry.tagId);
-        const confidence = TYPE_CONFIDENCE[entry.termType] || 0.5;
         matches.push({
           tagId: entry.tagId,
           tag: this.getTag(entry.tagId),
           matchedTerm: entry.originalTerm,
           matchType: entry.termType,
-          confidence,
+          confidence: TYPE_CONFIDENCE[entry.termType] || 0.5,
         });
+      }
+    }
+
+    // Step 3b: Single-word matching (O(1) Map lookups)
+    const expandedWords = new Set();
+    for (const qw of queryWords) {
+      expandedWords.add(qw);
+      expandedWords.add(depluralize(qw));
+    }
+
+    for (const qw of expandedWords) {
+      const termEntries = this.termMap.get(qw);
+      if (termEntries) {
+        for (const entry of termEntries) {
+          if (!seen.has(entry.tagId)) {
+            seen.add(entry.tagId);
+            matches.push({
+              tagId: entry.tagId,
+              tag: this.getTag(entry.tagId),
+              matchedTerm: entry.originalTerm,
+              matchType: entry.termType,
+              confidence: TYPE_CONFIDENCE[entry.termType] || 0.5,
+            });
+          }
+        }
       }
     }
 
