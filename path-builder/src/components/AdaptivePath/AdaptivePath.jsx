@@ -22,7 +22,8 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import { loadRecentQueries, saveRecentQuery, deleteRecentQuery } from "../../utils/recentQueriesStore";
+import { X } from "lucide-react";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -298,6 +299,12 @@ export default function AdaptivePath() {
     resetQuiz();
   }, [clearProfile, resetStepActions, resetQuiz]);
 
+  const handleDeleteQuery = useCallback((e, q) => {
+    e.stopPropagation();
+    deleteRecentQuery(q);
+    setRecentQueries(loadRecentQueries());
+  }, []);
+
   // Auto-advance to next step when audio finishes playing
   const handleAudioEnded = useCallback(() => {
     const cur = expandedStep ?? 0;
@@ -502,9 +509,29 @@ export default function AdaptivePath() {
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
                 <div className="recent-queries-grid">
                   {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                    <div
+                      key={i}
+                      className="recent-query-card"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setQuery(q)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setQuery(q);
+                        }
+                      }}
+                    >
+                      <span className="recent-query-text">{q}</span>
+                      <button
+                        className="delete-query-btn"
+                        onClick={(e) => handleDeleteQuery(e, q)}
+                        aria-label={`Delete query "${q}"`}
+                        title="Remove from history"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
