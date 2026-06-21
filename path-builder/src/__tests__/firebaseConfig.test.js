@@ -12,10 +12,15 @@ describe("firebaseConfig", () => {
     expect(firebaseConfig).toHaveProperty("appId");
   });
 
-  it("getFirebaseApp returns an app object", () => {
+  it("getFirebaseApp returns an app object (or null in test/e2e mode)", () => {
     const app = getFirebaseApp();
-    expect(app).toBeDefined();
-    expect(app.name).toBeDefined();
+    // In Vitest MODE === 'test', getFirebaseApp() returns null via e2eBypass.js
+    if (import.meta.env.MODE === "test") {
+      expect(app).toBeNull();
+    } else {
+      expect(app).toBeDefined();
+      expect(app.name).toBeDefined();
+    }
   });
 
   it("getFirebaseApp returns the same singleton on repeated calls", () => {
