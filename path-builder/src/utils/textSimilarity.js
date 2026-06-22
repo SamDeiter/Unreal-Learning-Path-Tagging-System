@@ -18,13 +18,20 @@ export function wordJaccard(textA, textB) {
     (textB || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
   );
 
-  if (wordsA.size === 0 && wordsB.size === 0) return 0;
+  const sizeA = wordsA.size;
+  const sizeB = wordsB.size;
+
+  if (sizeA === 0 && sizeB === 0) return 0;
 
   let intersection = 0;
-  for (const w of wordsA) {
-    if (wordsB.has(w)) intersection++;
+  // Optimization: Iterate over the smaller set to minimize lookups
+  const [smaller, larger] = sizeA < sizeB ? [wordsA, wordsB] : [wordsB, wordsA];
+  for (const w of smaller) {
+    if (larger.has(w)) intersection++;
   }
 
-  const union = new Set([...wordsA, ...wordsB]).size;
+  // Optimization: Use inclusion-exclusion principle (|A ∪ B| = |A| + |B| - |A ∩ B|)
+  // to avoid allocating a new Set for the union.
+  const union = sizeA + sizeB - intersection;
   return union === 0 ? 0 : intersection / union;
 }
