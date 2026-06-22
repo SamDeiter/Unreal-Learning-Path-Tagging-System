@@ -161,27 +161,35 @@ export async function findTopSegments(courseCode, keywords) {
 
   const scoredSegments = [];
 
+  // Pre-compile regexes and lowercased keywords to avoid redundant work in the hot loop
+  const keywordHandlers = keywords.map((kw) => {
+    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return {
+      kw,
+      kwLower: kw.toLowerCase(),
+      regex: new RegExp(escaped, "gi"),
+    };
+  });
+
   for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
     if (!videoData.segments) continue;
 
     for (const segment of videoData.segments) {
-      const textLower = segment.text.toLowerCase();
+      const text = segment.text;
+      const textLower = text.toLowerCase();
       let segScore = 0;
       const matched = [];
 
-      for (const kw of keywords) {
-        const kwLower = kw.toLowerCase();
-        // Count occurrences of keyword in segment text
-        const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-        const matches = textLower.match(regex);
+      for (const { kw, kwLower, regex } of keywordHandlers) {
+        // Use pre-compiled regex for global match count
+        const matches = text.match(regex);
         if (matches) {
-          segScore += matches.length * 10;
+          segScore += matches.length * 10 + 5;
           matched.push(kw);
-        }
-        // Partial match bonus
-        if (textLower.includes(kwLower)) {
+        } else if (textLower.includes(kwLower)) {
+          // Fallback for any cases where regex might miss but includes catches
           segScore += 5;
-          if (!matched.includes(kw)) matched.push(kw);
+          matched.push(kw);
         }
       }
 
