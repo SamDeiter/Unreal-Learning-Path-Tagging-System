@@ -396,6 +396,7 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                         return updated;
                       });
                     }}
+                    aria-label={`Remove recent query: ${q}`}
                     title="Remove"
                   >
                     ×
