@@ -358,7 +358,9 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
       {/* Past question history */}
       {queryHistory.length > 0 && (
         <div className="query-history">
-          <span className="history-label">🕘 Recent questions:</span>
+          <span className="history-label" tabIndex={-1}>
+            🕘 Recent questions:
+          </span>
           <div className="history-chips">
             {queryHistory.map((item, i) => {
               const q = item.query || item; // backward compat
@@ -390,13 +392,27 @@ export default function ProblemInput({ onSubmit, detectedPersona, isLoading }) {
                     type="button"
                     className="history-delete"
                     onClick={() => {
+                      const listLength = queryHistory.length;
                       setQueryHistory((prev) => {
                         const updated = prev.filter((_, j) => j !== i);
                         localStorage.setItem("fix-problem-history", JSON.stringify(updated));
                         return updated;
                       });
+
+                      // Focus management: move focus to next/prev item or container
+                      setTimeout(() => {
+                        const nextIndex = i >= listLength - 1 ? i - 1 : i;
+                        const rows = document.querySelectorAll(".history-chip-row");
+                        if (rows.length > 0 && nextIndex >= 0) {
+                          const targetBtn = rows[nextIndex]?.querySelector(".history-delete");
+                          targetBtn?.focus();
+                        } else {
+                          document.querySelector(".history-label")?.focus();
+                        }
+                      }, 0);
                     }}
-                    title="Remove"
+                    title={`Remove "${q}"`}
+                    aria-label={`Remove recent query: ${q}`}
                   >
                     ×
                   </button>
