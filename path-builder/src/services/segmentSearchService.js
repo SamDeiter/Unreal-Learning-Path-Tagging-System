@@ -161,6 +161,16 @@ export async function findTopSegments(courseCode, keywords) {
 
   const scoredSegments = [];
 
+  // ⚡ Bolt Optimization: Pre-compile regexes once for all segments
+  const keywordMatchers = keywords.map((kw) => {
+    const kwLower = kw.toLowerCase();
+    return {
+      kw,
+      kwLower,
+      regex: new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+    };
+  });
+
   for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
     if (!videoData.segments) continue;
 
@@ -169,10 +179,8 @@ export async function findTopSegments(courseCode, keywords) {
       let segScore = 0;
       const matched = [];
 
-      for (const kw of keywords) {
-        const kwLower = kw.toLowerCase();
+      for (const { kw, kwLower, regex } of keywordMatchers) {
         // Count occurrences of keyword in segment text
-        const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
         const matches = textLower.match(regex);
         if (matches) {
           segScore += matches.length * 10;
