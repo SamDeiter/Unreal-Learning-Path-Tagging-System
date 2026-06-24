@@ -70,8 +70,9 @@ function openFixStepsPopout({ steps, checked }) {
   if (!popup) return null;
 
   const splitSteps = steps.map(splitTitle);
-  const stepsJSON = JSON.stringify(splitSteps);
-  const checkedJSON = JSON.stringify([...checked]);
+  // Security: Escape < as \u003c to prevent </script> injection in document.write
+  const stepsJSON = JSON.stringify(splitSteps).replace(/</g, "\\u003c");
+  const checkedJSON = JSON.stringify([...checked]).replace(/</g, "\\u003c");
 
   popup.document.open();
   popup.document.write(`<!DOCTYPE html>
