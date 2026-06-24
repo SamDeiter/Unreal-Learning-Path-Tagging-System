@@ -10,7 +10,7 @@
  * 4. Generate a depth-adjusted BespokePath based on the profile
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import useAdaptiveQuiz from "../../hooks/useAdaptiveQuiz";
 import usePathQuiz from "../../hooks/usePathQuiz";
 import usePathStepActions from "../../hooks/usePathStepActions";
@@ -22,7 +22,11 @@ import { trackSessionCompleted, trackGapFillCompleted, trackGapAutoFillCompleted
 import { insertAtPhasePosition } from "../../utils/insertAtPhasePosition";
 import PathStep from "../BespokePath/PathStep";
 import { getStruggleBadges } from "../../services/struggleBadgeService";
-import { loadRecentQueries, saveRecentQuery } from "../../utils/recentQueriesStore";
+import {
+  loadRecentQueries,
+  saveRecentQuery,
+  deleteRecentQuery,
+} from "../../utils/recentQueriesStore";
 import PRE_SEEDED_PATHS from "../../data/preSeededPaths";
 import PreSeededPaths from "../BespokePath/PreSeededPaths";
 import "../BespokePath/BespokePath.css";
@@ -46,6 +50,7 @@ const PIPELINE_STEPS = [
 
 export default function AdaptivePath() {
   const [query, setQuery] = useState("");
+  const recentQueriesListRef = useRef(null);
   const [pathData, setPathData] = useState(null);
   const [pathLoading, setPathLoading] = useState(false);
   const [pathError, setPathError] = useState(null);
@@ -156,6 +161,37 @@ export default function AdaptivePath() {
   /**
    * Handle level selection from the simple picker
    */
+  /**
+   * Handle deleting a recent query
+   */
+  const handleDeleteRecentQuery = useCallback(
+    (e, q, index) => {
+      e.stopPropagation();
+      deleteRecentQuery(q);
+      const updated = loadRecentQueries();
+      setRecentQueries(updated);
+
+      // Programmatic focus management
+      setTimeout(() => {
+        if (!recentQueriesListRef.current) return;
+        const buttons = recentQueriesListRef.current.querySelectorAll(".recent-query-card");
+        if (buttons.length > 0) {
+          // Focus next item, or previous if we deleted the last one
+          const nextIndex = Math.min(index, buttons.length - 1);
+          buttons[nextIndex]?.focus();
+        } else {
+          // Focus the section label if no items left
+          const label = recentQueriesListRef.current.parentElement.querySelector(
+            ".recent-queries-label"
+          );
+          label?.setAttribute("tabindex", "-1");
+          label?.focus();
+        }
+      }, 0);
+    },
+    [setRecentQueries]
+  );
+
   const handleLevelSelect = useCallback(
     (level) => {
       const profile = { level, knows: [], gaps: [] };
@@ -500,11 +536,31 @@ export default function AdaptivePath() {
             {recentQueries.length > 0 && (
               <div className="recent-queries-section">
                 <span className="recent-queries-label">🕐 Recent Questions:</span>
-                <div className="recent-queries-grid">
+                <div className="recent-queries-grid" ref={recentQueriesListRef}>
                   {recentQueries.map((q, i) => (
-                    <button key={i} className="recent-query-card" onClick={() => setQuery(q)}>
-                      {q}
-                    </button>
+                    <div
+                      key={i}
+                      className="recent-query-card"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setQuery(q)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setQuery(q);
+                        }
+                      }}
+                    >
+                      <span className="recent-query-text">{q}</span>
+                      <button
+                        className="recent-query-delete"
+                        aria-label={`Delete recent query: ${q}`}
+                        onClick={(e) => handleDeleteRecentQuery(e, q, i)}
+                        title="Delete"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
