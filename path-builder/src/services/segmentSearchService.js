@@ -161,6 +161,13 @@ export async function findTopSegments(courseCode, keywords) {
 
   const scoredSegments = [];
 
+  // Pre-compile Regex objects outside the segment loops for O(k) instead of O(k * n_segments) regex creation
+  const kwCompiled = keywords.map((kw) => ({
+    original: kw,
+    lower: kw.toLowerCase(),
+    regex: new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+  }));
+
   for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
     if (!videoData.segments) continue;
 
@@ -169,19 +176,23 @@ export async function findTopSegments(courseCode, keywords) {
       let segScore = 0;
       const matched = [];
 
-      for (const kw of keywords) {
-        const kwLower = kw.toLowerCase();
-        // Count occurrences of keyword in segment text
-        const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      for (const { original, lower, regex } of kwCompiled) {
+        // Count occurrences of keyword in segment text using the pre-compiled regex
         const matches = textLower.match(regex);
+        let hasMatch = false;
         if (matches) {
           segScore += matches.length * 10;
-          matched.push(kw);
+          hasMatch = true;
         }
-        // Partial match bonus
-        if (textLower.includes(kwLower)) {
+
+        // Partial match bonus (using includes is faster than regex for simple substring check)
+        if (textLower.includes(lower)) {
           segScore += 5;
-          if (!matched.includes(kw)) matched.push(kw);
+          hasMatch = true;
+        }
+
+        if (hasMatch) {
+          matched.push(original);
         }
       }
 
