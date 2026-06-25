@@ -56,6 +56,20 @@ export default function AccessibilityPanel({ className = "" }) {
     };
   }, [open]);
 
+  // Effect for focus management: auto-focus on open, focus-return on close
+  const prevOpen = useRef(open);
+  useEffect(() => {
+    if (prevOpen.current && !open) {
+      triggerRef.current?.focus();
+    }
+    if (!prevOpen.current && open) {
+      // Auto-focus first element on open
+      const firstFocusable = popoverRef.current?.querySelector("button, input, select, textarea");
+      firstFocusable?.focus();
+    }
+    prevOpen.current = open;
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onDown = (e) => {
@@ -67,7 +81,29 @@ export default function AccessibilityPanel({ className = "" }) {
       }
     };
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+
+      // Focus trap
+      if (e.key === "Tab" && popoverRef.current) {
+        const focusable = popoverRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -96,6 +132,7 @@ export default function AccessibilityPanel({ className = "" }) {
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
+          aria-modal="true"
           aria-label="Accessibility settings"
           style={{ left: pos.left, top: pos.top }}
         >
