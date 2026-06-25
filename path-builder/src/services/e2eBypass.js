@@ -11,7 +11,9 @@
 function checkBypass() {
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
-  // 2. localStorage flag (runtime — set by Playwright storageState)
+  // 2. Vitest / Test mode detection
+  if (import.meta.env.MODE === "test") return true;
+  // 3. localStorage flag (runtime — set by Playwright storageState)
   if (typeof window !== "undefined") {
     try {
       return window.localStorage.getItem("e2e_auth_bypass") === "true";
