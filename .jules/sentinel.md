@@ -1,0 +1,4 @@
+## 2026-03-03 - Insecure token_usage ownership and data collision
+**Vulnerability:** The `token_usage` collection was a top-level collection in Firestore where any authenticated user could read or write any document. Since documents were keyed by date (e.g., `2026-03-03`), they were easily enumerable, and multiple users would overwrite each other's daily data.
+**Learning:** Security rules that only check `request.auth != null` are insufficient for personal data. Without per-user path isolation (e.g., `users/{uid}/...`), data ownership cannot be effectively enforced and collisions are inevitable in multi-user environments.
+**Prevention:** Always isolate user-specific data under a subcollection keyed by the user's UID (e.g., `users/{uid}/collection_name`). Ensure Firestore rules strictly enforce `request.auth.uid == uid` for both read and write operations.
