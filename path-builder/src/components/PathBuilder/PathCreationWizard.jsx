@@ -117,7 +117,7 @@ function PathCreationWizard({ onComplete, onCancel }) {
         {/* Header */}
         <div className="pcw-header">
           <h2 className="pcw-title">Create Learning Path</h2>
-          <button className="pcw-close" onClick={onCancel}>
+          <button className="pcw-close" onClick={onCancel} aria-label="Close modal">
             ×
           </button>
         </div>
@@ -183,6 +183,7 @@ function PathCreationWizard({ onComplete, onCancel }) {
                     key={level}
                     className={`pcw-level-card ${skillLevel === level ? "selected" : ""}`}
                     onClick={() => handleSkillChange(level)}
+                    aria-pressed={skillLevel === level}
                   >
                     <span className="pcw-level-name">{level}</span>
                     <span className="pcw-level-time">{info.label}</span>
@@ -221,6 +222,7 @@ function PathCreationWizard({ onComplete, onCancel }) {
                     type="button"
                     className={`pcw-industry-chip ${industries.length === 0 ? "selected" : ""}`}
                     onClick={() => toggleIndustry("All")}
+                    aria-pressed={industries.length === 0}
                   >
                     All
                   </button>
@@ -230,6 +232,7 @@ function PathCreationWizard({ onComplete, onCancel }) {
                       type="button"
                       className={`pcw-industry-chip ${industries.includes(ind) ? "selected" : ""}`}
                       onClick={() => toggleIndustry(ind)}
+                      aria-pressed={industries.includes(ind)}
                     >
                       {ind}
                     </button>
