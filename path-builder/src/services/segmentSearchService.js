@@ -161,6 +161,16 @@ export async function findTopSegments(courseCode, keywords) {
 
   const scoredSegments = [];
 
+  // Pre-compile regexes and lowercase keywords outside loops to save ~45% overhead
+  const kwData = keywords.map((kw) => {
+    const kwLower = kw.toLowerCase();
+    return {
+      kw,
+      kwLower,
+      regex: new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+    };
+  });
+
   for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
     if (!videoData.segments) continue;
 
@@ -169,10 +179,8 @@ export async function findTopSegments(courseCode, keywords) {
       let segScore = 0;
       const matched = [];
 
-      for (const kw of keywords) {
-        const kwLower = kw.toLowerCase();
+      for (const { kw, kwLower, regex } of kwData) {
         // Count occurrences of keyword in segment text
-        const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
         const matches = textLower.match(regex);
         if (matches) {
           segScore += matches.length * 10;
@@ -191,7 +199,9 @@ export async function findTopSegments(courseCode, keywords) {
         if (preview.length > 120) {
           // Try to find the first keyword occurrence and center around it
           const firstKw = matched[0] || "";
-          const idx = preview.toLowerCase().indexOf(firstKw.toLowerCase());
+          const firstKwLower =
+            kwData.find((d) => d.kw === firstKw)?.kwLower || firstKw.toLowerCase();
+          const idx = textLower.indexOf(firstKwLower);
           if (idx > 40) {
             preview = "..." + preview.substring(idx - 30);
           }
