@@ -70,7 +70,20 @@ function PathDashboard({ onEditPath, onCreateNew }) {
 
         {/* Saved Path Cards */}
         {paths.map((path) => (
-          <div key={path.id} className="pd-card pd-card-saved" onClick={() => onEditPath(path)}>
+          <div
+            key={path.id}
+            className="pd-card pd-card-saved"
+            role="button"
+            tabIndex={0}
+            onClick={() => onEditPath(path)}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onEditPath(path);
+              }
+            }}
+          >
             <div className="pd-card-header">
               <h3 className="pd-card-title">{path.title || "Untitled Path"}</h3>
               <button
@@ -80,6 +93,7 @@ function PathDashboard({ onEditPath, onCreateNew }) {
                   handleDelete(path.id);
                 }}
                 title="Delete path"
+                aria-label="Delete path"
               >
                 ×
               </button>
