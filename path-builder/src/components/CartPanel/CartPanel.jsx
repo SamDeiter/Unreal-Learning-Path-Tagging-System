@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { X } from "lucide-react";
 import { cleanVideoTitle } from "../../utils/cleanVideoTitle";
 import "./CartPanel.css";
 
@@ -97,7 +98,7 @@ export default function CartPanel({ cart, onRemove, onClear, onWatchPath }) {
                     onClick={() => onRemove(itemId)}
                     aria-label={`Remove ${item.title}`}
                   >
-                    ×
+                    <X size={14} />
                   </button>
                 </div>
               );
