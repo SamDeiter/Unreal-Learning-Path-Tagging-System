@@ -156,20 +156,28 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
           {_curatedMatch && <span className="vrc-curated-badge">✓ Solution</span>}
           {role && role !== "core" && (
             <div className="vrc-role-wrapper" ref={role === "prerequisite" ? tipRef : null}>
-              <button
-                className={`vrc-role-badge vrc-role-${role} ${role === "prerequisite" ? "vrc-role-clickable" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (role === "prerequisite") setPrereqTip((v) => !v);
-                }}
-                title={
-                  role === "prerequisite" ? "Click to see why this is a prerequisite" : undefined
-                }
-              >
-                {role === "prerequisite" && "🔗 Prerequisite"}
-                {role === "troubleshooting" && "🔧 Troubleshooting"}
-                {role === "supplemental" && "📚 Supplemental"}
-              </button>
+              {role === "prerequisite" ? (
+                <button
+                  className="vrc-role-badge vrc-role-prerequisite vrc-role-clickable"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPrereqTip((v) => !v);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setPrereqTip(false);
+                  }}
+                  aria-expanded={prereqTip}
+                  aria-haspopup="true"
+                  title="Click to see why this is a prerequisite"
+                >
+                  🔗 Prerequisite
+                </button>
+              ) : (
+                <span className={`vrc-role-badge vrc-role-${role}`}>
+                  {role === "troubleshooting" && "🔧 Troubleshooting"}
+                  {role === "supplemental" && "📚 Supplemental"}
+                </span>
+              )}
               {prereqTip && role === "prerequisite" && (
                 <div className="vrc-prereq-tooltip">
                   <strong>Prerequisite Course</strong>
