@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { firebaseConfig, getFirebaseApp } from "../services/firebaseConfig";
+import { IS_E2E } from "../services/e2eBypass";
 
 describe("firebaseConfig", () => {
   it("exports a config object with required Firebase keys", () => {
@@ -14,8 +15,12 @@ describe("firebaseConfig", () => {
 
   it("getFirebaseApp returns an app object", () => {
     const app = getFirebaseApp();
-    expect(app).toBeDefined();
-    expect(app.name).toBeDefined();
+    if (IS_E2E) {
+      expect(app).toBeNull();
+    } else {
+      expect(app).toBeDefined();
+      expect(app.name).toBeDefined();
+    }
   });
 
   it("getFirebaseApp returns the same singleton on repeated calls", () => {
