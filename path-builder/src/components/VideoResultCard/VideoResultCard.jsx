@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import PropTypes from "prop-types";
 import { PlayCircle, Check, Plus } from "lucide-react";
 import { recordUpvote, recordDownvote, getFeedbackStatus } from "../../services/feedbackService";
@@ -47,7 +47,7 @@ function formatDuration(seconds) {
 /**
  * Individual video result card — compact display.
  */
-export default function VideoResultCard({ video, isAdded, onToggle, userQuery }) {
+function VideoResultCard({ video, isAdded, onToggle, userQuery }) {
   const {
     title: rawTitle,
     duration,
@@ -255,6 +255,12 @@ export default function VideoResultCard({ video, isAdded, onToggle, userQuery })
     </div>
   );
 }
+
+/**
+ * Memoized VideoResultCard to prevent unnecessary re-renders when other items in the
+ * results list change, but this specific video's state (isAdded, video data) remains the same.
+ */
+export default memo(VideoResultCard);
 
 VideoResultCard.propTypes = {
   video: PropTypes.shape({
