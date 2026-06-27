@@ -47,6 +47,7 @@ vi.mock("../../services/firebaseConfig", () => ({
 beforeEach(() => {
   localStorageMock.clear();
   vi.stubGlobal("localStorage", localStorageMock);
+  feedbackService.resetFeedbackCache();
 });
 
 // ─── recordUpvote / recordDownvote ───────────────────────────
