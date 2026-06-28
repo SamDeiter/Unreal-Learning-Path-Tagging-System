@@ -488,15 +488,25 @@ export async function getVideoSegmentScore(courseCode, videoKey, keywords) {
   if (!videoData?.segments) return fallback;
 
   const scored = [];
+  const kwData = keywords.map((kw) => {
+    const lower = kw.toLowerCase();
+    return {
+      original: kw,
+      lower,
+      regex: new RegExp(lower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+    };
+  });
+
   for (const segment of videoData.segments) {
     const textLower = segment.text.toLowerCase();
     let segScore = 0;
     const matched = [];
-    for (const kw of keywords) {
-      if (textLower.includes(kw)) {
-        const count = textLower.split(kw).length - 1;
+    for (const { original, lower, regex } of kwData) {
+      if (textLower.includes(lower)) {
+        const matches = textLower.match(regex);
+        const count = matches ? matches.length : 0;
         segScore += count * 10;
-        matched.push(kw);
+        matched.push(original);
       }
     }
     if (segScore > 0) {

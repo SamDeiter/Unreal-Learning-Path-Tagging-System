@@ -1,0 +1,3 @@
+## 2025-03-24 - Hoisting RegExp and Lowercasing in Search Loops
+**Learning:** Compiling `RegExp` objects and lowercasing search terms inside nested loops (segment searching) was a significant bottleneck. Hoisting these operations out of the loops and using `String.prototype.includes()` as a fast-path before `RegExp.match()` provided a measurable speedup. Also, `pnpm install` can unexpectedly update the lockfile with unrelated changes; use `git restore` on the lockfile if it's not part of the intended change.
+**Action:** Always hoist `RegExp` creation and string transformations out of performance-critical loops. Use fast string checks before expensive regex operations.

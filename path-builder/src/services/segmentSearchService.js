@@ -161,6 +161,13 @@ export async function findTopSegments(courseCode, keywords) {
 
   const scoredSegments = [];
 
+  // Pre-compile Regex and lowercase keywords for performance
+  const kwData = keywords.map((kw) => ({
+    original: kw,
+    lower: kw.toLowerCase(),
+    regex: new RegExp(kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+  }));
+
   for (const [videoKey, videoData] of Object.entries(courseData.videos)) {
     if (!videoData.segments) continue;
 
@@ -169,20 +176,19 @@ export async function findTopSegments(courseCode, keywords) {
       let segScore = 0;
       const matched = [];
 
-      for (const kw of keywords) {
-        const kwLower = kw.toLowerCase();
+      for (const { original, lower, regex } of kwData) {
+        // Fast-path: check if keyword exists before running Regex
+        if (!textLower.includes(lower)) continue;
+
         // Count occurrences of keyword in segment text
-        const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
         const matches = textLower.match(regex);
         if (matches) {
           segScore += matches.length * 10;
-          matched.push(kw);
+          matched.push(original);
         }
         // Partial match bonus
-        if (textLower.includes(kwLower)) {
-          segScore += 5;
-          if (!matched.includes(kw)) matched.push(kw);
-        }
+        segScore += 5;
+        if (!matched.includes(original)) matched.push(original);
       }
 
       if (segScore > 0) {
