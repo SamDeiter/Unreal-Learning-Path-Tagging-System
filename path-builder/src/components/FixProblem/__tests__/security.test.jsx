@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { openFixStepsPopout } from '../AnswerView';
+import { openFixStepsPopout } from '../popoutUtils';
 
 describe('AnswerView Security', () => {
   let mockWindow;
