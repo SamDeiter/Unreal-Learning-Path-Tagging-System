@@ -15,6 +15,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { X } from "lucide-react";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
 import "./AccessibilityPanel.css";
 
@@ -71,9 +72,11 @@ export default function AccessibilityPanel({ className = "" }) {
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
+    const trigger = triggerRef.current;
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
+      trigger?.focus();
     };
   }, [open]);
 
@@ -85,6 +88,7 @@ export default function AccessibilityPanel({ className = "" }) {
         className="a11y-panel__trigger"
         aria-label="Accessibility settings"
         aria-expanded={open}
+        aria-haspopup="dialog"
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
@@ -96,6 +100,7 @@ export default function AccessibilityPanel({ className = "" }) {
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
+          aria-modal="true"
           aria-label="Accessibility settings"
           style={{ left: pos.left, top: pos.top }}
         >
@@ -107,7 +112,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={16} />
             </button>
           </div>
 
