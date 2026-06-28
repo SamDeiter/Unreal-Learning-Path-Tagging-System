@@ -52,7 +52,7 @@ function loadCheckedSteps(key) {
 // Popup-only renderer for the Fix Steps checklist. Opens a compact window
 // sized to fit the list; checkboxes postMessage back to the opener so
 // sessionStorage state stays synced with the main view.
-function openFixStepsPopout({ steps, checked }) {
+export function openFixStepsPopout({ steps, checked }) {
   if (typeof window === "undefined") return null;
   const estimatedHeight = Math.min(820, 160 + steps.length * 78);
   const width = 560;
@@ -70,8 +70,9 @@ function openFixStepsPopout({ steps, checked }) {
   if (!popup) return null;
 
   const splitSteps = steps.map(splitTitle);
-  const stepsJSON = JSON.stringify(splitSteps);
-  const checkedJSON = JSON.stringify([...checked]);
+  // Security: Escape < as \u003c to prevent </script> injection
+  const stepsJSON = JSON.stringify(splitSteps).replace(/</g, "\\u003c");
+  const checkedJSON = JSON.stringify([...checked]).replace(/</g, "\\u003c");
 
   popup.document.open();
   popup.document.write(`<!DOCTYPE html>
