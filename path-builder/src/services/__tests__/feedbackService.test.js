@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import feedbackService from "../../services/feedbackService";
+import feedbackService, { resetFeedbackCache } from "../../services/feedbackService";
 
 // ─── Mock localStorage ───────────────────────────────────────
 
@@ -46,6 +46,7 @@ vi.mock("../../services/firebaseConfig", () => ({
 
 beforeEach(() => {
   localStorageMock.clear();
+  resetFeedbackCache();
   vi.stubGlobal("localStorage", localStorageMock);
 });
 

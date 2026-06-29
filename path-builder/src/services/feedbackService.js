@@ -32,16 +32,29 @@ const STORAGE_KEY = "feedback_v1";
 const DEMOTION_MULTIPLIER = 0.3; // Downvoted videos get 30% of their score
 const BOOST_MULTIPLIER = 1.3; // Upvoted videos get 130% of their score
 
+// Module-level cache for feedback data to avoid redundant localStorage.getItem/JSON.parse calls
+let feedbackCache = null;
+
+/**
+ * Reset the feedback cache (useful for testing).
+ */
+export function resetFeedbackCache() {
+  feedbackCache = null;
+}
+
 function loadFeedback() {
+  if (feedbackCache) return feedbackCache;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    feedbackCache = raw ? JSON.parse(raw) : {};
+    return feedbackCache;
   } catch {
     return {};
   }
 }
 
 function saveFeedback(data) {
+  feedbackCache = data;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
@@ -353,4 +366,5 @@ export default {
   logVideoFeedback,
   getBoostMap,
   submitStepFeedback,
+  resetFeedbackCache,
 };
