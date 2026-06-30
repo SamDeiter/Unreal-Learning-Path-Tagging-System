@@ -435,19 +435,22 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
   // Pass 2: All significant words present in key/title (avoids 'fitting' matching 'geofittingpresets')
   let bestMatch = null;
   let bestScore = 0;
+
+  // Hoist RegExp compilation for word boundary matching
+  const preparedTitleWords = titleWords.map((w) => ({
+    word: w,
+    regex: new RegExp(`(^|\\s|_)${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|_|$)`, "i"),
+  }));
+
   for (const key of keys) {
     const vidTitle = normalize(courseData.videos[key].title || "");
     const keyNorm = normalize(key);
     const combined = vidTitle + " " + keyNorm;
 
     let wordHits = 0;
-    for (const w of titleWords) {
+    for (const { regex } of preparedTitleWords) {
       // Use word boundary matching — 'fitting' should match 'fitting' not 'geofittingpresets'
-      const wordRegex = new RegExp(
-        `(^|\\s|_)${w.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\s|_|$)`,
-        "i"
-      );
-      if (wordRegex.test(combined)) wordHits++;
+      if (regex.test(combined)) wordHits++;
     }
 
     if (wordHits > 0 && wordHits > bestScore) {
@@ -488,13 +491,26 @@ export async function getVideoSegmentScore(courseCode, videoKey, keywords) {
   if (!videoData?.segments) return fallback;
 
   const scored = [];
+
+  // Hoist RegExp compilation and lowercasing for consistent, fast matching
+  const preparedKeywords = keywords.map((kw) => {
+    const kwLower = kw.toLowerCase();
+    return {
+      kw,
+      kwLower,
+      regex: new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+    };
+  });
+
   for (const segment of videoData.segments) {
     const textLower = segment.text.toLowerCase();
     let segScore = 0;
     const matched = [];
-    for (const kw of keywords) {
-      if (textLower.includes(kw)) {
-        const count = textLower.split(kw).length - 1;
+
+    for (const { kw, kwLower, regex } of preparedKeywords) {
+      if (textLower.includes(kwLower)) {
+        const matches = textLower.match(regex);
+        const count = matches ? matches.length : 0;
         segScore += count * 10;
         matched.push(kw);
       }
