@@ -15,6 +15,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { Settings, X } from "lucide-react";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
 import "./AccessibilityPanel.css";
 
@@ -57,11 +58,13 @@ export default function AccessibilityPanel({ className = "" }) {
   }, [open]);
 
   useEffect(() => {
+    const trigger = triggerRef.current;
     if (!open) return;
+
     const onDown = (e) => {
       if (
         !popoverRef.current?.contains(e.target) &&
-        !triggerRef.current?.contains(e.target)
+        !trigger?.contains(e.target)
       ) {
         setOpen(false);
       }
@@ -74,6 +77,8 @@ export default function AccessibilityPanel({ className = "" }) {
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
+      // Return focus to trigger when closing
+      if (trigger) trigger.focus();
     };
   }, [open]);
 
@@ -85,18 +90,22 @@ export default function AccessibilityPanel({ className = "" }) {
         className="a11y-panel__trigger"
         aria-label="Accessibility settings"
         aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-controls="a11y-popover"
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⚙️</span>
+        <Settings size={16} aria-hidden="true" />
       </button>
 
       {open && createPortal(
         <div
+          id="a11y-popover"
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
           aria-label="Accessibility settings"
+          aria-modal="true"
           style={{ left: pos.left, top: pos.top }}
         >
           <div className="a11y-panel__header">
@@ -107,7 +116,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 

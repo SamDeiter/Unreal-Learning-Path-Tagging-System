@@ -12,7 +12,9 @@ import { isAdmin } from "../services/accessControl";
 import { IS_E2E } from "../services/e2eBypass";
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(
+    IS_E2E ? { email: "e2e@example.com", displayName: "E2E User" } : null
+  );
   const [userIsAdmin, setUserIsAdmin] = useState(IS_E2E);
   // In E2E mode, skip the auth flow entirely — start as "loaded"
   const [authLoading, setAuthLoading] = useState(!IS_E2E);

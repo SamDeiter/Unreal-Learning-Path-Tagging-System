@@ -1,0 +1,3 @@
+## 2026-06-30 - Focus Management and Icon Consistency in Popovers
+**Learning:** In portal-based popovers (like `AccessibilityPanel`), focus management is critical. Failing to return focus to the trigger element on close causes focus loss, forcing keyboard users to restart their navigation from the top of the document. Additionally, replacing raw emojis or text symbols (like '×') with Lucide icons improves visual consistency and allows for better styling of interactive elements.
+**Action:** Always capture the triggering element's ref and return focus to it in the `useEffect` cleanup when a popover or modal closes. Use consistent Lucide icons with `aria-hidden="true"` for all UI controls to ensure a polished and accessible experience.
