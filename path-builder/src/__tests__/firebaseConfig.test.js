@@ -12,10 +12,16 @@ describe("firebaseConfig", () => {
     expect(firebaseConfig).toHaveProperty("appId");
   });
 
-  it("getFirebaseApp returns an app object", () => {
+  it("getFirebaseApp returns an app object (or null in bypass mode)", () => {
     const app = getFirebaseApp();
-    expect(app).toBeDefined();
-    expect(app.name).toBeDefined();
+    // In Vitest, VITE_E2E_BYPASS=true is set in vitest.config.js,
+    // so getFirebaseApp() returns null by design.
+    if (import.meta.env.VITE_E2E_BYPASS === "true") {
+      expect(app).toBeNull();
+    } else {
+      expect(app).toBeDefined();
+      expect(app.name).toBeDefined();
+    }
   });
 
   it("getFirebaseApp returns the same singleton on repeated calls", () => {
