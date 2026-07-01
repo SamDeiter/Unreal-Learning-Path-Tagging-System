@@ -13,7 +13,6 @@ globalThis.import = {
       VITE_FIREBASE_STORAGE_BUCKET: "test.appspot.com",
       VITE_FIREBASE_MESSAGING_SENDER_ID: "123456",
       VITE_FIREBASE_APP_ID: "1:123456:web:abc123",
-      VITE_E2E_BYPASS: "true",
     },
   },
 };

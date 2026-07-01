@@ -9,5 +9,8 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test/setup.js",
     exclude: ["e2e/**", "**/node_modules/**"],
+    env: {
+      VITE_E2E_BYPASS: "true",
+    },
   },
 });
