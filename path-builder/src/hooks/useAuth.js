@@ -12,7 +12,17 @@ import { isAdmin } from "../services/accessControl";
 import { IS_E2E } from "../services/e2eBypass";
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (IS_E2E) {
+      try {
+        const stored = window.localStorage.getItem("firebase:authUser");
+        return stored ? JSON.parse(stored) : { uid: "e2e-user", displayName: "E2E User" };
+      } catch {
+        return { uid: "e2e-user", displayName: "E2E User" };
+      }
+    }
+    return null;
+  });
   const [userIsAdmin, setUserIsAdmin] = useState(IS_E2E);
   // In E2E mode, skip the auth flow entirely — start as "loaded"
   const [authLoading, setAuthLoading] = useState(!IS_E2E);

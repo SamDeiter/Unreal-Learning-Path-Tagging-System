@@ -1,0 +1,3 @@
+## 2026-07-04 - Improve AccessibilityPanel UX and focus management
+**Learning:** Purely decorative or non-standard icons like literal emojis (⚙️) or characters (×) in interactive elements lack consistent rendering and can be screen-reader unfriendly. Proper modal accessibility requires more than just ARIA roles; it requires active focus management (auto-focusing the dialog on open and returning focus to the trigger on close) to ensure a smooth keyboard navigation flow.
+**Action:** Always use high-quality SVGs (like Lucide) for interactive icons and implement explicit focus management for all modal/popover components.
