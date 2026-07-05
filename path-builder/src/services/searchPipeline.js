@@ -195,10 +195,22 @@ export async function runSearchPipeline(query, options = {}) {
       );
 
       // Semantic dedup: remove passages with >70% word overlap with a higher-scoring passage
+      // Pre-calculate word sets to avoid O(N^2) tokenization overhead
+      const passageWordSets = new Map();
+      const getWordSet = (text) => {
+        if (passageWordSets.has(text)) return passageWordSets.get(text);
+        const words = new Set(
+          (text || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
+        );
+        passageWordSets.set(text, words);
+        return words;
+      };
+
       const semanticDeduped = [];
       for (const p of retrievedPassages) {
+        const currentSet = getWordSet(p.text);
         const isDupe = semanticDeduped.some(
-          (kept) => wordJaccard(kept.text || "", p.text || "") > 0.7
+          (kept) => wordJaccard(getWordSet(kept.text), currentSet) > 0.7
         );
         if (!isDupe) semanticDeduped.push(p);
       }
