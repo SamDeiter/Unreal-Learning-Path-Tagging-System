@@ -18,7 +18,14 @@ import {
 // IS_E2E imported from e2eBypass.js (checks both env var and localStorage)
 
 const app = IS_E2E ? null : getFirebaseApp();
-const auth = app ? getAuth(app) : null;
+let auth = null;
+if (app) {
+  try {
+    auth = getAuth(app);
+  } catch (err) {
+    console.warn("[GoogleAuth] Auth initialization failed (likely missing API key):", err.message);
+  }
+}
 
 // Provider — email + profile only (no restricted scopes)
 // Drive video embeds use browser cookies, not OAuth tokens
