@@ -15,6 +15,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { Settings, X } from "lucide-react";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
 import "./AccessibilityPanel.css";
 
@@ -58,6 +59,7 @@ export default function AccessibilityPanel({ className = "" }) {
 
   useEffect(() => {
     if (!open) return;
+    const triggerEl = triggerRef.current;
     const onDown = (e) => {
       if (
         !popoverRef.current?.contains(e.target) &&
@@ -74,6 +76,8 @@ export default function AccessibilityPanel({ className = "" }) {
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
+      // Return focus to trigger when closing
+      triggerEl?.focus();
     };
   }, [open]);
 
@@ -85,10 +89,11 @@ export default function AccessibilityPanel({ className = "" }) {
         className="a11y-panel__trigger"
         aria-label="Accessibility settings"
         aria-expanded={open}
+        aria-haspopup="dialog"
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⚙️</span>
+        <Settings size={14} aria-hidden="true" />
       </button>
 
       {open && createPortal(
@@ -96,6 +101,7 @@ export default function AccessibilityPanel({ className = "" }) {
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
+          aria-modal="true"
           aria-label="Accessibility settings"
           style={{ left: pos.left, top: pos.top }}
         >
@@ -107,7 +113,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 

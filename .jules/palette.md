@@ -1,0 +1,3 @@
+## 2026-07-20 - AccessibilityPanel Enhancements
+**Learning:** Programmatic focus management (returning focus to the trigger after closing a modal/popover) is essential for keyboard navigation continuity. Using literal emojis or characters for icons is less consistent than using a dedicated icon library like Lucide, which provides consistent sizing and better screen reader compatibility when paired with `aria-hidden`.
+**Action:** Always implement a `useEffect` cleanup or equivalent to return focus to the trigger element when a dialog or popover is closed. Use Lucide icons with `aria-hidden="true"` instead of inline emojis.
