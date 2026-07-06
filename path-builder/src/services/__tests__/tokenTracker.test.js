@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { recordTokenUsage, fetchCloudStats } from "../tokenTracker";
-import { doc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, collection } from "firebase/firestore";
 import { getCurrentUser } from "../googleAuthService";
 
 // Mock Firebase
