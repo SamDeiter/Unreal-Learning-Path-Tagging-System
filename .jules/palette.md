@@ -1,0 +1,3 @@
+## 2026-07-07 - AccessibilityPanel ARIA and Focus Management
+**Learning:** For floating UI panels (like `AccessibilityPanel`), ensuring focus returns to the trigger on close is critical for keyboard users. Capturing the ref value in `useEffect` cleanup ensures reliability even if the ref might change (though unlikely for a persistent sidebar trigger). Additionally, replacing literal emojis with Lucide icons improves visual consistency and allows for better `aria-hidden` control.
+**Action:** Always implement programmatic focus management for modals/popovers and use SVGs (Lucide) over emojis for interactive elements to ensure a professional and accessible UI.
