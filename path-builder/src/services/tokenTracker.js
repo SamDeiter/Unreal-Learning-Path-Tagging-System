@@ -220,14 +220,18 @@ export function resetTokenTracker() {
 
 /**
  * Sync a day's token data to Firestore for persistent storage.
- * Writes to: token_usage/{date}
+ * Writes to: users/{uid}/token_usage/{date}
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
+    const { getCurrentUser } = await import("./googleAuthService");
+    const user = getCurrentUser();
+    if (!user?.uid) return;
+
     const app = getFirebaseApp();
     if (!app) return;
     const db = getFirestore(app);
-    const docRef = doc(db, "token_usage", dateKey);
+    const docRef = doc(db, "users", user.uid, "token_usage", dateKey);
     await setDoc(
       docRef,
       {
@@ -254,10 +258,18 @@ async function syncDayToFirestore(dateKey, dayData) {
  */
 export async function fetchCloudStats(days = 30) {
   try {
+    const { getCurrentUser } = await import("./googleAuthService");
+    const user = getCurrentUser();
+    if (!user?.uid) return [];
+
     const app = getFirebaseApp();
     if (!app) return [];
     const db = getFirestore(app);
-    const q = query(collection(db, "token_usage"), orderBy("date", "desc"), limit(days));
+    const q = query(
+      collection(db, "users", user.uid, "token_usage"),
+      orderBy("date", "desc"),
+      limit(days)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
