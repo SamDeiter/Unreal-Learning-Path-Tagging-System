@@ -29,7 +29,6 @@ import {
   limit,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./firebaseConfig";
-import { getCurrentUser } from "./googleAuthService";
 
 const TRACKER_KEY = "bespoke_token_tracker";
 const DAILY_BUDGET_ALERT = 10.0; // $10/day threshold
@@ -225,6 +224,7 @@ export function resetTokenTracker() {
  */
 async function syncDayToFirestore(dateKey, dayData) {
   try {
+    const { getCurrentUser } = await import("./googleAuthService");
     const user = getCurrentUser();
     if (!user?.uid) return;
 
@@ -258,6 +258,7 @@ async function syncDayToFirestore(dateKey, dayData) {
  */
 export async function fetchCloudStats(days = 30) {
   try {
+    const { getCurrentUser } = await import("./googleAuthService");
     const user = getCurrentUser();
     if (!user?.uid) return [];
 
