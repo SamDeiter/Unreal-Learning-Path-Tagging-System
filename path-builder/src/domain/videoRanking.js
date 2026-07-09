@@ -433,6 +433,12 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
   }
 
   // Pass 2: All significant words present in key/title (avoids 'fitting' matching 'geofittingpresets')
+  // Pre-compile regexes for each word to avoid O(N*M) recompilation overhead
+  const wordRegexes = titleWords.map(
+    (w) =>
+      new RegExp(`(^|\\s|_)${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|_|$)`, "i")
+  );
+
   let bestMatch = null;
   let bestScore = 0;
   for (const key of keys) {
@@ -441,12 +447,8 @@ export async function findVideoKeyForIndex(courseCode, videoTitle, videoIndex) {
     const combined = vidTitle + " " + keyNorm;
 
     let wordHits = 0;
-    for (const w of titleWords) {
+    for (const wordRegex of wordRegexes) {
       // Use word boundary matching — 'fitting' should match 'fitting' not 'geofittingpresets'
-      const wordRegex = new RegExp(
-        `(^|\\s|_)${w.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\s|_|$)`,
-        "i"
-      );
       if (wordRegex.test(combined)) wordHits++;
     }
 
@@ -488,14 +490,21 @@ export async function getVideoSegmentScore(courseCode, videoKey, keywords) {
   if (!videoData?.segments) return fallback;
 
   const scored = [];
+  // Pre-compile regexes for each keyword to avoid O(N*M) recompilation and inefficient splitting
+  const kwRegexes = keywords.map((kw) => ({
+    kw,
+    regex: new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+  }));
+
   for (const segment of videoData.segments) {
     const textLower = segment.text.toLowerCase();
     let segScore = 0;
     const matched = [];
-    for (const kw of keywords) {
-      if (textLower.includes(kw)) {
-        const count = textLower.split(kw).length - 1;
-        segScore += count * 10;
+
+    for (const { kw, regex } of kwRegexes) {
+      const matches = textLower.match(regex);
+      if (matches) {
+        segScore += matches.length * 10;
         matched.push(kw);
       }
     }
