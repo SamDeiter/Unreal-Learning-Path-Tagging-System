@@ -15,6 +15,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { Settings, X } from "lucide-react";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
 import "./AccessibilityPanel.css";
 
@@ -28,6 +29,7 @@ export default function AccessibilityPanel({ className = "" }) {
   const { prefs, setDyslexicFont, setReducedMotion, setReadingLevel } =
     useAccessibilityPreferences();
   const [open, setOpen] = useState(false);
+  const wasOpen = useRef(false);
   const triggerRef = useRef(null);
   const popoverRef = useRef(null);
   const [pos, setPos] = useState({ left: 0, top: 0 });
@@ -57,6 +59,12 @@ export default function AccessibilityPanel({ className = "" }) {
   }, [open]);
 
   useEffect(() => {
+    // Return focus when closing
+    if (wasOpen.current && !open) {
+      triggerRef.current?.focus();
+    }
+    wasOpen.current = open;
+
     if (!open) return;
     const onDown = (e) => {
       if (
@@ -85,10 +93,11 @@ export default function AccessibilityPanel({ className = "" }) {
         className="a11y-panel__trigger"
         aria-label="Accessibility settings"
         aria-expanded={open}
+        aria-haspopup="dialog"
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⚙️</span>
+        <Settings size={14} aria-hidden="true" />
       </button>
 
       {open && createPortal(
@@ -96,6 +105,7 @@ export default function AccessibilityPanel({ className = "" }) {
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
+          aria-modal="true"
           aria-label="Accessibility settings"
           style={{ left: pos.left, top: pos.top }}
         >
@@ -107,7 +117,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 
