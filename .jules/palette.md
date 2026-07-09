@@ -1,0 +1,3 @@
+## 2026-07-09 - Accessibility and Visual Polish for Popover Panels
+**Learning:** For dialogs or popovers (like `AccessibilityPanel`), implement focus-return logic using a `useRef` to track the previous `open` state, ensuring focus is restored to the trigger element upon closing for better keyboard accessibility. Additionally, replacing literal characters/emojis with standardized icon libraries (like `lucide-react`) improves visual consistency and allows for proper ARIA labeling of decorative elements.
+**Action:** Always include focus restoration when implementing modal/popover states and prefer SVG-based icons with `aria-hidden="true"` over text-based emojis.
