@@ -9,6 +9,8 @@
  */
 
 function checkBypass() {
+  // 0. Vitest check (auto-bypass in tests)
+  if (import.meta.env.MODE === "test" || import.meta.env.VITEST) return true;
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
   // 2. localStorage flag (runtime — set by Playwright storageState)
