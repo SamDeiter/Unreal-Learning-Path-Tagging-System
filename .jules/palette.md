@@ -1,0 +1,3 @@
+## 2026-07-25 - Accessibility Enhancements for Popovers
+**Learning:** Popovers and dialog-like components (such as AccessibilityPanel) often suffer from "focus loss" when closed, which disorients keyboard and screen reader users. Implementing a focus-return pattern using `useRef` to track the previous `open` state ensures the trigger element regains focus upon closing. Additionally, using standard icons (like Lucide) instead of emojis/characters improves visual consistency and allows for better styling control.
+**Action:** Always implement focus-return logic for modal/popover components and use `aria-modal="true"` and `aria-haspopup="dialog"` where appropriate.
