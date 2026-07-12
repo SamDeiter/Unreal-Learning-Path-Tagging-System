@@ -7,7 +7,7 @@
  */
 
 import { devLog, devWarn } from "../utils/logger";
-import { stemMatch } from "../utils/stemmer";
+import { getStems, stemMatchStems } from "../utils/stemmer";
 import { fetchJSON } from "./dataLoader";
 
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -101,15 +101,45 @@ export async function searchDocsSemantic(queryEmbedding, topK = 5, _threshold = 
 // ── Topic-Aware Doc Lookup (uses expanded doc_links.json) ──
 
 let _docLinks = null;
+let _processedDocLinks = null;
 
 /**
- * Lazily load doc_links.json from public/data/.
+ * Lazily load doc_links.json and pre-process it for faster lookup.
  */
 async function getDocLinks() {
-  if (_docLinks) return _docLinks;
+  if (_processedDocLinks) return _processedDocLinks;
+
   try {
-    _docLinks = await fetchJSON("doc_links");
-    return _docLinks;
+    const rawLinks = _docLinks || (await fetchJSON("doc_links"));
+    if (!rawLinks) return {};
+
+    // Pre-process for performance: lowercase and pre-stem fields used in hot search loops
+    const processed = {};
+    for (const [key, doc] of Object.entries(rawLinks)) {
+      const keyLower = key.toLowerCase().replace(/[-_]/g, " ");
+      const labelLower = (doc.label || "").toLowerCase();
+      const urlSlug = (doc.url || "").split("/").pop().replace(/-/g, " ").toLowerCase();
+      const docTags = (doc.tags || []).map((t) => t.toLowerCase());
+      const descLower = (doc.description || "").toLowerCase();
+
+      processed[key] = {
+        ...doc,
+        _keyLower: keyLower,
+        _labelLower: labelLower,
+        _urlSlug: urlSlug,
+        _docTags: docTags,
+        _descLower: descLower,
+        // Pre-calculate stems for fallback matching
+        _keyStems: getStems(keyLower),
+        _labelStems: getStems(labelLower),
+        _tagStems: docTags.flatMap((t) => getStems(t)),
+        _descStems: getStems(descLower),
+      };
+    }
+
+    _processedDocLinks = processed;
+    _docLinks = rawLinks;
+    return _processedDocLinks;
   } catch (err) {
     devWarn("⚠️ doc_links.json not available:", err.message);
     return {};
@@ -138,6 +168,8 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
 
   const maxTierOrder = TIER_ORDER[maxTier] ?? 2;
   const topicSet = topics.map((t) => t.toLowerCase());
+  // Pre-calculate stems for input topics once
+  const topicStems = topicSet.map((t) => getStems(t));
   const results = [];
 
   for (const [key, doc] of Object.entries(docLinks)) {
@@ -146,18 +178,21 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
 
     // Score: how well does this doc match the requested topics?
     let score = 0;
-    const keyLower = key.toLowerCase().replace(/[-_]/g, " ");
-    const labelLower = (doc.label || "").toLowerCase();
-    // Extract slug from URL for matching: "https://...unreal-engine/blueprints-visual-scripting" → "blueprints visual scripting"
-    const urlSlug = (doc.url || "").split("/").pop().replace(/-/g, " ").toLowerCase();
-    // UDN tags array (e.g., ["optimization", "performance", "rendering"])
-    const docTags = (doc.tags || []).map((t) => t.toLowerCase());
-    const descLower = (doc.description || "").toLowerCase();
+
+    // Use pre-processed fields from getDocLinks()
+    const keyLower = doc._keyLower;
+    const labelLower = doc._labelLower;
+    const urlSlug = doc._urlSlug;
+    const docTags = doc._docTags;
+    const descLower = doc._descLower;
 
     // Track which distinct topics matched this doc
     let matchedTopicCount = 0;
-    for (const topic of topicSet) {
+    for (let i = 0; i < topicSet.length; i++) {
+      const topic = topicSet[i];
+      const tStems = topicStems[i];
       let matched = false;
+
       // Priority 1: Key matches (what the doc IS about)
       if (keyLower === topic) {
         score += 15;
@@ -194,16 +229,16 @@ export async function getDocsForTopic(topics, { maxTier = "advanced", limit = 10
         matched = true;
       }
       // Stem-aware fallback: "mesh" ↔ "meshes", "import" ↔ "importing"
-      else if (stemMatch(topic, keyLower)) {
+      else if (stemMatchStems(tStems, doc._keyStems)) {
         score += 4;
         matched = true;
-      } else if (stemMatch(topic, labelLower)) {
+      } else if (stemMatchStems(tStems, doc._labelStems)) {
         score += 3;
         matched = true;
-      } else if (docTags.some((t) => stemMatch(topic, t))) {
+      } else if (stemMatchStems(tStems, doc._tagStems)) {
         score += 1;
         matched = true;
-      } else if (stemMatch(topic, descLower)) {
+      } else if (stemMatchStems(tStems, doc._descStems)) {
         score += 1;
         matched = true;
       }
