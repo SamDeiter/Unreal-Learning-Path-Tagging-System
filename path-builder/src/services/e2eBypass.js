@@ -9,6 +9,10 @@
  */
 
 function checkBypass() {
+  // 0. Test mode detection (Vitest/CI)
+  // Automatically bypass if running in Vitest to avoid 'auth/invalid-api-key' in CI
+  if (import.meta.env.MODE === "test" || import.meta.env.VITEST) return true;
+
   // 1. Vite env var (compile-time)
   if (import.meta.env.VITE_E2E_BYPASS === "true") return true;
   // 2. localStorage flag (runtime — set by Playwright storageState)
