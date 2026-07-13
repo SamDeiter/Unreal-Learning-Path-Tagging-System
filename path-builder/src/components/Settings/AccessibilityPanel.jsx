@@ -15,6 +15,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { Settings, X } from "lucide-react";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
 import "./AccessibilityPanel.css";
 
@@ -88,7 +89,7 @@ export default function AccessibilityPanel({ className = "" }) {
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⚙️</span>
+        <Settings size={16} aria-hidden="true" />
       </button>
 
       {open && createPortal(
@@ -107,7 +108,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 
