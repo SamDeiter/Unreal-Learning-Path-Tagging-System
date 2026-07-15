@@ -1,0 +1,4 @@
+## 2026-03-03 - Insecure token_usage Data Ownership (IDOR)
+**Vulnerability:** The `token_usage` collection was stored at the root level in Firestore, and security rules allowed any authenticated user to read and update any document in that collection. This allowed for Insecure Direct Object Reference (IDOR) where a user could potentially view or overwrite other users' token usage data.
+**Learning:** Root-level collections are inherently prone to IDOR if they don't include explicit ownership checks (e.g., `resource.data.userId == request.auth.uid`). Even with such checks, nesting per-user data under `/users/{uid}` is a more robust pattern as it allows for easier rule inheritance and clearer data isolation.
+**Prevention:** Always scope user-specific data under a `/users/{uid}` path in Firestore and enforce strict ownership rules at that level. Avoid root-level collections for data that is inherently private to a user.
