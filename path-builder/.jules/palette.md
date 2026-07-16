@@ -1,0 +1,3 @@
+## 2025-05-15 - Accessibility Modernization
+**Learning:** For modal dialogs (e.g., `AccessibilityPanel`), focus restoration to the trigger element and focus trapping within the modal are critical for a seamless keyboard navigation experience. Replacing literal emojis with standardized icons (e.g., `lucide-react`) also improves visual consistency and allows for better accessibility control (e.g., `aria-hidden` on decorative icons).
+**Action:** Always implement a `wasOpen` ref pattern for focus restoration and a `keydown` listener for focus trapping in any new modal or popover component. Prefer `lucide-react` over emojis for UI controls.
