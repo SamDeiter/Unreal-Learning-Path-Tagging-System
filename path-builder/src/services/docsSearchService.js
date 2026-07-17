@@ -7,7 +7,7 @@
  */
 
 import { devLog, devWarn } from "../utils/logger";
-import { stemMatch, getStems, stemMatchStems } from "../utils/stemmer";
+import { getStems, stemMatchStems } from "../utils/stemmer";
 import { fetchJSON } from "./dataLoader";
 
 import { getFunctions, httpsCallable } from "firebase/functions";
