@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+
 /**
  * Security Guardrails for Bespoke Learning Paths
  *
@@ -17,13 +19,18 @@ let lastQueryTime = 0;
 
 /**
  * Strip HTML tags, script injections, and markdown formatting.
+ * Uses DOMPurify for robust HTML tag stripping (preventing ReDoS and bypasses).
  * Returns clean, safe text.
  */
 function stripDangerous(input) {
+  // Use DOMPurify to strip all HTML tags and attributes securely
+  const strippedHtml = DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  });
+
   return (
-    input
-      // Remove HTML/XML tags
-      .replace(/<[^>]*>/g, "")
+    strippedHtml
       // Remove script: protocol
       .replace(/javascript:/gi, "")
       // Remove on* event handlers

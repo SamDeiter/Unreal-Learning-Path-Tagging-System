@@ -59,7 +59,7 @@ describe("securityGuardrails", () => {
     });
 
     it("strips HTML tags", () => {
-      const result = sanitizeQuery("How do <b>I fix</b> my <script>alert</script> lighting?");
+      const result = sanitizeQuery("How do <b>I fix</b> my <script>alert</script> lighting in my Unreal Engine 5 project?");
       expect(result.valid).toBe(true);
       expect(result.sanitized).not.toContain("<");
       expect(result.sanitized).not.toContain(">");
