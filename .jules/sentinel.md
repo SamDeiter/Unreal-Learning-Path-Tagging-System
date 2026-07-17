@@ -1,0 +1,4 @@
+## 2026-05-21 - ReDoS and Bypass Risks in Regex-Based HTML Stripping
+**Vulnerability:** Regex-based patterns like `/<[^>]*>/g` used to strip user inputs or sanitize text are highly vulnerable to ReDoS (Regular Expression Denial of Service) when evaluated against complex nested/unbalanced tag inputs, and fail to prevent advanced bypasses (e.g. nested tags or scripts).
+**Learning:** The initial implementation relied on simple `.replace(/<[^>]*>/g, "")` to sanitize query parameters, which left nested text within `<script>` intact (meaning payload fragments survived stripping) and exposed the application to ReDoS issues.
+**Prevention:** Utilize dedicated, standard sanitization libraries like `DOMPurify` with clean profiles (e.g. `ALLOWED_TAGS: [], ALLOWED_ATTR: []` for plain-text extraction) rather than manual regex-based pattern matching to strip raw user-submitted queries.
