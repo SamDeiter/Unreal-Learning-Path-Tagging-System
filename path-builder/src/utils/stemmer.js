@@ -22,6 +22,33 @@ export function stem(word) {
 export const stemWord = stem;
 
 /**
+ * Tokenize and stem a given string, filtering out words <= 2 characters.
+ * Splitting is done on spaces, underscores, and hyphens.
+ *
+ * @param {string} text
+ * @returns {string[]} Array of stems
+ */
+export function getStems(text) {
+  if (!text) return [];
+  return text.split(/[\s_-]+/).filter((w) => w.length > 2).map(stem);
+}
+
+/**
+ * Check if any stemmed word in pre-calculated stem array `aStems` matches any
+ * stemmed word in pre-calculated stem array `bStems`.
+ *
+ * @param {string[]} aStems
+ * @param {string[]} bStems
+ * @returns {boolean}
+ */
+export function stemMatchStems(aStems, bStems) {
+  if (!aStems || !bStems || aStems.length === 0 || bStems.length === 0) return false;
+  return aStems.some((as) =>
+    bStems.some((bs) => as === bs || as.includes(bs) || bs.includes(as))
+  );
+}
+
+/**
  * Check if any stemmed word in string `a` matches any stemmed word in string `b`.
  * Uses word-boundary splitting on spaces, underscores, and hyphens.
  * @param {string} a
@@ -29,7 +56,5 @@ export const stemWord = stem;
  * @returns {boolean}
  */
 export function stemMatch(a, b) {
-  const aStems = a.split(/[\s_-]+/).filter(w => w.length > 2).map(stem);
-  const bStems = b.split(/[\s_-]+/).filter(w => w.length > 2).map(stem);
-  return aStems.some(as => bStems.some(bs => as === bs || as.includes(bs) || bs.includes(as)));
+  return stemMatchStems(getStems(a), getStems(b));
 }
