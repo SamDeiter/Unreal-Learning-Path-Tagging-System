@@ -16,7 +16,7 @@ import { devLog, devWarn } from "../utils/logger";
 import { deduplicateBy } from "../utils/collectionUtils";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { classifyQueryIntent } from "./queryIntentClassifier";
-import { wordJaccard } from "../utils/textSimilarity";
+import { wordJaccard, getWordSet, wordJaccardFromSets } from "../utils/textSimilarity";
 
 /**
  * Run the full RAG search pipeline: embed → expand → multi-source search → dedup → re-rank.
@@ -194,14 +194,22 @@ export async function runSearchPipeline(query, options = {}) {
         (p.text || "").trim().toLowerCase().slice(0, 120)
       );
 
+      // Pre-calculate word sets to avoid redundant O(N^2) tokenization in semantic deduplication
+      const passageWordSets = new Map();
+      for (const p of retrievedPassages) {
+        passageWordSets.set(p, getWordSet(p.text || ""));
+      }
+
       // Semantic dedup: remove passages with >70% word overlap with a higher-scoring passage
       const semanticDeduped = [];
       for (const p of retrievedPassages) {
+        const pWordSet = passageWordSets.get(p);
         const isDupe = semanticDeduped.some(
-          (kept) => wordJaccard(kept.text || "", p.text || "") > 0.7
+          (kept) => wordJaccardFromSets(passageWordSets.get(kept), pWordSet) > 0.7
         );
         if (!isDupe) semanticDeduped.push(p);
       }
+
       retrievedPassages = semanticDeduped;
 
       devLog(`[RAG] Total: ${retrievedPassages.length} passages after rank+dedup`);
