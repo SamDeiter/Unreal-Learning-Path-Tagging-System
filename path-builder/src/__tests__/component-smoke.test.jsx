@@ -13,6 +13,20 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
+
+vi.mock("../hooks/useSpeech", () => ({
+  __esModule: true,
+  default: () => ({
+    speak: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    cancel: vi.fn(),
+    state: "idle",
+    currentId: null,
+    supported: true,
+  }),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +188,40 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render trigger button with Settings icon", () => {
+    const { container } = render(<AccessibilityPanel />);
+    const trigger = container.querySelector(".a11y-panel__trigger");
+    expect(trigger).toBeTruthy();
+    expect(trigger.getAttribute("aria-label")).toBe("Accessibility settings");
+    expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+    const svg = trigger.querySelector("svg");
+    expect(svg).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. SpeakButton
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import SpeakButton from "../components/Settings/SpeakButton";
+
+describe("SpeakButton", () => {
+  it("should render with Volume2 icon by default", () => {
+    const { container } = render(<SpeakButton text="Hello world" id="test-speak-id" />);
+    const btn = container.querySelector(".speak-btn");
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute("aria-label")).toBe("Read aloud");
+    const svg = btn.querySelector("svg");
+    expect(svg).toBeTruthy();
   });
 });
