@@ -1,0 +1,3 @@
+## 2025-07-19 - Accessible Focus Management in Modals and Popovers
+**Learning:** For overlay components such as `AccessibilityPanel`, merely setting `aria-expanded` and labels is insufficient. True compliance and smooth user experience require focus trapping (to prevent tab escapes) and focus restoration to the trigger upon closing, particularly when the popover is rendered outside the parent DOM node via `createPortal`.
+**Action:** Always implement a `wasOpen` ref and keydown listener to confine keyboard focus (Tab/Shift+Tab) within overlay panels, and restore focus back to the triggering element when the panel closes.

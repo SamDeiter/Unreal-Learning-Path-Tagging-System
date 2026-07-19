@@ -6,13 +6,26 @@
  * exceptions that would otherwise only surface in production.
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
 vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
+
+vi.mock("../hooks/useSpeech", () => ({
+  default: () => ({
+    speak: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    cancel: vi.fn(),
+    state: "idle",
+    currentId: null,
+    supported: true,
+  }),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +187,44 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render trigger button without crashing", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: /accessibility settings/i });
+    expect(trigger).toBeTruthy();
+    expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+  });
+
+  it("should open dialog on click", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: /accessibility settings/i });
+    act(() => {
+      trigger.click();
+    });
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByText("Dyslexic-friendly font")).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. SpeakButton
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import SpeakButton from "../components/Settings/SpeakButton";
+
+describe("SpeakButton", () => {
+  it("should render the SpeakButton with provided label", () => {
+    render(<SpeakButton text="Test narration text" id="test-1" label="Listen up" />);
+    const button = screen.getByRole("button", { name: /Listen up/i });
+    expect(button).toBeTruthy();
   });
 });

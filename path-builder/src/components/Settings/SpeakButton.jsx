@@ -10,6 +10,7 @@
  *
  * Renders nothing when speechSynthesis is unsupported.
  */
+import { Volume2, Pause, Play } from "lucide-react";
 import PropTypes from "prop-types";
 import useSpeech from "../../hooks/useSpeech";
 
@@ -23,13 +24,13 @@ export default function SpeakButton({ text, id, label = "Read aloud", className 
   const isSpeaking = isMine && state === "speaking";
   const isPaused = isMine && state === "paused";
 
-  let icon = "🔊";
+  let Icon = Volume2;
   let title = label;
   if (isSpeaking) {
-    icon = "⏸️";
+    Icon = Pause;
     title = "Pause reading";
   } else if (isPaused) {
-    icon = "▶️";
+    Icon = Play;
     title = "Resume reading";
   }
 
@@ -53,7 +54,7 @@ export default function SpeakButton({ text, id, label = "Read aloud", className 
       aria-pressed={isSpeaking || isPaused}
       title={title}
     >
-      <span aria-hidden="true">{icon}</span>
+      <Icon size={14} aria-hidden="true" />
       <span className="speak-btn__label">{label}</span>
     </button>
   );
