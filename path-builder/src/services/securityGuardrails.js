@@ -6,6 +6,8 @@
  * Guard 3: XSS Prevention — sanitize AI output before rendering
  */
 
+import DOMPurify from "dompurify";
+
 const MAX_QUERY_LENGTH = 500;
 const MAX_PATHS_PER_SESSION = 100;
 const SESSION_COUNTER_KEY = "bespoke_session_count";
@@ -20,10 +22,11 @@ let lastQueryTime = 0;
  * Returns clean, safe text.
  */
 function stripDangerous(input) {
+  // Use DOMPurify to strip HTML tags and prevent XSS/injection in a robust, ReDoS-safe manner
+  const cleanHtml = DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+
   return (
-    input
-      // Remove HTML/XML tags
-      .replace(/<[^>]*>/g, "")
+    cleanHtml
       // Remove script: protocol
       .replace(/javascript:/gi, "")
       // Remove on* event handlers
