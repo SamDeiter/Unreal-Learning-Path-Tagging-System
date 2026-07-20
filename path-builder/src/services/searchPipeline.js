@@ -16,7 +16,7 @@ import { devLog, devWarn } from "../utils/logger";
 import { deduplicateBy } from "../utils/collectionUtils";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { classifyQueryIntent } from "./queryIntentClassifier";
-import { wordJaccard, getWordSet, wordJaccardFromSets } from "../utils/textSimilarity";
+import { getWordSet, wordJaccardFromSets } from "../utils/textSimilarity";
 
 /**
  * Run the full RAG search pipeline: embed → expand → multi-source search → dedup → re-rank.
