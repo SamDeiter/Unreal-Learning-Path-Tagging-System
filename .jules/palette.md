@@ -1,0 +1,3 @@
+## 2026-07-20 - Focus Trapping & Restoration in Sidebar Portals
+**Learning:** Portals rendered outside the React root container (e.g. at `document.body`) bypass normal tab-order navigation, allowing screen-reader and keyboard users to accidentally move focus back to hidden background elements.
+**Action:** Always implement explicit focus trapping inside modal popovers/dialogs by capturing keydown events (Tab/Shift+Tab) on the popover ref. Additionally, utilize a `wasOpen` ref inside a clean `useEffect` to restore focus back to the triggering element only when the popup is closed, avoiding accidental triggers on initial mount.
