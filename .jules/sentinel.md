@@ -1,0 +1,4 @@
+## 2026-05-21 - Regex-based HTML Tag Stripping Vulnerability in Input Sanitization
+**Vulnerability:** We identified a fragile regex-based HTML tag stripper (`input.replace(/<[^>]*>/g, "")`) in the bespoke search query sanitization logic. This regex is easily bypassed using nested HTML tags or malformed tags, and presents a significant risk of Regular Expression Denial of Service (ReDoS).
+**Learning:** This existed because of a legacy attempt to perform fast, lightweight tag-stripping without pulling in full parser structures. However, regex-based parsing of irregular languages like HTML is fundamentally insecure.
+**Prevention:** Avoid custom regex-based HTML parsing or stripping. Utilize a battle-tested, highly optimized, and ReDoS-safe parsing/sanitization library like `DOMPurify` configured with `{ ALLOWED_TAGS: [], ALLOWED_ATTR: [] }` to safely strip all tags.
