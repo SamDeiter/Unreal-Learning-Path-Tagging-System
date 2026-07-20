@@ -6,7 +6,7 @@
  * exceptions that would otherwise only surface in production.
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
 vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
@@ -174,5 +174,32 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel UX & A11y
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel UX", () => {
+  it("should render and handle open/close with focus restoration", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: "Accessibility settings" });
+    expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+
+    const closeBtn = screen.getByRole("button", { name: "Close" });
+    act(() => {
+      closeBtn.focus();
+    });
+    fireEvent.click(closeBtn);
+    expect(document.activeElement).toBe(trigger);
   });
 });
