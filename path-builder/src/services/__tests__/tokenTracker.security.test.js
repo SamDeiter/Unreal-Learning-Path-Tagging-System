@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { syncDayToFirestore, fetchCloudStats } from "../tokenTracker";
-import { getAuth } from "firebase/auth";
 import { getFirestore, doc, collection, setDoc, getDocs } from "firebase/firestore";
 
 // Mock firebaseConfig
