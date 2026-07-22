@@ -5,7 +5,7 @@
  * These tests catch import errors, missing dependencies, and render-time
  * exceptions that would otherwise only surface in production.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
@@ -174,5 +174,88 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+import { fireEvent } from "@testing-library/react";
+
+describe("AccessibilityPanel", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    document.documentElement.removeAttribute("data-font");
+    document.documentElement.removeAttribute("data-motion");
+  });
+
+  it("should render the trigger button", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: "Accessibility settings" });
+    expect(trigger).toBeTruthy();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+  });
+
+  it("should open and close the popover", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: "Accessibility settings" });
+
+    // Open
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("dialog", { name: "Accessibility settings" })).toBeTruthy();
+    expect(screen.getByText("Dyslexic-friendly font")).toBeTruthy();
+
+    // Close
+    const closeBtn = screen.getByRole("button", { name: "Close" });
+    fireEvent.click(closeBtn);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("should restore focus to the trigger on close", async () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: "Accessibility settings" });
+
+    // Focus the trigger and click
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    // Dialog is open, now close it
+    const closeBtn = screen.getByRole("button", { name: "Close" });
+    fireEvent.click(closeBtn);
+
+    // Focus should be restored to the trigger
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("should trap focus inside the popover", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByRole("button", { name: "Accessibility settings" });
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole("dialog");
+    const focusable = Array.from(
+      dialog.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    expect(focusable.length).toBeGreaterThan(1);
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    // Focus last element and press Tab -> should wrap to first
+    last.focus();
+    fireEvent.keyDown(dialog, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+
+    // Focus first element and press Shift+Tab -> should wrap to last
+    first.focus();
+    fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
   });
 });
