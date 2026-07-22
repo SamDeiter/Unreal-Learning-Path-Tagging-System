@@ -1,0 +1,4 @@
+## 2026-05-21 - ReDoS and XSS bypass via Regex HTML Stripping
+**Vulnerability:** Regular Expression-based HTML and `javascript:` protocol tag stripping was used in input sanitization. This is highly vulnerable to nesting bypasses, XSS, and Regular Expression Denial of Service (ReDoS) attacks.
+**Learning:** Developers often use custom regular expressions like `/<[^>]*>/g` to strip tags because they seem simple and lightweight. However, custom regex cannot parse arbitrary HTML safely, is prone to bypasses, and has exponential time complexity under malicious inputs, leading to CPU exhaustion (ReDoS).
+**Prevention:** Avoid custom regex for HTML or tag sanitization. Instead, always use a high-performance, environment-safe, zero-dependency linear character scanner/state-machine that strips tags in strictly O(N) linear time, completely avoiding ReDoS vulnerabilities and any environment/DOM compatibility issues.

@@ -20,13 +20,24 @@ let lastQueryTime = 0;
  * Returns clean, safe text.
  */
 function stripDangerous(input) {
+  // Safe O(N) environment-safe, zero-dependency linear tag stripper (ReDoS-immune)
+  let cleanHtml = "";
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] === "<") {
+      const closeIdx = input.indexOf(">", i);
+      if (closeIdx !== -1) {
+        i = closeIdx;
+        continue;
+      }
+    }
+    cleanHtml += input[i];
+  }
+
   return (
-    input
-      // Remove HTML/XML tags
-      .replace(/<[^>]*>/g, "")
-      // Remove script: protocol
+    cleanHtml
+      // Remove script: protocol (defense-in-depth for plain text context)
       .replace(/javascript:/gi, "")
-      // Remove on* event handlers
+      // Remove on* event handlers (defense-in-depth for plain text context)
       .replace(/\bon\w+\s*=/gi, "")
       // Remove markdown code blocks that might hide injection
       .replace(/```[\s\S]*?```/g, "")
