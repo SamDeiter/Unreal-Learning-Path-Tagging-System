@@ -11,8 +11,15 @@ import { onAuthChange } from "../services/googleAuthService";
 import { isAdmin } from "../services/accessControl";
 import { IS_E2E } from "../services/e2eBypass";
 
+const MOCK_USER = IS_E2E ? {
+  uid: "mock-uid-123",
+  email: "mock-user@example.com",
+  displayName: "Indie Isaac",
+  photoURL: "https://example.com/avatar.png"
+} : null;
+
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(MOCK_USER);
   const [userIsAdmin, setUserIsAdmin] = useState(IS_E2E);
   // In E2E mode, skip the auth flow entirely — start as "loaded"
   const [authLoading, setAuthLoading] = useState(!IS_E2E);
