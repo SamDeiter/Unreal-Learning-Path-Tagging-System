@@ -1,0 +1,4 @@
+## 2026-03-03 - Secure Token Tracking subcollections
+**Vulnerability:** Insecure Direct Object Reference (IDOR) and Broken Object Level Authorization (BOLA) via a global client-writeable `/token_usage/{dateKey}` Firestore collection.
+**Learning:** Storing daily token usage at a root collection level keyed by date allowed any authenticated user to enumerate, overwrite, or corrupt the entire application's token usage stats. Firestore security rules do not automatically inherit user-scoped authorization unless nested under user documents or validated explicitly against nested attributes.
+**Prevention:** Always nest client-side usage, session, or metric tracking collections under `/users/{uid}` subcollections. Enforce `request.auth.uid == uid` on both read and write rules. For database queries, ensure the client service dynamically injects the active user's `uid` to filter collection reads/writes.
