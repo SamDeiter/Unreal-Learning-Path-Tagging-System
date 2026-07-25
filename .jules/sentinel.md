@@ -1,0 +1,4 @@
+## 2026-07-25 - Secure User Isolation for Token Tracking
+**Vulnerability:** Insecure Direct Object References (IDOR) and Broken Object Level Authorization (BOLA) in Firestore token tracking rules.
+**Learning:** Storing telemetry data (such as API token usage) in a root-level `token_usage/{dateKey}` collection without mapping to user IDs allowed any authenticated user to inspect, overwrite, or corrupt other users' usage statistics. Additionally, queries in `tokenTracker.js` were unscoped, fetching global usage lists.
+**Prevention:** Always nest user-specific or sensitive analytics subcollections under individual user documents (e.g., `/users/{uid}/token_usage/{dateKey}`) and restrict Firestore access rules with strict `request.auth.uid == uid` checks. In frontend data fetch logic, explicitly query the user's specific nested path to preserve strict multitenancy data boundaries.
