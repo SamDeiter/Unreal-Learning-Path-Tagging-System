@@ -1,0 +1,3 @@
+## 2026-05-21 - Jaccard Similarity and Semantic Deduplication Optimization
+**Learning:** Performing string-splitting, lowercase, filtering, and set construction in $O(N^2)$ comparison loops is a major bottleneck. Pre-calculating word sets using regex `match(/\S+/g)` instead of split regexes reduces GC pressure and tokenization complexity. Applying the Inclusion-Exclusion Principle ($|A \cup B| = |A| + |B| - |A \cap B|$) avoids any Set union allocations inside Jaccard calculation.
+**Action:** Always pre-calculate expensive features/tokens outside comparison loops into a Map or cache, and design Jaccard distance/similarity measures to use pre-calculated sets/frequencies with algebraic simplification to avoid temporary Set allocation.
