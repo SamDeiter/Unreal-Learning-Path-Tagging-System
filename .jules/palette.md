@@ -1,0 +1,3 @@
+## 2025-07-27 - Focus Restoration and Trapping for Accessible Settings Popovers
+**Learning:** For interactive overlay panels like `AccessibilityPanel` containing multiple form inputs/buttons, screen-reader and keyboard users can lose context or focus entirely if the panel closes without restoring focus to the original trigger button, or if focus is allowed to escape the active dialog area.
+**Action:** Always implement a keyboard focus trap within the modal/popover container (catching Tab and Shift+Tab) and record original open state with `wasOpenRef` to restore focus to the trigger element cleanly on unmount/dismissal.
