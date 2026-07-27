@@ -13,6 +13,7 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +175,33 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+import { fireEvent } from "@testing-library/react";
+
+describe("AccessibilityPanel", () => {
+  it("renders correctly and manages focus and dialog state", () => {
+    render(<AccessibilityPanel />);
+    const trigger = screen.getByLabelText("Accessibility settings");
+    expect(trigger).toBeTruthy();
+
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    // Open the panel
+    fireEvent.click(trigger);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+
+    // Verify focus restoration on close
+    const closeBtn = screen.getByLabelText("Close");
+    fireEvent.click(closeBtn);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 });
