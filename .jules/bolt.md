@@ -1,0 +1,3 @@
+## 2025-02-18 - [Optimized Word-level Jaccard Semantic Deduplication]
+**Learning:** O(N^2) Jaccard loops repeatedly tokenized, lowercased, split, and filtered raw text on each iteration, causing significant overhead. Using `new Set([...wordsA, ...wordsB])` inside comparisons heavily increased memory allocations and GC sweeps.
+**Action:** Pre-calculate and cache word sets in a `Map` before comparison to achieve true O(N) tokenization. Employ the Inclusion-Exclusion Principle ($|A \cup B| = |A| + |B| - |A \cap B|$) to compute the union size in O(1) space, avoiding set allocations during comparison loops. Use regex non-whitespace sequences matching instead of `.split(/\s+/)` to bypass intermediate empty-string allocations.
