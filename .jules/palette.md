@@ -1,0 +1,3 @@
+## 2026-07-28 - [Accessible Interactive Popovers & Consistent Icons]
+**Learning:** Using system emojis for key buttons (like gear and times) looks unprofessional, degrades contrast/design consistency, and lacks semantic value on screen readers. Interactive popovers must trap focus on Tab/Shift+Tab and restore focus on closure to prevent the user's keyboard state from being lost or trapped.
+**Action:** Always replace raw emojis with SVGs/icons like `lucide-react`. Implement standard keyboard trapping inside `useEffect` of modals/popovers and use a `wasOpen` ref to selectively restore focus back to the triggering element only on close.
