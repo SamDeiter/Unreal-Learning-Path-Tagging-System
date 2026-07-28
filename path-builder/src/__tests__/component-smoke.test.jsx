@@ -13,6 +13,32 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
+
+// Mock hooks for the smoke tests
+vi.mock("../hooks/useAccessibilityPreferences", () => ({
+  default: () => ({
+    prefs: {
+      dyslexicFont: false,
+      reducedMotion: "system",
+      readingLevel: "standard",
+    },
+    setDyslexicFont: vi.fn(),
+    setReducedMotion: vi.fn(),
+    setReadingLevel: vi.fn(),
+  }),
+}));
+
+vi.mock("../hooks/useSpeech", () => ({
+  default: () => ({
+    speak: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    state: "idle",
+    currentId: null,
+    supported: true,
+  }),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +200,33 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render without crashing", () => {
+    const { container } = render(<AccessibilityPanel />);
+    expect(container.querySelector(".a11y-panel")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Accessibility settings" })).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. SpeakButton
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import SpeakButton from "../components/Settings/SpeakButton";
+
+describe("SpeakButton", () => {
+  it("should render without crashing", () => {
+    const { container } = render(<SpeakButton text="Test speak text" id="test-id" />);
+    expect(container.querySelector(".speak-btn")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Read aloud" })).toBeTruthy();
   });
 });
