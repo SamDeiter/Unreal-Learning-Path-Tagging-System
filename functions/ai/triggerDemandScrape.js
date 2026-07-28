@@ -27,9 +27,26 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
+    // Require authentication
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+    }
+
+    // Require admin privileges (admin custom claim or bootstrap email) to prevent unauthorized dispatches
+    const BOOTSTRAP_ADMIN_EMAILS = [
+      "sam.deiter@epicgames.com",
+      "samdeiter@gmail.com",
+    ];
+    const callerEmail = (request.auth.token?.email || "").toLowerCase();
+    const callerIsAdmin =
+      request.auth.token?.admin === true ||
+      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail);
+
+    if (!callerIsAdmin) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only admins can trigger a demand scrape."
+      );
     }
 
     // Get engine from request data (default to UE5)
