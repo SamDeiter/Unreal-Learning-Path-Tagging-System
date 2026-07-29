@@ -13,6 +13,20 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
+
+// Mock useSpeech hook for SpeakButton
+vi.mock("../hooks/useSpeech", () => ({
+  default: () => ({
+    speak: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    cancel: vi.fn(),
+    state: "idle",
+    currentId: null,
+    supported: true,
+  }),
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +188,33 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render without crashing", () => {
+    const { container } = render(<AccessibilityPanel />);
+    expect(container.querySelector(".a11y-panel")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /accessibility settings/i })).toBeTruthy();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. SpeakButton
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import SpeakButton from "../components/Settings/SpeakButton";
+
+describe("SpeakButton", () => {
+  it("should render and display the default label", () => {
+    render(<SpeakButton text="Test content to read" id="msg-123" />);
+    expect(screen.getByText("Read aloud")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Read aloud" })).toBeTruthy();
   });
 });
