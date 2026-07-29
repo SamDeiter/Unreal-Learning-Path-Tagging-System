@@ -1,0 +1,4 @@
+## 2026-05-21 - [Authorization Bypass on Admin Callable]
+**Vulnerability:** The `triggerDemandScrape` Callable Cloud Function lacked proper administrative authorization, allowing any signed-in user to trigger GitHub Actions workflow dispatches using the repository's GitHub PAT.
+**Learning:** Operational functions designed as internal tools are sometimes deployed with permissive access controls (e.g. standard user authentication) under the assumption of a trusted workspace. However, standard users must not have access to dispatch administrative build, deployment, or scrape workflows.
+**Prevention:** Always restrict sensitive operations and workflow dispatches to authenticated administrative users. Verify both the `admin` custom claim (`request.auth.token?.admin === true`) and membership in an administrative allow list (`BOOTSTRAP_ADMIN_EMAILS`) to block unauthorized workflow runs.
