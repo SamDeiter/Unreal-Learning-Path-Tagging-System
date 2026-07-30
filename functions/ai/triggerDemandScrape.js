@@ -16,6 +16,11 @@ const GITHUB_OWNER = "SamDeiter";
 const GITHUB_REPO = "Unreal-Learning-Path-Tagging-System";
 const WORKFLOW_FILE = "scrape-demand-intel.yml";
 
+const BOOTSTRAP_ADMIN_EMAILS = [
+  "sam.deiter@epicgames.com",
+  "samdeiter@gmail.com",
+];
+
 exports.triggerDemandScrape = onCall(
   {
     secrets: ["GITHUB_PAT"],
@@ -27,9 +32,22 @@ exports.triggerDemandScrape = onCall(
     // App Check enforcement (permissive during rollout)
     requireAppCheck(request, { allowInvalid: false });
 
-    // Require authentication (any signed-in user)
+    // Require authentication
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "You must be signed in to trigger a scrape.");
+    }
+
+    // Restrict to admins (via custom claim or bootstrap email)
+    const callerEmail = (request.auth.token?.email || "").toLowerCase();
+    const callerIsAdmin =
+      request.auth.token?.admin === true ||
+      BOOTSTRAP_ADMIN_EMAILS.includes(callerEmail);
+
+    if (!callerIsAdmin) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only administrative users can trigger a demand scrape."
+      );
     }
 
     // Get engine from request data (default to UE5)
