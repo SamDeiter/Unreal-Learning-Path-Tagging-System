@@ -5,7 +5,23 @@
  * These tests catch import errors, missing dependencies, and render-time
  * exceptions that would otherwise only surface in production.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Set up speech synthesis mock globally before any imports so useSpeech sees it on load
+if (typeof window !== "undefined") {
+  window.speechSynthesis = {
+    speak: vi.fn(),
+    cancel: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+  };
+  window.SpeechSynthesisUtterance = class {
+    constructor(text) {
+      this.text = text;
+    }
+  };
+}
+
 import { render, screen } from "@testing-library/react";
 
 // ── Mock CSS imports (jsdom doesn't support them) ──────────────────────────
@@ -13,6 +29,7 @@ vi.mock("../components/LoadingSpinner/LoadingSpinner.css", () => ({}));
 vi.mock("../components/FixProblem/FixProblem.css", () => ({}));
 vi.mock("../components/ProblemFirst/ProblemFirst.css", () => ({}));
 vi.mock("../components/GuidedPlayer/GuidedPlayer.css", () => ({}));
+vi.mock("../components/Settings/AccessibilityPanel.css", () => ({}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. LoadingSpinner
@@ -174,5 +191,42 @@ describe("BridgeCard", () => {
     const btn = screen.getByText("Continue →");
     btn.click();
     expect(onContinue).toHaveBeenCalledOnce();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render trigger button with correct attributes", () => {
+    const { container } = render(<AccessibilityPanel />);
+    const trigger = container.querySelector(".a11y-panel__trigger");
+    expect(trigger).toBeTruthy();
+    expect(trigger.getAttribute("aria-label")).toBe("Accessibility settings");
+    expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. SpeakButton
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import SpeakButton from "../components/Settings/SpeakButton";
+import { __resetSpeechForTests } from "../hooks/useSpeech";
+
+describe("SpeakButton", () => {
+  beforeEach(() => {
+    __resetSpeechForTests();
+  });
+
+  it("should render without crashing when speech is supported", () => {
+    const { container } = render(<SpeakButton text="Test Speech" id="test-1" />);
+    const btn = container.querySelector(".speak-btn");
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute("aria-label")).toBe("Read aloud");
   });
 });
