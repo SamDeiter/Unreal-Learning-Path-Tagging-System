@@ -1,0 +1,3 @@
+## 2025-02-17 - Bounded Stemming and Tokenization Cache
+**Learning:** Local search over large JSON datasets (like `doc_links.json` with 2,692 items) repeatedly performs regex matches and string splits on the same fields for every query keyword. This produces an O(N * M) overhead of redundant garbage collection and CPU cycles. Applying a bounded FIFO cache with a Map size check prevents memory leaks while avoiding costly re-tokenization.
+**Action:** Always cache string splits, sanitization, and regex-heavy parsing results inside utility functions when those utilities are invoked inside large processing loops.
