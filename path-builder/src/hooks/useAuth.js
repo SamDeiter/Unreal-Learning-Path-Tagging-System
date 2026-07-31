@@ -12,7 +12,16 @@ import { isAdmin } from "../services/accessControl";
 import { IS_E2E } from "../services/e2eBypass";
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(
+    IS_E2E
+      ? {
+          uid: "mock-e2e-user-123",
+          email: "lpb-e2e-tester@example.com",
+          displayName: "E2E Tester",
+          photoURL: "https://lh3.googleusercontent.com/a/mock-avatar",
+        }
+      : null
+  );
   const [userIsAdmin, setUserIsAdmin] = useState(IS_E2E);
   // In E2E mode, skip the auth flow entirely — start as "loaded"
   const [authLoading, setAuthLoading] = useState(!IS_E2E);

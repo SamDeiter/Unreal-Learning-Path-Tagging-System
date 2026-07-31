@@ -12,6 +12,7 @@
  */
 import PropTypes from "prop-types";
 import useSpeech from "../../hooks/useSpeech";
+import { Volume2, Pause, Play } from "lucide-react";
 
 export default function SpeakButton({ text, id, label = "Read aloud", className = "" }) {
   const { speak, pause, resume, state, currentId, supported } = useSpeech();
@@ -23,13 +24,13 @@ export default function SpeakButton({ text, id, label = "Read aloud", className 
   const isSpeaking = isMine && state === "speaking";
   const isPaused = isMine && state === "paused";
 
-  let icon = "🔊";
+  let icon = <Volume2 size={14} className="speak-btn__icon" aria-hidden="true" />;
   let title = label;
   if (isSpeaking) {
-    icon = "⏸️";
+    icon = <Pause size={14} className="speak-btn__icon" aria-hidden="true" />;
     title = "Pause reading";
   } else if (isPaused) {
-    icon = "▶️";
+    icon = <Play size={14} className="speak-btn__icon" aria-hidden="true" />;
     title = "Resume reading";
   }
 
@@ -53,7 +54,7 @@ export default function SpeakButton({ text, id, label = "Read aloud", className 
       aria-pressed={isSpeaking || isPaused}
       title={title}
     >
-      <span aria-hidden="true">{icon}</span>
+      {icon}
       <span className="speak-btn__label">{label}</span>
     </button>
   );

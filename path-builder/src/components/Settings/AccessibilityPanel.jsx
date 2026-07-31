@@ -16,6 +16,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import useAccessibilityPreferences from "../../hooks/useAccessibilityPreferences";
+import { Settings, X } from "lucide-react";
 import "./AccessibilityPanel.css";
 
 const READING_LEVELS = [
@@ -31,6 +32,7 @@ export default function AccessibilityPanel({ className = "" }) {
   const triggerRef = useRef(null);
   const popoverRef = useRef(null);
   const [pos, setPos] = useState({ left: 0, top: 0 });
+  const wasOpenRef = useRef(false);
 
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return;
@@ -56,8 +58,27 @@ export default function AccessibilityPanel({ className = "" }) {
     };
   }, [open]);
 
+  // Focus Restoration
+  useEffect(() => {
+    if (!open && wasOpenRef.current) {
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = open;
+  }, [open]);
+
+  // Focus Trapping and Key Listeners
   useEffect(() => {
     if (!open) return;
+
+    // Focus the first focusable element in popover on open
+    const popover = popoverRef.current;
+    if (popover) {
+      const focusable = popover.querySelectorAll("button, input, select");
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
+
     const onDown = (e) => {
       if (
         !popoverRef.current?.contains(e.target) &&
@@ -66,9 +87,36 @@ export default function AccessibilityPanel({ className = "" }) {
         setOpen(false);
       }
     };
+
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key === "Tab") {
+        const popover = popoverRef.current;
+        if (!popover) return;
+        const focusable = popover.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            last.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === last) {
+            first.focus();
+            e.preventDefault();
+          }
+        }
+      }
     };
+
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -85,10 +133,11 @@ export default function AccessibilityPanel({ className = "" }) {
         className="a11y-panel__trigger"
         aria-label="Accessibility settings"
         aria-expanded={open}
+        aria-haspopup="dialog"
         title="Accessibility settings"
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">⚙️</span>
+        <Settings size={14} className="a11y-panel__icon" aria-hidden="true" />
       </button>
 
       {open && createPortal(
@@ -96,6 +145,7 @@ export default function AccessibilityPanel({ className = "" }) {
           ref={popoverRef}
           className="a11y-panel__popover"
           role="dialog"
+          aria-modal="true"
           aria-label="Accessibility settings"
           style={{ left: pos.left, top: pos.top }}
         >
@@ -107,7 +157,7 @@ export default function AccessibilityPanel({ className = "" }) {
               aria-label="Close"
               onClick={() => setOpen(false)}
             >
-              ×
+              <X size={14} aria-hidden="true" />
             </button>
           </div>
 
