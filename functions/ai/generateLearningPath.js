@@ -12,6 +12,7 @@ const { normalizeQuery } = require("../pipeline/cache");
 const { PROMPT_VERSION } = require("../pipeline/promptVersions");
 const { writePathCache } = require("../utils/pathCacheUtils");
 const { requireAppCheck } = require("../utils/appCheckMiddleware");
+const { sanitizeAndValidate } = require("../utils/sanitizeInput");
 
 // Hardcoded fallback videos (verified real @UnrealEngine IDs)
 const FALLBACK_VIDEOS = [
@@ -174,14 +175,17 @@ exports.generateLearningPath = functions
     // App Check enforcement (permissive during rollout)
     requireAppCheck({ app: context.app, auth: context.auth }, { allowInvalid: false });
     const userId = requireAuth(context);
-    const { query, tags = [], engine = "UE5" } = data;
+    const { query: rawQuery, tags = [], engine = "UE5" } = data;
 
-    if (!query || query.trim().length < 3) {
+    // Security sanitization and validation on raw query
+    const validation = sanitizeAndValidate(rawQuery);
+    if (validation.blocked) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Query must be at least 3 characters."
+        validation.reason || "Invalid input."
       );
     }
+    const query = validation.clean;
 
     const rateLimitCheck = await checkRateLimit(userId, "learningPath");
     if (!rateLimitCheck.allowed) {
