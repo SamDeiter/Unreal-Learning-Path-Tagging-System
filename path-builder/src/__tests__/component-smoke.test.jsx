@@ -176,3 +176,16 @@ describe("BridgeCard", () => {
     expect(onContinue).toHaveBeenCalledOnce();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. AccessibilityPanel
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import AccessibilityPanel from "../components/Settings/AccessibilityPanel";
+
+describe("AccessibilityPanel", () => {
+  it("should render without crashing", () => {
+    const { container } = render(<AccessibilityPanel />);
+    expect(container.querySelector(".a11y-panel")).toBeTruthy();
+  });
+});
