@@ -11,12 +11,11 @@
  * @returns {number} Similarity in [0, 1] — 1 means identical word sets
  */
 export function wordJaccard(textA, textB) {
-  const wordsA = new Set(
-    (textA || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
-  const wordsB = new Set(
-    (textB || "").toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-  );
+  const matchesA = (textA || "").toLowerCase().match(/\S+/g) || [];
+  const matchesB = (textB || "").toLowerCase().match(/\S+/g) || [];
+
+  const wordsA = new Set(matchesA.filter((w) => w.length > 2));
+  const wordsB = new Set(matchesB.filter((w) => w.length > 2));
 
   if (wordsA.size === 0 && wordsB.size === 0) return 0;
 
@@ -25,6 +24,7 @@ export function wordJaccard(textA, textB) {
     if (wordsB.has(w)) intersection++;
   }
 
-  const union = new Set([...wordsA, ...wordsB]).size;
-  return union === 0 ? 0 : intersection / union;
+  // Inclusion-Exclusion Principle: |A ∪ B| = |A| + |B| - |A ∩ B|
+  const unionSize = wordsA.size + wordsB.size - intersection;
+  return unionSize === 0 ? 0 : intersection / unionSize;
 }
