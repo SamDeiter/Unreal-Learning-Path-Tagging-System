@@ -1,0 +1,3 @@
+## 2026-08-03 - [In-memory caching for repeated string stemming]
+**Learning:** Repetitive string cleaning, replacement, and splitting operations (e.g. stemming and tokenization in a local loop across thousands of items) are a major CPU bottleneck in JS. By using a bounded Map cache (e.g., limit of 5000) with a fast FIFO eviction strategy, we can completely eliminate regex evaluations and string splits for repetitive strings.
+**Action:** Use bounded in-memory `Map` caches with FIFO eviction (`map.delete(map.keys().next().value)`) for core string manipulation helper utilities that are invoked in nested matching loops.
