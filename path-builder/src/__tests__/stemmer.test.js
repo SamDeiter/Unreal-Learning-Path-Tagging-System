@@ -77,3 +77,41 @@ describe("stemMatch", () => {
     expect(stemMatch("lumen", "nanite")).toBe(false);
   });
 });
+
+describe("stemMatch performance micro-benchmark", () => {
+  it("should correctly match stems and demonstrate extremely fast cache-hit lookup speeds", () => {
+    // Warm up the caches
+    const query = "post-process volume setting";
+    const targets = [
+      "post processing volume settings in Unreal Engine",
+      "global illumination lumen configuration",
+      "nanite meshes and geometry optimization guidelines",
+      "blueprint actor communication using interfaces",
+      "static mesh materials import and setup"
+    ];
+
+    // Verify first that correctness is absolutely preserved
+    expect(stemMatch(query, targets[0])).toBe(true);
+    for (let i = 1; i < targets.length; i++) {
+      expect(stemMatch(query, targets[i])).toBe(false);
+    }
+    for (const target of targets) {
+      expect(stemMatch("nonexistent", target)).toBe(false);
+    }
+
+    // Now, run a heavy repeated matching loop to benchmark
+    const iterations = 5000;
+    const startTime = performance.now();
+    for (let i = 0; i < iterations; i++) {
+      for (const target of targets) {
+        stemMatch(query, target);
+        stemMatch("nonexistent", target);
+      }
+    }
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    console.log(`[Benchmark] ${iterations * targets.length * 2} stemMatch lookups completed in ${duration.toFixed(1)}ms`);
+
+    expect(duration).toBeLessThan(1000); // Guarantees execution doesn't hang or take too long, typically < 20ms
+  });
+});
